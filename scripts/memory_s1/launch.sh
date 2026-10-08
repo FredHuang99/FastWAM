@@ -22,14 +22,21 @@ if [[ -f "$RUN_DIR/launcher.pid" ]] && kill -0 "$(cat "$RUN_DIR/launcher.pid")" 
   echo "A launcher recorded for this run is still alive; refuse a duplicate launch." >&2
   exit 1
 fi
-LAUNCH_ID="$(date -u +%Y%m%dT%H%M%SZ)"
+LAUNCH_ID="$(date -u +%Y%m%dT%H%M%SZ)_$$"
 LOG="$RUN_DIR/launches/$LAUNCH_ID.log"
 COMMAND=(torchrun --standalone --nnodes=1 --nproc_per_node="$GPUS" -m fastwam.memory_s1.train --config "$CONFIG" --micro-batch "$MICRO_BATCH")
 if [[ -n "${RESUME:-}" ]]; then COMMAND+=(--resume "$RESUME"); fi
 printf '%q ' "${COMMAND[@]}" > "$RUN_DIR/launches/$LAUNCH_ID.command"
 printf '\n' >> "$RUN_DIR/launches/$LAUNCH_ID.command"
-nohup "${COMMAND[@]}" > "$LOG" 2>&1 < /dev/null &
+export TRAIN_EXIT="${LOG%.log}.exit"
+nohup bash -c '
+  "$@"
+  result=$?
+  printf "%s\n" "$result" > "$TRAIN_EXIT"
+  exit "$result"
+' mwam-train "${COMMAND[@]}" > "$LOG" 2>&1 < /dev/null &
 PID=$!
+printf '%s\n' "$LOG" > "$RUN_DIR/latest_log.txt"
 printf '%s\n' "$PID" > "$RUN_DIR/launcher.pid"
 printf 'run=%s\nlaunch=%s\npid=%s\nlog=%s\n' "$RUN_DIR" "$LAUNCH_ID" "$PID" "$LOG" > "$RUN_DIR/launches/$LAUNCH_ID.info"
 printf 'Started PID=%s.\nLog: tail -f %q\nStatus: ps -p %q -o pid,etime,cmd\nSafe stop: bash scripts/memory_s1/safe_stop.sh %q\n' "$PID" "$LOG" "$PID" "$RUN_DIR"

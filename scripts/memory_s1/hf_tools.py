@@ -100,42 +100,83 @@ def checkpoint(args):
     root = Path(config["root"])
     provenance = run / "provenance"
     provenance.mkdir(exist_ok=True)
-    (provenance / "git.diff").write_text(subprocess.check_output(["git", "-C", str(root), "diff", "--binary"], text=True))
+    (provenance / "git.diff").write_text(subprocess.check_output(["git", "-C", str(root), "diff", "HEAD", "--binary"], text=True))
     (provenance / "pip-freeze.txt").write_text(subprocess.check_output([config.get("training_python", "/usr/local/bin/python"), "-m", "pip", "list", "--format=freeze"], text=True))
     files = [(directory / "resume.pt", f"checkpoints/{directory.name}/resume.pt"),
              (directory / "complete.json", f"checkpoints/{directory.name}/complete.json")]
+    # Save one complete Git source bundle and a patch covering tracked local modifications.
+    bundle = provenance / "source.bundle"
+    bundle_stamp = provenance / "source_bundle_commit.json"
+    commit_id = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip()
+    if not bundle.exists() or not bundle_stamp.exists() or json.loads(bundle_stamp.read_text())["commit"] != commit_id:
+        subprocess.run(["git", "-C", str(root), "bundle", "create", str(bundle), "HEAD", "refs/heads/memory"], check=True)
+        write_json(bundle_stamp, {"commit": commit_id, "sha256": digest(bundle)})
+    resources = {}
+    for key in ("base", "stats", "vae", "t5", "tokenizer"):
+        path = Path(config["paths"][key])
+        members = [path] if path.is_file() else [p for p in path.rglob("*") if p.is_file() and ".cache" not in p.parts]
+        for member in members:
+            resources[str(member.relative_to(root))] = {"sha256": digest(member), "bytes": member.stat().st_size}
+    write_json(provenance / "frozen_resources.json", resources)
+    for kind in ("prepared", "cache"):
+        directory_root = Path(config["paths"][kind])
+        for filename in ("manifest.json", "alignment_approved.json", "identity.json"):
+            path = directory_root / filename
+            if path.is_file():
+                files.append((path, f"resource_metadata/{kind}/{filename}"))
+    download_lock = root / "resources/download_lock.json"
+    if download_lock.exists():
+        files.append((download_lock, "resource_metadata/download_lock.json"))
+    if (directory / "continuation.json").exists():
+        files.append((directory / "continuation.json", f"checkpoints/{directory.name}/continuation.json"))
     for path in run.rglob("*"):
-        if not path.is_file() or path.relative_to(run).parts[0] in ("checkpoints", "code") or path.suffix in (".sock", ".tmp"):
+        if not path.is_file() or path.relative_to(run).parts[0] in ("checkpoints", "code") or path.suffix in (".sock", ".tmp", ".pid", ".lock"):
             continue
-        if path.name in ("STOP_REQUESTED", "launcher.pid", "UPLOAD_FAILED.json"):
+        if path.name in ("STOP_REQUESTED", "STOP.json", "ABORT.json", "launcher.pid", "UPLOAD_FAILED.json", "HF_EPISODES.json"):
             continue
-        files.append((path, str(path.relative_to(run)).replace(os.sep, "/")))
+        relative = path.relative_to(run)
+        if ("launches" in relative.parts and path.suffix == ".log") or "frames" in relative.parts or "interrupted_logs" in relative.parts or "interrupted_artifacts" in relative.parts or path.name in ("BACKUP_FILES.json", "LATEST_REMOTE.json"):
+            continue
+        files.append((path, str(relative).replace(os.sep, "/")))
     for subdirectory in ("src/fastwam/memory_s1", "src/fastwam/models/wan22", "scripts/memory_s1", "configs/memory_s1", "requirements"):
         for path in (root / subdirectory).rglob("*"):
             if path.is_file() and "__pycache__" not in path.parts:
                 files.append((path, "code/" + str(path.relative_to(root)).replace(os.sep, "/")))
-    runbook = root / "docs/memory_s1_runbook_zh.md"
-    if runbook.is_file():
-        files.append((runbook, "code/docs/memory_s1_runbook_zh.md"))
     for filename in ("configs/model/fastwam.yaml", "pyproject.toml", ".gitignore"):
         files.append((root / filename, "code/" + filename))
-    estimated = sum(path.stat().st_size for path, _ in files)
+    # A snapshot hash manifest makes both download integrity and unchanged-file reuse explicit.
+    snapshot_files = {remote: digest(path) for path, remote in files}
+    manifest_path = directory / "backup_manifest.json"
+    write_json(manifest_path, {"step": marker["completed_updates"], "files": snapshot_files})
+    files.append((manifest_path, f"checkpoints/{directory.name}/backup_manifest.json"))
+    previous_path = run / "BACKUP_FILES.json"
+    previous = json.loads(previous_path.read_text()) if previous_path.exists() else {}
+    changed = [(path, remote) for path, remote in files if previous.get(remote) != digest(path)]
+    estimated = sum(path.stat().st_size for path, _ in changed)
+    expected = json.loads((run / "storage_plan.json").read_text())
+    limit = expected["initial_checkpoint_estimate_bytes"] if marker["completed_updates"] == 0 else expected["full_checkpoint_estimate_bytes"]
+    if (directory / "resume.pt").stat().st_size > limit:
+        raise RuntimeError("The serialized checkpoint exceeds the preflight budget. Recompute storage_plan before retrying.")
     budget = check_budget(api, estimated, args.quota_gib, args.reserve_gib)
     ensure_private(api, args.repo, "model")
     run_id = run.name
-    operations = [CommitOperationAdd(path_in_repo=f"runs/{run_id}/{remote}", path_or_fileobj=str(path)) for path, remote in files]
+    operations = [CommitOperationAdd(path_in_repo=f"runs/{run_id}/{remote}", path_or_fileobj=str(path)) for path, remote in changed]
+    commit = None
     for start in range(0, len(operations), 50):
         commit = api.create_commit(args.repo, repo_type="model", operations=operations[start:start+50],
                                    commit_message=f"S1 update {marker['completed_updates']} ({run_id}), files {start+1}-{min(start+50,len(operations))}")
+    revision = commit.oid if commit is not None else api.repo_info(args.repo, repo_type="model").sha
     pointer = {"run_id": run_id, "step": marker["completed_updates"], "directory": directory.name,
-               "checkpoint_revision": commit.oid, "resume_sha256": marker["sha256"],
+               "checkpoint_revision": revision, "resume_sha256": marker["sha256"],
+               "backup_manifest_sha256": digest(manifest_path),
                "upload_seconds": time.monotonic() - started}
     pointer_path = directory / "remote_pointer.json"
     write_json(pointer_path, pointer)
     pointer_commit = api.upload_file(path_or_fileobj=str(pointer_path), path_in_repo=f"runs/{run_id}/LATEST_COMPLETE.json",
                                     repo_id=args.repo, repo_type="model", commit_message=f"Publish complete S1 pointer {marker['completed_updates']}")
+    write_json(run / "BACKUP_FILES.json", {remote: digest(path) for path, remote in files})
     write_json(run / "LATEST_REMOTE.json", {**pointer, "pointer_revision": pointer_commit.oid, "budget": budget})
-    print(f"[HF] complete update={pointer['step']} revision={commit.oid}", flush=True)
+    print(f"[HF] complete update={pointer['step']} revision={revision}", flush=True)
 
 
 def upload_package(args):
@@ -157,15 +198,27 @@ def download_resume(args):
     pointer_file = hf_hub_download(args.repo, f"runs/{args.run_id}/LATEST_COMPLETE.json", repo_type="model")
     pointer = json.loads(Path(pointer_file).read_text())
     revision = pointer["checkpoint_revision"]
-    snapshot_download(args.repo, repo_type="model", revision=revision, local_dir=args.output,
-                      allow_patterns=[f"runs/{args.run_id}/checkpoints/{pointer['directory']}/*",
-                                      f"runs/{args.run_id}/code/**", f"runs/{args.run_id}/provenance/**",
-                                      f"runs/{args.run_id}/*.json", f"runs/{args.run_id}/*.jsonl",
-                                      f"runs/{args.run_id}/weights/**", f"runs/{args.run_id}/validation/**"])
-    resume = Path(args.output) / "runs" / args.run_id / "checkpoints" / pointer["directory"] / "resume.pt"
+    prefix = f"runs/{args.run_id}"
+    manifest_remote = f"{prefix}/checkpoints/{pointer['directory']}/backup_manifest.json"
+    if pointer.get("backup_manifest_sha256"):
+        path = hf_hub_download(args.repo, manifest_remote, repo_type="model", revision=revision, local_dir=args.output)
+        if digest(path) != pointer["backup_manifest_sha256"]:
+            raise ValueError("Backup manifest checksum mismatch.")
+        manifest = json.loads(Path(path).read_text())
+        wanted = [f"{prefix}/{relative}" for relative in manifest["files"]]
+    else:
+        raise ValueError("This downloader requires a checksummed variable-period backup manifest.")
+    # Exact file names include source bundles, launch commands, environment records and pending queues.
+    snapshot_download(args.repo, repo_type="model", revision=revision, local_dir=args.output, allow_patterns=wanted)
+    root = Path(args.output) / "runs" / args.run_id
+    for relative, expected in manifest["files"].items():
+        path = (root / relative).resolve()
+        if root.resolve() not in path.parents or not path.is_file() or digest(path) != expected:
+            raise ValueError(f"Missing/corrupt downloaded backup material: {relative}")
+    resume = root / "checkpoints" / pointer["directory"] / "resume.pt"
     if digest(resume) != pointer["resume_sha256"]:
         raise ValueError("Downloaded resume checksum mismatch.")
-    write_json(Path(args.output) / "runs" / args.run_id / "RESTORE_REMOTE.json", pointer)
+    write_json(root / "RESTORE_REMOTE.json", pointer)
     print(f"[restore] completed_update={pointer['step']} resume={resume}", flush=True)
 
 
@@ -207,7 +260,7 @@ def eval_results(args):
         if not sent.get("code_saved"):
             config = read(root / "evaluation.json")["config"]
             source_root = Path(config["root"])
-            for subtree in ("src", "scripts/memory_s1", "configs", "requirements", "docs"):
+            for subtree in ("src", "scripts/memory_s1", "configs", "requirements"):
                 for path in (source_root / subtree).rglob("*"):
                     if path.is_file() and "__pycache__" not in path.parts and path.suffix in (".py", ".sh", ".json", ".yaml", ".yml", ".toml", ".txt", ".md"):
                         relative = str(path.relative_to(source_root)).replace(os.sep, "/")

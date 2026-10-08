@@ -1,33 +1,56 @@
 #!/usr/bin/env bash
 set -euo pipefail
 MODE="${1:?Use resources or run}"
-REPO_ROOT="${2:?Pass the absolute FastWAM root}"
-OUTPUT="${3:?Pass a new output package directory outside the resource/run folder}"
-REPO_ROOT="$(realpath "$REPO_ROOT")"
-OUTPUT="$(realpath -m "$OUTPUT")"
-case "$OUTPUT/" in "$REPO_ROOT/resources/"*|"$REPO_ROOT/outputs/"*)
-  echo 'Package destination must be outside resource/run input folders.' >&2; exit 1;;
-esac
-if [[ -e "$OUTPUT" ]]; then echo "Package directory already exists; refuse to overwrite." >&2; exit 1; fi
+REPO_ROOT="$(realpath "${2:?Pass the FastWAM root}")"
+OUTPUT="$(realpath -m "${3:?Pass a NEW package directory}")"
+CONFIG="${4:-configs/memory_s1/s1_variable_t.yaml}"
+cd "$REPO_ROOT"
+export FW_ROOT="$REPO_ROOT"
+[[ ! -e "$OUTPUT" ]] || { echo 'Package directory already exists.' >&2; exit 1; }
+# Build a configuration-derived list; every archive member stays relative to the repository.
+ITEM_LIST="$(python - "$MODE" "$CONFIG" "$OUTPUT" <<'PY'
+import sys
+from pathlib import Path
+from fastwam.memory_s1.common import load_config
+from fastwam.memory_s1.eval_state import is_alive, process_identity
+cfg = load_config(sys.argv[2])
+root, output = Path(cfg["root"]).resolve(), Path(sys.argv[3]).resolve()
+if sys.argv[1] == "resources":
+    sys.path.insert(0, str(root / "scripts/memory_s1"))
+    from storage_plan import resource_paths
+    paths = resource_paths(cfg)
+elif sys.argv[1] == "run":
+    run = Path(cfg["paths"]["run"])
+    pid_path = run / "launcher.pid"
+    if pid_path.exists() and process_identity(int(pid_path.read_text())) is not None:
+        raise RuntimeError("Complete safe stop before packaging mutable training state.")
+    if not (run / "provenance/source.bundle").is_file():
+        raise RuntimeError("Complete step-0 backup first; source.bundle is required.")
+    paths = [root / name for name in ("src", "scripts/memory_s1", "configs", "requirements", "pyproject.toml", ".gitignore")]
+    paths += [run]
+else:
+    raise ValueError("Unknown package mode")
+for path in paths:
+    logical = path.absolute()
+    actual = path.resolve()
+    if output == actual or actual in output.parents:
+        raise ValueError("Package destination overlaps an input tree.")
+    if not path.exists():
+        raise FileNotFoundError(path)
+    print(logical.relative_to(root))
+PY
+)"
+mapfile -t ITEMS <<< "$ITEM_LIST"
+[[ ${#ITEMS[@]} -gt 0 ]] || { echo 'Package list failed; inspect the error above.' >&2; exit 1; }
 mkdir -p "$OUTPUT"
 NAME="fastwam-s1-$MODE-$(date -u +%Y%m%dT%H%M%SZ)"
-if [[ "$MODE" == resources ]]; then
-  ITEMS=(resources/base resources/encoders resources/tokenizer resources/RMBench/data/download_cache resources/RMBench/assets resources/cache_s1 resources/prepared resources/download_lock.json)
-elif [[ "$MODE" == run ]]; then
-  if [[ -f "$REPO_ROOT/outputs/memory_s1_seed17/launcher.pid" ]] && kill -0 "$(cat "$REPO_ROOT/outputs/memory_s1_seed17/launcher.pid")" 2>/dev/null; then
-    echo "Launcher is alive. Complete safe stop before packaging mutable training state." >&2; exit 1
-  fi
-  ITEMS=(src/fastwam/memory_s1 src/fastwam/models/wan22 scripts/memory_s1 configs/memory_s1 configs/model/fastwam.yaml pyproject.toml .gitignore requirements/memory_s1.txt docs/memory_s1_runbook_zh.md outputs/memory_s1_seed17)
-else
-  echo "Unknown package mode: $MODE" >&2; exit 1
-fi
-for ITEM in "${ITEMS[@]}"; do [[ -e "$REPO_ROOT/$ITEM" ]] || { echo "Missing package input: $ITEM" >&2; exit 1; }; done
-tar -C "$REPO_ROOT" --exclude='*/.cache/*' --exclude='*/__pycache__/*' --exclude='*.tmp' --exclude='*.sock' --exclude='*.pid' \
-  -I 'zstd -T4 -3' -cf "$OUTPUT/$NAME.tar.zst" "${ITEMS[@]}"
+tar --dereference -C "$REPO_ROOT" --exclude='*/.cache/*' --exclude='*/__pycache__/*' --exclude='*.tmp' --exclude='*.sock' \
+    --exclude='*.pid' --exclude='*.lock' --exclude='*/frames/*' --exclude='*/interrupted_logs/*' --exclude='*/interrupted_artifacts/*' \
+    -I 'zstd -T4 -3' -cf "$OUTPUT/$NAME.tar.zst" "${ITEMS[@]}"
 if [[ "$MODE" == resources ]]; then
   split --bytes=4G --numeric-suffixes=0 --suffix-length=4 "$OUTPUT/$NAME.tar.zst" "$OUTPUT/$NAME.tar.zst.part-"
   rm -- "$OUTPUT/$NAME.tar.zst"
 fi
 (cd "$OUTPUT"; sha256sum ./* > "$NAME.sha256")
 du -h "$OUTPUT"
-echo "Package: $OUTPUT. Credentials, Docker images and duplicate extracted raw episodes are excluded."
+printf 'Package: %s\n' "$OUTPUT"

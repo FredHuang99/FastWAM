@@ -4,6 +4,7 @@ from __future__ import annotations
 import math
 
 import torch
+from torch.utils.checkpoint import checkpoint
 from torch import nn
 from torch.nn import functional as F
 
@@ -98,7 +99,10 @@ class MemoryModules(nn.Module):
         source = (history_tokens + temporal + spatial[None, None]).flatten(1, 2)
         valid = history_valid.repeat_interleave(120, dim=1)
         for block in self.reader:
-            query = block(query, source, valid)
+            if self.training and getattr(self, "activation_checkpointing", False) and torch.is_grad_enabled():
+                query = checkpoint(block, query, source, valid, use_reentrant=False)
+            else:
+                query = block(query, source, valid)
         return query
 
     def parameter_groups(self):

@@ -8,7 +8,7 @@ REPO_ROOT="$(realpath "$REPO_ROOT")"
 if [[ -n "$(git -C "$REPO_ROOT" status --porcelain)" ]]; then
   echo 'Destination repository has local changes. Preserve them before restoring backup code.' >&2; exit 1
 fi
-for ITEM in src/fastwam/memory_s1 src/fastwam/models/wan22 scripts/memory_s1 configs/memory_s1 configs/model requirements docs; do
+for ITEM in src/fastwam/memory_s1 src/fastwam/models/wan22 scripts/memory_s1 configs/memory_s1 configs/model requirements; do
   if [[ -d "$SNAPSHOT_RUN/code/$ITEM" ]]; then
     mkdir -p "$REPO_ROOT/$ITEM"
     cp -a "$SNAPSHOT_RUN/code/$ITEM/." "$REPO_ROOT/$ITEM/"

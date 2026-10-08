@@ -54,7 +54,7 @@ class RPCPolicy:
 
     def execute(self, environment, observation):
         check_stop(self.config.get("memory_stop_root"))
-        if self.frame_id % 8 == 0:
+        if self.frame_id % int(os.environ.get("MEMORY_S1_ARCHIVE_STRIDE", "8")) == 0:
             self.pending.append(self.capture(environment, observation))
         if not self.actions:
             if self.frame_id % 16:

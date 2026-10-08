@@ -17,6 +17,7 @@ import torch
 
 from .common import TASKS, ReleaseNormalizer, atomic_json, append_jsonl, load_config, read_json, seed_for, sha256
 from .data import mosaic_rgb, collate, history_variant, load_evidence
+from .history import select_ids, online_period
 
 
 class InferenceSession:
@@ -30,6 +31,7 @@ class InferenceSession:
 
     def reset(self):
         self.archive = {}
+        self.raw_archive = {}
         self.observation_signatures = {}
         self.instruction = None
         self.text = self.text_valid = None
@@ -50,30 +52,40 @@ class InferenceSession:
         with torch.autocast("cuda", dtype=torch.bfloat16):
             for observation in request["observations"]:
                 index = int(observation["frame_id"])
-                if index > current_id or (index % 8 != 0 and index != current_id):
-                    raise ValueError("Invalid/future observation slot.")
-                if self.condition == "gate_zero" and index != current_id:
-                    continue
+                if index < 0 or index > current_id:
+                    raise ValueError("Negative/future observation ID.")
                 signature = hashlib.sha256(b"".join(observation["images"]) + json.dumps([observation["shapes"], observation["proprio"]]).encode()).hexdigest()
-                if index in self.archive:
-                    if self.observation_signatures[index] != signature:
-                        raise ValueError("The same frame_id was reused for different observation content.")
-                    if index != current_id:
-                        continue
+                if index in self.raw_archive and self.observation_signatures[index] != signature:
+                    raise ValueError("The same frame ID has different observation content.")
+                self.raw_archive[index] = observation
+                self.observation_signatures[index] = signature
+            period = online_period(self.cfg, current_id)
+            if self.cfg.get("history", {}).get("archive_stride", 8) == 1:
+                if sorted(self.raw_archive) != list(range(current_id + 1)):
+                    raise ValueError("Dense online archive is missing completed-action observations.")
+            indices = select_ids(sorted(self.raw_archive), current_id, period)
+            if indices != select_ids(range(current_id + 1), current_id, period):
+                raise ValueError("Raw archive lacks observations required by this historical period.")
+            if self.condition in ("gate_zero", "current_only"):
+                indices = [current_id]
+            newly_encoded = []
+            for index in indices:
+                if index in self.archive and index != current_id:
+                    continue
+                observation = self.raw_archive[index]
                 images = [np.frombuffer(raw, dtype=np.uint8).reshape(shape) for raw, shape in zip(observation["images"], observation["shapes"])]
                 mosaic = mosaic_rgb(images)[None].to(self.device)
                 proprio = self.normalizer.normalize(torch.tensor(observation["proprio"], device=self.device)[None], "state")
                 latent = encode_latent(self.vae, mosaic)
                 feature, kv, context = self.model.backbone.encode_observation(latent, self.text, proprio, keep_kv=index == current_id)
-                self.archive[index] = feature[0].detach()
-                self.observation_signatures[index] = signature
+                self.archive[index] = feature[0].detach().cpu()
+                newly_encoded.append(index)
                 if index == current_id:
                     current_latent, current_proprio, current_feature, current_kv, current_context = latent, proprio, feature, kv, context
-            if current_latent is None or (self.condition != "gate_zero" and 0 not in self.archive):
-                raise ValueError("Current observation and initial episode evidence must be uploaded.")
-            indices = [current_id] if self.condition == "gate_zero" else sorted(self.archive)
+            if current_latent is None:
+                raise ValueError("Current observation must be uploaded.")
             sample = {"latent": current_latent[0], "proprio": current_proprio[0], "text": self.text[0],
-                      "text_valid": self.text_valid[0], "history": torch.stack([self.archive[i] for i in indices]),
+                      "text_valid": self.text_valid[0], "history": torch.stack([self.archive[i] for i in indices]).to(self.device),
                       "frame_ids": torch.tensor(indices, device=self.device),
                       "history_valid": torch.ones(len(indices), device=self.device, dtype=torch.bool),
                       "actions": torch.zeros(32, 14, device=self.device), "action_valid": torch.ones(32, device=self.device, dtype=torch.bool),
@@ -99,13 +111,13 @@ class InferenceSession:
         torch.cuda.synchronize(self.device)
         append_jsonl(self.output / "decisions.jsonl", {"task": request["task"], "seed": self.episode_seed, "frame_id": current_id,
                                                        "condition": self.condition, "archive_frames": len(self.archive),
+                                                       "raw_archive_frames": len(self.raw_archive), "history_period": period,
+                                                       "selected_frame_ids": indices, "read_frame_ids": sample["frame_ids"].tolist(),
+                                                       "newly_encoded_frame_ids": newly_encoded,
                                                        "read_frames": 0 if readout is None else len(sample["frame_ids"]),
                                                        "readout_norm": None if readout is None else float(readout.float().norm(dim=-1).mean()),
                                                        "seconds": time.monotonic() - started, "gripper_clipped_scalars": clipped,
                                                        "predict": 32, "execute": 16, "instruction": self.instruction})
-        if self.condition == "gate_zero":
-            self.archive.clear()
-            self.observation_signatures.clear()
         return {"actions": actions.cpu().tolist()}
 
 

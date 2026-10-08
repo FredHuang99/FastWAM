@@ -30,6 +30,7 @@ def simulator_environment(cfg, gpu_uuid):
     prefix = Path(cfg["closed_loop"]["simulator_python"]).parent.parent
     environment.update(CUDA_VISIBLE_DEVICES=gpu_uuid, CUDA_DEVICE_ORDER="PCI_BUS_ID", CUDA_HOME=str(prefix),
                        PYTHONUNBUFFERED="1", OMP_NUM_THREADS="4", MKL_NUM_THREADS="4", OPENBLAS_NUM_THREADS="4")
+    environment["MEMORY_S1_ARCHIVE_STRIDE"] = str(cfg.get("history", {}).get("archive_stride", 8))
     environment["PATH"] = str(prefix / "bin") + os.pathsep + environment["PATH"]
     environment["LD_LIBRARY_PATH"] = os.pathsep.join([str(prefix / "lib"), str(prefix / "targets/x86_64-linux/lib"), environment.get("LD_LIBRARY_PATH", "")])
     return environment
@@ -117,6 +118,8 @@ def prepare_scenes(cfg, mode, gpu_uuids, stop_root):
             started, last_print = time.monotonic(), 0
             limit = 6 * 3600 if mode == "official" else 2 * 3600
             while any(process.poll() is None for _, process, _ in processes):
+                if (Path(cfg["paths"]["run"]) / "STOP_REQUESTED").exists():
+                    durable_json(Path(stop_root) / "STOP.json", {"mode": "now", "reason": "training safe stop during scene planning"})
                 if stop_mode(stop_root) or time.monotonic() - started > limit:
                     raise RuntimeError("Scene planning stopped or timed out; partial manifests are preserved.")
                 if any(process.poll() not in (None, 0) for _, process, _ in processes):
@@ -154,7 +157,8 @@ def evaluation_identity(cfg, contract, scenes, conditions, weights, evidence, re
                       "vae": digest(cfg["paths"]["vae"]), "t5": digest(cfg["paths"]["t5"]),
                       "weights": digest(weights) if weights else "gate_zero_diagnostic_only",
                       "evidence": evidence, "source": source, "noise_seed": cfg["seed"],
-                      "predict": 32, "execute": 16, "denoising_steps": 10, "record_frames": record_frames})
+                      "predict": 32, "execute": 16, "denoising_steps": 10, "record_frames": record_frames,
+                      "history_sampling": cfg.get("history", {"online_period": 8, "archive_stride": 8})})
 
 
 @contextmanager
@@ -325,13 +329,18 @@ def upload_results(cfg, output):
     command = [cfg["hf"]["python"], str(Path(cfg["root"]) / "scripts/memory_s1/hf_tools.py"), "eval-results",
                "--repo", cfg["hf"]["backup_repo"], "--evaluation", str(output), "--run-id", Path(cfg["paths"]["run"]).name,
                "--quota-gib", str(cfg["hf"]["quota_gib"]), "--reserve-gib", str(cfg["hf"]["reserve_gib"])]
+    started = time.monotonic()
     subprocess.run(command, check=True, timeout=600)
+    from .common import append_jsonl
+    append_jsonl(Path(output) / "upload_timings.jsonl", {"seconds": time.monotonic() - started, "time": time.time()})
 
 
 def standalone(args):
     from .common import load_config
     from .data import load_evidence
     cfg = load_config(args.config)
+    from .history import override_online
+    override_online(cfg, getattr(args, "history_period", None), getattr(args, "history_cycle", None))
     if not cfg["closed_loop"]["enabled"]:
         raise ValueError("Closed-loop evaluation is disabled in this configuration.")
     output = Path(args.output).resolve()
@@ -427,6 +436,7 @@ def distributed_validation(cfg, weights, output, resident_model):
     device = next(resident_model.memory.parameters()).device
     output = Path(output)
     state = random_state()
+    validation_started = time.time()
     box = [None]
     guard = None
     try:
@@ -460,8 +470,12 @@ def distributed_validation(cfg, weights, output, resident_model):
             try:
                 if any(errors):
                     raise RuntimeError("\n".join(e for e in errors if e))
-                result = summarize(output, "internal", require_complete=True)
+                result = summarize(output, "internal", require_complete=False)
                 upload_results(cfg, output)
+                timing_path = output / "upload_timings.jsonl"
+                import json
+                timings = [json.loads(line) for line in timing_path.read_text().splitlines()] if timing_path.exists() else []
+                result["hf_upload_seconds_this_launch"] = sum(row["seconds"] for row in timings if row["time"] >= validation_started)
                 box[0] = {"ok": True, "result": result}
             except Exception:
                 box[0] = {"ok": False, "error": traceback.format_exc()}
@@ -484,6 +498,8 @@ def main():
     run.add_argument("--output", required=True)
     run.add_argument("--mode", choices=("diagnostic", "internal", "official"), required=True)
     run.add_argument("--conditions", nargs="+", default=["gate_zero"])
+    run.add_argument("--history-period", type=int)
+    run.add_argument("--history-cycle", help="Decision periods, e.g. 8,4,16")
     run.add_argument("--weights")
     run.add_argument("--evidence")
     run.add_argument("--gpus", default="0,1,2,3,4,5,6,7")

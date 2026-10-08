@@ -89,6 +89,7 @@ class S1Model(nn.Module):
         super().__init__()
         self.backbone = FrozenBackbone(cfg, device)
         self.memory = MemoryModules().to(device=device, dtype=torch.float32)
+        self.memory.activation_checkpointing = cfg.get("history", {}).get("reader_checkpointing", False)
         self.scheduler = WanContinuousFlowMatchScheduler(shift=1.0)
 
     def train(self, mode=True):

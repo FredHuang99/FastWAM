@@ -11,7 +11,8 @@ import numpy as np
 from PIL import Image
 import torch
 
-from .common import TASKS, ReleaseNormalizer, read_json, seed_for
+from .common import TASKS, ReleaseNormalizer, read_json, seed_for, sha256
+from .history import select_ids, training_period
 
 
 def official_decoder(root):
@@ -121,6 +122,20 @@ class CachedEpisodes:
             value = torch.load(path, map_location="cpu", weights_only=True)
             if value["signature"] != self.signature:
                 raise ValueError(f"Stale cache: {path}.")
+            if value.get("shards"):
+                fields = {name: [] for name in ("features", "latents", "proprio", "frame_ids")}
+                for shard in value["shards"]:
+                    shard_path = self.root / shard["file"]
+                    if sha256(shard_path) != shard["sha256"]:
+                        raise ValueError(f"Corrupt cache shard: {shard_path}")
+                    block = torch.load(shard_path, map_location="cpu", weights_only=True)
+                    if block["signature"] != self.signature:
+                        raise ValueError("Cache shard encoder identity mismatch.")
+                    for name in fields:
+                        fields[name].append(block[name])
+                value.update({name: torch.cat(parts) for name, parts in fields.items()})
+                if value["frame_ids"].tolist() != list(range(record["length"])):
+                    raise ValueError("Dense cache must cover every original observation.")
             self.loaded[key] = value
             if len(self.loaded) > 8:
                 self.loaded.popitem(last=False)
@@ -134,12 +149,16 @@ class CachedEpisodes:
         record = records[int(generator.integers(len(records)))]
         episode = self.load(record)
         anchor = int(generator.choice(episode["anchors"].numpy()))
-        return self.at(record, anchor)
+        period = 8 if validation else training_period(self.cfg, step, slot)
+        return self.at(record, anchor, period=period)
 
-    def at(self, record, anchor):
+    def at(self, record, anchor, period=8):
         episode = self.load(record)
         indices = episode["frame_ids"]
-        selected = indices <= anchor
+        chosen = select_ids(indices.tolist(), anchor, int(period))
+        if chosen != select_ids(range(anchor + 1), anchor, int(period)):
+            raise ValueError("The cache lacks observations required by this historical period.")
+        selected = torch.isin(indices, torch.tensor(chosen))
         position = torch.nonzero(indices == anchor, as_tuple=False).flatten()
         if position.numel() != 1:
             raise ValueError("Decision observation must be cached exactly once.")
@@ -156,7 +175,7 @@ class CachedEpisodes:
                 "text": episode["text"], "text_valid": episode["text_valid"], "history": episode["features"][selected],
                 "frame_ids": indices[selected], "history_valid": torch.ones(int(selected.sum()), dtype=torch.bool),
                 "actions": actions, "action_valid": valid, "t": torch.tensor(anchor),
-                "episode_id": record["episode_id"], "task": record["task"]}
+                "episode_id": record["episode_id"], "task": record["task"], "history_period": int(period)}
 
 
 def collate(samples, device):

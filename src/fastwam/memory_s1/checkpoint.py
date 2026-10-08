@@ -43,9 +43,10 @@ def save_checkpoint(model, optimizer, scheduler, run, step, cfg, identity, rng_s
              "optimizer": to_cpu(optimizer.state_dict()), "scheduler": scheduler.state_dict(),
              "completed_updates": step, "sampler_next_update": step, "rng_states": rng_states,
              "config": cfg, "identity": identity, "progress": progress, "best": best}
+    (directory / "continuation.json").unlink(missing_ok=True)
     atomic_torch(directory / "resume.pt", value)
     atomic_json(directory / "complete.json", {"schema": SCHEMA, "completed_updates": step,
-                                              "sha256": sha256(directory / "resume.pt"), "identity": identity})
+                                              "sha256": sha256(directory / "resume.pt"), "identity": identity, "phase": progress.get("phase", "train")})
     atomic_json(Path(run) / "LATEST_LOCAL.json", {"directory": str(directory.relative_to(run)), "step": step})
     return directory
 
@@ -57,7 +58,25 @@ def verified_load(path, weights_only=False):
     marker = read_json(path.parent / "complete.json")
     if marker["sha256"] != sha256(path):
         raise ValueError(f"Incomplete or corrupt resume file: {path}.")
-    return torch.load(path, map_location="cpu", weights_only=weights_only)
+    value = torch.load(path, map_location="cpu", weights_only=weights_only)
+    continuation_path = path.parent / "continuation.json"
+    if continuation_path.exists():
+        if marker.get("continuation_sha256") != sha256(continuation_path):
+            raise ValueError("Continuation checksum mismatch.")
+        continuation = read_json(continuation_path)
+        if continuation["step"] != value["completed_updates"] or continuation["identity"] != value["identity"]:
+            raise ValueError("Continuation refers to a different completed update.")
+        value.update(progress=continuation["progress"], best=continuation["best"])
+    return value
+
+
+def save_continuation(directory, step, identity, progress, best):
+    directory = Path(directory)
+    atomic_json(directory / "continuation.json", {"step": step, "identity": identity, "progress": progress, "best": best})
+    marker = read_json(directory / "complete.json")
+    marker["continuation_sha256"] = sha256(directory / "continuation.json")
+    marker["phase"] = progress.get("phase", "train")
+    atomic_json(directory / "complete.json", marker)
 
 
 def upload_checkpoint(cfg, directory):
