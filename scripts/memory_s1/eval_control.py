@@ -11,8 +11,13 @@ import signal
 import sys
 import time
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src/fastwam/memory_s1"))
-from eval_state import digest, durable_json, is_alive, process_identity, read
+# Import the standalone state module, then restore the search path.
+_state_directory = str(Path(__file__).resolve().parents[2] / "src/fastwam/memory_s1")
+sys.path.insert(0, _state_directory)
+try:
+    from eval_state import digest, durable_json, is_alive, process_identity, read
+finally:
+    sys.path.remove(_state_directory)
 
 
 def children_of(pid):

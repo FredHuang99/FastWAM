@@ -173,8 +173,13 @@ def eval_results(args):
     import tempfile
     import shutil
     import sys
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src/fastwam/memory_s1"))
-    from eval_state import EpisodeQueue, durable_json, read, signature
+    # Import the standalone state module, then restore the search path.
+    _state_directory = str(Path(__file__).resolve().parents[2] / "src/fastwam/memory_s1")
+    sys.path.insert(0, _state_directory)
+    try:
+        from eval_state import EpisodeQueue, durable_json, read, signature
+    finally:
+        sys.path.remove(_state_directory)
     root = Path(args.evaluation).resolve()
     queue = EpisodeQueue(root)
     value = queue.snapshot()

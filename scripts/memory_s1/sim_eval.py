@@ -11,8 +11,13 @@ import time
 import traceback
 
 # Simulator Python imports only the standard-library state module.
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src/fastwam/memory_s1"))
-from eval_state import EvaluationInterrupted, check_stop, cuda_gpu_uuid, durable_json, read, signature
+# Import the standalone state module, then restore the search path.
+_state_directory = str(Path(__file__).resolve().parents[2] / "src/fastwam/memory_s1")
+sys.path.insert(0, _state_directory)
+try:
+    from eval_state import EvaluationInterrupted, check_stop, cuda_gpu_uuid, durable_json, read, signature
+finally:
+    sys.path.remove(_state_directory)
 
 
 def verify_gpu(expected, scene):
