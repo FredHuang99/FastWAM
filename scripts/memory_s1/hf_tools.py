@@ -9,6 +9,10 @@ from pathlib import Path
 import subprocess
 import time
 
+# Enable Hub requests only in this independent HF utility process.
+os.environ["HF_HUB_OFFLINE"] = "0"
+os.environ["TRANSFORMERS_OFFLINE"] = "0"
+
 from huggingface_hub import HfApi, CommitOperationAdd, snapshot_download
 
 
@@ -29,40 +33,37 @@ def write_json(path, value):
 
 
 def account_storage(api):
-    from huggingface_hub.utils import build_hf_headers, get_session
     username = api.whoami()["name"]
+    if not callable(getattr(api, "list_user_repos", None)):
+        raise RuntimeError(
+            "HF account storage requires HfApi.list_user_repos; "
+            "run this utility with /opt/hf-tools/bin/python and huggingface-hub==1.19.0."
+        )
     total = 0
     inventory = []
-    # Count private storage across all owned models, datasets, and Spaces, including repository history.
-    for kind, plural in (("model", "models"), ("dataset", "datasets"), ("space", "spaces")):
-        url = f"https://huggingface.co/api/{plural}"
-        params = {"author": username, "limit": 100, "expand": ["private", "usedStorage"]}
-        while url:
-            response = get_session().get(url, params=params, headers=build_hf_headers(token=api.token), timeout=60)
-            response.raise_for_status()
-            for repository in response.json():
-                if "private" not in repository:
-                    raise RuntimeError("HF did not expose repository visibility; quota cannot be verified.")
-                if repository["private"]:
-                    if not isinstance(repository.get("usedStorage"), (int, float)):
-                        info = api.repo_info(repository["id"], repo_type=kind, expand=["usedStorage"])
-                        used = getattr(info, "used_storage", None)
-                    else:
-                        used = repository["usedStorage"]
-                    if not isinstance(used, (int, float)):
-                        raise RuntimeError(f"HF did not expose history-inclusive storage for {repository['id']}; stop and inspect hf repos ls.")
-                    total += int(used)
-                    inventory.append({"id": repository["id"], "type": kind, "used_bytes": int(used)})
-            url = response.links.get("next", {}).get("url")
-            params = None
-    if not hasattr(api, "list_buckets"):
-        raise RuntimeError("Installed HF utility cannot inspect all account storage; use the pinned HF-tools version.")
-    for bucket in api.list_buckets(namespace=username):
-        if bucket.private:
-            if not isinstance(bucket.size, (int, float)):
-                raise RuntimeError("Private bucket storage was not exposed; quota cannot be verified.")
-            total += int(bucket.size)
-            inventory.append({"id": bucket.id, "type": "bucket", "used_bytes": int(bucket.size)})
+    seen = set()
+    # Read personal-namespace storage from the account endpoint, including buckets.
+    # Do not enumerate buckets again or estimate storage from the current file tree.
+    for repository in api.list_user_repos():
+        repo_id = repository.id
+        kind = repository.type
+        visibility = repository.visibility
+        if not isinstance(repo_id, str) or kind not in ("model", "dataset", "space", "bucket"):
+            raise RuntimeError("HF returned an unsupported repository in the account storage listing.")
+        key = (kind, repo_id)
+        if key in seen:
+            raise RuntimeError(f"HF returned a duplicate storage entry: {kind}/{repo_id}.")
+        seen.add(key)
+        if visibility not in ("public", "private"):
+            raise RuntimeError(f"HF did not expose supported visibility for {repo_id}; quota cannot be verified.")
+        if visibility == "public":
+            continue
+        used = repository.storage
+        if isinstance(used, bool) or not isinstance(used, int) or used < 0:
+            raise RuntimeError(f"HF did not expose valid account storage for {repo_id}; quota cannot be verified.")
+        total += used
+        inventory.append({"id": repo_id, "type": kind, "used_bytes": used})
+    inventory.sort(key=lambda entry: (entry["type"], entry["id"]))
     return username, total, inventory
 
 
