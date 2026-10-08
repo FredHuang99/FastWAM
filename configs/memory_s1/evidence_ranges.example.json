@@ -1,0 +1,13 @@
+{
+  "reviewed": false,
+  "provenance": "Replace with reviewed videos/task phases; all ranges below are placeholders, not experimental annotations.",
+  "offline_index": "native_observation_record",
+  "online_index": "completed_action_target",
+  "offline": {
+    "put_back_block/episode_0000000": {"apply_from": 64, "critical": [[0, 16]], "irrelevant": [[32, 48]]}
+  },
+  "online": {
+    "put_back_block": {"1800000": {"apply_from": 64, "critical": [[0, 16]], "irrelevant": [[32, 48]]}},
+    "swap_blocks": {"1800000": {"apply_from": 64, "critical": [[0, 16]], "irrelevant": [[32, 48]]}}
+  }
+}

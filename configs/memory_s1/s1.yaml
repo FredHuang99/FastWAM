@@ -1,0 +1,38 @@
+root: .
+paths:
+  base: resources/base/robotwin_uncond_3cam_384.pt
+  stats: resources/base/robotwin_uncond_3cam_384_dataset_stats.json
+  vae: resources/encoders/Wan2.2_VAE.safetensors
+  t5: resources/encoders/models_t5_umt5-xxl-enc-bf16.safetensors
+  tokenizer: resources/tokenizer/google/umt5-xxl
+  raw: resources/RMBench/data/demo_clean
+  prepared: resources/prepared
+  cache: resources/cache_s1
+  run: outputs/memory_s1_seed17
+seed: 17
+global_batch: 16
+steps: 2000
+micro_batch: 2
+learning_rate: 0.0001
+min_learning_rate: 0.00001
+warmup: 100
+checkpoint_every: 100
+validate_every: 500
+log_every: 10
+validation_anchors_per_task: 32
+hf:
+  enabled: true
+  python: /opt/hf-tools/bin/python
+  backup_repo: hhyfred/fastwam-memory-s1-backup
+  assets_repo: hhyfred/fastwam-memory-s1-assets
+  quota_gib: 93.132257462
+  reserve_gib: 10
+closed_loop:
+  enabled: true
+  simulator_python: /opt/rmbench-env/bin/python
+  simulator_root: resources/RMBench
+  internal_seed: 17
+  official_seed: 42
+  internal_episodes: 10
+  official_episodes: 100
+  evidence_manifest: resources/evidence_ranges.json

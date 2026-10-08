@@ -244,3 +244,7 @@ manifest.json
 wandb/
 onelogger.err
 onelogger.log
+
+# Memory S1 generated resources
+resources/
+!requirements/memory_s1.txt
