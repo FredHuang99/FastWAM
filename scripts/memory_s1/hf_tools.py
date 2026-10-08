@@ -100,7 +100,7 @@ def checkpoint(args):
     provenance = run / "provenance"
     provenance.mkdir(exist_ok=True)
     (provenance / "git.diff").write_text(subprocess.check_output(["git", "-C", str(root), "diff", "--binary"], text=True))
-    (provenance / "pip-freeze.txt").write_text(subprocess.check_output([config.get("training_python", "/usr/local/bin/python"), "-m", "pip", "freeze"], text=True))
+    (provenance / "pip-freeze.txt").write_text(subprocess.check_output([config.get("training_python", "/usr/local/bin/python"), "-m", "pip", "list", "--format=freeze"], text=True))
     files = [(directory / "resume.pt", f"checkpoints/{directory.name}/resume.pt"),
              (directory / "complete.json", f"checkpoints/{directory.name}/complete.json")]
     for path in run.rglob("*"):
@@ -168,6 +168,72 @@ def download_resume(args):
     print(f"[restore] completed_update={pointer['step']} resume={resume}", flush=True)
 
 
+def eval_results(args):
+    import tempfile
+    import shutil
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src/fastwam/memory_s1"))
+    from eval_state import EpisodeQueue, durable_json, read, signature
+    root = Path(args.evaluation).resolve()
+    queue = EpisodeQueue(root)
+    value = queue.snapshot()
+    completed = [job for job in value["jobs"] if job["state"] == "complete"]
+    for job in completed:
+        queue.result(job, value["identity"])
+    # Serialize a restartable snapshot; live worker leases are never restored as live jobs.
+    for job in value["jobs"]:
+        if job["state"] != "complete":
+            job["state"] = "pending"
+            job.pop("owner", None)
+    prefix = f"evaluations/{args.run_id}/{value['identity']}"
+    api = HfApi()
+    with tempfile.TemporaryDirectory(prefix="mwam-eval-upload-") as temporary:
+        temporary = Path(temporary)
+        durable_json(temporary / "queue.json", value)
+        for name in ("evaluation.json", "scenes.json", "summary.json", "status.json"):
+            if (root / name).exists():
+                shutil.copy2(root / name, temporary / name)
+        operations = []
+        sent_path = root / "HF_EPISODES.json"
+        sent = read(sent_path) if sent_path.exists() else {"identity": value["identity"], "jobs": []}
+        if sent["identity"] != value["identity"]:
+            raise ValueError("HF episode pointer identity mismatch.")
+        if not sent.get("code_saved"):
+            config = read(root / "evaluation.json")["config"]
+            source_root = Path(config["root"])
+            for subtree in ("src", "scripts/memory_s1", "configs", "requirements", "docs"):
+                for path in (source_root / subtree).rglob("*"):
+                    if path.is_file() and "__pycache__" not in path.parts and path.suffix in (".py", ".sh", ".json", ".yaml", ".yml", ".toml", ".txt", ".md"):
+                        relative = str(path.relative_to(source_root)).replace(os.sep, "/")
+                        operations.append(CommitOperationAdd(path_in_repo=f"{prefix}/code/{relative}", path_or_fileobj=str(path)))
+            operations.append(CommitOperationAdd(path_in_repo=f"{prefix}/code/pyproject.toml", path_or_fileobj=str(source_root / "pyproject.toml")))
+            bundle = temporary / "source.bundle"
+            subprocess.run(["git", "-C", str(source_root), "bundle", "create", str(bundle), "HEAD", "refs/heads/memory"], check=True)
+            operations.append(CommitOperationAdd(path_in_repo=f"{prefix}/code/source.bundle", path_or_fileobj=str(bundle)))
+            scene_contract = read(root / "scenes.json")["contract"]
+            manifest_root = Path(config["paths"]["run"]) / "scene_manifests" / signature(scene_contract)[:16]
+            for path in manifest_root.glob("*.json"):
+                operations.append(CommitOperationAdd(path_in_repo=f"{prefix}/run_metadata/scene_manifests/{manifest_root.name}/{path.name}", path_or_fileobj=str(path)))
+        for job in completed:
+            if job["directory"] in sent["jobs"]:
+                continue
+            directory = root / job["directory"]
+            for name in ("job.json", "result.json", "decisions.jsonl", "simulator.log", "complete.json"):
+                path = directory / name
+                if path.exists():
+                    operations.append(CommitOperationAdd(path_in_repo=f"{prefix}/{job['directory']}/{name}", path_or_fileobj=str(path)))
+        snapshots = [p for p in temporary.iterdir() if p.suffix == ".json"]
+        estimated = sum(Path(operation.path_or_fileobj).stat().st_size for operation in operations) + sum(p.stat().st_size for p in snapshots)
+        check_budget(api, estimated, args.quota_gib, args.reserve_gib)
+        ensure_private(api, args.repo, "model")
+        for start in range(0, len(operations), 50):
+            api.create_commit(args.repo, repo_type="model", operations=operations[start:start+50], commit_message="Save immutable completed evaluation episodes")
+        commit = api.create_commit(args.repo, repo_type="model", operations=[CommitOperationAdd(path_in_repo=f"{prefix}/{p.name}", path_or_fileobj=str(p)) for p in snapshots],
+                                   commit_message=f"Publish evaluation resume snapshot ({len(completed)} complete)")
+        durable_json(sent_path, {"identity": value["identity"], "jobs": [job["directory"] for job in completed], "revision": commit.oid, "prefix": prefix, "code_saved": True})
+        print(f"[HF evaluation] completed={len(completed)} revision={commit.oid} prefix={prefix}", flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser(__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -186,7 +252,11 @@ def main():
     restore.add_argument("--repo", required=True)
     restore.add_argument("--run-id", required=True)
     restore.add_argument("--output", required=True)
-    for target in (quota, cp, package):
+    evaluation = sub.add_parser("eval-results")
+    evaluation.add_argument("--repo", required=True)
+    evaluation.add_argument("--evaluation", required=True)
+    evaluation.add_argument("--run-id", required=True)
+    for target in (quota, cp, package, evaluation):
         target.add_argument("--quota-gib", type=float, default=100_000_000_000 / 2**30)
         target.add_argument("--reserve-gib", type=float, default=10)
     args = parser.parse_args()
@@ -196,6 +266,8 @@ def main():
         checkpoint(args)
     elif args.command == "upload-package":
         upload_package(args)
+    elif args.command == "eval-results":
+        eval_results(args)
     else:
         download_resume(args)
 

@@ -52,6 +52,8 @@ def run_training(args):
     stop_requested = [False]
     def request_stop(signum, frame):
         stop_requested[0] = True
+        if run.exists():
+            (run / "STOP_REQUESTED").touch()
     signal.signal(signal.SIGTERM, request_stop)
     signal.signal(signal.SIGINT, request_stop)
     random.seed(17 + rank)
@@ -138,6 +140,7 @@ def run_training(args):
                                                   "pid": os.getpid(), "device": torch.cuda.get_device_name(local)})
         print(f"[start] update={step}/{cfg['steps']} world={world} micro={micro} accumulation={accumulation}", flush=True)
     rolling = deque(maxlen=30)
+    validation_error = None
     start_wall = time.monotonic()
     prior_wall = progress["wall_seconds"]
     while step < cfg["steps"]:
@@ -195,20 +198,51 @@ def run_training(args):
             print(f"[train] {step}/{cfg['steps']} loss={row['loss']:.6f} lr={row['learning_rate']:.2e} grad={row['gradient_norm']:.3f} ETA={duration(remaining)}", flush=True)
         if step % cfg["validate_every"] == 0 and not stop:
             validation_start = time.monotonic()
+            saved_rng = random_state()
+            validation_box = [None]
             if rank == 0:
-                from .sim_bridge import run_closed_loop
-                result = validate(model, val_data, cfg, device)
+                try:
+                    result = validate(model, val_data, cfg, device)
+                    weights = run / "weights" / f"step_{step:06d}.pt"
+                    save_weights(model, weights, step, identity)
+                    validation_box[0] = {"ok": True, "offline": result}
+                except Exception as error:
+                    validation_box[0] = {"ok": False, "error": repr(error)}
+            dist.broadcast_object_list(validation_box, src=0, device=device)
+            validation_error = None
+            try:
+                if not validation_box[0]["ok"]:
+                    raise RuntimeError(validation_box[0]["error"])
+                from .eval_parallel import distributed_validation
                 weights = run / "weights" / f"step_{step:06d}.pt"
-                save_weights(model, weights, step, identity)
-                closed = run_closed_loop(cfg, weights, "internal", ["full"], run / "validation" / f"step_{step:06d}", resident_model=model)
+                closed = distributed_validation(cfg, weights, run / "validation" / f"step_{step:06d}", model)
                 success_rate = closed["success_rate"]
-                atomic_json(run / "validation" / f"step_{step:06d}.json", {"offline": result, "closed_loop": closed})
-                append_jsonl(run / "metrics.jsonl", {"kind": "validation", "step": step, "fm": result["fm"], "success_rate": success_rate})
-                if success_rate > best["success_rate"] or (success_rate == best["success_rate"] and (best["fm"] is None or result["fm"] < best["fm"])):
-                    best = {"success_rate": success_rate, "fm": result["fm"], "step": step}
-                    save_weights(model, run / "weights/best.pt", step, identity)
-                    atomic_json(run / "BEST.json", best)
-            dist.barrier()
+                final_box = [None]
+                if rank == 0:
+                    try:
+                        result = validation_box[0]["offline"]
+                        atomic_json(run / "validation" / f"step_{step:06d}.json", {"offline": result, "closed_loop": closed})
+                        append_jsonl(run / "metrics.jsonl", {"kind": "validation", "step": step, "fm": result["fm"], "success_rate": success_rate})
+                        if success_rate > best["success_rate"] or (success_rate == best["success_rate"] and (best["fm"] is None or result["fm"] < best["fm"])):
+                            best = {"success_rate": success_rate, "fm": result["fm"], "step": step}
+                            save_weights(model, run / "weights/best.pt", step, identity)
+                            atomic_json(run / "BEST.json", best)
+                        final_box[0] = {"ok": True, "best": best}
+                    except Exception as error:
+                        final_box[0] = {"ok": False, "error": repr(error)}
+                dist.broadcast_object_list(final_box, src=0, device=device)
+                if not final_box[0]["ok"]:
+                    raise RuntimeError(final_box[0]["error"])
+                best = final_box[0]["best"]
+            except Exception as error:
+                validation_error = repr(error)
+                stop = True
+                if rank == 0:
+                    atomic_json(run / "VALIDATION_FAILED.json", {"step": step, "error": validation_error})
+                    print(f"[safe-stop] Validation failed at update={step}; saving a complete training checkpoint: {validation_error}", flush=True)
+            finally:
+                restore_random_state(saved_rng)
+                model.train()
             progress["validation_seconds"] += time.monotonic() - validation_start
         if any(parameter._version != version for parameter, version in frozen_versions):
             raise RuntimeError("A frozen backbone parameter was modified.")
@@ -242,7 +276,7 @@ def run_training(args):
             break
     if rank == 0:
         print(f"[finish] completed_updates={step}; full evaluation is a separate explicit command.", flush=True)
-    return 0
+    return 2 if validation_error is not None else 0
 
 
 def main():

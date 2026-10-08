@@ -61,6 +61,9 @@ class Injector(nn.Module):
         self.gate = nn.Parameter(torch.tensor(1e-3, dtype=torch.float32))
 
     def forward(self, action, readout, gate_scale=1.0):
+        # Only the explicit diagnostic override bypasses the memory path.
+        if gate_scale == 0:
+            return action
         return action + (self.gate * gate_scale).to(action.dtype) * self.attention(self.q_norm(action), self.kv_norm(readout))
 
 
