@@ -34,7 +34,7 @@ def physical_state(robot):
 
 def object_snapshot(environment):
     result = {}
-    for name in ("block", "block1", "block2", "button"):
+    for name in ("block", "block1", "block2", "box", "target_box", "button"):
         actor = getattr(environment, name, None)
         if actor is not None and hasattr(actor, "get_pose"):
             pose = actor.get_pose()

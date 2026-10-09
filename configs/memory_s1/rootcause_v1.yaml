@@ -1,0 +1,36 @@
+root: .
+diagnostic_only: true
+paths:
+  base: resources/base/robotwin_uncond_3cam_384.pt
+  stats: resources/base/robotwin_uncond_3cam_384_dataset_stats.json
+  vae: resources/encoders/Wan2.2_VAE.pth
+  t5: resources/encoders/models_t5_umt5-xxl-enc-bf16.pth
+  tokenizer: resources/tokenizer/google/umt5-xxl
+  raw: resources/RMBench/data/demo_clean
+  prepared: resources/prepared_dense_v1
+  cache: resources/cache_s1_dense_v1
+  run: outputs/base_rootcause_v1
+seed: 17
+global_batch: 16
+steps: 2000
+micro_batch: 2
+history:
+  train_min: 1
+  train_max: 16
+  archive_stride: 1
+  cache_shard_frames: 64
+closed_loop:
+  enabled: true
+  simulator_python: /opt/rmbench-env/bin/python
+  simulator_root: resources/RMBench
+hf:
+  enabled: true
+  python: /opt/hf-tools/bin/python
+  backup_repo: hhyfred/fastwam-memory-s1-backup
+  quota_gib: 93.132257462
+  reserve_gib: 10
+rootcause:
+  robotwin_root: third_party/RoboTwin
+  rm_scenes_from: outputs/base_prefix_precision_v3_20261009T022201Z/scenes.json
+  episode_timeout: 3600
+  planning_timeout: 7200
