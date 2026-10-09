@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from collections import deque
+import json
 from multiprocessing.connection import Client
 import os
 from pathlib import Path
@@ -42,7 +43,8 @@ class RPCPolicy:
         state = np.asarray(observation["joint_action"]["vector"], dtype=np.float32)
         if state.shape != (14,):
             raise ValueError(f"Aloha state shape is {state.shape}; expected 14.")
-        if self.config.get("memory_record_frames"):
+        frame_stride = int(os.environ.get("MEMORY_S1_RECORD_FRAME_STRIDE", "1"))
+        if self.config.get("memory_record_frames") and self.frame_id % frame_stride == 0:
             write_started = time.monotonic()
             directory = Path(self.config["memory_output"]) / "frames" / str(environment._memory_seed)
             directory.mkdir(parents=True, exist_ok=True)
@@ -72,8 +74,24 @@ class RPCPolicy:
             print(f"[decision] frame={self.frame_id} RPC+inference={time.monotonic()-started:.3f}s", flush=True)
         check_stop(self.config.get("memory_stop_root"))
         action_started = time.monotonic()
-        environment.take_action(self.actions.popleft(), action_type="qpos")
+        target = self.actions.popleft()
+        feedback = self.config.get("memory_record_feedback", False)
+        if feedback:
+            from sim_feedback import physical_state, object_snapshot
+            physical_before = physical_state(environment.robot)
+            objects_before = object_snapshot(environment)
+        environment.take_action(target, action_type="qpos")
         self.timings["action_execution_seconds"] += time.monotonic() - action_started
+        if feedback:
+            physical_after = physical_state(environment.robot)
+            row = {"completed_target_id": self.frame_id + 1, "target": target.tolist(),
+                   "physical_before": physical_before.tolist(), "physical_after": physical_after.tolist(),
+                   "physical_abs_error": np.abs(physical_after - target).tolist(),
+                   "command_echo_before": np.asarray(observation["joint_action"]["vector"]).tolist(),
+                   "objects_before": objects_before, "objects_after": object_snapshot(environment),
+                   "feedback_source": "physical_qpos_unclipped_gripper_mean_fingers"}
+            with (Path(self.config["memory_output"]) / "executed_actions.jsonl").open("a", encoding="utf-8") as stream:
+                stream.write(json.dumps(row, allow_nan=False) + "\n")
         self.frame_id += 1
 
 

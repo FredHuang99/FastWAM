@@ -15,6 +15,7 @@ from fastwam.models.wan22.helpers.loader import _load_registered_model
 from fastwam.models.wan22.wan_video_text_encoder import HuggingfaceTokenizer
 from fastwam.models.wan22.schedulers.scheduler_continuous import WanContinuousFlowMatchScheduler
 from .modules import MemoryModules
+from .protocol import format_task_prompt
 
 
 class FrozenBackbone(nn.Module):
@@ -51,13 +52,14 @@ class FrozenBackbone(nn.Module):
         context, context_mask = self.context(text, proprio)
         expert = self.mot.mixtures["video"]
         x, _, mod, ctx, ctx_mask, freqs, _, _, _, _ = expert.prepare(
-            x=latent.to(torch.bfloat16), timestep=torch.zeros(latent.shape[0], device=latent.device),
+            x=latent.to(torch.bfloat16), timestep=torch.zeros(latent.shape[0], device=latent.device, dtype=torch.bfloat16),
             context=context, context_mask=context_mask, fuse_vae_embedding_in_latents=True)
         keys, values = [], []
+        attention_mask = torch.ones((x.shape[1], x.shape[1]), device=x.device, dtype=torch.bool)
         for block in expert.blocks:
             q, k, v, residual, gate, shift, scale, ffn_gate, _ = self.mot._build_expert_attention_io(
                 expert=expert, block=block, x=x, freqs=freqs, t_mod=mod)
-            mixed = flash_attention(q=q, k=k, v=v, num_heads=24)
+            mixed = flash_attention(q=q, k=k, v=v, num_heads=24, ctx_mask=attention_mask)
             x = self.mot._apply_expert_post_block_tensor(
                 block=block, residual_x=residual, mixed_attn_out=mixed, gate_msa=gate,
                 shift_mlp=shift, scale_mlp=scale, gate_mlp=ffn_gate, context=ctx, context_mask=ctx_mask)
@@ -71,17 +73,18 @@ class FrozenBackbone(nn.Module):
         expert = self.mot.mixtures["action"]
         x, _, mod, ctx, ctx_mask, freqs = expert.prepare(
             action_tokens=actions.to(torch.bfloat16), timestep=timestep, context=context, context_mask=mask)
+        attention_mask = torch.ones((x.shape[1], kv[0][0].shape[1] + x.shape[1]), device=x.device, dtype=torch.bool)
         for layer, block in enumerate(expert.blocks):
             q, k, v, residual, gate, shift, scale, ffn_gate, _ = self.mot._build_expert_attention_io(
                 expert=expert, block=block, x=x, freqs=freqs, t_mod=mod)
             mixed = flash_attention(q=q, k=torch.cat((kv[0][layer], k), 1),
-                                    v=torch.cat((kv[1][layer], v), 1), num_heads=24)
+                                    v=torch.cat((kv[1][layer], v), 1), num_heads=24, ctx_mask=attention_mask)
             x = self.mot._apply_expert_post_block_tensor(
                 block=block, residual_x=residual, mixed_attn_out=mixed, gate_msa=gate,
                 shift_mlp=shift, scale_mlp=scale, gate_mlp=ffn_gate, context=ctx, context_mask=ctx_mask)
             if str(layer) in memory.injectors:
                 x = memory.injectors[str(layer)](x, readout, gate_scale)
-        return expert.post(x).float()
+        return expert.post(x)
 
 
 class S1Model(nn.Module):
@@ -111,6 +114,7 @@ class S1Model(nn.Module):
             kv, context, readout = self.conditions(batch)
             noisy = (1 - tau[:, None, None]) * batch["actions"] + tau[:, None, None] * noise
             prediction = self.backbone.action_velocity(noisy, 1000 * tau, context, kv, self.memory, readout, gate_scale)
+        prediction = prediction.float()
         target = noise.float() - batch["actions"].float()
         count = batch["action_valid"].sum(1)
         if (count == 0).any():
@@ -124,13 +128,13 @@ class S1Model(nn.Module):
     def sample(self, batch, noise, gate_scale=1.0, prepared_conditions=None):
         with torch.autocast("cuda", dtype=torch.bfloat16):
             kv, context, readout = self.conditions(batch) if prepared_conditions is None else prepared_conditions
-            timesteps, deltas = self.scheduler.build_inference_schedule(10, noise.device, torch.float32)
-            actions = noise.float().clone()
+            actions = noise.to(torch.bfloat16).clone()
+            timesteps, deltas = self.scheduler.build_inference_schedule(10, noise.device, actions.dtype)
             for timestep, delta in zip(timesteps, deltas):
                 velocity = self.backbone.action_velocity(actions, timestep.expand(len(actions)), context,
                                                          kv, self.memory, readout, gate_scale)
-                actions = self.scheduler.step(velocity, delta, actions)
-        return actions, readout
+                actions = self.scheduler.step(velocity.to(actions.dtype), delta, actions)
+        return actions.float(), readout
 
 
 def load_observation_encoders(cfg, device):
@@ -144,7 +148,7 @@ def load_observation_encoders(cfg, device):
 
 @torch.no_grad()
 def encode_text(encoder, tokenizer, instruction, device):
-    ids, valid = tokenizer(instruction, return_mask=True)
+    ids, valid = tokenizer(format_task_prompt(instruction), return_mask=True, add_special_tokens=True)
     ids, valid = ids.to(device), valid.to(device).bool()
     features = encoder(ids, valid)
     features = features.masked_fill(~valid[..., None], 0)

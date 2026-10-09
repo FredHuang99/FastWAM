@@ -64,6 +64,8 @@ def archive_uncommitted_logs(run, step, phase):
 
 def run_training(args):
     cfg = load_config(args.config)
+    if cfg.get("diagnostic_only"):
+        raise ValueError("Base diagnostic configurations cannot launch parameter training.")
     cfg["training_python"] = sys.executable
     rank, world = int(os.environ.get("RANK", 0)), int(os.environ.get("WORLD_SIZE", 1))
     local = int(os.environ.get("LOCAL_RANK", 0))
@@ -115,6 +117,9 @@ def run_training(args):
             raise ValueError("Base admission is missing; do not infer it from memory-task success rates.")
         if base.get("base_sha256") != sha256(cfg["paths"]["base"]) or base.get("stats_sha256") != sha256(cfg["paths"]["stats"]):
             raise ValueError("Base admission identifies different weights/statistics.")
+        from .protocol import inference_contract
+        if base.get("inference_contract") != inference_contract():
+            raise ValueError("Base admission predates the corrected prompt/sampler; review new compatible diagnostics first.")
         for record in train_data.manifest["episodes"]:
             if sha256(Path(cfg["paths"]["cache"]) / record["file"]) != record["cache_sha256"]:
                 raise ValueError(f"Corrupt cached episode: {record['episode_id']}")

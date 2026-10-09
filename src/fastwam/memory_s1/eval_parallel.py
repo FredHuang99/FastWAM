@@ -8,6 +8,7 @@ from multiprocessing.connection import Listener
 import os
 from pathlib import Path
 import signal
+import shutil
 import subprocess
 import sys
 import time
@@ -31,6 +32,7 @@ def simulator_environment(cfg, gpu_uuid):
     environment.update(CUDA_VISIBLE_DEVICES=gpu_uuid, CUDA_DEVICE_ORDER="PCI_BUS_ID", CUDA_HOME=str(prefix),
                        PYTHONUNBUFFERED="1", OMP_NUM_THREADS="4", MKL_NUM_THREADS="4", OPENBLAS_NUM_THREADS="4")
     environment["MEMORY_S1_ARCHIVE_STRIDE"] = str(cfg.get("history", {}).get("archive_stride", 8))
+    environment["MEMORY_S1_RECORD_FRAME_STRIDE"] = str(cfg.get("diagnostic", {}).get("record_frame_stride", 1))
     environment["PATH"] = str(prefix / "bin") + os.pathsep + environment["PATH"]
     environment["LD_LIBRARY_PATH"] = os.pathsep.join([str(prefix / "lib"), str(prefix / "targets/x86_64-linux/lib"), environment.get("LD_LIBRARY_PATH", "")])
     return environment
@@ -95,6 +97,30 @@ def protocol(cfg, mode):
 
 def prepare_scenes(cfg, mode, gpu_uuids, stop_root):
     contract = protocol(cfg, mode)
+    diagnostic = cfg.get("diagnostic", {})
+    if diagnostic.get("scenes_from"):
+        if mode != "diagnostic":
+            raise ValueError("Reused short diagnostics cannot replace the official evaluation protocol.")
+        source = Path(diagnostic["scenes_from"])
+        saved = read(source)
+        if saved["contract"] != contract:
+            raise ValueError("Old scene protocol/simulator changed; do not silently reuse different scenes.")
+        count = int(diagnostic.get("episodes_per_task", 2))
+        if count <= 0:
+            raise ValueError("A positive diagnostic scene count is required.")
+        scenes = []
+        for task in contract["tasks"]:
+            candidates = sorted((s for s in saved["scenes"] if s["task"] == task), key=lambda s: s["ordinal"])
+            if len(candidates) < count or len({s["seed"] for s in candidates}) != len(candidates):
+                raise ValueError(f"Missing or duplicate old scenes for {task}.")
+            scenes.extend(candidates[:count])
+        borrowed = {**contract, "subset_per_task": count, "parent_scenes_sha": digest(source),
+                    "purpose": "base_compatibility_prefix_diagnostic"}
+        directory = Path(stop_root) / "borrowed_scenes"
+        directory.mkdir(parents=True, exist_ok=True)
+        durable_json(directory / "manifest.json", {"contract": borrowed, "scenes": scenes, "source": str(source)})
+        print(f"[scenes] reused {len(scenes)} frozen scenes from {source}; expert replanning skipped", flush=True)
+        return borrowed, scenes, directory
     root = Path(cfg["paths"]["run"]) / "scene_manifests" / signature(contract)[:16]
     root.mkdir(parents=True, exist_ok=True)
     with locked(root / "planner.lock"):
@@ -147,6 +173,7 @@ def prepare_scenes(cfg, mode, gpu_uuids, stop_root):
 
 
 def evaluation_identity(cfg, contract, scenes, conditions, weights, evidence, record_frames):
+    from .protocol import inference_contract
     root = Path(cfg["root"])
     source = {}
     for directory in ("src/fastwam/memory_s1", "src/fastwam/models/wan22", "scripts/memory_s1"):
@@ -158,7 +185,8 @@ def evaluation_identity(cfg, contract, scenes, conditions, weights, evidence, re
                       "weights": digest(weights) if weights else "gate_zero_diagnostic_only",
                       "evidence": evidence, "source": source, "noise_seed": cfg["seed"],
                       "predict": 32, "execute": 16, "denoising_steps": 10, "record_frames": record_frames,
-                      "history_sampling": cfg.get("history", {"online_period": 8, "archive_stride": 8})})
+                      "history_sampling": cfg.get("history", {"online_period": 8, "archive_stride": 8}),
+                      "inference_contract": inference_contract(), "diagnostic": cfg.get("diagnostic", {})})
 
 
 @contextmanager
@@ -207,6 +235,11 @@ def execute_job(model, encoders, cfg, queue, job, gpu_uuid, record_frames, evide
                        "--stop-root", str(queue.root)]
             if record_frames:
                 command.append("--record-frames")
+            diagnostic = cfg.get("diagnostic", {})
+            if diagnostic.get("max_targets", 0):
+                command += ["--max-targets", str(diagnostic["max_targets"])]
+            if diagnostic.get("record_feedback", False):
+                command.append("--record-feedback")
             process = subprocess.Popen(command, cwd=Path(cfg["root"]) / cfg["closed_loop"]["simulator_root"],
                                        env=environment, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
             durable_json(directory / "simulator_owner.json", process_identity(process.pid))
@@ -339,6 +372,36 @@ def standalone(args):
     from .common import load_config
     from .data import load_evidence
     cfg = load_config(args.config)
+    from .protocol import inference_contract, verify_released_prompt
+    verify_released_prompt(cfg["root"])
+    diagnostic = cfg.setdefault("diagnostic", {})
+    for key in ("scenes_from", "episodes_per_task", "max_targets", "compatibility_report"):
+        value = getattr(args, key, None)
+        if value is not None:
+            diagnostic[key] = str(Path(value).resolve()) if key in ("scenes_from", "compatibility_report") else value
+    if diagnostic.get("require_compatibility"):
+        from .common import code_version
+        if not diagnostic.get("compatibility_report"):
+            raise ValueError("Pass --compatibility-report with a completed same-input numerical comparison first.")
+        report = read(diagnostic["compatibility_report"])
+        current_code = code_version(cfg["root"])
+        if not (report.get("complete") is True and report.get("passed") is True
+                and report.get("inference_contract") == inference_contract()
+                and report.get("base_sha256") == digest(cfg["paths"]["base"])
+                and report.get("stats_sha256") == digest(cfg["paths"]["stats"])
+                and report.get("vae_sha256") == digest(cfg["paths"]["vae"])
+                and report.get("t5_sha256") == digest(cfg["paths"]["t5"])
+                and all(report.get("code", {}).get(key) == current_code[key] for key in ("implementation_sha", "core_sha"))):
+            raise ValueError("Compatibility failed or refers to a different base/statistics/implementation. Preserve its reports; do not run the closed loop yet.")
+        diagnostic["compatibility_sha256"] = digest(diagnostic["compatibility_report"])
+    if cfg.get("diagnostic_only") and args.mode != "diagnostic":
+        raise ValueError("This configuration is only for base diagnostics.")
+    if diagnostic.get("max_targets", 0) and (args.mode != "diagnostic" or args.weights):
+        raise ValueError("A short prefix is a base diagnostic, not a trained/official evaluation.")
+    if diagnostic.get("max_targets", 0) < 0:
+        raise ValueError("max-targets cannot be negative.")
+    if diagnostic.get("episodes_per_task") and not diagnostic.get("scenes_from"):
+        raise ValueError("Pass --scenes-from to select a subset of previously frozen scenes.")
     from .history import override_online
     override_online(cfg, getattr(args, "history_period", None), getattr(args, "history_cycle", None))
     if not cfg["closed_loop"]["enabled"]:
@@ -350,8 +413,10 @@ def standalone(args):
     if len(uuids) != len(set(uuids)):
         raise ValueError("Each worker must have a distinct GPU.")
     conditions = args.conditions
-    if not args.weights and conditions != ["gate_zero"]:
-        raise ValueError("Untrained diagnostics support gate_zero only.")
+    if not args.weights and (args.mode != "diagnostic" or any(c not in ("gate_zero", "native_base") for c in conditions)):
+        raise ValueError("Untrained diagnostics support gate_zero/native_base only.")
+    if "native_base" in conditions and (args.mode != "diagnostic" or args.weights):
+        raise ValueError("native_base is an untrained released-base diagnostic.")
     evidence = load_evidence(args.evidence) if args.evidence else None
     if any(c.startswith("delete_") for c in conditions) and evidence is None:
         raise ValueError("Deletion conditions require a reviewed evidence manifest.")
@@ -375,9 +440,17 @@ def standalone(args):
         identity = evaluation_identity(cfg, contract, scenes, conditions, args.weights, evidence, args.record_frames)
         queue = EpisodeQueue(output)
         queue.initialize(identity, scenes, conditions, args.resume)
+        if diagnostic.get("compatibility_report"):
+            source = Path(diagnostic["compatibility_report"]).parent
+            destination = output / "compatibility"
+            destination.mkdir(exist_ok=True)
+            for name in ("summary.json", "cases.jsonl"):
+                if (source / name).is_file():
+                    shutil.copy2(source / name, destination / name)
         durable_json(output / "evaluation.json", {"config": cfg, "mode": args.mode, "conditions": conditions,
                                                    "weights": str(Path(args.weights).resolve()) if args.weights else None,
-                                                   "evidence": evidence, "record_frames": args.record_frames, "scene_manifest": str(manifest)})
+                                                   "evidence": evidence, "record_frames": args.record_frames, "scene_manifest": str(manifest),
+                                                   "inference_contract": inference_contract()})
         durable_json(output / "scenes.json", {"contract": contract, "scenes": scenes})
         processes = []
         try:
@@ -449,7 +522,9 @@ def distributed_validation(cfg, weights, output, resident_model):
                 contract, scenes, manifest = prepare_scenes(cfg, "internal", uuids, output)
                 identity = evaluation_identity(cfg, contract, scenes, ["full"], weights, None, False)
                 EpisodeQueue(output).initialize(identity, scenes, ["full"], resume=(output / "queue.json").exists())
-                durable_json(output / "evaluation.json", {"mode": "internal", "config": cfg, "weights": str(weights)})
+                from .protocol import inference_contract
+                durable_json(output / "evaluation.json", {"mode": "internal", "config": cfg, "weights": str(weights),
+                                                           "inference_contract": inference_contract()})
                 durable_json(output / "scenes.json", {"contract": contract, "scenes": scenes})
                 box[0] = {"ok": True}
             except Exception:
@@ -507,6 +582,10 @@ def main():
     run.add_argument("--record-frames", action="store_true")
     run.add_argument("--hf-results", action="store_true")
     run.add_argument("--episode-timeout", type=int, default=2400)
+    run.add_argument("--scenes-from", help="Reuse an existing frozen scenes.json for base diagnostics")
+    run.add_argument("--episodes-per-task", type=int)
+    run.add_argument("--max-targets", type=int, help="Diagnostic prefix limit; 0 keeps the complete episode")
+    run.add_argument("--compatibility-report", help="Completed same-input comparison summary.json")
     worker = sub.add_parser("worker")
     worker.add_argument("--output", required=True)
     worker.add_argument("--worker", required=True)

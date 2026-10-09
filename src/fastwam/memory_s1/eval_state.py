@@ -199,7 +199,7 @@ class EpisodeQueue:
         value = read(self.path)
         durable_json(directory / "result.json", result)
         files = {}
-        for name in ("result.json", "decisions.jsonl", "simulator.log", "job.json"):
+        for name in ("result.json", "decisions.jsonl", "executed_actions.jsonl", "simulator.log", "job.json"):
             path = directory / name
             if path.exists():
                 with path.open("rb") as stream:
@@ -225,6 +225,11 @@ def summarize(root, mode, require_complete=False):
         count = len(selected)
         if not count:
             return {"episodes": 0, "success_rate": None, "wilson_95": None}
+        if any(row.get("truncated", False) for row in selected):
+            return {"episodes": count, "success_rate": None, "wilson_95": None,
+                    "truncated_episodes": sum(row.get("truncated", False) for row in selected),
+                    "observed_successes": sum(row["success"] for row in selected),
+                    "note": "Prefix diagnostics do not estimate full-task success rate."}
         p = sum(row["success"] for row in selected) / count
         denom = 1 + 1.96**2 / count
         center = (p + 1.96**2 / (2 * count)) / denom
@@ -238,5 +243,10 @@ def summarize(root, mode, require_complete=False):
                "conditions": {c: rate([r for r in rows if r["condition"] == c]) for c in conditions},
                "by_task": {t: {c: rate([r for r in rows if r["task"] == t and r["condition"] == c]) for c in conditions} for t in tasks},
                "protocol": "Fixed official expert-feasible candidate order, frozen instructions, episode-boundary resume."}
+    if any(row.get("diagnostic_prefix", False) for row in rows):
+        summary["task_success_scope"] = "prefix_diagnostic_not_full_task_evaluation"
+    evaluation_file = Path(root) / "evaluation.json"
+    if evaluation_file.exists():
+        summary["inference_contract"] = read(evaluation_file).get("inference_contract")
     durable_json(Path(root) / "summary.json", summary)
     return summary

@@ -23,11 +23,18 @@ def main():
     args = parser.parse_args()
     root = Path(args.root)
     diagnostic = json.loads(Path(args.diagnostic).read_text())
+    # Read the lightweight contract without importing the training environment.
+    import importlib.util
+    specification = importlib.util.spec_from_file_location("memory_inference_protocol", root / "src/fastwam/memory_s1/protocol.py")
+    protocol = importlib.util.module_from_spec(specification)
+    specification.loader.exec_module(protocol)
+    if not diagnostic.get("complete") or diagnostic.get("inference_contract") != protocol.inference_contract():
+        raise ValueError("A complete diagnostic with the corrected prompt/sampler is required; old evidence remains archived.")
     if len(diagnostic["episodes"]) != 20 or any(row["condition"] != "gate_zero" for row in diagnostic["episodes"]):
         raise ValueError("Admission requires gate-zero base diagnostics for 10 scenarios per task.")
     value = {"base_sha256": digest(root / "resources/base/robotwin_uncond_3cam_384.pt"),
              "stats_sha256": digest(root / "resources/base/robotwin_uncond_3cam_384_dataset_stats.json"),
-             "diagnostic_summary": str(Path(args.diagnostic).resolve()), "interface_correct": False,
+             "diagnostic_summary": str(Path(args.diagnostic).resolve()), "inference_contract": protocol.inference_contract(), "interface_correct": False,
              "basic_manipulation_adequate": False, "reviewer": "",
              "notes": "Review joint order, gripper ranges, grasp/transport/button prefixes and failures; full memory-task success is not the admission criterion."}
     Path(args.output).parent.mkdir(parents=True, exist_ok=True)

@@ -157,7 +157,8 @@ def run_episode(args, official):
             timings["setup_seconds"] = time.monotonic() - before
             official.eval_function_decorator("deploy_policy", "reset_model")(model)
             function = official.eval_function_decorator("deploy_policy", "eval")
-            while environment.take_action_cnt < environment.step_lim:
+            target_limit = min(environment.step_lim, args.max_targets) if args.max_targets else environment.step_lim
+            while environment.take_action_cnt < target_limit:
                 check_stop(args.stop_root)
                 before = time.monotonic()
                 observation = environment.get_obs()
@@ -167,11 +168,19 @@ def run_episode(args, official):
                 timings["policy_seconds"] += time.monotonic() - before
                 if environment.eval_success:
                     break
+            if args.max_targets and args.record_frames:
+                before = time.monotonic()
+                final_observation = environment.get_obs()
+                timings["observation_seconds"] += time.monotonic() - before
+                model.capture(environment, final_observation)
             timings.update(model.timings)
             value = {"status": "complete", "task": task, "seed": scene["seed"], "ordinal": scene["ordinal"],
                      "instruction": scene["instruction"], "condition": job["condition"],
                      "success": bool(environment.eval_success), "max_reward": float(environment.max_reward),
-                     "executed_targets": int(environment.take_action_cnt), "gpu": gpu, "timings": timings}
+                     "executed_targets": int(environment.take_action_cnt), "gpu": gpu, "timings": timings,
+                     "diagnostic_prefix": bool(args.max_targets), "target_limit": int(target_limit),
+                     "truncated": bool(args.max_targets and not environment.eval_success and target_limit < environment.step_lim),
+                     "termination": "success" if environment.eval_success else ("diagnostic_target_limit" if args.max_targets and target_limit < environment.step_lim else "official_target_limit")}
         except EvaluationInterrupted as error:
             value = {"status": "interrupted", "error": str(error)}
         except Exception:
@@ -189,7 +198,7 @@ def run_episode(args, official):
     official.main({"task_name": scene["task"], "task_config": "demo_clean", "ckpt_setting": episode_tag,
                    "policy_name": "deploy_policy", "instruction_type": "seen", "seed": args.seed,
                    "memory_socket": args.socket, "memory_output": args.output, "memory_stop_root": args.stop_root,
-                   "memory_record_frames": args.record_frames})
+                   "memory_record_frames": args.record_frames, "memory_record_feedback": args.record_feedback})
 
 
 def main():
@@ -205,7 +214,11 @@ def main():
     parser.add_argument("--stop-root")
     parser.add_argument("--gpu-uuid")
     parser.add_argument("--record-frames", action="store_true")
+    parser.add_argument("--record-feedback", action="store_true")
+    parser.add_argument("--max-targets", type=int, default=0)
     args = parser.parse_args()
+    if args.max_targets < 0:
+        parser.error("max-targets cannot be negative")
     official = load_official()
     if args.operation == "plan":
         plan_scenes(args, official)

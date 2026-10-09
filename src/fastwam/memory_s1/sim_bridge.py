@@ -18,6 +18,7 @@ import torch
 from .common import TASKS, ReleaseNormalizer, atomic_json, append_jsonl, load_config, read_json, seed_for, sha256
 from .data import mosaic_rgb, collate, history_variant, load_evidence
 from .history import select_ids, online_period
+from .protocol import format_task_prompt, inference_contract
 
 
 class InferenceSession:
@@ -27,6 +28,10 @@ class InferenceSession:
         self.normalizer = ReleaseNormalizer(cfg["paths"]["stats"])
         self.condition, self.output, self.evidence, self.seed = condition, Path(output), evidence, seed
         self.device = next(model.memory.parameters()).device
+        self.reference = None
+        if condition == "native_base":
+            from .native_reference import build_reference
+            self.reference = build_reference(model.backbone, encoders)
         self.reset()
 
     def reset(self):
@@ -43,12 +48,17 @@ class InferenceSession:
         if self.instruction is None:
             self.instruction = request["instruction"]
             self.episode_seed = int(request["episode_seed"])
-            self.text, self.text_valid = encode_text(self.text_encoder, self.tokenizer, self.instruction, self.device)
+            if self.reference is None:
+                self.text, self.text_valid = encode_text(self.text_encoder, self.tokenizer, self.instruction, self.device)
+            else:
+                self.text, self.text_valid = self.reference.encode_prompt(format_task_prompt(self.instruction))
         elif request["instruction"] != self.instruction or request["episode_seed"] != self.episode_seed:
             raise ValueError("Instruction/episode changed without reset.")
         current_id = int(request["current_id"])
         current_latent = current_proprio = current_feature = current_kv = current_context = None
         started = time.monotonic()
+        if self.reference is not None:
+            return self.decide_native(request, started)
         with torch.autocast("cuda", dtype=torch.bfloat16):
             for observation in request["observations"]:
                 index = int(observation["frame_id"])
@@ -98,26 +108,55 @@ class InferenceSession:
             readout = None if self.condition == "gate_zero" else self.model.memory.read(
                 current_feature, self.text, self.text_valid, current_proprio,
                 batch["history"], batch["frame_ids"], batch["history_valid"])
-            generator = torch.Generator(device="cpu").manual_seed(seed_for(self.seed, self.episode_seed, current_id, "closed-loop-noise"))
+            noise_seed = seed_for(self.seed, self.episode_seed, current_id, "closed-loop-noise")
+            generator = torch.Generator(device="cpu").manual_seed(noise_seed)
             noise = torch.randn(1, 32, 14, generator=generator).to(self.device)
             actions, _ = self.model.sample(batch, noise, gate_scale=0 if self.condition == "gate_zero" else 1,
                                            prepared_conditions=(current_kv, current_context, readout))
-            actions = self.normalizer.denormalize(actions[0])
+        return self.finish_actions(request, actions[0], started, period, indices, sample["frame_ids"].tolist(), newly_encoded, readout, noise_seed)
+
+    @torch.no_grad()
+    def decide_native(self, request, started):
+        from .native_reference import native_actions
+        current_id = int(request["current_id"])
+        for observation in request["observations"]:
+            index = int(observation["frame_id"])
+            if not 0 <= index <= current_id:
+                raise ValueError("Negative/future observation ID.")
+            self.raw_archive[index] = observation
+        if current_id not in self.raw_archive:
+            raise ValueError("Native reference requires the current observation.")
+        observation = self.raw_archive[current_id]
+        images = [np.frombuffer(raw, dtype=np.uint8).reshape(shape) for raw, shape in zip(observation["images"], observation["shapes"])]
+        mosaic = mosaic_rgb(images)[None].to(self.device)
+        state = self.normalizer.normalize(torch.tensor(observation["proprio"], device=self.device)[None], "state")
+        noise_seed = seed_for(self.seed, self.episode_seed, current_id, "closed-loop-noise")
+        actions = native_actions(self.reference, mosaic, state, noise_seed, context=self.text)
+        return self.finish_actions(request, actions, started, online_period(self.cfg, current_id), [current_id], [], [], None, noise_seed)
+
+    def finish_actions(self, request, normalized, started, period, selected, read_ids, newly_encoded, readout, noise_seed):
+        actions = self.normalizer.denormalize(normalized)
         if not torch.isfinite(actions).all():
             raise FloatingPointError("Non-finite generated action.")
+        before_clip = actions.detach().cpu().tolist()
         grippers = actions[:, [6, 13]]
         clipped = int(((grippers < 0) | (grippers > 1)).sum())
         actions[:, [6, 13]] = grippers.clamp(0, 1)
         torch.cuda.synchronize(self.device)
-        append_jsonl(self.output / "decisions.jsonl", {"task": request["task"], "seed": self.episode_seed, "frame_id": current_id,
+        append_jsonl(self.output / "decisions.jsonl", {"task": request["task"], "seed": self.episode_seed, "frame_id": int(request["current_id"]),
                                                        "condition": self.condition, "archive_frames": len(self.archive),
                                                        "raw_archive_frames": len(self.raw_archive), "history_period": period,
-                                                       "selected_frame_ids": indices, "read_frame_ids": sample["frame_ids"].tolist(),
+                                                       "selected_frame_ids": selected, "read_frame_ids": read_ids if readout is not None else [],
                                                        "newly_encoded_frame_ids": newly_encoded,
-                                                       "read_frames": 0 if readout is None else len(sample["frame_ids"]),
+                                                       "read_frames": 0 if readout is None else len(read_ids),
                                                        "readout_norm": None if readout is None else float(readout.float().norm(dim=-1).mean()),
                                                        "seconds": time.monotonic() - started, "gripper_clipped_scalars": clipped,
-                                                       "predict": 32, "execute": 16, "instruction": self.instruction})
+                                                       "predict": 32, "execute": 16, "instruction": self.instruction,
+                                                       "prompt": format_task_prompt(self.instruction), "noise_seed": noise_seed,
+                                                       "inference_contract": inference_contract(),
+                                                       "normalized_actions": normalized.detach().float().cpu().tolist(),
+                                                       "actions_before_gripper_clip": before_clip,
+                                                       "actions_after_gripper_clip": actions.detach().cpu().tolist()})
         return {"actions": actions.cpu().tolist()}
 
 
