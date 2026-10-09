@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import csv
 import importlib.metadata
+import importlib.util
 import json
 from multiprocessing.connection import Listener
 import os
@@ -124,7 +125,6 @@ def audit(cfg, output, identity, uuid):
         "observation_calls": "RMBench every completed target; original RoboTwin positive control only at decision boundaries"}
     report["runtime"] = {"driver_capabilities": os.environ.get("NVIDIA_DRIVER_CAPABILITIES"),
         "container_image_digest": os.environ.get("MWAM_IMAGE_DIGEST")}
-    import importlib.util
     report["import_paths"] = {name: importlib.util.find_spec(name).origin for name in ("fastwam", "torch", "transformers", "numpy")}
     report["installed_distributions"] = sorted({d.metadata["Name"]: d.version for d in importlib.metadata.distributions() if d.metadata.get("Name")}.items())
     for kind, tasks in (("rmbench", TASKS), ("robotwin", POSITIVE_TASKS)):
