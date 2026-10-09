@@ -111,13 +111,16 @@ def make_cache_contract(cfg, prepared_manifest):
             "architecture_sha": sha256(Path(cfg["root"]) / "configs/model/fastwam.yaml"),
             "core_sha": code_version(cfg["root"])["core_sha"],
             "encoding": "independent_T1_clean_time0_with_then_proprio_fixed_instruction",
-            "mosaic": "RGB_PIL_bilinear_head256x320_wrists128x160_float_minus1_plus1",
+            "mosaic": "RGB_PIL_bilinear_head256x320_wrists128x160_device_bf16_then_affine_v2",
             "stride": 8, "decision_stride": 16, "text": "128_zero_padded_base_all_true_reader_valid_mask",
             "prompt": prompt_contract(), "precision": precision_contract(),
             "prompt_code_sha": sha256(Path(__file__).parent / "protocol.py")}
+    if cfg.get("integration"):
+        from .integration_contract import numerics
+        contract["numerics"] = numerics(cfg)
     if cfg.get("history", {}).get("archive_stride", 8) == 1:
         names = {"model.py": {"FrozenBackbone", "load_observation_encoders", "encode_text", "encode_latent"},
-                 "data.py": {"official_decoder", "mosaic_rgb"}, "common.py": {"ReleaseNormalizer"}}
+                 "data.py": {"official_decoder", "mosaic_rgb", "observation_tensor"}, "common.py": {"ReleaseNormalizer"}, "dense.py": {"cache_observation"}}
         sources = {}
         for filename, functions in names.items():
             tree = ast.parse((Path(__file__).parent / filename).read_text(encoding="utf-8"))
@@ -150,13 +153,16 @@ class ReleaseNormalizer:
             self.fields[kind] = (mean, std + 1e-8)
 
     def normalize(self, x, kind):
-        mean, scale = (v.to(device=x.device) for v in self.fields[kind])
-        reciprocal = 1 / scale
+        mean, scale = self.fields[kind]
+        reciprocal = 1.0 / scale
         offset = -mean / scale
-        return (x.float() * reciprocal + offset).clamp(-5, 5)
+        # The official deployment processor normalizes CPU FP32 state vectors.
+        value = (x.float().cpu() * reciprocal + offset).clamp(-5, 5)
+        return value.to(x.device)
 
     def denormalize(self, x):
-        mean, scale = (v.to(device=x.device) for v in self.fields["action"])
-        reciprocal = 1 / scale
+        mean, scale = self.fields["action"]
+        reciprocal = 1.0 / scale
         offset = -mean / scale
-        return (x.float() - offset) / reciprocal
+        value = (x.float().cpu() - offset) / reciprocal
+        return value.to(x.device)

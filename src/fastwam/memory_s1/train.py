@@ -103,7 +103,8 @@ def run_training(args):
     def admission():
         prepared = read_json(Path(cfg["paths"]["prepared"]) / "manifest.json")
         approval = read_json(Path(cfg["paths"]["prepared"]) / "alignment_approved.json")
-        base = read_json(run / "base_admission.json")
+        from .integration_contract import verify_admission
+        integration = verify_admission(cfg, train_data.signature)
         budget = read_json(run / "storage_plan.json")
         if "quota_check" not in budget or budget.get("recipe_sha") != fingerprint(recipe(cfg)):
             raise ValueError("Run the configuration-bound storage planner before training.")
@@ -113,13 +114,6 @@ def run_training(args):
             raise ValueError("HF interval changed after storage budgeting.")
         if approval["manifest_sha"] != fingerprint(prepared) or train_data.manifest["contract"]["prepared_sha"] != fingerprint(prepared):
             raise ValueError("Data, alignment and cache identities differ.")
-        if not (base.get("interface_correct") is True and base.get("basic_manipulation_adequate") is True and base.get("reviewer") and base.get("notes")):
-            raise ValueError("Base admission is missing; do not infer it from memory-task success rates.")
-        if base.get("base_sha256") != sha256(cfg["paths"]["base"]) or base.get("stats_sha256") != sha256(cfg["paths"]["stats"]):
-            raise ValueError("Base admission identifies different weights/statistics.")
-        from .protocol import inference_contract
-        if base.get("inference_contract") != inference_contract():
-            raise ValueError("Base admission predates the corrected prompt/sampler; review new compatible diagnostics first.")
         for record in train_data.manifest["episodes"]:
             if sha256(Path(cfg["paths"]["cache"]) / record["file"]) != record["cache_sha256"]:
                 raise ValueError(f"Corrupt cached episode: {record['episode_id']}")
@@ -128,7 +122,8 @@ def run_training(args):
                     raise ValueError(f"Corrupt cache shard: {shard['file']}")
         atomic_json(run / "cache_audit.json", audit_cache(model, val_data, cfg, device))
         return {"schema": SCHEMA, "base_sha256": sha256(cfg["paths"]["base"]), "stats_sha256": sha256(cfg["paths"]["stats"]),
-                "cache_signature": train_data.signature, "data_sha": fingerprint(prepared), "code": code_version(cfg["root"]),
+                 "cache_signature": train_data.signature, "data_sha": fingerprint(prepared), "code": code_version(cfg["root"]),
+                "integration_sha": fingerprint(integration),
                 "recipe": fingerprint({**{key: cfg[key] for key in ("seed", "global_batch", "steps", "learning_rate", "min_learning_rate", "warmup")},
                                        "history": recipe(cfg), "validation_periods": cfg.get("history", {}).get("validation_periods", [8])})}
     identity = leader(admission)
@@ -144,7 +139,7 @@ def run_training(args):
     if args.resume:
         saved = verified_load(args.resume)
         old = saved["identity"]
-        for key in ("schema", "base_sha256", "stats_sha256", "cache_signature", "data_sha", "recipe"):
+        for key in ("schema", "base_sha256", "stats_sha256", "cache_signature", "data_sha", "recipe", "integration_sha"):
             if old[key] != identity[key]:
                 raise ValueError(f"Resume identity mismatch: {key}")
         if old["code"]["implementation_sha"] != identity["code"]["implementation_sha"] or old["code"]["core_sha"] != identity["code"]["core_sha"] or old["code"].get("support_sha") != identity["code"].get("support_sha"):

@@ -24,7 +24,8 @@ def precision_contract():
     return {"version": "released_explicit_bf16_precision_v3",
             "frozen_weights_dtype": "bfloat16", "vae_autocast": False,
             "text_autocast": False, "video_autocast": False, "action_autocast": False,
-            "action_timestep_dtype": "bfloat16", "memory_autocast": "bfloat16"}
+            "action_timestep_dtype": "bfloat16", "memory_autocast": "bfloat16",
+            "image": "uint8_to_device_bf16_then_affine_2_over_255_minus1_v2"}
 
 
 def inference_contract():

@@ -238,6 +238,82 @@ def policy_episode(environment, recorder, args, job):
     return target_limit
 
 
+
+def fixed_chunks(environment, recorder, args, job):
+    """Execute the same two generated chunks through upstream and production queues."""
+    import ast
+    import logging
+    from types import MethodType, SimpleNamespace
+    from deploy_policy import RPCPolicy
+    scene = job["scene"]
+    bank = np.asarray(json.loads(Path(scene["integration_actions_file"]).read_text())["chunks"], dtype=np.float32)
+    if bank.shape != (2, 32, 14) or not np.isfinite(bank).all():
+        raise ValueError("Fixed integration actions must be finite [2,32,14].")
+    captured = []
+    original_take_action = environment.take_action
+    def observed_action(target, action_type="qpos"):
+        if action_type != "qpos":
+            raise ValueError("Integration route changed the official action_type.")
+        captured.append(np.asarray(target, dtype=np.float32).copy())
+        return original_take_action(target, action_type=action_type)
+    environment.take_action = observed_action
+    if job["condition"] == "reference":
+        path = Path(scene["integration_reference_root"]) / "experiments/robotwin/fastwam_policy/deploy_policy.py"
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        cls = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "WorldActionRobotWinPolicy")
+        methods = [n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name in ("step", "_fill_action_queue")]
+        if len(methods) != 2:
+            raise ValueError("The pinned official queue methods cannot be resolved.")
+        namespace = {"np": np, "time": time, "logger": logging.getLogger("integration")}
+        exec(compile(ast.Module(body=methods, type_ignores=[]), str(path), "exec"), namespace)
+        policy = SimpleNamespace(pending_actions=deque(), replan_steps=16, timing_enabled=False,
+                                 step_count=0, _timing_rollout={"infer_s": 0., "sim_s": 0.})
+        chunks = iter(bank)
+        policy._infer_action_chunk = lambda **unused: next(chunks).copy()
+        policy._fill_action_queue = MethodType(namespace["_fill_action_queue"], policy)
+        policy.step = MethodType(namespace["step"], policy)
+        dispatch = lambda observation: policy.step(environment, observation)
+    else:
+        class FixedRPCPolicy(RPCPolicy):
+            def call(self, request):
+                if request["command"] == "reset":
+                    return {"ok": True}
+                if request["current_id"] != self.frame_id or self.frame_id not in (0, 16):
+                    raise ValueError("Unexpected production decision boundary.")
+                return {"actions": bank[self.frame_id//16].tolist()}
+        os.environ["MEMORY_S1_RPC_KEY"] = "00" * 24
+        os.environ["MEMORY_S1_ARCHIVE_STRIDE"] = "1"
+        policy = FixedRPCPolicy({"memory_socket": "", "memory_output": args.output,
+                    "task_name": scene["task"], "memory_stop_root": args.stop_root,
+                    "memory_record_frames": False, "memory_record_feedback": False})
+        environment._memory_seed = scene["seed"]
+        dispatch = lambda observation: policy.execute(environment, observation)
+    environment.set_instruction(instruction=scene["instruction"])
+    try:
+        for index in range(32):
+            check_stop(args.stop_root)
+            with recorder.wall_operation("get_obs"):
+                observation = environment.get_obs()
+            if index % 16 == 0:
+                save_images(args.output, observation, index)
+            recorder.target_id = index + 1
+            before, tick, started = physical_state(environment.robot), recorder.steps, time.monotonic()
+            previous = len(captured)
+            dispatch(observation)
+            if len(captured) != previous + 1:
+                raise ValueError("Queue did not execute exactly one target per call.")
+            row = target_row(environment, recorder, captured[-1], before, started, tick)
+            row["observation_record_id"] = index
+            row["action_type"] = "qpos"
+            with (Path(args.output)/"executed_actions.jsonl").open("a", encoding="utf-8") as stream:
+                stream.write(json.dumps(row, allow_nan=False)+"\n")
+        with recorder.wall_operation("get_obs"):
+            save_images(args.output, environment.get_obs(), 32)
+    finally:
+        environment.take_action = original_take_action
+    return 32
+
+
 def run_scene(args):
     root = Path.cwd()
     official = load_official(root)
@@ -296,6 +372,9 @@ def run_scene(args):
                 durable_json(Path(args.output) / "cadence.json", cadence)
             elif args.operation == "replay":
                 replay(environment, recorder, args, job)
+                expert_success = bool(environment.eval_success)
+            elif args.operation == "integration_actions":
+                target_limit = fixed_chunks(environment, recorder, args, job)
                 expert_success = bool(environment.eval_success)
             else:
                 environment.set_instruction(instruction=scene["instruction"])
@@ -358,7 +437,7 @@ def plan(args):
 
 def main():
     parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument("--operation", choices=("preflight", "expert", "replay", "plan", "policy"), required=True)
+    parser.add_argument("--operation", choices=("preflight", "expert", "replay", "plan", "policy", "integration_actions"), required=True)
     parser.add_argument("--output", required=True)
     parser.add_argument("--tasks", nargs="+", default=["put_back_block", "swap_blocks"])
     parser.add_argument("--job")

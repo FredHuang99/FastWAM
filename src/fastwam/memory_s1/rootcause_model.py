@@ -12,7 +12,7 @@ import numpy as np
 import torch
 
 from .common import ReleaseNormalizer, append_jsonl, atomic_json, fingerprint, read_json, seed_for, sha256
-from .data import mosaic_rgb, official_decoder
+from .data import mosaic_rgb, observation_tensor, official_decoder
 from .base_compatibility import difference, kv_differences, kv_passed
 from .protocol import format_task_prompt, precision_contract
 
@@ -121,15 +121,6 @@ def current_observation(images, state):
             "joint_action": {"vector": np.asarray(state, dtype=np.float32)}}
 
 
-def aligned_mosaic(images, device):
-    """Implement the released arithmetic independently of its deployment processor."""
-    from PIL import Image
-    parts = [np.asarray(Image.fromarray(image).resize(size, Image.Resampling.BILINEAR))
-             for image, size in zip(images, ((320, 256), (160, 128), (160, 128)))]
-    rgb = np.concatenate((parts[0], np.concatenate(parts[1:], axis=1)), axis=0).copy()
-    return torch.from_numpy(rgb).permute(2, 0, 1)[None].to(device, torch.bfloat16) * (2.0 / 255.0) - 1.0
-
-
 @torch.no_grad()
 @torch.autocast("cuda", enabled=False)
 def compare_case(model, policy, encoders, images, state, instruction, noise_seed):
@@ -137,8 +128,8 @@ def compare_case(model, policy, encoders, images, state, instruction, noise_seed
     reference = policy.model
     device = reference.device
     native_mosaic = policy._build_robotwin_image_tensor(current_observation(images, state))
-    custom_mosaic = aligned_mosaic(images, device)
-    legacy_mosaic = mosaic_rgb(images)[None].to(device, torch.bfloat16)
+    custom_mosaic = observation_tensor(images, device)
+    legacy_mosaic = (mosaic_rgb(images)[None].float() / 127.5 - 1).to(device, torch.bfloat16)
     normalizer = ReleaseNormalizer(policy._rootcause_config["paths"]["stats"])
     proprio = normalizer.normalize(torch.as_tensor(state, device=device)[None], "state")
     native_proprio = policy._normalize_state(np.asarray(state, dtype=np.float32)).to(device)

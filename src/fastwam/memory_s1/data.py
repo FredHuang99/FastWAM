@@ -30,7 +30,13 @@ def mosaic_rgb(images):
             raise ValueError("Official RGB decode must return uint8 HWC with three channels.")
         parts.append(np.asarray(Image.fromarray(rgb).resize(size, Image.Resampling.BILINEAR)))
     mosaic = np.concatenate((parts[0], np.concatenate(parts[1:], axis=1)), axis=0)
-    return torch.from_numpy(mosaic.copy()).permute(2, 0, 1).float() / 127.5 - 1
+    return torch.from_numpy(mosaic.copy()).permute(2, 0, 1)
+
+
+def observation_tensor(images, device):
+    """Apply the released uint8 -> device BF16 -> affine image contract."""
+    image = mosaic_rgb(images)[None].to(device=device, dtype=torch.bfloat16)
+    return image * (2.0 / 255.0) - 1.0
 
 
 def camera_columns(file):

@@ -21,6 +21,9 @@ from .protocol import format_task_prompt
 class FrozenBackbone(nn.Module):
     def __init__(self, cfg, device):
         super().__init__()
+        if cfg.get("integration"):
+            from .integration_contract import configure_numerics
+            configure_numerics(cfg)
         architecture = yaml.safe_load((Path(cfg["root"]) / "configs/model/fastwam.yaml").read_text())
         video_cfg = dict(architecture["video_dit_config"])
         action_cfg = dict(architecture["action_dit_config"])
@@ -58,6 +61,8 @@ class FrozenBackbone(nn.Module):
             context=context, context_mask=context_mask, fuse_vae_embedding_in_latents=True)
         keys, values = [], []
         attention_mask = torch.ones((x.shape[1], x.shape[1]), device=x.device, dtype=torch.bool)
+        if getattr(self, "integration_trace", None) is not None:
+            self.integration_trace["video_mask"] = attention_mask.detach().cpu()
         for block in expert.blocks:
             q, k, v, residual, gate, shift, scale, ffn_gate, _ = self.mot._build_expert_attention_io(
                 expert=expert, block=block, x=x, freqs=freqs, t_mod=mod)
@@ -78,6 +83,8 @@ class FrozenBackbone(nn.Module):
         x, _, mod, ctx, ctx_mask, freqs = expert.prepare(
             action_tokens=actions.to(torch.bfloat16), timestep=timestep, context=context, context_mask=mask)
         attention_mask = torch.ones((x.shape[1], kv[0][0].shape[1] + x.shape[1]), device=x.device, dtype=torch.bool)
+        if getattr(self, "integration_trace", None) is not None:
+            self.integration_trace["action_mask"] = attention_mask.detach().cpu()
         for layer, block in enumerate(expert.blocks):
             q, k, v, residual, gate, shift, scale, ffn_gate, _ = self.mot._build_expert_attention_io(
                 expert=expert, block=block, x=x, freqs=freqs, t_mod=mod)
@@ -121,10 +128,10 @@ class S1Model(nn.Module):
 
     def forward(self, batch, noise, tau, gate_scale=1.0):
         kv, context, readout = self.conditions(batch)
-        noisy = (1 - tau[:, None, None]) * batch["actions"] + tau[:, None, None] * noise
+        noisy = self.scheduler.add_noise(batch["actions"], noise, 1000 * tau)
         prediction = self.backbone.action_velocity(noisy, 1000 * tau, context, kv, self.memory, readout, gate_scale)
         prediction = prediction.float()
-        target = noise.float() - batch["actions"].float()
+        target = self.scheduler.training_target(batch["actions"].float(), noise.float(), 1000 * tau)
         count = batch["action_valid"].sum(1)
         if (count == 0).any():
             raise ValueError("An all-invalid anchor reached the trainer.")

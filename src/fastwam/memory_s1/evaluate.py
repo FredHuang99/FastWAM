@@ -76,26 +76,57 @@ def validate(model, dataset, cfg, device, interventions=False, evidence=None, pe
 
 @torch.no_grad()
 def audit_cache(model, dataset, cfg, device):
-    cache_manifest = dataset.manifest
-    prepared = read_json(Path(cfg["paths"]["prepared"]) / "manifest.json")
-    expected = make_cache_contract(cfg, prepared)
-    if fingerprint(expected) != cache_manifest["signature"]:
-        raise ValueError("Cache was produced by different resources, preprocessing, or feature code.")
-    if sha256(cfg["paths"]["base"]) != cache_manifest["contract"]["base_sha256"] or sha256(cfg["paths"]["stats"]) != cache_manifest["contract"]["stats_sha256"]:
-        raise ValueError("Base/statistics do not match the cache.")
+    """Re-encode raw RGB at fixed anchors, never use cached latents as the oracle."""
+    import h5py
+    from .data import official_decoder
+    from .dense import cache_observation
+    from .model import load_observation_encoders, encode_text
+    from .integration_contract import exact_difference
+    expected = make_cache_contract(cfg, read_json(Path(cfg["paths"]["prepared"]) / "manifest.json"))
+    if fingerprint(expected) != dataset.signature:
+        raise ValueError("Cache resources, preprocessing or feature implementation changed.")
+    vae, text_encoder, tokenizer = load_observation_encoders(cfg, device)
+    decoder = official_decoder(Path(cfg["root"]) / cfg["closed_loop"]["simulator_root"])
     reports = []
-    for task, records in dataset.by_task.items():
-        record = records[0]
-        sample = dataset.at(record, 0)
-        batch = collate([sample], device)
-        with torch.autocast("cuda", dtype=torch.bfloat16):
-            current, _, _ = model.backbone.encode_observation(batch["latent"], batch["text"], batch["proprio"])
-        stored = batch["history"][:, 0]
-        delta = (current.float() - stored.float()).abs()
-        relative = float(delta.mean() / stored.float().abs().mean().clamp_min(1e-6))
-        if relative > 0.02:
-            raise ValueError(f"Online/cache relative MAE too large for {task}: {relative}.")
-        reports.append({"task": task, "relative_mae": relative, "maximum_abs": float(delta.max())})
+    try:
+        for task, records in dataset.by_task.items():
+            for record in sorted(records, key=lambda row: row["episode_id"])[:2]:
+                raw = Path(cfg["root"]) / record["raw"]
+                if sha256(raw) != record["raw_sha256"]:
+                    raise ValueError(f"Raw data changed: {raw}")
+                saved = dataset.load(record)
+                source = torch.load(Path(cfg["paths"]["prepared"])/record["file"], map_location="cpu", weights_only=True)
+                text, valid = encode_text(text_encoder, tokenizer, record["instruction"], device)
+                with h5py.File(raw, "r") as file:
+                    anchors = (0, 64, 128) if cfg.get("integration") else (0,)
+                    for frame in anchors:
+                        if frame >= record["length"]:
+                            raise ValueError(f"Audit anchor missing: {record['episode_id']}:{frame}")
+                        current = cache_observation(model.backbone, vae, text, dataset.normalizer,
+                            source["states"][frame], [decoder(file[key][frame]) for key in record["camera_paths"]], device)
+                        indices = torch.nonzero(saved["frame_ids"] == frame).flatten()
+                        if len(indices) != 1:
+                            raise ValueError("Audit frame is missing or duplicated.")
+                        index = int(indices[0])
+                        pairs = {"latent": (current["latent"][0], saved["latents"][index]),
+                                 "feature": (current["feature"][0], saved["features"][index]),
+                                 "proprio": (current["proprio"][0], saved["proprio"][index]),
+                                 "text": (text[0], saved["text"]), "text_valid": (valid[0], saved["text_valid"])}
+                        checks = {key: exact_difference(*pair) for key, pair in pairs.items()}
+                        row = {"task": task, "episode_id": record["episode_id"], "frame_id": frame,
+                               "passed": all(item["exact"] for item in checks.values()), "segments": checks,
+                               "relative_mae": 0.0 if checks["feature"]["exact"] else
+                                float((pairs["feature"][0].float().cpu()-pairs["feature"][1].float()).abs().mean()/
+                                      pairs["feature"][1].float().abs().mean().clamp_min(1e-6)),
+                               "maximum_abs": checks["feature"].get("maximum_abs"),
+                               "source": "raw_rgb_through_actual_dense_encoder"}
+                        reports.append(row)
+                        print(f"[raw-cache-audit] {record['episode_id']}:{frame} exact={row['passed']}", flush=True)
+                        if not row["passed"]:
+                            raise ValueError(f"Raw RGB/cache divergence: {row}")
+    finally:
+        del vae, text_encoder, tokenizer
+        torch.cuda.empty_cache()
     return reports
 
 

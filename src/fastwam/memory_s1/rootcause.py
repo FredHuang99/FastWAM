@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import argparse
 import csv
-import importlib.metadata
+from importlib import metadata as package_metadata
 import importlib.util
 import json
 from multiprocessing.connection import Listener
@@ -112,8 +112,8 @@ def audit(cfg, output, identity, uuid):
         report["repositories"][name] = info
     for name in ("torch", "transformers", "numpy", "hydra-core", "huggingface-hub"):
         try:
-            report["versions"][name] = importlib.metadata.version(name)
-        except importlib.metadata.PackageNotFoundError:
+            report["versions"][name] = package_metadata.version(name)
+        except package_metadata.PackageNotFoundError:
             report["versions"][name] = None
     report["training_python"] = sys.executable
     report["python_version"] = sys.version
@@ -209,7 +209,7 @@ def execute_job(policy, cfg, queue, job, uuid, parent_stop):
     execute = 24 if job["condition"] in ("execute_24", "positive") else 16
     instruction = PREFIXES[scene["task"]] if job["condition"] == "prefix_instruction" else scene["instruction"]
     payload = {**job, "scene": {**scene, "instruction": instruction}, "execute": execute,
-        "max_targets": 0 if scene["environment"] == "robotwin" else (512 if operation == "policy" else 0),
+        "max_targets": 32 if operation == "integration_actions" else (0 if scene["environment"] == "robotwin" else (512 if operation == "policy" else 0)),
         "episode": scene.get("episode"), "cadence": scene.get("cadence"),
         "noise": "derived" if job["condition"] == "derived_noise" else "fixed",
         "preprocessor": "released_uint8_to_device_bf16_then_affine_v1", "executor": executor,

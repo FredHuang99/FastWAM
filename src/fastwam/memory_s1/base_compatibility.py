@@ -10,7 +10,7 @@ import torch
 
 from .common import (ReleaseNormalizer, append_jsonl, atomic_json, code_version,
                      load_config, read_json, seed_for, sha256)
-from .data import mosaic_rgb, official_decoder
+from .data import mosaic_rgb, observation_tensor, official_decoder
 from .model import S1Model, encode_latent, encode_text, load_observation_encoders
 from .native_reference import build_reference, native_actions
 from .protocol import format_task_prompt, inference_contract, verify_released_prompt
@@ -147,7 +147,7 @@ def main():
         episode = torch.load(Path(cfg["paths"]["prepared"]) / record["file"], map_location="cpu", weights_only=True)
         with h5py.File(raw, "r") as file:
             for index in (i for i in anchors if i < record["length"]):
-                mosaic = mosaic_rgb([decoder(file[key][index]) for key in record["camera_paths"]])[None].to(device)
+                mosaic = observation_tensor([decoder(file[key][index]) for key in record["camera_paths"]], device)
                 state = normalizer.normalize(episode["states"][index][None].to(device), "state")
                 noise_seed = seed_for(cfg["seed"], index, len(results), "base-compatibility-noise")
                 row = compare_case(model, reference, encoders, mosaic, state, record["instruction"], noise_seed)

@@ -13,7 +13,7 @@ from PIL import Image
 
 from .common import (SCHEMA, TASKS, ReleaseNormalizer, atomic_json, atomic_torch, fingerprint,
                      load_config, make_cache_contract, read_json, sha256, duration)
-from .data import official_decoder, mosaic_rgb, read_episode, choose_instruction
+from .data import official_decoder, mosaic_rgb, observation_tensor, read_episode, choose_instruction
 
 
 def convert(cfg):
@@ -41,7 +41,7 @@ def convert(cfg):
                         images = [decoder(file[key][index]) for key in cameras]
                         mosaic = mosaic_rgb(images)
                         if rgb_preview is None:
-                            rgb_preview = ((mosaic.permute(1, 2, 0) + 1) * 127.5).byte().numpy()
+                            rgb_preview = mosaic.permute(1, 2, 0).numpy()
                 name = f"episodes/{task}_{path.stem}.pt"
                 atomic_torch(output / name, {"states": torch.from_numpy(states), "targets": torch.from_numpy(targets),
                                             "frame_ids": torch.tensor(frame_ids), "anchors": torch.tensor(anchors)})
@@ -124,7 +124,7 @@ def build_cache(cfg, device):
             features, latents, proprio = [], [], []
             with h5py.File(raw_path, "r") as file, torch.no_grad(), torch.autocast("cuda", dtype=torch.bfloat16):
                 for index in episode["frame_ids"].tolist():
-                    mosaic = mosaic_rgb([decoder(file[key][index]) for key in record["camera_paths"]])[None].to(device)
+                    mosaic = observation_tensor([decoder(file[key][index]) for key in record["camera_paths"]], device)
                     state = normalizer.normalize(episode["states"][index][None].to(device), "state")
                     latent = encode_latent(vae, mosaic)
                     feature, _, _ = backbone.encode_observation(latent, text, state, keep_kv=False)

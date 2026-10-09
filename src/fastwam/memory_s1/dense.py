@@ -12,7 +12,7 @@ import torch
 import torch.distributed as dist
 from .common import (SCHEMA, atomic_json, atomic_torch, fingerprint, load_config,
                      make_cache_contract, read_json, sha256, ReleaseNormalizer, duration)
-from .data import official_decoder, mosaic_rgb, read_episode, choose_instruction
+from .data import official_decoder, mosaic_rgb, observation_tensor, read_episode, choose_instruction
 
 
 def migrate(cfg, parent_cfg):
@@ -69,17 +69,8 @@ def migrate(cfg, parent_cfg):
     run = Path(cfg["paths"]["run"])
     run.mkdir(parents=True, exist_ok=True)
     admission_path = Path(parent_cfg["paths"]["run"]) / "base_admission.json"
-    if admission_path.exists():
-        admission = read_json(admission_path)
-        if not (admission.get("interface_correct") is True and admission.get("basic_manipulation_adequate") is True
-                and admission.get("reviewer") and admission.get("notes")
-                and admission.get("base_sha256") == sha256(cfg["paths"]["base"])
-                and admission.get("stats_sha256") == sha256(cfg["paths"]["stats"])):
-            raise ValueError("Existing base admission is incomplete or references different resources.")
-        atomic_json(run / "base_admission.json", {**admission, "parent_admission_path": str(admission_path),
-                                                "parent_admission_sha": sha256(admission_path)})
-    else:
-        print("[admission-required] No valid base_admission.json was inherited. Cache preparation is allowed; parameter training is blocked.", flush=True)
+    print("[integration-required] Data preparation does not inherit a manipulation-success gate. "
+          "Create version-bound integration_admission.json after the integration checks.", flush=True)
     for name in ("provenance",):
         old_path = Path(parent_cfg["paths"]["run"]) / name
         if old_path.is_dir():
@@ -115,6 +106,18 @@ def checked_shard(path, signature, ids):
     return marker
 
 
+@torch.no_grad()
+@torch.autocast("cuda", enabled=False)
+def cache_observation(backbone, vae, text, normalizer, raw_state, images, device):
+    """Encode one raw observation through the same dense-cache production path."""
+    from .model import encode_latent
+    image = observation_tensor(images, device)
+    state = normalizer.normalize(raw_state[None], "state").to(device)
+    latent = encode_latent(vae, image)
+    feature, _, _ = backbone.encode_observation(latent, text, state, keep_kv=False)
+    return {"mosaic": image, "proprio": state, "latent": latent, "feature": feature}
+
+
 def cache(cfg):
     from .model import FrozenBackbone, load_observation_encoders, encode_text, encode_latent
     rank, world = int(os.environ.get("RANK", 0)), int(os.environ.get("WORLD_SIZE", 1))
@@ -128,10 +131,21 @@ def cache(cfg):
     manifest, approval = read_json(prepared / "manifest.json"), read_json(prepared / "alignment_approved.json")
     if manifest.get("coverage") != "all_native_observation_records" or approval["manifest_sha"] != fingerprint(manifest):
         raise ValueError("A verified dense preparation is required.")
-    box = [make_cache_contract(cfg, manifest) if rank == 0 else None]
+    box = [None]
+    if rank == 0:
+        try:
+            if cfg.get("integration"):
+                from .integration import require_report
+                require_report(cfg, "pilot")
+            box[0] = {"contract": make_cache_contract(cfg, manifest)}
+        except Exception as error:
+            box[0] = {"error": f"{type(error).__name__}: {error}"}
+
     if world > 1:
         dist.broadcast_object_list(box, src=0)
-    contract, signature = box[0], fingerprint(box[0])
+    if "error" in box[0]:
+        raise ValueError(box[0]["error"])
+    contract, signature = box[0]["contract"], fingerprint(box[0]["contract"])
     identity_file = root / "identity.json"
     if identity_file.exists() and read_json(identity_file)["signature"] != signature:
         raise ValueError("This cache directory belongs to different encoder resources.")
@@ -155,7 +169,7 @@ def cache(cfg):
             raise ValueError("Prepared dense IDs are incomplete.")
         text, text_valid = encode_text(text_encoder, tokenizer, record["instruction"], device)
         shards = []
-        with h5py.File(raw_path, "r") as file, torch.no_grad(), torch.autocast("cuda", dtype=torch.bfloat16):
+        with h5py.File(raw_path, "r") as file, torch.no_grad():
             for start in range(0, record["length"], 64):
                 ids = list(range(start, min(start + 64, record["length"])))
                 relative = f"shards/{record['task']}_{Path(record['file']).stem}/{start:06d}.pt"
@@ -164,10 +178,9 @@ def cache(cfg):
                 if marker is None:
                     fields = {name: [] for name in ("features", "latents", "proprio")}
                     for i in ids:
-                        image = mosaic_rgb([decoder(file[key][i]) for key in record["camera_paths"]])[None].to(device)
-                        state = normalizer.normalize(episode["states"][i][None].to(device), "state")
-                        latent = encode_latent(vae, image)
-                        feature, _, _ = backbone.encode_observation(latent, text, state, keep_kv=False)
+                        encoded = cache_observation(backbone, vae, text, normalizer, episode["states"][i],
+                                                    [decoder(file[key][i]) for key in record["camera_paths"]], device)
+                        state, latent, feature = encoded["proprio"], encoded["latent"], encoded["feature"]
                         if not torch.isfinite(feature).all() or not torch.isfinite(latent).all():
                             raise ValueError(f"Non-finite cache at {record['episode_id']}:{i}")
                         for name, tensor in (("features", feature), ("latents", latent), ("proprio", state)):

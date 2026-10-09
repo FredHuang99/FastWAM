@@ -1,0 +1,61 @@
+root: .
+paths:
+  base: resources/base/robotwin_uncond_3cam_384.pt
+  stats: resources/base/robotwin_uncond_3cam_384_dataset_stats.json
+  vae: resources/encoders/Wan2.2_VAE.pth
+  t5: resources/encoders/models_t5_umt5-xxl-enc-bf16.pth
+  tokenizer: resources/tokenizer/google/umt5-xxl
+  raw: resources/RMBench/data/demo_clean
+  prepared: resources/prepared_dense_v1
+  cache: resources/cache_s1_dense_v2
+  run: outputs/memory_s1_variable_t_seed17_v2
+seed: 17
+global_batch: 16
+steps: 2000
+micro_batch: 2
+learning_rate: 0.0001
+min_learning_rate: 0.00001
+warmup: 100
+checkpoint_every: 100
+validate_every: 500
+log_every: 10
+validation_anchors_per_task: 32
+hf:
+  enabled: true
+  python: /opt/hf-tools/bin/python
+  backup_repo: hhyfred/fastwam-memory-s1-backup
+  assets_repo: hhyfred/fastwam-memory-s1-assets
+  quota_gib: 93.132257462
+  reserve_gib: 10
+closed_loop:
+  enabled: true
+  simulator_python: /opt/rmbench-env/bin/python
+  simulator_root: resources/RMBench
+  internal_seed: 17
+  official_seed: 42
+  internal_episodes: 10
+  official_episodes: 100
+  evidence_manifest: resources/evidence_ranges.json
+
+history:
+  train_min: 1
+  train_max: 16
+  online_period: 8
+  online_cycle: []
+  archive_stride: 1
+  cache_shard_frames: 64
+  reader_checkpointing: true
+  validation_periods: [1, 4, 8, 16]
+backup_budget:
+  extra_stop_checkpoints: 1
+  auxiliary_history_gib: 4
+  weight_versions: 8
+
+integration:
+  reference_root: resources/reference/FastWAM
+  public_rmbench_root: resources/reference/RMBench
+  output: outputs/fastwam_rmbench_integration_v2
+  attention_backend: math
+  subprocess_timeout: 3600
+rootcause:
+  episode_timeout: 3600

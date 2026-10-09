@@ -16,14 +16,15 @@ import numpy as np
 import torch
 
 from .common import TASKS, ReleaseNormalizer, atomic_json, append_jsonl, load_config, read_json, seed_for, sha256
-from .data import mosaic_rgb, collate, history_variant, load_evidence
+from .data import mosaic_rgb, observation_tensor, collate, history_variant, load_evidence
 from .history import select_ids, online_period
 from .protocol import format_task_prompt, inference_contract
 
 
 class InferenceSession:
-    def __init__(self, model, cfg, encoders, condition, output, evidence, seed):
+    def __init__(self, model, cfg, encoders, condition, output, evidence, seed, trace=None):
         self.model, self.cfg = model, cfg
+        self.trace = trace
         self.vae, self.text_encoder, self.tokenizer = encoders
         self.normalizer = ReleaseNormalizer(cfg["paths"]["stats"])
         self.condition, self.output, self.evidence, self.seed = condition, Path(output), evidence, seed
@@ -84,7 +85,7 @@ class InferenceSession:
                     continue
                 observation = self.raw_archive[index]
                 images = [np.frombuffer(raw, dtype=np.uint8).reshape(shape) for raw, shape in zip(observation["images"], observation["shapes"])]
-                mosaic = mosaic_rgb(images)[None].to(self.device)
+                mosaic = observation_tensor(images, self.device)
                 proprio = self.normalizer.normalize(torch.tensor(observation["proprio"], device=self.device)[None], "state")
                 latent = encode_latent(self.vae, mosaic)
                 feature, kv, context = self.model.backbone.encode_observation(latent, self.text, proprio, keep_kv=index == current_id)
@@ -92,6 +93,11 @@ class InferenceSession:
                 newly_encoded.append(index)
                 if index == current_id:
                     current_latent, current_proprio, current_feature, current_kv, current_context = latent, proprio, feature, kv, context
+                    if self.trace is not None:
+                        from .checkpoint import to_cpu
+                        self.trace.update(to_cpu({"mosaic": mosaic, "proprio": proprio,
+                            "latent": latent, "feature": feature, "kv": kv,
+                            "text": self.text, "context": context[0], "context_mask": context[1]}))
             if current_latent is None:
                 raise ValueError("Current observation must be uploaded.")
             sample = {"latent": current_latent[0], "proprio": current_proprio[0], "text": self.text[0],
@@ -111,6 +117,8 @@ class InferenceSession:
             noise_seed = seed_for(self.seed, self.episode_seed, current_id, "closed-loop-noise")
             generator = torch.Generator(device="cpu").manual_seed(noise_seed)
             noise = torch.randn(1, 32, 14, generator=generator).to(self.device)
+            if self.trace is not None:
+                self.trace["noise"] = noise.detach().cpu()
             actions, _ = self.model.sample(batch, noise, gate_scale=0 if self.condition == "gate_zero" else 1,
                                            prepared_conditions=(current_kv, current_context, readout))
         return self.finish_actions(request, actions[0], started, period, indices, sample["frame_ids"].tolist(), newly_encoded, readout, noise_seed)
@@ -128,7 +136,7 @@ class InferenceSession:
             raise ValueError("Native reference requires the current observation.")
         observation = self.raw_archive[current_id]
         images = [np.frombuffer(raw, dtype=np.uint8).reshape(shape) for raw, shape in zip(observation["images"], observation["shapes"])]
-        mosaic = mosaic_rgb(images)[None].to(self.device)
+        mosaic = observation_tensor(images, self.device)
         state = self.normalizer.normalize(torch.tensor(observation["proprio"], device=self.device)[None], "state")
         noise_seed = seed_for(self.seed, self.episode_seed, current_id, "closed-loop-noise")
         actions = native_actions(self.reference, mosaic, state, noise_seed, context=self.text)
@@ -139,9 +147,14 @@ class InferenceSession:
         if not torch.isfinite(actions).all():
             raise FloatingPointError("Non-finite generated action.")
         before_clip = actions.detach().cpu().tolist()
+        if self.trace is not None:
+            self.trace["normalized_actions"] = normalized.detach().float().cpu()
+            self.trace["denormalized_actions"] = actions.detach().cpu()[None].clone()
         grippers = actions[:, [6, 13]]
         clipped = int(((grippers < 0) | (grippers > 1)).sum())
         actions[:, [6, 13]] = grippers.clamp(0, 1)
+        if self.trace is not None:
+            self.trace["clipped_actions"] = actions.detach().cpu().clone()
         torch.cuda.synchronize(self.device)
         append_jsonl(self.output / "decisions.jsonl", {"task": request["task"], "seed": self.episode_seed, "frame_id": int(request["current_id"]),
                                                        "condition": self.condition, "archive_frames": len(self.archive),
