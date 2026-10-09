@@ -38,14 +38,16 @@ class FrozenBackbone(nn.Module):
         del payload
         self.to(device=device, dtype=torch.bfloat16).eval().requires_grad_(False)
 
+    @torch.autocast("cuda", enabled=False)
     def context(self, text, proprio):
         text = text.to(torch.bfloat16)
-        state = self.proprio_encoder(proprio.to(torch.bfloat16))[:, None]
+        state = self.proprio_encoder(proprio.to(device=text.device, dtype=text.dtype).unsqueeze(1)).to(text.dtype)
         context = torch.cat((text, state), 1)
         # Retain the released encoder's zero-padded text/all-true backbone mask.
         return context, torch.ones(context.shape[:2], device=context.device, dtype=torch.bool)
 
     @torch.no_grad()
+    @torch.autocast("cuda", enabled=False)
     def encode_observation(self, latent, text, proprio, keep_kv=True):
         if tuple(latent.shape[1:]) != (48, 1, 24, 20):
             raise ValueError(f"Expected independent single-frame latent, got {latent.shape}.")
@@ -68,9 +70,11 @@ class FrozenBackbone(nn.Module):
                 values.append(v.detach())
         return x.detach(), (keys, values), (context, context_mask)
 
+    @torch.autocast("cuda", enabled=False)
     def action_velocity(self, actions, timestep, shared_context, kv, memory, readout, gate_scale=1.0):
         context, mask = shared_context
         expert = self.mot.mixtures["action"]
+        timestep = timestep.to(device=actions.device, dtype=torch.bfloat16)
         x, _, mod, ctx, ctx_mask, freqs = expert.prepare(
             action_tokens=actions.to(torch.bfloat16), timestep=timestep, context=context, context_mask=mask)
         attention_mask = torch.ones((x.shape[1], kv[0][0].shape[1] + x.shape[1]), device=x.device, dtype=torch.bool)
@@ -83,7 +87,12 @@ class FrozenBackbone(nn.Module):
                 block=block, residual_x=residual, mixed_attn_out=mixed, gate_msa=gate,
                 shift_mlp=shift, scale_mlp=scale, gate_mlp=ffn_gate, context=ctx, context_mask=ctx_mask)
             if str(layer) in memory.injectors:
-                x = memory.injectors[str(layer)](x, readout, gate_scale)
+                if gate_scale != 0:
+                    core_dtype = x.dtype
+                    # Apply the trainable memory residual under its own autocast scope.
+                    with torch.autocast("cuda", dtype=torch.bfloat16):
+                        x = memory.injectors[str(layer)](x, readout, gate_scale)
+                    x = x.to(core_dtype)
         return expert.post(x)
 
 
@@ -105,15 +114,15 @@ class S1Model(nn.Module):
         history_valid = batch["history_valid"]
         if ((batch["frame_ids"] > batch["t"][:, None]) & history_valid).any():
             raise ValueError("Future history is forbidden.")
-        readout = self.memory.read(current, batch["text"], batch["text_valid"], batch["proprio"],
-                                   batch["history"], batch["frame_ids"], history_valid)
+        with torch.autocast("cuda", dtype=torch.bfloat16):
+            readout = self.memory.read(current, batch["text"], batch["text_valid"], batch["proprio"],
+                                       batch["history"], batch["frame_ids"], history_valid)
         return kv, context, readout
 
     def forward(self, batch, noise, tau, gate_scale=1.0):
-        with torch.autocast("cuda", dtype=torch.bfloat16):
-            kv, context, readout = self.conditions(batch)
-            noisy = (1 - tau[:, None, None]) * batch["actions"] + tau[:, None, None] * noise
-            prediction = self.backbone.action_velocity(noisy, 1000 * tau, context, kv, self.memory, readout, gate_scale)
+        kv, context, readout = self.conditions(batch)
+        noisy = (1 - tau[:, None, None]) * batch["actions"] + tau[:, None, None] * noise
+        prediction = self.backbone.action_velocity(noisy, 1000 * tau, context, kv, self.memory, readout, gate_scale)
         prediction = prediction.float()
         target = noise.float() - batch["actions"].float()
         count = batch["action_valid"].sum(1)
@@ -125,15 +134,15 @@ class S1Model(nn.Module):
                       "readout_norm": readout.detach().float().norm(dim=-1).mean()}
 
     @torch.no_grad()
+    @torch.autocast("cuda", enabled=False)
     def sample(self, batch, noise, gate_scale=1.0, prepared_conditions=None):
-        with torch.autocast("cuda", dtype=torch.bfloat16):
-            kv, context, readout = self.conditions(batch) if prepared_conditions is None else prepared_conditions
-            actions = noise.to(torch.bfloat16).clone()
-            timesteps, deltas = self.scheduler.build_inference_schedule(10, noise.device, actions.dtype)
-            for timestep, delta in zip(timesteps, deltas):
-                velocity = self.backbone.action_velocity(actions, timestep.expand(len(actions)), context,
-                                                         kv, self.memory, readout, gate_scale)
-                actions = self.scheduler.step(velocity.to(actions.dtype), delta, actions)
+        kv, context, readout = self.conditions(batch) if prepared_conditions is None else prepared_conditions
+        actions = noise.to(torch.bfloat16).clone()
+        timesteps, deltas = self.scheduler.build_inference_schedule(10, noise.device, actions.dtype)
+        for timestep, delta in zip(timesteps, deltas):
+            velocity = self.backbone.action_velocity(actions, timestep.expand(len(actions)), context,
+                                                     kv, self.memory, readout, gate_scale)
+            actions = self.scheduler.step(velocity.to(actions.dtype), delta, actions)
         return actions.float(), readout
 
 
@@ -147,6 +156,7 @@ def load_observation_encoders(cfg, device):
 
 
 @torch.no_grad()
+@torch.autocast("cuda", enabled=False)
 def encode_text(encoder, tokenizer, instruction, device):
     ids, valid = tokenizer(format_task_prompt(instruction), return_mask=True, add_special_tokens=True)
     ids, valid = ids.to(device), valid.to(device).bool()
@@ -156,6 +166,7 @@ def encode_text(encoder, tokenizer, instruction, device):
 
 
 @torch.no_grad()
+@torch.autocast("cuda", enabled=False)
 def encode_latent(vae, mosaics):
     # Use the eager single-frame encoder, without sharing VAE temporal state.
-    return vae.model.encode(mosaics.unsqueeze(2).to(torch.bfloat16), [vae.mean, vae.inv_std]).detach()
+    return vae.model.encode(mosaics.unsqueeze(2).to(torch.bfloat16), vae.scale).detach()

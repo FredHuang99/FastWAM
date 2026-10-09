@@ -101,7 +101,7 @@ def code_version(root):
 
 
 def make_cache_contract(cfg, prepared_manifest):
-    from .protocol import prompt_contract
+    from .protocol import prompt_contract, precision_contract
     contract = {"schema": SCHEMA, "base_sha256": sha256(cfg["paths"]["base"]),
             "stats_sha256": sha256(cfg["paths"]["stats"]), "vae_sha256": sha256(cfg["paths"]["vae"]),
             "t5_sha256": sha256(cfg["paths"]["t5"]),
@@ -113,7 +113,8 @@ def make_cache_contract(cfg, prepared_manifest):
             "encoding": "independent_T1_clean_time0_with_then_proprio_fixed_instruction",
             "mosaic": "RGB_PIL_bilinear_head256x320_wrists128x160_float_minus1_plus1",
             "stride": 8, "decision_stride": 16, "text": "128_zero_padded_base_all_true_reader_valid_mask",
-            "prompt": prompt_contract(), "prompt_code_sha": sha256(Path(__file__).parent / "protocol.py")}
+            "prompt": prompt_contract(), "precision": precision_contract(),
+            "prompt_code_sha": sha256(Path(__file__).parent / "protocol.py")}
     if cfg.get("history", {}).get("archive_stride", 8) == 1:
         names = {"model.py": {"FrozenBackbone", "load_observation_encoders", "encode_text", "encode_latent"},
                  "data.py": {"official_decoder", "mosaic_rgb"}, "common.py": {"ReleaseNormalizer"}}

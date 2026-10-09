@@ -20,10 +20,18 @@ def prompt_contract():
     return {"version": PROMPT_VERSION, "template": TASK_PROMPT, "add_special_tokens": True}
 
 
+def precision_contract():
+    return {"version": "released_explicit_bf16_precision_v3",
+            "frozen_weights_dtype": "bfloat16", "vae_autocast": False,
+            "text_autocast": False, "video_autocast": False, "action_autocast": False,
+            "action_timestep_dtype": "bfloat16", "memory_autocast": "bfloat16"}
+
+
 def inference_contract():
     return {"prompt": prompt_contract(), "sampler": SAMPLER_VERSION,
             "steps": 10, "shift": 1.0, "noise": "cpu_fp32_then_bf16",
-            "action_state_dtype": "bfloat16", "predict": 32, "execute": 16}
+            "action_state_dtype": "bfloat16", "predict": 32, "execute": 16,
+            "precision": precision_contract()}
 
 
 def verify_released_prompt(root):

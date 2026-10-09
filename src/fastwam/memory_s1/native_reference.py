@@ -22,6 +22,7 @@ def build_reference(backbone, encoders):
 
 
 @torch.no_grad()
+@torch.autocast("cuda", enabled=False)
 def native_actions(reference, mosaic, proprio, seed, instruction=None, context=None):
     kwargs = {"prompt": format_task_prompt(instruction)} if context is None else {
         "prompt": None, "context": context,
