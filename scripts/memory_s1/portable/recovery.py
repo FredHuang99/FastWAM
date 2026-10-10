@@ -360,6 +360,132 @@ def restore_code(args):
     print("[sources] saved production sources restored; portable tools and H200 config preserved.", flush=True)
 
 
+SIMULATOR_FOLDERS = ("envs", "scripts", "script", "env_cfg", "task_config", "description", "data", "assets")
+SIMULATOR_SUFFIXES = {".py", ".json", ".yaml", ".yml", ".urdf", ".srdf", ".stl", ".obj", ".glb", ".dae"}
+
+
+def simulator_snapshot(ready, old):
+    """Locate the exact source snapshot authenticated by the prior admission."""
+    manifest = unique_file(ready, "simulator_sources.json")
+    if digest(manifest) != old.get("simulator_snapshot_manifest_sha256"):
+        raise ValueError("Prior simulator snapshot manifest failed its admission-bound SHA256.")
+    value = read(manifest)
+    files = {str(safe_relative(name)): sha for name, sha in value["files"].items()}
+    archive = unique_file(ready, "simulator_sources.tar.gz")
+    if digest(archive) != value["archive_sha256"]:
+        raise ValueError("Prior simulator source archive failed its recorded SHA256.")
+    return manifest, archive, files
+
+
+def simulator_difference(ready, root, old, actual):
+    """Report differences without inventing a complete historical file inventory."""
+    expected, origins = {}, []
+    archive = unique_file(ready, "RMBench.source.tar.gz", required=False)
+    if archive:
+        with tarfile.open(archive, "r:gz") as stream:
+            members = stream.getmembers()
+            prefixes = {m.name[:-len("envs/_base_task.py")] for m in members
+                        if m.isfile() and m.name.endswith("envs/_base_task.py")}
+            if len(prefixes) == 1:
+                prefix = prefixes.pop()
+                for member in members:
+                    if not member.isfile() or not member.name.startswith(prefix):
+                        continue
+                    name = member.name[len(prefix):]
+                    if not name:
+                        continue
+                    path = safe_relative(name)
+                    if (path.parts[0] in SIMULATOR_FOLDERS and path.suffix.lower() in SIMULATOR_SUFFIXES
+                            and "__pycache__" not in path.parts):
+                        with stream.extractfile(member) as source:
+                            expected[str(path)] = hashlib.file_digest(source, "sha256").hexdigest()
+                origins.append({"file": str(archive), "sha256": digest(archive)})
+    lock_path = unique_file(ready, "download_lock.json", required=False)
+    if lock_path:
+        for name, row in read(lock_path).get("files", {}).items():
+            name = name.replace("\\", "/")
+            if name.startswith("resources/RMBench/assets/"):
+                relative = name.removeprefix("resources/RMBench/")
+                path = safe_relative(relative)
+                if path.suffix.lower() in SIMULATOR_SUFFIXES:
+                    expected[str(path)] = row["sha256"]
+        origins.append({"file": str(lock_path), "sha256": digest(lock_path)})
+    manifest = unique_file(ready, "simulator_sources.json", required=False)
+    if manifest:
+        if digest(manifest) != old.get("simulator_snapshot_manifest_sha256"):
+            raise ValueError("Simulator source manifest is not authenticated by the old admission.")
+        expected.update({str(safe_relative(name)): sha for name, sha in read(manifest)["files"].items()})
+        origins.append({"file": str(manifest), "sha256": digest(manifest), "admission_bound": True})
+    complete = canonical(expected) == old["binding"]["simulator_source_sha"]
+    changed = [{"file": name, "expected_sha256": expected[name], "actual_sha256": actual[name]}
+               for name in sorted(expected.keys() & actual.keys()) if expected[name] != actual[name]]
+    missing = sorted(expected.keys() - actual.keys())
+    unmatched = sorted(actual.keys() - expected.keys())
+    value = {"expected_signature": old["binding"]["simulator_source_sha"],
+             "actual_signature": canonical(actual), "reconstructed_expected_signature": canonical(expected),
+             "historical_inventory_complete": complete, "inventory_sources": origins,
+             "changed": changed, "missing": missing,
+             "added" if complete else "uncovered_current": unmatched,
+             "note": "Uncovered current files are not proven additions when the historical inventory is partial.",
+             "counts": {"historical_files": len(expected), "current_files": len(actual),
+                        "changed": len(changed), "missing": len(missing),
+                        "added" if complete else "uncovered_current": len(unmatched)}}
+    target = Path(root) / "outputs/recovery_aws_v2/SIMULATOR_SOURCE_DIFF.json"
+    write(target, value)
+    print(f"[simulator-diff] {json.dumps(value['counts'])} historical_inventory_complete={complete}", flush=True)
+    for row in changed[:20]:
+        print(f"[changed] {row['file']}", flush=True)
+    for name in missing[:20]:
+        print(f"[missing] {name}", flush=True)
+    label = "added" if complete else "uncovered"
+    for name in unmatched[:20]:
+        print(f"[{label}] {name}", flush=True)
+    print(f"[simulator-diff] Full report: {target}", flush=True)
+    return target
+
+
+def restore_simulator(args):
+    """Restore authenticated source files; preserve current files and compiled libraries."""
+    ready, root = Path(args.ready).resolve(), Path(args.root).resolve()
+    _, old, _ = admission(ready)
+    verify_source_hashes(ready, root, assets=False)
+    manifest, archive, expected = simulator_snapshot(ready, old)
+    destination = (root / "resources/RMBench").resolve()
+    if not destination.is_dir():
+        raise ValueError("Restore the RMBench checkout before applying its exact source snapshot.")
+    stamp = str(time.time_ns())
+    work = root / "outputs/recovery_aws_v2/simulator_snapshot" / stamp
+    extract_archive(archive, work)
+    recovered = {p.relative_to(work).as_posix(): p for p in work.rglob("*") if p.is_file()}
+    if set(recovered) != set(expected):
+        raise ValueError("Simulator snapshot members differ from its authenticated manifest.")
+    for name, path in recovered.items():
+        if digest(path) != expected[name]:
+            raise ValueError(f"Simulator snapshot member SHA256 mismatch: {name}")
+    preserved = root / "outputs/recovery_aws_v2/simulator_before_restore" / stamp
+    restored = []
+    for name, source in recovered.items():
+        target = destination / str(safe_relative(name))
+        if target.is_symlink() or not target.resolve().is_relative_to(destination):
+            raise ValueError(f"Simulator source target is a link or escapes the checkout: {name}")
+        if target.is_file() and digest(target) == expected[name]:
+            continue
+        if target.exists():
+            backup = preserved / name
+            backup.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(target, backup)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
+        restored.append(name)
+    write(root / "outputs/recovery_aws_v2/SIMULATOR_RESTORE.json", {
+        "manifest": str(manifest), "manifest_sha256": digest(manifest),
+        "archive_sha256": digest(archive), "restored": restored, "preserved": str(preserved),
+        "note": "Only authenticated source members restored; other assets, data and compiled extensions retained.",
+    })
+    print(f"[simulator-restore] Exact source files restored={len(restored)}; prior files preserved in {preserved}", flush=True)
+    verify_source_hashes(ready, root, assets=True)
+
+
 def verify_source_hashes(ready, root, assets):
     _, old, _ = admission(ready)
     bound = old["binding"]
@@ -373,12 +499,13 @@ def verify_source_hashes(ready, root, assets):
             raise ValueError(f"Restored production code differs from prior admission: {name}")
     if assets:
         simulator = root / "resources/RMBench"
-        folders = ("envs", "scripts", "script", "env_cfg", "task_config", "description", "data", "assets")
-        files = {p.relative_to(simulator).as_posix(): digest(p) for folder in folders
+        files = {p.relative_to(simulator).as_posix(): digest(p) for folder in SIMULATOR_FOLDERS
                  for p in sorted((simulator / folder).rglob("*")) if p.is_file() and "__pycache__" not in p.parts
-                 and p.suffix.lower() in (".py", ".json", ".yaml", ".yml", ".urdf", ".srdf", ".stl", ".obj", ".glb", ".dae")}
+                 and p.suffix.lower() in SIMULATOR_SUFFIXES}
         if canonical(files) != bound["simulator_source_sha"]:
-            raise ValueError("Simulator sources/assets differ from the old binding; keep downloads and inspect the differences.")
+            difference = simulator_difference(ready, root, old, files)
+            raise ValueError(f"Simulator sources/assets differ from the old binding; inspect {difference}. "
+                             "Source restoration does not remove extra files or approve changed assets.")
     print(f"[source-binding] production code verified; simulator_assets={assets}", flush=True)
 
 
@@ -593,7 +720,7 @@ def main():
         item.add_argument("--output", required=True)
         if name == "download-ready":
             item.add_argument("--run-id", default="memory_s1_variable_t_seed17_v2")
-    for name in ("restore-code", "verify-sources"):
+    for name in ("restore-code", "restore-simulator", "verify-sources"):
         item = sub.add_parser(name)
         item.add_argument("--root", required=True)
         item.add_argument("--ready", required=True)
@@ -625,7 +752,8 @@ def main():
     args = parser.parse_args()
     functions = {"inventory": remote_inventory, "download-ready": download_ready, "restore-code": restore_code,
                  "resource-download": protected_download, "pack-ready": ready_pack, "upload-ready": ready_upload,
-                 "environment": environment, "pins": pins, "conda-spec": conda_spec, "download-payload": download_payload}
+                 "environment": environment, "pins": pins, "conda-spec": conda_spec, "download-payload": download_payload,
+                 "restore-simulator": restore_simulator}
     if args.command == "verify-sources":
         verify_source_hashes(args.ready, args.root, assets=True)
     else:
