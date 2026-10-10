@@ -58,7 +58,11 @@ def pins(args):
     application = {"einops", "omegaconf", "hydra-core", "safetensors", "transformers", "huggingface-hub",
                    "sentencepiece", "ftfy", "regex", "pillow", "h5py", "pyyaml", "opencv-python-headless",
                    "matplotlib", "gitpython", "rich", "imageio", "imageio-ffmpeg", "nvidia-ml-py"}
-    ignored = {"torch", "torchvision", "torchaudio", "pytorch3d", "curobo", "fastwam", "pip", "setuptools", "wheel"}
+    # CuRobo imports as `curobo`, but its distribution is named `nvidia_curobo`.
+    # Both names must be excluded: the simulator installer builds saved source
+    # for the current GPU instead of resolving its version from a package index.
+    source_installed = {"pytorch3d", "curobo", "nvidia-curobo", "fastwam"}
+    ignored = {"torch", "torchvision", "torchaudio", "pip", "setuptools", "wheel"} | source_installed
     values = {name: version for name, version in packages.items() if name not in ignored
               and (kind != "training" or name in application)
               and re.fullmatch(r"[A-Za-z0-9.+_-]+", version)}
@@ -75,7 +79,11 @@ def pins(args):
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text("".join(f"{name}=={version}\n" for name, version in sorted(values.items())), encoding="utf-8")
     write(target.with_suffix(".sources.json"), {"kind": kind, "records": [{"file": str(p), "sha256": digest(p)} for p, _ in candidates],
-          "intentionally_rebuilt": sorted(ignored), "selected": values})
+          "intentionally_rebuilt": sorted(ignored),
+          "source_installed": {name: packages[name] for name in sorted(source_installed) if name in packages},
+          "selected": values})
+    for name in sorted(source_installed & packages.keys()):
+        print(f"[pins] {name}=={packages[name]} excluded from index install; restored from source", flush=True)
     print(f"[pins] {kind}: {len(values)} recorded packages -> {target}", flush=True)
 
 
