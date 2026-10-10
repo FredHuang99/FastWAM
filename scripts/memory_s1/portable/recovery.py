@@ -396,7 +396,10 @@ def protected_download(args):
     write(root / "outputs/recovery_aws_v2/EXPECTED_DOWNLOADS.json", {"files": expected, "prior_lock": lock})
     if not current.exists():
         write(current, lock)
-    command = [sys.executable, "-u", str(root / "scripts/memory_s1/download_resources.py"), "--root", str(root)]
+    # Restored production scripts remain byte-identical to their admission binding.
+    # Recovery uses maintained public sources without editing that old downloader.
+    downloader = Path(__file__).resolve().with_name("resource_download.py")
+    command = [sys.executable, "-u", str(downloader), "--root", str(root)]
     command += [f"--{key}" for key in ("models", "data", "assets") if getattr(args, key)]
     if len(command) == 5:
         raise ValueError("Choose at least one of --models --data --assets.")
