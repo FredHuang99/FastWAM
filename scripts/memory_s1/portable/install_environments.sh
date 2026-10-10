@@ -79,8 +79,27 @@ simulator)
     echo 'The saved CuRobo source is missing. Restore its recorded commit before continuing.' >&2
     exit 2
   fi
+  # Source archives omit .git; recover the distribution version from saved
+  # environment records rather than asking setuptools-scm to infer it.
+  CUROBO_VERSION="$("$PY" - <<'PY'
+import json
+from pathlib import Path
+from packaging.version import Version
+
+record = json.loads(Path("outputs/recovery_aws_v2/simulator-recorded-pins.sources.json").read_text())
+packages = record.get("source_installed", {})
+versions = {packages[name] for name in ("nvidia-curobo", "curobo") if name in packages}
+if len(versions) != 1:
+    raise SystemExit("Missing or conflicting recorded CuRobo versions; regenerate pins using the current recovery.py.")
+version = versions.pop()
+Version(version)
+print(version)
+PY
+  )"
+  printf '[build] CuRobo version from saved environment: %s; GPU architecture: %s\n' "$CUROBO_VERSION" "$TORCH_CUDA_ARCH_LIST"
   "$PY" -m pip install ./resources/PyTorch3D --no-build-isolation
-  "$PY" -m pip install -e ./resources/RMBench/envs/curobo --no-build-isolation
+  SETUPTOOLS_SCM_PRETEND_VERSION_FOR_NVIDIA_CUROBO="$CUROBO_VERSION" \
+    "$PY" -m pip install -e ./resources/RMBench/envs/curobo --no-build-isolation
   "$PY" - <<'PY'
 import sys
 import torch
