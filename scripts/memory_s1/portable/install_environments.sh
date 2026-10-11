@@ -1,9 +1,26 @@
 #!/usr/bin/env bash
 set -euo pipefail
 ROOT="${FW_ROOT:-/workspace/FastWAM}"
-READY="${READY_DIR:-$ROOT/outputs/recovery_aws_v2/restored}"
-MODE="${1:?Choose system, hf, training, simulator or patches}"
+MODE="${1:?Choose system, hf, training, simulator, patches or render}"
 cd "$ROOT"
+CONFIG="${CONFIG:-configs/memory_s1/s1_variable_t_h200.yaml}"
+mapfile -t PROFILE < <(python3 - "$CONFIG" "$ROOT" <<'PY'
+import sys
+from pathlib import Path
+import yaml
+cfg = yaml.safe_load(Path(sys.argv[1]).read_text())
+profile = cfg.get("recovery", {})
+print(profile.get("expected_world_size", 2))
+print(Path(sys.argv[2]) / profile.get("output", "outputs/recovery_aws_v2"))
+print(Path(sys.argv[2]) / profile.get("ready_directory", "outputs/recovery_aws_v2/restored"))
+print(profile.get("cuda_arch", "9.0"))
+print(profile.get("max_jobs", 4))
+PY
+)
+EXPECTED_GPUS="${PROFILE[0]}"
+export RECOVERY_ROOT="${RECOVERY_ROOT:-${PROFILE[1]}}"
+READY="${READY_DIR:-${PROFILE[2]}}"
+mkdir -p "$RECOVERY_ROOT"
 # Drop the image's global install constraints in these child installs only.
 unset PIP_CONSTRAINT PIP_BUILD_CONSTRAINT UV_CONSTRAINT
 export PIP_CONFIG_FILE=/dev/null PYTHONUNBUFFERED=1
@@ -22,9 +39,9 @@ hf)
 training)
   python3 -m venv --system-site-packages /opt/mwam
   /opt/hf-tools/bin/python scripts/memory_s1/portable/recovery.py pins --ready "$READY" \
-    --kind training --output outputs/recovery_aws_v2/training-recorded-pins.txt
-  /opt/mwam/bin/python -m pip install -r outputs/recovery_aws_v2/training-recorded-pins.txt
-  /opt/mwam/bin/python - "$ROOT" <<'PY'
+    --kind training --output "$RECOVERY_ROOT/training-recorded-pins.txt"
+  /opt/mwam/bin/python -m pip install -r "$RECOVERY_ROOT/training-recorded-pins.txt"
+  /opt/mwam/bin/python - "$ROOT" "$EXPECTED_GPUS" <<'PY'
 from pathlib import Path
 import site
 import sys
@@ -32,7 +49,7 @@ Path(site.getsitepackages()[0], "fastwam_source.pth").write_text(str(Path(sys.ar
 import torch
 assert torch.__version__.startswith("2.10.0a0"), torch.__version__
 assert torch.version.cuda == "13.0", torch.version.cuda
-assert torch.cuda.device_count() == 2
+assert torch.cuda.device_count() == int(sys.argv[2]), torch.cuda.device_count()
 print("Training Python:", sys.executable, "PyTorch:", torch.__version__, "CUDA:", torch.version.cuda)
 PY
   /opt/mwam/bin/python -c 'import fastwam.memory_s1.train, fastwam.memory_s1.integration; print("S1 imports: OK")'
@@ -42,35 +59,35 @@ simulator)
     INSTALLER="/tmp/mwam-Miniforge3.sh"
     curl -fL --retry 3 -o "$INSTALLER" \
       https://github.com/conda-forge/miniforge/releases/download/25.3.1-0/Miniforge3-Linux-x86_64.sh
-    mkdir -p outputs/recovery_aws_v2/environment
-    sha256sum "$INSTALLER" > outputs/recovery_aws_v2/environment/miniforge-installer.sha256
-    bash "$INSTALLER" -b -p /opt/miniforge
+    mkdir -p "$RECOVERY_ROOT/environment"
+    sha256sum "$INSTALLER" > "$RECOVERY_ROOT/environment/miniforge-installer.sha256"
+    bash "$INSTALLER" -b -u -p /opt/miniforge
   fi
   if [[ ! -x /opt/rmbench-env/bin/python ]]; then
     /opt/hf-tools/bin/python scripts/memory_s1/portable/recovery.py conda-spec --ready "$READY" \
-      --output outputs/recovery_aws_v2/simulator-saved-conda.txt
-    if [[ -f outputs/recovery_aws_v2/simulator-saved-conda.txt ]]; then
-      /opt/miniforge/bin/conda create -y -p /opt/rmbench-env --file outputs/recovery_aws_v2/simulator-saved-conda.txt
+      --output "$RECOVERY_ROOT/simulator-saved-conda.txt"
+    if [[ -f "$RECOVERY_ROOT/simulator-saved-conda.txt" ]]; then
+      /opt/miniforge/bin/conda create -y -p /opt/rmbench-env --file "$RECOVERY_ROOT/simulator-saved-conda.txt"
     else
       /opt/miniforge/bin/conda create -y -p /opt/rmbench-env -c conda-forge python=3.10 pip
       /opt/miniforge/bin/conda install -y -p /opt/rmbench-env -c nvidia cuda-toolkit=12.4.1
     fi
   fi
-  export CUDA_HOME=/opt/rmbench-env CC=gcc-12 CXX=g++-12 TORCH_CUDA_ARCH_LIST=9.0 MAX_JOBS=8
+  export CUDA_HOME=/opt/rmbench-env CC=gcc-12 CXX=g++-12 TORCH_CUDA_ARCH_LIST="${PROFILE[3]}" MAX_JOBS="${PROFILE[4]}"
   export PATH="/opt/rmbench-env/bin:$PATH"
   export LD_LIBRARY_PATH="/opt/rmbench-env/lib:/opt/rmbench-env/targets/x86_64-linux/lib:${LD_LIBRARY_PATH:-}"
   PY=/opt/rmbench-env/bin/python
   "$PY" -m pip install 'torch==2.4.1' 'torchvision==0.19.1' --index-url https://download.pytorch.org/whl/cu124
   printf '%s\n' 'torch==2.4.1' 'torchvision==0.19.1' 'numpy<2' 'zarr<3' 'moviepy<2' \
-    > outputs/recovery_aws_v2/simulator-constraints.txt
+    > "$RECOVERY_ROOT/simulator-constraints.txt"
   /opt/hf-tools/bin/python scripts/memory_s1/portable/recovery.py pins --ready "$READY" \
-    --kind simulator --output outputs/recovery_aws_v2/simulator-recorded-pins.txt
+    --kind simulator --output "$RECOVERY_ROOT/simulator-recorded-pins.txt"
   # The actual fork requirements are restored before this operation.
-  "$PY" -m pip install -c outputs/recovery_aws_v2/simulator-constraints.txt \
-    -r resources/RMBench/scripts/requirements.txt -c outputs/recovery_aws_v2/simulator-recorded-pins.txt
-  "$PY" -m pip install -c outputs/recovery_aws_v2/simulator-constraints.txt \
-    -r outputs/recovery_aws_v2/simulator-recorded-pins.txt
-  "$PY" -m pip install -c outputs/recovery_aws_v2/simulator-constraints.txt \
+  "$PY" -m pip install -c "$RECOVERY_ROOT/simulator-constraints.txt" \
+    -r resources/RMBench/scripts/requirements.txt -c "$RECOVERY_ROOT/simulator-recorded-pins.txt"
+  "$PY" -m pip install -c "$RECOVERY_ROOT/simulator-constraints.txt" \
+    -r "$RECOVERY_ROOT/simulator-recorded-pins.txt"
+  "$PY" -m pip install -c "$RECOVERY_ROOT/simulator-constraints.txt" \
     'numpy<2' 'zarr<3' 'moviepy<2' PyYAML Pillow toppra 'setuptools==69.5.1' 'warp-lang==1.12.0' ninja
   if [[ ! -f resources/PyTorch3D/setup.py ]]; then
     git clone --branch v0.7.8 --depth 1 https://github.com/facebookresearch/pytorch3d.git resources/PyTorch3D
@@ -86,7 +103,8 @@ import json
 from pathlib import Path
 from packaging.version import Version
 
-record = json.loads(Path("outputs/recovery_aws_v2/simulator-recorded-pins.sources.json").read_text())
+import os
+record = json.loads((Path(os.environ["RECOVERY_ROOT"]) / "simulator-recorded-pins.sources.json").read_text())
 packages = record.get("source_installed", {})
 versions = {packages[name] for name in ("nvidia-curobo", "curobo") if name in packages}
 if len(versions) != 1:
@@ -110,6 +128,22 @@ assert torch.__version__.split("+")[0] == "2.4.1"
 assert torch.version.cuda == "12.4"
 assert torch.cuda.is_available()
 print("Simulator imports: OK; extension architecture target: 9.0")
+PY
+  ;;
+render)
+  /opt/rmbench-env/bin/python - <<'PY'
+import numpy as np
+import sapien.core as sapien
+engine = sapien.Engine()
+renderer = sapien.SapienRenderer(offscreen_only=True)
+engine.set_renderer(renderer)
+scene = engine.create_scene()
+camera = scene.add_camera("recovery_probe", 64, 64, 1.0, 0.1, 10)
+scene.update_render()
+camera.take_picture()
+pixels = camera.get_float_texture("Color")
+assert pixels.shape == (64, 64, 4) and np.isfinite(pixels).all()
+print("Simulator offscreen render: OK", pixels.shape)
 PY
   ;;
 patches)

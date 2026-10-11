@@ -100,7 +100,17 @@ def prepare_scenes(cfg, mode, gpu_uuids, stop_root):
     diagnostic = cfg.get("diagnostic", {})
     if diagnostic.get("scenes_from"):
         if mode != "diagnostic":
-            raise ValueError("Reused short diagnostics cannot replace the official evaluation protocol.")
+            source = Path(diagnostic["scenes_from"])
+            saved = read(source)
+            if saved["contract"] != contract:
+                raise ValueError("Frozen evaluation scenes refer to another complete protocol.")
+            for task in contract["tasks"]:
+                rows = [row for row in saved["scenes"] if row["task"] == task]
+                if len(rows) != contract["count"] or len({row["seed"] for row in rows}) != len(rows):
+                    raise ValueError("Full evaluations cannot borrow a prefix or incomplete scene bank.")
+            if len(saved["scenes"]) != contract["count"] * len(contract["tasks"]):
+                raise ValueError("Frozen scene bank has extra tasks.")
+            return contract, saved["scenes"], source
         source = Path(diagnostic["scenes_from"])
         saved = read(source)
         if saved["contract"] != contract:

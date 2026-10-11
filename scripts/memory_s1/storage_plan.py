@@ -7,6 +7,7 @@ import subprocess
 from fastwam.memory_s1.common import load_config, atomic_json, read_json, fingerprint, make_cache_contract, sha256
 from fastwam.memory_s1.history import recipe
 from fastwam.memory_s1.modules import MemoryModules
+from fastwam.memory_s1.schedule import checkpoint_steps, milestone_steps, validation_policy
 
 
 def resource_paths(cfg):
@@ -39,9 +40,9 @@ def main():
     parameter_bytes = sum(p.numel() * 4 for p in MemoryModules().parameters())
     full = 3 * parameter_bytes + 16 * 2**20
     initial = parameter_bytes + 16 * 2**20
-    updates = set(range(cfg["checkpoint_every"], cfg["steps"] + 1, cfg["checkpoint_every"]))
-    updates.update(range(cfg["validate_every"], cfg["steps"] + 1, cfg["validate_every"]))
-    updates.add(cfg["steps"])
+    policy = validation_policy(cfg)
+    deferred = policy["schedule"] == "deferred"
+    updates = set(checkpoint_steps(cfg))
     settings = cfg.get("backup_budget", {})
     run = Path(cfg["paths"]["run"])
     remote_step, remote_phase = -1, "train"
@@ -60,14 +61,17 @@ def main():
                 remote_phase = read_json(marker).get("phase", "train")
     updates = {step for step in updates if step > remote_step}
     extra = settings.get("extra_stop_checkpoints", 1)
-    weights = settings.get("weight_versions", 2 * cfg["steps"] // cfg["validate_every"])
+    weights = settings.get("weight_versions", len(milestone_steps(cfg)) + 2 if deferred else 2 * cfg["steps"] // cfg["validate_every"])
     auxiliary = int(settings.get("auxiliary_history_gib", 4) * 2**30)
-    remaining_validations = sum(step > remote_step for step in range(cfg["validate_every"], cfg["steps"] + 1, cfg["validate_every"]))
+    remaining_validations = 0 if deferred else sum(step > remote_step for step in range(cfg["validate_every"], cfg["steps"] + 1, cfg["validate_every"]))
     if remote_phase == "validation":
         remaining_validations += 1
-    weights = min(weights, 2 * remaining_validations)
+    if deferred:
+        weights = min(weights, sum(step > remote_step for step in [0, *milestone_steps(cfg)]) + 1)
+    else:
+        weights = min(weights, 2 * remaining_validations)
     native = (initial if remote_step < 0 else 0) + (len(updates) + extra) * full + weights * parameter_bytes + auxiliary
-    recovery = 2 * full + (cfg["steps"] // cfg["validate_every"] + 1) * parameter_bytes + 2 * 2**30
+    recovery = 2 * full + (len(milestone_steps(cfg)) + 2) * parameter_bytes + 2 * 2**30
     # BF16 features/latent, FP32 proprio, int64 ID; allow metadata and serialization overhead.
     dense_estimate = int(frames * (120 * 3072 * 2 + 48 * 24 * 20 * 2 + 14 * 4 + 8) * 1.03) + 128 * 2**20
     inventory = {str(p): tree_bytes(p) for p in resource_paths(cfg)}
@@ -89,7 +93,7 @@ def main():
             combined_budget = quota(native + recovery + resources)
         except RuntimeError as error:
             assets_local_only, asset_error = True, str(error)
-    value = {"checkpoint_every": cfg["checkpoint_every"], "recipe_sha": fingerprint(recipe(cfg)), "cache_signature": cache_signature,
+    value = {"checkpoint_every": cfg["checkpoint_every"], "validation": policy, "recipe_sha": fingerprint(recipe(cfg)), "cache_signature": cache_signature,
              "parameter_bytes_fp32": parameter_bytes, "initial_checkpoint_estimate_bytes": initial,
              "full_checkpoint_estimate_bytes": full, "periodic_completed_updates": sorted(updates),
              "last_verified_remote_update": remote_step, "remote_phase": remote_phase, "extra_stop_checkpoints": extra, "weight_versions": weights, "auxiliary_history_bytes": auxiliary,

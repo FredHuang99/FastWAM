@@ -30,6 +30,9 @@ def main():
     from huggingface_hub import HfApi, hf_hub_download, snapshot_download
 
     root = Path(args.root).resolve()
+    recovery_root = Path(os.environ.get("RECOVERY_ROOT", root / "outputs/recovery_aws_v2")).resolve()
+    if not recovery_root.is_relative_to(root):
+        raise ValueError("RECOVERY_ROOT must remain inside the project.")
     resource_root = root / "resources"
     lock_path = resource_root / "download_lock.json"
     lock = read(lock_path) if lock_path.is_file() else {"repositories": {}, "files": {}}
@@ -37,7 +40,7 @@ def main():
     lock.setdefault("files", {})
     expected = {name.replace("\\", "/"): row["sha256"]
                 for name, row in lock["files"].items()}
-    protection = root / "outputs/recovery_aws_v2/EXPECTED_DOWNLOADS.json"
+    protection = recovery_root / "EXPECTED_DOWNLOADS.json"
     if protection.is_file():
         expected.update(read(protection)["files"])
     api = HfApi()
@@ -61,7 +64,7 @@ def main():
         actual = digest(path)
         required = expected.get(name)
         if required is not None and actual != required:
-            write(root / "outputs/recovery_aws_v2/DOWNLOAD_MISMATCH.json", {
+            write(recovery_root / "DOWNLOAD_MISMATCH.json", {
                 "file": name, "expected_sha256": required, "actual_sha256": actual,
             })
             raise ValueError(f"Original SHA256 mismatch: {name}. Files retained; not approved.")

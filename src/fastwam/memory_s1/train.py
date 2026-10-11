@@ -23,6 +23,7 @@ from .data import CachedEpisodes, collate
 from .evaluate import deterministic_noise, validate, audit_cache
 from .history import recipe
 from .model import S1Model
+from .schedule import checkpoint_steps, milestone_steps, validation_policy
 
 
 def learning_rate_factor(step, cfg):
@@ -60,6 +61,16 @@ def archive_uncommitted_logs(run, step, phase):
             directory.mkdir(exist_ok=True)
             (directory / f"{time.time_ns()}_{name}").write_text("".join(orphan), encoding="utf-8")
             path.write_text("".join(kept), encoding="utf-8")
+    index_path = run / "MILESTONES.json"
+    if index_path.exists():
+        index = read_json(index_path)
+        index["weights"] = {key: value for key, value in index["weights"].items() if int(key) <= step}
+        atomic_json(index_path, index)
+    final_path = run / "FINAL.json"
+    if final_path.exists() and read_json(final_path)["step"] > step:
+        destination = run / "interrupted_artifacts" / str(time.time_ns()) / final_path.name
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(final_path), destination)
 
 
 def run_training(args):
@@ -67,6 +78,9 @@ def run_training(args):
     if cfg.get("diagnostic_only"):
         raise ValueError("Base diagnostic configurations cannot launch parameter training.")
     cfg["training_python"] = sys.executable
+    policy = validation_policy(cfg)
+    deferred = policy["schedule"] == "deferred"
+    milestones = milestone_steps(cfg)
     rank, world = int(os.environ.get("RANK", 0)), int(os.environ.get("WORLD_SIZE", 1))
     local = int(os.environ.get("LOCAL_RANK", 0))
     torch.cuda.set_device(local)
@@ -112,6 +126,8 @@ def run_training(args):
             raise ValueError("Storage budget refers to a different cache.")
         if budget.get("checkpoint_every") != cfg["checkpoint_every"]:
             raise ValueError("HF interval changed after storage budgeting.")
+        if budget.get("validation") != policy:
+            raise ValueError("Evaluation scheduling changed after storage budgeting.")
         if approval["manifest_sha"] != fingerprint(prepared) or train_data.manifest["contract"]["prepared_sha"] != fingerprint(prepared):
             raise ValueError("Data, alignment and cache identities differ.")
         for record in train_data.manifest["episodes"]:
@@ -125,7 +141,7 @@ def run_training(args):
                  "cache_signature": train_data.signature, "data_sha": fingerprint(prepared), "code": code_version(cfg["root"]),
                 "integration_sha": fingerprint(integration),
                 "recipe": fingerprint({**{key: cfg[key] for key in ("seed", "global_batch", "steps", "learning_rate", "min_learning_rate", "warmup")},
-                                       "history": recipe(cfg), "validation_periods": cfg.get("history", {}).get("validation_periods", [8])})}
+                                       "history": recipe(cfg), "validation": policy})}
     identity = leader(admission)
     optimizer = torch.optim.AdamW(model.memory.parameter_groups(), lr=cfg["learning_rate"], betas=(.9, .95))
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lambda step: learning_rate_factor(step, cfg))
@@ -188,6 +204,21 @@ def run_training(args):
     model.train()
     if rank == 0:
         run.mkdir(parents=True, exist_ok=True)
+        preparation_path = run / "PREPARATION.json"
+        if not preparation_path.exists():
+            lease = Path(cfg["root"]) / cfg.get("time_budget", {}).get("lease_file", "outputs/lease.json")
+            elapsed = time.time() - read_json(lease)["started_unix"] if lease.exists() else None
+            cache_launches = []
+            for exit_file in sorted((Path(cfg["paths"]["cache"]) / "launches").glob("*.exit")):
+                command_file = exit_file.with_suffix(".command")
+                if command_file.exists():
+                    cache_launches.append({"launch": exit_file.stem, "exit": exit_file.read_text().strip(),
+                        "seconds": max(0., exit_file.stat().st_mtime - command_file.stat().st_mtime)})
+            cache_seconds = sum(item["seconds"] for item in cache_launches)
+            atomic_json(preparation_path, {"elapsed_before_training_seconds": elapsed,
+                "cache_launch_seconds": cache_seconds, "cache_launches": cache_launches,
+                "other_preparation_seconds": max(0., elapsed - cache_seconds) if elapsed is not None else None,
+                "note": "Preparation wall time ends after startup admission; restored caches have no new build launch."})
         atomic_json(run / "config_resolved.json", cfg)
         atomic_json(run / "identity.json", identity)
         atomic_json(run / "parameters.json", {name: {"shape": list(p.shape), "dtype": str(p.dtype), "trainable": True} for name, p in model.memory.named_parameters()})
@@ -197,6 +228,25 @@ def run_training(args):
         print(f"[start] update={step}/{cfg['steps']} phase={progress['phase']} world={world} micro={micro} accumulation={accumulation}", flush=True)
     wall_start, prior_wall = time.monotonic(), progress["wall_seconds"]
     rolling = deque(maxlen=30)
+
+    def export_weights(update):
+        path = run / "weights" / f"step_{update:06d}.pt"
+        save_weights(model, path, update, identity)
+        index_path = run / "MILESTONES.json"
+        index = read_json(index_path) if index_path.exists() else {
+            "identity": identity, "candidate_steps": milestones, "weights": {}}
+        if index["identity"] != identity:
+            raise ValueError("Weight export index belongs to another training run.")
+        index["weights"][str(update)] = {"file": str(path.relative_to(run)), "sha256": sha256(path)}
+        atomic_json(index_path, index)
+        if update == cfg["steps"]:
+            atomic_json(run / "FINAL.json", {"step": update, **index["weights"][str(update)],
+                        "selection": "pending_evaluation" if deferred else "inline_evaluation"})
+
+    def training_status():
+        atomic_json(run / "TRAINING_STATUS.json", {"completed_updates": step, "total_updates": cfg["steps"],
+            "state": "trained_pending_evaluation" if deferred and step == cfg["steps"] else progress["phase"],
+            "validation": policy, "candidate_steps": milestones, "best_selected": best.get("step") is not None})
 
     def event(component, seconds):
         progress[component + "_seconds"] += seconds
@@ -219,6 +269,7 @@ def run_training(args):
             started = time.monotonic()
             try:
                 upload_checkpoint(cfg, directory)
+                (run / "UPLOAD_FAILED.json").unlink(missing_ok=True)
                 progress["uploads"] += 1
                 event("upload", time.monotonic() - started)
                 progress["wall_seconds"] = prior_wall + time.monotonic() - wall_start
@@ -233,6 +284,8 @@ def run_training(args):
 
     # Validate the actual serialized size, credentials and upload path before any parameter update.
     if not args.resume:
+        leader(lambda: export_weights(0))
+        leader(training_status)
         persist()
     stopped = False
     while step < cfg["steps"] or progress["phase"] == "validation":
@@ -357,31 +410,48 @@ def run_training(args):
             for sample in all_samples:
                 append_jsonl(run / "samples.jsonl", sample)
             remaining = sum(rolling) / len(rolling) * (cfg["steps"] - step)
-            for component, count_name, remaining_events in (("checkpoint", "checkpoints", (cfg["steps"]-step)//cfg["checkpoint_every"]),
-                    ("upload", "uploads", (cfg["steps"]-step)//cfg["checkpoint_every"] + (cfg["steps"]-step)//cfg["validate_every"]),
-                    ("offline_validation", "offline_validations", (cfg["steps"]-step)//cfg["validate_every"]),
-                    ("closed_validation", "closed_validations", (cfg["steps"]-step)//cfg["validate_every"])):
+            pending_checkpoints = sum(update >= step for update in checkpoint_steps(cfg))
+            pending_validations = 0 if deferred else sum(update >= step for update in range(cfg["validate_every"], cfg["steps"] + 1, cfg["validate_every"]))
+            for component, count_name, remaining_events in (("checkpoint", "checkpoints", pending_checkpoints),
+                    ("upload", "uploads", pending_checkpoints + pending_validations),
+                    ("offline_validation", "offline_validations", pending_validations),
+                    ("closed_validation", "closed_validations", pending_validations)):
                 remaining += progress[component + "_seconds"] / max(1, progress[count_name]) * remaining_events
-            remaining += progress["evaluation_upload_seconds"] / max(1, progress["closed_validations"]) * ((cfg["steps"] - step) // cfg["validate_every"])
+            remaining += progress["evaluation_upload_seconds"] / max(1, progress["closed_validations"]) * pending_validations
             row = {"kind": "train", "step": step, "loss": float(values[0]), "fm_unweighted": float(values[4]),
                 "readout_norm": float(values[1]), "history_frames": float(values[2]), "valid_actions": float(values[3]),
                 "learning_rate": update_learning_rate, "next_learning_rate": optimizer.param_groups[0]["lr"], "update_seconds": seconds, "data_seconds": float(maxima[1]),
                 "gpu_peak_gib": float(maxima[2]), "T_histogram": dict(Counter(str(sample["T"]) for sample in all_samples)),
-                "eta_seconds": remaining, "eta_provisional": not progress["closed_validations"], "cumulative": dict(progress)}
+                "eta_seconds": remaining, "eta_provisional": (step < 100 or progress["uploads"] < 2) if deferred else not progress["closed_validations"], "cumulative": dict(progress)}
+            budget = cfg.get("time_budget", {})
+            lease = Path(cfg["root"]) / budget.get("lease_file", "outputs/lease.json")
+            if lease.exists():
+                elapsed = time.time() - read_json(lease)["started_unix"]
+                available = float(budget.get("hours", 72)) * 3600 - elapsed
+                row.update(lease_elapsed_seconds=elapsed, lease_remaining_seconds=available,
+                           lease_margin_seconds=available - remaining,
+                           lease_projection_provisional=row["eta_provisional"])
             if step % cfg["log_every"] == 0 or step == 1:
                 row.update(gradient_norm=float(norm), gates={name: float(module.gate.detach()) for name, module in model.memory.injectors.items()},
                     gradient_by_module={name: float(torch.sqrt(sum(p.grad.float().square().sum() for p in module.parameters() if p.grad is not None)))
                                         for name, module in (("reader", model.memory.reader), ("injectors", model.memory.injectors))})
                 print(f"[train] {step}/{cfg['steps']} ({100*step/cfg['steps']:.1f}%) loss={row['loss']:.6f} lr={row['learning_rate']:.2e} ETA={duration(remaining)} provisional={row['eta_provisional']}", flush=True)
+                if "lease_margin_seconds" in row:
+                    print(f"[budget] remaining_hours={row['lease_remaining_seconds']/3600:.2f} margin_hours={row['lease_margin_seconds']/3600:.2f} provisional={row['eta_provisional']}", flush=True)
             append_jsonl(run / "metrics.jsonl", row)
         if any(p._version != version for p, version in frozen):
             raise RuntimeError("A frozen backbone parameter changed.")
         stop_flag = torch.tensor(int((run / "STOP_REQUESTED").exists()), device=device)
         dist.all_reduce(stop_flag, op=dist.ReduceOp.MAX)
         stopped = bool(stop_flag.item())
-        if step % cfg["validate_every"] == 0:
+        if not deferred and step % cfg["validate_every"] == 0:
             progress["phase"] = "validation"
-        if step % cfg["checkpoint_every"] == 0 or progress["phase"] == "validation" or stopped or step == cfg["steps"]:
+        if step in milestones:
+            leader(lambda: export_weights(step))
+        if deferred and step == cfg["steps"]:
+            progress["phase"] = "trained_pending_evaluation"
+        leader(training_status)
+        if step % cfg["checkpoint_every"] == 0 or step in milestones or progress["phase"] == "validation" or stopped or step == cfg["steps"]:
             persist()
         if stopped:
             break

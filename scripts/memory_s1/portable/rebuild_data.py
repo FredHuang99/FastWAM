@@ -21,11 +21,12 @@ def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("--config", required=True)
     parser.add_argument("--ready", required=True)
+    parser.add_argument("--mode", choices=("legacy", "current"), default="legacy")
     args = parser.parse_args()
     cfg = load_config(args.config)
     ready = Path(args.ready)
     prior_path, prior, reports = admission(ready)
-    verify_source_hashes(ready, cfg["root"], assets=True)
+    verify_source_hashes(ready, cfg["root"], assets=True, mode=args.mode)
     if source_semantics(cfg) != reports["data"]["source"]:
         raise ValueError("Collection/conversion sources differ from the verified prior semantics.")
     expected = {row["episode_id"]: row for row in reports["data"]["episodes"]}
@@ -133,7 +134,8 @@ def main():
             "joint_order_confirmed": False, "gripper_units_confirmed": False,
             "next_record_targets_replay_confirmed": False, "whole_task_instructions_no_location_leak_confirmed": False,
             "rgb_preview_confirmed": False, "reviewer": "", "notes": "Review recovered source checks, instructions, RGB previews and physical replay evidence. Prior review file is missing."})
-    result = {"prior_admission_sha256": sha256(prior_path), "source_semantics_identical": True,
+    result = {"prior_admission_sha256": sha256(prior_path), "recovery_mode": args.mode,
+              "new_integration_required": args.mode == "current", "source_semantics_identical": True,
               "raw_files_identical": True, "dense_frames": frame_total, "episodes": checks,
               "manifest_sha": fingerprint(manifest), "original_manifest_restored": saved_manifest is not None,
               "alignment_review_available": approved is not None, "phase": "ready_for_checks" if approved else "pending_alignment_review"}
