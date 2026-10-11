@@ -551,6 +551,72 @@ def restore_simulator(args):
     verify_source_hashes(ready, root, assets=True, mode=args.mode)
 
 
+def record_current_simulator(root, old, actual, difference):
+    """Verify known historical files and identify new downloads without approving them."""
+    report = read(difference)
+    provenance_path = recovery_output(root) / "CURRENT_SIMULATOR_PROVENANCE.json"
+    lock_path = root / "resources/download_lock.json"
+    lock = read(lock_path) if lock_path.is_file() else {}
+    downloaded = {name.replace("\\", "/"): row for name, row in lock.get("files", {}).items()}
+    dataset_key = "dataset:TianxingChen/RMBench"
+    revision = lock.get("repositories", {}).get(dataset_key)
+    pinned = isinstance(revision, str) and re.fullmatch(r"[0-9a-f]{40}", revision) is not None
+    extras = report.get("uncovered_current", report.get("added", []))
+    assets, build_files, unresolved = {}, [], []
+    simulator = (root / "resources/RMBench").resolve()
+    for name in extras:
+        relative = safe_relative(name)
+        path = simulator / str(relative)
+        if path.is_symlink() or not path.resolve().is_relative_to(simulator):
+            unresolved.append({"file": name, "reason": "link_or_path_outside_simulator"})
+            continue
+        derived = name.startswith("envs/curobo/") and any(
+            part in ("build", "dist") or part.endswith(".egg-info") for part in relative.parts)
+        if derived:
+            build_files.append(name)
+            continue
+        if not name.startswith(("assets/embodiments/", "assets/objects/")):
+            unresolved.append({"file": name, "reason": "no_supported_download_or_build_origin"})
+            continue
+        row = downloaded.get(f"resources/RMBench/{name}", {})
+        if not pinned:
+            unresolved.append({"file": name, "reason": "missing_immutable_dataset_revision"})
+        elif row.get("sha256") != actual[name] or row.get("bytes") != path.stat().st_size:
+            unresolved.append({"file": name, "reason": "current_download_lock_size_or_sha256_mismatch",
+                               "expected_sha256": row.get("sha256"), "actual_sha256": actual[name]})
+        else:
+            assets[name] = {"bytes": row["bytes"], "sha256": actual[name],
+                            "repo": "TianxingChen/RMBench", "repo_type": "dataset",
+                            "revision": revision, "file": name.removeprefix("assets/")}
+    historical_match = not report["changed"] and not report["missing"]
+    verified = historical_match and not unresolved
+    write(provenance_path, {
+        "mode": "current", "recovery_verified": verified,
+        "historical_files_verified": historical_match,
+        "historical_files_checked": report["counts"]["historical_files"],
+        "historical_inventory_complete": report["historical_inventory_complete"],
+        "matches_full_historical_binding": False,
+        "additional_build_files": build_files,
+        "current_download_assets": assets, "unresolved_files": unresolved,
+        "current_download_lock": {"file": str(lock_path), "sha256": digest(lock_path)}
+        if lock_path.is_file() else None,
+        "actual_simulator_sha": canonical(actual),
+        "historical_simulator_sha": old["binding"]["simulator_source_sha"],
+        "requires_new_admission": True, "difference_report": str(difference),
+        "note": "Current downloads are bound to this machine's inventory, not approved as historical assets. "
+                "All six local integration checks remain mandatory before training.",
+    })
+    if not verified:
+        for row in unresolved[:20]:
+            print(f"[unresolved] {row['file']}: {row['reason']}", flush=True)
+        print(f"[source-binding] Recovery not verified; inspect {provenance_path}", flush=True)
+        return False
+    print(f"[source-binding] Known historical files verified={report['counts']['historical_files']}; "
+          f"current download assets verified={len(assets)}; build files recorded={len(build_files)}. "
+          "New local integration admission is required.", flush=True)
+    return True
+
+
 def verify_source_hashes(ready, root, assets, mode="legacy"):
     _, old, _ = admission(ready)
     bound = old["binding"]
@@ -578,19 +644,8 @@ def verify_source_hashes(ready, root, assets, mode="legacy"):
                  and p.suffix.lower() in SIMULATOR_SUFFIXES}
         if canonical(files) != bound["simulator_source_sha"]:
             difference = simulator_difference(ready, root, old, files)
-            if mode == "current":
-                _, _, expected = simulator_snapshot(ready, old)
-                mismatched = [name for name, sha in expected.items() if files.get(name) != sha]
-                extra = sorted(set(files) - set(expected))
-                derived = lambda name: name.startswith("envs/curobo/") and any(
-                    part in ("build", "dist") or part.endswith(".egg-info") for part in Path(name).parts)
-                if not mismatched and all(derived(name) for name in extra):
-                    write(recovery_output(root) / "CURRENT_SIMULATOR_PROVENANCE.json", {
-                        "historical_files_verified": True, "additional_build_files": extra,
-                        "actual_simulator_sha": canonical(files), "historical_simulator_sha": bound["simulator_source_sha"],
-                        "requires_new_admission": True, "difference_report": str(difference)})
-                    print("[source-binding] Current build artifacts recorded separately; all authenticated historical files match.", flush=True)
-                    return
+            if mode == "current" and record_current_simulator(root, old, files, difference):
+                return
             raise ValueError(f"Simulator sources/assets differ from the old binding; inspect {difference}. "
                              "Source restoration does not remove extra files or approve changed assets.")
     print(f"[source-binding] mode={mode}; frozen core verified; simulator_assets={assets}", flush=True)
