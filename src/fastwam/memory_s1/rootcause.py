@@ -17,6 +17,7 @@ import time
 import traceback
 
 from .common import append_jsonl, code_version, load_config, seed_for
+from .simulator_backend import configured_backend
 from .eval_state import EpisodeQueue, EvaluationInterrupted, check_stop, digest, durable_json, is_alive, locked, process_identity, read, signature, stop_mode, summarize
 from .eval_parallel import gpu_inventory, loading_slot, simulator_environment, terminate_owned, cleanup_simulators
 
@@ -269,6 +270,8 @@ def execute_job(policy, cfg, queue, job, uuid, parent_stop):
                 if process.returncode:
                     raise RuntimeError(f"Simulator exit={process.returncode}; inspect {directory / 'simulator.log'}")
         result = read(directory / "simulator_result.json")
+        if result.get("simulator_backend") != configured_backend(cfg):
+            raise ValueError("Simulator returned a different CuRobo backend contract.")
         result["wall_seconds"] = time.monotonic() - started
         result["contract"] = {k: payload[k] for k in ("execute", "max_targets", "noise", "preprocessor", "executor")}
         publish(queue, job, result)

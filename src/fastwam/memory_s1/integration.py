@@ -762,10 +762,24 @@ def package(cfg, compact=True):
             if not path.is_file() or "packages" in path.parts or path.suffix in (".lock", ".sock"):
                 continue
             relative = path.relative_to(root)
-            if compact and (path.suffix.lower() not in (".json", ".jsonl", ".log", ".gz") or "frames" in relative.parts):
+            reviewed_archive = relative == Path("reviewed_alignment_evidence.zip")
+            if reviewed_archive and path.stat().st_size > 16 * 2**20:
+                raise ValueError("Reviewed alignment evidence exceeds the compact 16 MiB budget.")
+            if compact and not reviewed_archive and (path.suffix.lower() not in (".json", ".jsonl", ".log", ".gz") or "frames" in relative.parts):
                 continue
             members[str(relative)] = sha256(path)
             stream.add(path, arcname=str(relative), recursive=False)
+        prepared = Path(cfg["paths"]["prepared"])
+        for filename in ("manifest.json", "alignment_approved.json", "recovery_verification.json"):
+            path = prepared / filename
+            if path.is_file():
+                relative = "prepared/" + filename
+                members[relative] = sha256(path)
+                stream.add(path, arcname=relative, recursive=False)
+        resource_lock = Path(cfg["root"]) / "resources/download_lock.json"
+        if resource_lock.is_file():
+            members["resources/download_lock.json"] = sha256(resource_lock)
+            stream.add(resource_lock, arcname="resources/download_lock.json", recursive=False)
         for subtree in ("src", "scripts/memory_s1", "configs", "requirements"):
             for path in sorted((Path(cfg["root"])/subtree).rglob("*")):
                 if path.is_file() and path.suffix in (".py", ".sh", ".yaml", ".yml", ".json", ".txt") and "__pycache__" not in path.parts:

@@ -19,7 +19,7 @@ import numpy as np
 from PIL import Image
 import yaml
 
-from sim_eval import check_stop, durable_json, verify_gpu
+from sim_eval import SIMULATOR_BACKEND, check_stop, durable_json, verify_gpu
 from sim_executor import execute_target
 from sim_feedback import object_snapshot, physical_state
 from sim_instrumentation import PhysicalRecorder, command_state, joint_details, contact_pairs
@@ -316,6 +316,7 @@ def fixed_chunks(environment, recorder, args, job):
 
 def run_scene(args):
     root = Path.cwd()
+    durable_json(Path(args.output) / "simulator_backend.json", SIMULATOR_BACKEND)
     official = load_official(root)
     job = json.loads(Path(args.job).read_text())
     scene = job["scene"]
@@ -383,6 +384,7 @@ def run_scene(args):
         value = {"status": "complete", "success": expert_success, "task": scene["task"], "seed": scene["seed"],
             "condition": job["condition"], "operation": args.operation, "executor": args.executor,
             "environment_root": str(root), "gpu": gpu, "executed_targets": int(environment.take_action_cnt),
+            "simulator_backend": SIMULATOR_BACKEND,
             "effective_simulator_config": cfg,
             "initial_physical_state": initial_physical.tolist(),
             "max_reward": float(environment.max_reward) if hasattr(environment, "max_reward") else None,

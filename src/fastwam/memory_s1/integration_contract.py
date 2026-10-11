@@ -5,6 +5,7 @@ from pathlib import Path
 
 from .common import code_version, fingerprint, make_cache_contract, read_json, sha256
 from .protocol import inference_contract
+from .simulator_backend import configured_backend
 
 FASTWAM_COMMIT = "7faa71108368fbb3b6885649f112af607427a2d4"
 RMBENCH_COMMIT = "4955514916dce325e1e2a90f03b60e1ea6504829"
@@ -69,7 +70,8 @@ def binding(cfg):
             "prepared_sha": fingerprint(manifest), "sources_sha": fingerprint(lock),
             "core_sha": code["core_sha"], "implementation_sha": code["implementation_sha"],
             "support_sha": code["support_sha"], "simulator_source_sha": simulator_sources(cfg),
-            "inference": inference_contract(), "numerics": numerics(cfg)}
+            "inference": inference_contract(), "numerics": numerics(cfg),
+            "simulator_backend": configured_backend(cfg)}
 
 
 def verify_admission(cfg, cache_signature):

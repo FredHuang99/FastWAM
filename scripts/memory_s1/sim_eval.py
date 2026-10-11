@@ -16,8 +16,13 @@ _state_directory = str(Path(__file__).resolve().parents[2] / "src/fastwam/memory
 sys.path.insert(0, _state_directory)
 try:
     from eval_state import EvaluationInterrupted, check_stop, cuda_gpu_uuid, durable_json, read, signature
+    from simulator_backend import configure_backend
 finally:
     sys.path.remove(_state_directory)
+
+
+# Spawn reimports this module before constructing planner workers; fork inherits it.
+SIMULATOR_BACKEND = configure_backend()
 
 
 def verify_gpu(expected, scene):
@@ -70,6 +75,8 @@ def load_official():
 def plan_scenes(args, official):
     path = Path(args.output)
     contract = read(args.contract)
+    if contract.get("simulator_backend") != SIMULATOR_BACKEND:
+        raise ValueError("Scene contract differs from the active CuRobo backend.")
     if path.exists():
         saved = read(path)
         if saved["contract"] != contract:
@@ -178,6 +185,7 @@ def run_episode(args, official):
                      "instruction": scene["instruction"], "condition": job["condition"],
                      "success": bool(environment.eval_success), "max_reward": float(environment.max_reward),
                      "executed_targets": int(environment.take_action_cnt), "gpu": gpu, "timings": timings,
+                     "simulator_backend": SIMULATOR_BACKEND,
                      "diagnostic_prefix": bool(args.max_targets), "target_limit": int(target_limit),
                      "truncated": bool(args.max_targets and not environment.eval_success and target_limit < environment.step_lim),
                      "termination": "success" if environment.eval_success else ("diagnostic_target_limit" if args.max_targets and target_limit < environment.step_lim else "official_target_limit")}

@@ -41,18 +41,29 @@ def contact_pairs(scene):
         contacts = scene.get_contacts()
     except (AttributeError, NotImplementedError):
         return {"available": False, "pairs": [], "reason": "Installed scene exposes no get_contacts API."}
-    def name(actor):
-        if actor is None:
-            return "unknown"
-        return str(actor.get_name() if hasattr(actor, "get_name") else getattr(actor, "name", "unknown"))
+    def name(body):
+        # SAPIEN 3 contacts expose physics components; names can live on entities.
+        for actor in (getattr(body, "entity", None), body):
+            if actor is not None:
+                value = actor.get_name() if hasattr(actor, "get_name") else getattr(actor, "name", "")
+                if value:
+                    return str(value)
+        return "unknown"
     pairs = []
     for contact in contacts:
-        a = getattr(contact, "actor0", getattr(contact, "body0", None))
-        b = getattr(contact, "actor1", getattr(contact, "body1", None))
+        bodies = getattr(contact, "bodies", None)
+        if bodies is not None and len(bodies) == 2:
+            a, b = bodies
+        else:
+            a = getattr(contact, "actor0", getattr(contact, "body0", None))
+            b = getattr(contact, "actor1", getattr(contact, "body1", None))
         points = getattr(contact, "points", [])
         impulse = sum(float(np.linalg.norm(np.asarray(getattr(p, "impulse", [0, 0, 0])))) for p in points)
         pairs.append({"a": name(a), "b": name(b), "impulse": impulse})
-    return {"available": True, "pairs": pairs}
+    resolved = all(row["a"] != "unknown" and row["b"] != "unknown" for row in pairs)
+    return {"available": resolved, "pairs": pairs, "names_resolved": resolved,
+            "reason": None if resolved else "Contact bodies have unresolved names; absence of contact cannot be inferred."}
+
 
 
 class PhysicalRecorder:
@@ -162,6 +173,10 @@ class PhysicalRecorder:
                 *[f"{side}_ee_{axis}" for side in ("left", "right") for axis in ("x", "y", "z", "qw", "qx", "qy", "qz")],
                 *[f"{side}_finger_{kind}_{i}" for side in ("left", "right") for kind in ("qpos", "qvel") for i in range(self.finger_counts[side])],
                 *[f"{name}_{axis}" for name in self.events for axis in "xyz"]]))
+        if not self.contacts_available:
+            for event in self.events.values():
+                if not event["contact_seen"]:
+                    event["contact_seen"] = None
         report = {"physics_steps": self.steps, "timestep": self.dt, "simulated_seconds": self.steps * self.dt,
             "physics_step_origin": "zero immediately after setup_demo; setup physics is outside this trace",
             "executing_target_id_scope": "one-based policy/replay target; zero during live expert continuous execution",

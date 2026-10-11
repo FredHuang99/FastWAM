@@ -16,6 +16,8 @@ import traceback
 
 from .eval_state import EpisodeQueue, cuda_gpu_uuid, digest, durable_json, is_alive, locked, process_identity, read, signature, stop_mode, summarize
 
+from .simulator_backend import ENVIRONMENT_KEY, configured_backend
+
 
 def gpu_inventory():
     output = subprocess.check_output(["nvidia-smi", "--query-gpu=index,uuid", "--format=csv,noheader"], text=True)
@@ -28,6 +30,10 @@ def gpu_uuid_for_model(model):
 
 def simulator_environment(cfg, gpu_uuid):
     environment = dict(os.environ)
+    backend = configured_backend(cfg)
+    environment[ENVIRONMENT_KEY] = backend["name"]
+    if backend.get("cuda_launch_blocking"):
+        environment["CUDA_LAUNCH_BLOCKING"] = "1"
     prefix = Path(cfg["closed_loop"]["simulator_python"]).parent.parent
     environment.update(CUDA_VISIBLE_DEVICES=gpu_uuid, CUDA_DEVICE_ORDER="PCI_BUS_ID", CUDA_HOME=str(prefix),
                        PYTHONUNBUFFERED="1", OMP_NUM_THREADS="4", MKL_NUM_THREADS="4", OPENBLAS_NUM_THREADS="4")
@@ -92,7 +98,7 @@ def protocol(cfg, mode):
             "tasks": ["put_back_block", "swap_blocks"], "task_config": "demo_clean", "instruction_type": "seen",
             "candidate_rule": "first K expert-feasible increasing seeds", "language_seed_rule": "scene_seed xor 0x51A17, freeze literal string",
             "python_scene_random": "random.seed(scene_seed) before expert and policy setup",
-            "simulator_source": signature(inventory)}
+            "simulator_source": signature(inventory), "simulator_backend": configured_backend(cfg)}
 
 
 def prepare_scenes(cfg, mode, gpu_uuids, stop_root):
@@ -282,6 +288,8 @@ def execute_job(model, encoders, cfg, queue, job, gpu_uuid, record_frames, evide
             if value["status"] == "complete" and process.returncode != 0:
                 raise RuntimeError(f"Simulator failed after producing a result: exit={process.returncode}")
         if value["status"] == "complete":
+            if value.get("simulator_backend") != configured_backend(cfg):
+                raise ValueError("Simulator returned a different CuRobo backend contract.")
             value["wall_seconds"] = time.monotonic() - started
             value["policy_gpu_uuid"] = gpu_uuid
             queue.publish(job, value)

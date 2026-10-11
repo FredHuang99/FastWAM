@@ -34,6 +34,7 @@ closed_loop:
   enabled: false
   simulator_python: /opt/rmbench-env/bin/python
   simulator_root: resources/RMBench
+  curobo_backend: builtin_torch_v1
   internal_seed: 17
   official_seed: 42
   internal_episodes: 10
@@ -55,7 +56,7 @@ backup_budget:
 integration:
   reference_root: resources/reference/FastWAM
   public_rmbench_root: resources/reference/RMBench
-  output: outputs/fastwam_rmbench_integration_h100_v1
+  output: outputs/fastwam_rmbench_integration_h100_v2
   attention_backend: math
   subprocess_timeout: 3600
 rootcause:
