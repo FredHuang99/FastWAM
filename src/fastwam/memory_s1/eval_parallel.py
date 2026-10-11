@@ -523,7 +523,11 @@ def standalone(args):
 def distributed_validation(cfg, weights, output, resident_model):
     import torch.distributed as dist
     from .checkpoint import random_state, restore_random_state
-    rank, world = dist.get_rank(), dist.get_world_size()
+    initialized = dist.is_initialized()
+    if not initialized and int(os.environ.get("WORLD_SIZE", "1")) != 1:
+        raise ValueError("Multi-worker validation requires an initialized process group.")
+    rank, world = (dist.get_rank(), dist.get_world_size()) if initialized else (0, 1)
+    distributed = world > 1
     device = next(resident_model.memory.parameters()).device
     output = Path(output)
     state = random_state()
@@ -547,7 +551,8 @@ def distributed_validation(cfg, weights, output, resident_model):
                 box[0] = {"ok": True}
             except Exception:
                 box[0] = {"ok": False, "error": traceback.format_exc()}
-        dist.broadcast_object_list(box, src=0, device=device)
+        if distributed:
+            dist.broadcast_object_list(box, src=0, device=device)
         if not box[0]["ok"]:
             raise RuntimeError(box[0]["error"])
         error = None
@@ -556,8 +561,11 @@ def distributed_validation(cfg, weights, output, resident_model):
         except Exception:
             error = traceback.format_exc()
             durable_json(output / "ABORT.json", {"rank": rank, "error": error})
-        errors = [None] * world
-        dist.all_gather_object(errors, error)
+        if distributed:
+            errors = [None] * world
+            dist.all_gather_object(errors, error)
+        else:
+            errors = [error]
         box = [None]
         if rank == 0:
             try:
@@ -572,7 +580,8 @@ def distributed_validation(cfg, weights, output, resident_model):
                 box[0] = {"ok": True, "result": result}
             except Exception:
                 box[0] = {"ok": False, "error": traceback.format_exc()}
-        dist.broadcast_object_list(box, src=0, device=device)
+        if distributed:
+            dist.broadcast_object_list(box, src=0, device=device)
         if not box[0]["ok"]:
             raise RuntimeError(box[0]["error"])
         return box[0]["result"]

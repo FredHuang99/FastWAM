@@ -19,7 +19,7 @@
     },
     "src/fastwam/memory_s1/eval_parallel.py": {
       "before": "8710e67891b19e6701a7758b2dabdff6195fa57e2e5f1cebe87dcfe745c56b59",
-      "after": "5f9dbd9f2269f4b93b3e3fe29d9b9049d0d708225e50e1d12603ee38bcaf03d4"
+      "after": "5035be3cfa0f7151df05ff88eace66b2d14ca98081a8a63eb07e97a06ffb4efd"
     },
     "src/fastwam/memory_s1/history.py": {
       "before": "20bb127baa57c461d6bb45815e17d30433e72a17adfe5def61b75bc69e6647b8",
@@ -27,7 +27,7 @@
     },
     "src/fastwam/memory_s1/integration.py": {
       "before": "79670735cac184c120aaa7283d55eedf3b2fb6de5485be0a97c2b7c9f7583923",
-      "after": "5d240eef72a6b6c15f870db47e2f12494ab80851d2d38adf7e9060e66f3a49e0"
+      "after": "f4f321bf8c1758ad371d7aacaf645ca6fae8a101214df935a35f17009b48eea7"
     },
     "src/fastwam/memory_s1/integration_contract.py": {
       "before": "394c03369090a7a3d980ffbda5cc9f193ca018a47ccb8125e48ed216a1a8ec5b",
@@ -39,7 +39,7 @@
     },
     "src/fastwam/memory_s1/phase_validation.py": {
       "before": null,
-      "after": "73ae762223ec7b5b2fb906b07eb8aa80af6808dacb5658806efbc61c76242ebb"
+      "after": "0561567b4cb7e03b2c913e26de6b8a06769814ccff0a43d91c239930490ba5ec"
     },
     "src/fastwam/memory_s1/readiness.py": {
       "before": null,
@@ -55,7 +55,7 @@
     },
     "src/fastwam/memory_s1/train.py": {
       "before": "23f6188ad88602c63e7ca60b4a27609170ef78cb6856e33a881ffe809b3a68ff",
-      "after": "4854d4701a8624e444658db69f2583a85712ffc09f72b872dc75e7c8e80eb52a"
+      "after": "5d7c98373dac67d2ffb3c00b1c6ec63c7d0c8733f4fea7808f885e2f411835c1"
     },
     "scripts/memory_s1/hf_tools.py": {
       "before": "559fd54ba0584f2d8f358f2ae87602df6b1aef3a2d5a94ba106dd92ff2b7559c",

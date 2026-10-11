@@ -20,6 +20,23 @@ def global_slots(index, world, micro, rank):
     return [index * world * micro + rank * micro + offset for offset in range(micro)]
 
 
+def wrap_training_model(model, device, world):
+    """Share the production/preflight wrapper choice; one worker needs no collectives."""
+    if world == 1:
+        if dist.is_initialized():
+            raise ValueError("Single-worker training must not initialize a process group.")
+        return model
+    if world < 1 or not dist.is_initialized() or dist.get_world_size() != world:
+        raise ValueError("Multi-worker training requires a matching initialized process group.")
+    return DDP(model, device_ids=[device.index], broadcast_buffers=False, find_unused_parameters=False)
+
+
+def accumulation_context(model, last_micro_batch):
+    if last_micro_batch or not isinstance(model, DDP):
+        return nullcontext()
+    return model.no_sync()
+
+
 def loader_comparison(dataset, record, sample):
     """Compare the LRU loader with direct, independently indexed shard reads."""
     wanted = sample["frame_ids"]
@@ -63,11 +80,14 @@ def verify_full_inventory(cfg):
 
 
 def accumulation_check(model, dataset, cfg, device, micro, check_masks=True):
-    if not dist.is_initialized() or dist.get_world_size() != 1:
+    if int(os.environ.get("WORLD_SIZE", "1")) != 1 or dist.is_initialized():
         raise ValueError("Use torchrun --nproc_per_node=1 -m fastwam.memory_s1.train --functional-preflight.")
     if micro not in (1, 2):
         raise ValueError("H100 preflight supports micro-batch 1 or 2.")
+    if cfg["global_batch"] != 16 or cfg["global_batch"] % micro:
+        raise ValueError("Preflight requires exactly 16 global slots per complete update.")
     started = time.monotonic()
+    print(f"[preflight] phase masks start; micro={micro} check_masks={check_masks}", flush=True)
     mask_cases = 0
     for task, records in (dataset.by_task.items() if check_masks else []):
         longest = max(records, key=lambda row: row["length"])
@@ -80,6 +100,7 @@ def accumulation_check(model, dataset, cfg, device, micro, check_masks=True):
                 if ids != expected or not {0, anchor}.issubset(ids):
                     raise ValueError("Production phase selection dropped mandatory frames or admitted future frames.")
                 mask_cases += 1
+    print(f"[preflight] phase masks complete; cases={mask_cases}", flush=True)
     # Worst available history for both tasks, plus the actual padded action tails.
     longest_samples = []
     for records in dataset.by_task.values():
@@ -92,22 +113,27 @@ def accumulation_check(model, dataset, cfg, device, micro, check_masks=True):
         model.zero_grad(set_to_none=True)
         batch = collate(longest_samples[start:start + micro], device)
         noise, tau = deterministic_noise(cfg["seed"], 0, list(range(start, start + len(batch["t"]))), device)
+        print(f"[preflight] longest-history forward; micro={micro} frames={batch['history_valid'].sum(1).tolist()}", flush=True)
         loss, _ = model(batch, noise, tau)
+        print(f"[preflight] longest-history backward; micro={micro}", flush=True)
         loss.backward()
+        torch.cuda.synchronize(device)
+        print(f"[preflight] longest-history complete; micro={micro}", flush=True)
         if not torch.isfinite(loss):
             raise ValueError("Longest-history loss is non-finite.")
         del batch, noise, tau, loss
     model.zero_grad(set_to_none=True)
-    wrapped = DDP(model, device_ids=[device.index], broadcast_buffers=False, find_unused_parameters=False)
+    wrapped = wrap_training_model(model, device, world=1)
     slots_seen, samples = [], []
     accumulation = cfg["global_batch"] // micro
     before = [(p, p._version) for p in model.parameters()]
+    print(f"[preflight] accumulation start; execution=single_process world=1 micro={micro} accumulation={accumulation}", flush=True)
     for index in range(accumulation):
         slots = global_slots(index, 1, micro, 0)
         values = [dataset.sample(0, slot) for slot in slots]
         batch = collate(values, device)
         noise, tau = deterministic_noise(cfg["seed"], 0, slots, device)
-        with nullcontext() if index == accumulation - 1 else wrapped.no_sync():
+        with accumulation_context(wrapped, index == accumulation - 1):
             loss, _ = wrapped(batch, noise, tau)
             if not torch.isfinite(loss):
                 raise ValueError("Accumulation preflight loss is non-finite.")
@@ -116,7 +142,8 @@ def accumulation_check(model, dataset, cfg, device, micro, check_masks=True):
             samples.append({"global_slot": slot, "episode_id": sample["episode_id"], "anchor": int(sample["t"]),
                 "T": sample["history_period"], "phase": sample["history_phase"], "frame_ids": sample["frame_ids"].tolist()})
         slots_seen.extend(slots)
-        print(f"[preflight] accumulation {index+1}/{accumulation}; optimizer_updates=0", flush=True)
+        torch.cuda.synchronize(device)
+        print(f"[preflight] accumulation {index+1}/{accumulation}; micro={micro} optimizer_updates=0", flush=True)
     if slots_seen != list(range(16)):
         raise ValueError("Accumulation does not cover exactly 16 global slots.")
     if any(p._version != version for p, version in before):
@@ -127,7 +154,8 @@ def accumulation_check(model, dataset, cfg, device, micro, check_masks=True):
         raise ValueError("Frozen backbone received parameter gradients.")
     torch.cuda.synchronize(device)
     result = {"passed": True, "micro_batch": micro, "accumulation": accumulation, "world_size": 1,
-              "optimizer_updates": 0, "legal_phase_cases": mask_cases, "samples": samples,
+              "optimizer_updates": 0, "execution": "single_process", "process_group_initialized": dist.is_initialized(),
+              "legal_phase_cases": mask_cases, "samples": samples,
               "longest_histories": [{"episode_id": s["episode_id"], "anchor": int(s["t"]),
                                      "frames": len(s["frame_ids"])} for s in longest_samples],
               "peak_gpu_gib": torch.cuda.max_memory_allocated(device) / 2**30,
@@ -150,7 +178,9 @@ def run(args):
     if int(os.environ.get("WORLD_SIZE", "1")) != 1:
         raise ValueError("This preflight requires exactly one H100 worker.")
     torch.cuda.set_device(0)
-    dist.init_process_group("nccl")
+    if dist.is_initialized():
+        raise ValueError("Preflight must start without a distributed process group.")
+    print("[preflight] execution=single_process world=1; no NCCL/DDP initialization; optimizer_updates=0", flush=True)
     root = output_root(cfg)
     if (root / "STOP_REQUESTED").exists():
         raise ValueError("Preflight stop marker exists; inspect it before retrying.")

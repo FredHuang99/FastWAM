@@ -1,8 +1,8 @@
-"""S1 DDP training with variable historical periods and durable validation phases."""
+"""S1 single-GPU/DDP training with variable histories and durable validation phases."""
 from __future__ import annotations
 import argparse
+import faulthandler
 from collections import Counter, deque
-from contextlib import nullcontext
 from datetime import timedelta
 import math
 import os
@@ -14,7 +14,6 @@ import time
 import numpy as np
 import torch
 import torch.distributed as dist
-from torch.nn.parallel import DistributedDataParallel as DDP
 from .checkpoint import (save_checkpoint, upload_checkpoint, prune_local, save_weights,
                          random_state, restore_random_state, verified_load, save_continuation)
 from .common import (SCHEMA, append_jsonl, atomic_json, code_version, duration, fingerprint,
@@ -24,7 +23,7 @@ from .evaluate import deterministic_noise, validate, audit_cache
 from .history import recipe
 from .model import S1Model
 from .schedule import checkpoint_steps, milestone_steps, validation_policy
-from .phase_validation import global_slots
+from .phase_validation import global_slots, wrap_training_model, accumulation_context
 from .readiness import lease_elapsed
 
 
@@ -127,7 +126,15 @@ def run_training(args):
     local = int(os.environ.get("LOCAL_RANK", 0))
     torch.cuda.set_device(local)
     device = torch.device("cuda", local)
-    dist.init_process_group("nccl", timeout=timedelta(hours=8))
+    if world < 1 or not 0 <= rank < world:
+        raise ValueError("Invalid launcher rank/world size.")
+    distributed = world > 1
+    execution = "ddp_nccl" if distributed else "single_process"
+    if distributed:
+        dist.init_process_group("nccl", timeout=timedelta(hours=8))
+    elif dist.is_initialized():
+        raise ValueError("Single-worker training must start without a distributed process group.")
+    print(f"[runtime] execution={execution} world={world} rank={rank}", flush=True)
     run = Path(cfg["paths"]["run"])
     micro = args.micro_batch if args.micro_batch is not None else cfg["micro_batch"]
     if micro <= 0 or cfg["global_batch"] % (micro * world):
@@ -151,7 +158,8 @@ def run_training(args):
                 box[0] = {"ok": True, "value": function()}
             except Exception as error:
                 box[0] = {"ok": False, "error": repr(error)}
-        dist.broadcast_object_list(box, src=0, device=device)
+        if distributed:
+            dist.broadcast_object_list(box, src=0, device=device)
         if not box[0]["ok"]:
             raise RuntimeError(box[0]["error"])
         return box[0]["value"]
@@ -238,7 +246,7 @@ def run_training(args):
         leader(reconcile_best)
     elif (run / "LATEST_LOCAL.json").exists():
         raise ValueError("Existing run requires explicit --resume.")
-    wrapped = DDP(model, device_ids=[local], broadcast_buffers=False, find_unused_parameters=False)
+    wrapped = wrap_training_model(model, device, world)
     frozen = [(p, p._version) for p in model.backbone.parameters()]
     model.train()
     if rank == 0:
@@ -261,6 +269,7 @@ def run_training(args):
         atomic_json(run / "identity.json", identity)
         atomic_json(run / "parameters.json", {name: {"shape": list(p.shape), "dtype": str(p.dtype), "trainable": True} for name, p in model.memory.named_parameters()})
         atomic_json(run / "launch_runtime.json", {"world_size": world, "micro_batch": micro, "accumulation": accumulation,
+                    "execution": execution, "process_group_initialized": dist.is_initialized(),
                     "torch": torch.__version__, "cuda": torch.version.cuda, "python": sys.version, "start_update": step,
                     "pid": os.getpid(), "device": torch.cuda.get_device_name(local)})
         print(f"[start] update={step}/{cfg['steps']} phase={progress['phase']} world={world} micro={micro} accumulation={accumulation}", flush=True)
@@ -296,8 +305,11 @@ def run_training(args):
             append_jsonl(run / "metrics.jsonl", {"kind": "timing", "step": step, "component": component, "seconds": seconds})
 
     def persist(rewrite=True):
-        states = [None] * world if rank == 0 else None
-        dist.gather_object(random_state(), states, dst=0)
+        if distributed:
+            states = [None] * world if rank == 0 else None
+            dist.gather_object(random_state(), states, dst=0)
+        else:
+            states = [random_state()]
         def write_upload():
             progress["wall_seconds"] = prior_wall + time.monotonic() - wall_start
             started = time.monotonic()
@@ -423,7 +435,7 @@ def run_training(args):
                     "evidence_coverage": "unknown", "read_frames": len(ids), "frame_ids_sha": fingerprint(ids),
                     "first_ids": ids[:8], "last_ids": ids[-8:]})
             noise, tau = deterministic_noise(cfg["seed"], step, slots, device)
-            sync = nullcontext() if index == accumulation - 1 else wrapped.no_sync()
+            sync = accumulation_context(wrapped, index == accumulation - 1)
             with sync:
                 loss, diagnostic = wrapped(batch, noise, tau)
                 if not torch.isfinite(loss):
@@ -440,15 +452,20 @@ def run_training(args):
         scheduler.step()
         step += 1
         torch.cuda.synchronize(device)
-        dist.all_reduce(values)
+        if distributed:
+            dist.all_reduce(values)
         values /= world
         maxima = torch.tensor([time.monotonic() - started, data_seconds, torch.cuda.max_memory_allocated(device) / 2**30], device=device, dtype=torch.float64)
-        dist.all_reduce(maxima, op=dist.ReduceOp.MAX)
+        if distributed:
+            dist.all_reduce(maxima, op=dist.ReduceOp.MAX)
         seconds = float(maxima[0])
         rolling.append(seconds)
         progress["train_seconds"] += seconds
-        gathered = [None] * world if rank == 0 else None
-        dist.gather_object(local_samples, gathered, dst=0)
+        if distributed:
+            gathered = [None] * world if rank == 0 else None
+            dist.gather_object(local_samples, gathered, dst=0)
+        else:
+            gathered = [local_samples]
         if rank == 0:
             all_samples = sorted([sample for rows in gathered for sample in rows], key=lambda sample: sample["global_slot"])
             if [sample["global_slot"] for sample in all_samples] != list(range(cfg["global_batch"])):
@@ -491,7 +508,8 @@ def run_training(args):
         if any(p._version != version for p, version in frozen):
             raise RuntimeError("A frozen backbone parameter changed.")
         stop_flag = torch.tensor(int((run / "STOP_REQUESTED").exists()), device=device)
-        dist.all_reduce(stop_flag, op=dist.ReduceOp.MAX)
+        if distributed:
+            dist.all_reduce(stop_flag, op=dist.ReduceOp.MAX)
         stopped = bool(stop_flag.item())
         if not deferred and step % cfg["validate_every"] == 0:
             progress["phase"] = "validation"
@@ -512,6 +530,7 @@ def run_training(args):
 
 
 def main():
+    faulthandler.enable(all_threads=True)
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("--config", required=True)
     parser.add_argument("--resume")

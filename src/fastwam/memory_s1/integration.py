@@ -579,6 +579,7 @@ def training_check(cfg, root, uuid):
         if not row["passed"]:
             report(cfg, "training", False, oracle=rows, first_failure=case["case_id"])
             raise ValueError("Gate-zero training forward or masked loss differs from upstream.")
+    print("[training-gradient] oracle complete; preparing ragged histories and padded action tails", flush=True)
     # Exercise ragged history and a padded action tail using real stored training data.
     training = CachedEpisodes(cfg, "train")
     samples, mask_checks = [], []
@@ -630,8 +631,12 @@ def training_check(cfg, root, uuid):
         micro = cfg.get("preflight_micro_batch", 2)
         for start in range(0, len(samples), micro):
             active = {key: value[start:start+micro] for key, value in batch.items()}
+            print(f"[training-gradient] forward start; micro={micro} frames={active['history_valid'].sum(1).tolist()}", flush=True)
             loss, diagnostic = model(active, noise[start:start+micro], tau[start:start+micro])
+            print("[training-gradient] backward start", flush=True)
             loss.backward()
+            torch.cuda.synchronize(device)
+            print("[training-gradient] backward complete; optimizer_updates=0", flush=True)
     finally:
         for handle in handles:
             handle.remove()
@@ -647,6 +652,7 @@ def training_check(cfg, root, uuid):
         groups[group] = groups.get(group, 0.0)+float(parameter.grad.float().square().sum())
     frozen = all(not p.requires_grad and p.grad is None for p in model.backbone.parameters())
     passed = bool(torch.isfinite(loss) and frozen and not missing and not nonfinite and all(v > 0 for v in groups.values()))
+    print(f"[training-gradient] finite_gradients_and_frozen_backbone={passed}", flush=True)
     phase_preflight = None
     if cfg.get("history", {}).get("train_phase") == "uniform":
         from .phase_validation import accumulation_check
