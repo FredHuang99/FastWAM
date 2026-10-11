@@ -132,18 +132,36 @@ PY
   ;;
 render)
   /opt/rmbench-env/bin/python - <<'PY'
+import importlib.metadata
+import json
+import os
+from pathlib import Path
 import numpy as np
-import sapien.core as sapien
-engine = sapien.Engine()
-renderer = sapien.SapienRenderer(offscreen_only=True)
-engine.set_renderer(renderer)
-scene = engine.create_scene()
+import sapien
+from PIL import Image
+
+# The production simulator uses SAPIEN 3 and selects its renderer explicitly.
+version = importlib.metadata.version("sapien")
+sapien.render.set_global_config(offscreen_only=True)
+renderer = sapien.render.RenderSystem(device="cuda:0")
+scene = sapien.Scene([sapien.physx.PhysxCpuSystem(), renderer])
 camera = scene.add_camera("recovery_probe", 64, 64, 1.0, 0.1, 10)
+scene.step()
 scene.update_render()
 camera.take_picture()
-pixels = camera.get_float_texture("Color")
+pixels = camera.get_picture("Color")
 assert pixels.shape == (64, 64, 4) and np.isfinite(pixels).all()
-print("Simulator offscreen render: OK", pixels.shape)
+output = Path(os.environ["RECOVERY_ROOT"]) / "environment"
+output.mkdir(parents=True, exist_ok=True)
+Image.fromarray((np.clip(pixels[..., :3], 0, 1) * 255).astype(np.uint8)).save(output / "render_probe.png")
+(output / "render_probe.json").write_text(json.dumps({
+    "passed": True, "sapien_version": version,
+    "camera_api": "get_picture", "requested_render_device": "cuda:0",
+    "render_device": str(renderer.device), "rgba_shape": list(pixels.shape),
+    "scope": "offscreen_camera_readback_not_RMBench_task_admission",
+}, indent=2), encoding="utf-8")
+print("SAPIEN:", version, "Render device:", renderer.device)
+print("Simulator offscreen render: OK", pixels.shape, "API=get_picture")
 PY
   ;;
 patches)
