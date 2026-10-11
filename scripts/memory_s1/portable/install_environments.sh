@@ -142,7 +142,7 @@ from PIL import Image
 
 # The production simulator uses SAPIEN 3 and selects its renderer explicitly.
 version = importlib.metadata.version("sapien")
-sapien.render.set_global_config(offscreen_only=True)
+# No Viewer or window is created; do not pass version-specific global options.
 renderer = sapien.render.RenderSystem(device="cuda:0")
 scene = sapien.Scene([sapien.physx.PhysxCpuSystem(), renderer])
 camera = scene.add_camera("recovery_probe", 64, 64, 1.0, 0.1, 10)
