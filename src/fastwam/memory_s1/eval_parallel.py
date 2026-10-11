@@ -421,7 +421,7 @@ def standalone(args):
     if diagnostic.get("episodes_per_task") and not diagnostic.get("scenes_from"):
         raise ValueError("Pass --scenes-from to select a subset of previously frozen scenes.")
     from .history import override_online
-    override_online(cfg, getattr(args, "history_period", None), getattr(args, "history_cycle", None))
+    override_online(cfg, getattr(args, "history_period", None), getattr(args, "history_cycle", None), getattr(args, "history_phase", None))
     if not cfg["closed_loop"]["enabled"]:
         raise ValueError("Closed-loop evaluation is disabled in this configuration.")
     output = Path(args.output).resolve()
@@ -592,6 +592,7 @@ def main():
     run.add_argument("--mode", choices=("diagnostic", "internal", "official"), required=True)
     run.add_argument("--conditions", nargs="+", default=["gate_zero"])
     run.add_argument("--history-period", type=int)
+    run.add_argument("--history-phase", type=int, help="Override the episode-seeded phase with a fixed residue")
     run.add_argument("--history-cycle", help="Decision periods, e.g. 8,4,16")
     run.add_argument("--weights")
     run.add_argument("--evidence")

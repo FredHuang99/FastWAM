@@ -1,0 +1,92 @@
+{
+  "schema": "reviewed-s1-phase-transition-v1",
+  "changes": {
+    "src/fastwam/memory_s1/checkpoint.py": {
+      "before": "38eeab61e8f1fecff867316dfd950d136fa4f9d536c9c5548ad0601926f451d8",
+      "after": "c4d1a6073e23f0a2421863b62fc2bda1760e580f446d62677a21b591f5dbc4ac"
+    },
+    "src/fastwam/memory_s1/common.py": {
+      "before": "2fd7fbb7d6c39712bcec02295fa95d3b11ef2762a6d62d29737c5163b55d638b",
+      "after": "bf418bc376aa0f646e9009dac0dba48b8eaa20df7dd40d340711562ae0a7885d"
+    },
+    "src/fastwam/memory_s1/data.py": {
+      "before": "5cde38d04f631585fea3ea2f57c60c247bf53bc818d1ca6b07b81ad4293c960d",
+      "after": "713e692e11a1af4e9fc81f2d842c65fe78fb8ac57c6f0a3f6db3402060bb583e"
+    },
+    "src/fastwam/memory_s1/evaluate.py": {
+      "before": "28558796e1335d4de4c40803f1b874df64d5ac45978b378e36e33c4396233fe0",
+      "after": "1d41dc7c5c8cacfe48e2704f7066c04bf394c915face92bc6d1086f40763e1d2"
+    },
+    "src/fastwam/memory_s1/eval_parallel.py": {
+      "before": "8710e67891b19e6701a7758b2dabdff6195fa57e2e5f1cebe87dcfe745c56b59",
+      "after": "5f9dbd9f2269f4b93b3e3fe29d9b9049d0d708225e50e1d12603ee38bcaf03d4"
+    },
+    "src/fastwam/memory_s1/history.py": {
+      "before": "20bb127baa57c461d6bb45815e17d30433e72a17adfe5def61b75bc69e6647b8",
+      "after": "79676b1fe98ca8d86eecbb1959f9c4512fa8afd5644924cffeb26acc3f1da864"
+    },
+    "src/fastwam/memory_s1/integration.py": {
+      "before": "79670735cac184c120aaa7283d55eedf3b2fb6de5485be0a97c2b7c9f7583923",
+      "after": "5d240eef72a6b6c15f870db47e2f12494ab80851d2d38adf7e9060e66f3a49e0"
+    },
+    "src/fastwam/memory_s1/integration_contract.py": {
+      "before": "394c03369090a7a3d980ffbda5cc9f193ca018a47ccb8125e48ed216a1a8ec5b",
+      "after": "a194bf54bdb791de5a9813ca926cd5945587e8407199dba0dd1d5272825ce290"
+    },
+    "src/fastwam/memory_s1/phase_transition.py": {
+      "before": null,
+      "after": "d86b90755a1f9eebfa60bb119543ed6fcbd5944bdb2aa71b1be951d3e11396fa"
+    },
+    "src/fastwam/memory_s1/phase_validation.py": {
+      "before": null,
+      "after": "73ae762223ec7b5b2fb906b07eb8aa80af6808dacb5658806efbc61c76242ebb"
+    },
+    "src/fastwam/memory_s1/readiness.py": {
+      "before": null,
+      "after": "3be9c44916a0c3b12b2d60f28c7f4ce8221b8422270c3517da7f80c9be7b40c5"
+    },
+    "src/fastwam/memory_s1/sim_bridge.py": {
+      "before": "111b68eb8edf808722f82909bb2e5c5399a26a19f998d8c1ba3460259a521356",
+      "after": "57e3da502c99f4ff3937b38bfe2a359a7fb5981ef9695c3118b81252fd23eb6b"
+    },
+    "src/fastwam/memory_s1/startup.py": {
+      "before": null,
+      "after": "143595da4a4a29e7585fa5e3568dc1dd166545d8ff348842d57cdcbf71a93a01"
+    },
+    "src/fastwam/memory_s1/train.py": {
+      "before": "23f6188ad88602c63e7ca60b4a27609170ef78cb6856e33a881ffe809b3a68ff",
+      "after": "4854d4701a8624e444658db69f2583a85712ffc09f72b872dc75e7c8e80eb52a"
+    },
+    "scripts/memory_s1/hf_tools.py": {
+      "before": "559fd54ba0584f2d8f358f2ae87602df6b1aef3a2d5a94ba106dd92ff2b7559c",
+      "after": "ed61e3930db0b7ec71f89621ee186876a9a64e43c7dd78785077f722f2eeebe9"
+    },
+    "scripts/memory_s1/launch.sh": {
+      "before": "60b171f361ed23573a7fc9d742622f265f863be9c9103a2217bed450674b6b7d",
+      "after": "e9a9ecb35a0c76adadaa8fc639ef8921a7733ee10c280db5ac3cbb4440420f74"
+    },
+    "scripts/memory_s1/safe_stop.sh": {
+      "before": "32d3ae409f05de78988d19a9e156f606fa93bce2c113a20e5baa123cfe21c30d",
+      "after": "90c8798eb712f256177086f0dbd4d5f0760c4901fc475c0e52f9c708bc7aa6a2"
+    },
+    "scripts/memory_s1/storage_plan.py": {
+      "before": "6bff4726cb504a5a399fa3c0c8293b0bdf96bbf8a9b3ed2f55e73460d2673b7f",
+      "after": "0c86856c6c1e9256e5a2bdfdc22cba0aef521c3b268655ae3c75d073ab4c7fdf"
+    },
+    "scripts/memory_s1/restore_run.py": {
+      "before": "1dd4ca0972d3646e8a63b7ca1ea1ed4fd7c5fbce1bccc08f446b2978edca35b7",
+      "after": "657525de19197d45b3a6e1043a888c2371e1fb7229704b6537921a7beba8bf60"
+    }
+  },
+  "inherited_stages": [
+    "model",
+    "execution",
+    "data",
+    "pilot",
+    "cache"
+  ],
+  "fresh_stages": [
+    "training"
+  ],
+  "scope": "Phase RNG, loader and training lifecycle; frozen RGB/encoding AST and action execution contract unchanged."
+}

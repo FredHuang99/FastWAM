@@ -12,7 +12,7 @@ from PIL import Image
 import torch
 
 from .common import TASKS, ReleaseNormalizer, read_json, seed_for, sha256
-from .history import select_ids, training_period
+from .history import select_ids, training_period, training_phase
 
 
 def official_decoder(root):
@@ -106,6 +106,40 @@ def choose_instruction(path, embedded):
     raise ValueError("Missing fixed whole-task instruction.")
 
 
+# Shared by train/validation datasets in one process. No tensors are modified here.
+_HOST_CACHE = OrderedDict()
+_HOST_BYTES = 0
+_VERIFIED_FILES = {}
+
+
+def _file_stamp(path):
+    stat = path.stat()
+    return (stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns, stat.st_ino)
+
+
+def verify_cache_file(path, expected):
+    path = Path(path).resolve()
+    stamp = _file_stamp(path)
+    old = _VERIFIED_FILES.get(str(path))
+    if old is not None:
+        if old != (stamp, expected):
+            raise ValueError(f"Cache file changed during this process: {path}")
+        return
+    if sha256(path) != expected:
+        raise ValueError(f"Corrupt cache file: {path}")
+    _VERIFIED_FILES[str(path)] = (stamp, expected)
+
+
+def _tensor_bytes(value):
+    if isinstance(value, torch.Tensor):
+        return value.numel() * value.element_size()
+    if isinstance(value, dict):
+        return sum(_tensor_bytes(item) for item in value.values())
+    if isinstance(value, (tuple, list)):
+        return sum(_tensor_bytes(item) for item in value)
+    return 0
+
+
 class CachedEpisodes:
     def __init__(self, cfg, split):
         self.cfg = cfg
@@ -118,35 +152,66 @@ class CachedEpisodes:
                 self.by_task[episode["task"]].append(episode)
         if any(not episodes for episodes in self.by_task.values()):
             raise ValueError(f"Each task needs at least one {split} episode.")
-        self.loaded = OrderedDict()
+        self.cache_limit = int(cfg.get("startup", {}).get("cpu_cache_gib", 64) * 2**30)
+        if self.cache_limit <= 0:
+            raise ValueError("cpu_cache_gib must be positive.")
+        self.cache_hits = self.cache_misses = 0
         self.normalizer = ReleaseNormalizer(cfg["paths"]["stats"])
 
+    def verify_record(self, record):
+        verify_cache_file(self.root / record["file"], record["cache_sha256"])
+        for shard in record.get("shards", []):
+            verify_cache_file(self.root / shard["file"], shard["sha256"])
+
     def load(self, record):
-        key = record["episode_id"]
-        if key not in self.loaded:
-            path = self.root / record["file"]
-            value = torch.load(path, map_location="cpu", weights_only=True)
-            if value["signature"] != self.signature:
-                raise ValueError(f"Stale cache: {path}.")
-            if value.get("shards"):
-                fields = {name: [] for name in ("features", "latents", "proprio", "frame_ids")}
-                for shard in value["shards"]:
-                    shard_path = self.root / shard["file"]
-                    if sha256(shard_path) != shard["sha256"]:
-                        raise ValueError(f"Corrupt cache shard: {shard_path}")
-                    block = torch.load(shard_path, map_location="cpu", weights_only=True)
-                    if block["signature"] != self.signature:
-                        raise ValueError("Cache shard encoder identity mismatch.")
-                    for name in fields:
-                        fields[name].append(block[name])
-                value.update({name: torch.cat(parts) for name, parts in fields.items()})
-                if value["frame_ids"].tolist() != list(range(record["length"])):
-                    raise ValueError("Dense cache must cover every original observation.")
-            self.loaded[key] = value
-            if len(self.loaded) > 8:
-                self.loaded.popitem(last=False)
-        self.loaded.move_to_end(key)
-        return self.loaded[key]
+        global _HOST_BYTES
+        self.verify_record(record)
+        key = (str(self.root.resolve()), self.signature, record["episode_id"])
+        if key in _HOST_CACHE:
+            self.cache_hits += 1
+            _HOST_CACHE.move_to_end(key)
+            return _HOST_CACHE[key][0]
+        self.cache_misses += 1
+        # Evict before allocation; reserve space for concatenation and other host work.
+        estimated = int(record["length"]) * (120 * 3072 * 2 + 48 * 24 * 20 * 2 + 128)
+        while _HOST_CACHE and _HOST_BYTES + 2 * estimated > self.cache_limit:
+            _, (old_value, size) = _HOST_CACHE.popitem(last=False)
+            del old_value
+            _HOST_BYTES -= size
+        if Path("/proc/meminfo").exists():
+            available = int(next(line.split()[1] for line in Path("/proc/meminfo").read_text().splitlines()
+                                 if line.startswith("MemAvailable:"))) * 1024
+            while _HOST_CACHE and available < 2 * estimated + 16 * 2**30:
+                _, (old_value, size) = _HOST_CACHE.popitem(last=False)
+                del old_value
+                _HOST_BYTES -= size
+                available += size
+        path = self.root / record["file"]
+        value = torch.load(path, map_location="cpu", weights_only=True)
+        if value["signature"] != self.signature:
+            raise ValueError(f"Stale cache: {path}.")
+        if value.get("shards"):
+            if value["shards"] != record.get("shards"):
+                raise ValueError("Episode descriptor and manifest shard lists differ.")
+            fields = {name: [] for name in ("features", "latents", "proprio", "frame_ids")}
+            for shard in value["shards"]:
+                block = torch.load(self.root / shard["file"], map_location="cpu", weights_only=True)
+                if block["signature"] != self.signature:
+                    raise ValueError("Cache shard encoder identity mismatch.")
+                for name in fields:
+                    fields[name].append(block[name])
+            value.update({name: torch.cat(parts) for name, parts in fields.items()})
+            if value["frame_ids"].tolist() != list(range(record["length"])):
+                raise ValueError("Dense cache must cover every original observation.")
+        size = _tensor_bytes(value)
+        while _HOST_CACHE and _HOST_BYTES + size > self.cache_limit:
+            _, (old_value, old_size) = _HOST_CACHE.popitem(last=False)
+            del old_value
+            _HOST_BYTES -= old_size
+        if size <= self.cache_limit:
+            _HOST_CACHE[key] = (value, size)
+            _HOST_BYTES += size
+        return value
 
     def sample(self, step, slot, validation=False):
         task = TASKS[(step + slot) % len(TASKS)]
@@ -156,13 +221,13 @@ class CachedEpisodes:
         episode = self.load(record)
         anchor = int(generator.choice(episode["anchors"].numpy()))
         period = 8 if validation else training_period(self.cfg, step, slot)
-        return self.at(record, anchor, period=period)
+        return self.at(record, anchor, period=period, phase=0 if validation else training_phase(self.cfg, step, slot, period))
 
-    def at(self, record, anchor, period=8):
+    def at(self, record, anchor, period=8, phase=0):
         episode = self.load(record)
         indices = episode["frame_ids"]
-        chosen = select_ids(indices.tolist(), anchor, int(period))
-        if chosen != select_ids(range(anchor + 1), anchor, int(period)):
+        chosen = select_ids(indices.tolist(), anchor, int(period), phase=phase)
+        if chosen != select_ids(range(anchor + 1), anchor, int(period), phase=phase):
             raise ValueError("The cache lacks observations required by this historical period.")
         selected = torch.isin(indices, torch.tensor(chosen))
         position = torch.nonzero(indices == anchor, as_tuple=False).flatten()
@@ -181,7 +246,7 @@ class CachedEpisodes:
                 "text": episode["text"], "text_valid": episode["text_valid"], "history": episode["features"][selected],
                 "frame_ids": indices[selected], "history_valid": torch.ones(int(selected.sum()), dtype=torch.bool),
                 "actions": actions, "action_valid": valid, "t": torch.tensor(anchor),
-                "episode_id": record["episode_id"], "task": record["task"], "history_period": int(period)}
+                "episode_id": record["episode_id"], "task": record["task"], "history_period": int(period), "history_phase": phase}
 
 
 def collate(samples, device):

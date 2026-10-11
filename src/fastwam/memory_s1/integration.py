@@ -148,6 +148,8 @@ def require_report(cfg, name):
     value = read_json(output_root(cfg) / f"{name}.json")
     if not value.get("passed") or value.get("binding") != binding(cfg):
         raise ValueError(f"Missing, failed or stale integration stage: {name}")
+    from .phase_transition import verify_inherited
+    verify_inherited(cfg, value)
     return value
 
 
@@ -540,11 +542,14 @@ def training_check(cfg, root, uuid):
     model = S1Model(cfg, device).eval()
     dataset = CachedEpisodes(cfg, "val")
     cases = torch.load(root/"model/request.pt", map_location="cpu", weights_only=True)["cases"]
-    rows = []
+    rows, loader_checks = [], []
     for index, case in enumerate(cases):
         check_stop(root)
         record = next(r for r in dataset.by_task[case["task"]] if r["episode_id"] == case["record"]["episode_id"])
         sample = dataset.at(record, case["frame_id"], period=8)
+        if cfg.get("history", {}).get("train_phase") == "uniform":
+            from .phase_validation import loader_comparison
+            loader_checks.append(loader_comparison(dataset, record, sample))
         batch = collate([sample], device)
         expected = torch.load(root/f"model/official/case_{index:02d}.pt", map_location="cpu", weights_only=True)
         noise, tau = case["noise"].to(device), case["probe_tau"].to(device)
@@ -606,7 +611,7 @@ def training_check(cfg, root, uuid):
         def capture(module, args):
             source_valid = args[2] if len(args) > 2 else None
             if expects_history:
-                expected_valid = batch["history_valid"].repeat_interleave(120, dim=1)
+                expected_valid = active["history_valid"].repeat_interleave(120, dim=1)
                 passed = source_valid is not None and torch.equal(source_valid, expected_valid)
             else:
                 passed = source_valid is None
@@ -622,8 +627,11 @@ def training_check(cfg, root, uuid):
     for name, block in model.memory.injectors.items():
         handles.append(block.attention.register_forward_pre_hook(observe_attention(f"injector.{name}", False)))
     try:
-        loss, diagnostic = model(batch, noise, tau)
-        loss.backward()
+        micro = cfg.get("preflight_micro_batch", 2)
+        for start in range(0, len(samples), micro):
+            active = {key: value[start:start+micro] for key, value in batch.items()}
+            loss, diagnostic = model(active, noise[start:start+micro], tau[start:start+micro])
+            loss.backward()
     finally:
         for handle in handles:
             handle.remove()
@@ -639,7 +647,17 @@ def training_check(cfg, root, uuid):
         groups[group] = groups.get(group, 0.0)+float(parameter.grad.float().square().sum())
     frozen = all(not p.requires_grad and p.grad is None for p in model.backbone.parameters())
     passed = bool(torch.isfinite(loss) and frozen and not missing and not nonfinite and all(v > 0 for v in groups.values()))
-    value = report(cfg, "training", passed, oracle=rows, history_mask_cases=mask_checks,
+    phase_preflight = None
+    if cfg.get("history", {}).get("train_phase") == "uniform":
+        from .phase_validation import accumulation_check
+        phase_preflight = accumulation_check(model, training, cfg, device, cfg.get("preflight_micro_batch", cfg["micro_batch"]))
+        phase_preflight["allowed_micro_batches"] = [phase_preflight["micro_batch"]]
+        if phase_preflight["micro_batch"] == 2:
+            phase_preflight["fallback"] = accumulation_check(model, training, cfg, device, 1, check_masks=False)
+            phase_preflight["allowed_micro_batches"].append(1)
+    value = report(cfg, "training", passed, phase_preflight=phase_preflight, loader_checks=loader_checks,
+                   cache_integrity=read_json(root / "cache_integrity_phase.json") if phase_preflight else None,
+                   oracle=rows, history_mask_cases=mask_checks,
                    period_histogram={str(t): periods.count(t) for t in range(1, 17)},
                    gradient_norms={key: value**0.5 for key, value in groups.items()},
                    missing_gradients=missing, nonfinite_gradients=nonfinite, frozen_without_gradients=frozen,

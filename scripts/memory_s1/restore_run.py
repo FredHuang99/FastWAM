@@ -7,21 +7,16 @@ import shutil
 import time
 from fastwam.memory_s1.common import load_config, read_json, sha256, atomic_json
 from fastwam.memory_s1.checkpoint import verified_load
-from fastwam.memory_s1.eval_state import process_identity
+from fastwam.memory_s1.eval_state import is_alive, locked
 
 
-def main():
-    parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument("--snapshot", required=True, help="Downloaded runs/run_id folder")
-    parser.add_argument("--config", required=True)
-    args = parser.parse_args()
-    cfg = load_config(args.config)
+def restore(args, cfg):
     source, destination = Path(args.snapshot).resolve(), Path(cfg["paths"]["run"]).resolve()
     if source == destination or source in destination.parents or destination in source.parents:
         raise ValueError("Restore source and destination must be distinct nonoverlapping directories.")
-    pid_file = destination / "launcher.pid"
-    if pid_file.exists() and process_identity(int(pid_file.read_text())) is not None:
-        raise ValueError("A recorded launcher is alive. Stop and inspect it before restoring.")
+    launcher = read_json(destination / "launcher.json") if (destination / "launcher.json").exists() else {}
+    if any(is_alive(launcher.get(key)) for key in ("owner", "child")):
+        raise ValueError("An owned launcher/torchrun is alive. Stop it before restoring.")
     pointer = read_json(source / "RESTORE_REMOTE.json")
     directory = source / "checkpoints" / pointer["directory"]
     saved = verified_load(directory)
@@ -74,6 +69,16 @@ def main():
     (destination / "STOP_REQUESTED").unlink(missing_ok=True)
     print(f"[restore] update={pointer['step']} phase={saved['progress'].get('phase', 'train')}")
     print(f"RESUME={destination / 'checkpoints' / pointer['directory'] / 'resume.pt'}")
+
+def main():
+    parser = argparse.ArgumentParser(__doc__)
+    parser.add_argument("--snapshot", required=True, help="Downloaded runs/run_id folder")
+    parser.add_argument("--config", required=True)
+    args = parser.parse_args()
+    cfg = load_config(args.config)
+    with locked(Path(cfg["paths"]["run"]) / "training.lock", blocking=False):
+        restore(args, cfg)
+
 
 if __name__ == "__main__":
     main()

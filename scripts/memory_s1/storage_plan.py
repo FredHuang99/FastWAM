@@ -4,6 +4,8 @@ import argparse
 import json
 from pathlib import Path
 import subprocess
+import time
+from fastwam.memory_s1.readiness import disk_budget, current_identity, ready_upper_bound
 from fastwam.memory_s1.common import load_config, atomic_json, read_json, fingerprint, make_cache_contract, sha256
 from fastwam.memory_s1.history import recipe
 from fastwam.memory_s1.modules import MemoryModules
@@ -85,15 +87,19 @@ def main():
         if result.returncode:
             raise RuntimeError(result.stderr.strip())
         return json.loads(result.stdout)
-    training_budget = quota(native + recovery)
+    local = disk_budget(cfg, full, parameter_bytes, auxiliary)
+    ready_estimate = ready_upper_bound(cfg) if cfg.get("startup", {}).get("require_ready") else 0
+    training_budget = quota(native + recovery + ready_estimate)
     assets_local_only, asset_error = args.assets_local_only, None
     combined_budget = None
     if not assets_local_only:
         try:
-            combined_budget = quota(native + recovery + resources)
+            combined_budget = quota(native + recovery + resources + ready_estimate)
         except RuntimeError as error:
             assets_local_only, asset_error = True, str(error)
-    value = {"checkpoint_every": cfg["checkpoint_every"], "validation": policy, "recipe_sha": fingerprint(recipe(cfg)), "cache_signature": cache_signature,
+    value = {"created_unix": time.time(), "local_disk_check": local, "ready_estimate_bytes": ready_estimate,
+             "startup_identity": current_identity(cfg) if cfg.get("startup", {}).get("require_ready") else None,
+             "checkpoint_every": cfg["checkpoint_every"], "validation": policy, "recipe_sha": fingerprint(recipe(cfg)), "cache_signature": cache_signature,
              "parameter_bytes_fp32": parameter_bytes, "initial_checkpoint_estimate_bytes": initial,
              "full_checkpoint_estimate_bytes": full, "periodic_completed_updates": sorted(updates),
              "last_verified_remote_update": remote_step, "remote_phase": remote_phase, "extra_stop_checkpoints": extra, "weight_versions": weights, "auxiliary_history_bytes": auxiliary,
@@ -105,6 +111,8 @@ def main():
              "assumptions": "No compression or dedup savings; private historical blobs count. Initial checkpoint has no moments. Reserve includes one extra stop and all milestone/best weights. Re-run after additional stops, recorded evaluation frames or other account uploads."}
     atomic_json(args.output, value)
     print(json.dumps(value, indent=2))
+    if not local["passed"]:
+        raise RuntimeError("Local filesystem capacity failed; inspect local_disk_check in storage_plan.json.")
     if assets_local_only:
         print("[assets-local-only] Training recovery fits; keep a SHA256-verified split resources package locally. No assets upload is authorized by this budget.")
 

@@ -6,12 +6,13 @@ cd "$REPO_ROOT"
 export FW_ROOT="$REPO_ROOT" PYTHONUNBUFFERED=1
 export TOKENIZERS_PARALLELISM=false HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
 export WANDB_MODE=disabled
-GPUS="${GPUS:-8}"
-MICRO_BATCH="${MICRO_BATCH:-2}"
 CONFIG="${CONFIG:-configs/memory_s1/s1.yaml}"
 # Bind the launcher and workers to the active Python environment.
 PYTHON_BIN="$(python -c 'import sys; print(sys.executable)')"
 export PYTHON_EXEC="$PYTHON_BIN"
+read -r CONFIG_GPUS CONFIG_MICRO < <("$PYTHON_BIN" -c 'import sys; from fastwam.memory_s1.common import load_config; c=load_config(sys.argv[1]); print(c.get("startup", {}).get("expected_world_size", c.get("recovery", {}).get("expected_world_size", 8)), c["micro_batch"])' "$CONFIG")
+GPUS="${GPUS:-$CONFIG_GPUS}"
+MICRO_BATCH="${MICRO_BATCH:-$CONFIG_MICRO}"
 RESOLVED_RUN="$("$PYTHON_BIN" -c 'import sys; from fastwam.memory_s1.common import load_config; print(load_config(sys.argv[1])["paths"]["run"])' "$CONFIG")"
 if [[ -n "${RUN_DIR:-}" && "$RUN_DIR" != "$RESOLVED_RUN" ]]; then
   echo 'RUN_DIR differs from the configured trainer output; edit the config instead.' >&2; exit 1
@@ -22,13 +23,9 @@ if [[ -e "$RUN_DIR/STOP_REQUESTED" ]]; then
   echo "An old STOP_REQUESTED marker exists. Inspect the previous stop and remove it before launch." >&2
   exit 1
 fi
-if [[ -f "$RUN_DIR/launcher.pid" ]] && kill -0 "$(cat "$RUN_DIR/launcher.pid")" 2>/dev/null; then
-  echo "A launcher recorded for this run is still alive; refuse a duplicate launch." >&2
-  exit 1
-fi
 LAUNCH_ID="$(date -u +%Y%m%dT%H%M%SZ)_$$"
 LOG="$RUN_DIR/launches/$LAUNCH_ID.log"
-COMMAND=("$PYTHON_BIN" -m torch.distributed.run --standalone --nnodes=1 --nproc_per_node="$GPUS" -m fastwam.memory_s1.train --config "$CONFIG" --micro-batch "$MICRO_BATCH")
+COMMAND=("$PYTHON_BIN" -m fastwam.memory_s1.startup guard --config "$CONFIG" --workers "$GPUS" --micro-batch "$MICRO_BATCH")
 if [[ -n "${RESUME:-}" ]]; then COMMAND+=(--resume "$RESUME"); fi
 printf '%q ' "${COMMAND[@]}" > "$RUN_DIR/launches/$LAUNCH_ID.command"
 printf '\n' >> "$RUN_DIR/launches/$LAUNCH_ID.command"

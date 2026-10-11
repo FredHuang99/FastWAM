@@ -10,10 +10,15 @@ def main():
     parser.add_argument("--run", required=True)
     args = parser.parse_args()
     root = Path(args.run)
-    for name in ("TRAINING_STATUS.json", "PREPARATION.json", "LATEST_LOCAL.json", "LATEST_REMOTE.json", "BEST.json", "UPLOAD_FAILED.json"):
+    for name in ("TRAINING_STATUS.json", "PREPARATION.json", "LATEST_LOCAL.json", "LATEST_REMOTE.json", "LATEST_READY_REMOTE.json", "BEST.json", "UPLOAD_FAILED.json"):
         path = root / name
         if path.exists():
             print(name, json.dumps(json.loads(path.read_text()), indent=2))
+    remote = root / "LATEST_REMOTE.json"
+    if remote.exists():
+        pointer = json.loads(remote.read_text())
+        if pointer.get("readback_verified"):
+            print("verified_remote_state", pointer.get("training_state"), "update", pointer["step"])
     metrics = root / "metrics.jsonl"
     if metrics.exists():
         last = None

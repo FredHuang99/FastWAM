@@ -14,6 +14,7 @@ import yaml
 
 SCHEMA = "fastwam-memory-s1-v1"
 TASKS = ("put_back_block", "swap_blocks")
+_HASHES = {}
 
 
 def read_json(path):
@@ -21,11 +22,22 @@ def read_json(path):
 
 
 def sha256(path):
+    path = Path(path).resolve()
+    stat = path.stat()
+    stamp = (stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns)
+    previous = _HASHES.get(path)
+    if previous is not None and previous[0] == stamp:
+        return previous[1]
     digest = hashlib.sha256()
     with open(path, "rb") as stream:
         for chunk in iter(lambda: stream.read(8 * 1024 * 1024), b""):
             digest.update(chunk)
-    return digest.hexdigest()
+    after = path.stat()
+    if stamp != (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns, after.st_ctime_ns):
+        raise ValueError(f"File changed while calculating SHA256: {path}")
+    value = digest.hexdigest()
+    _HASHES[path] = (stamp, value)
+    return value
 
 
 def fingerprint(value):
@@ -136,7 +148,9 @@ def make_cache_contract(cfg, prepared_manifest):
 
 
 def duration(seconds):
-    return time.strftime("%H:%M:%S", time.gmtime(max(0, seconds)))
+    hours, rest = divmod(int(max(0, seconds)), 3600)
+    minutes, seconds = divmod(rest, 60)
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
 
 class ReleaseNormalizer:

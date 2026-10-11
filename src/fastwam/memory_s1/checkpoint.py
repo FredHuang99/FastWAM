@@ -6,6 +6,8 @@ from pathlib import Path
 import random
 import subprocess
 import sys
+import time
+import shutil
 
 import numpy as np
 import torch
@@ -37,18 +39,35 @@ def restore_random_state(value):
     torch.cuda.set_rng_state(value["cuda"])
 
 
+def _publish(directory, run, step):
+    final = directory.with_name(directory.name.removeprefix(".").removesuffix(".tmp"))
+    os.replace(directory, final)
+    for folder in (final, final.parent):
+        descriptor = os.open(folder, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+        try:
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
+    atomic_json(Path(run) / "LATEST_LOCAL.json", {"directory": str(final.relative_to(run)), "step": step})
+    return final
+
+
+def _generation(run, step):
+    directory = Path(run) / "checkpoints" / f".step_{step:06d}_g{time.time_ns()}.tmp"
+    directory.mkdir(parents=True, exist_ok=False)
+    return directory
+
+
 def save_checkpoint(model, optimizer, scheduler, run, step, cfg, identity, rng_states, progress, best):
-    directory = Path(run) / "checkpoints" / f"step_{step:06d}"
+    directory = _generation(run, step)
     value = {"schema": SCHEMA, "memory": to_cpu(model.memory.state_dict()),
              "optimizer": to_cpu(optimizer.state_dict()), "scheduler": scheduler.state_dict(),
              "completed_updates": step, "sampler_next_update": step, "rng_states": rng_states,
-             "config": cfg, "identity": identity, "progress": progress, "best": best}
-    (directory / "continuation.json").unlink(missing_ok=True)
+             "config": cfg, "identity": identity, "progress": dict(progress), "best": dict(best)}
     atomic_torch(directory / "resume.pt", value)
     atomic_json(directory / "complete.json", {"schema": SCHEMA, "completed_updates": step,
-                                              "sha256": sha256(directory / "resume.pt"), "identity": identity, "phase": progress.get("phase", "train")})
-    atomic_json(Path(run) / "LATEST_LOCAL.json", {"directory": str(directory.relative_to(run)), "step": step})
-    return directory
+               "sha256": sha256(directory / "resume.pt"), "identity": identity, "phase": progress.get("phase", "train")})
+    return _publish(directory, run, step)
 
 
 def verified_load(path, weights_only=False):
@@ -59,6 +78,8 @@ def verified_load(path, weights_only=False):
     if marker["sha256"] != sha256(path):
         raise ValueError(f"Incomplete or corrupt resume file: {path}.")
     value = torch.load(path, map_location="cpu", weights_only=weights_only)
+    if marker["completed_updates"] != value["completed_updates"] or marker["identity"] != value["identity"]:
+        raise ValueError("Checkpoint completion marker does not match its payload identity/update.")
     continuation_path = path.parent / "continuation.json"
     if continuation_path.exists():
         if marker.get("continuation_sha256") != sha256(continuation_path):
@@ -72,11 +93,19 @@ def verified_load(path, weights_only=False):
 
 def save_continuation(directory, step, identity, progress, best):
     directory = Path(directory)
-    atomic_json(directory / "continuation.json", {"step": step, "identity": identity, "progress": progress, "best": best})
+    verified_load(directory)
+    run = directory.parent.parent
+    target = _generation(run, step)
+    try:
+        os.link(directory / "resume.pt", target / "resume.pt")
+    except OSError:
+        shutil.copy2(directory / "resume.pt", target / "resume.pt")
+    atomic_json(target / "continuation.json", {"step": step, "identity": identity, "progress": progress, "best": best})
     marker = read_json(directory / "complete.json")
-    marker["continuation_sha256"] = sha256(directory / "continuation.json")
+    marker["continuation_sha256"] = sha256(target / "continuation.json")
     marker["phase"] = progress.get("phase", "train")
-    atomic_json(directory / "complete.json", marker)
+    atomic_json(target / "complete.json", marker)
+    return _publish(target, run, step)
 
 
 def upload_checkpoint(cfg, directory):

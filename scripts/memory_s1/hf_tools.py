@@ -85,6 +85,29 @@ def ensure_private(api, repository, repo_type):
         raise ValueError("Existing backup repository is public; this utility only uploads to private repositories.")
 
 
+def verify_remote_snapshot(api, repo, revision, files):
+    from huggingface_hub import hf_hub_download
+    names = [remote for _, remote in files]
+    info = {}
+    for start in range(0, len(names), 100):
+        for item in api.get_paths_info(repo, names[start:start+100], repo_type="model", revision=revision):
+            info[item.path] = item
+    for local, remote in files:
+        item = info.get(remote)
+        if item is None or item.size != local.stat().st_size:
+            raise ValueError(f"Remote recovery file missing or wrong size: {remote}")
+        lfs = getattr(item, "lfs", None)
+        expected = digest(local)
+        remote_sha = lfs.get("sha256") if isinstance(lfs, dict) else getattr(lfs, "sha256", None)
+        if remote_sha is not None:
+            if remote_sha != expected:
+                raise ValueError(f"Remote LFS SHA256 mismatch: {remote}")
+        else:
+            downloaded = hf_hub_download(repo, remote, repo_type="model", revision=revision)
+            if digest(downloaded) != expected:
+                raise ValueError(f"Remote readback SHA256 mismatch: {remote}")
+
+
 def checkpoint(args):
     started = time.monotonic()
     api = HfApi()
@@ -150,7 +173,9 @@ def checkpoint(args):
     write_json(manifest_path, {"step": marker["completed_updates"], "files": snapshot_files})
     files.append((manifest_path, f"checkpoints/{directory.name}/backup_manifest.json"))
     previous_path = run / "BACKUP_FILES.json"
-    previous = json.loads(previous_path.read_text()) if previous_path.exists() else {}
+    saved_previous = json.loads(previous_path.read_text()) if previous_path.exists() else {}
+    previous = saved_previous.get("files", {}) if (saved_previous.get("repo") == args.repo
+        and saved_previous.get("run_id") == run.name and saved_previous.get("revision")) else {}
     changed = [(path, remote) for path, remote in files if previous.get(remote) != digest(path)]
     estimated = sum(path.stat().st_size for path, _ in changed)
     expected = json.loads((run / "storage_plan.json").read_text())
@@ -166,7 +191,10 @@ def checkpoint(args):
         commit = api.create_commit(args.repo, repo_type="model", operations=operations[start:start+50],
                                    commit_message=f"S1 update {marker['completed_updates']} ({run_id}), files {start+1}-{min(start+50,len(operations))}")
     revision = commit.oid if commit is not None else api.repo_info(args.repo, repo_type="model").sha
-    pointer = {"run_id": run_id, "step": marker["completed_updates"], "directory": directory.name,
+    verify_remote_snapshot(api, args.repo, revision, [(p, f"runs/{run_id}/{remote}") for p, remote in files])
+    pointer = {"readback_verified": True, "run_id": run_id, "step": marker["completed_updates"], "directory": directory.name,
+               "training_state": marker.get("phase", "train"), "backup_complete": True,
+               "parameters_complete": marker["completed_updates"] == config["steps"],
                "checkpoint_revision": revision, "resume_sha256": marker["sha256"],
                "backup_manifest_sha256": digest(manifest_path),
                "upload_seconds": time.monotonic() - started}
@@ -174,7 +202,12 @@ def checkpoint(args):
     write_json(pointer_path, pointer)
     pointer_commit = api.upload_file(path_or_fileobj=str(pointer_path), path_in_repo=f"runs/{run_id}/LATEST_COMPLETE.json",
                                     repo_id=args.repo, repo_type="model", commit_message=f"Publish complete S1 pointer {marker['completed_updates']}")
-    write_json(run / "BACKUP_FILES.json", {remote: digest(path) for path, remote in files})
+    from huggingface_hub import hf_hub_download
+    readback = hf_hub_download(args.repo, f"runs/{run_id}/LATEST_COMPLETE.json", revision=pointer_commit.oid, repo_type="model")
+    if json.loads(Path(readback).read_text()) != pointer:
+        raise ValueError("Published checkpoint pointer failed readback.")
+    write_json(run / "BACKUP_FILES.json", {"repo": args.repo, "run_id": run_id, "revision": revision,
+                                            "files": {remote: digest(path) for path, remote in files}})
     write_json(run / "LATEST_REMOTE.json", {**pointer, "pointer_revision": pointer_commit.oid, "budget": budget})
     print(f"[HF] complete update={pointer['step']} revision={revision}", flush=True)
 

@@ -24,6 +24,8 @@ from .evaluate import deterministic_noise, validate, audit_cache
 from .history import recipe
 from .model import S1Model
 from .schedule import checkpoint_steps, milestone_steps, validation_policy
+from .phase_validation import global_slots
+from .readiness import lease_elapsed
 
 
 def learning_rate_factor(step, cfg):
@@ -49,18 +51,55 @@ def archive_uncommitted_logs(run, step, phase):
     for name in ("metrics.jsonl", "samples.jsonl"):
         path = run / name
         if not path.exists():
+            if step:
+                raise ValueError(f"Missing committed log: {path}; restore the verified HF snapshot.")
             continue
         import json
-        kept, orphan = [], []
-        for line in path.read_text().splitlines(True):
-            row = json.loads(line)
-            invalid = row.get("step", 0) > step or (row.get("step") == step and row.get("kind") == "validation" and phase == "validation")
-            (orphan if invalid else kept).append(line)
+        kept, orphan, seen, sample_slots, train_steps = [], [], {}, {}, set()
+        lines = path.read_bytes().splitlines(keepends=True)
+        for index, line in enumerate(lines):
+            try:
+                row = json.loads(line)
+            except (ValueError, UnicodeDecodeError):
+                if index != len(lines) - 1:
+                    raise ValueError(f"Corrupt committed log body: {path}:{index + 1}")
+                orphan.append(line)
+                continue
+            invalid = (not line.endswith(b"\n") or row.get("step", 0) > step or
+                       (row.get("step") == step and row.get("kind") == "validation" and phase == "validation"))
+            if invalid:
+                orphan.append(line)
+                continue
+            key = None
+            if name == "samples.jsonl":
+                key = (row["step"], row["global_slot"])
+                sample_slots.setdefault(row["step"], set()).add(row["global_slot"])
+            elif row.get("kind") == "train":
+                key = ("train", row["step"])
+                train_steps.add(row["step"])
+            if key is not None and key in seen:
+                if seen[key] != row:
+                    raise ValueError(f"Conflicting committed log records: {path}: {key}")
+                orphan.append(line)
+                continue
+            if key is not None:
+                seen[key] = row
+            kept.append(line)
+        if name == "samples.jsonl":
+            if set(sample_slots) != set(range(1, step + 1)) or any(slots != set(range(16)) for slots in sample_slots.values()):
+                raise ValueError("Committed sample logs lack complete 16-slot updates; restore their verified HF snapshot.")
+        elif train_steps != set(range(1, step + 1)):
+            raise ValueError("Committed metrics lack completed updates; restore their verified HF snapshot.")
         if orphan:
             directory = run / "interrupted_logs"
             directory.mkdir(exist_ok=True)
-            (directory / f"{time.time_ns()}_{name}").write_text("".join(orphan), encoding="utf-8")
-            path.write_text("".join(kept), encoding="utf-8")
+            archive = directory / f"{time.time_ns()}_{name}"
+            with archive.open("wb") as stream:
+                stream.write(b"".join(orphan)); stream.flush(); os.fsync(stream.fileno())
+            temporary = path.with_suffix(".reconciled.tmp")
+            with temporary.open("wb") as stream:
+                stream.write(b"".join(kept)); stream.flush(); os.fsync(stream.fileno())
+            os.replace(temporary, path)
     index_path = run / "MILESTONES.json"
     if index_path.exists():
         index = read_json(index_path)
@@ -77,6 +116,9 @@ def run_training(args):
     cfg = load_config(args.config)
     if cfg.get("diagnostic_only"):
         raise ValueError("Base diagnostic configurations cannot launch parameter training.")
+    if cfg.get("startup", {}).get("require_ready"):
+        from .readiness import verify_materials
+        verify_materials(cfg, require_ready=not args.resume, micro=args.micro_batch or cfg["micro_batch"])
     cfg["training_python"] = sys.executable
     policy = validation_policy(cfg)
     deferred = policy["schedule"] == "deferred"
@@ -96,9 +138,9 @@ def run_training(args):
         (run / "STOP_REQUESTED").touch()
     signal.signal(signal.SIGTERM, request_stop)
     signal.signal(signal.SIGINT, request_stop)
-    random.seed(17 + rank)
-    np.random.seed(17 + rank)
-    torch.manual_seed(17)
+    random.seed(cfg["seed"] + rank)
+    np.random.seed(cfg["seed"] + rank)
+    torch.manual_seed(cfg["seed"])
     model = S1Model(cfg, device)
     train_data, val_data = CachedEpisodes(cfg, "train"), CachedEpisodes(cfg, "val")
 
@@ -131,11 +173,7 @@ def run_training(args):
         if approval["manifest_sha"] != fingerprint(prepared) or train_data.manifest["contract"]["prepared_sha"] != fingerprint(prepared):
             raise ValueError("Data, alignment and cache identities differ.")
         for record in train_data.manifest["episodes"]:
-            if sha256(Path(cfg["paths"]["cache"]) / record["file"]) != record["cache_sha256"]:
-                raise ValueError(f"Corrupt cached episode: {record['episode_id']}")
-            for shard in record.get("shards", []):
-                if sha256(Path(cfg["paths"]["cache"]) / shard["file"]) != shard["sha256"]:
-                    raise ValueError(f"Corrupt cache shard: {shard['file']}")
+            train_data.verify_record(record)
         atomic_json(run / "cache_audit.json", audit_cache(model, val_data, cfg, device))
         return {"schema": SCHEMA, "base_sha256": sha256(cfg["paths"]["base"]), "stats_sha256": sha256(cfg["paths"]["stats"]),
                  "cache_signature": train_data.signature, "data_sha": fingerprint(prepared), "code": code_version(cfg["root"]),
@@ -177,8 +215,9 @@ def run_training(args):
             live = read_json(run / "progress_live.json")
             if live.get("step") == step and live["progress"].get("phase") == progress["phase"]:
                 progress.update(live["progress"])
-        if len(saved["rng_states"]) == world:
-            restore_random_state(saved["rng_states"][rank])
+        if len(saved["rng_states"]) != world:
+            raise ValueError("Changing world size requires an explicit RNG migration; micro-batch changes are supported.")
+        restore_random_state(saved["rng_states"][rank])
         leader(lambda: archive_uncommitted_logs(run, step, progress["phase"]))
         def reconcile_best():
             import shutil
@@ -206,8 +245,7 @@ def run_training(args):
         run.mkdir(parents=True, exist_ok=True)
         preparation_path = run / "PREPARATION.json"
         if not preparation_path.exists():
-            lease = Path(cfg["root"]) / cfg.get("time_budget", {}).get("lease_file", "outputs/lease.json")
-            elapsed = time.time() - read_json(lease)["started_unix"] if lease.exists() else None
+            elapsed = lease_elapsed(cfg)
             cache_launches = []
             for exit_file in sorted((Path(cfg["paths"]["cache"]) / "launches").glob("*.exit")):
                 command_file = exit_file.with_suffix(".command")
@@ -244,8 +282,12 @@ def run_training(args):
                         "selection": "pending_evaluation" if deferred else "inline_evaluation"})
 
     def training_status():
+        remote_path = run / "LATEST_REMOTE.json"
+        remote_step = read_json(remote_path).get("step", -1) if remote_path.exists() else -1
         atomic_json(run / "TRAINING_STATUS.json", {"completed_updates": step, "total_updates": cfg["steps"],
-            "state": "trained_pending_evaluation" if deferred and step == cfg["steps"] else progress["phase"],
+            "state": ("trained_pending_evaluation" if remote_step == step else "trained_pending_backup")
+                     if deferred and step == cfg["steps"] else progress["phase"],
+            "last_verified_remote_update": remote_step,
             "validation": policy, "candidate_steps": milestones, "best_selected": best.get("step") is not None})
 
     def event(component, seconds):
@@ -259,12 +301,13 @@ def run_training(args):
         def write_upload():
             progress["wall_seconds"] = prior_wall + time.monotonic() - wall_start
             started = time.monotonic()
-            directory = run / "checkpoints" / f"step_{step:06d}"
-            if rewrite or not (directory / "resume.pt").exists():
+            pointer = read_json(run / "LATEST_LOCAL.json") if (run / "LATEST_LOCAL.json").exists() else {}
+            directory = run / pointer.get("directory", "checkpoints/not_created")
+            if rewrite or pointer.get("step") != step or not (directory / "resume.pt").exists():
                 directory = save_checkpoint(model, optimizer, scheduler, run, step, cfg, identity, states, progress, best)
                 progress["checkpoints"] += 1
             else:
-                save_continuation(directory, step, identity, progress, best)
+                directory = save_continuation(directory, step, identity, progress, best)
             event("checkpoint", time.monotonic() - started)
             started = time.monotonic()
             try:
@@ -274,6 +317,7 @@ def run_training(args):
                 event("upload", time.monotonic() - started)
                 progress["wall_seconds"] = prior_wall + time.monotonic() - wall_start
                 atomic_json(run / "progress_live.json", {"step": step, "progress": progress, "best": best})
+                training_status()
                 prune_local(run)
                 print(f"[saved] update={step} phase={progress['phase']} local+HF complete", flush=True)
             except Exception as error:
@@ -365,7 +409,7 @@ def run_training(args):
         torch.cuda.reset_peak_memory_stats(device)
         optimizer.zero_grad(set_to_none=True)
         for index in range(accumulation):
-            slots = [index * world * micro + rank * micro + j for j in range(micro)]
+            slots = global_slots(index, world, micro, rank)
             before = time.monotonic()
             samples = [train_data.sample(step, slot) for slot in slots]
             batch = collate(samples, device)
@@ -374,9 +418,11 @@ def run_training(args):
                 ids = sample["frame_ids"].tolist()
                 local_samples.append({"step": step + 1, "sampling_update": step, "global_slot": slot,
                     "episode_id": sample["episode_id"], "task": sample["task"], "anchor": int(sample["t"]),
-                    "T": sample["history_period"], "read_frames": len(ids), "frame_ids_sha": fingerprint(ids),
+                    "T": sample["history_period"], "phase": sample["history_phase"],
+                    "frame_ids": ids, "mandatory_ids": [i for i in ids if i == 0 or i % 16 == 0 or i == int(sample["t"])],
+                    "evidence_coverage": "unknown", "read_frames": len(ids), "frame_ids_sha": fingerprint(ids),
                     "first_ids": ids[:8], "last_ids": ids[-8:]})
-            noise, tau = deterministic_noise(17, step, slots, device)
+            noise, tau = deterministic_noise(cfg["seed"], step, slots, device)
             sync = nullcontext() if index == accumulation - 1 else wrapped.no_sync()
             with sync:
                 loss, diagnostic = wrapped(batch, noise, tau)
@@ -422,15 +468,18 @@ def run_training(args):
                 "readout_norm": float(values[1]), "history_frames": float(values[2]), "valid_actions": float(values[3]),
                 "learning_rate": update_learning_rate, "next_learning_rate": optimizer.param_groups[0]["lr"], "update_seconds": seconds, "data_seconds": float(maxima[1]),
                 "gpu_peak_gib": float(maxima[2]), "T_histogram": dict(Counter(str(sample["T"]) for sample in all_samples)),
+                "phase_histogram": dict(Counter(f"{sample['T']}:{sample['phase']}" for sample in all_samples)),
+                "cache_hits": train_data.cache_hits, "cache_misses": train_data.cache_misses,
                 "eta_seconds": remaining, "eta_provisional": (step < 100 or progress["uploads"] < 2) if deferred else not progress["closed_validations"], "cumulative": dict(progress)}
             budget = cfg.get("time_budget", {})
-            lease = Path(cfg["root"]) / budget.get("lease_file", "outputs/lease.json")
-            if lease.exists():
-                elapsed = time.time() - read_json(lease)["started_unix"]
+            elapsed = lease_elapsed(cfg)
+            if elapsed is not None:
                 available = float(budget.get("hours", 72)) * 3600 - elapsed
                 row.update(lease_elapsed_seconds=elapsed, lease_remaining_seconds=available,
                            lease_margin_seconds=available - remaining,
                            lease_projection_provisional=row["eta_provisional"])
+            else:
+                row["lease_start_status"] = "unknown"
             if step % cfg["log_every"] == 0 or step == 1:
                 row.update(gradient_norm=float(norm), gates={name: float(module.gate.detach()) for name, module in model.memory.injectors.items()},
                     gradient_by_module={name: float(torch.sqrt(sum(p.grad.float().square().sum() for p in module.parameters() if p.grad is not None)))
@@ -456,6 +505,7 @@ def run_training(args):
         if stopped:
             break
     if rank == 0:
+        training_status()
         (run / "STOP_REQUESTED").unlink(missing_ok=True)
         print(f"[finish] completed_updates={step} phase={progress['phase']} stopped={stopped}; latest complete HF pointer is LATEST_REMOTE.json", flush=True)
     return 2 if stopped else 0
@@ -465,10 +515,18 @@ def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("--config", required=True)
     parser.add_argument("--resume")
+    parser.add_argument("--functional-preflight", action="store_true")
     parser.add_argument("--micro-batch", type=int)
     args = parser.parse_args()
     try:
-        result = run_training(args)
+        if args.functional_preflight:
+            if args.resume:
+                raise ValueError("A preflight must not resume or update a trained model.")
+            from .phase_validation import run
+            run(args)
+            result = 0
+        else:
+            result = run_training(args)
     finally:
         if dist.is_initialized():
             dist.destroy_process_group()

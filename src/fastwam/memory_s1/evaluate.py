@@ -3,12 +3,14 @@ from __future__ import annotations
 
 import argparse
 import math
+import hashlib
 from pathlib import Path
 
 import torch
 
 from .common import atomic_json, load_config, read_json, seed_for, sha256, fingerprint, make_cache_contract
 from .data import CachedEpisodes, collate, history_variant, load_evidence
+from .history import evaluation_phase, override_online, recipe
 
 
 def deterministic_noise(seed, step, slots, device, purpose="noise"):
@@ -28,9 +30,16 @@ def validate(model, dataset, cfg, device, interventions=False, evidence=None, pe
     conditions = ["full", "gate_zero", "current_only"] if interventions else ["full"]
     if evidence is not None:
         conditions += ["delete_critical", "delete_irrelevant"]
+    weight_hash = hashlib.sha256()
+    for name, tensor in sorted(model.memory.state_dict().items()):
+        weight_hash.update(f"{name}:{tuple(tensor.shape)}:{tensor.dtype}".encode())
+        weight_hash.update(tensor.detach().cpu().contiguous().reshape(-1).view(torch.uint8).numpy().tobytes())
+    cursor_identity = fingerprint({"weights_sha256": weight_hash.hexdigest(), "cache": dataset.signature,
+        "config": cfg, "period": period, "conditions": conditions, "evidence": evidence,
+        "recipe": recipe(cfg), "count": count, "noise": "validation-noise"})
     if progress_path and Path(progress_path).exists():
         saved = read_json(progress_path)
-        if saved["period"] != period or saved["cache_signature"] != dataset.signature:
+        if saved.get("identity") != cursor_identity or saved.get("next_slot") != len(saved["episodes"]) or len(saved["episodes"]) > count:
             raise ValueError("Offline validation cursor identity mismatch.")
         results = saved["episodes"]
         for row in results:
@@ -41,9 +50,15 @@ def validate(model, dataset, cfg, device, interventions=False, evidence=None, pe
             raise EvaluationInterrupted("Stopped at an offline-validation anchor boundary.")
         original = dataset.sample(0, slot, validation=True)
         record = next(r for r in dataset.by_task[original["task"]] if r["episode_id"] == original["episode_id"])
-        sample = dataset.at(record, int(original["t"]), period=period)
-        noise, tau = deterministic_noise(17, 0, [slot], device, "validation-noise")
-        entry = {"episode_id": sample["episode_id"], "t": int(sample["t"]), "task": sample["task"], "period": period, "tau": float(tau[0]), "read_frame_ids": sample["frame_ids"].tolist(), "conditions": {}}
+        phase = evaluation_phase(cfg, period, record["episode_id"])
+        sample = dataset.at(record, int(original["t"]), period=period, phase=phase)
+        noise, tau = deterministic_noise(cfg["seed"], 0, [slot], device, "validation-noise")
+        entry = {"episode_id": sample["episode_id"], "t": int(sample["t"]), "task": sample["task"], "period": period, "phase": phase, "slot": slot, "evidence_coverage": "unknown", "tau": float(tau[0]), "read_frame_ids": sample["frame_ids"].tolist(), "conditions": {}}
+        annotation = None if evidence is None else evidence.get("offline", {}).get(sample["episode_id"])
+        if annotation and int(sample["t"]) >= annotation["apply_from"]:
+            entry["evidence_coverage"] = {"status": "reviewed", "interval_hits": [
+                any(start <= frame <= end for frame in entry["read_frame_ids"])
+                for start, end in annotation["critical"]]}
         for condition in conditions:
             annotation = None if evidence is None else evidence.get("offline", {}).get(sample["episode_id"])
             changed = history_variant(sample, condition, annotation)
@@ -60,7 +75,7 @@ def validate(model, dataset, cfg, device, interventions=False, evidence=None, pe
                 bins[min(4, int(float(tau[0]) * 5))].append(error)
         results.append(entry)
         if progress_path:
-            atomic_json(progress_path, {"period": period, "cache_signature": dataset.signature, "episodes": results, "next_slot": slot + 1})
+            atomic_json(progress_path, {"identity": cursor_identity, "period": period, "cache_signature": dataset.signature, "episodes": results, "next_slot": slot + 1})
     summary = {"fm": sum(row["conditions"]["full"]["fm"] for row in results) / len(results),
                "sample_mse": sum(row["conditions"]["full"]["sample_mse"] for row in results) / len(results),
                "noise_bins": [{"low": i / 5, "high": (i + 1) / 5, "count": len(values),
@@ -136,6 +151,7 @@ def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("--config", required=True)
     parser.add_argument("--period", type=int, default=8)
+    parser.add_argument("--phase", type=int)
     parser.add_argument("--checkpoint")
     parser.add_argument("--output", required=True)
     parser.add_argument("--evidence")
@@ -143,6 +159,7 @@ def main():
     parser.add_argument("--plot", action="store_true")
     args = parser.parse_args()
     cfg = load_config(args.config)
+    override_online(cfg, period=args.period, phase=args.phase)
     if args.plot:
         plot_metrics(cfg["paths"]["run"], args.output)
         return

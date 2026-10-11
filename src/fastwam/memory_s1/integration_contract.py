@@ -90,6 +90,8 @@ def verify_admission(cfg, cache_signature):
         report = read_json(evidence / info["file"])
         if report.get("passed") is not True or report.get("binding") != expected:
             raise ValueError(f"Unapproved integration evidence: {name}")
+        from .phase_transition import verify_inherited
+        verify_inherited(cfg, report)
     return value
 
 

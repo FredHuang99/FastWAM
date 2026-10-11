@@ -122,7 +122,8 @@ def conda_spec(args):
 
 
 def unique_file(directory, name, required=True):
-    candidates = sorted(p for p in Path(directory).rglob(name) if ".cache" not in p.parts)
+    candidates = sorted(p for p in Path(directory).rglob(name)
+                        if not {".cache", "parent_provenance", "phase_parent"}.intersection(p.relative_to(directory).parts))
     if not candidates:
         if required:
             raise FileNotFoundError(f"Snapshot has no {name}; do not invent missing provenance.")
@@ -146,7 +147,17 @@ def admission(directory):
         report = read(matches[0])
         if report.get("passed") is not True or report.get("binding") != value["binding"]:
             raise ValueError(f"Inconsistent prior evidence: {name}")
-        reports[name] = report
+        if report.get("evidence_origin") == "inherited":
+            origin = report["parent_report"]
+            parent_path = path.parent / "parent_provenance/integration_evidence" / origin["file"]
+            if not parent_path.is_file() or digest(parent_path) != origin["sha256"]:
+                raise ValueError(f"Missing authenticated parent payload: {name}")
+            parent = read(parent_path)
+            if not parent.get("passed") or parent["binding"] != report["transition"]["parent_binding"]:
+                raise ValueError(f"Unapproved parent payload: {name}")
+            reports[name] = parent
+        else:
+            reports[name] = report
     return path, value, reports
 
 
@@ -708,7 +719,14 @@ def ready_pack(args):
         raise ValueError("Generate this configuration's integration admission before publishing readiness.")
     if (run / "checkpoints").exists() and any((run / "checkpoints").rglob("resume.pt")):
         raise ValueError("Training has started; use checkpoint backup rather than admitted_not_started.")
+    subprocess.run(["/opt/mwam/bin/python", "-m", "fastwam.memory_s1.startup", "materials", "--config", args.config], check=True)
+    readiness_spec = importlib.util.spec_from_file_location("ready_identity", root / "src/fastwam/memory_s1/readiness.py")
+    readiness = importlib.util.module_from_spec(readiness_spec)
+    readiness_spec.loader.exec_module(readiness)
+    startup_identity = readiness.current_identity(cfg)
     stage = Path(args.output).resolve() / "payload"
+    if stage.exists():
+        raise ValueError("Partial ready staging already exists; retain it and choose a fresh output directory.")
     if (Path(args.output) / "PACKAGE.json").exists():
         raise ValueError("Ready snapshots are immutable; choose a new output directory.")
     stage.mkdir(parents=True, exist_ok=True)
@@ -716,6 +734,16 @@ def ready_pack(args):
     selected += [root / "resources/download_lock.json", Path(cfg["paths"]["prepared"]), run / "integration_admission.json",
                  run / "integration_evidence", run / "storage_plan.json", recovery_output(root) / "environment"]
     selected += [p for p in (run / "provenance", run / "parent_provenance") if p.exists()]
+    approval = read(Path(cfg["paths"]["prepared"]) / "alignment_approved.json")
+    for task, item in approval.get("recovery_evidence", {}).items():
+        evidence_path = Path(item["path"]).resolve()
+        if not evidence_path.is_relative_to(root) or not evidence_path.is_file() or digest(evidence_path) != item["sha256"]:
+            raise ValueError(f"Missing original reviewed alignment evidence: {task}: {evidence_path}")
+        selected.extend(p for p in evidence_path.parent.rglob("*") if p.is_file()
+                        and p.suffix.lower() in (".json", ".jsonl", ".log", ".png", ".jpg", ".npz"))
+    lease = root / cfg.get("time_budget", {}).get("lease_file", "outputs/lease.json")
+    if lease.is_file():
+        selected.append(lease)
     review = run / "alignment_recovery_review.json"
     if review.exists():
         selected.append(review)
@@ -759,7 +787,7 @@ def ready_pack(args):
     bundle = stage / "source.bundle"
     subprocess.run(["git", "-C", str(root), "bundle", "create", str(bundle), "HEAD", "refs/heads/memory"], check=True)
     write(stage / "READY.json", {"schema": "fastwam-s1-ready-v1", "snapshot_id": snapshot_id, "run_id": run.name,
-          "phase": "admitted_not_started", "source_commit": commit, "resolved_config": cfg,
+          "phase": "admitted_not_started", "source_commit": commit, "resolved_config": cfg, "startup_identity": startup_identity,
           "prepared_tensors_included": True, "cache_payload_included": False, "frozen_weights_included": False})
     _, bound, _ = admission(stage)
     files = inventory([stage], stage)
@@ -780,7 +808,7 @@ def ready_pack(args):
             raise ValueError("Ready compression failed; no pointer may reference this package.")
     temporary.replace(path)
     write(Path(args.output) / "PACKAGE.json", {"snapshot_id": snapshot_id, "run_id": run.name,
-          "package": str(path), "bytes": path.stat().st_size, "sha256": digest(path), "phase": "admitted_not_started"})
+          "package": str(path), "bytes": path.stat().st_size, "sha256": digest(path), "phase": "admitted_not_started", "startup_identity": startup_identity})
     print(f"[ready-package] {path} bytes={path.stat().st_size}; model/cache payloads are separate.", flush=True)
 
 
@@ -792,12 +820,22 @@ def ready_upload(args):
     utilities = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(utilities)
     metadata = read(Path(args.directory) / "PACKAGE.json")
+    subprocess.run(["/opt/mwam/bin/python", "-m", "fastwam.memory_s1.startup", "materials", "--config", args.config], check=True)
     package = Path(metadata["package"])
     if digest(package) != metadata["sha256"]:
         raise ValueError("Ready package changed after packing.")
     plan = read(Path(cfg["paths"]["run"]) / "storage_plan.json")
     if plan["cache_signature"] != read(Path(cfg["paths"]["run"]) / "integration_admission.json")["binding"]["cache_signature"]:
         raise ValueError("Recompute the configuration-bound storage budget.")
+    spec_ready = importlib.util.spec_from_file_location("ready_identity", root / "src/fastwam/memory_s1/readiness.py")
+    readiness = importlib.util.module_from_spec(spec_ready)
+    spec_ready.loader.exec_module(readiness)
+    if metadata.get("startup_identity") != readiness.current_identity(cfg):
+        raise ValueError("Code/config/admission changed after packing; create a fresh ready package.")
+    local = readiness.disk_budget(cfg, plan["full_checkpoint_estimate_bytes"], plan["parameter_bytes_fp32"],
+                                 plan["auxiliary_history_bytes"], metadata["bytes"])
+    if not local["passed"]:
+        raise ValueError(f"Readback/temporary capacity guard failed: {local}")
     proposed = plan["planned_new_bytes"] + metadata["bytes"] + 1024**2
     budget = utilities.check_budget(api, proposed, cfg["hf"]["quota_gib"], cfg["hf"]["reserve_gib"])
     repo = cfg["hf"]["backup_repo"]
@@ -809,7 +847,7 @@ def ready_upload(args):
     if digest(check) != metadata["sha256"]:
         raise ValueError("Uploaded immutable package failed readback; latest-ready pointer is unchanged.")
     pointer = {key: metadata[key] for key in ("run_id", "snapshot_id", "phase", "bytes", "sha256")}
-    pointer.update(repo=repo, revision=result.oid, package=remote)
+    pointer.update(repo=repo, revision=result.oid, package=remote, startup_identity=metadata["startup_identity"], readback_verified=True)
     pointer_file = Path(args.directory) / "LATEST_READY.json"
     write(pointer_file, pointer)
     publication = api.upload_file(path_or_fileobj=str(pointer_file), path_in_repo=f"ready/{metadata['run_id']}/LATEST_READY.json",

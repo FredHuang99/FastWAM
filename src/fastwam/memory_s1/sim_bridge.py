@@ -17,7 +17,7 @@ import torch
 
 from .common import TASKS, ReleaseNormalizer, atomic_json, append_jsonl, load_config, read_json, seed_for, sha256
 from .data import mosaic_rgb, observation_tensor, collate, history_variant, load_evidence
-from .history import select_ids, online_period
+from .history import select_ids, online_period, evaluation_phase
 from .protocol import format_task_prompt, inference_contract
 
 
@@ -71,11 +71,12 @@ class InferenceSession:
                 self.raw_archive[index] = observation
                 self.observation_signatures[index] = signature
             period = online_period(self.cfg, current_id)
+            phase = evaluation_phase(self.cfg, period, f"{request['task']}:{self.episode_seed}", "online")
             if self.cfg.get("history", {}).get("archive_stride", 8) == 1:
                 if sorted(self.raw_archive) != list(range(current_id + 1)):
                     raise ValueError("Dense online archive is missing completed-action observations.")
-            indices = select_ids(sorted(self.raw_archive), current_id, period)
-            if indices != select_ids(range(current_id + 1), current_id, period):
+            indices = select_ids(sorted(self.raw_archive), current_id, period, phase=phase)
+            if indices != select_ids(range(current_id + 1), current_id, period, phase=phase):
                 raise ValueError("Raw archive lacks observations required by this historical period.")
             if self.condition in ("gate_zero", "current_only"):
                 indices = [current_id]
@@ -156,9 +157,17 @@ class InferenceSession:
         if self.trace is not None:
             self.trace["clipped_actions"] = actions.detach().cpu().clone()
         torch.cuda.synchronize(self.device)
+        annotation = (self.evidence or {}).get("online", {}).get(request["task"], {}).get(str(self.episode_seed))
+        coverage = "unknown"
+        if annotation and int(request["current_id"]) >= annotation["apply_from"]:
+            coverage = {"status": "reviewed", "interval_hits": [
+                any(start <= frame <= end for frame in read_ids) if readout is not None else False
+                for start, end in annotation["critical"]]}
         append_jsonl(self.output / "decisions.jsonl", {"task": request["task"], "seed": self.episode_seed, "frame_id": int(request["current_id"]),
                                                        "condition": self.condition, "archive_frames": len(self.archive),
                                                        "raw_archive_frames": len(self.raw_archive), "history_period": period,
+                                                       "history_phase": evaluation_phase(self.cfg, period, f"{request['task']}:{self.episode_seed}", "online"),
+                                                       "evidence_coverage": coverage,
                                                        "selected_frame_ids": selected, "read_frame_ids": read_ids if readout is not None else [],
                                                        "newly_encoded_frame_ids": newly_encoded,
                                                        "read_frames": 0 if readout is None else len(read_ids),
