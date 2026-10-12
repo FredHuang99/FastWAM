@@ -1,6 +1,6 @@
 {
-  "version": "selection-top2-cuda126-dev-v6",
-  "scope": "Evaluation-only checkpoint subsets, timing, isolated CUDA development packages and fused subprocess library paths; unchanged model, training, task limits, scene bank, and inference settings.",
+  "version": "selection-top2-cuda126-dev-v7",
+  "scope": "Evaluation-only checkpoint subsets, timing, isolated CUDA development packages, explicit GCC 12 ranges and fused subprocess library paths; unchanged model, training, task limits, scene bank, and inference settings.",
   "files": {
     "scripts/memory_s1/launch_posttrain.sh": {
       "before": "790211ec79936ed70ee08129ba2d0798c8793c0e69c2a1291d453a43feb6c5f9",
@@ -45,7 +45,7 @@
     "scripts/memory_s1/portable/fused_environment.py": {
       "before": null,
       "before_lf": null,
-      "after": "a8668b1870fcfc5c28a4e587d93ea8e61aca221e197e183ae2bf2dbe23468825"
+      "after": "ba447c08f03bd6eb32c0ba4945224f488725a992e44459c7f349f0944228e9ee"
     },
     "scripts/memory_s1/portable/prepare_fused_env.sh": {
       "before": null,

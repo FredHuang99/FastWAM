@@ -15,6 +15,9 @@ import time
 
 
 CUDA_CHANNEL = "nvidia/label/cuda-12.6.3"
+COMPILER_WRAPPERS = ("gcc_linux-64", "gxx_linux-64")
+COMPILER_IMPLEMENTATIONS = ("gcc_impl_linux-64", "gxx_impl_linux-64")
+COMPILER_CONSTRAINT = ">=12,<13"
 CUDA_DEVELOPMENT = {
     # Explicit compiler/header/library roots avoid the release's broken aggregate
     # libraries-dev dependency on an unpublished libnvjpeg-dev version.
@@ -81,7 +84,18 @@ def solved_records(path, prefix, initial):
     return final
 
 
+def check_compilers(records, *, required=True):
+    for name in COMPILER_WRAPPERS + COMPILER_IMPLEMENTATIONS:
+        version = str(records.get(name, {}).get("version", ""))
+        if not version and not required:
+            continue
+        if version.split(".", 1)[0] != "12":
+            raise ValueError(f"Expected GCC 12 compiler package {name}; found {version or 'absent'}. "
+                             "Stop before CUDA removal or extension builds.")
+
+
 def check_development(records):
+    check_compilers(records)
     for name, version in CUDA_DEVELOPMENT.items():
         if records.get(name, {}).get("version") != version:
             raise ValueError(f"Expected development package {name}={version}")
@@ -95,6 +109,7 @@ def cuda_migration(args, output):
     prefix = Path(args.prefix).resolve()
     records = conda_records(prefix)
     if args.command == "cuda-specs":
+        check_compilers(records, required=False)
         output.mkdir(parents=True, exist_ok=False)
         metadata_dir = output / "conda-meta-before"
         metadata_dir.mkdir()
@@ -109,14 +124,16 @@ def cuda_migration(args, output):
                 version, build = package_identity(record)
                 specs.append(f"{name}={version}={build}")
         specs += [f"{CUDA_CHANNEL}::{name}={version}" for name, version in CUDA_DEVELOPMENT.items()]
-        # New nvcc packages depend on these wrappers; avoid selecting GCC 14/15.
-        for name in ("gcc_linux-64", "gxx_linux-64"):
+        # Conda --file treats '=12' as the exact version 12, unlike the CLI's
+        # major-version shorthand. Explicit bounds accept available 12.x builds.
+        for name in COMPILER_WRAPPERS:
             if name not in records:
-                specs.append(f"{name}=12")
+                specs.append(f"{name}{COMPILER_CONSTRAINT}")
         (output / "requested-specs.txt").write_text("\n".join(specs) + "\n")
         (output / "remove-names.txt").write_text("\n".join(remove) + ("\n" if remove else ""))
         (output / "before.json").write_text(json.dumps({"prefix": str(prefix), "records": records}, indent=2))
         print(f"[cuda] saved {len(records)} records; old CUDA set={len(remove)}; new roots={CUDA_DEVELOPMENT}", flush=True)
+        print(f"[compiler] GCC/G++ {COMPILER_CONSTRAINT}; existing 12.x packages retain their exact builds", flush=True)
         return
     before = json.loads(Path(args.before).read_text())
     if before["prefix"] != str(prefix):
