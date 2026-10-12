@@ -33,7 +33,30 @@ if [[ -f "$BUILD/COMPLETE.json" ]]; then
   echo '[environment] existing fused environment verified; no reinstall'
   exit 0
 fi
-/opt/miniforge/bin/conda install -y -p "$NEW" -c nvidia cuda-toolkit=12.6
+# Conda clone preserves exact CUDA 12.4 component requests. Replacing only the
+# toolkit metapackage leaves incompatible visual-tools/libcufile/Nsight pins.
+# Save the old inventory, update every CUDA request, and pin other packages.
+CUDA_ATTEMPT="$BUILD/cuda_$(date -u +%Y%m%dT%H%M%SZ)_$$"
+"$NEW/bin/python" "$HELPER" cuda-specs --prefix "$NEW" --output "$CUDA_ATTEMPT"
+CONDA_CUDA=(/opt/miniforge/bin/conda install -y -p "$NEW"
+  --override-channels -c nvidia/label/cuda-12.6.3 -c conda-forge
+  --update-specs --no-pin)
+echo "[cuda] solving fixed 12.6.3 release; diagnostics=$CUDA_ATTEMPT"
+if ! env -u CONDA_PINNED_PACKAGES CONDA_SUBDIR=linux-64 "${CONDA_CUDA[@]}" \
+    --file "$CUDA_ATTEMPT/requested-specs.txt" --dry-run --json > "$CUDA_ATTEMPT/solve.json"; then
+  cat "$CUDA_ATTEMPT/solve.json"
+  echo '[cuda] solve failed; no CUDA transaction applied; original simulator unchanged' >&2
+  exit 1
+fi
+"$NEW/bin/python" "$HELPER" cuda-plan --prefix "$NEW" \
+  --before "$CUDA_ATTEMPT/before.json" --plan "$CUDA_ATTEMPT/solve.json" \
+  --output "$CUDA_ATTEMPT/resolved.json"
+echo '[cuda] installing the reviewed package versions/builds into the isolated clone'
+env -u CONDA_PINNED_PACKAGES CONDA_SUBDIR=linux-64 "${CONDA_CUDA[@]}" \
+  --file "$CUDA_ATTEMPT/resolved.specs.txt"
+"$NEW/bin/python" "$HELPER" cuda-check --prefix "$NEW" \
+  --before "$CUDA_ATTEMPT/before.json" --plan "$CUDA_ATTEMPT/resolved.json" \
+  --output "$CUDA_ATTEMPT/installed.json"
 "$NEW/bin/python" -m pip install --disable-pip-version-check --no-input \
   torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu126
 "$NEW/bin/python" -m pip install --disable-pip-version-check --no-input --no-deps warp-lang==1.12.0

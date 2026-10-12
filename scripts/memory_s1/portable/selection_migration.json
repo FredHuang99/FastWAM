@@ -1,6 +1,6 @@
 {
-  "version": "selection-top2-v4",
-  "scope": "Evaluation-only checkpoint subsets and explicit partial timing; unchanged training, task limits, scene bank, and fused backend.",
+  "version": "selection-top2-cuda126-v5",
+  "scope": "Evaluation-only checkpoint subsets, timing and isolated CUDA component migration; unchanged training, task limits, scene bank, and fused runtime settings.",
   "files": {
     "scripts/memory_s1/launch_posttrain.sh": {
       "before": "790211ec79936ed70ee08129ba2d0798c8793c0e69c2a1291d453a43feb6c5f9",
@@ -45,12 +45,12 @@
     "scripts/memory_s1/portable/fused_environment.py": {
       "before": null,
       "before_lf": null,
-      "after": "200e4fe2bc4d8f2a1b4fa0db7cc8d076bad21faa1f49e7265cd86dee0f1682e7"
+      "after": "0fe06d81f85567ca715fae54aee82886bd2fff1db03c2f856014f5ae7dba8bd6"
     },
     "scripts/memory_s1/portable/prepare_fused_env.sh": {
       "before": null,
       "before_lf": null,
-      "after": "8807998b274c6378ba05173124282418eb4349405806fe47b7de662e9fc3b7cc"
+      "after": "bc6e6cdcc0b1a569089818c909288aadf0a123b0eb137840e6481f8cfbe2f6a2"
     },
     "src/fastwam/memory_s1/fused_evaluation.py": {
       "before": null,
