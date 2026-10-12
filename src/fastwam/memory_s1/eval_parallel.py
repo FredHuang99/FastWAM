@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 from contextlib import contextmanager
 import gc
 from multiprocessing.connection import Listener
@@ -16,7 +17,9 @@ import traceback
 
 from .eval_state import EpisodeQueue, cuda_gpu_uuid, digest, durable_json, is_alive, locked, process_identity, read, signature, stop_mode, summarize
 
-from .simulator_backend import ENVIRONMENT_KEY, configured_backend
+from .simulator_backend import ENVIRONMENT_KEY, configured_backend, backend_contract
+from .selection_runtime import duration, event, live_details
+from .eval_state import EvaluationInterrupted, check_stop
 
 
 def gpu_inventory():
@@ -34,6 +37,8 @@ def simulator_environment(cfg, gpu_uuid):
     environment[ENVIRONMENT_KEY] = backend["name"]
     if backend.get("cuda_launch_blocking"):
         environment["CUDA_LAUNCH_BLOCKING"] = "1"
+    elif backend["name"] == "builtin_torch_async_v2":
+        environment.pop("CUDA_LAUNCH_BLOCKING", None)
     prefix = Path(cfg["closed_loop"]["simulator_python"]).parent.parent
     environment.update(CUDA_VISIBLE_DEVICES=gpu_uuid, CUDA_DEVICE_ORDER="PCI_BUS_ID", CUDA_HOME=str(prefix),
                        PYTHONUNBUFFERED="1", OMP_NUM_THREADS="4", MKL_NUM_THREADS="4", OPENBLAS_NUM_THREADS="4")
@@ -41,6 +46,9 @@ def simulator_environment(cfg, gpu_uuid):
     environment["MEMORY_S1_RECORD_FRAME_STRIDE"] = str(cfg.get("diagnostic", {}).get("record_frame_stride", 1))
     environment["PATH"] = str(prefix / "bin") + os.pathsep + environment["PATH"]
     environment["LD_LIBRARY_PATH"] = os.pathsep.join([str(prefix / "lib"), str(prefix / "targets/x86_64-linux/lib"), environment.get("LD_LIBRARY_PATH", "")])
+    lock_root = Path(cfg["paths"]["run"]) / "selection_locks"
+    lock_root.mkdir(parents=True, exist_ok=True)
+    environment["MEMORY_S1_WARMUP_LOCK"] = str(lock_root / f"{gpu_uuid}.warmup.lock")
     return environment
 
 
@@ -93,12 +101,16 @@ def protocol(cfg, mode):
         for path in sorted((root / directory).rglob("*")):
             if path.is_file() and path.suffix in (".py", ".yml", ".yaml", ".json") and "__pycache__" not in path.parts:
                 inventory[str(path.relative_to(root))] = digest(path)
-    return {"seed": loop["internal_seed"] if internal else loop["official_seed"],
+    value = {"seed": loop["internal_seed"] if internal else loop["official_seed"],
             "count": loop["internal_episodes"] if internal else loop["official_episodes"],
             "tasks": ["put_back_block", "swap_blocks"], "task_config": "demo_clean", "instruction_type": "seen",
             "candidate_rule": "first K expert-feasible increasing seeds", "language_seed_rule": "scene_seed xor 0x51A17, freeze literal string",
             "python_scene_random": "random.seed(scene_seed) before expert and policy setup",
             "simulator_source": signature(inventory), "simulator_backend": configured_backend(cfg)}
+    filtering = backend_contract(loop.get("curobo_backend", "upstream"))
+    if filtering != value["simulator_backend"]:
+        value["scene_filter_backend"] = filtering
+    return value
 
 
 def prepare_scenes(cfg, mode, gpu_uuids, stop_root):
@@ -137,51 +149,77 @@ def prepare_scenes(cfg, mode, gpu_uuids, stop_root):
         durable_json(directory / "manifest.json", {"contract": borrowed, "scenes": scenes, "source": str(source)})
         print(f"[scenes] reused {len(scenes)} frozen scenes from {source}; expert replanning skipped", flush=True)
         return borrowed, scenes, directory
-    root = Path(cfg["paths"]["run"]) / "scene_manifests" / signature(contract)[:16]
+    # Candidate acceptance is always determined by the existing reference backend.
+    # Accelerated rollouts reuse the same expert-feasible seeds and literal instructions.
+    planning_cfg = copy.deepcopy(cfg)
+    planning_cfg.setdefault("selection_runtime", {})["backend"] = cfg["closed_loop"].get("curobo_backend", "upstream")
+    filtering_contract = protocol(planning_cfg, mode)
+    root = Path(cfg["paths"]["run"]) / "scene_manifests" / signature(filtering_contract)[:16]
     root.mkdir(parents=True, exist_ok=True)
-    with locked(root / "planner.lock"):
-        durable_json(root / "contract.json", contract)
+    with locked(root / "planner.lock", blocking=False):
+        durable_json(root / "contract.json", filtering_contract)
         processes = []
+        pending = [task for task in contract["tasks"]
+                   if not (root / f"{task}.json").exists() or not read(root / f"{task}.json").get("complete")]
+        started, last_print = time.monotonic(), 0
+        limit = 6 * 3600 if mode == "official" else 2 * 3600
+        durable_json(Path(stop_root) / "planning.json", {"directory": str(root), "contract": contract})
         try:
-            for index, task in enumerate(contract["tasks"]):
-                output = root / f"{task}.json"
-                if output.exists() and read(output).get("complete"):
-                    continue
-                command = [cfg["closed_loop"]["simulator_python"], str(Path(cfg["root"]) / "scripts/memory_s1/sim_eval.py"),
-                           "--operation", "plan", "--task", task, "--output", str(output), "--contract", str(root / "contract.json"),
-                           "--episodes", str(contract["count"]), "--seed", str(contract["seed"]),
-                           "--gpu-uuid", gpu_uuids[index % len(gpu_uuids)], "--stop-root", str(stop_root)]
-                log = (root / f"{task}.planner.log").open("a", encoding="utf-8")
-                process = subprocess.Popen(command, env=simulator_environment(cfg, gpu_uuids[index % len(gpu_uuids)]),
-                                           cwd=Path(cfg["root"]) / cfg["closed_loop"]["simulator_root"], stdout=log,
-                                           stderr=subprocess.STDOUT, start_new_session=True)
-                processes.append((task, process, log))
-                durable_json(root / f"{task}.owner.json", process_identity(process.pid))
-            started, last_print = time.monotonic(), 0
-            limit = 6 * 3600 if mode == "official" else 2 * 3600
-            while any(process.poll() is None for _, process, _ in processes):
+            while pending or processes:
                 if (Path(cfg["paths"]["run"]) / "STOP_REQUESTED").exists():
-                    durable_json(Path(stop_root) / "STOP.json", {"mode": "now", "reason": "training safe stop during scene planning"})
-                if stop_mode(stop_root) or time.monotonic() - started > limit:
-                    raise RuntimeError("Scene planning stopped or timed out; partial manifests are preserved.")
-                if any(process.poll() not in (None, 0) for _, process, _ in processes):
-                    raise RuntimeError(f"Scene planner failed; inspect {root}/*.planner.log")
-                if time.monotonic() - last_print >= 30:
-                    progress = {task: len(read(root / f"{task}.json")["scenes"]) if (root / f"{task}.json").exists() else 0 for task in contract["tasks"]}
-                    print(f"[planning] accepted={progress}; count_per_task={contract['count']}; logs={root}", flush=True)
+                    durable_json(Path(stop_root) / "STOP.json", {"mode": "now", "reason": "training safe stop"})
+                check_stop(stop_root)
+                if time.monotonic()-started > limit:
+                    raise TimeoutError(f"Scene planning exceeded {duration(limit)}; saved seeds retained: {root}")
+                busy = {uuid for _, _, _, uuid in processes}
+                for uuid in gpu_uuids:
+                    if uuid in busy or not pending or stop_mode(stop_root):
+                        continue
+                    task = pending.pop(0)
+                    output = root / f"{task}.json"
+                    command = [cfg["closed_loop"]["simulator_python"], str(Path(cfg["root"]) / "scripts/memory_s1/sim_eval.py"),
+                               "--operation", "plan", "--task", task, "--output", str(output), "--contract", str(root / "contract.json"),
+                               "--episodes", str(contract["count"]), "--seed", str(contract["seed"]),
+                               "--gpu-uuid", uuid, "--stop-root", str(stop_root)]
+                    environment = simulator_environment(planning_cfg, uuid)
+                    environment["MEMORY_S1_PROGRESS_ROOT"] = str(root / f"{task}.progress")
+                    log = (root / f"{task}.planner.log").open("a", encoding="utf-8")
+                    process = subprocess.Popen(command, env=environment,
+                                               cwd=Path(cfg["root"]) / cfg["closed_loop"]["simulator_root"], stdout=log,
+                                               stderr=subprocess.STDOUT, start_new_session=True)
+                    processes.append((task, process, log, uuid))
+                    durable_json(root / f"{task}.owner.json", process_identity(process.pid))
+                    event(stop_root, "planning_dispatch", task=task, gpu=uuid, queued=pending)
+                for item in list(processes):
+                    task, process, log, uuid = item
+                    if process.poll() is not None:
+                        terminate_owned(process)
+                        log.close()
+                        processes.remove(item)
+                        if stop_mode(stop_root):
+                            raise EvaluationInterrupted("Scene filtering stopped; unfinished seed will run again.")
+                        if process.returncode:
+                            raise RuntimeError(f"Scene planner failed: {root / (task + '.planner.log')}")
+                if stop_mode(stop_root) and not processes:
+                    raise EvaluationInterrupted("Scene filtering drained.")
+                if time.monotonic()-last_print >= 15:
+                    counts = {task: len(read(root / f"{task}.json")["scenes"]) if (root / f"{task}.json").exists() else 0 for task in contract["tasks"]}
+                    details = live_details(root)
+                    durable_json(Path(stop_root) / "status.json", {"stage": "planning", "accepted": counts,
+                                 "required_per_task": contract["count"], "queued": pending, "active": details,
+                                 "elapsed_seconds": time.monotonic()-started, "eta_seconds": None})
+                    description = "; ".join(f"{r['phase']} {r['state']} batch={r.get('batch', '-')} age={duration(r['phase_age_seconds'])}" for r in details)
+                    print(f"[planning heartbeat] accepted={counts}/{contract['count']} per task | elapsed={duration(time.monotonic()-started)} | ETA=unknown | {description} | queued={pending}", flush=True)
                     last_print = time.monotonic()
-                time.sleep(1)
-            if any(process.returncode != 0 for _, process, _ in processes):
-                raise RuntimeError(f"Scene planner failed; inspect {root}")
+                time.sleep(.5)
         finally:
-            for _, process, log in processes:
-                if process.poll() is None:
-                    terminate_owned(process)
+            for _, process, log, _ in processes:
+                terminate_owned(process)
                 log.close()
         scenes = []
         for task in contract["tasks"]:
             value = read(root / f"{task}.json")
-            if value["contract"] != contract or not value["complete"] or value["sha256"] != signature(value["scenes"]):
+            if value["contract"] != filtering_contract or not value["complete"] or value["sha256"] != signature(value["scenes"]):
                 raise ValueError("Incomplete/corrupt scene manifest.")
             # Runtime timings and GPU assignments are provenance, not scene identity.
             scenes.extend([{key: row[key] for key in ("task", "seed", "ordinal", "instruction", "episode_info")} for row in value["scenes"]])
@@ -202,7 +240,8 @@ def evaluation_identity(cfg, contract, scenes, conditions, weights, evidence, re
                       "evidence": evidence, "source": source, "noise_seed": cfg["seed"],
                       "predict": 32, "execute": 16, "denoising_steps": 10, "record_frames": record_frames,
                       "history_sampling": cfg.get("history", {"online_period": 8, "archive_stride": 8}),
-                      "inference_contract": inference_contract(), "diagnostic": cfg.get("diagnostic", {})})
+                      "inference_contract": inference_contract(), "diagnostic": cfg.get("diagnostic", {}),
+                      "selection_runtime": cfg.get("selection_runtime", {})})
 
 
 @contextmanager
@@ -229,7 +268,7 @@ def loading_slot(root, count=2):
             stream.close()
 
 
-def execute_job(model, encoders, cfg, queue, job, gpu_uuid, record_frames, evidence, timeout):
+def execute_job(model, encoders, cfg, queue, job, gpu_uuid, record_frames, evidence, timeout, resident=None):
     from .sim_bridge import InferenceSession
     directory = queue.root / job["directory"]
     started = time.monotonic()
@@ -237,18 +276,30 @@ def execute_job(model, encoders, cfg, queue, job, gpu_uuid, record_frames, evide
     temporary.mkdir(parents=True, exist_ok=True)
     socket_path = temporary / f"p{os.getpid()}.sock"
     socket_path.unlink(missing_ok=True)
-    key = os.urandom(24)
+    if resident and resident.get("task") != job["scene"]["task"]:
+        terminate_owned(resident["process"])
+        resident.clear()
+    key = resident["key"] if resident else os.urandom(24)
     process = None
+    completed = False
     session = InferenceSession(model, cfg, encoders, job["condition"], directory, evidence, cfg["seed"])
     try:
         with Listener(str(socket_path), family="AF_UNIX", authkey=key) as listener, (directory / "simulator.log").open("w", encoding="utf-8") as log:
             listener._listener._socket.settimeout(1)
             environment = simulator_environment(cfg, gpu_uuid)
             environment["MEMORY_S1_RPC_KEY"] = key.hex()
+            progress_root = queue.root / "simulator_progress" / str(os.getpid())
+            environment["MEMORY_S1_PROGRESS_ROOT"] = str(progress_root)
             command = [cfg["closed_loop"]["simulator_python"], str(Path(cfg["root"]) / "scripts/memory_s1/sim_eval.py"),
                        "--operation", "episode", "--job", str(directory / "job.json"), "--output", str(directory),
                        "--socket", str(socket_path), "--seed", str(cfg["seed"]), "--gpu-uuid", gpu_uuid,
                        "--stop-root", str(queue.root)]
+            if cfg.get("selection_runtime", {}).get("qualification"):
+                command.append("--qualification-trace")
+            if resident is not None:
+                service = queue.root / "resident" / str(os.getpid())
+                service.mkdir(parents=True, exist_ok=True)
+                command += ["--service", str(service)]
             if record_frames:
                 command.append("--record-frames")
             diagnostic = cfg.get("diagnostic", {})
@@ -256,10 +307,31 @@ def execute_job(model, encoders, cfg, queue, job, gpu_uuid, record_frames, evide
                 command += ["--max-targets", str(diagnostic["max_targets"])]
             if diagnostic.get("record_feedback", False):
                 command.append("--record-feedback")
-            process = subprocess.Popen(command, cwd=Path(cfg["root"]) / cfg["closed_loop"]["simulator_root"],
-                                       env=environment, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
-            durable_json(directory / "simulator_owner.json", process_identity(process.pid))
+            if resident:
+                process = resident["process"]
+                if process.poll() is not None:
+                    raise RuntimeError("Resident simulator exited between episodes; resume will create a new worker.")
+                durable_json(service / "next.json", {"job": str(directory / "job.json"), "output": str(directory)})
+            else:
+                bootstrap = (service / "bootstrap.log").open("a", encoding="utf-8") if resident is not None else None
+                try:
+                    process = subprocess.Popen(command, cwd=Path(cfg["root"]) / cfg["closed_loop"]["simulator_root"],
+                                               env=environment, stdout=bootstrap or log, stderr=subprocess.STDOUT, start_new_session=True)
+                finally:
+                    if bootstrap:
+                        bootstrap.close()
+                if resident is not None:
+                    resident.update(process=process, key=key, task=job["scene"]["task"])
+                    durable_json(service / "simulator_owner.json", process_identity(process.pid))
+            if resident is None:
+                durable_json(directory / "simulator_owner.json", process_identity(process.pid))
             while process.poll() is None:
+                check_stop(queue.root)
+                if resident is not None and (directory / "service_complete.json").exists():
+                    marker = read(directory / "service_complete.json")
+                    if marker != {"job": job["id"], "attempt": job["attempt"]}:
+                        raise ValueError("Resident result belongs to another episode")
+                    break
                 if (Path(cfg["paths"]["run"]) / "STOP_REQUESTED").exists():
                     durable_json(queue.root / "STOP.json", {"mode": "now", "reason": "training safe stop"})
                 if time.monotonic() - started > timeout:
@@ -283,9 +355,10 @@ def execute_job(model, encoders, cfg, queue, job, gpu_uuid, record_frames, evide
                     except Exception:
                         response = {"ok": False, "error": traceback.format_exc()}
                     connection.send(response)
-            terminate_owned(process)
+            if resident is None:
+                terminate_owned(process)
             value = read(directory / "simulator_result.json")
-            if value["status"] == "complete" and process.returncode != 0:
+            if value["status"] == "complete" and process.returncode not in (None, 0):
                 raise RuntimeError(f"Simulator failed after producing a result: exit={process.returncode}")
         if value["status"] == "complete":
             if value.get("simulator_backend") != configured_backend(cfg):
@@ -293,16 +366,21 @@ def execute_job(model, encoders, cfg, queue, job, gpu_uuid, record_frames, evide
             value["wall_seconds"] = time.monotonic() - started
             value["policy_gpu_uuid"] = gpu_uuid
             queue.publish(job, value)
+            completed = True
         else:
             queue.finish(job, value["status"], value.get("error"))
+    except EvaluationInterrupted as error:
+        queue.finish(job, "interrupted", str(error))
     except Exception:
         error = traceback.format_exc()
         durable_json(directory / "error.json", {"error": error})
         queue.finish(job, "error", error)
         raise
     finally:
-        if process is not None:
+        if process is not None and (resident is None or not completed):
             terminate_owned(process)
+            if resident is not None:
+                resident.clear()
         socket_path.unlink(missing_ok=True)
         session.reset()
 
@@ -314,9 +392,11 @@ def worker_loop(cfg, output, worker, weights=None, resident_model=None, record_f
     own_model = resident_model is None
     model = resident_model
     encoders = None
+    resident = {} if cfg.get("selection_runtime", {}).get("resident_simulator") else None
     try:
         load_started = time.monotonic()
         print(f"[worker {worker}] waiting for model/encoder loading slot", flush=True)
+        event(queue.root / "workers" / f"progress_{worker}", "model_load", worker=worker)
         with loading_slot(queue.root):
             if own_model:
                 model = S1Model(cfg, torch.device("cuda:0"))
@@ -328,6 +408,7 @@ def worker_loop(cfg, output, worker, weights=None, resident_model=None, record_f
             model.eval()
             encoders = load_observation_encoders(cfg, next(model.memory.parameters()).device)
         print(f"[worker {worker}] model/encoders ready; load_and_wait_seconds={time.monotonic()-load_started:.1f}", flush=True)
+        event(queue.root / "workers" / f"progress_{worker}", "model_load", "complete", worker=worker, seconds=time.monotonic()-load_started)
         uuid = gpu_uuid_for_model(model)
         durable_json(queue.root / "workers" / f"{worker}.json", {"owner": process_identity(), "gpu_uuid": uuid, "torch": torch.__version__, "cuda": torch.version.cuda})
         while True:
@@ -337,13 +418,15 @@ def worker_loop(cfg, output, worker, weights=None, resident_model=None, record_f
             if job is None:
                 break
             print(f"[worker {worker}] start {job['id']} attempt={job['attempt']} GPU={uuid}", flush=True)
-            execute_job(model, encoders, cfg, queue, job, uuid, record_frames, evidence, timeout)
+            execute_job(model, encoders, cfg, queue, job, uuid, record_frames, evidence, timeout, resident)
             print(f"[worker {worker}] finish {job['id']}", flush=True)
             if resident_model is not None and worker == "rank_0":
                 status = progress(queue, int(os.environ.get("WORLD_SIZE", 1)))
-                print(f"[validation] {status['completed']}/{status['total']} ETA~{status['eta_seconds']/60:.1f}min provisional={status['eta_provisional']}", flush=True)
+                print(f"[validation] {status['completed']}/{status['total']} ETA~{duration(status['eta_seconds'])} provisional={status['eta_provisional']}", flush=True)
                 upload_results(cfg, output)
     finally:
+        if resident:
+            terminate_owned(resident["process"])
         del encoders
         gc.collect()
         torch.cuda.empty_cache()
@@ -354,21 +437,26 @@ def worker_loop(cfg, output, worker, weights=None, resident_model=None, record_f
 def progress(queue, workers):
     value = queue.snapshot()
     completed = [job for job in value["jobs"] if job["state"] == "complete"]
-    by_task = {}
-    estimates = {}
+    by_task, estimates = {}, {}
     for task in ("put_back_block", "swap_blocks"):
-        rows = [queue.result(job, value["identity"]) for job in completed if job["scene"]["task"] == task]
-        estimates[task] = sum(row["wall_seconds"] for row in rows) / len(rows) if rows else (370 if task == "put_back_block" else 740)
-        by_task[task] = {"completed": len(rows), "measured_mean_seconds": estimates[task] if rows else None}
-    workloads = [0.0] * max(1, workers)
-    for job in sorted((j for j in value["jobs"] if j["state"] in ("pending", "running")), key=lambda j: estimates[j["scene"]["task"]], reverse=True):
-        remaining = estimates[job["scene"]["task"]]
-        if job["state"] == "running":
-            remaining = max(0, remaining - (time.time() - job["started"]))
-        index = min(range(len(workloads)), key=workloads.__getitem__)
-        workloads[index] += remaining
-    result = {"completed": len(completed), "total": len(value["jobs"]), "by_task": by_task,
-              "eta_seconds": max(workloads), "eta_provisional": any(v["measured_mean_seconds"] is None for v in by_task.values()),
+        rows = [read(queue.root / job["directory"] / "result.json") for job in completed if job["scene"]["task"] == task]
+        estimates[task] = sum(row["wall_seconds"] for row in rows) / len(rows) if rows else None
+        by_task[task] = {"completed": len(rows), "measured_mean_seconds": estimates[task]}
+    remaining = [j for j in value["jobs"] if j["state"] != "complete"]
+    eta = 0 if not remaining else None
+    if remaining and all(estimates[j["scene"]["task"]] is not None for j in remaining):
+        workloads = [0.0] * max(1, workers)
+        overdue = False
+        for job in sorted(remaining, key=lambda j: estimates[j["scene"]["task"]], reverse=True):
+            estimate = estimates[job["scene"]["task"]]
+            if job["state"] == "running":
+                estimate -= time.time() - job["started"]
+                overdue |= estimate <= 0
+            workloads[min(range(len(workloads)), key=workloads.__getitem__)] += max(0, estimate)
+        eta = None if overdue else max(workloads)
+    result = {"stage": "episodes", "completed": len(completed), "total": len(value["jobs"]), "by_task": by_task,
+              "eta_seconds": eta, "eta_provisional": len(completed) < 4,
+              "active": live_details(queue.root / "simulator_progress") + live_details(queue.root / "workers"),
               "stop": stop_mode(queue.root), "errors": sum(j["state"] == "error" for j in value["jobs"])}
     durable_json(queue.root / "status.json", result)
     return result
@@ -414,7 +502,8 @@ def standalone(args):
         diagnostic["compatibility_sha256"] = digest(diagnostic["compatibility_report"])
     if cfg.get("diagnostic_only") and args.mode != "diagnostic":
         raise ValueError("This configuration is only for base diagnostics.")
-    if diagnostic.get("max_targets", 0) and (args.mode != "diagnostic" or args.weights):
+    qualification = cfg.get("selection_runtime", {}).get("qualification", False)
+    if diagnostic.get("max_targets", 0) and (args.mode != "diagnostic" or args.weights) and not qualification:
         raise ValueError("A short prefix is a base diagnostic, not a trained/official evaluation.")
     if diagnostic.get("max_targets", 0) < 0:
         raise ValueError("max-targets cannot be negative.")
@@ -438,6 +527,14 @@ def standalone(args):
     evidence = load_evidence(args.evidence) if args.evidence else None
     if any(c.startswith("delete_") for c in conditions) and evidence is None:
         raise ValueError("Deletion conditions require a reviewed evidence manifest.")
+    options = cfg.get("selection_runtime", {})
+    if options.get("qualification"):
+        if args.mode != "diagnostic" or diagnostic.get("max_targets") != 32 or diagnostic.get("episodes_per_task") != 2:
+            raise ValueError("Acceleration qualification is restricted to two 32-target scenes per task")
+    elif options.get("profile", "serial") != "serial":
+        from types import SimpleNamespace
+        from .posttrain import verify_qualification
+        verify_qualification(cfg, SimpleNamespace(runtime_profile=options["profile"], qualification_report=options.get("qualification_report")))
     with locked(output / "launcher.lock", blocking=False):
         durable_json(output / "launcher.json", {"owner": process_identity(), "argv": sys.argv, "gpu_uuids": uuids})
         if args.resume:
@@ -470,6 +567,10 @@ def standalone(args):
                                                    "evidence": evidence, "record_frames": args.record_frames, "scene_manifest": str(manifest),
                                                    "inference_contract": inference_contract()})
         durable_json(output / "scenes.json", {"contract": contract, "scenes": scenes})
+        if all(job["state"] == "complete" for job in queue.snapshot()["jobs"]):
+            summarize(output, args.mode, require_complete=True)
+            print("[resume] all episodes verified; no model or simulator will be loaded", flush=True)
+            return 0
         processes = []
         try:
             for worker, uuid in enumerate(uuids):
@@ -483,28 +584,38 @@ def standalone(args):
                            "--worker", str(worker), "--timeout", str(args.episode_timeout)]
                 process = subprocess.Popen(command, env=environment, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
                 processes.append((process, log))
-            last_print, last_uploaded = 0, -1
+                durable_json(directory / f"launcher_{worker}.json", {"owner": process_identity(process.pid), "gpu_uuid": uuid})
+            last_print, last_uploaded = 0, 0
+            last_upload_time = time.monotonic()
             workers_started = time.monotonic()
             while any(process.poll() is None for process, _ in processes):
+                if stop_mode(output) == "now":
+                    break
                 hung = [j["id"] for j in queue.snapshot()["jobs"] if j["state"] == "running" and time.time() - j["started"] > args.episode_timeout + 60]
                 if hung or time.monotonic() - workers_started > len(scenes) * len(conditions) * args.episode_timeout + 1800:
                     durable_json(output / "ABORT.json", {"error": "Worker timeout", "jobs": hung})
                     durable_json(output / "STOP.json", {"mode": "now", "reason": "worker timeout"})
                     break
                 if any(process.poll() not in (None, 0) for process, _ in processes):
+                    if stop_mode(output):
+                        break
                     durable_json(output / "ABORT.json", {"error": "A policy worker failed; inspect workers/*.log"})
+                    break
                 if time.monotonic() - last_print >= 15:
                     status = progress(queue, len(uuids))
                     summarize(output, args.mode)
-                    print(f"[progress] {status['completed']}/{status['total']} ETA~{status['eta_seconds']/60:.1f}min provisional={status['eta_provisional']} tasks={status['by_task']}", flush=True)
+                    print(f"[progress] {status['completed']}/{status['total']} ETA~{duration(status['eta_seconds'])} provisional={status['eta_provisional']} tasks={status['by_task']}", flush=True)
+                    for row in status["active"]:
+                        print(f"[active] {row['phase']} {row['state']} task={row.get('task', '-')} seed={row.get('seed', '-')} targets={row.get('targets', '-')} batch={row.get('batch', '-')} age={duration(row['phase_age_seconds'])}", flush=True)
                     last_print = time.monotonic()
-                    if args.hf_results and status["completed"] != last_uploaded:
+                    if args.hf_results and status["completed"] > last_uploaded and (status["completed"]-last_uploaded >= 5 or time.monotonic()-last_upload_time >= 600):
                         try:
                             upload_results(cfg, output)
                             last_uploaded = status["completed"]
+                            last_upload_time = time.monotonic()
                         except Exception:
                             durable_json(output / "UPLOAD_FAILED.json", {"error": traceback.format_exc()})
-                            durable_json(output / "STOP.json", {"mode": "drain", "time": time.time()})
+                            durable_json(output / "STOP.json", {"mode": "drain", "time": time.time(), "deadline": time.time()+120})
                 time.sleep(1)
         finally:
             for process, log in processes:

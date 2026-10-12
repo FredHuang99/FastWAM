@@ -13,11 +13,14 @@ import signal
 import subprocess
 import sys
 import tarfile
+import copy
 import time
 
 from .common import atomic_json, code_version, fingerprint, load_config, read_json, sha256
 from .eval_state import EvaluationInterrupted, check_stop, locked, process_identity
 from .schedule import milestone_steps
+from .eval_state import stop_mode, is_alive
+from .selection_runtime import duration, source_migration, import_offline, stop_request
 
 
 def verified_weights(run):
@@ -48,6 +51,8 @@ def checked_result(path, identity):
 
 def closed_child(cfg_file, weights, root, directory, mode, conditions, args,
                  scenes=None, period=8, cycle=None, evidence=None):
+    if stop_mode(root):
+        raise EvaluationInterrupted("Stopped before starting another evaluation group.")
     directory.mkdir(parents=True, exist_ok=True)
     command = [sys.executable, "-u", "-m", "fastwam.memory_s1.eval_parallel", "run",
                "--config", str(cfg_file), "--weights", str(weights), "--output", str(directory),
@@ -61,19 +66,46 @@ def closed_child(cfg_file, weights, root, directory, mode, conditions, args,
         command += ["--history-period", str(period)]
     if evidence:
         command += ["--evidence", str(evidence)]
-    if (directory / "queue.json").exists():
+    if any((directory / name).exists() for name in ("queue.json", "launcher.json", "STOP.json")):
         command.append("--resume")
-    if args.hf_results:
-        command.append("--hf-results")
+    # The parent backs up all groups together and verifies immutable readback.
     atomic_json(root / "active.json", {"directory": str(directory), "command": command})
     with (directory / "launcher.log").open("a", encoding="utf-8") as log:
         process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+        atomic_json(root / "active.json", {"directory": str(directory), "command": command, "owner": process_identity(process.pid)})
+        last_log, last_backup, uploaded = 0, time.monotonic(), completed_count(root)
+        offset = 0
         try:
             while process.poll() is None:
-                if (root / "STOP_REQUESTED").exists():
-                    atomic_json(directory / "STOP.json", {"mode": "now", "reason": "post-training stop"})
-                time.sleep(0.5)
-            check_stop(root)
+                if stop_mode(root):
+                    atomic_json(directory / "STOP.json", read_json(root / "STOP.json"))
+                if time.monotonic()-last_log >= 15:
+                    with (directory / "launcher.log").open(encoding="utf-8", errors="replace") as stream:
+                        stream.seek(offset)
+                        lines = stream.read().splitlines()
+                        offset = stream.tell()
+                    for line in lines[-12:]:
+                        print(f"[{directory.name}] {line}", flush=True)
+                    print_overall(root, args.phase)
+                    last_log = time.monotonic()
+                count = completed_count(root)
+                if args.hf_results and not stop_mode(root) and count > uploaded and (count-uploaded >= 5 or time.monotonic()-last_backup >= 600):
+                    try:
+                        upload_compact(load_config(cfg_file), Path(load_config(cfg_file)["paths"]["run"]), root, args.phase)
+                        uploaded, last_backup = count, time.monotonic()
+                    except Exception as error:
+                        atomic_json(root / "BACKUP_PENDING.json", {"phase": args.phase, "error": repr(error)})
+                        stop_request(root, "drain", 120)
+                if stop_mode(root) == "now":
+                    deadline = read_json(root / "STOP.json").get("deadline", time.time())
+                    if time.time() > deadline+30:
+                        from .eval_parallel import terminate_owned, cleanup_simulators
+                        terminate_owned(process)
+                        cleanup_simulators(directory)
+                        break
+                time.sleep(.5)
+            if stop_mode(root):
+                raise EvaluationInterrupted("Stopped; completed episodes remain reusable.")
             if process.returncode:
                 raise RuntimeError(f"Evaluation exited {process.returncode}; inspect {directory / 'launcher.log'}")
         finally:
@@ -81,8 +113,10 @@ def closed_child(cfg_file, weights, root, directory, mode, conditions, args,
                 from .eval_parallel import terminate_owned
                 terminate_owned(process)
     value = read_json(directory / "summary.json")
-    if not value.get("complete") or value.get("success_rate") is None:
+    if not value.get("complete") or (mode != "diagnostic" and value.get("success_rate") is None):
         raise ValueError("A partial/prefix evaluation cannot select a checkpoint.")
+    if args.hf_results:
+        upload_compact(load_config(cfg_file), Path(load_config(cfg_file)["paths"]["run"]), root, args.phase)
     return value
 
 
@@ -254,26 +288,76 @@ def upload_compact(cfg, run, root, phase):
     directory = root / "packages" / f"{phase}_{time.time_ns()}"
     directory.mkdir(parents=True)
     package = directory / "posttrain.tar.zst"
-    files = [p for p in root.rglob("*") if p.is_file() and
-             not set(p.relative_to(root).parts) & {"packages", "frames", "attempt_001", "workers"} and
-             p.suffix in (".json", ".csv", ".png", ".pdf") and p.stat().st_size < 16 * 2**20]
-    if phase == "selection":
-        files.append(run / "weights" / "best.pt")
-    manifest = {str(p.relative_to(root)) if p.is_relative_to(root) else "weights/best.pt": sha256(p) for p in files}
-    atomic_json(directory / "manifest.json", {"files": manifest, "phase": phase})
-    with package.open("wb") as stream:
-        process = subprocess.Popen(["zstd", "-T2", "-3", "-c"], stdin=subprocess.PIPE, stdout=stream)
-        try:
-            with tarfile.open(fileobj=process.stdin, mode="w|") as archive:
-                for path in files:
-                    name = str(path.relative_to(root)) if path.is_relative_to(root) else "weights/best.pt"
-                    archive.add(path, arcname=name, recursive=False)
-                archive.add(directory / "manifest.json", arcname="manifest.json", recursive=False)
-        finally:
-            process.stdin.close()
-            code = process.wait()
-        if code:
-            raise RuntimeError("Compact report compression failed.")
+    snapshot = root / "packages" / f"snapshot_{time.time_ns()}"
+    snapshot.mkdir()
+    print(f"[backup] snapshot started: {directory.name}", flush=True)
+    backed_up = 0
+    backup_started = time.monotonic()
+    try:
+        files = [p for p in root.rglob("*") if p.is_file() and
+                 not set(p.relative_to(root).parts) & {"packages", "frames"} and
+                 p.suffix in (".json", ".jsonl", ".csv", ".png", ".pdf", ".log", ".yaml") and p.stat().st_size < 16 * 2**20]
+        for path in files:
+            target = snapshot / path.relative_to(root)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(path, target)
+        # Capture every checksummed completed-episode dependency, including larger logs.
+        from .eval_state import EpisodeQueue
+        for queue_path in root.rglob("queue.json"):
+            if "packages" in queue_path.relative_to(root).parts:
+                continue
+            with locked(queue_path.parent / "queue.lock"):
+                value = read_json(queue_path)
+                if "selection" in queue_path.relative_to(root).parts:
+                    backed_up += sum(job["state"] == "complete" for job in value["jobs"])
+                for job in value["jobs"]:
+                    if job["state"] == "complete":
+                        EpisodeQueue(queue_path.parent).result(job, value["identity"])
+                        attempt = queue_path.parent / job["directory"]
+                        for name in (*read_json(attempt / "complete.json")["files"], "complete.json"):
+                            target = snapshot / attempt.relative_to(root) / name
+                            target.parent.mkdir(parents=True, exist_ok=True)
+                            shutil.copy2(attempt / name, target)
+                    else:
+                        job["state"] = "pending"
+                        job.pop("owner", None)
+                atomic_json(snapshot / queue_path.relative_to(root), value)
+        # Include partial scene manifests even before the first policy episode exists.
+        for plan in root.rglob("planning.json"):
+            if "packages" in plan.relative_to(root).parts:
+                continue
+            scene_root = Path(read_json(plan)["directory"])
+            for path in scene_root.glob("*.json"):
+                target = snapshot / "scene_manifests" / scene_root.name / path.name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(path, target)
+        migration = Path(cfg["root"]) / "scripts/memory_s1/portable/selection_migration.json"
+        if migration.exists():
+            for name in ["scripts/memory_s1/portable/selection_migration.json", *read_json(migration)["files"]]:
+                target = snapshot / "evaluation_code" / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(Path(cfg["root"]) / name, target)
+        if (root / "BEST.json").exists():
+            target = snapshot / "weights/best.pt"
+            target.parent.mkdir(exist_ok=True)
+            shutil.copy2(run / "weights/best.pt", target)
+        files = sorted(p for p in snapshot.rglob("*") if p.is_file())
+        manifest = {p.relative_to(snapshot).as_posix(): sha256(p) for p in files}
+        atomic_json(directory / "manifest.json", {"files": manifest, "phase": phase, "selection_completed": backed_up})
+        with package.open("wb") as stream:
+            process = subprocess.Popen(["zstd", "-T2", "-3", "-c"], stdin=subprocess.PIPE, stdout=stream)
+            try:
+                with tarfile.open(fileobj=process.stdin, mode="w|") as archive:
+                    for path in files:
+                        archive.add(path, arcname=path.relative_to(snapshot).as_posix(), recursive=False)
+                    archive.add(directory / "manifest.json", arcname="manifest.json", recursive=False)
+            finally:
+                process.stdin.close()
+                code = process.wait()
+            if code:
+                raise RuntimeError("Compact report compression failed")
+    finally:
+        shutil.rmtree(snapshot)
     prefix = f"posttrain/{run.name}/{phase}/{directory.name}"
     environment = dict(os.environ)
     for name in ("HF_HUB_OFFLINE", "TRANSFORMERS_OFFLINE"):
@@ -282,7 +366,7 @@ def upload_compact(cfg, run, root, phase):
                "upload-package", "--repo", cfg["hf"]["backup_repo"], "--repo-type", "model", "--directory", str(directory),
                "--prefix", prefix, "--quota-gib", str(cfg["hf"]["quota_gib"]),
                "--reserve-gib", str(cfg["hf"]["reserve_gib"])]
-    result = subprocess.run(command, env=environment, check=True, capture_output=True, text=True)
+    result = subprocess.run(command, env=environment, check=True, capture_output=True, text=True, timeout=600)
     print(result.stdout, flush=True)
     revision = re.search(r"revision=([0-9a-f]{40})", result.stdout)
     if revision is None:
@@ -290,56 +374,224 @@ def upload_compact(cfg, run, root, phase):
     # Call the installed CLI executable, whose module entry point varies by release.
     download = [str(Path(cfg["hf"]["python"]).with_name("hf")), "download", cfg["hf"]["backup_repo"],
                 f"{prefix}/posttrain.tar.zst", "--revision", revision[1], "--local-dir", str(directory / "readback")]
-    subprocess.run(download, check=True, env=environment)
+    subprocess.run(download, check=True, env=environment, timeout=600)
     recovered = directory / "readback" / prefix / "posttrain.tar.zst"
     if sha256(recovered) != sha256(package):
         raise ValueError("HF post-training package failed readback.")
     atomic_json(root / f"HF_{phase}.json", {"revision": revision[1], "package": f"{prefix}/posttrain.tar.zst",
-                                           "sha256": sha256(package), "repo": cfg["hf"]["backup_repo"]})
+                                           "sha256": sha256(package), "repo": cfg["hf"]["backup_repo"], "readback_verified": True,
+                                           "completed": backed_up, "seconds": time.monotonic()-backup_started, "time": time.time()})
+    (root / "BACKUP_PENDING.json").unlink(missing_ok=True)
+    print(f"[backup] verified revision={revision[1]} completed={backed_up} seconds={time.monotonic()-backup_started:.1f}", flush=True)
+
+
+def completed_count(root):
+    return sum(sum(j["state"] == "complete" for j in read_json(path)["jobs"])
+               for path in Path(root).glob("selection/*/queue.json"))
+
+
+def print_overall(root, phase):
+    root = Path(root)
+    rows, total = [], 0
+    for path in root.glob("selection/*/queue.json"):
+        value = read_json(path)
+        total = max(total, len(value["jobs"])*5)
+        rows.extend((path.parent, job) for job in value["jobs"] if job["state"] == "complete")
+    if not total and (root / "evaluation_config.yaml").exists():
+        cfg = load_config(root / "evaluation_config.yaml")
+        total = 2 * cfg["closed_loop"]["internal_episodes"] * 5
+    means = {}
+    for task in ("put_back_block", "swap_blocks"):
+        seconds = [read_json(directory / j["directory"] / "result.json")["wall_seconds"]
+                   for directory, j in rows if j["scene"]["task"] == task]
+        means[task] = sum(seconds)/len(seconds) if seconds else None
+    remaining = total-len(rows)
+    eta = 0 if remaining == 0 and total else None
+    if remaining and all(v is not None for v in means.values()):
+        # Include a full remaining episode for in-flight work and disclose omitted overhead.
+        by_task = {task: sum(j["scene"]["task"] == task for _, j in rows) for task in means}
+        eta = sum(max(0, total//2-by_task[task])*mean for task, mean in means.items())
+    print(f"[{phase}] overall={len(rows)}/{total or '?'} | remaining-episode work={duration(eta)} (GPU-seconds; excludes future loads/backups)", flush=True)
+    if (root / "active.json").exists():
+        active = Path(read_json(root / "active.json")["directory"])
+        if (active / "status.json").exists():
+            status = read_json(active / "status.json")
+            print(f"[current {active.name}] stage={status.get('stage')} completed={status.get('completed', status.get('accepted'))}/{status.get('total', '?')} ETA={duration(status.get('eta_seconds'))}", flush=True)
+            for row in status.get("active", []):
+                print(f"  {row['phase']} {row['state']} task={row.get('task', '-')} seed={row.get('seed', '-')} batch={row.get('batch', '-')} targets={row.get('targets', '-')} age={duration(row.get('phase_age_seconds'))}", flush=True)
+
+
+def wait_stopped(root, deadline):
+    helper = Path(__file__).resolve().parents[3] / "scripts/memory_s1/portable/selection_control.py"
+    subprocess.run([sys.executable, str(helper), "--output", str(root), "--wait-only",
+                    "--deadline", str(deadline)], check=True)
+
+
+def runtime_options(profile):
+    return {"version": "selection-runtime-v2", "profile": profile,
+            "resident_simulator": profile in ("resident", "async-resident"),
+            "backend": "builtin_torch_async_v2" if profile in ("async", "async-resident") else "builtin_torch_v1",
+            "one_planning_task_per_gpu": True, "serialize_arm_warmup": True}
+
+
+def qualification_binding(cfg, profile):
+    from .eval_parallel import protocol
+    from .simulator_backend import backend_contract
+    contract = protocol(cfg, "internal")
+    contract["simulator_backend"] = backend_contract("builtin_torch_v1")
+    contract.pop("scene_filter_backend", None)
+    return {"source": code_version(cfg["root"]), "protocol": contract, "profile": profile,
+            "base_sha256": sha256(cfg["paths"]["base"]), "stats_sha256": sha256(cfg["paths"]["stats"]),
+            "runtime": subprocess.check_output([cfg["closed_loop"]["simulator_python"], "-c",
+                "import sys,torch; print(sys.version); print(torch.__version__,torch.version.cuda); print(torch.cuda.get_device_name(0))"], text=True)}
+
+
+def verify_qualification(cfg, args):
+    if not args.qualification_report:
+        raise ValueError("This acceleration profile requires --qualification-report; serial is the safe fallback.")
+    report = read_json(args.qualification_report)
+    if report.get("passed") is not True or report.get("binding") != qualification_binding(cfg, args.runtime_profile):
+        raise ValueError("Acceleration qualification is absent, failed, or belongs to a different environment/source.")
+    source_root = Path(report["directory"])
+    for name, expected in report["files"].items():
+        if sha256(source_root / name) != expected:
+            raise ValueError(f"Qualification evidence changed: {name}")
+
+
+def qualify(cfg, run, root, weights, args):
+    """Real simulator checks, explicitly requested; never part of selection itself."""
+    import yaml
+    from .eval_parallel import prepare_scenes, gpu_inventory
+    from .eval_state import EpisodeQueue
+    if args.runtime_profile == "serial":
+        raise ValueError("Select the acceleration profile to qualify")
+    base_cfg = copy.deepcopy(cfg)
+    base_cfg["selection_runtime"] = runtime_options("serial")
+    inventory = gpu_inventory()
+    gpu = [inventory[int(args.gpus.split(",")[0])]]
+    contract, scenes, _ = prepare_scenes(base_cfg, "internal", gpu, root)
+    scene_file = root / "qualification_scenes.json"
+    atomic_json(scene_file, {"contract": contract, "scenes": scenes})
+    summaries = {}
+    for name, profile in (("reference", "serial"), ("reference_repeat", "serial"), ("candidate", args.runtime_profile)):
+        check_stop(root)
+        current = copy.deepcopy(base_cfg)
+        current["selection_runtime"] = {**runtime_options(profile), "qualification": True}
+        current["diagnostic"] = {"scenes_from": str(scene_file), "episodes_per_task": 2,
+                                 "max_targets": 32, "record_feedback": True}
+        # The original frozen scenes/instructions stay identical; only the declared backend changes.
+        from .eval_parallel import protocol
+        profile_scenes = root / f"{name}_scenes.json"
+        atomic_json(profile_scenes, {"contract": protocol(current, "internal"), "scenes": scenes})
+        current["diagnostic"]["scenes_from"] = str(profile_scenes)
+        path = root / f"{name}.yaml"
+        path.write_text(yaml.safe_dump(current, sort_keys=False), encoding="utf-8")
+        prefix_args = copy.copy(args)
+        prefix_args.gpus = args.gpus.split(",")[0]
+        closed_child(path, weights[0], root, root / "qualification" / name,
+                     "diagnostic", ["gate_zero"], prefix_args)
+        summaries[name] = EpisodeQueue(root / "qualification" / name)
+    files, comparisons, timings = {}, [], []
+    reference = summaries["reference"].snapshot()
+    for name, queue in summaries.items():
+        state = queue.snapshot()
+        if len(state["jobs"]) != 4 or any(j["state"] != "complete" for j in state["jobs"]):
+            raise ValueError("Qualification requires two complete prefix scenes per task")
+        for job in state["jobs"]:
+            result = queue.result(job, state["identity"])
+            timings.append({"group": name, "job": job["id"], "wall_seconds": result["wall_seconds"],
+                            "setup_seconds": result["timings"]["setup_seconds"], "executed_targets": result["executed_targets"]})
+            prior = next(j for j in reference["jobs"] if j["id"] == job["id"])
+            for filename in ("qualification_trace.jsonl", "executed_actions.jsonl"):
+                path = queue.root / job["directory"] / filename
+                baseline = summaries["reference"].root / prior["directory"] / filename
+                actual = [json.loads(line) for line in path.read_text().splitlines()]
+                expected = [json.loads(line) for line in baseline.read_text().splitlines()]
+                equal = bool(actual) and actual == expected
+                files[str(path.relative_to(root))] = sha256(path)
+                first = next((i for i, (a, b) in enumerate(zip(actual, expected)) if a != b),
+                             min(len(actual), len(expected)) if len(actual) != len(expected) else None)
+                comparisons.append({"group": name, "job": job["id"], "file": filename, "exact": equal,
+                                    "first_different_row": first, "rows": len(actual)})
+            if not result.get("executed_targets"):
+                raise ValueError("Qualification did not execute targets")
+    passed = all(row["exact"] for row in comparisons)
+    with (root / "qualification_timings.csv").open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=tuple(timings[0]))
+        writer.writeheader()
+        writer.writerows(timings)
+    atomic_json(root / "QUALIFICATION.json", {"passed": passed, "binding": qualification_binding(cfg, args.runtime_profile),
+                "directory": str(root), "files": files, "comparisons": comparisons, "timings": timings,
+                "scope": "same inputs/actions/physical feedback for two 32-target scenes per task; no full-task success claim"})
+    if not passed:
+        raise ValueError("Acceleration changed observed results (or reference was not repeatable); keep serial profile and inspect QUALIFICATION.json")
+    print("[qualification] exact reference repeat and accelerated reset/action comparisons passed", flush=True)
 
 
 def main():
     parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument("command", choices=("run", "status", "stop"))
+    parser.add_argument("command", choices=("run", "status", "stop", "backup"))
     parser.add_argument("--config")
     parser.add_argument("--run")
     parser.add_argument("--output", required=True)
-    parser.add_argument("--phase", choices=("offline", "selection", "official", "memory"))
+    parser.add_argument("--phase", choices=("offline", "selection", "official", "memory", "qualify"))
     parser.add_argument("--gpus", default="0")
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--hf-results", action="store_true")
     parser.add_argument("--evidence")
+    parser.add_argument("--offline-from", help="Import matching previous offline metrics with explicit provenance")
+    parser.add_argument("--runtime-profile", choices=("serial", "async", "resident", "async-resident"), default="serial")
+    parser.add_argument("--qualification-report")
+    parser.add_argument("--mode", choices=("drain", "now"), default="drain")
+    parser.add_argument("--grace-seconds", type=int, default=120)
+    parser.add_argument("--wait", action="store_true")
     parser.add_argument("--selection-from", help="Verified unpacked selection evidence from another evaluation environment")
     parser.add_argument("--episode-timeout", type=int, default=3600)
     args = parser.parse_args()
     root = Path(args.output).resolve()
     if args.command == "stop":
-        atomic_json(root / "STOP.json", {"mode": "now", "time": time.time()})
-        (root / "STOP_REQUESTED").touch()
+        request = stop_request(root, args.mode, args.grace_seconds)
+        print(f"Stop requested: {args.mode}; deadline={time.ctime(request['deadline'])}", flush=True)
+        if args.wait:
+            wait_stopped(root, request["deadline"])
         return
     if args.command == "status":
-        for name in ("status.json", "active.json", "BEST.json", "launcher.json"):
+        print_overall(root, "selection")
+        for name in ("status.json", "BACKUP_PENDING.json", "HF_selection.json", "BEST.json"):
             if (root / name).exists():
-                print(name, json.dumps(read_json(root / name), indent=2))
-        active = root / "active.json"
-        if active.exists():
-            child_status = Path(read_json(active)["directory"]) / "status.json"
-            if child_status.exists():
-                print("evaluation_progress", json.dumps(read_json(child_status), indent=2))
+                value = read_json(root / name)
+                print(name, json.dumps({k: v for k, v in value.items() if k != "identity"}, indent=2))
         return
+    if args.command == "backup":
+        with locked(root / "launcher.lock", blocking=False):
+            cfg = load_config(root / "evaluation_config.yaml")
+            upload_compact(cfg, Path(cfg["paths"]["run"]), root, args.phase or "selection")
+            previous = read_json(root / "status.json") if (root / "status.json").exists() else {}
+            previous.update(backup_pending=False, backup_verified=True)
+            if (root / "BEST.json").exists() and (args.phase or "selection") == "selection":
+                previous["state"] = "complete"
+            atomic_json(root / "status.json", previous)
+        return
+    with locked(root / "launcher.lock", blocking=False):
+        run_phase(args, root)
+
+
+def run_phase(args, root):
     if not args.config or not args.phase:
-        parser.error("run requires --config and --phase; phases are never chained implicitly")
+        raise ValueError("run requires --config and --phase")
     if args.selection_from and args.phase not in ("official", "memory"):
-        parser.error("--selection-from applies only to official or memory evaluation")
+        raise ValueError("--selection-from applies only to official or memory evaluation")
     cfg = load_config(args.config)
     run = Path(args.run or cfg["paths"]["run"]).resolve()
     identity, weights = verified_weights(run)
     if read_json(run / "MILESTONES.json")["candidate_steps"] != milestone_steps(cfg):
         raise ValueError("Candidate schedule differs from the exported training schedule.")
-    actual_code = code_version(cfg["root"])
-    for key in ("core_sha", "implementation_sha", "support_sha"):
-        if actual_code[key] != identity["code"][key]:
-            raise ValueError(f"Restore the exact training code before evaluating: {key}")
+    migration = source_migration(cfg, identity["code"])
+    cfg["selection_runtime"] = runtime_options(args.runtime_profile)
+    atomic_json(root / "SOURCE_MIGRATION.json", migration)
+    if args.phase not in ("qualify", "offline") and args.runtime_profile != "serial":
+        verify_qualification(cfg, args)
+        cfg["selection_runtime"]["qualification_report"] = str(Path(args.qualification_report).resolve())
     if identity["base_sha256"] != sha256(cfg["paths"]["base"]) or identity["stats_sha256"] != sha256(cfg["paths"]["stats"]):
         raise ValueError("Evaluation base/statistics differ from training.")
     cfg["paths"]["run"] = str(run)
@@ -355,43 +607,52 @@ def main():
     runtime = {"torch": torch.__version__, "cuda": torch.version.cuda, "python": sys.version,
                "gpus": subprocess.check_output(["nvidia-smi", "--query-gpu=name,driver_version", "--format=csv,noheader"], text=True)}
     evaluation_identity = {"training": identity, "weights": {str(k): sha256(v) for k, v in weights.items()},
-                           "config_sha": fingerprint(cfg), "candidate_steps": milestone_steps(cfg), "runtime": runtime}
+                           "config_sha": fingerprint(cfg), "candidate_steps": milestone_steps(cfg), "runtime": runtime, "evaluation_code": migration["code"]}
     marker = root / "identity.json"
     if marker.exists() and read_json(marker) != evaluation_identity:
         raise ValueError("Evaluation environment/weights changed; use a separate output directory.")
     atomic_json(marker, evaluation_identity)
-    with locked(root / "launcher.lock", blocking=False):
-        if (root / "STOP_REQUESTED").exists() or (root / "STOP.json").exists():
-            if not args.resume:
-                raise ValueError("A stop marker exists; inspect status and pass --resume.")
-            (root / "STOP_REQUESTED").unlink(missing_ok=True)
-            (root / "STOP.json").unlink(missing_ok=True)
-        atomic_json(root / "launcher.json", {"owner": process_identity(), "phase": args.phase, "argv": sys.argv})
-        def stop(signum, frame):
-            atomic_json(root / "STOP.json", {"mode": "now", "signal": signum})
-            (root / "STOP_REQUESTED").touch()
-        signal.signal(signal.SIGTERM, stop)
-        signal.signal(signal.SIGINT, stop)
-        started = time.monotonic()
-        atomic_json(root / "status.json", {"phase": args.phase, "state": "running"})
-        try:
-            if args.selection_from:
-                import_selection(args.selection_from, run, root, weights, evaluation_identity, cfg)
-            if args.phase == "offline":
-                offline(cfg, run, root, weights, evaluation_identity, args)
-            elif args.phase == "selection":
-                selection(cfg, cfg_file, run, root, weights, evaluation_identity, args)
-            else:
-                final_evaluation(cfg_file, run, root, weights, evaluation_identity, args)
-            if args.hf_results:
+    if (root / "STOP_REQUESTED").exists() or (root / "STOP.json").exists():
+        if not args.resume:
+            raise ValueError("A stop marker exists; inspect status and pass --resume.")
+        (root / "STOP_REQUESTED").unlink(missing_ok=True)
+        (root / "STOP.json").unlink(missing_ok=True)
+    atomic_json(root / "launcher.json", {"owner": process_identity(), "phase": args.phase, "argv": sys.argv})
+    def stop(signum, frame):
+        stop_request(root, "now", 30)
+    signal.signal(signal.SIGTERM, stop)
+    signal.signal(signal.SIGINT, stop)
+    started = time.monotonic()
+    atomic_json(root / "status.json", {"phase": args.phase, "state": "running"})
+    try:
+        if args.offline_from:
+            import_offline(args.offline_from, root, evaluation_identity, migration)
+        if args.selection_from:
+            import_selection(args.selection_from, run, root, weights, evaluation_identity, cfg)
+        if args.phase == "qualify":
+            qualify(cfg, run, root, weights, args)
+        elif args.phase == "offline":
+            offline(cfg, run, root, weights, evaluation_identity, args)
+        elif args.phase == "selection":
+            selection(cfg, cfg_file, run, root, weights, evaluation_identity, args)
+        else:
+            final_evaluation(cfg_file, run, root, weights, evaluation_identity, args)
+        if args.hf_results:
+            upload_compact(cfg, run, root, args.phase)
+        atomic_json(root / "status.json", {"phase": args.phase, "state": "complete", "seconds": time.monotonic()-started})
+    except EvaluationInterrupted:
+        if args.hf_results:
+            try:
                 upload_compact(cfg, run, root, args.phase)
-            atomic_json(root / "status.json", {"phase": args.phase, "state": "complete", "seconds": time.monotonic()-started})
-        except EvaluationInterrupted:
-            atomic_json(root / "status.json", {"phase": args.phase, "state": "stopped", "seconds": time.monotonic()-started})
-            raise SystemExit(2)
-        except Exception as error:
-            atomic_json(root / "status.json", {"phase": args.phase, "state": "error", "error": repr(error), "seconds": time.monotonic()-started})
-            raise
+            except Exception as error:
+                atomic_json(root / "BACKUP_PENDING.json", {"phase": args.phase, "error": repr(error)})
+        atomic_json(root / "status.json", {"phase": args.phase, "state": "stopped", "seconds": time.monotonic()-started})
+        raise SystemExit(2)
+    except Exception as error:
+        if args.hf_results:
+            atomic_json(root / "BACKUP_PENDING.json", {"phase": args.phase, "error": repr(error)})
+        atomic_json(root / "status.json", {"phase": args.phase, "state": "error", "error": repr(error), "seconds": time.monotonic()-started})
+        raise
 
 
 if __name__ == "__main__":

@@ -1,0 +1,46 @@
+{
+  "version": "selection-runtime-v2",
+  "scope": "Evaluation orchestration, telemetry, explicit backend qualification and stop control; model/training inputs unchanged.",
+  "files": {
+    "scripts/memory_s1/launch_posttrain.sh": {
+      "before": "790211ec79936ed70ee08129ba2d0798c8793c0e69c2a1291d453a43feb6c5f9",
+      "before_lf": "790211ec79936ed70ee08129ba2d0798c8793c0e69c2a1291d453a43feb6c5f9",
+      "after": "c71f6128acd8b952b402ed4ce3b9a3cb6995194376979e8464ad48d5b75887fc"
+    },
+    "scripts/memory_s1/portable/selection_control.py": {
+      "before": null,
+      "before_lf": null,
+      "after": "2950a29f01faccc6b0aea37a8d5910fd120b1f458c754a1f8227acee5b75a3d6"
+    },
+    "scripts/memory_s1/sim_eval.py": {
+      "before": "d3e15cd1836bebf982ea6de4af098c9b12f04bb8bd04800572cdbcb7cfb54668",
+      "before_lf": "d3e15cd1836bebf982ea6de4af098c9b12f04bb8bd04800572cdbcb7cfb54668",
+      "after": "1b96593b1464b51d650b2dec865d5eb5344440d69a845338d67da18407b2a333"
+    },
+    "src/fastwam/memory_s1/eval_parallel.py": {
+      "before": "5035be3cfa0f7151df05ff88eace66b2d14ca98081a8a63eb07e97a06ffb4efd",
+      "before_lf": "5035be3cfa0f7151df05ff88eace66b2d14ca98081a8a63eb07e97a06ffb4efd",
+      "after": "9c658dc08cc16a591731f5b50cac01b7564aefe6630624a8c1c1cc02fa70db1e"
+    },
+    "src/fastwam/memory_s1/eval_state.py": {
+      "before": "066053aa29fd9e3b0566c763331eea9ff803fd6935259eaaa0e078b763d024e9",
+      "before_lf": "066053aa29fd9e3b0566c763331eea9ff803fd6935259eaaa0e078b763d024e9",
+      "after": "e36b722d7fe748d3a99354aa0adb09a6377d0d0ff39e4f85593606cfc92a1b80"
+    },
+    "src/fastwam/memory_s1/posttrain.py": {
+      "before": "1866b9534418ffb4adc9d877b73004c1ae2441ad0b977b112e597a4e777a3ac8",
+      "before_lf": "1866b9534418ffb4adc9d877b73004c1ae2441ad0b977b112e597a4e777a3ac8",
+      "after": "a9a84ded0454cabf93c9527300c4ffa823ad7bf1fcb3abc4c020c9a48b903342"
+    },
+    "src/fastwam/memory_s1/selection_runtime.py": {
+      "before": null,
+      "before_lf": null,
+      "after": "e612c442c3d6953b4f6be9d47a65a2ff248e5ee6075662578007bac859d3f7bd"
+    },
+    "src/fastwam/memory_s1/simulator_backend.py": {
+      "before": "27681a329b51a6f8d2605b84962ea5dcff746f716e1fc1132e54a8cf0b35bf6e",
+      "before_lf": "27681a329b51a6f8d2605b84962ea5dcff746f716e1fc1132e54a8cf0b35bf6e",
+      "after": "06647b77f789b358abab9890f2d3a0a93a88ebfd0f4dc3ffde8b61d1ed4dc1a2"
+    }
+  }
+}

@@ -14,6 +14,20 @@ if [[ -z "$OUTPUT" || -z "$PHASE" ]]; then
   exit 2
 fi
 mkdir -p "$OUTPUT/launches"
+# The background wrapper retains this lock for the entire launch.
+exec 9>"$OUTPUT/launch.lock"
+if ! flock -n 9; then
+  echo "This output already has an active launcher: $OUTPUT" >&2
+  exit 1
+fi
+# Direct Python launches use launcher.lock; do not replace their latest log.
+exec 8>"$OUTPUT/launcher.lock"
+if ! flock -n 8; then
+  echo "This output already has an active evaluation: $OUTPUT" >&2
+  exit 1
+fi
+flock -u 8
+exec 8>&-
 PYTHON_BIN="${MEMORY_S1_PYTHON:-/opt/mwam/bin/python}"
 LOG="$OUTPUT/launches/${PHASE}_$(date -u +%Y%m%dT%H%M%SZ)_$$.log"
 COMMAND=("$PYTHON_BIN" -u -m fastwam.memory_s1.posttrain run "${ARGS[@]}")

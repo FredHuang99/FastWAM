@@ -2,7 +2,10 @@
 from __future__ import annotations
 
 import argparse
+from contextlib import redirect_stdout, redirect_stderr
 import importlib.util
+import hashlib
+import json
 import os
 from pathlib import Path
 import random
@@ -15,7 +18,8 @@ import traceback
 _state_directory = str(Path(__file__).resolve().parents[2] / "src/fastwam/memory_s1")
 sys.path.insert(0, _state_directory)
 try:
-    from eval_state import EvaluationInterrupted, check_stop, cuda_gpu_uuid, durable_json, read, signature
+    from eval_state import EvaluationInterrupted, check_stop, cuda_gpu_uuid, durable_json, read, signature, stop_mode
+    from selection_runtime import event
     from simulator_backend import configure_backend
 finally:
     sys.path.remove(_state_directory)
@@ -85,12 +89,16 @@ def plan_scenes(args, official):
             return
     else:
         saved = {"contract": contract, "scenes": [], "next_seed": 100000 * (1 + args.seed), "complete": False}
+    durable_json(path, saved)
+    progress_root = os.environ.get("MEMORY_S1_PROGRESS_ROOT")
     official.eval_function_decorator = lambda policy, name: lambda config: None
     def freeze(task, environment, config, model, start, **unused):
         config["eval_mode"] = True
         render_frequency = config["render_freq"]
         config["render_freq"] = 0
         for _ in range(10000):
+            if stop_mode(args.stop_root):
+                raise EvaluationInterrupted("Scene filtering stopped at a candidate boundary.")
             if len(saved["scenes"]) >= args.episodes:
                 saved["complete"] = True
                 saved["sha256"] = signature(saved["scenes"])
@@ -102,7 +110,9 @@ def plan_scenes(args, official):
             accepted, info, error = False, None, None
             try:
                 random.seed(seed)
+                event(progress_root, "scene_setup", task=task, seed=seed)
                 environment.setup_demo(now_ep_num=ordinal, seed=seed, is_test=True, **config)
+                event(progress_root, "expert_filter", task=task, seed=seed)
                 info = environment.play_once()
                 environment.close_env()
                 accepted = bool(environment.plan_success and environment.check_success())
@@ -110,12 +120,15 @@ def plan_scenes(args, official):
                 raise
             except Exception:
                 error = traceback.format_exc()
+                durable_json(path.with_suffix(".error.json"), {"seed": seed, "error": error, "next_seed_preserved": True})
                 try:
                     environment.close_env()
                 except Exception:
                     pass
+                raise RuntimeError("Scene infrastructure failed; the candidate seed was not skipped. " + error)
             if accepted:
                 check_stop(args.stop_root)
+                event(progress_root, "freeze_instruction", task=task, seed=seed)
                 config["render_freq"] = render_frequency
                 try:
                     random.seed(seed)
@@ -132,6 +145,8 @@ def plan_scenes(args, official):
                 saved["scenes"].append({"task": task, "seed": seed, "ordinal": ordinal,
                                         "instruction": instruction, "episode_info": info["info"],
                                         "filter_seconds": time.monotonic() - started, "gpu": gpu})
+            event(progress_root, "candidate", "complete", task=task, seed=seed, accepted=accepted, seconds=time.monotonic()-started)
+            saved.setdefault("candidates", []).append({"seed": seed, "accepted": accepted, "seconds": time.monotonic()-started})
             saved["next_seed"] = seed + 1
             durable_json(path, saved)
             print(f"[scene-plan] {task} accepted={len(saved['scenes'])}/{args.episodes} candidate={seed} feasible={accepted} seconds={time.monotonic()-started:.1f}", flush=True)
@@ -147,7 +162,8 @@ def run_episode(args, official):
     job = read(args.job)
     scene = job["scene"]
     output = Path(args.output)
-    def evaluate(task, environment, config, model, start, **unused):
+    def single_episode(task, environment, config, model, start, **unused):
+        progress_root = os.environ.get("MEMORY_S1_PROGRESS_ROOT")
         config["eval_mode"] = True
         config["eval_video_log"] = False
         config.pop("eval_video_save_dir", None)
@@ -157,6 +173,7 @@ def run_episode(args, official):
             check_stop(args.stop_root)
             before = time.monotonic()
             random.seed(scene["seed"])
+            event(progress_root, "episode_setup", task=task, seed=scene["seed"])
             environment.setup_demo(now_ep_num=scene["ordinal"], seed=scene["seed"], is_test=True, **config)
             environment._memory_seed = scene["seed"]
             environment.set_instruction(instruction=scene["instruction"])
@@ -165,14 +182,31 @@ def run_episode(args, official):
             official.eval_function_decorator("deploy_policy", "reset_model")(model)
             function = official.eval_function_decorator("deploy_policy", "eval")
             target_limit = min(environment.step_lim, args.max_targets) if args.max_targets else environment.step_lim
+            event(progress_root, "rollout", task=task, seed=scene["seed"], targets=0, target_limit=int(target_limit))
+            last_progress = time.monotonic()
             while environment.take_action_cnt < target_limit:
                 check_stop(args.stop_root)
                 before = time.monotonic()
                 observation = environment.get_obs()
                 timings["observation_seconds"] += time.monotonic() - before
+                if args.qualification_trace:
+                    import numpy as np
+                    from sim_feedback import physical_state, object_snapshot
+                    # Observe existing data only; never request additional camera frames.
+                    cameras = observation["observation"]
+                    trace = {"target_id": int(environment.take_action_cnt),
+                             "rgb": {name: hashlib.sha256(np.ascontiguousarray(cameras[name]["rgb"]).tobytes()).hexdigest()
+                                     for name in ("head_camera", "left_camera", "right_camera")},
+                             "command_state": np.asarray(observation["joint_action"]["vector"]).tolist(),
+                             "physical": physical_state(environment.robot).tolist(), "objects": object_snapshot(environment)}
+                    with (output / "qualification_trace.jsonl").open("a", encoding="utf-8") as stream:
+                        stream.write(json.dumps(trace, sort_keys=True, allow_nan=False) + "\n")
                 before = time.monotonic()
                 function(environment, model, observation)
                 timings["policy_seconds"] += time.monotonic() - before
+                if time.monotonic() - last_progress >= 15:
+                    event(progress_root, "rollout", task=task, seed=scene["seed"], targets=int(environment.take_action_cnt), target_limit=int(target_limit))
+                    last_progress = time.monotonic()
                 if environment.eval_success:
                     break
             if args.max_targets and args.record_frames:
@@ -196,11 +230,44 @@ def run_episode(args, official):
         finally:
             environment.close_env(clear_cache=True)
         value["simulator_seconds"] = time.monotonic() - started
+        event(progress_root, "episode", value["status"], task=task, seed=scene["seed"], seconds=value["simulator_seconds"])
         durable_json(output / "simulator_result.json", value)
         print(f"[episode] {scene['task']} seed={scene['seed']} status={value['status']} seconds={value['simulator_seconds']:.1f}", flush=True)
         if value["status"] == "error":
             raise RuntimeError(value["error"])
         return scene["seed"] + 1, int(value.get("success", False)), value.get("max_reward", 0)
+    def evaluate(task, environment, config, model, start, **unused):
+        nonlocal job, scene, output
+        while True:
+            if args.service:
+                # Publish completion only after the attempt log has stopped changing.
+                with (output / "simulator.log").open("a", encoding="utf-8") as log:
+                    with redirect_stdout(log), redirect_stderr(log):
+                        result = single_episode(task, environment, config, model, start, **unused)
+                durable_json(output / "service_complete.json", {"job": job["id"], "attempt": job["attempt"]})
+            else:
+                return single_episode(task, environment, config, model, start, **unused)
+            if read(output / "simulator_result.json")["status"] != "complete":
+                return result
+            event(os.environ.get("MEMORY_S1_PROGRESS_ROOT"), "resident_idle", "complete", task=task)
+            inbox = Path(args.service) / "next.json"
+            idle_started = time.monotonic()
+            while not inbox.exists():
+                if stop_mode(args.stop_root) or time.monotonic()-idle_started > 600:
+                    return result
+                time.sleep(.2)
+            command = read(inbox)
+            inbox.unlink()
+            if command.get("stop"):
+                return result
+            job = read(command["job"])
+            scene = job["scene"]
+            if scene["task"] != task:
+                raise ValueError("A resident simulator cannot switch task classes")
+            output = Path(command["output"])
+            model.config["memory_output"] = str(output)
+            # Inference and history are reset by the normal reset_model call above.
+
     official.eval_policy = evaluate
     episode_tag = "memory_s1_episode_" + signature({"job": job["id"], "attempt": job["attempt"], "output": str(output)})[:12]
     official.main({"task_name": scene["task"], "task_config": "demo_clean", "ckpt_setting": episode_tag,
@@ -219,14 +286,17 @@ def main():
     parser.add_argument("--contract")
     parser.add_argument("--job")
     parser.add_argument("--socket")
+    parser.add_argument("--service", help="Private resident worker inbox; qualification is required by the parent")
     parser.add_argument("--stop-root")
     parser.add_argument("--gpu-uuid")
     parser.add_argument("--record-frames", action="store_true")
     parser.add_argument("--record-feedback", action="store_true")
+    parser.add_argument("--qualification-trace", action="store_true")
     parser.add_argument("--max-targets", type=int, default=0)
     args = parser.parse_args()
     if args.max_targets < 0:
         parser.error("max-targets cannot be negative")
+    event(os.environ.get("MEMORY_S1_PROGRESS_ROOT"), "simulator_import")
     official = load_official()
     if args.operation == "plan":
         plan_scenes(args, official)

@@ -103,7 +103,12 @@ def locked(path, blocking=True):
 
 def stop_mode(root):
     path = Path(root) / "STOP.json"
-    return read(path)["mode"] if path.exists() else None
+    if not path.exists():
+        return None
+    value = read(path)
+    if value["mode"] == "drain" and time.time() >= value.get("deadline", float("inf")):
+        return "now"
+    return value["mode"]
 
 
 class EpisodeQueue:
@@ -199,7 +204,7 @@ class EpisodeQueue:
         value = read(self.path)
         durable_json(directory / "result.json", result)
         files = {}
-        for name in ("result.json", "decisions.jsonl", "executed_actions.jsonl", "simulator.log", "job.json"):
+        for name in ("result.json", "decisions.jsonl", "executed_actions.jsonl", "simulator.log", "job.json", "qualification_trace.jsonl"):
             path = directory / name
             if path.exists():
                 with path.open("rb") as stream:

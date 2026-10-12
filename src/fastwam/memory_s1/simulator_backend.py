@@ -11,17 +11,17 @@ _active = None
 
 
 def backend_contract(name="upstream"):
-    if name not in ("upstream", "builtin_torch_v1"):
+    if name not in ("upstream", "builtin_torch_v1", "builtin_torch_async_v2"):
         raise ValueError(f"Unsupported CuRobo backend: {name!r}")
     value = {"name": name, "version": "explicit-curobo-backend-v1"}
-    if name == "builtin_torch_v1":
-        value.update(optimizer="LBFGS", use_cuda_graph=False, cuda_launch_blocking=True,
+    if name.startswith("builtin_torch"):
+        value.update(optimizer="LBFGS", use_cuda_graph=False, cuda_launch_blocking=name == "builtin_torch_v1",
                      **dict.fromkeys(SWITCHES, False))
     return value
 
 
 def configured_backend(cfg):
-    return backend_contract(cfg.get("closed_loop", {}).get("curobo_backend", "upstream"))
+    return backend_contract(cfg.get("selection_runtime", {}).get("backend", cfg.get("closed_loop", {}).get("curobo_backend", "upstream")))
 
 
 def configure_backend(name=None):
@@ -35,9 +35,17 @@ def configure_backend(name=None):
         _active = contract
         return dict(contract)
 
-    os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
+    if contract["cuda_launch_blocking"]:
+        os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
+    else:
+        os.environ.pop("CUDA_LAUNCH_BLOCKING", None)
     from curobo.opt.newton.lbfgs import LBFGSOpt, LBFGSOptConfig
-    from curobo.wrap.reacher.motion_gen import MotionGenConfig
+    from curobo.wrap.reacher.motion_gen import MotionGenConfig, MotionGen
+    try:
+        from .selection_runtime import install_warmup_observer
+    except ImportError:
+        from selection_runtime import install_warmup_observer
+    install_warmup_observer(MotionGen)
     missing = set(SWITCHES) - set(LBFGSOptConfig.__dataclass_fields__)
     if missing:
         raise RuntimeError(f"Unsupported CuRobo flags: {sorted(missing)}")
@@ -73,5 +81,5 @@ def configure_backend(name=None):
     MotionGenConfig.load_from_robot_config = staticmethod(load_without_graph)
     LBFGSOpt._fastwam_backend = dict(contract)
     _active = contract
-    print(f"[backend] pid={os.getpid()} builtin_torch_v1; fused LBFGS/line-search/update-best=False; cuda_graph=False", flush=True)
+    print(f"[backend] pid={os.getpid()} {contract['name']}; fused kernels=False; cuda_graph=False; launch_blocking={contract['cuda_launch_blocking']}", flush=True)
     return dict(contract)
