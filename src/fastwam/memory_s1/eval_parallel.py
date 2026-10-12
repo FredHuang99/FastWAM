@@ -18,7 +18,7 @@ import traceback
 from .eval_state import EpisodeQueue, cuda_gpu_uuid, digest, durable_json, is_alive, locked, process_identity, read, signature, stop_mode, summarize
 
 from .simulator_backend import ENVIRONMENT_KEY, configured_backend, backend_contract
-from .selection_runtime import duration, event, live_details, format_active
+from .selection_runtime import duration, event, live_details, format_active, episode_work, failure_report, tail_text
 from .eval_state import EvaluationInterrupted, check_stop
 
 
@@ -311,6 +311,8 @@ def execute_job(model, encoders, cfg, queue, job, gpu_uuid, record_frames, evide
                        "--operation", "episode", "--job", str(directory / "job.json"), "--output", str(directory),
                        "--socket", str(socket_path), "--seed", str(cfg["seed"]), "--gpu-uuid", gpu_uuid,
                        "--stop-root", str(queue.root)]
+            command += ["--scene-count", str(sum(j["scene"]["task"] == job["scene"]["task"]
+                          and j["condition"] == job["condition"] for j in queue.snapshot()["jobs"]))]
             if cfg.get("selection_runtime", {}).get("qualification"):
                 command.append("--qualification-trace")
             if resident is not None:
@@ -366,15 +368,26 @@ def execute_job(model, encoders, cfg, queue, job, gpu_uuid, record_frames, evide
                             session.reset()
                             response = {"ok": True}
                         elif request["command"] == "decide":
+                            inference_started = time.monotonic()
+                            progress = queue.root / "workers" / f"progress_{job['worker']}"
+                            event(progress, "inference", task=job["scene"]["task"], seed=job["scene"]["seed"],
+                                  job_id=job["id"], targets=request["current_id"])
                             response = {"ok": True, **session.decide(request)}
+                            event(progress, "inference", "complete", task=job["scene"]["task"],
+                                  seed=job["scene"]["seed"], seconds=time.monotonic()-inference_started)
                         else:
                             raise ValueError("Unknown RPC command.")
                     except Exception:
                         response = {"ok": False, "error": traceback.format_exc()}
                     connection.send(response)
+            result_path = directory / "simulator_result.json"
+            if not result_path.is_file():
+                startup_log = service / "bootstrap.log" if resident is not None else directory / "simulator.log"
+                raise RuntimeError(f"Simulator exited {process.poll()} before producing its result. "
+                                   f"Startup log: {startup_log}\n{tail_text(startup_log)}")
             if resident is None:
                 terminate_owned(process)
-            value = read(directory / "simulator_result.json")
+            value = read(result_path)
             if value["status"] == "complete" and process.returncode not in (None, 0):
                 raise RuntimeError(f"Simulator failed after producing a result: exit={process.returncode}")
         if value["status"] == "complete":
@@ -441,6 +454,14 @@ def worker_loop(cfg, output, worker, weights=None, resident_model=None, record_f
                 status = progress(queue, int(os.environ.get("WORLD_SIZE", 1)))
                 print(f"[validation] {status['completed']}/{status['total']} ETA~{duration(status['eta_seconds'])} provisional={status['eta_provisional']}", flush=True)
                 upload_results(cfg, output)
+    except EvaluationInterrupted:
+        event(queue.root / "workers" / f"progress_{worker}", "worker", "interrupted", worker=worker)
+        raise
+    except Exception:
+        error = traceback.format_exc()
+        durable_json(queue.root / "workers" / f"error_{worker}.json", {"error": error, "owner": process_identity()})
+        event(queue.root / "workers" / f"progress_{worker}", "worker", "error", worker=worker, error=error)
+        raise
     finally:
         if resident:
             terminate_owned(resident["process"])
@@ -454,34 +475,24 @@ def worker_loop(cfg, output, worker, weights=None, resident_model=None, record_f
 def progress(queue, workers):
     value = queue.snapshot()
     completed = [job for job in value["jobs"] if job["state"] == "complete"]
-    by_task, estimates = {}, {}
+    by_task, rows = {}, []
     for task in ("put_back_block", "swap_blocks"):
-        rows = [read(queue.root / job["directory"] / "result.json") for job in completed if job["scene"]["task"] == task]
-        estimates[task] = sum(row["wall_seconds"] for row in rows) / len(rows) if rows else None
-        by_task[task] = {"completed": len(rows), "measured_mean_seconds": estimates[task]}
-    remaining = [j for j in value["jobs"] if j["state"] != "complete"]
-    known_work, unknown_episodes = 0.0, 0
-    for job in remaining:
-        estimate = estimates[job["scene"]["task"]]
-        if estimate is None:
-            unknown_episodes += 1
-        else:
-            known_work += estimate
-    eta = 0 if not remaining else None
-    if remaining and all(estimates[j["scene"]["task"]] is not None for j in remaining):
-        workloads = [0.0] * max(1, workers)
-        overdue = False
-        for job in sorted(remaining, key=lambda j: estimates[j["scene"]["task"]], reverse=True):
-            estimate = estimates[job["scene"]["task"]]
-            if job["state"] == "running":
-                estimate -= time.time() - job["started"]
-                overdue |= estimate <= 0
-            workloads[min(range(len(workloads)), key=workloads.__getitem__)] += max(0, estimate)
-        eta = None if overdue else max(workloads)
+        selected = [read(queue.root / job["directory"] / "result.json") for job in completed if job["scene"]["task"] == task]
+        rows.extend(selected)
+        by_task[task] = {"completed": len(selected),
+                         "measured_mean_seconds": sum(row["wall_seconds"] for row in selected)/len(selected) if selected else None}
+    active = live_details(queue.root / "simulator_progress") + live_details(queue.root / "workers")
+    config = read(queue.root / "evaluation.json").get("config", {})
+    limits = config.get("selection_runtime", {}).get("eta_target_limits", {})
+    prefix = config.get("diagnostic", {}).get("max_targets", 0)
+    if prefix:
+        limits = {task: min(cap, prefix) for task, cap in limits.items()}
+        limits.update({job["scene"]["task"]: prefix for job in value["jobs"] if job["scene"]["task"] not in limits})
+    projection = episode_work(value["jobs"], rows, active, limits, workers)
+    launcher = read(queue.root / "launcher.json") if (queue.root / "launcher.json").exists() else {}
     result = {"stage": "episodes", "completed": len(completed), "total": len(value["jobs"]), "by_task": by_task,
-              "eta_seconds": eta, "eta_provisional": len(completed) < 4,
-               "known_remaining_work_seconds": known_work, "unknown_duration_episodes": unknown_episodes,
-              "active": live_details(queue.root / "simulator_progress") + live_details(queue.root / "workers"),
+              **projection, "elapsed_seconds": time.time()-launcher.get("started", value["created"]),
+              "active": active,
               "stop": stop_mode(queue.root), "errors": sum(j["state"] == "error" for j in value["jobs"])}
     durable_json(queue.root / "status.json", result)
     return result
@@ -562,7 +573,7 @@ def standalone(args):
         from .posttrain import verify_qualification
         verify_qualification(cfg, SimpleNamespace(runtime_profile=options["profile"], qualification_report=options.get("qualification_report")))
     with locked(output / "launcher.lock", blocking=False):
-        durable_json(output / "launcher.json", {"owner": process_identity(), "argv": sys.argv, "gpu_uuids": uuids})
+        durable_json(output / "launcher.json", {"owner": process_identity(), "argv": sys.argv, "gpu_uuids": uuids, "started": time.time()})
         if args.resume:
             for path in (output / "workers").glob("*.json"):
                 value = read(path)
@@ -632,10 +643,10 @@ def standalone(args):
                 if time.monotonic() - last_print >= 15:
                     status = progress(queue, len(uuids))
                     summarize(output, args.mode)
-                    print(f"[progress] {status['completed']}/{status['total']} ETA~{duration(status['eta_seconds'])} "
-                          f"known_remaining_work~{duration(status['known_remaining_work_seconds'])} + "
-                          f"{status['unknown_duration_episodes']} episodes without timing samples "
-                          f"provisional={status['eta_provisional']} tasks={status['by_task']}", flush=True)
+                    print(f"[progress] {status['completed']}/{status['total']} elapsed={duration(status['elapsed_seconds'])} "
+                          f"rollout_remaining~{duration(status['eta_seconds'])} source={status['eta_reason']} "
+                          f"borrowed_task_estimates={status['borrowed_task_estimates']} "
+                          "(measured target rate; initialization/cleanup/upload separate)", flush=True)
                     for row in status["active"]:
                         print(f"[active] {format_active(row)}", flush=True)
                     last_print = time.monotonic()
@@ -655,6 +666,10 @@ def standalone(args):
                 log.close()
             cleanup_simulators(output)
         summary = summarize(output, args.mode)
+        if not summary["complete"] or (output / "ABORT.json").exists():
+            details = failure_report(output)
+            (output / "FAILURE_DETAILS.txt").write_text(details+"\n", encoding="utf-8")
+            print(f"[evaluation failure]\n{details}", flush=True)
         if args.hf_results:
             upload_results(cfg, output)
         progress(queue, len(uuids))

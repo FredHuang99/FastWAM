@@ -21,12 +21,11 @@ try:
     from eval_state import EvaluationInterrupted, check_stop, cuda_gpu_uuid, durable_json, read, signature, stop_mode
     from selection_runtime import event
     from simulator_backend import configure_backend
+    # Backend configuration imports fused_evaluation lazily. Keep this path
+    # available until those standalone imports finish, including spawned workers.
+    SIMULATOR_BACKEND = configure_backend()
 finally:
     sys.path.remove(_state_directory)
-
-
-# Spawn reimports this module before constructing planner workers; fork inherits it.
-SIMULATOR_BACKEND = configure_backend()
 
 
 def verify_gpu(expected, scene):
@@ -164,6 +163,8 @@ def run_episode(args, official):
     output = Path(args.output)
     def single_episode(task, environment, config, model, start, **unused):
         progress_root = os.environ.get("MEMORY_S1_PROGRESS_ROOT")
+        fields = {"task": task, "seed": scene["seed"], "job_id": job["id"],
+                  "scene_number": scene["ordinal"]+1, "scene_total": args.scene_count}
         config["eval_mode"] = True
         config["eval_video_log"] = False
         config.pop("eval_video_save_dir", None)
@@ -173,7 +174,7 @@ def run_episode(args, official):
             check_stop(args.stop_root)
             before = time.monotonic()
             random.seed(scene["seed"])
-            event(progress_root, "episode_setup", task=task, seed=scene["seed"], scene_number=scene["ordinal"]+1)
+            event(progress_root, "episode_setup", **fields)
             environment.setup_demo(now_ep_num=scene["ordinal"], seed=scene["seed"], is_test=True, **config)
             environment._memory_seed = scene["seed"]
             environment.set_instruction(instruction=scene["instruction"])
@@ -183,9 +184,10 @@ def run_episode(args, official):
             function = official.eval_function_decorator("deploy_policy", "eval")
             target_limit = min(environment.step_lim, args.max_targets) if args.max_targets else environment.step_lim
             rollout_started = time.monotonic()
-            event(progress_root, "rollout", task=task, seed=scene["seed"], scene_number=scene["ordinal"]+1,
-                  targets=0, target_limit=int(target_limit), episode_elapsed_seconds=rollout_started-started)
+            event(progress_root, "rollout", **fields, targets=0, target_limit=int(target_limit),
+                  rollout_seconds=0, episode_elapsed_seconds=rollout_started-started)
             last_progress = rollout_started
+            last_targets = 0
             while environment.take_action_cnt < target_limit:
                 check_stop(args.stop_root)
                 before = time.monotonic()
@@ -206,16 +208,23 @@ def run_episode(args, official):
                 before = time.monotonic()
                 function(environment, model, observation)
                 timings["policy_seconds"] += time.monotonic() - before
-                if time.monotonic() - last_progress >= 15:
-                    targets = int(environment.take_action_cnt)
+                targets = int(environment.take_action_cnt)
+                if ((targets >= 16 and last_targets < 16) or time.monotonic()-last_progress >= 15
+                        or targets >= target_limit or environment.eval_success):
                     now = time.monotonic()
-                    budget_eta = (target_limit-targets)*(now-rollout_started)/targets if targets >= 16 else None
-                    event(progress_root, "rollout", task=task, seed=scene["seed"], scene_number=scene["ordinal"]+1,
+                    cumulative = (now-rollout_started)/targets if targets >= 16 else None
+                    window = (now-last_progress)/(targets-last_targets) if targets > last_targets else 0
+                    rate = max(cumulative, window) if cumulative is not None else None
+                    budget_eta = max(0, target_limit-targets)*rate if rate is not None else None
+                    event(progress_root, "rollout", **fields,
                           targets=targets, target_limit=int(target_limit), episode_elapsed_seconds=now-started,
+                          rollout_seconds=now-rollout_started, seconds_per_target=rate,
+                          observation_seconds=timings["observation_seconds"], policy_seconds=timings["policy_seconds"],
                           target_budget_eta_seconds=budget_eta)
-                    last_progress = time.monotonic()
+                    last_progress, last_targets = now, targets
                 if environment.eval_success:
                     break
+            timings["rollout_seconds"] = time.monotonic()-rollout_started
             if args.max_targets and args.record_frames:
                 before = time.monotonic()
                 final_observation = environment.get_obs()
@@ -237,7 +246,7 @@ def run_episode(args, official):
         finally:
             environment.close_env(clear_cache=True)
         value["simulator_seconds"] = time.monotonic() - started
-        event(progress_root, "episode", value["status"], task=task, seed=scene["seed"], scene_number=scene["ordinal"]+1, seconds=value["simulator_seconds"], timings=value.get("timings"))
+        event(progress_root, "episode", value["status"], **fields, seconds=value["simulator_seconds"], timings=value.get("timings"))
         durable_json(output / "simulator_result.json", value)
         print(f"[episode] {scene['task']} seed={scene['seed']} status={value['status']} seconds={value['simulator_seconds']:.1f}", flush=True)
         if value["status"] == "error":
@@ -300,6 +309,7 @@ def main():
     parser.add_argument("--record-feedback", action="store_true")
     parser.add_argument("--qualification-trace", action="store_true")
     parser.add_argument("--max-targets", type=int, default=0)
+    parser.add_argument("--scene-count", type=int, default=10, help="Display only; never changes the frozen scene bank")
     args = parser.parse_args()
     if args.max_targets < 0:
         parser.error("max-targets cannot be negative")

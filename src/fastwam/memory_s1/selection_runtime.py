@@ -4,6 +4,7 @@ from __future__ import annotations
 import csv
 import functools
 import json
+import math
 import os
 from pathlib import Path
 import signal
@@ -17,7 +18,7 @@ except ImportError:
 
 def duration(seconds):
     if seconds is None:
-        return "unknown (waiting for completed samples)"
+        return "not calibrated"
     days, seconds = divmod(max(0, int(seconds)), 86400)
     hours, seconds = divmod(seconds, 3600)
     minutes, seconds = divmod(seconds, 60)
@@ -67,17 +68,118 @@ def live_details(root):
 
 
 def format_active(row):
-    text = (f"{row['phase']} {row['state']} task={row.get('task', '-')} "
-            f"scene={row.get('scene_number', '-')}/10 seed={row.get('seed', '-')} "
-            f"targets={row.get('targets', '-')}/{row.get('target_limit', '-')} "
-            f"stage_elapsed={duration(row.get('phase_age_seconds'))} "
-            f"heartbeat_age={duration(row.get('heartbeat_age_seconds'))}")
+    text = f"{row['phase']} {row['state']}"
+    if row.get("task"):
+        text += f" task={row['task']} seed={row.get('seed', '-')}"
+    if row.get("scene_number") is not None:
+        text += f" scene={row['scene_number']}/{row.get('scene_total', '?')}"
+    if row.get("targets") is not None:
+        text += f" targets={row['targets']}/{row.get('target_limit', '?')}"
+    text += (f" stage_elapsed={duration(row.get('phase_age_seconds'))} "
+             f"last_update={duration(row.get('heartbeat_age_seconds'))} ago")
     if row.get("episode_elapsed_seconds") is not None:
         elapsed = row["episode_elapsed_seconds"] + row.get("heartbeat_age_seconds", 0)
         text += f" episode_elapsed={duration(elapsed)}"
     if row.get("target_budget_eta_seconds") is not None:
-        text += f" time_to_target_limit~{duration(row['target_budget_eta_seconds'])} (measured rollout rate; success may end earlier)"
+        targets = row.get("targets", 0)
+        rate = row.get("seconds_per_target") or 0
+        if targets and row.get("rollout_seconds") is not None:
+            rate = max(rate, (row["rollout_seconds"] + row.get("heartbeat_age_seconds", 0))/targets)
+        remaining = max(0, row.get("target_limit", targets)-targets)*rate
+        text += f" time_to_target_limit~{duration(remaining)} (measured rollout rate; success may end earlier)"
     return text
+
+
+def episode_work(jobs, completed, active, limits, workers=1):
+    """Project rollout work from live targets, without waiting for an episode end.
+
+    This estimates time to target caps, not an upper time bound or success rate.
+    Unknown initialization/cleanup/upload costs are explicitly outside its scope.
+    """
+    rates, running = {}, {}
+    for row in completed:
+        targets = row.get("executed_targets", 0)
+        seconds = row.get("timings", {}).get("rollout_seconds")
+        if targets >= 16 and seconds is not None and math.isfinite(seconds) and seconds > 0:
+            rates.setdefault(row["task"], []).append(seconds / targets)
+        if row.get("target_limit"):
+            limits = {**limits, row["task"]: row["target_limit"]}
+    for row in active:
+        if row.get("phase") != "rollout" or not row.get("task"):
+            continue
+        targets = row.get("targets", 0)
+        seconds = row.get("rollout_seconds")
+        if targets < 16 or seconds is None:
+            continue
+        # An in-flight slow chunk must increase the estimate, not count down to 0.
+        elapsed = seconds + max(0, row.get("heartbeat_age_seconds", 0))
+        rate = max(elapsed / targets, row.get("seconds_per_target") or 0)
+        if not math.isfinite(rate) or rate <= 0:
+            continue
+        rates.setdefault(row["task"], []).append(rate)
+        running[(row.get("job_id"), row["task"], row.get("seed"))] = row
+        if row.get("target_limit"):
+            limits = {**limits, row["task"]: row["target_limit"]}
+    means = {task: sum(values)/len(values) for task, values in rates.items()}
+    workloads, missing, borrowed, remaining = [0.0]*max(1, workers), 0, 0, 0
+    for job in jobs:
+        if job["state"] == "complete":
+            continue
+        remaining += 1
+        task, seed = job["scene"]["task"], job["scene"]["seed"]
+        row = running.get((job["id"], task, seed))
+        cap = (row or {}).get("target_limit", limits.get(task))
+        peers = [rate for name, rate in means.items()
+                 if ":" not in task or name.split(":", 1)[0] == task.split(":", 1)[0]]
+        rate = means.get(task, max(peers) if peers else None)
+        if cap is None or rate is None:
+            missing += 1
+            continue
+        borrowed += int(task not in means)
+        done = (row or {}).get("targets", 0)
+        if row:
+            rate = max(rate, row.get("seconds_per_target") or rate,
+                       (row["rollout_seconds"] + row.get("heartbeat_age_seconds", 0))/done)
+        cost = max(0, cap-done) * rate
+        workloads[min(range(len(workloads)), key=workloads.__getitem__)] += cost
+    return {"eta_seconds": max(workloads) if not missing else (0 if not remaining else None),
+            "known_remaining_work_seconds": sum(workloads), "unknown_duration_episodes": missing,
+            "borrowed_task_estimates": borrowed, "target_rates": means,
+            "eta_scope": "rollout_to_target_caps; initialization/cleanup/upload excluded; success may finish earlier",
+            "eta_provisional": True,
+            "eta_reason": "awaiting first 16 executed targets" if missing else "measured executed-target rate"}
+
+
+def tail_text(path, lines=60, size=16384):
+    """Bound diagnostic reads, including logs with no final newline."""
+    path = Path(path)
+    if not path.is_file():
+        return ""
+    with path.open("rb") as stream:
+        stream.seek(max(0, path.stat().st_size-size))
+        return "\n".join(stream.read(size).decode("utf-8", errors="replace").splitlines()[-lines:])
+
+
+def failure_report(root):
+    root = Path(root)
+    paths = [root / "ABORT.json", root / "UPLOAD_FAILED.json"]
+    paths += sorted((root / "workers").glob("error_*.json"))
+    paths += sorted((root / "workers").glob("worker_*.log"))
+    if (root / "queue.json").exists():
+        for job in read(root / "queue.json")["jobs"]:
+            if job["state"] == "error" and job.get("directory"):
+                directory = root / job["directory"]
+                paths += [directory / "error.json", directory / "simulator_result.json", directory / "simulator.log"]
+    paths += sorted((root / "resident").glob("*/bootstrap.log"))
+    paths.append(root / "launcher.log")
+    pieces = []
+    for path in dict.fromkeys(paths):
+        text = tail_text(path)
+        if text:
+            pieces.append(f"===== {path} =====\n{text}")
+        if len(pieces) >= 8:
+            break
+    return "\n\n".join(pieces) or f"No child diagnostics found in {root}"
 
 
 def install_warmup_observer(MotionGen):

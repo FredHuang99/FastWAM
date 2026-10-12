@@ -20,7 +20,7 @@ from .common import atomic_json, code_version, fingerprint, load_config, read_js
 from .eval_state import EvaluationInterrupted, check_stop, locked, process_identity
 from .schedule import milestone_steps
 from .eval_state import stop_mode, is_alive
-from .selection_runtime import duration, source_migration, import_offline, stop_request, format_active
+from .selection_runtime import duration, source_migration, import_offline, stop_request, format_active, failure_report, episode_work, live_details
 from .fused_evaluation import comparison_spec
 
 
@@ -72,10 +72,10 @@ def closed_child(cfg_file, weights, root, directory, mode, conditions, args,
     # The parent backs up all groups together and verifies immutable readback.
     atomic_json(root / "active.json", {"directory": str(directory), "command": command})
     with (directory / "launcher.log").open("a", encoding="utf-8") as log:
+        offset = log.tell()
         process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
         atomic_json(root / "active.json", {"directory": str(directory), "command": command, "owner": process_identity(process.pid)})
         last_log, last_backup, uploaded = 0, time.monotonic(), completed_count(root)
-        offset = 0
         try:
             while process.poll() is None:
                 if stop_mode(root):
@@ -85,8 +85,10 @@ def closed_child(cfg_file, weights, root, directory, mode, conditions, args,
                         stream.seek(offset)
                         lines = stream.read().splitlines()
                         offset = stream.tell()
-                    for line in lines[-12:]:
-                        print(f"[{directory.name}] {line}", flush=True)
+                    for line in lines[-40:]:
+                        # The parent prints a single structured progress block.
+                        if not line.startswith(("[progress]", "[active]")):
+                            print(f"[{directory.name}] {line}", flush=True)
                     print_overall(root, args.phase)
                     if args.phase == "selection" and getattr(args, "runtime_profile", "") == "fused-resident":
                         from .fused_evaluation import comparison_table
@@ -111,7 +113,9 @@ def closed_child(cfg_file, weights, root, directory, mode, conditions, args,
             if stop_mode(root):
                 raise EvaluationInterrupted("Stopped; completed episodes remain reusable.")
             if process.returncode:
-                raise RuntimeError(f"Evaluation exited {process.returncode}; inspect {directory / 'launcher.log'}")
+                details = failure_report(directory)
+                (root / "FAILURE_DETAILS.txt").write_text(details+"\n", encoding="utf-8")
+                raise RuntimeError(f"Evaluation exited {process.returncode}. Child diagnostics:\n{details}")
         finally:
             if process.poll() is None:
                 from .eval_parallel import terminate_owned
@@ -430,48 +434,76 @@ def completed_count(root):
 
 def print_overall(root, phase):
     root = Path(root)
-    rows, total = [], 0
     cfg_path = root / "evaluation_config.yaml"
     cfg = load_config(cfg_path) if cfg_path.exists() else None
     spec = comparison_spec(cfg) if cfg else None
     labels = [("base" if step == 0 else f"step_{step:06d}") for step in spec["steps"]] if spec else None
     pattern = "qualification/*/queue.json" if phase == "qualify" else "selection/*/queue.json"
+    jobs, results, live, limits, existing = [], [], [], {}, set()
+    nominal = cfg.get("selection_runtime", {}).get("eta_target_limits", {}) if cfg else {}
+    if phase == "qualify" and cfg and cfg.get("selection_runtime", {}).get("profile") == "fused-resident":
+        nominal = {task: 32 for task in spec["tasks"]}
     for path in root.glob(pattern):
         if phase == "selection" and labels is not None and path.parent.name not in labels:
             raise ValueError(f"Unexpected model queue in this comparison: {path.parent.name}")
+        label = path.parent.name
+        existing.add(label)
+        # Rates may be borrowed across memory checkpoints, never from base.
+        family = "base" if label == "base" else "memory"
+        prefix = f"{label}:"
         value = read_json(path)
-        total += len(value["jobs"])
-        rows.extend((path.parent, job) for job in value["jobs"] if job["state"] == "complete")
+        for job in value["jobs"]:
+            task = job["scene"]["task"]
+            key = f"{family}:{task}"
+            if task in nominal:
+                limits[key] = nominal[task]
+            jobs.append({**job, "id": prefix+job["id"], "scene": {**job["scene"], "task": key}})
+            if job["state"] == "complete":
+                row = read_json(path.parent / job["directory"] / "result.json")
+                results.append({**row, "task": key})
+        for row in live_details(path.parent / "simulator_progress"):
+            if row.get("phase") == "rollout" and row.get("task"):
+                live.append({**row, "job_id": prefix+row.get("job_id", ""),
+                             "task": f"{family}:{row['task']}"})
+    total = len(jobs)
     if cfg:
         total = (2 if cfg.get("selection_runtime", {}).get("profile") == "fused-resident" else 12) if phase == "qualify" else len(spec["tasks"]) * spec["episodes_per_task"] * len(labels)
-    known_work, unknown = 0.0, max(0, total-len(rows))
-    borrowed = 0
     if phase == "selection" and spec:
-        unknown = 0
-        measured = [(directory.name, job["scene"]["task"],
-                     read_json(directory / job["directory"] / "result.json")["wall_seconds"])
-                    for directory, job in rows]
         for label in labels:
+            if label in existing:
+                continue
+            family = "base" if label == "base" else "memory"
             for task in spec["tasks"]:
-                own = [s for name, t, s in measured if name == label and t == task]
-                left = max(0, spec["episodes_per_task"]-len(own))
-                # Another memory checkpoint may provide a provisional cost; base never does.
-                samples = own or [s for name, t, s in measured if t == task and (name == "base") == (label == "base")]
-                if samples:
-                    known_work += left * sum(samples)/len(samples)
-                    if not own:
-                        borrowed += left
-                else:
-                    unknown += left
-    print(f"[{phase}] overall={len(rows)}/{total or '?'} | known_remaining_work~{duration(known_work)} "
-          f"+ {unknown} episodes without timing samples | borrowed_checkpoint_estimates={borrowed} "
-          "(GPU-time; includes full active episode; model loads/backups excluded)", flush=True)
+                key = f"{family}:{task}"
+                if task in nominal:
+                    limits[key] = nominal[task]
+                for ordinal in range(spec["episodes_per_task"]):
+                    jobs.append({"id": f"{label}:{task}:{ordinal}", "state": "pending",
+                                 "scene": {"task": key, "seed": None}})
+    projection = episode_work(jobs, results, live, limits)
+    unknown = projection["unknown_duration_episodes"] + max(0, total-len(jobs))
+    estimate = projection["eta_seconds"] if not unknown else None
+    launcher = read_json(root / "launcher.json") if (root / "launcher.json").exists() else {}
+    elapsed = time.time()-launcher["started"] if "started" in launcher else None
+    progress_record = {**projection, "eta_seconds": estimate, "unknown_duration_episodes": unknown,
+                       "phase": phase, "completed": len(results), "total": total, "elapsed_seconds": elapsed}
+    atomic_json(root / "progress.json", progress_record)
+    partial = (f" | calibrated_work~{duration(projection['known_remaining_work_seconds'])}; "
+               f"uncalibrated_episodes={unknown}") if unknown else ""
+    print(f"[{phase}] overall={len(results)}/{total or '?'} | elapsed={duration(elapsed)} "
+          f"| remaining_rollout_work~{duration(estimate)}{partial} "
+          "(GPU-time to target limits; includes current remaining targets; "
+          "initialization/cleanup/upload excluded; task/checkpoint rates provisional)", flush=True)
     if (root / "active.json").exists():
         active = Path(read_json(root / "active.json")["directory"])
         if (active / "status.json").exists():
             status = read_json(active / "status.json")
-            print(f"[current {active.name}] stage={status.get('stage')} completed={status.get('completed', status.get('accepted'))}/{status.get('total', '?')} ETA={duration(status.get('eta_seconds'))}", flush=True)
-            for row in status.get("active", []):
+            print(f"[current {active.name}] stage={status.get('stage')} "
+                  f"completed={status.get('completed', status.get('accepted'))}/{status.get('total', '?')} "
+                  f"elapsed={duration(status.get('elapsed_seconds'))} "
+                  f"remaining_rollout~{duration(status.get('eta_seconds'))} "
+                  f"source={status.get('eta_reason', 'waiting for startup')}", flush=True)
+            for row in live_details(active / "simulator_progress") + live_details(active / "workers"):
                 print(f"  {format_active(row)}", flush=True)
 
 
@@ -483,8 +515,11 @@ def wait_stopped(root, deadline):
 
 def runtime_options(profile):
     if profile == "fused-resident":
-        return {"version": "selection-runtime-v3", "profile": profile, "resident_simulator": True,
-                "backend": "fused_graph_v1", "one_planning_task_per_gpu": True, "serialize_arm_warmup": True}
+        return {"version": "selection-runtime-v4", "profile": profile, "resident_simulator": True,
+                "backend": "fused_graph_v1", "one_planning_task_per_gpu": True, "serialize_arm_warmup": True,
+                # Projection only; the actual environment still enforces step_lim.
+                # Live observations override these nominal target caps.
+                "eta_target_limits": {"put_back_block": 500, "swap_blocks": 1000}}
     return {"version": "selection-runtime-v2", "profile": profile,
             "resident_simulator": profile in ("resident", "async-resident"),
             "backend": "builtin_torch_async_v2" if profile in ("async", "async-resident") else "builtin_torch_v1",
@@ -699,7 +734,7 @@ def run_phase(args, root):
             raise ValueError("A stop marker exists; inspect status and pass --resume.")
         (root / "STOP_REQUESTED").unlink(missing_ok=True)
         (root / "STOP.json").unlink(missing_ok=True)
-    atomic_json(root / "launcher.json", {"owner": process_identity(), "phase": args.phase, "argv": sys.argv})
+    atomic_json(root / "launcher.json", {"owner": process_identity(), "phase": args.phase, "argv": sys.argv, "started": time.time()})
     def stop(signum, frame):
         stop_request(root, "now", 30)
     signal.signal(signal.SIGTERM, stop)

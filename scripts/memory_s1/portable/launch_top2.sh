@@ -2,15 +2,15 @@
 # User-invoked only. Existing posttrain owns the queue, locks, backup and recovery.
 set -euo pipefail
 ACTION="${1:-}"
-case "$ACTION" in prepare|qualify|run|status|stop|backup) ;; *) echo 'Usage: launch_top2.sh prepare|qualify|run|status|stop|backup' >&2; exit 2 ;; esac
+case "$ACTION" in prepare|qualify|run|status|stop|backup|watch) ;; *) echo 'Usage: launch_top2.sh prepare|qualify|run|status|stop|backup|watch {prepare|qualify|run}' >&2; exit 2 ;; esac
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$ROOT"
 export FW_ROOT="$ROOT"
 PY=/opt/mwam/bin/python
 CFG="$ROOT/configs/memory_s1/eval_h100_top2.yaml"
 RUN="$ROOT/outputs/memory_s1_variable_t_h100_phase_seed17"
-QUAL="$ROOT/outputs/selection_fused_qualification_top2_h100_v1"
-POST="$ROOT/outputs/posttrain_h100_phase_seed17_top2_v1"
+QUAL="$ROOT/outputs/selection_fused_qualification_top2_h100_v2"
+POST="$ROOT/outputs/posttrain_h100_phase_seed17_top2_v2"
 unset CUDA_LAUNCH_BLOCKING HF_HUB_OFFLINE TRANSFORMERS_OFFLINE
 export PYTHONUNBUFFERED=1
 
@@ -30,6 +30,47 @@ background() {
 }
 
 case "$ACTION" in
+  watch)
+    case "${2:-}" in
+      prepare) pointer="$POST/latest_environment_log.txt" ;;
+      qualify) pointer="$QUAL/latest_log.txt" ;;
+      run) pointer="$POST/latest_log.txt" ;;
+      *) echo 'Usage: launch_top2.sh watch prepare|qualify|run' >&2; exit 2 ;;
+    esac
+    "$PY" - "$pointer" <<'PY'
+import sys
+import time
+from pathlib import Path
+pointer = Path(sys.argv[1])
+if not pointer.is_file():
+    raise SystemExit(f'No launch log recorded: {pointer}')
+log = Path(pointer.read_text().strip())
+exit_path = log.with_suffix('.exit')
+print(f'Log: {log}\nCtrl-C stops this log viewer only.', flush=True)
+try:
+    with log.open('rb') as stream:
+        stream.seek(max(0, log.stat().st_size-32768))
+        tail = stream.read().splitlines(keepends=True)[-40:]
+        sys.stdout.buffer.write(b''.join(tail))
+        sys.stdout.flush()
+        while True:
+            data = stream.read()
+            if data:
+                sys.stdout.buffer.write(data)
+                sys.stdout.flush()
+            if exit_path.is_file():
+                data = stream.read()
+                if data:
+                    sys.stdout.buffer.write(data)
+                    sys.stdout.flush()
+                code = int(exit_path.read_text().strip())
+                print(f'\nExit code: {code}', flush=True)
+                raise SystemExit(code)
+            time.sleep(1)
+except KeyboardInterrupt:
+    print('\nLog viewer stopped; background job unchanged.', flush=True)
+PY
+    exit ;;
   prepare)
     background environment bash scripts/memory_s1/portable/prepare_fused_env.sh
     exit ;;

@@ -1,6 +1,6 @@
 {
-  "version": "selection-top2-cuda126-dev-v7",
-  "scope": "Evaluation-only checkpoint subsets, timing, isolated CUDA development packages, explicit GCC 12 ranges and fused subprocess library paths; unchanged model, training, task limits, scene bank, and inference settings.",
+  "version": "selection-top2-progress-import-v8",
+  "scope": "Evaluation-only fused startup import ordering, live executed-target timing, child error propagation, and bounded log viewing. Unchanged model/training, task limits, scene bank and inference settings. Prior evaluation environment and source migration remain explicitly recorded.",
   "files": {
     "scripts/memory_s1/launch_posttrain.sh": {
       "before": "790211ec79936ed70ee08129ba2d0798c8793c0e69c2a1291d453a43feb6c5f9",
@@ -15,12 +15,12 @@
     "scripts/memory_s1/sim_eval.py": {
       "before": "d3e15cd1836bebf982ea6de4af098c9b12f04bb8bd04800572cdbcb7cfb54668",
       "before_lf": "d3e15cd1836bebf982ea6de4af098c9b12f04bb8bd04800572cdbcb7cfb54668",
-      "after": "3b7404e2a438229825499ee9e6d6ab1cb77012ba8be763c66804333d2fa5fe7e"
+      "after": "beaf39250c9379a6676dda6260016d743c0aa086a0842e935e7590847b683108"
     },
     "src/fastwam/memory_s1/eval_parallel.py": {
       "before": "5035be3cfa0f7151df05ff88eace66b2d14ca98081a8a63eb07e97a06ffb4efd",
       "before_lf": "5035be3cfa0f7151df05ff88eace66b2d14ca98081a8a63eb07e97a06ffb4efd",
-      "after": "c7525b2f9b88fecfcac3576ec3298e597798975126b598b74f1e3ba7d127432c"
+      "after": "6f9eb92862669f56d0608fdc060b1a89aa570f41b41376c5caca39f983ed5e62"
     },
     "src/fastwam/memory_s1/eval_state.py": {
       "before": "066053aa29fd9e3b0566c763331eea9ff803fd6935259eaaa0e078b763d024e9",
@@ -30,12 +30,12 @@
     "src/fastwam/memory_s1/posttrain.py": {
       "before": "1866b9534418ffb4adc9d877b73004c1ae2441ad0b977b112e597a4e777a3ac8",
       "before_lf": "1866b9534418ffb4adc9d877b73004c1ae2441ad0b977b112e597a4e777a3ac8",
-      "after": "473807e64593fef98c11d80eb8a96c88673324dcfb1fd26cb95b6c46aaa0d6c2"
+      "after": "5cd38077682c9bd5ba13ba053728b595134e8d59f9512ab6ad20642a8429b9a9"
     },
     "src/fastwam/memory_s1/selection_runtime.py": {
       "before": null,
       "before_lf": null,
-      "after": "971ccebca9526bd6a59f77e0c461ceb70d81600191caf20eebfd4e793221a6fc"
+      "after": "14cd06646e0313fa40c506d915b232682bae5df88aa6ce4a54588f53b358b04a"
     },
     "src/fastwam/memory_s1/simulator_backend.py": {
       "before": "27681a329b51a6f8d2605b84962ea5dcff746f716e1fc1132e54a8cf0b35bf6e",
@@ -60,7 +60,7 @@
     "scripts/memory_s1/portable/launch_top2.sh": {
       "before": null,
       "before_lf": null,
-      "after": "bee99671f87559e2d891731c22f1d24b254b9b5e8c6dc24e8adb19eaceacbdf6"
+      "after": "59e215691bf91d394989a443508fd037b1673f3f836eda6fe6311c9689b7ccb5"
     }
   }
 }
