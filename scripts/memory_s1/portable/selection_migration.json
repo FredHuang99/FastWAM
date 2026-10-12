@@ -1,6 +1,6 @@
 {
-  "version": "selection-top2-cuda126-v5",
-  "scope": "Evaluation-only checkpoint subsets, timing and isolated CUDA component migration; unchanged training, task limits, scene bank, and fused runtime settings.",
+  "version": "selection-top2-cuda126-dev-v6",
+  "scope": "Evaluation-only checkpoint subsets, timing, isolated CUDA development packages and fused subprocess library paths; unchanged model, training, task limits, scene bank, and inference settings.",
   "files": {
     "scripts/memory_s1/launch_posttrain.sh": {
       "before": "790211ec79936ed70ee08129ba2d0798c8793c0e69c2a1291d453a43feb6c5f9",
@@ -20,7 +20,7 @@
     "src/fastwam/memory_s1/eval_parallel.py": {
       "before": "5035be3cfa0f7151df05ff88eace66b2d14ca98081a8a63eb07e97a06ffb4efd",
       "before_lf": "5035be3cfa0f7151df05ff88eace66b2d14ca98081a8a63eb07e97a06ffb4efd",
-      "after": "86426d5e6fb5c27b534518caf15306290990d352630caf6b6250a849cf9287ea"
+      "after": "c7525b2f9b88fecfcac3576ec3298e597798975126b598b74f1e3ba7d127432c"
     },
     "src/fastwam/memory_s1/eval_state.py": {
       "before": "066053aa29fd9e3b0566c763331eea9ff803fd6935259eaaa0e078b763d024e9",
@@ -45,12 +45,12 @@
     "scripts/memory_s1/portable/fused_environment.py": {
       "before": null,
       "before_lf": null,
-      "after": "0fe06d81f85567ca715fae54aee82886bd2fff1db03c2f856014f5ae7dba8bd6"
+      "after": "a8668b1870fcfc5c28a4e587d93ea8e61aca221e197e183ae2bf2dbe23468825"
     },
     "scripts/memory_s1/portable/prepare_fused_env.sh": {
       "before": null,
       "before_lf": null,
-      "after": "bc6e6cdcc0b1a569089818c909288aadf0a123b0eb137840e6481f8cfbe2f6a2"
+      "after": "9bd6cf58e8bebd99b532bc5013315d5c41b26b71f5e68b6f68db4ed33a0ff78d"
     },
     "src/fastwam/memory_s1/fused_evaluation.py": {
       "before": null,

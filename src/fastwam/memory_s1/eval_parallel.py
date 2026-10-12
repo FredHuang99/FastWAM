@@ -46,6 +46,21 @@ def simulator_environment(cfg, gpu_uuid):
     environment["MEMORY_S1_RECORD_FRAME_STRIDE"] = str(cfg.get("diagnostic", {}).get("record_frame_stride", 1))
     environment["PATH"] = str(prefix / "bin") + os.pathsep + environment["PATH"]
     environment["LD_LIBRARY_PATH"] = os.pathsep.join([str(prefix / "lib"), str(prefix / "targets/x86_64-linux/lib"), environment.get("LD_LIBRARY_PATH", "")])
+    if backend["name"] == "fused_graph_v1":
+        # Match the build environment; do not inherit training CUDA 13 or the old
+        # simulator's CUDA 12.4 libraries and editable Python search paths.
+        for key in ("PYTHONPATH", "PYTHONHOME", "VIRTUAL_ENV", "CONDA_PREFIX", "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH"):
+            environment.pop(key, None)
+        environment["PATH"] = os.pathsep.join([str(prefix / "bin"), "/usr/local/sbin", "/usr/local/bin", "/usr/sbin", "/usr/bin", "/sbin", "/bin"])
+        environment["LD_LIBRARY_PATH"] = os.pathsep.join([
+            str(prefix / "lib"), str(prefix / "targets/x86_64-linux/lib"),
+            "/usr/local/nvidia/lib", "/usr/local/nvidia/lib64",
+        ])
+        environment.update(CC="/usr/bin/gcc-12", CXX="/usr/bin/g++-12", CUDAHOSTCXX="/usr/bin/g++-12",
+                           TORCH_CUDA_ARCH_LIST="9.0", MAX_JOBS="2",
+                           CPATH=os.pathsep.join([str(prefix / "include"), str(prefix / "targets/x86_64-linux/include")]),
+                           LIBRARY_PATH=os.pathsep.join([str(prefix / "lib"), str(prefix / "targets/x86_64-linux/lib"), str(prefix / "targets/x86_64-linux/lib/stubs")]),
+                           TORCH_EXTENSIONS_DIR=str(Path(cfg["root"]) / "outputs/fused_environment_h100_v1/torch_extensions_torch260_cu126_sm90"))
     lock_root = Path(cfg["paths"]["run"]) / "selection_locks"
     lock_root.mkdir(parents=True, exist_ok=True)
     environment["MEMORY_S1_WARMUP_LOCK"] = str(lock_root / f"{gpu_uuid}.warmup.lock")
