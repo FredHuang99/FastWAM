@@ -11,12 +11,15 @@ _active = None
 
 
 def backend_contract(name="upstream"):
-    if name not in ("upstream", "builtin_torch_v1", "builtin_torch_async_v2"):
+    if name not in ("upstream", "builtin_torch_v1", "builtin_torch_async_v2", "fused_graph_v1"):
         raise ValueError(f"Unsupported CuRobo backend: {name!r}")
     value = {"name": name, "version": "explicit-curobo-backend-v1"}
     if name.startswith("builtin_torch"):
         value.update(optimizer="LBFGS", use_cuda_graph=False, cuda_launch_blocking=name == "builtin_torch_v1",
                      **dict.fromkeys(SWITCHES, False))
+    elif name == "fused_graph_v1":
+        value.update(optimizer="LBFGS", use_cuda_graph=True, cuda_launch_blocking=False,
+                     native_validity_guards=True, **dict.fromkeys(SWITCHES, True))
     return value
 
 
@@ -61,6 +64,33 @@ def configure_backend(name=None):
     signature = inspect.signature(original_load)
     if "use_cuda_graph" not in signature.parameters:
         raise RuntimeError("CuRobo loader does not expose use_cuda_graph.")
+
+    if contract["name"] == "fused_graph_v1":
+        @functools.wraps(original_init)
+        def fused_init(self, config=None):
+            if config is not None:
+                for key in SWITCHES:
+                    setattr(config, key, True)
+            # Native constructors retain their dimension/algorithm safety guards.
+            original_init(self, config)
+
+        @functools.wraps(original_load)
+        def load_with_graph(*args, **kwargs):
+            bound = signature.bind_partial(*args, **kwargs)
+            bound.arguments["use_cuda_graph"] = True
+            return original_load(*bound.args, **bound.kwargs)
+
+        LBFGSOpt.__init__ = fused_init
+        MotionGenConfig.load_from_robot_config = staticmethod(load_with_graph)
+        try:
+            from .fused_evaluation import observe_fused_backend
+        except ImportError:
+            from fused_evaluation import observe_fused_backend
+        observe_fused_backend(LBFGSOpt, MotionGen)
+        LBFGSOpt._fastwam_backend = dict(contract)
+        _active = contract
+        print(f"[backend] pid={os.getpid()} fused_graph_v1; native guards retained; launch_blocking unset", flush=True)
+        return dict(contract)
 
     @functools.wraps(original_init)
     def compatible_init(self, config=None):

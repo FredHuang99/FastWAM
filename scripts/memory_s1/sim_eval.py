@@ -173,7 +173,7 @@ def run_episode(args, official):
             check_stop(args.stop_root)
             before = time.monotonic()
             random.seed(scene["seed"])
-            event(progress_root, "episode_setup", task=task, seed=scene["seed"])
+            event(progress_root, "episode_setup", task=task, seed=scene["seed"], scene_number=scene["ordinal"]+1)
             environment.setup_demo(now_ep_num=scene["ordinal"], seed=scene["seed"], is_test=True, **config)
             environment._memory_seed = scene["seed"]
             environment.set_instruction(instruction=scene["instruction"])
@@ -182,8 +182,10 @@ def run_episode(args, official):
             official.eval_function_decorator("deploy_policy", "reset_model")(model)
             function = official.eval_function_decorator("deploy_policy", "eval")
             target_limit = min(environment.step_lim, args.max_targets) if args.max_targets else environment.step_lim
-            event(progress_root, "rollout", task=task, seed=scene["seed"], targets=0, target_limit=int(target_limit))
-            last_progress = time.monotonic()
+            rollout_started = time.monotonic()
+            event(progress_root, "rollout", task=task, seed=scene["seed"], scene_number=scene["ordinal"]+1,
+                  targets=0, target_limit=int(target_limit), episode_elapsed_seconds=rollout_started-started)
+            last_progress = rollout_started
             while environment.take_action_cnt < target_limit:
                 check_stop(args.stop_root)
                 before = time.monotonic()
@@ -205,7 +207,12 @@ def run_episode(args, official):
                 function(environment, model, observation)
                 timings["policy_seconds"] += time.monotonic() - before
                 if time.monotonic() - last_progress >= 15:
-                    event(progress_root, "rollout", task=task, seed=scene["seed"], targets=int(environment.take_action_cnt), target_limit=int(target_limit))
+                    targets = int(environment.take_action_cnt)
+                    now = time.monotonic()
+                    budget_eta = (target_limit-targets)*(now-rollout_started)/targets if targets >= 16 else None
+                    event(progress_root, "rollout", task=task, seed=scene["seed"], scene_number=scene["ordinal"]+1,
+                          targets=targets, target_limit=int(target_limit), episode_elapsed_seconds=now-started,
+                          target_budget_eta_seconds=budget_eta)
                     last_progress = time.monotonic()
                 if environment.eval_success:
                     break
@@ -230,7 +237,7 @@ def run_episode(args, official):
         finally:
             environment.close_env(clear_cache=True)
         value["simulator_seconds"] = time.monotonic() - started
-        event(progress_root, "episode", value["status"], task=task, seed=scene["seed"], seconds=value["simulator_seconds"])
+        event(progress_root, "episode", value["status"], task=task, seed=scene["seed"], scene_number=scene["ordinal"]+1, seconds=value["simulator_seconds"], timings=value.get("timings"))
         durable_json(output / "simulator_result.json", value)
         print(f"[episode] {scene['task']} seed={scene['seed']} status={value['status']} seconds={value['simulator_seconds']:.1f}", flush=True)
         if value["status"] == "error":

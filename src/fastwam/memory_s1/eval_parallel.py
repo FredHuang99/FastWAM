@@ -18,7 +18,7 @@ import traceback
 from .eval_state import EpisodeQueue, cuda_gpu_uuid, digest, durable_json, is_alive, locked, process_identity, read, signature, stop_mode, summarize
 
 from .simulator_backend import ENVIRONMENT_KEY, configured_backend, backend_contract
-from .selection_runtime import duration, event, live_details
+from .selection_runtime import duration, event, live_details, format_active
 from .eval_state import EvaluationInterrupted, check_stop
 
 
@@ -37,7 +37,7 @@ def simulator_environment(cfg, gpu_uuid):
     environment[ENVIRONMENT_KEY] = backend["name"]
     if backend.get("cuda_launch_blocking"):
         environment["CUDA_LAUNCH_BLOCKING"] = "1"
-    elif backend["name"] == "builtin_torch_async_v2":
+    elif backend["name"] in ("builtin_torch_async_v2", "fused_graph_v1"):
         environment.pop("CUDA_LAUNCH_BLOCKING", None)
     prefix = Path(cfg["closed_loop"]["simulator_python"]).parent.parent
     environment.update(CUDA_VISIBLE_DEVICES=gpu_uuid, CUDA_DEVICE_ORDER="PCI_BUS_ID", CUDA_HOME=str(prefix),
@@ -103,7 +103,7 @@ def protocol(cfg, mode):
                 inventory[str(path.relative_to(root))] = digest(path)
     value = {"seed": loop["internal_seed"] if internal else loop["official_seed"],
             "count": loop["internal_episodes"] if internal else loop["official_episodes"],
-            "tasks": ["put_back_block", "swap_blocks"], "task_config": "demo_clean", "instruction_type": "seen",
+            "tasks": cfg.get("comparison", {}).get("tasks", ["put_back_block", "swap_blocks"]), "task_config": "demo_clean", "instruction_type": "seen",
             "candidate_rule": "first K expert-feasible increasing seeds", "language_seed_rule": "scene_seed xor 0x51A17, freeze literal string",
             "python_scene_random": "random.seed(scene_seed) before expert and policy setup",
             "simulator_source": signature(inventory), "simulator_backend": configured_backend(cfg)}
@@ -116,6 +116,8 @@ def protocol(cfg, mode):
 def prepare_scenes(cfg, mode, gpu_uuids, stop_root):
     contract = protocol(cfg, mode)
     diagnostic = cfg.get("diagnostic", {})
+    if cfg.get("selection_runtime", {}).get("profile") == "fused-resident" and not diagnostic.get("scenes_from"):
+        raise ValueError("Fused comparison requires inherited scenes; expert search is disabled")
     if diagnostic.get("scenes_from"):
         if mode != "diagnostic":
             source = Path(diagnostic["scenes_from"])
@@ -443,6 +445,13 @@ def progress(queue, workers):
         estimates[task] = sum(row["wall_seconds"] for row in rows) / len(rows) if rows else None
         by_task[task] = {"completed": len(rows), "measured_mean_seconds": estimates[task]}
     remaining = [j for j in value["jobs"] if j["state"] != "complete"]
+    known_work, unknown_episodes = 0.0, 0
+    for job in remaining:
+        estimate = estimates[job["scene"]["task"]]
+        if estimate is None:
+            unknown_episodes += 1
+        else:
+            known_work += estimate
     eta = 0 if not remaining else None
     if remaining and all(estimates[j["scene"]["task"]] is not None for j in remaining):
         workloads = [0.0] * max(1, workers)
@@ -456,6 +465,7 @@ def progress(queue, workers):
         eta = None if overdue else max(workloads)
     result = {"stage": "episodes", "completed": len(completed), "total": len(value["jobs"]), "by_task": by_task,
               "eta_seconds": eta, "eta_provisional": len(completed) < 4,
+               "known_remaining_work_seconds": known_work, "unknown_duration_episodes": unknown_episodes,
               "active": live_details(queue.root / "simulator_progress") + live_details(queue.root / "workers"),
               "stop": stop_mode(queue.root), "errors": sum(j["state"] == "error" for j in value["jobs"])}
     durable_json(queue.root / "status.json", result)
@@ -529,8 +539,9 @@ def standalone(args):
         raise ValueError("Deletion conditions require a reviewed evidence manifest.")
     options = cfg.get("selection_runtime", {})
     if options.get("qualification"):
-        if args.mode != "diagnostic" or diagnostic.get("max_targets") != 32 or diagnostic.get("episodes_per_task") != 2:
-            raise ValueError("Acceleration qualification is restricted to two 32-target scenes per task")
+        expected_count = 1 if options.get("profile") == "fused-resident" else 2
+        if args.mode != "diagnostic" or diagnostic.get("max_targets") != 32 or diagnostic.get("episodes_per_task") != expected_count:
+            raise ValueError(f"Acceleration qualification requires {expected_count} 32-target scene(s) per task")
     elif options.get("profile", "serial") != "serial":
         from types import SimpleNamespace
         from .posttrain import verify_qualification
@@ -578,6 +589,8 @@ def standalone(args):
                 directory.mkdir(exist_ok=True)
                 log = (directory / f"worker_{worker}.log").open("a", encoding="utf-8")
                 environment = dict(os.environ)
+                if options.get("backend") == "fused_graph_v1":
+                    environment.pop("CUDA_LAUNCH_BLOCKING", None)
                 environment.update(CUDA_VISIBLE_DEVICES=uuid, CUDA_DEVICE_ORDER="PCI_BUS_ID", PYTHONUNBUFFERED="1",
                                    OMP_NUM_THREADS="4", MKL_NUM_THREADS="4", OPENBLAS_NUM_THREADS="4")
                 command = [sys.executable, "-u", "-m", "fastwam.memory_s1.eval_parallel", "worker", "--output", str(output),
@@ -604,9 +617,12 @@ def standalone(args):
                 if time.monotonic() - last_print >= 15:
                     status = progress(queue, len(uuids))
                     summarize(output, args.mode)
-                    print(f"[progress] {status['completed']}/{status['total']} ETA~{duration(status['eta_seconds'])} provisional={status['eta_provisional']} tasks={status['by_task']}", flush=True)
+                    print(f"[progress] {status['completed']}/{status['total']} ETA~{duration(status['eta_seconds'])} "
+                          f"known_remaining_work~{duration(status['known_remaining_work_seconds'])} + "
+                          f"{status['unknown_duration_episodes']} episodes without timing samples "
+                          f"provisional={status['eta_provisional']} tasks={status['by_task']}", flush=True)
                     for row in status["active"]:
-                        print(f"[active] {row['phase']} {row['state']} task={row.get('task', '-')} seed={row.get('seed', '-')} targets={row.get('targets', '-')} batch={row.get('batch', '-')} age={duration(row['phase_age_seconds'])}", flush=True)
+                        print(f"[active] {format_active(row)}", flush=True)
                     last_print = time.monotonic()
                     if args.hf_results and status["completed"] > last_uploaded and (status["completed"]-last_uploaded >= 5 or time.monotonic()-last_upload_time >= 600):
                         try:

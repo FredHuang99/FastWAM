@@ -10,7 +10,7 @@ for ((i=0; i<${#ARGS[@]}; i++)); do
   if [[ "${ARGS[$i]}" == --phase ]]; then PHASE="${ARGS[$((i+1))]}"; fi
 done
 if [[ -z "$OUTPUT" || -z "$PHASE" ]]; then
-  echo 'Pass --config CFG --run RUN --output OUTPUT --phase offline|selection|official|memory [--gpus 0] [--resume] [--hf-results]' >&2
+  echo 'Pass --config CFG --run RUN --output OUTPUT --phase offline|selection|official|memory|qualify [--runtime-profile fused-resident --frozen-scenes FILE] [--gpus 0] [--resume] [--hf-results]' >&2
   exit 2
 fi
 mkdir -p "$OUTPUT/launches"

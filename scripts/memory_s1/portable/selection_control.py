@@ -62,7 +62,9 @@ def wait(root, deadline):
         child = active.get("owner")
         if active and (Path(active["directory"]) / "launcher.json").exists():
             child = child or read(Path(active["directory"]) / "launcher.json").get("owner")
-        for owner in tree(child):
+        # Include the recorded launcher and its backup subprocesses: otherwise a
+        # stuck launcher/upload could outlive all GPU workers and wait 22 minutes.
+        for owner in tree(parent) + tree(child):
             known[(owner["pid"], owner["start_ticks"])] = owner
         # Qualification can run scene planning directly under the posttrain parent.
         if (root / "planning.json").exists():
@@ -87,8 +89,8 @@ def wait(root, deadline):
         if time.time()-last_print >= 15:
             print(f"[stopping] launcher_alive={alive(parent)} evaluation_processes={len(survivors)}; waiting for local publication/backup", flush=True)
             last_print = time.time()
-        if time.time() > deadline+1350:
-            raise TimeoutError("Launcher/backup is still active; inspect logs. No unrecorded processes were signaled.")
+        if time.time() > deadline+90:
+            raise TimeoutError("Recorded processes did not exit after TERM/KILL; inspect status. No unrecorded processes were signaled.")
         time.sleep(.5)
 
 

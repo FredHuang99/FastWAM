@@ -1,26 +1,26 @@
 {
-  "version": "selection-runtime-v2",
-  "scope": "Evaluation orchestration, telemetry, explicit backend qualification and stop control; model/training inputs unchanged.",
+  "version": "selection-top2-v4",
+  "scope": "Evaluation-only checkpoint subsets and explicit partial timing; unchanged training, task limits, scene bank, and fused backend.",
   "files": {
     "scripts/memory_s1/launch_posttrain.sh": {
       "before": "790211ec79936ed70ee08129ba2d0798c8793c0e69c2a1291d453a43feb6c5f9",
       "before_lf": "790211ec79936ed70ee08129ba2d0798c8793c0e69c2a1291d453a43feb6c5f9",
-      "after": "c71f6128acd8b952b402ed4ce3b9a3cb6995194376979e8464ad48d5b75887fc"
+      "after": "6d7ee97589054cbfcb7f6ba559d09990c73b4cc24f1a56e40137e7d14494634e"
     },
     "scripts/memory_s1/portable/selection_control.py": {
       "before": null,
       "before_lf": null,
-      "after": "2950a29f01faccc6b0aea37a8d5910fd120b1f458c754a1f8227acee5b75a3d6"
+      "after": "a4afb26cbd4a2dfcab340d71f85fc7866270fb8715e6850393d5b7174b47d1b3"
     },
     "scripts/memory_s1/sim_eval.py": {
       "before": "d3e15cd1836bebf982ea6de4af098c9b12f04bb8bd04800572cdbcb7cfb54668",
       "before_lf": "d3e15cd1836bebf982ea6de4af098c9b12f04bb8bd04800572cdbcb7cfb54668",
-      "after": "1b96593b1464b51d650b2dec865d5eb5344440d69a845338d67da18407b2a333"
+      "after": "3b7404e2a438229825499ee9e6d6ab1cb77012ba8be763c66804333d2fa5fe7e"
     },
     "src/fastwam/memory_s1/eval_parallel.py": {
       "before": "5035be3cfa0f7151df05ff88eace66b2d14ca98081a8a63eb07e97a06ffb4efd",
       "before_lf": "5035be3cfa0f7151df05ff88eace66b2d14ca98081a8a63eb07e97a06ffb4efd",
-      "after": "9c658dc08cc16a591731f5b50cac01b7564aefe6630624a8c1c1cc02fa70db1e"
+      "after": "86426d5e6fb5c27b534518caf15306290990d352630caf6b6250a849cf9287ea"
     },
     "src/fastwam/memory_s1/eval_state.py": {
       "before": "066053aa29fd9e3b0566c763331eea9ff803fd6935259eaaa0e078b763d024e9",
@@ -30,17 +30,37 @@
     "src/fastwam/memory_s1/posttrain.py": {
       "before": "1866b9534418ffb4adc9d877b73004c1ae2441ad0b977b112e597a4e777a3ac8",
       "before_lf": "1866b9534418ffb4adc9d877b73004c1ae2441ad0b977b112e597a4e777a3ac8",
-      "after": "a9a84ded0454cabf93c9527300c4ffa823ad7bf1fcb3abc4c020c9a48b903342"
+      "after": "473807e64593fef98c11d80eb8a96c88673324dcfb1fd26cb95b6c46aaa0d6c2"
     },
     "src/fastwam/memory_s1/selection_runtime.py": {
       "before": null,
       "before_lf": null,
-      "after": "e612c442c3d6953b4f6be9d47a65a2ff248e5ee6075662578007bac859d3f7bd"
+      "after": "971ccebca9526bd6a59f77e0c461ceb70d81600191caf20eebfd4e793221a6fc"
     },
     "src/fastwam/memory_s1/simulator_backend.py": {
       "before": "27681a329b51a6f8d2605b84962ea5dcff746f716e1fc1132e54a8cf0b35bf6e",
       "before_lf": "27681a329b51a6f8d2605b84962ea5dcff746f716e1fc1132e54a8cf0b35bf6e",
-      "after": "06647b77f789b358abab9890f2d3a0a93a88ebfd0f4dc3ffde8b61d1ed4dc1a2"
+      "after": "7e58b77a1100914a632824b81678bdfcb2d51fd1703c7af30449f53c6f86bb25"
+    },
+    "scripts/memory_s1/portable/fused_environment.py": {
+      "before": null,
+      "before_lf": null,
+      "after": "200e4fe2bc4d8f2a1b4fa0db7cc8d076bad21faa1f49e7265cd86dee0f1682e7"
+    },
+    "scripts/memory_s1/portable/prepare_fused_env.sh": {
+      "before": null,
+      "before_lf": null,
+      "after": "8807998b274c6378ba05173124282418eb4349405806fe47b7de662e9fc3b7cc"
+    },
+    "src/fastwam/memory_s1/fused_evaluation.py": {
+      "before": null,
+      "before_lf": null,
+      "after": "6f0aac95fa418315bb4bbb133098c76ddb0502c928306e0ab4b0963b9e79926f"
+    },
+    "scripts/memory_s1/portable/launch_top2.sh": {
+      "before": null,
+      "before_lf": null,
+      "after": "bee99671f87559e2d891731c22f1d24b254b9b5e8c6dc24e8adb19eaceacbdf6"
     }
   }
 }

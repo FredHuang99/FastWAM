@@ -1,4 +1,4 @@
-"""Explicit, restartable post-training evaluation of four exported milestones."""
+"""Explicit, restartable post-training evaluation of selected exported milestones."""
 from __future__ import annotations
 
 import argparse
@@ -20,7 +20,8 @@ from .common import atomic_json, code_version, fingerprint, load_config, read_js
 from .eval_state import EvaluationInterrupted, check_stop, locked, process_identity
 from .schedule import milestone_steps
 from .eval_state import stop_mode, is_alive
-from .selection_runtime import duration, source_migration, import_offline, stop_request
+from .selection_runtime import duration, source_migration, import_offline, stop_request, format_active
+from .fused_evaluation import comparison_spec
 
 
 def verified_weights(run):
@@ -87,6 +88,9 @@ def closed_child(cfg_file, weights, root, directory, mode, conditions, args,
                     for line in lines[-12:]:
                         print(f"[{directory.name}] {line}", flush=True)
                     print_overall(root, args.phase)
+                    if args.phase == "selection" and getattr(args, "runtime_profile", "") == "fused-resident":
+                        from .fused_evaluation import comparison_table
+                        comparison_table(root, load_config(cfg_file), read_json(root / "identity.json"))
                     last_log = time.monotonic()
                 count = completed_count(root)
                 if args.hf_results and not stop_mode(root) and count > uploaded and (count-uploaded >= 5 or time.monotonic()-last_backup >= 600):
@@ -179,31 +183,58 @@ def offline(cfg, run, root, weights, identity, args):
 
 
 def selection(cfg, cfg_file, run, root, weights, identity, args):
-    for step in milestone_steps(cfg):
+    fused = args.runtime_profile == "fused-resident"
+    spec = comparison_spec(cfg)
+    steps = spec["steps"]
+    candidates = [step for step in steps if step > 0]
+    scene_source = None
+    if fused:
+        from .fused_evaluation import inherit_scenes, comparison_table
+        scene_source = inherit_scenes(cfg, root)
+        comparison_table(root, cfg, identity, render=True)
+    labels = ["base" if step == 0 else f"step {step}" for step in steps]
+    print(f"[protocol] {' -> '.join(labels)} | put_back_block + swap_blocks | "
+          f"10 shared scenes/task = {20 * len(steps)} episodes | T=8 | predict/execute/denoise=32/16/10", flush=True)
+    for step in candidates:
         checked = checked_result(root / "offline" / f"step_{step:06d}" / "T8.json", identity)
         if checked is None:
             raise ValueError("Run the offline phase before checkpoint selection.")
-    baseline = root / "selection" / "base"
-    closed_child(cfg_file, weights[0], root, baseline, "internal", ["gate_zero"], args)
-    scenes = baseline / "scenes.json"
+    scenes = scene_source
     records = []
-    for step in milestone_steps(cfg):
+    for step in steps:
         check_stop(root)
-        result = closed_child(cfg_file, weights[step], root, root / "selection" / f"step_{step:06d}",
-                              "internal", ["full"], args, scenes=scenes)
+        directory = root / "selection" / ("base" if step == 0 else f"step_{step:06d}")
+        result = closed_child(cfg_file, weights[step], root, directory,
+                              "internal", ["gate_zero" if step == 0 else "full"], args, scenes=scenes)
+        if scenes is None:
+            scenes = directory / "scenes.json"
+        if fused:
+            table = comparison_table(root, cfg, identity, render=True)
+            row = next(r for r in table["models"] if r["step"] == step)
+            if not row["complete"] or row["mean_success_rate"] != result["success_rate"]:
+                raise ValueError("Candidate macro average/completeness differs from episode summary")
+        if step == 0:
+            continue
         fm = read_json(root / "offline" / f"step_{step:06d}" / "T8.json")["result"]["fm"]
         records.append({"step": step, "success_rate": result["success_rate"], "fm": fm,
                         "weight_sha256": sha256(weights[step])})
         atomic_json(root / "candidates.json", {"identity": identity, "candidates": records})
     best = min(records, key=lambda row: (-row["success_rate"], row["fm"], row["step"]))
-    temporary = run / "weights" / "best.pt.partial"
+    winner_root = root if fused else run
+    (winner_root / "weights").mkdir(exist_ok=True)
+    temporary = winner_root / "weights" / "best.pt.partial"
     shutil.copy2(weights[best["step"]], temporary)
-    temporary.replace(run / "weights" / "best.pt")
+    temporary.replace(winner_root / "weights" / "best.pt")
     value = {**best, "identity": identity, "criterion": "internal_success_then_T8_FM_then_earlier_update",
-             "candidate_steps": milestone_steps(cfg), "scenes_sha256": sha256(scenes),
-             "scope": "best_of_four_milestones_not_all_training_updates"}
+             "candidate_steps": candidates, "evaluated_steps": steps, "scenes_sha256": sha256(scenes),
+             "scope": f"best_of_{len(candidates)}_selected_milestones_not_all_training_updates",
+             "tied_success_steps": [r["step"] for r in records if r["success_rate"] == best["success_rate"]],
+             "independent_test": False, "weight_file": str(weights[best["step"]])}
     atomic_json(root / "BEST.json", value)
-    atomic_json(run / "BEST.json", value)
+    if not fused:
+        atomic_json(run / "BEST.json", value)
+    else:
+        comparison_table(root, cfg, identity, render=True)
     with (root / "candidates.csv").open("w", newline="", encoding="utf-8") as stream:
         writer = csv.DictWriter(stream, fieldnames=tuple(records[0]))
         writer.writeheader()
@@ -308,8 +339,7 @@ def upload_compact(cfg, run, root, phase):
                 continue
             with locked(queue_path.parent / "queue.lock"):
                 value = read_json(queue_path)
-                if "selection" in queue_path.relative_to(root).parts:
-                    backed_up += sum(job["state"] == "complete" for job in value["jobs"])
+                backed_up += sum(job["state"] == "complete" for job in value["jobs"])
                 for job in value["jobs"]:
                     if job["state"] == "complete":
                         EpisodeQueue(queue_path.parent).result(job, value["identity"])
@@ -338,9 +368,15 @@ def upload_compact(cfg, run, root, phase):
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(Path(cfg["root"]) / name, target)
         if (root / "BEST.json").exists():
+            best_record = read_json(root / "BEST.json")
+            best_weight = root / "weights/best.pt"
+            if not best_weight.exists():
+                best_weight = run / "weights/best.pt"
+            if sha256(best_weight) != best_record["weight_sha256"]:
+                raise ValueError("Best weight differs from this comparison; refusing to upload another run's winner")
             target = snapshot / "weights/best.pt"
             target.parent.mkdir(exist_ok=True)
-            shutil.copy2(run / "weights/best.pt", target)
+            shutil.copy2(best_weight, target)
         files = sorted(p for p in snapshot.rglob("*") if p.is_file())
         manifest = {p.relative_to(snapshot).as_posix(): sha256(p) for p in files}
         atomic_json(directory / "manifest.json", {"files": manifest, "phase": phase, "selection_completed": backed_up})
@@ -386,39 +422,57 @@ def upload_compact(cfg, run, root, phase):
 
 
 def completed_count(root):
+    state = read_json(Path(root) / "status.json") if (Path(root) / "status.json").exists() else {}
+    prefix = "qualification" if state.get("phase") == "qualify" else "selection"
     return sum(sum(j["state"] == "complete" for j in read_json(path)["jobs"])
-               for path in Path(root).glob("selection/*/queue.json"))
+               for path in Path(root).glob(f"{prefix}/*/queue.json"))
 
 
 def print_overall(root, phase):
     root = Path(root)
     rows, total = [], 0
-    for path in root.glob("selection/*/queue.json"):
+    cfg_path = root / "evaluation_config.yaml"
+    cfg = load_config(cfg_path) if cfg_path.exists() else None
+    spec = comparison_spec(cfg) if cfg else None
+    labels = [("base" if step == 0 else f"step_{step:06d}") for step in spec["steps"]] if spec else None
+    pattern = "qualification/*/queue.json" if phase == "qualify" else "selection/*/queue.json"
+    for path in root.glob(pattern):
+        if phase == "selection" and labels is not None and path.parent.name not in labels:
+            raise ValueError(f"Unexpected model queue in this comparison: {path.parent.name}")
         value = read_json(path)
-        total = max(total, len(value["jobs"])*5)
+        total += len(value["jobs"])
         rows.extend((path.parent, job) for job in value["jobs"] if job["state"] == "complete")
-    if not total and (root / "evaluation_config.yaml").exists():
-        cfg = load_config(root / "evaluation_config.yaml")
-        total = 2 * cfg["closed_loop"]["internal_episodes"] * 5
-    means = {}
-    for task in ("put_back_block", "swap_blocks"):
-        seconds = [read_json(directory / j["directory"] / "result.json")["wall_seconds"]
-                   for directory, j in rows if j["scene"]["task"] == task]
-        means[task] = sum(seconds)/len(seconds) if seconds else None
-    remaining = total-len(rows)
-    eta = 0 if remaining == 0 and total else None
-    if remaining and all(v is not None for v in means.values()):
-        # Include a full remaining episode for in-flight work and disclose omitted overhead.
-        by_task = {task: sum(j["scene"]["task"] == task for _, j in rows) for task in means}
-        eta = sum(max(0, total//2-by_task[task])*mean for task, mean in means.items())
-    print(f"[{phase}] overall={len(rows)}/{total or '?'} | remaining-episode work={duration(eta)} (GPU-seconds; excludes future loads/backups)", flush=True)
+    if cfg:
+        total = (2 if cfg.get("selection_runtime", {}).get("profile") == "fused-resident" else 12) if phase == "qualify" else len(spec["tasks"]) * spec["episodes_per_task"] * len(labels)
+    known_work, unknown = 0.0, max(0, total-len(rows))
+    borrowed = 0
+    if phase == "selection" and spec:
+        unknown = 0
+        measured = [(directory.name, job["scene"]["task"],
+                     read_json(directory / job["directory"] / "result.json")["wall_seconds"])
+                    for directory, job in rows]
+        for label in labels:
+            for task in spec["tasks"]:
+                own = [s for name, t, s in measured if name == label and t == task]
+                left = max(0, spec["episodes_per_task"]-len(own))
+                # Another memory checkpoint may provide a provisional cost; base never does.
+                samples = own or [s for name, t, s in measured if t == task and (name == "base") == (label == "base")]
+                if samples:
+                    known_work += left * sum(samples)/len(samples)
+                    if not own:
+                        borrowed += left
+                else:
+                    unknown += left
+    print(f"[{phase}] overall={len(rows)}/{total or '?'} | known_remaining_work~{duration(known_work)} "
+          f"+ {unknown} episodes without timing samples | borrowed_checkpoint_estimates={borrowed} "
+          "(GPU-time; includes full active episode; model loads/backups excluded)", flush=True)
     if (root / "active.json").exists():
         active = Path(read_json(root / "active.json")["directory"])
         if (active / "status.json").exists():
             status = read_json(active / "status.json")
             print(f"[current {active.name}] stage={status.get('stage')} completed={status.get('completed', status.get('accepted'))}/{status.get('total', '?')} ETA={duration(status.get('eta_seconds'))}", flush=True)
             for row in status.get("active", []):
-                print(f"  {row['phase']} {row['state']} task={row.get('task', '-')} seed={row.get('seed', '-')} batch={row.get('batch', '-')} targets={row.get('targets', '-')} age={duration(row.get('phase_age_seconds'))}", flush=True)
+                print(f"  {format_active(row)}", flush=True)
 
 
 def wait_stopped(root, deadline):
@@ -428,6 +482,9 @@ def wait_stopped(root, deadline):
 
 
 def runtime_options(profile):
+    if profile == "fused-resident":
+        return {"version": "selection-runtime-v3", "profile": profile, "resident_simulator": True,
+                "backend": "fused_graph_v1", "one_planning_task_per_gpu": True, "serialize_arm_warmup": True}
     return {"version": "selection-runtime-v2", "profile": profile,
             "resident_simulator": profile in ("resident", "async-resident"),
             "backend": "builtin_torch_async_v2" if profile in ("async", "async-resident") else "builtin_torch_v1",
@@ -435,6 +492,9 @@ def runtime_options(profile):
 
 
 def qualification_binding(cfg, profile):
+    if profile == "fused-resident":
+        from .fused_evaluation import qualification_key
+        return qualification_key(cfg)
     from .eval_parallel import protocol
     from .simulator_backend import backend_contract
     contract = protocol(cfg, "internal")
@@ -460,6 +520,9 @@ def verify_qualification(cfg, args):
 
 def qualify(cfg, run, root, weights, args):
     """Real simulator checks, explicitly requested; never part of selection itself."""
+    if args.runtime_profile == "fused-resident":
+        from .fused_evaluation import qualify_fused
+        return qualify_fused(cfg, run, root, weights, args)
     import yaml
     from .eval_parallel import prepare_scenes, gpu_inventory
     from .eval_state import EpisodeQueue
@@ -540,7 +603,8 @@ def main():
     parser.add_argument("--hf-results", action="store_true")
     parser.add_argument("--evidence")
     parser.add_argument("--offline-from", help="Import matching previous offline metrics with explicit provenance")
-    parser.add_argument("--runtime-profile", choices=("serial", "async", "resident", "async-resident"), default="serial")
+    parser.add_argument("--runtime-profile", choices=("serial", "async", "resident", "async-resident", "fused-resident"), default="serial")
+    parser.add_argument("--frozen-scenes", help="Existing complete twenty-scene bank; fused mode never searches new seeds")
     parser.add_argument("--qualification-report")
     parser.add_argument("--mode", choices=("drain", "now"), default="drain")
     parser.add_argument("--grace-seconds", type=int, default=120)
@@ -556,7 +620,10 @@ def main():
             wait_stopped(root, request["deadline"])
         return
     if args.command == "status":
-        print_overall(root, "selection")
+        phase = read_json(root / "status.json").get("phase", "selection") if (root / "status.json").exists() else "selection"
+        print_overall(root, phase)
+        if (root / "comparison.csv").exists():
+            print((root / "comparison.csv").read_text(encoding="utf-8-sig"))
         for name in ("status.json", "BACKUP_PENDING.json", "HF_selection.json", "BEST.json"):
             if (root / name).exists():
                 value = read_json(root / name)
@@ -588,6 +655,19 @@ def run_phase(args, root):
         raise ValueError("Candidate schedule differs from the exported training schedule.")
     migration = source_migration(cfg, identity["code"])
     cfg["selection_runtime"] = runtime_options(args.runtime_profile)
+    spec = comparison_spec(cfg)
+    if spec["steps"] != [0, 500, 1000, 1500, 2000] and args.runtime_profile != "fused-resident":
+        raise ValueError("Selected-checkpoint comparison requires fused-resident and an existing frozen scene bank")
+    if args.runtime_profile == "fused-resident":
+        from .fused_evaluation import runtime_binding
+        if args.phase not in ("qualify", "selection") or not args.frozen_scenes:
+            raise ValueError("fused-resident requires --frozen-scenes and phase qualify|selection")
+        if args.gpus != "0":
+            raise ValueError("This H100 comparison profile uses exactly GPU 0")
+        os.environ.pop("CUDA_LAUNCH_BLOCKING", None)
+        cfg["selection_runtime"]["frozen_scenes"] = str(Path(args.frozen_scenes).resolve())
+        cfg["selection_runtime"]["environment"] = runtime_binding(cfg)
+        atomic_json(root / "SIMULATOR_ENVIRONMENT.json", cfg["selection_runtime"]["environment"])
     atomic_json(root / "SOURCE_MIGRATION.json", migration)
     if args.phase not in ("qualify", "offline") and args.runtime_profile != "serial":
         verify_qualification(cfg, args)
@@ -608,6 +688,8 @@ def run_phase(args, root):
                "gpus": subprocess.check_output(["nvidia-smi", "--query-gpu=name,driver_version", "--format=csv,noheader"], text=True)}
     evaluation_identity = {"training": identity, "weights": {str(k): sha256(v) for k, v in weights.items()},
                            "config_sha": fingerprint(cfg), "candidate_steps": milestone_steps(cfg), "runtime": runtime, "evaluation_code": migration["code"]}
+    if cfg.get("comparison"):
+        evaluation_identity["comparison"] = spec
     marker = root / "identity.json"
     if marker.exists() and read_json(marker) != evaluation_identity:
         raise ValueError("Evaluation environment/weights changed; use a separate output directory.")

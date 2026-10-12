@@ -30,7 +30,13 @@ def event(root, phase, state="running", **fields):
     root = Path(root)
     root.mkdir(parents=True, exist_ok=True)
     row = {"time": time.time(), "owner": process_identity(), "phase": phase, "state": state, **fields}
-    durable_json(root / f"progress_{os.getpid()}.json", row)
+    path = root / f"progress_{os.getpid()}.json"
+    previous = read(path) if path.exists() else {}
+    same_owner = all((previous.get("owner") or {}).get(k) == (row.get("owner") or {}).get(k)
+                     for k in ("pid", "start_ticks", "host", "boot"))
+    same_stage = same_owner and all(previous.get(k) == row.get(k) for k in ("phase", "state", "task", "seed", "batch"))
+    row["phase_started"] = previous.get("phase_started", previous.get("time", row["time"])) if same_stage else row["time"]
+    durable_json(path, row)
     with locked(root / "events.lock"):
         with (root / "events.jsonl").open("a", encoding="utf-8") as stream:
             stream.write(json.dumps(row, ensure_ascii=False) + "\n")
@@ -54,8 +60,24 @@ def live_details(root):
             continue
         value = read(path)
         if value.get("state") in ("running", "waiting") and is_alive(value.get("owner")):
-            rows.append({**value, "phase_age_seconds": time.time() - value["time"]})
+            now = time.time()
+            rows.append({**value, "phase_age_seconds": now - value.get("phase_started", value["time"]),
+                         "heartbeat_age_seconds": now - value["time"]})
     return sorted(rows, key=lambda row: row["time"])
+
+
+def format_active(row):
+    text = (f"{row['phase']} {row['state']} task={row.get('task', '-')} "
+            f"scene={row.get('scene_number', '-')}/10 seed={row.get('seed', '-')} "
+            f"targets={row.get('targets', '-')}/{row.get('target_limit', '-')} "
+            f"stage_elapsed={duration(row.get('phase_age_seconds'))} "
+            f"heartbeat_age={duration(row.get('heartbeat_age_seconds'))}")
+    if row.get("episode_elapsed_seconds") is not None:
+        elapsed = row["episode_elapsed_seconds"] + row.get("heartbeat_age_seconds", 0)
+        text += f" episode_elapsed={duration(elapsed)}"
+    if row.get("target_budget_eta_seconds") is not None:
+        text += f" time_to_target_limit~{duration(row['target_budget_eta_seconds'])} (measured rollout rate; success may end earlier)"
+    return text
 
 
 def install_warmup_observer(MotionGen):
@@ -164,8 +186,14 @@ def import_offline(source, destination, identity, migration):
             raise ValueError(f"Offline evidence differs: {name}")
     old_cfg = yaml.safe_load((source / "evaluation_config.yaml").read_text())
     new_cfg = yaml.safe_load((destination / "evaluation_config.yaml").read_text())
-    new_cfg.pop("selection_runtime", None)
-    if fingerprint(old_cfg) != prior["config_sha"] or new_cfg != old_cfg:
+    if fingerprint(old_cfg) != prior["config_sha"]:
+        raise ValueError("Offline source configuration checksum changed")
+    # Only evaluator routing changes; model/data/history/numerical settings stay exact.
+    for config in (old_cfg, new_cfg):
+        config.pop("selection_runtime", None)
+        config.pop("comparison", None)
+        config.get("closed_loop", {}).pop("simulator_python", None)
+    if new_cfg != old_cfg:
         raise ValueError("Offline inference/data configuration changed")
     evidence = {}
     for step in identity["candidate_steps"]:
