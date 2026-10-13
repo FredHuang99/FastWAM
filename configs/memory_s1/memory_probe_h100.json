@@ -1,0 +1,21 @@
+{
+  "schema": "memory-injection-probe-v1",
+  "machine": "h100",
+  "output": "outputs/s1_memory_probe_h100_v1",
+  "intervention_output": "outputs/s1_initial_intervention_h100_v1",
+  "intervention_archive": "outputs/s1_initial_intervention_h100_v1/packages/1791922125506016273/initial_intervention.tar.gz",
+  "intervention_archive_sha256": "45fa7df783b65fa1c7118acc3911c49b0f4626e33d32f8f5aaa054331029d36c",
+  "grasp_archive_sha256": "4d6bca4e1b3cadeb777c03c0e355e0a5c67a1ad45960716577103ac2585e62b1",
+  "checkpoint_step": 2000,
+  "modes": ["original", "mean_readout", "memory_fp32"],
+  "cases": [
+    {"id": "put_train_initial", "input": "put_back_block_train_initial"},
+    {"id": "swap_val_initial", "input": "swap_blocks_val_initial"},
+    {"id": "put_expert_080", "task": "put_back_block", "anchor": 80},
+    {"id": "swap_expert_048", "task": "swap_blocks", "anchor": 48}
+  ],
+  "noises": ["production", "independent"],
+  "gradient_tau": 0.9,
+  "stage_timeout_seconds": 4200,
+  "case_timeout_seconds": 900
+}
