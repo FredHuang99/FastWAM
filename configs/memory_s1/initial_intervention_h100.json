@@ -1,0 +1,15 @@
+{
+  "schema": "initial-intervention-v1",
+  "machine": "h100",
+  "output": "outputs/s1_initial_intervention_h100_v1",
+  "grasp_output": "outputs/s1_grasp_bridge_h100_v2",
+  "sampler": "outputs/s1_initial_sampler_h100_v1/run_20261013T184641Z_57227",
+  "sampler_archive_sha256": "20cec122561470b67d793bcc96025e5e47e8f32604d43765afb9fccaf96750a4",
+  "tasks": ["put_back_block", "swap_blocks"],
+  "checkpoint_step": 2000,
+  "target_cap": 128,
+  "expert_prefix_targets": 48,
+  "case_timeout_seconds": 1800,
+  "stage_timeout_seconds": 4200,
+  "micro_updates": 16
+}
