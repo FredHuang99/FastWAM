@@ -2,11 +2,14 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import copy
 import csv
+import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import signal
 import subprocess
@@ -22,6 +25,86 @@ STAGES = ("prepare", "first-noise", "expert-prefix", "micro", "report", "pack")
 TASKS = ("put_back_block", "swap_blocks")
 REVISION = "31784b6f37815f4d6b4e06377fa158b3a5965fda"
 SOURCE_FOLDERS = ("src/fastwam", "scripts/memory_s1")
+BRIDGE_SOURCE = "src/fastwam/memory_s1/grasp_bridge.py"
+
+
+def verify_sampler(sampler, expected_archive_sha256):
+    """Authenticate all archived bytes, then require every persistent local file."""
+    archive_path = sampler / "probe.tar.gz"
+    if sha(archive_path) != expected_archive_sha256:
+        raise ValueError("Sampler archive differs from the reviewed download")
+    with tarfile.open(archive_path, "r:gz") as archive:
+        member = archive.getmember("FILES.json")
+        if not member.isfile():
+            raise ValueError("Sampler archive manifest must be a regular file")
+        with archive.extractfile(member) as stream:
+            manifest = json.load(stream)
+        if read(sampler / "FILES.json") != manifest:
+            raise ValueError("Sampler file manifest differs from the authenticated archive")
+        members = {}
+        for member in archive.getmembers():
+            checked_path(sampler, member.name)
+            if member.name in members or not member.isfile():
+                raise ValueError(f"Duplicate or non-file sampler archive member: {member.name}")
+            members[member.name] = member
+        if set(members) != set(manifest) | {"FILES.json"}:
+            raise ValueError("Sampler archive members differ from its file manifest")
+        for name, expected in manifest.items():
+            digest = hashlib.sha256()
+            with archive.extractfile(members[name]) as stream:
+                for block in iter(lambda: stream.read(8 * 1024**2), b""):
+                    digest.update(block)
+            if digest.hexdigest() != expected:
+                raise ValueError(f"Archived sampler checksum mismatch: {name}")
+    # torch.distributed.nn creates this file in a TemporaryDirectory and deletes
+    # it at interpreter shutdown. Its original bytes remain authenticated above.
+    # No arbitrary tmp path, result or input is exempted from local verification.
+    ephemeral = {name: expected for name, expected in manifest.items()
+                 if re.fullmatch(r"tmp/tmp[A-Za-z0-9_-]+/_remote_module_non_scriptable\.py", name)}
+    persistent = {name: expected for name, expected in manifest.items() if name not in ephemeral}
+    verify(sampler, persistent)
+    print(f"[sampler] archived={len(manifest)} verified; persistent={len(persistent)} verified; "
+          f"torch temporary files authenticated in archive only={len(ephemeral)}", flush=True)
+    return {"archive_sha256": expected_archive_sha256, "manifest_sha256": sha(sampler / "FILES.json"),
+            "archived_files_verified": len(manifest), "persistent_files_verified": len(persistent),
+            "archive_only_torch_temporary_files": ephemeral}
+
+
+def verify_sampler_sources(root, expected, archive_path, archive_manifest):
+    """Allow only a reviewed archive-I/O helper change, keeping inference exact."""
+    verify(root, {name: digest for name, digest in expected.items() if name != BRIDGE_SOURCE})
+    current_path = root / BRIDGE_SOURCE
+    current_hash = sha(current_path)
+    original_hash = expected[BRIDGE_SOURCE]
+    record = {"historical_sha256": original_hash, "current_sha256": current_hash,
+              "historical_archive_sha256": sha(archive_path), "unchanged_production_sources": True}
+    if current_hash == original_hash:
+        record["mode"] = "exact"
+        return record
+    name = "source/" + BRIDGE_SOURCE
+    if archive_manifest.get(name) != original_hash:
+        raise ValueError("Historical archive lacks the exact sampler bridge source")
+    with tarfile.open(archive_path, "r:gz") as archive:
+        member = archive.getmember(name)
+        if not member.isfile():
+            raise ValueError("Historical bridge source must be a regular file")
+        with archive.extractfile(member) as stream:
+            original = stream.read()
+    if hashlib.sha256(original).hexdigest() != original_hash:
+        raise ValueError("Historical bridge source checksum differs from the sampler")
+    trees = (ast.parse(original.decode("utf-8")), ast.parse(current_path.read_text(encoding="utf-8")))
+    for tree in trees:
+        helpers = [node for node in tree.body if isinstance(node, ast.FunctionDef)
+                   and node.name == "historical_manifest"]
+        if len(helpers) != 1:
+            raise ValueError("Expected exactly one historical_manifest archive-I/O helper")
+        tree.body = [node for node in tree.body if node is not helpers[0]]
+    if ast.dump(trees[0], include_attributes=False) != ast.dump(trees[1], include_attributes=False):
+        raise ValueError(f"Sampler source changed outside the archive-I/O helper: {current_path}")
+    record.update(mode="archive_io_helper_only", excluded_definition="historical_manifest",
+                  reason="HF cache symlink decompression fix; all other bridge code is structurally identical")
+    print("[source] bridge archive-I/O helper changed; all model/execution sources and other bridge code verified", flush=True)
+    return record
 
 
 def profile(root):
@@ -61,20 +144,13 @@ def runtime(cfg):
 def prepare(root, spec, output):
     print("[prepare] authenticating completed sampler, frozen inputs, checkpoint and current runtime", flush=True)
     sampler = root / spec["sampler"]
-    if sha(sampler / "probe.tar.gz") != spec["sampler_archive_sha256"]:
-        raise ValueError("Sampler archive differs from the reviewed download")
-    with tarfile.open(sampler / "probe.tar.gz", "r:gz") as archive:
-        manifest = json.load(archive.extractfile("FILES.json"))
-    if read(sampler / "FILES.json") != manifest:
-        raise ValueError("Sampler file manifest differs from the authenticated archive")
-    verify(sampler, manifest)
+    sampler_verification = verify_sampler(sampler, spec["sampler_archive_sha256"])
     result = read(sampler / "RESULT.json")
     if not result.get("complete") or [result.get(k) for k in ("action_samples", "fm_forwards", "reference_exact_cases")] != [36, 48, 12]:
         raise ValueError("Expected the completed 36/48/12 sampler diagnostic")
     sampler_bound = read(sampler / "IDENTITY.json")
     if sampler_bound["evidence_revision"] != REVISION:
         raise ValueError("Different historical grasp evidence")
-    verify(root, sampler_bound["sources"])
     old = root / spec["grasp_output"]
     old_receipt = read(old / "HF_grasp.json")
     if old_receipt.get("revision") != REVISION or not old_receipt.get("readback_verified"):
@@ -84,6 +160,7 @@ def prepare(root, spec, output):
         raise ValueError("Original grasp archive differs from sampler provenance")
     with tarfile.open(old_archive, "r:gz") as archive:
         old_manifest = json.load(archive.extractfile("BACKUP_FILES.json"))
+    source_verification = verify_sampler_sources(root, sampler_bound["sources"], old_archive, old_manifest)
     verify(old, {"CURRENT.json": old_manifest["CURRENT.json"]})
     old_bound = read(old / "CURRENT.json")
     cfg = copy.deepcopy(sampler_bound["config"])
@@ -114,7 +191,8 @@ def prepare(root, spec, output):
     bound = {"protocol": spec, "config": cfg, "code": code_files(root), "runtime": actual_runtime,
              "weight": weight, "frozen_files_sha256": sha(origin / "FILES.json"),
              "sampler_identity_sha256": sha(sampler / "IDENTITY.json"), "simulator_receipt": str(install),
-             "simulator_receipt_sha256": sha(install), "historical_revision": REVISION}
+             "simulator_receipt_sha256": sha(install), "historical_revision": REVISION,
+             "sampler_verification": sampler_verification, "source_verification": source_verification}
     if (output / "IDENTITY.json").exists():
         if read(output / "IDENTITY.json") != bound:
             raise ValueError("Run identity changed; preserve this run and choose a new output profile")
@@ -270,7 +348,7 @@ def pack(root, output):
     directory = output / "packages" / str(time.time_ns())
     directory.mkdir(parents=True)
     selected = [p for p in output.rglob("*") if p.is_file() and not p.is_symlink()
-                and not set(p.relative_to(output).parts) & {"packages", "interrupted", "__pycache__", "launches"}
+                and not set(p.relative_to(output).parts) & {"packages", "interrupted", "__pycache__", "launches", "tmp"}
                 and p.name not in ("job.lock", "LAUNCH.json", "latest_log.txt")]
     for name in code_files(root):
         target = directory / "source" / name
