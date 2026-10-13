@@ -1,0 +1,22 @@
+{
+  "schema": "memory-query-repair-v1",
+  "machine": "h100",
+  "output": "outputs/s1_memory_repair_h100_v1",
+  "probe_output": "outputs/s1_memory_probe_h100_v1",
+  "probe_archive": "outputs/s1_memory_probe_h100_v1/packages/1791928099732343041/memory_probe.tar.gz",
+  "probe_archive_sha256": "89fd737de6eae16ea2b09637ba95e503a0b88b18bf058b56beca9d66f9b4fe83",
+  "modes": ["original", "query_scale_64"],
+  "query_scale": 64.0,
+  "updates_per_arm": 64,
+  "global_batch": 16,
+  "micro_batch": 2,
+  "accumulation": 8,
+  "checkpoint_every": 16,
+  "evaluation_noises": ["production", "independent", "heldout"],
+  "mechanism_thresholds": {"slot_gain": 10.0, "gradient_gain": 100.0},
+  "fit_thresholds": {"arm_margin_rad": 0.0001, "gripper_margin": 0.005, "max_regression_factor": 1.1},
+  "target_cap": 128,
+  "case_timeout_seconds": 1800,
+  "stage_timeout_seconds": 7200,
+  "local_reserve_gib": 20
+}
