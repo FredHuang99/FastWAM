@@ -5,7 +5,22 @@ export FW_ROOT="${FW_ROOT:-/workspace/FastWAM}"
 cd "$FW_ROOT"
 machine="${FW_BRIDGE_MACHINE:?Use the independent h100/a100 diagnose.sh entry}"
 case "$machine" in h100|a100) ;; *) exit 2 ;; esac
-OUT="$FW_ROOT/outputs/s1_grasp_bridge_${machine}_v1"
+# Resolve the same output profile as the Python worker; inputs can stay at a frozen old path.
+unset PYTHONHOME
+OUT="$(python3 - "$FW_ROOT" "$machine" <<'PY'
+import json
+from pathlib import Path
+import sys
+
+root = Path(sys.argv[1]).resolve()
+machine = sys.argv[2]
+profile = json.loads((root / f'configs/memory_s1/grasp_{machine}.json').read_text(encoding='utf-8'))
+output = (root / profile['output']).resolve()
+if profile['machine'] != machine or not output.is_relative_to(root / 'outputs'):
+    raise ValueError('Invalid machine/output profile')
+print(output)
+PY
+)"
 mkdir -p "$OUT/launches" "$OUT/tmp"
 export TMPDIR="$OUT/tmp" PYTHONUNBUFFERED=1 PYTHONNOUSERSITE=1
 export CUBLAS_WORKSPACE_CONFIG=:4096:8 OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4

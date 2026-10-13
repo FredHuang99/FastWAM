@@ -1,7 +1,7 @@
 {
   "machine": "h100",
   "config": "configs/memory_s1/s1_variable_t_h100_phase.yaml",
-  "output": "outputs/s1_grasp_bridge_h100_v1",
+  "output": "outputs/s1_grasp_bridge_h100_v2",
   "inputs": "outputs/s1_grasp_bridge_h100_v1/frozen",
   "historical": "outputs/s1_zero_success_followup_v2",
   "simulator_python": "/opt/rmbench-fused-env/bin/python",

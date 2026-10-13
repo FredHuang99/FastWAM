@@ -31,11 +31,17 @@ def cpu(value):
 
 def summary(value):
     if isinstance(value,torch.Tensor):
-        array=value.detach().cpu().contiguous()
-        raw=array.view(torch.uint8).numpy().tobytes()
+        array=value.detach().cpu()
+        # A size-one expanded dimension can be "contiguous" with stride zero.
+        # Allocate a real flat buffer: byte views require rank >= 1 and stride(-1) == 1.
+        packed=torch.empty(array.numel(),dtype=array.dtype,device='cpu')
+        packed.copy_(array.reshape(-1))
+        raw=packed.view(torch.uint8).numpy().tobytes()
+        finite=bool(torch.isfinite(array).all())
         return {'shape':list(array.shape),'dtype':str(array.dtype),'sha256':hashlib.sha256(raw).hexdigest(),
-                'min':float(array.min()) if array.numel() else None,'max':float(array.max()) if array.numel() else None,
-                'finite':bool(torch.isfinite(array).all())}
+                'min':float(array.min()) if array.numel() and finite else None,
+                'max':float(array.max()) if array.numel() and finite else None,
+                'finite':finite}
     if isinstance(value,dict): return {k:summary(v) for k,v in value.items()}
     if isinstance(value,(list,tuple)): return [summary(v) for v in value]
     return value
