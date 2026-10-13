@@ -999,18 +999,32 @@ def devices(args):
             stream.close()
 
 
+def validate_nccl_runtime_record(runtime):
+    """Authenticate a saved runtime without borrowing the collector's environment."""
+    if not isinstance(runtime, dict) or runtime.get('profile') != A100_NCCL_PROFILE:
+        raise ValueError('Unexpected recorded A100 NCCL profile')
+    environment = runtime.get('environment')
+    if not isinstance(environment, dict):
+        raise ValueError('Missing recorded A100 NCCL environment')
+    for name, expected in A100_NCCL_SETTINGS.items():
+        if environment.get(name) != expected:
+            raise ValueError(f'A100 NCCL setting mismatch: {name}; expected={expected}; actual={environment.get(name)}')
+    if runtime.get('ld_preload', 'missing') is not None:
+        raise ValueError('Recorded A100 NCCL runtime must not use LD_PRELOAD')
+    if runtime.get('scope') != 'single_node_collective; not multi_node or throughput qualification':
+        raise ValueError('Unexpected recorded A100 NCCL scope')
+    return runtime
+
+
 def nccl_runtime_values():
     if os.environ.get('FW_A100_NCCL_PROFILE') != A100_NCCL_PROFILE:
         raise ValueError('Launch this check through the A100 NCCL entry, not an inherited shell environment')
-    for name, expected in A100_NCCL_SETTINGS.items():
-        if os.environ.get(name) != expected:
-            raise ValueError(f'A100 NCCL setting mismatch: {name}; expected={expected}; actual={os.environ.get(name)}')
     if os.environ.get('LD_PRELOAD'):
         raise ValueError('A100 NCCL must not inherit LD_PRELOAD')
-    return {'profile':A100_NCCL_PROFILE, 'environment':{
+    return validate_nccl_runtime_record({'profile':A100_NCCL_PROFILE, 'environment':{
         name:value for name,value in os.environ.items()
         if name.startswith('NCCL_') or name in ('LD_LIBRARY_PATH','CUDA_VISIBLE_DEVICES','CUDA_DEVICE_ORDER')},
-        'ld_preload':None, 'scope':'single_node_collective; not multi_node or throughput qualification'}
+        'ld_preload':None, 'scope':'single_node_collective; not multi_node or throughput qualification'})
 
 
 def nccl_environment_snapshot():
@@ -1104,8 +1118,14 @@ def complete_nccl(root):
     """Called only after torch.distributed.run returns zero, including all workers."""
     environment, attempt = nccl_runtime_paths(root)
     runtime = read(environment)
-    if runtime['stage'] != 'nccl' or runtime['runtime'] != nccl_runtime_values():
-        raise ValueError('NCCL launch environment changed before publishing the complete record')
+    if runtime['stage'] != 'nccl':
+        raise ValueError('Expected NCCL launch evidence before publishing the complete record')
+    # This auxiliary Python process can inherit vendor startup defaults (ofi).
+    # Only the saved launcher/worker runtime describes the completed collective.
+    validate_nccl_runtime_record(runtime['runtime'])
+    errors = sorted(attempt.glob('*.error.json'))
+    if errors:
+        raise ValueError(f'NCCL attempt contains direct errors: {errors}')
     environment_sha = sha(environment)
     rows = []
     evidence = [environment]
@@ -1115,6 +1135,17 @@ def complete_nccl(root):
             or launcher_record.get('environment_sha256') != environment_sha):
         raise ValueError('Launcher did not authenticate and restore its NCCL runtime')
     evidence.append(launcher_runtime)
+    launcher_result = attempt/'launcher_result.json'
+    completed = read(launcher_result)
+    command_path = attempt/'torchrun_command.json'
+    if (completed.get('passed') is not True or completed.get('stage') != 'nccl'
+            or completed.get('exit_code') != 0 or completed.get('returned_normally') is not True
+            or completed.get('pid') != launcher_record.get('pid')
+            or completed.get('environment_sha256') != environment_sha
+            or completed.get('runtime_evidence_sha256') != sha(launcher_runtime)
+            or completed.get('command_sha256') != sha(command_path)):
+        raise ValueError(f'Missing/changed normal launcher exit proof: {launcher_result}')
+    evidence.extend((launcher_result, command_path))
     for rank in range(8):
         path = attempt/f'rank_{rank}.json'
         row = read(path)

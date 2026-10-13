@@ -9,7 +9,7 @@ import time
 import traceback
 
 from a100_migration import (nccl, nccl_environment_snapshot, nccl_runtime_paths,
-                            restore_nccl_runtime, write)
+                            restore_nccl_runtime, sha, write)
 
 
 def main():
@@ -22,7 +22,7 @@ def main():
     args.root = args.root.resolve()
     if args.stage == 'cache' and args.config is None:
         parser.error('cache requires --config')
-    _,attempt = nccl_runtime_paths(args.root)
+    environment,attempt = nccl_runtime_paths(args.root)
     rank = os.environ.get('LOCAL_RANK')
     try:
         if args.worker:
@@ -42,13 +42,21 @@ def main():
         else:
             before = nccl_environment_snapshot()
             from torch.distributed import run
-            restore_nccl_runtime(args.root,'launcher',before)
+            runtime_path = restore_nccl_runtime(args.root,'launcher',before)
             command = ['--standalone','--nnodes=1','--nproc_per_node=8',str(Path(__file__).resolve()),
                        args.stage,'--root',str(args.root),'--worker']
             if args.config is not None:
                 command += ['--config',str(args.config)]
-            write(attempt/'torchrun_command.json',command)
+            command_path = attempt/'torchrun_command.json'
+            write(command_path,command)
             run.main(command)
+            # Publish only after torchrun has joined every worker successfully.
+            # The separate receipt collector must authenticate this evidence,
+            # rather than compare its own interpreter's communication defaults.
+            write(attempt/'launcher_result.json',{'passed':True,'stage':args.stage,
+                  'pid':os.getpid(),'exit_code':0,'returned_normally':True,
+                  'environment_sha256':sha(environment),'runtime_evidence_sha256':sha(runtime_path),
+                  'command_sha256':sha(command_path),'completed_unix':time.time()})
     except BaseException as error:
         if not isinstance(error,SystemExit) or error.code not in (0,None):
             label = f'rank_{int(rank)}' if args.worker and rank is not None else 'launcher'
