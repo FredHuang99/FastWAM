@@ -208,6 +208,139 @@ def copy_tree(source, target, *, source_only=False, exclude_top=()):
         shutil.copy2(path, out)
 
 
+def locked_simulator_source(name):
+    """Only source/config trees, never H100 binaries or runtime output."""
+    if migration_name(name) != name:
+        raise ValueError(f"Noncanonical resource identity path: {name}")
+    path = PurePosixPath(name)
+    return (name.startswith(("resources/RMBench/envs/", "resources/RMBench/task_config/",
+                             "resources/RMBench/env_cfg/"))
+            and not set(path.parts) & SKIP
+            and not any(p.endswith(".egg-info") for p in path.parts)
+            and path.suffix.lower() not in (".so", ".pyc", ".o", ".a", ".dll", ".pyd", ".lib", ".cubin", ".fatbin", ".pem", ".key")
+            and ".so." not in path.name.lower()
+            and not path.name.startswith(".env")
+            and path.name not in ("token", "stored_tokens", "credentials", ".netrc"))
+
+
+def restore_locked_simulator_sources(root, package, files, snapshot_dir, snapshot):
+    """Recover omitted source members only when their original identity matches."""
+    base = root / "outputs/recovery_aws_a100_v1"
+    expected = {n: h for n, h in read(package / "RESOURCE_IDENTITY.json").items()
+                if locked_simulator_source(n)}
+    targets, needed = {}, {}
+    for name, checksum in expected.items():
+        target = (root / name).resolve()
+        if not target.is_relative_to((root / "resources/RMBench").resolve()):
+            raise ValueError(f"Simulator source destination escapes RMBench: {name}")
+        if target.exists() and not target.is_file():
+            raise ValueError(f"Simulator source destination is not a regular file: {target}")
+        targets[name] = target
+        if not target.is_file() or sha(target) != checksum:
+            needed[name] = checksum
+    restored, missing, rejected = [], [], {}
+    tmp_root = base / "tmp"
+    tmp_root.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="locked-sources-", dir=tmp_root) as temporary:
+        selected = {}
+        for name, checksum in needed.items():
+            candidates = ["project/" + name]
+            if name.startswith("resources/RMBench/envs/curobo/"):
+                candidates.append("build_sources/curobo/" + name.removeprefix("resources/RMBench/envs/curobo/"))
+            for member in candidates:
+                row = files.get(member)
+                if row is None:
+                    continue
+                source = migration_member_path(package, member)
+                if row["sha256"] == checksum and sha(source) == checksum:
+                    selected[name] = (source, "migration:" + member)
+                    break
+                rejected.setdefault(name, []).append({"member": member, "sha256": row["sha256"]})
+            # Some ready packages also contain directly inventoried source bytes.
+            row = snapshot["files"].get(name)
+            if name not in selected and row and row["sha256"] == checksum:
+                source = (snapshot_dir / name).resolve()
+                if source.is_relative_to(snapshot_dir.resolve()) and source.is_file() and sha(source) == checksum:
+                    selected[name] = (source, "ready:" + name)
+        # Older migrations filtered extensionless files from project/, while their
+        # authenticated ready source archives can still contain the exact bytes.
+        pending = set(needed) - set(selected)
+        for archive_name, row in snapshot["files"].items():
+            if not pending:
+                break
+            if PurePosixPath(archive_name).name not in ("RMBench.source.tar.gz", "simulator_sources.tar.gz"):
+                continue
+            archive = (snapshot_dir / archive_name).resolve()
+            if not archive.is_relative_to(snapshot_dir.resolve()) or sha(archive) != row["sha256"]:
+                raise ValueError(f"Changed ready source archive: {archive_name}")
+            suffixes = {tuple(PurePosixPath(n.removeprefix("resources/RMBench/")).parts): n for n in pending}
+            with tarfile.open(archive, "r|gz") as tar:
+                for member in tar:
+                    parts = PurePosixPath(member.name).parts
+                    if (not member.isfile() or PurePosixPath(member.name).is_absolute()
+                            or ".." in parts or "\\" in member.name):
+                        continue
+                    # Archives may have one leading checkout directory.
+                    key = next((parts[i:] for i, part in enumerate(parts)
+                                if part in ("envs", "task_config", "env_cfg") and parts[i:] in suffixes), None)
+                    name = suffixes.get(key)
+                    if name not in pending:
+                        continue
+                    source = Path(temporary) / hashlib.sha256(name.encode()).hexdigest()
+                    with tar.extractfile(member) as stream, source.open("wb") as out:
+                        shutil.copyfileobj(stream, out)
+                    actual = sha(source)
+                    if actual == needed[name]:
+                        source.chmod(member.mode & 0o777)
+                        selected[name] = (source, f"ready:{archive_name}:{member.name}")
+                        pending.remove(name)
+                    else:
+                        rejected.setdefault(name, []).append({"archive": archive_name, "member": member.name, "sha256": actual})
+        for name, checksum in needed.items():
+            if name not in selected:
+                missing.append({"file": name, "expected": checksum,
+                                "actual": sha(targets[name]) if targets[name].is_file() else "MISSING",
+                                "nonmatching_candidates": rejected.get(name, [])})
+                continue
+            source, origin = selected[name]
+            target = targets[name]
+            before = None
+            if target.is_file():
+                old_sha = sha(target)
+                before = base / "before_source_restore" / old_sha / target.name
+                before.parent.mkdir(parents=True, exist_ok=True)
+                if not before.exists():
+                    shutil.copy2(target, before)
+                if sha(before) != old_sha:
+                    raise ValueError(f"Preserved simulator source mismatch: {before}")
+            target.parent.mkdir(parents=True, exist_ok=True)
+            temporary_file = None
+            try:
+                with tempfile.NamedTemporaryFile(dir=target.parent, prefix=".source-restore-", delete=False) as out:
+                    temporary_file = Path(out.name)
+                    with source.open("rb") as stream:
+                        shutil.copyfileobj(stream, out)
+                if sha(temporary_file) != checksum:
+                    raise ValueError(f"Changed selected simulator source: {name}")
+                temporary_file.chmod(source.stat().st_mode & 0o777)
+                temporary_file.replace(target)
+            finally:
+                if temporary_file is not None and temporary_file.exists():
+                    temporary_file.unlink()
+            restored.append({"file": name, "sha256": checksum, "origin": origin,
+                             "previous_file": str(before) if before else None})
+        report = base / "LOCKED_SOURCE_RESTORE.json"
+        write(report, {"passed": not missing, "identity_sha256": sha(package / "RESOURCE_IDENTITY.json"),
+                       "checked": len(expected), "restored": restored, "unresolved": missing})
+        print(f"[locked-sources] checked={len(expected)} restored={len(restored)} unresolved={len(missing)}; report={report}", flush=True)
+        for item in restored:
+            print(f"[source-restored] {item['file']} <- {item['origin']}", flush=True)
+        if missing:
+            for item in missing:
+                print(f"[source-unresolved] {item['file']} expected={item['expected']} actual={item['actual']}", flush=True)
+            raise ValueError(f"Exact simulator sources unavailable; inspect all {len(missing)} differences in {report}")
+
+
 def export(args):
     root = args.root
     sim = Path("/opt/rmbench-fused-env/bin/python")
@@ -295,6 +428,15 @@ def export(args):
     for key in ('base','stats','vae','t5'):
         p = Path(read(evidence.parent/'identity.json')['config']['paths'][key])
         resource_files[p.relative_to(root).as_posix()] = sha(p)
+    # Include every identity-bound source file, not just recognized extensions.
+    # In particular, .clangd/.gitignore/CMake metadata must not disappear.
+    for name, expected in resource_files.items():
+        if locked_simulator_source(name):
+            target = payload / "project" / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(root / name, target)
+            if sha(target) != expected:
+                raise ValueError(f"Simulator source changed during migration export: {name}")
     write(payload/'RESOURCE_IDENTITY.json',resource_files)
     # Old Windows/H100 source paths are provenance only; current A100 code stays separate.
     write(payload/'CODE_IDENTITY.json',{p.relative_to(root).as_posix():sha(p) for folder in ('src','scripts/memory_s1','configs')
@@ -469,6 +611,8 @@ def restore(args):
         target.parent.mkdir(parents=True, exist_ok=True)
         if not target.exists():
             shutil.copy2(source, target)
+    if args.overlay_sources:
+        restore_locked_simulator_sources(root, package, files, snapshot.parent, restored)
     print("[restored] actual prepared data/source/locks; historical admission is not new A100 approval")
     mark(args.root, 'patch-sources' if args.overlay_sources else 'restore')
 
@@ -640,11 +784,26 @@ def resources(args):
 def verify_resources(args):
     require(args.root,'patch-sources')
     base=args.root/'outputs/recovery_aws_a100_v1'
-    for name,expected in read(base/'migration/RESOURCE_IDENTITY.json').items():
+    package=base/'migration'
+    verify_migration_files(package)
+    identity=read(package/'RESOURCE_IDENTITY.json')
+    differences=[]
+    for name,expected in identity.items():
+        if migration_name(name)!=name or not name.startswith('resources/'):
+            raise ValueError(f'Invalid final resource path: {name}')
         path=(args.root/name).resolve()
+        if not path.is_relative_to(args.root):
+            raise ValueError(f'Final resource path escapes project: {name}')
         actual=sha(path) if path.is_file() else 'MISSING'
-        if not path.is_relative_to(args.root) or actual!=expected:
-            raise ValueError(f'Final resource mismatch {path}: expected={expected}, actual={actual}')
+        if actual!=expected:
+            differences.append({'file':name,'expected':expected,'actual':actual})
+    report=base/'FINAL_RESOURCE_DIFF.json'
+    write(report,{'passed':not differences,'checked':len(identity),
+                  'identity_sha256':sha(package/'RESOURCE_IDENTITY.json'),'differences':differences})
+    if differences:
+        for row in differences:
+            print(f"[resource-mismatch] {row['file']}: expected={row['expected']}, actual={row['actual']}",flush=True)
+        raise ValueError(f'Final resource mismatches={len(differences)}; full report={report}')
     mark(args.root,'verify-resources')
     print('[resources] published resources plus sourced patches match final H100 identities; no local admission inherited')
 
