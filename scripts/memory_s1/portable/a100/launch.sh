@@ -60,6 +60,9 @@ case "$ACTION" in
     done
     tail -n 60 "$log"
     code="$(cat "${log%.log}.exit")"
+    if [[ "$code" != 0 ]]; then
+      python3 "$HELPER" failure --root "$FW_ROOT" --log "$log"
+    fi
     printf 'Exit code: %s\n' "$code"
     exit "$code" ;;
   system|hf) command=(bash scripts/memory_s1/portable/install_environments.sh "$ACTION") ;;
@@ -79,7 +82,7 @@ case "$ACTION" in
     test -f "$FW_ROOT/outputs/fused_environment_a100_v1/COMPLETE.json"
     command=(/opt/hf-tools/bin/python -u "$HELPER" devices --root "$FW_ROOT") ;;
   nccl)
-    command=(/opt/mwam/bin/python -u -m torch.distributed.run --standalone --nnodes=1 --nproc_per_node=8 "$HELPER" nccl --root "$FW_ROOT") ;;
+    command=(/opt/mwam/bin/python -u scripts/memory_s1/portable/a100/nccl_bootstrap.py nccl --root "$FW_ROOT") ;;
   planners|models)
     export PYTHONPATH="$FW_ROOT/src"
     command=(/opt/mwam/bin/python -u -m fastwam.memory_s1.grasp_bridge "$ACTION" --root "$FW_ROOT" --machine a100 "${resume[@]}") ;;
@@ -92,7 +95,7 @@ case "$ACTION" in
     test -f "$RECOVERY_ROOT/DEVICES_COMPLETE.json"
     test -f "$RECOVERY_ROOT/NCCL_COMPLETE.json"
     # dense.cache itself verifies a matching local pilot report before any encoding.
-    command=(/opt/mwam/bin/python -u -m torch.distributed.run --standalone --nnodes=1 --nproc_per_node=8 -m fastwam.memory_s1.dense cache --config "$CONFIG") ;;
+    command=(/opt/mwam/bin/python -u scripts/memory_s1/portable/a100/nccl_bootstrap.py cache --root "$FW_ROOT" --config "$CONFIG") ;;
   *) echo 'Usage: launch.sh system|hf|inventory|fetch|payloads|restore|resources|patch-sources|verify-resources|training|references|simulator|devices|planners|models|nccl|report|backup|cache|status|wait|watch|stop'; exit 2 ;;
 esac
 exec 9>"$RECOVERY_ROOT/job.lock"

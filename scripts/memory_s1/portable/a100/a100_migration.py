@@ -15,6 +15,7 @@ import sys
 import tarfile
 import tempfile
 import time
+import traceback
 from urllib.parse import urlsplit, parse_qs
 
 REPO = "hhyfred/fastwam-memory-s1-backup"
@@ -25,6 +26,7 @@ SKIP = {".git", ".cache", "__pycache__", "build", "dist", ".pytest_cache", "node
 RMBENCH_RUNTIME_DIRS = {"eval_result", "eval_results", "logs", "outputs"}
 MIGRATION_QUARANTINE = ".migration_runtime_quarantine"
 A100_NCCL_PROFILE = "a100-single-node-nccl-v1"
+NCCL_SOURCE_FILES = ('launch.sh', 'a100_migration.py', 'nccl_bootstrap.py')
 A100_NCCL_SETTINGS = {
     "LD_LIBRARY_PATH": "/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/lib64:/usr/local/lib",
     "NCCL_NET_PLUGIN": "none", "NCCL_TUNER_PLUGIN": "none",
@@ -1011,6 +1013,66 @@ def nccl_runtime_values():
         'ld_preload':None, 'scope':'single_node_collective; not multi_node or throughput qualification'}
 
 
+def nccl_environment_snapshot():
+    """Raw communication variables only; never tokens or unrelated environment."""
+    return {name:value for name,value in os.environ.items()
+            if name.startswith('NCCL_') or name in ('LD_LIBRARY_PATH','CUDA_VISIBLE_DEVICES','CUDA_DEVICE_ORDER')}
+
+
+def restore_nccl_runtime(root, phase, before_import=None):
+    """Reapply the authenticated launch profile after runtime import overrides.
+
+    AWS startup in the reported worker changed NCCL_NET_PLUGIN=none to ofi.
+    The repair happens before process-group construction, not by allowing ofi
+    through the validator. Device visibility and loader paths are never repaired
+    after libraries have loaded; an unexpected change to those still fails.
+    """
+    environment, attempt = nccl_runtime_paths(root)
+    recorded = read(environment)
+    expected = recorded['runtime']
+    desired = expected['environment']
+    if expected.get('profile') != A100_NCCL_PROFILE or recorded.get('stage') not in ('nccl','cache'):
+        raise ValueError('Unexpected NCCL runtime snapshot/profile')
+    if os.environ.get('FW_A100_NCCL_PROFILE') != A100_NCCL_PROFILE:
+        raise ValueError('Expected explicit A100 single-node runtime profile')
+    for name, value in A100_NCCL_SETTINGS.items():
+        if desired.get(name) != value:
+            raise ValueError(f'Launch snapshot has invalid {name}: {desired.get(name)}')
+    observed = nccl_environment_snapshot()
+    for name in ('LD_LIBRARY_PATH','CUDA_VISIBLE_DEVICES','CUDA_DEVICE_ORDER'):
+        if observed.get(name) != desired.get(name):
+            raise ValueError(f'{name} changed after launch; expected={desired.get(name)} actual={observed.get(name)}')
+    for name in list(os.environ):
+        if name.startswith('NCCL_') and name not in desired:
+            del os.environ[name]
+    for name,value in desired.items():
+        if name.startswith('NCCL_'):
+            os.environ[name] = value
+    restored = nccl_runtime_values()
+    if restored != expected:
+        raise ValueError(f'Restored NCCL environment differs from launch: {restored}')
+    changes = {name:{'observed':observed.get(name),'restored':desired.get(name)}
+               for name in sorted(observed.keys()|desired.keys()) if observed.get(name)!=desired.get(name)}
+    rank = os.environ.get('LOCAL_RANK')
+    filename = 'launcher_runtime.json' if phase == 'launcher' else f'rank_{int(rank)}_runtime.json'
+    path = attempt/filename
+    events = []
+    if path.exists():
+        previous = read(path)
+        if previous.get('pid') != os.getpid():
+            raise ValueError(f'Runtime evidence already belongs to another process: {path}')
+        events = previous.get('events',[])
+    events.append({'before_import':before_import,'after_import':observed,'changes':changes,
+                   'created_unix':time.time()})
+    write(path, {'phase':phase,'rank':None if phase=='launcher' else int(rank), 'pid':os.getpid(),
+          'environment_sha256':sha(environment),'before_import':before_import,
+          'after_import':observed,'changes':changes,'restored':restored,
+          'events':events,'before_process_group':True,'created_unix':time.time()})
+    print(f'[nccl runtime restored] phase={phase} rank={rank if phase != "launcher" else "-"} '
+          f'changes={json.dumps(changes,sort_keys=True)}',flush=True)
+    return path
+
+
 def nccl_runtime_paths(root):
     base = (root/'outputs/recovery_aws_a100_v1/launches').resolve()
     environment = Path(os.environ['FW_A100_NCCL_ENVIRONMENT']).resolve()
@@ -1030,7 +1092,7 @@ def nccl_runtime(args):
     attempt.mkdir()
     write(environment, {'runtime':runtime,'stage':args.stage,'created_unix':time.time()})
     source = args.root/'scripts/memory_s1/portable/a100'
-    for name in ('launch.sh','a100_migration.py'):
+    for name in NCCL_SOURCE_FILES:
         shutil.copy2(source/name, attempt/name)
     if args.stage == 'nccl':
         write(args.root/'outputs/recovery_aws_a100_v1/NCCL_LATEST_ATTEMPT.json',
@@ -1047,6 +1109,12 @@ def complete_nccl(root):
     environment_sha = sha(environment)
     rows = []
     evidence = [environment]
+    launcher_runtime = attempt/'launcher_runtime.json'
+    launcher_record = read(launcher_runtime)
+    if (launcher_record.get('phase') != 'launcher' or launcher_record.get('restored') != runtime['runtime']
+            or launcher_record.get('environment_sha256') != environment_sha):
+        raise ValueError('Launcher did not authenticate and restore its NCCL runtime')
+    evidence.append(launcher_runtime)
     for rank in range(8):
         path = attempt/f'rank_{rank}.json'
         row = read(path)
@@ -1055,9 +1123,18 @@ def complete_nccl(root):
                 or row.get('environment_sha256') != environment_sha):
             raise ValueError(f'Incomplete/mismatched NCCL rank evidence: {path}')
         rows.append(row); evidence.append(path)
+        runtime_path = attempt/f'rank_{rank}_runtime.json'
+        observed = read(runtime_path)
+        if (observed.get('rank') != rank or observed.get('phase') != 'nccl_worker'
+                or observed.get('restored') != runtime['runtime']
+                or observed.get('environment_sha256') != environment_sha
+                or observed.get('before_process_group') is not True
+                or row.get('runtime_evidence_sha256') != sha(runtime_path)):
+            raise ValueError(f'Missing/changed worker runtime restoration proof: {runtime_path}')
+        evidence.append(runtime_path)
     source = root/'scripts/memory_s1/portable/a100'
     source_hashes = {}
-    for name in ('launch.sh','a100_migration.py'):
+    for name in NCCL_SOURCE_FILES:
         archived = attempt/name
         if sha(archived) != sha(source/name):
             raise ValueError(f'A100 source changed while NCCL was running: {source/name}')
@@ -1079,8 +1156,10 @@ def nccl(args):
     from datetime import timedelta
     rank = int(os.environ['LOCAL_RANK'])
     print(f'[nccl rank={rank}] importing model torch', flush=True)
+    before_import = nccl_environment_snapshot()
     import torch
     import torch.distributed as dist
+    runtime_path = restore_nccl_runtime(args.root,'nccl_worker',before_import)
     environment, attempt = nccl_runtime_paths(args.root)
     recorded = read(environment)
     if recorded['stage'] != 'nccl' or recorded['runtime'] != nccl_runtime_values():
@@ -1091,6 +1170,9 @@ def nccl(args):
     assert torch.cuda.get_device_capability(rank) == (8, 0)
     device = torch.device(f'cuda:{rank}')
     print(f'[nccl rank={rank}] init torch={torch.__version__} cuda={torch.version.cuda} nccl={torch.cuda.nccl.version()}', flush=True)
+    # CUDA lazy initialization can run additional vendor startup code. Reapply
+    # once more at the actual process-group boundary and preserve both events.
+    runtime_path = restore_nccl_runtime(args.root,'nccl_worker')
     try:
         dist.init_process_group('nccl', timeout=timedelta(seconds=180), device_id=device)
         print(f'[nccl rank={rank}] all_reduce', flush=True)
@@ -1102,7 +1184,7 @@ def nccl(args):
         result = {'passed':True,'rank':rank,'world_size':8,'sum':value.item(),
                   'torch':torch.__version__,'cuda':torch.version.cuda,'nccl':torch.cuda.nccl.version(),
                   'device':str(device),'device_name':torch.cuda.get_device_name(rank),
-                  'environment_sha256':sha(environment)}
+                  'environment_sha256':sha(environment),'runtime_evidence_sha256':sha(runtime_path)}
     finally:
         if dist.is_initialized():
             print(f'[nccl rank={rank}] destroy process group', flush=True)
@@ -1114,6 +1196,29 @@ def nccl(args):
         and Path(parts[5]).name.startswith(('libnccl','libcuda','libucs','libucp','libmpi'))})
     write(attempt/f'rank_{rank}.json', result)
     print(f'[nccl rank={rank}] complete sum=36', flush=True)
+
+
+def failure(args):
+    """Display the direct worker error instead of only elastic's final summary."""
+    base = args.root/'outputs/recovery_aws_a100_v1/launches'
+    log = args.log.resolve() if args.log else Path((base.parent/'latest_log.txt').read_text().strip()).resolve()
+    if log.parent != base.resolve():
+        raise ValueError('Failure log must belong to this A100 launch directory')
+    attempt = log.with_name(log.name.removesuffix('.log')+'.workers')
+    errors = []
+    if attempt.is_dir():
+        for path in attempt.glob('*.error.json'):
+            value = read(path)
+            errors.append((value.get('created_unix',0),path,value))
+    if errors:
+        _,path,value = min(errors,key=lambda row:row[0])
+        print(f'[first direct error] {path}',flush=True)
+        print(value.get('traceback',value),flush=True)
+    elif log.is_file():
+        lines = log.read_text(errors='replace').splitlines()
+        start = next((i for i,line in enumerate(lines) if line.startswith('Traceback (most recent call last):')),0)
+        print('[direct launch error; first traceback]',flush=True)
+        print('\n'.join(lines[max(0,start-4):start+100]),flush=True)
 
 
 def process(pid):
@@ -1163,7 +1268,7 @@ def stop(args):
 
 def main():
     parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument("command", choices=("export", "fetch", "payloads", "restore", "pins", "patches", "device", "devices", "nccl", "nccl-runtime", "register", "status", "stop", 'resources','verify-resources','precheck','mark','report','compile-budget','training'))
+    parser.add_argument("command", choices=("export", "fetch", "payloads", "restore", "pins", "patches", "device", "devices", "nccl", "nccl-runtime", "failure", "register", "status", "stop", 'resources','verify-resources','precheck','mark','report','compile-budget','training'))
     parser.add_argument("--root", type=Path, default=Path("/workspace/FastWAM"))
     parser.add_argument("--repo", default=REPO)
     parser.add_argument("--kind", choices=("training", "simulator"))
