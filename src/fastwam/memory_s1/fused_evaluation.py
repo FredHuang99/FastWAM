@@ -131,9 +131,49 @@ def observe_fused_backend(LBFGSOpt, MotionGen):
         if row["launch_blocking"] is not None:
             raise RuntimeError("CUDA_LAUNCH_BLOCKING unexpectedly set in planner")
         durable_json(Path(root) / f"fused_backend_{os.getpid()}_{time.time_ns()}.json", row)
+        if os.environ.get('MEMORY_S1_GRAPH_FRESH_PROBE') == '1' and kwargs.get('batch', 1) == 1:
+            fresh_graph_probe(self, counts, Path(root))
         print(f"[fused verified] pid={os.getpid()} optimizers={len(effective)} captures={counts['captures']} replays={counts['replays']}", flush=True)
         return value
     MotionGen.warmup = checked_warmup
+
+
+def fresh_graph_probe(motion_gen, counts, output):
+    """Opt-in bounded A100 qualification; no simulated actions or task success calls."""
+    import torch
+    import random
+    import numpy as np
+    from curobo.types.robot import JointState
+    from curobo.wrap.reacher.motion_gen import MotionGenPlanConfig
+    saved = (random.getstate(), np.random.get_state(), torch.get_rng_state(), torch.cuda.get_rng_state_all())
+    before = dict(counts)
+    rows = []
+    try:
+        retract = motion_gen.get_retract_config().view(1, -1).clone()
+        start = JointState.from_position(retract)
+        for offset in (0.02, -0.02):
+            goal = JointState.from_position(retract.clone())
+            goal.position[0, 0] += offset
+            replay_before = counts['replays']
+            result = motion_gen.plan_single_js(start.clone(), goal,
+                MotionGenPlanConfig(max_attempts=1, timeout=10.0))
+            torch.cuda.synchronize()
+            if not bool(result.success.all()):
+                raise RuntimeError(f'Fresh-input graph qualification failed: {result.status}; no fallback')
+            trajectory = result.get_interpolated_plan().position
+            error = float((trajectory[-1]-goal.position[0]).abs().max())
+            row = {'goal':goal.position.detach().cpu().tolist(), 'endpoint':trajectory[-1].detach().cpu().tolist(),
+                   'endpoint_max_abs_error':error, 'graph_replays':counts['replays']-replay_before}
+            rows.append(row)
+            if not torch.isfinite(trajectory).all() or error > 0.01 or row['graph_replays'] <= 0:
+                raise RuntimeError(f'Fresh goal was not consumed by the captured planner graph: {row}')
+        if np.max(np.abs(np.asarray(rows[0]['endpoint'])-rows[1]['endpoint'])) < 0.02:
+            raise RuntimeError('Changed joint goals yielded an unchanged graph output')
+        durable_json(output/f'fresh_graph_{os.getpid()}_{time.time_ns()}.json', {
+            'passed':True,'cases':rows,'graphs_before':before,'graphs_after':dict(counts),
+            'scope':'two joint-space plans per arm; no environment step, no policy RNG consumption'})
+    finally:
+        random.setstate(saved[0]); np.random.set_state(saved[1]); torch.set_rng_state(saved[2]); torch.cuda.set_rng_state_all(saved[3])
 
 
 def inherit_scenes(cfg, root):

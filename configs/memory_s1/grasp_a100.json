@@ -1,0 +1,15 @@
+{
+  "machine": "a100",
+  "config": "configs/memory_s1/recovery_a100.yaml",
+  "output": "outputs/s1_grasp_bridge_a100_v1",
+  "inputs": "outputs/recovery_aws_a100_v1/migration/frozen_inputs",
+  "historical": "outputs/recovery_aws_a100_v1/historical_diagnosis",
+  "simulator_python": "/opt/rmbench-a100-env/bin/python",
+  "simulator_receipt": "outputs/fused_environment_a100_v1/COMPLETE.json",
+  "extensions_directory": "outputs/fused_environment_a100_v1/torch_extensions_torch260_cu126_sm80",
+  "cuda_arch": "8.0",
+  "gpu_name": "A100",
+  "gpus": [0, 1, 2, 3, 4, 5, 6, 7],
+  "stage_timeout_seconds": 21600,
+  "case_timeout_seconds": 1800
+}

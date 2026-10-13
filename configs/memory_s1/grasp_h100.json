@@ -1,0 +1,15 @@
+{
+  "machine": "h100",
+  "config": "configs/memory_s1/s1_variable_t_h100_phase.yaml",
+  "output": "outputs/s1_grasp_bridge_h100_v1",
+  "inputs": "outputs/s1_grasp_bridge_h100_v1/frozen",
+  "historical": "outputs/s1_zero_success_followup_v2",
+  "simulator_python": "/opt/rmbench-fused-env/bin/python",
+  "simulator_receipt": "outputs/fused_environment_h100_v1/COMPLETE.json",
+  "extensions_directory": "outputs/fused_environment_h100_v1/torch_extensions_torch260_cu126_sm90",
+  "cuda_arch": "9.0",
+  "gpu_name": "H100",
+  "gpus": [0],
+  "stage_timeout_seconds": 21600,
+  "case_timeout_seconds": 1800
+}

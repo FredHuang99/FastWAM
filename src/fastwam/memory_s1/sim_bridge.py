@@ -21,6 +21,17 @@ from .history import select_ids, resolve_online
 from .protocol import format_task_prompt, inference_contract
 
 
+def diagnostic_action_noise(seed, override=None):
+    """CPU-local RNG; explicit diagnostic input never changes the policy RNG stream."""
+    if override is None:
+        generator = torch.Generator(device="cpu").manual_seed(seed)
+        return torch.randn(1, 32, 14, generator=generator)
+    value = torch.as_tensor(override, dtype=torch.float32, device="cpu")
+    if tuple(value.shape) != (1, 32, 14) or not torch.isfinite(value).all():
+        raise ValueError("Diagnostic noise must be finite float32 [1,32,14].")
+    return value.clone()
+
+
 class InferenceSession:
     def __init__(self, model, cfg, encoders, condition, output, evidence, seed, trace=None):
         self.model, self.cfg = model, cfg
@@ -44,7 +55,7 @@ class InferenceSession:
         self.episode_seed = None
 
     @torch.no_grad()
-    def decide(self, request):
+    def decide(self, request, *, diagnostic_noise=None):
         from .model import encode_text, encode_latent
         if self.instruction is None:
             self.instruction = request["instruction"]
@@ -59,6 +70,8 @@ class InferenceSession:
         current_latent = current_proprio = current_feature = current_kv = current_context = None
         started = time.monotonic()
         if self.reference is not None:
+            if diagnostic_noise is not None:
+                raise ValueError("Diagnostic noise override is only supported by the S1 path.")
             return self.decide_native(request, started)
         with torch.autocast("cuda", dtype=torch.bfloat16):
             for observation in request["observations"]:
@@ -122,8 +135,12 @@ class InferenceSession:
             noise_seed = seed_for(self.seed, self.episode_seed, current_id, "closed-loop-noise")
             if self.trace is not None:
                 self.trace['readout'] = None if readout is None else readout.detach().cpu()
-            generator = torch.Generator(device="cpu").manual_seed(noise_seed)
-            noise = torch.randn(1, 32, 14, generator=generator).to(self.device)
+            noise = diagnostic_action_noise(noise_seed, diagnostic_noise).to(self.device)
+            if diagnostic_noise is not None:
+                # The optional interface leaves normal evaluation RNG derivation unchanged.
+                noise_seed = None
+                if self.trace is not None:
+                    self.trace["diagnostic_noise_sha256"] = hashlib.sha256(noise.detach().cpu().contiguous().numpy().tobytes()).hexdigest()
             if self.trace is not None:
                 self.trace["noise"] = noise.detach().cpu()
             actions, _ = self.model.sample(batch, noise, gate_scale=0 if self.condition == "gate_zero" else 1,

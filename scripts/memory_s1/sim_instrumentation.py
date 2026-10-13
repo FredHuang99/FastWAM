@@ -26,13 +26,18 @@ def joint_details(robot):
         qvel = np.asarray(entity.get_qvel(), dtype=np.float64)
         result[side] = {"arm_qpos": qpos[indices].tolist(), "arm_qvel": qvel[indices].tolist(),
             "finger_qpos": qpos[fingers].tolist(), "finger_qvel": qvel[fingers].tolist(),
-            "finger_joint_names": [active[i].get_name() for i in fingers]}
+            "finger_joint_names": [active[i].get_name() for i in fingers],
+            "gripper_scale": list(map(float, getattr(robot, f"{side}_gripper_scale"))),
+            "gripper_transform": [{"joint": joint.get_name(), "multiplier": float(multiplier), "offset": float(offset)}
+                for joint, multiplier, offset in getattr(robot, f"{side}_gripper") if joint is not None]}
         link = getattr(robot, f"{side}_ee", None)
         if link is None:
             link = getattr(robot, f"{side}_ee_link", None)
         if link is not None and (hasattr(link, "get_pose") or hasattr(link, "global_pose")):
             pose = link.get_pose() if hasattr(link, "get_pose") else link.global_pose
             result[side]["ee_pose"] = {"p": np.asarray(pose.p).tolist(), "q": np.asarray(pose.q).tolist()}
+            result[side]["ee_link_name"] = link.get_name() if hasattr(link, "get_name") else getattr(link, "name", None)
+            result[side]["ee_pose_scope"] = "configured end-effector link world pose; not inferred fingertip center"
     return result
 
 
@@ -48,29 +53,59 @@ def entity_names(actor):
     return names
 
 
+def entity_identity(actor):
+    """Prefer SAPIEN scene entity IDs; never use names for contact attribution."""
+    if actor is None:
+        return None
+    seen = set()
+    while id(actor) not in seen:
+        seen.add(id(actor))
+        wrapped = next((getattr(actor, key, None) for key in ('actor', 'entity')
+                        if getattr(actor, key, None) is not None and getattr(actor, key) is not actor), None)
+        if wrapped is None:
+            break
+        actor = wrapped
+    for name in ('per_scene_id', 'id'):
+        value = getattr(actor, name, None)
+        if isinstance(value, (int, np.integer)):
+            return f'{name}:{int(value)}'
+    for name in ('get_id',):
+        method = getattr(actor, name, None)
+        if callable(method):
+            return f'id:{int(method())}'
+    # Unresolved is reported as unknown rather than guessing from duplicate names.
+    return None
+
+
 def contact_aliases(environment):
-    fingers = set()
+    fingers = {'left': [], 'right': []}
     for side in ('left','right'):
         for joint, multiplier, offset in getattr(environment.robot, f'{side}_gripper'):
             if joint is None: continue
             child = joint.get_child_link() if hasattr(joint,'get_child_link') else getattr(joint,'child_link',None)
-            fingers.update(entity_names(child))
-    objects = {name: sorted(entity_names(getattr(environment,name)))
+            fingers[side].append({'id': entity_identity(child), 'names': sorted(entity_names(child))})
+    objects = {name: {'id': entity_identity(getattr(environment, name)), 'names': sorted(entity_names(getattr(environment,name)))}
                for name,value in object_snapshot(environment).items() if isinstance(value,dict) and 'p' in value}
-    return {'fingers':sorted(fingers),'objects':objects}
+    return {'version': 'entity-contact-v2', 'scope': 'IDs valid only inside this scene', 'fingers': fingers, 'objects': objects}
 
 
 def object_contacts(environment, contacts=None, aliases=None):
     contacts = contact_pairs(environment.scene) if contacts is None else contacts
     aliases = contact_aliases(environment) if aliases is None else aliases
-    fingers = set(aliases['fingers']); results = {}
-    for name, values in aliases['objects'].items():
-        objects = set(values)
-        hits = [r for r in contacts['pairs'] if
-                (r['a'] in objects and r['b'] in fingers) or (r['b'] in objects and r['a'] in fingers)]
-        mapped = bool(objects and fingers and contacts['available'])
+    results = {}
+    for name, value in aliases['objects'].items():
+        obj = value['id']
+        side_hits = {}
+        mapped = bool(obj and contacts['available'])
+        for side, rows in aliases['fingers'].items():
+            ids = {row['id'] for row in rows if row['id'] is not None}
+            mapped = mapped and bool(rows) and all(row['id'] is not None for row in rows)
+            side_hits[side] = [r for r in contacts['pairs'] if obj is not None and
+                ((r['a_id'] == obj and r['b_id'] in ids) or (r['b_id'] == obj and r['a_id'] in ids))]
+        hits = side_hits['left'] + side_hits['right']
         results[name] = {'gripper_contact':True if hits else (False if mapped else None),
                          'matched_pairs':hits,'aliases_resolved':mapped,
+                         'by_side': {s: bool(v) if mapped or v else None for s,v in side_hits.items()},
                          'absence_is_task_failure':False}
     return {'objects':results,'aliases':aliases,'available':contacts['available'],
             'scope':'Instantaneous contact observation; negative values do not prove absence over an interval'}
@@ -99,10 +134,14 @@ def contact_pairs(scene):
             b = getattr(contact, "actor1", getattr(contact, "body1", None))
         points = getattr(contact, "points", [])
         impulse = sum(float(np.linalg.norm(np.asarray(getattr(p, "impulse", [0, 0, 0])))) for p in points)
-        pairs.append({"a": name(a), "b": name(b), "impulse": impulse})
-    resolved = all(row["a"] != "unknown" and row["b"] != "unknown" for row in pairs)
+        pairs.append({"a": name(a), "b": name(b), "a_id": entity_identity(a), "b_id": entity_identity(b),
+            "impulse": impulse, 'points': [
+                {'position': np.asarray(getattr(p, 'position', [])).tolist(),
+                 'normal': np.asarray(getattr(p, 'normal', [])).tolist(),
+                 'impulse': np.asarray(getattr(p, 'impulse', [])).tolist()} for p in points]})
+    resolved = all(row["a_id"] is not None and row["b_id"] is not None for row in pairs)
     return {"available": resolved, "pairs": pairs, "names_resolved": resolved,
-            "reason": None if resolved else "Contact bodies have unresolved names; absence of contact cannot be inferred."}
+            "reason": None if resolved else "Contact entity identity unresolved; absence of contact cannot be inferred."}
 
 
 
@@ -141,6 +180,7 @@ class PhysicalRecorder:
             for name, value in self.initial_objects.items() if isinstance(value, dict) and "p" in value}
         self.contacts_available = True
         self.contact_aliases = contact_aliases(environment)
+        self.contact_stream = None
         self.contact_mapping_validated = False
         self.finger_counts = {side: len(joint_details(environment.robot)[side]["finger_qpos"]) for side in ("left", "right")}
         self.original_step = type(environment.scene).step
@@ -150,6 +190,9 @@ class PhysicalRecorder:
     def sample(self):
         objects = object_snapshot(self.environment)
         contacts = contact_pairs(self.environment.scene)
+        if self.contact_stream is not None and contacts['pairs']:
+            self.contact_stream.write(json.dumps({'physics_step_id':self.steps,'target_id':self.target_id,
+                'pairs':contacts['pairs'],'available':contacts['available']},allow_nan=False)+'\n')
         self.contacts_available &= contacts["available"]
         physical = physical_state(self.environment.robot)
         details = joint_details(self.environment.robot)
@@ -183,6 +226,8 @@ class PhysicalRecorder:
     def __enter__(self):
         from sim_eval import check_stop
         recorder = self
+        self.contact_stream = (self.output/'contacts_entity.jsonl').open('w',encoding='utf-8')
+        (self.output/'scene_entity_map.json').write_text(json.dumps(self.contact_aliases,indent=2),encoding='utf-8')
         def step(scene, *args, **kwargs):
             if scene is recorder.environment.scene:
                 check_stop(recorder.stop)
@@ -226,6 +271,8 @@ class PhysicalRecorder:
         self.environment._take_picture = self.original_picture
         for planner, original in self.patches:
             planner.TOPP = original
+        if self.contact_stream is not None:
+            self.contact_stream.close()
         array = np.asarray(self.samples, dtype=np.float32)
         np.savez_compressed(self.output / "physical_trace.npz", values=array,
             columns=np.asarray(["physics_step_id", "sim_time", "executing_target_id", *[f"qpos_{i}" for i in range(14)],

@@ -15,7 +15,9 @@ unset PIP_CONSTRAINT PIP_BUILD_CONSTRAINT UV_CONSTRAINT CUDA_LAUNCH_BLOCKING PYT
 unset CONDA_PINNED_PACKAGES CONDA_OVERRIDE_CUDA CONDA_OVERRIDE_GLIBC
 export PIP_CONFIG_FILE=/dev/null CONDA_SUBDIR=linux-64
 export CC=/usr/bin/gcc-12 CXX=/usr/bin/g++-12 CUDAHOSTCXX=/usr/bin/g++-12
-export CUDA_HOME="$NEW" TORCH_CUDA_ARCH_LIST=8.0 MAX_JOBS="${A100_COMPILE_JOBS:-16}"
+export CUDA_HOME="$NEW" TORCH_CUDA_ARCH_LIST=8.0
+MAX_JOBS="$(/opt/hf-tools/bin/python "$HELPER" compile-budget --root "$ROOT")"
+export MAX_JOBS
 export TORCH_EXTENSIONS_DIR="$BUILD/torch_extensions_torch260_cu126_sm80"
 export PATH="$NEW/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 export LD_LIBRARY_PATH="$NEW/lib:$NEW/targets/x86_64-linux/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64"
@@ -24,6 +26,7 @@ export LIBRARY_PATH="$NEW/lib:$NEW/targets/x86_64-linux/lib:$NEW/targets/x86_64-
 export OMP_NUM_THREADS=4
 [[ "$MAX_JOBS" =~ ^[1-9][0-9]*$ ]] || { echo 'A100_COMPILE_JOBS must be positive'; exit 2; }
 test -f "$INPUT/simulator-conda-explicit.txt"
+test -x "$CC" && test -x "$CXX" || { echo 'Missing /usr/bin/gcc-12 or g++-12; complete system packages first.'; exit 1; }
 if [[ -f "$BUILD/COMPLETE.json" ]]; then
   "$NEW/bin/python" - "$BUILD/COMPLETE.json" "$INPUT/FILES.json" "${BASH_SOURCE[0]}" <<'PY'
 import hashlib, importlib.metadata as md, json, sys

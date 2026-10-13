@@ -85,6 +85,8 @@ startup:
   parent_snapshot: outputs/recovery_aws_h100/phase_parent
 hardware:
   name: a100_8x80
+  extensions_directory: outputs/fused_environment_a100_v1/torch_extensions_torch260_cu126_sm80
+  warmup_lock_directory: outputs/recovery_aws_a100_v1/warmup_locks
   gpus:
   - 0
   - 1

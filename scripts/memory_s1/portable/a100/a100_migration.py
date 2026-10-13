@@ -18,6 +18,7 @@ from urllib.parse import urlsplit, parse_qs
 REPO = "hhyfred/fastwam-memory-s1-backup"
 RUN = "memory_s1_variable_t_h100_phase_seed17"
 POINTER = "migration/a100_after_h100/LATEST.json"
+HISTORICAL_REVISION = 'c1aaa6dafddc0909cf1d89cacf966eeffbec6b9c'
 SKIP = {".git", ".cache", "__pycache__", "build", "dist", ".pytest_cache", "node_modules", "packages"}
 
 
@@ -72,7 +73,7 @@ def copy_tree(source, target, *, source_only=False):
             continue
         if path.name.startswith(".env") or path.name in ("token", "stored_tokens", "credentials", ".netrc"):
             continue
-        if source_only and path.suffix not in (".py", ".yaml", ".yml", ".json", ".toml", ".txt", ".sh", ".cu", ".h", ".cuh", ".cpp", ".c", ".hpp", ".md", ".cfg", ".ini"):
+        if source_only and path.suffix.lower() not in (".py", ".yaml", ".yml", ".json", ".toml", ".txt", ".sh", ".cu", ".h", ".cuh", ".cpp", ".c", ".hpp", ".md", ".cfg", ".ini", ".urdf", ".srdf", ".xml", ".xacro"):
             continue
         out = target / rel
         out.parent.mkdir(parents=True, exist_ok=True)
@@ -85,9 +86,20 @@ def export(args):
     # This is an export of actual installed state, not the pre-training ready environment.
     probe = run([sim, "-c", "import sys,torch; assert sys.version_info[:2]==(3,10); assert torch.__version__.split('+')[0]=='2.6.0'; assert torch.version.cuda=='12.6'; print(torch.__version__)"])
     print("[export] simulator", probe.strip(), flush=True)
-    evidence = root / "outputs/s1_zero_success_followup_v2/HF_diagnosis.json"
+    evidence = args.diagnosis / 'HF_diagnosis.json'
     if not evidence.is_file() or read(evidence).get("readback_verified") is not True:
         raise ValueError("Finish this H100 diagnosis and its verified backup first; no diagnostic will be started here.")
+    if read(evidence)['revision'] != HISTORICAL_REVISION:
+        raise ValueError(f'Expected diagnosis revision {HISTORICAL_REVISION}, got {read(evidence)["revision"]}')
+    if args.frozen is None:
+        raise ValueError('--frozen is required; export does not wait for new GPU diagnostics')
+    sys.path.insert(0, str(root/'src'))
+    from fastwam.memory_s1.grasp_bridge import verify, historical_manifest
+    historical_manifest(evidence.parent)
+    verify(args.frozen, read(args.frozen/'FILES.json'))
+    frozen_value = read(args.frozen/'FROZEN.json')
+    if frozen_value['historical_revision'] != HISTORICAL_REVISION:
+        raise ValueError('Frozen input history differs')
     import fcntl
     diagnostic_lock = (evidence.parent / "diagnosis.lock").open("rb")
     fcntl.flock(diagnostic_lock, fcntl.LOCK_SH | fcntl.LOCK_NB)
@@ -106,6 +118,7 @@ def export(args):
     output = root / "outputs/a100_migration_exports" / (time.strftime("%Y%m%dT%H%M%SZ", time.gmtime()) + f"_{time.time_ns()}")
     payload = output / "payload"
     payload.mkdir(parents=True)
+    copy_tree(args.frozen, payload/'frozen_inputs')
     for name, python in (("training", "/opt/mwam/bin/python"), ("simulator", str(sim))):
         write(payload / f"{name}-pip.json", json.loads(run([python, "-m", "pip", "list", "--format=json"])))
     explicit = run(["/opt/miniforge/bin/conda", "list", "-p", "/opt/rmbench-fused-env", "--explicit"])
@@ -134,6 +147,29 @@ def export(args):
     for name in ("src", "scripts/memory_s1", "configs", "requirements"):
         copy_tree(root / name, payload / "historical_code" / name, source_only=True)
     copy_tree(root / "resources/prepared_dense_h100_v1", payload / "project/resources/prepared_dense_h100_v1")
+    host = root/'outputs/recovery_aws_h100/container-host.json'
+    if not host.is_file():
+        raise FileNotFoundError(f'Capture actual mwam image/digest/mounts on the host first: {host}')
+    # Export only an allowlisted host record, never docker inspect Config.Env.
+    host_value = read(host)
+    if not host_value.get('image_id') or not host_value.get('repo_digests'):
+        raise ValueError('container-host.json must contain image_id and repo_digests')
+    write(payload/'container-host.json',{k:host_value[k] for k in ('image_id','repo_digests','mounts','container') if k in host_value})
+    patch = subprocess.check_output(['git','-C',str(root),'diff','--binary','HEAD','--','src','scripts/memory_s1','configs','requirements'])
+    (payload/'historical_code/worktree.patch').write_bytes(patch)
+    # Final source/asset identity is measured after H100's real patches, not inferred from a branch name.
+    resource_files = {}
+    for directory in ('resources/RMBench/assets','resources/RMBench/envs','resources/RMBench/task_config','resources/RMBench/env_cfg','resources/RMBench/data/demo_clean','resources/tokenizer'):
+        for p in sorted((root/directory).rglob('*')):
+            if p.is_file() and not p.is_symlink() and not set(p.relative_to(root).parts)&SKIP and p.suffix not in ('.so','.pyc','.o'):
+                resource_files[p.relative_to(root).as_posix()] = sha(p)
+    for key in ('base','stats','vae','t5'):
+        p = Path(read(evidence.parent/'identity.json')['config']['paths'][key])
+        resource_files[p.relative_to(root).as_posix()] = sha(p)
+    write(payload/'RESOURCE_IDENTITY.json',resource_files)
+    # Old Windows/H100 source paths are provenance only; current A100 code stays separate.
+    write(payload/'CODE_IDENTITY.json',{p.relative_to(root).as_posix():sha(p) for folder in ('src','scripts/memory_s1','configs')
+        for p in sorted((root/folder).rglob('*')) if p.is_file() and p.suffix in ('.py','.sh','.yaml','.json')})
     for name in ("resources/download_lock.json", "outputs/memory_s1_variable_t_h100_phase_seed17/LATEST_READY_REMOTE.json"):
         path = root / name
         if not path.is_file():
@@ -144,14 +180,18 @@ def export(args):
     shutil.copy2(evidence, payload / "HF_diagnosis.json")
     api, download = hub()
     repository_revision = api.repo_info(args.repo).sha
-    write(payload / "CHECKPOINT_REMOTE.json", read(download(args.repo, f"runs/{RUN}/LATEST_COMPLETE.json", revision=repository_revision)))
+    checkpoint = read(download(args.repo, f"runs/{RUN}/LATEST_COMPLETE.json", revision=repository_revision))
+    if checkpoint['step'] != 2000:
+        raise ValueError('Migration requires the completed S1 update 2000 recovery point')
+    write(payload / "CHECKPOINT_REMOTE.json", checkpoint)
     # Save actual frozen banks without importing any completed evaluation into a new queue.
     banks = list((root / "outputs/posttrain_h100_phase_seed17_top2_v2").glob("frozen_scenes.json"))
     if len(banks) != 1 or len(read(banks[0]).get("scenes", [])) != 20:
         raise ValueError("Expected the existing 20-scene bank; no seed search is allowed")
     shutil.copy2(banks[0], payload / "frozen_scenes.json")
     write(payload / "ORIGIN.json", {"commit": run(["git", "-C", root, "rev-parse", "HEAD"]).strip(),
-          "run": RUN, "diagnosis": read(evidence), "export_tool_sha256": sha(__file__), "phase": "post_diagnosis_migration_inputs",
+          "run": RUN, "diagnosis": read(evidence), "export_tool_sha256": sha(__file__), "phase": "grasp_bridge_migration_v1",
+          "frozen_inputs_sha256":sha(args.frozen/'FILES.json'),"checkpoint_pointer_read_revision":repository_revision,
           "does_not_include": ["models", "raw_hdf5", "asset_meshes", "dense_cache", "CUDA_binaries", "tokens"],
           "note": "Historical code is evidence only. It must not overwrite the new A100 entry points."})
     files = {p.relative_to(payload).as_posix(): {"sha256": sha(p), "bytes": p.stat().st_size}
@@ -173,12 +213,15 @@ def export(args):
     if sha(download(args.repo, remote, revision=commit.oid)) != sha(archive):
         raise ValueError("Migration archive remote readback mismatch; pointer not published")
     pointer = {"repo": args.repo, "revision": commit.oid, "package": remote, "sha256": sha(archive),
+               "schema":"grasp_bridge_migration_v1", "diagnosis_revision":HISTORICAL_REVISION,
+               "frozen_inputs_sha256":sha(args.frozen/'FILES.json'),
                "bytes": archive.stat().st_size, "readback_verified": True, "budget": budget}
     write(output / "LATEST.json", pointer)
     publication = api.upload_file(repo_id=args.repo, path_or_fileobj=str(output / "LATEST.json"), path_in_repo=POINTER)
     if read(download(args.repo, POINTER, revision=publication.oid)) != pointer:
         raise ValueError("Migration pointer readback mismatch")
     write(output / "UPLOAD_COMPLETE.json", {**pointer, "pointer_revision": publication.oid})
+    write(args.frozen.parent/'MIGRATION_COMPLETE.json',{**pointer,'pointer_revision':publication.oid})
     print(json.dumps(pointer, indent=2), flush=True)
 
 
@@ -195,6 +238,8 @@ def fetch(args):
         pointer["pointer_revision"] = revision
     if pointer["repo"] != args.repo or not pointer["readback_verified"]:
         raise ValueError("Unverified/mismatched migration pointer")
+    if pointer.get('schema') != 'grasp_bridge_migration_v1' or pointer.get('diagnosis_revision') != HISTORICAL_REVISION:
+        raise ValueError(f'Stale pinned migration: {receipt}. Preserve it explicitly, then fetch the new verified export; no silent revision switch.')
     archive = Path(download(args.repo, pointer["package"], revision=pointer["revision"]))
     if sha(archive) != pointer["sha256"] or archive.stat().st_size != pointer["bytes"]:
         raise ValueError("Migration archive checksum mismatch")
@@ -205,7 +250,11 @@ def fetch(args):
         path = (target / name).resolve()
         if not path.is_relative_to(target.resolve()) or sha(path) != row["sha256"] or path.stat().st_size != row["bytes"]:
             raise ValueError(f"Migration member mismatch: {name}")
+    if (read(target/'ORIGIN.json')['diagnosis']['revision'] != HISTORICAL_REVISION or
+            sha(target/'frozen_inputs/FILES.json') != pointer['frozen_inputs_sha256']):
+        raise ValueError('Migration historical diagnosis/frozen identity mismatch')
     write(receipt, pointer)
+    mark(args.root,'fetch')
     print("[migration] verified", target, flush=True)
 
 
@@ -213,9 +262,13 @@ def restore(args):
     root = args.root
     package = root / "outputs/recovery_aws_a100_v1/migration"
     files = read(package / "FILES.json")
+    require(args.root, 'payloads')
     # Never restore live leases, checkpoints or historical code over current code.
     for name, row in files.items():
         if not name.startswith("project/"):
+            continue
+        # Download public asset bytes first; apply final URDF/config patches afterwards.
+        if name.startswith('project/resources/RMBench/assets/') and not args.overlay_sources:
             continue
         source = package / name
         if sha(source) != row["sha256"]:
@@ -256,12 +309,14 @@ def restore(args):
         if not target.exists():
             shutil.copy2(source, target)
     print("[restored] actual prepared data/source/locks; historical admission is not new A100 approval")
+    mark(args.root, 'patch-sources' if args.overlay_sources else 'restore')
 
 
 def payloads(args):
     root = args.root
     output = root / "outputs/recovery_aws_a100_v1"
     package = output / "migration"
+    require(root,'fetch')
     api, download = hub()
     recovery = tool(root, "portable/recovery.py")
     pointers = (("ready", read(package / f"project/outputs/{RUN}/LATEST_READY_REMOTE.json"), output / "restored"),
@@ -283,6 +338,11 @@ def payloads(args):
     from concurrent.futures import ThreadPoolExecutor
     destination = root / "outputs" / RUN
     files = read(manifest)["files"]
+    frozen_weights = read(package/'frozen_inputs/FROZEN.json')['weights']
+    for label in ('step_000000','step_001500','step_002000'):
+        name=f'weights/{label}.pt'
+        if files.get(name) != frozen_weights[label]['sha256']:
+            raise ValueError(f'Checkpoint manifest lacks the exact frozen weight: {name}')
     def one(item):
         name, expected = item
         target = (destination / name).resolve()
@@ -307,6 +367,7 @@ def payloads(args):
     write(output / "PAYLOADS_COMPLETE.json", {"checkpoint": pointer, "files": files,
           "historical_evidence_only": True, "gpu_admission_inherited": False})
     print(f"[checkpoint] verified update={pointer['step']}; training was not started")
+    mark(root,'payloads')
 
 
 def pins(args):
@@ -336,6 +397,136 @@ def patches(args):
             out.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(path, out)
     print("[patches] actual H100 Python patches restored; native wheels remain the new installation")
+
+
+DEPENDENCIES = {
+    'payloads':['fetch'], 'restore':['payloads'], 'resources':['restore'],
+    'patch-sources':['resources'], 'verify-resources':['patch-sources'],
+    'training':['verify-resources'], 'references':['training'], 'simulator':['references'],
+    'devices':['simulator'], 'planners':['devices'], 'models':['planners'],
+    'nccl':['devices'], 'report':['models','nccl'], 'backup':['report']}
+
+
+def mark(root, stage):
+    base=root/'outputs/recovery_aws_a100_v1'
+    migration=base/'MIGRATION_REMOTE.json'
+    write(base/'receipts'/f'{stage}.json', {'complete':True,'stage':stage,'migration_sha256':sha(migration),
+        'time':time.time()})
+
+
+def require(root, stage):
+    base=root/'outputs/recovery_aws_a100_v1'
+    path=base/'receipts'/f'{stage}.json'
+    if not path.exists() or not read(path).get('complete') or read(path)['migration_sha256']!=sha(base/'MIGRATION_REMOTE.json'):
+        raise ValueError(f'Complete matching A100 prerequisite first: {path}')
+
+
+def precheck(args):
+    for stage in DEPENDENCIES.get(args.stage,[]): require(args.root,stage)
+    package=args.root/'outputs/recovery_aws_a100_v1/migration'
+    if args.stage not in ('fetch','inventory','system','hf'):
+        for name,row in read(package/'FILES.json').items():
+            path=(package/name).resolve()
+            if not path.is_relative_to(package.resolve()) or sha(path)!=row['sha256']:
+                raise ValueError(f'Migration file changed: {path}')
+    if args.stage in ('training','simulator'):
+        source=read(package/'container-host.json')
+        current=read(args.root/'outputs/recovery_aws_a100_v1/container-host.json')
+        if not set(source['repo_digests'])&set(current['repo_digests']):
+            raise ValueError('Container digest differs; resolve it before environment installation')
+
+
+def training_env(args):
+    precheck(argparse.Namespace(root=args.root,stage='training'))
+    base=args.root/'outputs/recovery_aws_a100_v1'
+    package=base/'migration'
+    selected=base/'training-reuse-pins.txt'
+    tool(args.root,'portable/recovery.py').pins(argparse.Namespace(ready=str(package),kind='training',output=str(selected)))
+    expected=read(selected.with_suffix('.sources.json'))['selected']
+    python=Path('/opt/mwam/bin/python')
+    if python.exists():
+        actual={r['name'].lower().replace('_','-'):r['version'] for r in json.loads(run([python,'-m','pip','list','--format=json']))}
+        if all(actual.get(k)==v for k,v in expected.items()):
+            result=subprocess.run([str(python),'-c',
+                'import torch,fastwam.memory_s1.model; assert torch.__version__.startswith("2.10.0a0"); assert torch.version.cuda=="13.0"; assert torch.cuda.device_count()==8'],capture_output=True,text=True)
+            if result.returncode==0:
+                print('[reuse] Existing A100 model environment matches application pins, NVIDIA torch and 8 devices')
+                mark(args.root,'training'); return
+    env=dict(os.environ);env['READY_DIR']=str(package)
+    env['CONFIG']=str(args.root/'configs/memory_s1/recovery_a100.yaml')
+    subprocess.run(['bash',str(args.root/'scripts/memory_s1/portable/install_environments.sh'),'training'],check=True,env=env,cwd=args.root)
+    mark(args.root,'training')
+
+
+def resources(args):
+    precheck(argparse.Namespace(root=args.root,stage='resources'))
+    base=args.root/'outputs/recovery_aws_a100_v1'; package=base/'migration'
+    original=read(package/'project/resources/download_lock.json')
+    needed=('model:yuanty/fastwam','model:Wan-AI/Wan2.2-TI2V-5B','dataset:TianxingChen/RMBench')
+    import re
+    for name in needed:
+        if not re.fullmatch('[0-9a-f]{40}',original['repositories'].get(name,'')):
+            raise ValueError(f'Immutable publisher revision missing from exported lock: {name}; no latest-branch fallback')
+    patched={n.removeprefix('project/') for n in read(package/'FILES.json') if n.startswith('project/resources/RMBench/assets/')}
+    lock=base/'PUBLIC_DOWNLOAD_LOCK.json'
+    expected={n:row for n,row in original['files'].items() if n not in patched}
+    if not lock.exists(): write(lock,{'repositories':original['repositories'],'files':expected})
+    write(base/'PUBLIC_EXPECTED.json',{'files':{n:r['sha256'] for n,r in expected.items()}})
+    # Public revision authenticates downloaded pre-patch assets. Final patch identity is verified separately.
+    subprocess.run([sys.executable,'-u',str(args.root/'scripts/memory_s1/portable/resource_download.py'),
+        '--root',str(args.root),'--lock-file',str(lock),'--expected-file',str(base/'PUBLIC_EXPECTED.json'),
+        '--models','--data','--assets'],check=True)
+    mark(args.root,'resources')
+
+
+def verify_resources(args):
+    require(args.root,'patch-sources')
+    base=args.root/'outputs/recovery_aws_a100_v1'
+    for name,expected in read(base/'migration/RESOURCE_IDENTITY.json').items():
+        path=(args.root/name).resolve()
+        actual=sha(path) if path.is_file() else 'MISSING'
+        if not path.is_relative_to(args.root) or actual!=expected:
+            raise ValueError(f'Final resource mismatch {path}: expected={expected}, actual={actual}')
+    mark(args.root,'verify-resources')
+    print('[resources] published resources plus sourced patches match final H100 identities; no local admission inherited')
+
+
+def recovery_report(args):
+    base=args.root/'outputs/recovery_aws_a100_v1'
+    for stage in ('verify-resources','references','devices','planners','models','nccl'): require(args.root,stage)
+    bridge=args.root/'outputs/s1_grasp_bridge_a100_v1'
+    for stage in ('planners','models'):
+        value=read(bridge/'receipts'/f'{stage}.json')
+        if not value['passed']: raise ValueError(f'A100 {stage} failed')
+        for name,expected in value['files'].items():
+            if sha(bridge/name)!=expected: raise ValueError(f'Changed qualification file: {name}')
+    devices=read(base/'DEVICES_COMPLETE.json'); nccl_record=read(base/'NCCL_COMPLETE.json')
+    if not devices['passed'] or len(devices['devices'])!=8 or not nccl_record['passed']:
+        raise ValueError('Eight-device/NCCL proof incomplete')
+    source_host=read(base/'migration/container-host.json'); target_host=read(base/'container-host.json')
+    if not set(source_host['repo_digests'])&set(target_host['repo_digests']):
+        raise ValueError('A100 model container digest differs from exported H100 image; inspect before qualification approval')
+    value={'ready':True,'scope':'A100 diagnosis ready only; not training admission or benchmark success',
+        'migration':read(base/'MIGRATION_REMOTE.json'),'devices':devices,'nccl':nccl_record,
+        'planners':read(bridge/'planners.json'),'models':read(bridge/'models.json'),
+        'container':target_host,'dense_cache_required':False,'optimizer_updates':0}
+    write(base/'A100_DIAGNOSIS_READY.json',value); mark(args.root,'report')
+    write(bridge/'A100_DIAGNOSIS_READY.json',value)
+    print('[ready] A100 diagnosis ready: 8 device/planner/model checks + NCCL; no training/benchmark run')
+
+
+def compile_budget(args):
+    available=len(os.sched_getaffinity(0)) if hasattr(os,'sched_getaffinity') else os.cpu_count()
+    memory=next(int(line.split()[1])*1024 for line in Path('/proc/meminfo').read_text().splitlines() if line.startswith('MemAvailable:'))
+    total=min(64,max(1,available-8),int(memory//(3*1024**3)))
+    if total<2: raise ValueError('Need capacity for two compiler workers after CPU/memory reserves')
+    requested=os.environ.get('A100_COMPILE_JOBS')
+    per=max(1,total//2)
+    if requested: per=min(per,int(requested))
+    if per<1: raise ValueError('A100_COMPILE_JOBS must be positive')
+    write(args.root/'outputs/fused_environment_a100_v1/compile_budget.json',
+        {'available_cpu':available,'available_memory_bytes':memory,'total_limit':total,'jobs_per_build':per,'concurrent_builds':2})
+    print(per)
 
 
 def device(args):
@@ -493,6 +684,8 @@ def status(args):
 
 def stop(args):
     marker = args.root / "outputs/recovery_aws_a100_v1/LAUNCH.json"
+    if not marker.exists():
+        print('No A100 stage recorded'); return
     value = read(marker)
     owner = value["owner"]
     current = process(owner["pid"]) if owner else None
@@ -501,24 +694,31 @@ def stop(args):
         return
     if os.getpgid(owner["pid"]) != owner["pid"]:
         raise RuntimeError("Refusing to stop an unrelated process group")
-    os.killpg(owner["pid"], signal.SIGTERM)
+    write(args.root/'outputs/recovery_aws_a100_v1/STOP',{'owner':owner,'time':time.time()})
+    sys.path.insert(0,str(args.root/'src'))
+    from fastwam.memory_s1.grasp_bridge import stop_owned_tree
+    stop_owned_tree(owner)
     print("Stop requested for the recorded A100 setup only; retain partial files and inspect its exit receipt")
 
 
 def main():
     parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument("command", choices=("export", "fetch", "payloads", "restore", "pins", "patches", "device", "devices", "nccl", "register", "status", "stop"))
+    parser.add_argument("command", choices=("export", "fetch", "payloads", "restore", "pins", "patches", "device", "devices", "nccl", "register", "status", "stop", 'resources','verify-resources','precheck','mark','report','compile-budget','training'))
     parser.add_argument("--root", type=Path, default=Path("/workspace/FastWAM"))
     parser.add_argument("--repo", default=REPO)
     parser.add_argument("--kind", choices=("training", "simulator"))
     parser.add_argument("--output", type=Path)
     parser.add_argument("--pid", type=int)
     parser.add_argument("--log", type=Path)
+    parser.add_argument('--diagnosis',type=Path,default=Path('/workspace/FastWAM/outputs/s1_zero_success_followup_v2'))
+    parser.add_argument('--frozen',type=Path)
+    parser.add_argument('--stage')
     parser.add_argument("--overlay-sources", action="store_true", help="Restore recorded simulator patches after asset download; preserve conflicting downloaded files")
     args = parser.parse_args()
     args.root = args.root.resolve()
     signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))
-    globals()[args.command](args)
+    if args.command=='mark': mark(args.root,args.stage)
+    else: globals()[{'report':'recovery_report','verify-resources':'verify_resources','compile-budget':'compile_budget','training':'training_env'}.get(args.command,args.command)](args)
 
 
 if __name__ == "__main__":

@@ -18,6 +18,8 @@ DATASET_REPO = "TianxingChen/RMBench"
 def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("--root", required=True)
+    parser.add_argument('--lock-file', type=Path, help='Separate download transaction lock; original provenance remains unchanged')
+    parser.add_argument('--expected-file', type=Path, help='Explicit verified pre-patch checksum set')
     for name in ("models", "data", "assets"):
         parser.add_argument(f"--{name}", action="store_true")
     args = parser.parse_args()
@@ -34,13 +36,13 @@ def main():
     if not recovery_root.is_relative_to(root):
         raise ValueError("RECOVERY_ROOT must remain inside the project.")
     resource_root = root / "resources"
-    lock_path = resource_root / "download_lock.json"
+    lock_path = args.lock_file or resource_root / "download_lock.json"
     lock = read(lock_path) if lock_path.is_file() else {"repositories": {}, "files": {}}
     lock.setdefault("repositories", {})
     lock.setdefault("files", {})
     expected = {name.replace("\\", "/"): row["sha256"]
                 for name, row in lock["files"].items()}
-    protection = recovery_root / "EXPECTED_DOWNLOADS.json"
+    protection = args.expected_file or recovery_root / "EXPECTED_DOWNLOADS.json"
     if protection.is_file():
         expected.update(read(protection)["files"])
     api = HfApi()

@@ -209,15 +209,22 @@ def expert_replay(environment, recorder, args, job):
             if name not in current['objects'] or not np.allclose(current['objects'][name]['p'], value['p'], atol=1e-5, rtol=0) or not np.allclose(current['objects'][name]['q'], value['q'], atol=1e-5, rtol=0):
                 raise ValueError(f'Expert replay initial object pose differs: {name}')
     targets = source['targets']
-    limit = min(len(targets), environment.step_lim)
+    caps = [int(args.max_targets or 0), int(job.get('max_targets') or 0)]
+    if any(cap < 0 for cap in caps):
+        raise ValueError('Diagnostic target caps must be nonnegative.')
+    limit = min([len(targets), environment.step_lim] + [cap for cap in caps if cap])
     if not targets:
         raise ValueError('No actual expert command-boundary targets captured; do not substitute arbitrary actions.')
+    if job.get('capture_expert_observations'):
+        capture_expert_observation(environment, recorder, args.output, 0)
     for index, target in enumerate(targets[:limit]):
         check_stop(args.stop_root)
         recorder.target_id = index+1
         before, tick, started = physical_state(environment.robot), recorder.steps, time.monotonic()
         execute_target(environment, target, 'upstream_topp')
         row = target_row(environment, recorder, target, before, started, tick)
+        if job.get('capture_expert_observations'):
+            capture_expert_observation(environment, recorder, args.output, index + 1)
         with (Path(args.output)/'executed_actions.jsonl').open('a', encoding='utf-8') as stream:
             stream.write(json.dumps(row, allow_nan=False)+'\n')
         if index % 16 == 15:
@@ -227,6 +234,39 @@ def expert_replay(environment, recorder, args, job):
         'source_scope':source['scope'], 'available_targets':len(targets), 'official_limit':environment.step_lim,
         'replay_limit':limit, 'timing':'upstream TOPP; source boundary physical intervals are reported, not assumed equal'})
     return limit
+
+
+def capture_expert_observation(environment, recorder, output, completed):
+    """Frame N follows N completed targets; labels start at source.targets[N]."""
+    import hashlib
+    import pickle
+    import torch
+    from sim_instrumentation import contact_aliases
+    def rng_signature():
+        value = (random.getstate(), np.random.get_state(), torch.get_rng_state().numpy().tobytes(),
+                 [state.cpu().numpy().tobytes() for state in torch.cuda.get_rng_state_all()])
+        return hashlib.sha256(pickle.dumps(value)).hexdigest()
+    before, rng = recorder.steps, rng_signature()
+    with recorder.wall_operation('diagnostic_observation'):
+        observation = environment.get_obs()
+    if recorder.steps != before or rng_signature() != rng:
+        raise RuntimeError('Observation capture changed physics or Python/NumPy RNG; discard this diagnostic attempt.')
+    save_images(output, observation, completed)
+    names = ('head_camera', 'left_camera', 'right_camera')
+    row = {'frame_id': completed, 'completed_targets': completed,
+           'next_target_index': completed, 'physics_step_id': recorder.steps,
+           'sim_time': recorder.steps * recorder.dt,
+           'proprio': command_state(environment.robot).tolist(),
+           'physical': physical_state(environment.robot).tolist(),
+           'joint_details': joint_details(environment.robot), 'objects': object_snapshot(environment),
+           'images': [f'frames/{name}_{completed:06d}.png' for name in names]}
+    for name in names:
+        pixels = np.ascontiguousarray(observation['observation'][name]['rgb'], dtype=np.uint8)
+        row.setdefault('pixels_sha256', []).append(hashlib.sha256(pixels.tobytes()).hexdigest())
+    with (Path(output)/'observations.jsonl').open('a', encoding='utf-8') as stream:
+        stream.write(json.dumps(row, allow_nan=False)+'\n')
+    if completed == 0:
+        durable_json(Path(output)/'scene_entity_map.json', contact_aliases(environment))
 
 
 def policy_episode(environment, recorder, args, job):

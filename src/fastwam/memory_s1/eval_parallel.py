@@ -57,11 +57,11 @@ def simulator_environment(cfg, gpu_uuid):
             "/usr/local/nvidia/lib", "/usr/local/nvidia/lib64",
         ])
         environment.update(CC="/usr/bin/gcc-12", CXX="/usr/bin/g++-12", CUDAHOSTCXX="/usr/bin/g++-12",
-                           TORCH_CUDA_ARCH_LIST="9.0", MAX_JOBS="2",
+                           TORCH_CUDA_ARCH_LIST=str(cfg.get("recovery", {}).get("cuda_arch", "9.0")), MAX_JOBS="2",
                            CPATH=os.pathsep.join([str(prefix / "include"), str(prefix / "targets/x86_64-linux/include")]),
                            LIBRARY_PATH=os.pathsep.join([str(prefix / "lib"), str(prefix / "targets/x86_64-linux/lib"), str(prefix / "targets/x86_64-linux/lib/stubs")]),
-                           TORCH_EXTENSIONS_DIR=str(Path(cfg["root"]) / "outputs/fused_environment_h100_v1/torch_extensions_torch260_cu126_sm90"))
-    lock_root = Path(cfg["paths"]["run"]) / "selection_locks"
+                           TORCH_EXTENSIONS_DIR=str(Path(cfg["root"]) / cfg.get("hardware", {}).get("extensions_directory", "outputs/fused_environment_h100_v1/torch_extensions_torch260_cu126_sm90")))
+    lock_root = Path(cfg["root"]) / cfg.get("hardware", {}).get("warmup_lock_directory", str(Path(cfg["paths"]["run"]) / "selection_locks"))
     lock_root.mkdir(parents=True, exist_ok=True)
     environment["MEMORY_S1_WARMUP_LOCK"] = str(lock_root / f"{gpu_uuid}.warmup.lock")
     return environment
