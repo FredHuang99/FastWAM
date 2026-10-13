@@ -177,16 +177,24 @@ def historical_manifest(old):
     if sha(archive) != receipt['sha256']:
         raise ValueError(f'Historical archive differs from fixed revision: {archive}')
     result = None
-    child = subprocess.Popen(['zstd', '-dc', str(archive)], stdout=subprocess.PIPE)
+    # The verified package may be an HF cache symlink; open bytes rather than pass its name.
+    with archive.open('rb') as source:
+        child = subprocess.Popen(['zstd', '-dc'], stdin=source, stdout=subprocess.PIPE)
     try:
         with tarfile.open(fileobj=child.stdout, mode='r|') as tar:
             for member in tar:
                 if member.name == 'manifest.json' and member.isfile():
                     result = json.load(tar.extractfile(member))
-        child.stdout.close()
+        while child.stdout.read(8 * 1024**2):
+            pass
         if child.wait(timeout=30): raise RuntimeError('Historical archive decompression failed')
     finally:
-        if child.poll() is None: child.terminate(); child.wait(timeout=10)
+        child.stdout.close()
+        if child.poll() is None:
+            child.terminate()
+            try: child.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                child.kill(); child.wait(timeout=10)
     if result is None: raise ValueError('Historical archive has no authenticated manifest')
     return receipt, result['files']
 

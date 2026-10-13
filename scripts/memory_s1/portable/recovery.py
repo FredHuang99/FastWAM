@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import sys
 import tarfile
+import tempfile
 import time
 
 from common import digest, eligible, inventory, read, safe_relative, verify_files, write, add_verified
@@ -163,15 +164,37 @@ def admission(directory):
 
 def extract_archive(path, destination):
     """Reject traversal, special files and links before copying regular payloads."""
+    path = Path(path)
+    if not path.is_file() or path.stat().st_size == 0:
+        raise ValueError(f"Missing/empty recovery archive: {path}")
     destination = Path(destination).resolve()
     destination.mkdir(parents=True, exist_ok=True)
     process = None
-    if str(path).endswith(".zst"):
-        process = subprocess.Popen(["zstd", "-dc", str(path)], stdout=subprocess.PIPE)
-        archive = tarfile.open(fileobj=process.stdout, mode="r|")
-    else:
-        archive = tarfile.open(path, "r:*")
+    diagnostics = None
+
+    def stop_decompressor():
+        if process is None:
+            return
+        process.stdout.close()
+        if process.poll() is None:
+            process.terminate()
+            try:
+                process.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait(timeout=10)
+
     try:
+        if str(path).endswith(".zst"):
+            diagnostics = tempfile.TemporaryFile()
+            # Python follows HF snapshot symlinks; zstd's filename mode ignores them.
+            # Feed the opened bytes so blob filenames/symlink policy cannot alter decompression.
+            with path.open("rb") as source:
+                process = subprocess.Popen(["zstd", "-dc"], stdin=source,
+                                           stdout=subprocess.PIPE, stderr=diagnostics)
+            archive = tarfile.open(fileobj=process.stdout, mode="r|")
+        else:
+            archive = tarfile.open(path, "r:*")
         with archive:
             seen = set()
             for member in archive:
@@ -213,11 +236,27 @@ def extract_archive(path, destination):
                     shutil.copyfileobj(source, output, 8 * 1024**2)
                 os.chmod(temporary, member.mode & 0o777)
                 temporary.replace(target)
+        if process is not None:
+            # Tar can stop before zstd's final checksum/trailer; consume it before accepting.
+            while process.stdout.read(8 * 1024**2):
+                pass
+            if process.wait(timeout=30) != 0:
+                diagnostics.seek(0)
+                detail = diagnostics.read().decode("utf-8", errors="replace")[-8000:]
+                raise ValueError(f"Zstandard decompression failed for {path} "
+                                 f"(exit={process.returncode}): {detail}")
+    except tarfile.TarError as error:
+        stop_decompressor()
+        detail = ""
+        if diagnostics is not None:
+            diagnostics.seek(0)
+            detail = diagnostics.read().decode("utf-8", errors="replace")[-8000:]
+        raise ValueError(f"Recovery archive tar parsing failed for {path}: {error}; "
+                         f"zstd stderr: {detail or '(none)'}") from error
     finally:
-        if process:
-            process.stdout.close()
-            if process.wait() != 0:
-                raise ValueError("Zstandard decompression failed; no snapshot is accepted.")
+        stop_decompressor()
+        if diagnostics is not None:
+            diagnostics.close()
 
 
 def hub():
