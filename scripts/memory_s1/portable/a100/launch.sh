@@ -24,6 +24,27 @@ HELPER="$FW_ROOT/scripts/memory_s1/portable/a100/a100_migration.py"
 ACTION="${1:-status}"
 resume=()
 if [[ "$ACTION" == resume ]]; then ACTION="${2:?Usage: launch.sh resume STAGE}"; resume=(--resume); fi
+configure_a100_nccl() {
+  # The eight-GPU single-node profile passed on this A100 host. Keep it local
+  # to NCCL/cache launches; simulator compilation and H100 keep their own libs.
+  local variable
+  while IFS= read -r variable; do
+    case "$variable" in
+      NCCL_*|UCX_*|OMPI_*|PMIX_*|UCC_*|HCOLL_*|FI_*) unset "$variable" ;;
+    esac
+  done < <(compgen -e)
+  unset LD_PRELOAD CUDA_HOME CUDA_PATH MASTER_ADDR MASTER_PORT RANK LOCAL_RANK WORLD_SIZE
+  export LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/lib64:/usr/local/lib
+  export PYTHONFAULTHANDLER=1 TORCH_SHOW_CPP_STACKTRACES=1
+  export NCCL_NET_PLUGIN=none NCCL_TUNER_PLUGIN=none NCCL_PROFILER_PLUGIN=none NCCL_ENV_PLUGIN=none
+  export NCCL_IB_DISABLE=1 NCCL_NET=Socket NCCL_SOCKET_IFNAME='=lo' NCCL_SOCKET_FAMILY=AF_INET
+  export NCCL_CUMEM_HOST_ENABLE=0
+  export NCCL_DEBUG=INFO NCCL_DEBUG_SUBSYS=INIT,ENV,GRAPH,NET,P2P,SHM
+  export NCCL_DEBUG_FILE="${LOG%.log}.nccl.%h.%p.log"
+  export FW_A100_NCCL_PROFILE=a100-single-node-nccl-v1
+  export FW_A100_NCCL_ENVIRONMENT="${LOG%.log}.environment.json"
+  export FW_A100_NCCL_ATTEMPT="${LOG%.log}.workers"
+}
 case "$ACTION" in
   status|stop)
     exec python3 "$HELPER" "$ACTION" --root "$FW_ROOT" ;;
@@ -58,7 +79,7 @@ case "$ACTION" in
     test -f "$FW_ROOT/outputs/fused_environment_a100_v1/COMPLETE.json"
     command=(/opt/hf-tools/bin/python -u "$HELPER" devices --root "$FW_ROOT") ;;
   nccl)
-    command=(/opt/mwam/bin/torchrun --standalone --nnodes=1 --nproc_per_node=8 "$HELPER" nccl --root "$FW_ROOT") ;;
+    command=(/opt/mwam/bin/python -u -m torch.distributed.run --standalone --nnodes=1 --nproc_per_node=8 "$HELPER" nccl --root "$FW_ROOT") ;;
   planners|models)
     export PYTHONPATH="$FW_ROOT/src"
     command=(/opt/mwam/bin/python -u -m fastwam.memory_s1.grasp_bridge "$ACTION" --root "$FW_ROOT" --machine a100 "${resume[@]}") ;;
@@ -71,7 +92,7 @@ case "$ACTION" in
     test -f "$RECOVERY_ROOT/DEVICES_COMPLETE.json"
     test -f "$RECOVERY_ROOT/NCCL_COMPLETE.json"
     # dense.cache itself verifies a matching local pilot report before any encoding.
-    command=(/opt/mwam/bin/torchrun --standalone --nnodes=1 --nproc_per_node=8 -m fastwam.memory_s1.dense cache --config "$CONFIG") ;;
+    command=(/opt/mwam/bin/python -u -m torch.distributed.run --standalone --nnodes=1 --nproc_per_node=8 -m fastwam.memory_s1.dense cache --config "$CONFIG") ;;
   *) echo 'Usage: launch.sh system|hf|inventory|fetch|payloads|restore|resources|patch-sources|verify-resources|training|references|simulator|devices|planners|models|nccl|report|backup|cache|status|wait|watch|stop'; exit 2 ;;
 esac
 exec 9>"$RECOVERY_ROOT/job.lock"
@@ -88,10 +109,17 @@ if [[ "$ACTION" == planners || "$ACTION" == models || "$ACTION" == backup ]]; th
   flock -n 8 || { echo 'A100 diagnostic stage is active'; exit 1; }
 fi
 LOG="$RECOVERY_ROOT/launches/${ACTION}_$(date -u +%Y%m%dT%H%M%SZ)_$$.log"
+if [[ "$ACTION" == nccl || "$ACTION" == cache ]]; then
+  configure_a100_nccl
+  /opt/hf-tools/bin/python "$HELPER" nccl-runtime --root "$FW_ROOT" --stage "$ACTION"
+fi
 printf '%q ' "${command[@]}" > "${LOG%.log}.command"
 printf '\n' >> "${LOG%.log}.command"
 FW_A100_STAGE="$ACTION" FW_A100_HELPER="$HELPER" FW_A100_EXIT="${LOG%.log}.exit" nohup setsid bash -c '
   trap '\''printf "143\n" > "$FW_A100_EXIT"; exit 143'\'' TERM
+  if [[ "$FW_A100_STAGE" == nccl || "$FW_A100_STAGE" == cache ]]; then
+    printf "[nccl runtime] profile=%s environment=%s logs=%s\n" "$FW_A100_NCCL_PROFILE" "$FW_A100_NCCL_ENVIRONMENT" "$NCCL_DEBUG_FILE"
+  fi
   "$@"
   code=$?
   if [[ "$code" == 0 && "$FW_A100_STAGE" != system && "$FW_A100_STAGE" != hf && "$FW_A100_STAGE" != inventory ]]; then

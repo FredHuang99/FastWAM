@@ -24,6 +24,15 @@ HISTORICAL_REVISION = 'c1aaa6dafddc0909cf1d89cacf966eeffbec6b9c'
 SKIP = {".git", ".cache", "__pycache__", "build", "dist", ".pytest_cache", "node_modules", "packages"}
 RMBENCH_RUNTIME_DIRS = {"eval_result", "eval_results", "logs", "outputs"}
 MIGRATION_QUARANTINE = ".migration_runtime_quarantine"
+A100_NCCL_PROFILE = "a100-single-node-nccl-v1"
+A100_NCCL_SETTINGS = {
+    "LD_LIBRARY_PATH": "/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/lib64:/usr/local/lib",
+    "NCCL_NET_PLUGIN": "none", "NCCL_TUNER_PLUGIN": "none",
+    "NCCL_PROFILER_PLUGIN": "none", "NCCL_ENV_PLUGIN": "none",
+    "NCCL_IB_DISABLE": "1", "NCCL_NET": "Socket",
+    "NCCL_SOCKET_IFNAME": "=lo", "NCCL_SOCKET_FAMILY": "AF_INET",
+    "NCCL_CUMEM_HOST_ENABLE": "0",
+}
 
 
 def sha(path):
@@ -709,14 +718,20 @@ DEPENDENCIES = {
     'patch-sources':['resources'], 'verify-resources':['patch-sources'],
     'training':['verify-resources'], 'references':['training'], 'simulator':['references'],
     'devices':['simulator'], 'planners':['devices'], 'models':['planners'],
-    'nccl':['devices'], 'report':['models','nccl'], 'backup':['report']}
+    'nccl':['devices'], 'cache':['devices','nccl'], 'report':['models','nccl'], 'backup':['report']}
 
 
 def mark(root, stage):
     base=root/'outputs/recovery_aws_a100_v1'
     migration=base/'MIGRATION_REMOTE.json'
-    write(base/'receipts'/f'{stage}.json', {'complete':True,'stage':stage,'migration_sha256':sha(migration),
-        'time':time.time()})
+    record = {'complete':True,'stage':stage,'migration_sha256':sha(migration),'time':time.time()}
+    if stage == 'nccl':
+        record['proof_sha256'] = complete_nccl(root)
+    path = base/'receipts'/f'{stage}.json'
+    write(path, record)
+    if stage == 'nccl':
+        write(base/'NCCL_LATEST_ATTEMPT.json', {
+            'state':'complete','proof_sha256':record['proof_sha256'],'receipt_sha256':sha(path)})
 
 
 def require(root, stage):
@@ -724,6 +739,12 @@ def require(root, stage):
     path=base/'receipts'/f'{stage}.json'
     if not path.exists() or not read(path).get('complete') or read(path)['migration_sha256']!=sha(base/'MIGRATION_REMOTE.json'):
         raise ValueError(f'Complete matching A100 prerequisite first: {path}')
+    latest = base/'NCCL_LATEST_ATTEMPT.json'
+    if stage == 'nccl' and latest.exists():
+        record = read(latest)
+        if (record.get('state') != 'complete' or record.get('receipt_sha256') != sha(path)
+                or record.get('proof_sha256') != sha(base/'NCCL_COMPLETE.json')):
+            raise ValueError(f'Latest NCCL attempt is incomplete/changed; inspect {latest}')
 
 
 def precheck(args):
@@ -820,13 +841,36 @@ def recovery_report(args):
     devices=read(base/'DEVICES_COMPLETE.json'); nccl_record=read(base/'NCCL_COMPLETE.json')
     if not devices['passed'] or len(devices['devices'])!=8 or not nccl_record['passed']:
         raise ValueError('Eight-device/NCCL proof incomplete')
+    for name, expected in nccl_record.get('evidence_files', {}).items():
+        path = args.root/name
+        if not path.resolve().is_relative_to(base.resolve()) or not path.is_file() or sha(path) != expected:
+            raise ValueError(f'Changed/missing NCCL runtime evidence: {path}')
     source_host=read(base/'migration/container-host.json'); target_host=read(base/'container-host.json')
     if not set(source_host['repo_digests'])&set(target_host['repo_digests']):
         raise ValueError('A100 model container digest differs from exported H100 image; inspect before qualification approval')
+    # The compact backup packs the bridge directory, not recovery/launches.
+    # Copy verified runtime evidence there so its hashes remain recoverable.
+    portable = bridge/'nccl_evidence'/sha(base/'NCCL_COMPLETE.json')
+    evidence = {args.root/name:expected for name,expected in nccl_record.get('evidence_files', {}).items()}
+    for path in (base/'NCCL_COMPLETE.json',base/'receipts/nccl.json',base/'NCCL_LATEST_ATTEMPT.json'):
+        if path.is_file(): evidence[path] = sha(path)
+    portable_files = {}
+    for path, expected in evidence.items():
+        target = portable/path.relative_to(base)
+        target.parent.mkdir(parents=True,exist_ok=True)
+        if target.exists():
+            if sha(target) != expected:
+                raise ValueError(f'Changed archived NCCL evidence; preserve and inspect {target}')
+        else:
+            shutil.copy2(path,target)
+        if sha(target) != expected:
+            raise ValueError(f'NCCL evidence copy mismatch: {target}')
+        portable_files[target.relative_to(bridge).as_posix()] = expected
     value={'ready':True,'scope':'A100 diagnosis ready only; not training admission or benchmark success',
         'migration':read(base/'MIGRATION_REMOTE.json'),'devices':devices,'nccl':nccl_record,
         'planners':read(bridge/'planners.json'),'models':read(bridge/'models.json'),
-        'container':target_host,'dense_cache_required':False,'optimizer_updates':0}
+        'container':target_host,'dense_cache_required':False,'optimizer_updates':0,
+        'nccl_backup_files':portable_files}
     write(base/'A100_DIAGNOSIS_READY.json',value); mark(args.root,'report')
     write(bridge/'A100_DIAGNOSIS_READY.json',value)
     print('[ready] A100 diagnosis ready: 8 device/planner/model checks + NCCL; no training/benchmark run')
@@ -953,24 +997,123 @@ def devices(args):
             stream.close()
 
 
+def nccl_runtime_values():
+    if os.environ.get('FW_A100_NCCL_PROFILE') != A100_NCCL_PROFILE:
+        raise ValueError('Launch this check through the A100 NCCL entry, not an inherited shell environment')
+    for name, expected in A100_NCCL_SETTINGS.items():
+        if os.environ.get(name) != expected:
+            raise ValueError(f'A100 NCCL setting mismatch: {name}; expected={expected}; actual={os.environ.get(name)}')
+    if os.environ.get('LD_PRELOAD'):
+        raise ValueError('A100 NCCL must not inherit LD_PRELOAD')
+    return {'profile':A100_NCCL_PROFILE, 'environment':{
+        name:value for name,value in os.environ.items()
+        if name.startswith('NCCL_') or name in ('LD_LIBRARY_PATH','CUDA_VISIBLE_DEVICES','CUDA_DEVICE_ORDER')},
+        'ld_preload':None, 'scope':'single_node_collective; not multi_node or throughput qualification'}
+
+
+def nccl_runtime_paths(root):
+    base = (root/'outputs/recovery_aws_a100_v1/launches').resolve()
+    environment = Path(os.environ['FW_A100_NCCL_ENVIRONMENT']).resolve()
+    attempt = Path(os.environ['FW_A100_NCCL_ATTEMPT']).resolve()
+    if (environment.parent != base or attempt.parent != base
+            or not environment.name.endswith('.environment.json')
+            or attempt.name != environment.name.removesuffix('.environment.json')+'.workers'):
+        raise ValueError('NCCL runtime evidence must belong to this launch directory')
+    return environment, attempt
+
+
+def nccl_runtime(args):
+    environment, attempt = nccl_runtime_paths(args.root)
+    if args.stage not in ('nccl','cache') or environment.exists() or attempt.exists():
+        raise ValueError('Expected a fresh A100 NCCL/cache launch; preserve earlier runtime evidence')
+    runtime = nccl_runtime_values()
+    attempt.mkdir()
+    write(environment, {'runtime':runtime,'stage':args.stage,'created_unix':time.time()})
+    source = args.root/'scripts/memory_s1/portable/a100'
+    for name in ('launch.sh','a100_migration.py'):
+        shutil.copy2(source/name, attempt/name)
+    if args.stage == 'nccl':
+        write(args.root/'outputs/recovery_aws_a100_v1/NCCL_LATEST_ATTEMPT.json',
+              {'state':'prepared','environment':str(environment),'created_unix':time.time()})
+    print(f'[nccl runtime] {A100_NCCL_PROFILE}; environment={environment}', flush=True)
+
+
+def complete_nccl(root):
+    """Called only after torch.distributed.run returns zero, including all workers."""
+    environment, attempt = nccl_runtime_paths(root)
+    runtime = read(environment)
+    if runtime['stage'] != 'nccl' or runtime['runtime'] != nccl_runtime_values():
+        raise ValueError('NCCL launch environment changed before publishing the complete record')
+    environment_sha = sha(environment)
+    rows = []
+    evidence = [environment]
+    for rank in range(8):
+        path = attempt/f'rank_{rank}.json'
+        row = read(path)
+        if (row.get('passed') is not True or row.get('rank') != rank or row.get('world_size') != 8
+                or row.get('sum') != 36.0 or row.get('process_group_destroyed') is not True
+                or row.get('environment_sha256') != environment_sha):
+            raise ValueError(f'Incomplete/mismatched NCCL rank evidence: {path}')
+        rows.append(row); evidence.append(path)
+    source = root/'scripts/memory_s1/portable/a100'
+    source_hashes = {}
+    for name in ('launch.sh','a100_migration.py'):
+        archived = attempt/name
+        if sha(archived) != sha(source/name):
+            raise ValueError(f'A100 source changed while NCCL was running: {source/name}')
+        source_hashes[(source/name).relative_to(root).as_posix()] = sha(archived)
+        evidence.append(archived)
+    pattern = Path(runtime['runtime']['environment']['NCCL_DEBUG_FILE']).name.replace('%h','*').replace('%p','*')
+    evidence.extend(environment.parent.glob(pattern))
+    value = {'passed':True,'world_size':8,'sum':36.0,'scope':'collective_only_no_optimizer_updates',
+             'profile':A100_NCCL_PROFILE,'runtime':runtime,'rank_results':rows,'source_sha256':source_hashes,
+             'worker_launcher_exit_code':0,'performance_measured':False,
+             'evidence_files':{p.relative_to(root).as_posix():sha(p) for p in evidence},'completed_unix':time.time()}
+    path = root/'outputs/recovery_aws_a100_v1/NCCL_COMPLETE.json'
+    write(path, value)
+    print('[nccl complete] all 8 workers exited normally; sum=36; runtime evidence verified', flush=True)
+    return sha(path)
+
+
 def nccl(args):
     from datetime import timedelta
+    rank = int(os.environ['LOCAL_RANK'])
+    print(f'[nccl rank={rank}] importing model torch', flush=True)
     import torch
     import torch.distributed as dist
-    rank = int(os.environ["LOCAL_RANK"])
+    environment, attempt = nccl_runtime_paths(args.root)
+    recorded = read(environment)
+    if recorded['stage'] != 'nccl' or recorded['runtime'] != nccl_runtime_values():
+        raise ValueError('Worker environment does not match this NCCL launch')
     assert int(os.environ["WORLD_SIZE"]) == 8
+    assert 0 <= rank < 8 and torch.cuda.device_count() == 8
     torch.cuda.set_device(rank)
     assert torch.cuda.get_device_capability(rank) == (8, 0)
-    dist.init_process_group("nccl", timeout=timedelta(seconds=180))
+    device = torch.device(f'cuda:{rank}')
+    print(f'[nccl rank={rank}] init torch={torch.__version__} cuda={torch.version.cuda} nccl={torch.cuda.nccl.version()}', flush=True)
     try:
-        value = torch.tensor(float(rank + 1), device=f"cuda:{rank}")
+        dist.init_process_group('nccl', timeout=timedelta(seconds=180), device_id=device)
+        print(f'[nccl rank={rank}] all_reduce', flush=True)
+        value = torch.tensor(float(rank + 1), device=device)
         dist.all_reduce(value)
         assert value.item() == 36., value
-        dist.barrier()
-        if rank == 0:
-            write(args.root / "outputs/recovery_aws_a100_v1/NCCL_COMPLETE.json", {"passed": True, "world_size": 8, "sum": value.item(), "scope": "collective_only_no_optimizer_updates"})
+        dist.barrier(device_ids=[rank])
+        torch.cuda.synchronize(device)
+        result = {'passed':True,'rank':rank,'world_size':8,'sum':value.item(),
+                  'torch':torch.__version__,'cuda':torch.version.cuda,'nccl':torch.cuda.nccl.version(),
+                  'device':str(device),'device_name':torch.cuda.get_device_name(rank),
+                  'environment_sha256':sha(environment)}
     finally:
-        dist.destroy_process_group()
+        if dist.is_initialized():
+            print(f'[nccl rank={rank}] destroy process group', flush=True)
+            dist.destroy_process_group()
+    result['process_group_destroyed'] = True
+    maps = Path('/proc/self/maps').read_text().splitlines()
+    result['loaded_libraries'] = sorted({parts[5] for line in maps
+        if len(parts := line.split(maxsplit=5)) == 6 and parts[5].startswith('/')
+        and Path(parts[5]).name.startswith(('libnccl','libcuda','libucs','libucp','libmpi'))})
+    write(attempt/f'rank_{rank}.json', result)
+    print(f'[nccl rank={rank}] complete sum=36', flush=True)
 
 
 def process(pid):
@@ -1020,7 +1163,7 @@ def stop(args):
 
 def main():
     parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument("command", choices=("export", "fetch", "payloads", "restore", "pins", "patches", "device", "devices", "nccl", "register", "status", "stop", 'resources','verify-resources','precheck','mark','report','compile-budget','training'))
+    parser.add_argument("command", choices=("export", "fetch", "payloads", "restore", "pins", "patches", "device", "devices", "nccl", "nccl-runtime", "register", "status", "stop", 'resources','verify-resources','precheck','mark','report','compile-budget','training'))
     parser.add_argument("--root", type=Path, default=Path("/workspace/FastWAM"))
     parser.add_argument("--repo", default=REPO)
     parser.add_argument("--kind", choices=("training", "simulator"))
@@ -1035,7 +1178,7 @@ def main():
     args.root = args.root.resolve()
     signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))
     if args.command=='mark': mark(args.root,args.stage)
-    else: globals()[{'report':'recovery_report','verify-resources':'verify_resources','compile-budget':'compile_budget','training':'training_env'}.get(args.command,args.command)](args)
+    else: globals()[{'report':'recovery_report','verify-resources':'verify_resources','compile-budget':'compile_budget','training':'training_env','nccl-runtime':'nccl_runtime'}.get(args.command,args.command)](args)
 
 
 if __name__ == "__main__":
