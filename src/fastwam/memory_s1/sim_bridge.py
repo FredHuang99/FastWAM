@@ -17,7 +17,7 @@ import torch
 
 from .common import TASKS, ReleaseNormalizer, atomic_json, append_jsonl, load_config, read_json, seed_for, sha256
 from .data import mosaic_rgb, observation_tensor, collate, history_variant, load_evidence
-from .history import select_ids, online_period, evaluation_phase
+from .history import select_ids, resolve_online
 from .protocol import format_task_prompt, inference_contract
 
 
@@ -70,8 +70,8 @@ class InferenceSession:
                     raise ValueError("The same frame ID has different observation content.")
                 self.raw_archive[index] = observation
                 self.observation_signatures[index] = signature
-            period = online_period(self.cfg, current_id)
-            phase = evaluation_phase(self.cfg, period, f"{request['task']}:{self.episode_seed}", "online")
+            sampling = resolve_online(self.cfg, request['task'], self.episode_seed, current_id)
+            period, phase = sampling['period'], sampling['phase']
             if self.cfg.get("history", {}).get("archive_stride", 8) == 1:
                 if sorted(self.raw_archive) != list(range(current_id + 1)):
                     raise ValueError("Dense online archive is missing completed-action observations.")
@@ -112,17 +112,23 @@ class InferenceSession:
                 annotation = self.evidence["online"][request["task"]][str(self.episode_seed)]
             sample = history_variant(sample, self.condition, annotation)
             batch = {key: value[None] for key, value in sample.items()}
+            if self.trace is not None:
+                from .checkpoint import to_cpu
+                self.trace.update(to_cpu({"sampling": sampling, "batch": batch,
+                    "raw_ids": sorted(self.raw_archive), "encoded_ids": sorted(self.archive)}))
             readout = None if self.condition == "gate_zero" else self.model.memory.read(
                 current_feature, self.text, self.text_valid, current_proprio,
                 batch["history"], batch["frame_ids"], batch["history_valid"])
             noise_seed = seed_for(self.seed, self.episode_seed, current_id, "closed-loop-noise")
+            if self.trace is not None:
+                self.trace['readout'] = None if readout is None else readout.detach().cpu()
             generator = torch.Generator(device="cpu").manual_seed(noise_seed)
             noise = torch.randn(1, 32, 14, generator=generator).to(self.device)
             if self.trace is not None:
                 self.trace["noise"] = noise.detach().cpu()
             actions, _ = self.model.sample(batch, noise, gate_scale=0 if self.condition == "gate_zero" else 1,
                                            prepared_conditions=(current_kv, current_context, readout))
-        return self.finish_actions(request, actions[0], started, period, indices, sample["frame_ids"].tolist(), newly_encoded, readout, noise_seed)
+        return self.finish_actions(request, actions[0], started, sampling, indices, sample["frame_ids"].tolist(), newly_encoded, readout, noise_seed)
 
     @torch.no_grad()
     def decide_native(self, request, started):
@@ -141,9 +147,10 @@ class InferenceSession:
         state = self.normalizer.normalize(torch.tensor(observation["proprio"], device=self.device)[None], "state")
         noise_seed = seed_for(self.seed, self.episode_seed, current_id, "closed-loop-noise")
         actions = native_actions(self.reference, mosaic, state, noise_seed, context=self.text)
-        return self.finish_actions(request, actions, started, online_period(self.cfg, current_id), [current_id], [], [], None, noise_seed)
+        sampling = resolve_online(self.cfg, request['task'], self.episode_seed, current_id)
+        return self.finish_actions(request, actions, started, sampling, [current_id], [], [], None, noise_seed)
 
-    def finish_actions(self, request, normalized, started, period, selected, read_ids, newly_encoded, readout, noise_seed):
+    def finish_actions(self, request, normalized, started, sampling, selected, read_ids, newly_encoded, readout, noise_seed):
         actions = self.normalizer.denormalize(normalized)
         if not torch.isfinite(actions).all():
             raise FloatingPointError("Non-finite generated action.")
@@ -165,8 +172,8 @@ class InferenceSession:
                 for start, end in annotation["critical"]]}
         append_jsonl(self.output / "decisions.jsonl", {"task": request["task"], "seed": self.episode_seed, "frame_id": int(request["current_id"]),
                                                        "condition": self.condition, "archive_frames": len(self.archive),
-                                                       "raw_archive_frames": len(self.raw_archive), "history_period": period,
-                                                       "history_phase": evaluation_phase(self.cfg, period, f"{request['task']}:{self.episode_seed}", "online"),
+                                                       "raw_archive_frames": len(self.raw_archive), "history_period": sampling['period'],
+                                                       "history_phase": sampling['phase'], "history_sampling": sampling,
                                                        "evidence_coverage": coverage,
                                                        "selected_frame_ids": selected, "read_frame_ids": read_ids if readout is not None else [],
                                                        "newly_encoded_frame_ids": newly_encoded,
@@ -179,6 +186,9 @@ class InferenceSession:
                                                        "normalized_actions": normalized.detach().float().cpu().tolist(),
                                                        "actions_before_gripper_clip": before_clip,
                                                        "actions_after_gripper_clip": actions.detach().cpu().tolist()})
+        print(f"[history] mode={sampling['mode']} T={sampling['period']} phase={sampling['phase']} "
+              f"decision={sampling['decision_id']} read={len(read_ids) if readout is not None else 0} "
+              f"raw={len(self.raw_archive)} encoded={len(self.archive)} elapsed={time.monotonic()-started:.2f}s", flush=True)
         return {"actions": actions.cpu().tolist()}
 
 

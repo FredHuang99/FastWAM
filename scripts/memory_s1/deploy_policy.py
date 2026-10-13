@@ -48,7 +48,8 @@ class RPCPolicy:
             write_started = time.monotonic()
             directory = Path(self.config["memory_output"]) / "frames" / str(environment._memory_seed)
             directory.mkdir(parents=True, exist_ok=True)
-            Image.fromarray(images[0]).save(directory / f"head_{self.frame_id:06d}.png")
+            for name, image in zip(('head','left','right'), images):
+                Image.fromarray(image).save(directory / f"{name}_{self.frame_id:06d}.png")
             self.timings["image_write_seconds"] += time.monotonic() - write_started
         self.timings["capture_seconds"] += time.monotonic() - started
         return {"frame_id": self.frame_id, "images": [image.tobytes() for image in images],
@@ -76,6 +77,7 @@ class RPCPolicy:
         action_started = time.monotonic()
         target = self.actions.popleft()
         feedback = self.config.get("memory_record_feedback", False)
+        physics_before = getattr(environment, '_memory_physics_steps', None)
         if feedback:
             from sim_feedback import physical_state, object_snapshot
             physical_before = physical_state(environment.robot)
@@ -89,6 +91,10 @@ class RPCPolicy:
                    "physical_abs_error": np.abs(physical_after - target).tolist(),
                    "command_echo_before": np.asarray(observation["joint_action"]["vector"]).tolist(),
                    "objects_before": objects_before, "objects_after": object_snapshot(environment),
+                   "physics_step_id": getattr(environment, '_memory_physics_steps', None),
+                   "physics_steps": None if physics_before is None else environment._memory_physics_steps-physics_before,
+                   "physics_timestep": getattr(environment, '_memory_physics_dt', None),
+                   "seconds": time.monotonic()-action_started,
                    "feedback_source": "physical_qpos_unclipped_gripper_mean_fingers"}
             with (Path(self.config["memory_output"]) / "executed_actions.jsonl").open("a", encoding="utf-8") as stream:
                 stream.write(json.dumps(row, allow_nan=False) + "\n")

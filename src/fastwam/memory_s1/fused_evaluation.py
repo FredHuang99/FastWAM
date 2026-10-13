@@ -190,7 +190,8 @@ def qualify_fused(cfg, run, root, weights, args):
     scene_file = inherit_scenes(cfg, root)
     current = copy.deepcopy(cfg)
     current["selection_runtime"]["qualification"] = True
-    current["diagnostic"] = {"scenes_from": str(scene_file), "episodes_per_task": 1, "max_targets": 32, "record_feedback": True}
+    current["diagnostic"] = {"scenes_from": str(scene_file), "episodes_per_task": 1, "max_targets": 32, "record_feedback": True,
+                             "capture_evidence": bool(cfg.get('diagnosis'))}
     path = Path(root) / "fused_prefix.yaml"
     path.write_text(yaml.safe_dump(current, sort_keys=False), encoding="utf-8")
     group = Path(root) / "qualification/fused"

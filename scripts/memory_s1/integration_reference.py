@@ -232,7 +232,8 @@ def main():
         trace["timesteps"] = trace["timesteps"][:10]
         torch.save(trace, output / f"case_{slot:02d}.pt")
         elapsed = time.monotonic() - started
-        print(f"[official] {slot+1}/12 exact_self_repeat=True elapsed={elapsed:.1f}s ETA={elapsed/(slot+1)*(12-slot-1):.1f}s", flush=True)
+        total = len(request['cases'])
+        print(f"[official] {slot+1}/{total} exact_self_repeat=True elapsed={elapsed:.1f}s ETA={elapsed/(slot+1)*(total-slot-1):.1f}s", flush=True)
     metadata.update(passed=True, cases=len(request["cases"]), exact_self_repeat=True, imports=imported,
                     prompt=prompt, seconds=time.monotonic()-started, torch=torch.__version__,
                     cuda=torch.version.cuda, gpu=torch.cuda.get_device_name(),

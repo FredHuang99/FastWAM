@@ -164,9 +164,10 @@ def replay(environment, recorder, args, job):
     intervals = cadence.get("intervals", []) if cadence.get("verified") else []
     targets = episode["targets"].numpy()
     job["original_step_limit"] = environment.step_lim
-    environment.step_lim = max(environment.step_lim, len(targets))
+    if args.executor == "dense_native" and not intervals:
+        raise ValueError("Dense native replay needs verified physical intervals; 15 steps cannot be assumed.")
     rows = []
-    limit = min(len(targets), args.max_targets) if args.max_targets else len(targets)
+    limit = min(len(targets), environment.step_lim, args.max_targets or environment.step_lim)
     for index, target in enumerate(targets[:limit]):
         check_stop(args.stop_root)
         recorder.target_id = index + 1
@@ -190,11 +191,42 @@ def replay(environment, recorder, args, job):
             break
     report = {"targets": rows, "initial_state_abs_error": job["initial_physical_error"],
         "initial_command_error": initial.tolist(), "cadence_verified": bool(intervals),
-        "cadence_scope": "verified_native_intervals" if intervals else "approximate_fixed_15_physics_steps",
+        "cadence_scope": "verified_native_intervals" if intervals else "upstream_topp_measured_variable_intervals",
         "scene_match_review_required": not bool(intervals), "feedback_source": "physical_qpos_unclipped_gripper"}
     report.update(original_step_limit=job["original_step_limit"], replay_step_limit=environment.step_lim,
         observation_record_ids=list(range(len(episode["states"]))), target_source="next stored command state")
     durable_json(Path(args.output) / "alignment_replay.json", report)
+
+
+def expert_replay(environment, recorder, args, job):
+    source = json.loads(Path(job['scene']['expert_targets']).read_text())
+    current = {'physical': physical_state(environment.robot).tolist(), 'objects': object_snapshot(environment)}
+    initial = source['initial']
+    if not np.allclose(current['physical'], initial['physical'], atol=1e-5, rtol=0):
+        raise ValueError('Expert replay robot initial state differs.')
+    for name, value in initial['objects'].items():
+        if isinstance(value, dict) and 'p' in value:
+            if name not in current['objects'] or not np.allclose(current['objects'][name]['p'], value['p'], atol=1e-5, rtol=0) or not np.allclose(current['objects'][name]['q'], value['q'], atol=1e-5, rtol=0):
+                raise ValueError(f'Expert replay initial object pose differs: {name}')
+    targets = source['targets']
+    limit = min(len(targets), environment.step_lim)
+    if not targets:
+        raise ValueError('No actual expert command-boundary targets captured; do not substitute arbitrary actions.')
+    for index, target in enumerate(targets[:limit]):
+        check_stop(args.stop_root)
+        recorder.target_id = index+1
+        before, tick, started = physical_state(environment.robot), recorder.steps, time.monotonic()
+        execute_target(environment, target, 'upstream_topp')
+        row = target_row(environment, recorder, target, before, started, tick)
+        with (Path(args.output)/'executed_actions.jsonl').open('a', encoding='utf-8') as stream:
+            stream.write(json.dumps(row, allow_nan=False)+'\n')
+        if index % 16 == 15:
+            print(f'[expert-replay] targets={index+1}/{limit}', flush=True)
+        if environment.eval_success: break
+    durable_json(Path(args.output)/'expert_replay_source.json', {'path':job['scene']['expert_targets'],
+        'source_scope':source['scope'], 'available_targets':len(targets), 'official_limit':environment.step_lim,
+        'replay_limit':limit, 'timing':'upstream TOPP; source boundary physical intervals are reported, not assumed equal'})
+    return limit
 
 
 def policy_episode(environment, recorder, args, job):
@@ -329,6 +361,7 @@ def run_scene(args):
         gpu = verify_gpu(args.gpu_uuid, environment.scene)
         save_images(args.output, environment.get_obs(), 0)
         initial_physical = physical_state(environment.robot).copy()
+        initial_snapshot = {'physical':initial_physical.tolist(), 'objects':object_snapshot(environment)}
         if job.get("episode"):
             import torch
             initial_episode = torch.load(job["episode"], map_location="cpu", weights_only=True)
@@ -359,6 +392,10 @@ def run_scene(args):
             if args.operation == "expert":
                 environment.play_once()
                 expert_success = bool(environment.plan_success and environment.check_success())
+                durable_json(Path(args.output)/'expert_targets.json', {'initial':initial_snapshot,
+                    'scene':scene, 'scope':'actual native expert observation-boundary command states; not high-level planner goals',
+                    'targets':[r['command_state'] for r in recorder.boundaries[1:]],
+                    'physical_step_ids':[r['physics_step_id'] for r in recorder.boundaries]})
                 job_episode = job.get("episode")
                 cadence = {"verified": False, "intervals": [], "reason": "No matching saved episode."}
                 if job_episode:
@@ -376,6 +413,9 @@ def run_scene(args):
                 expert_success = bool(environment.eval_success)
             elif args.operation == "integration_actions":
                 target_limit = fixed_chunks(environment, recorder, args, job)
+                expert_success = bool(environment.eval_success)
+            elif args.operation == 'expert_replay':
+                target_limit = expert_replay(environment, recorder, args, job)
                 expert_success = bool(environment.eval_success)
             else:
                 environment.set_instruction(instruction=scene["instruction"])
@@ -439,7 +479,7 @@ def plan(args):
 
 def main():
     parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument("--operation", choices=("preflight", "expert", "replay", "plan", "policy", "integration_actions"), required=True)
+    parser.add_argument("--operation", choices=("preflight", "expert", "replay", "plan", "policy", "integration_actions", "expert_replay"), required=True)
     parser.add_argument("--output", required=True)
     parser.add_argument("--tasks", nargs="+", default=["put_back_block", "swap_blocks"])
     parser.add_argument("--job")

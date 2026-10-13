@@ -149,12 +149,16 @@ class EpisodeQueue:
                 value = {"schema": 1, "identity": identity, "jobs": jobs, "created": time.time()}
             durable_json(self.path, value)
 
-    def claim(self, worker):
+    def claim(self, worker, scene_cap=None):
         with locked(self.root / "queue.lock"):
             if stop_mode(self.root) or (self.root / "ABORT.json").exists():
                 return None
             value = read(self.path)
             candidates = [job for job in value["jobs"] if job["state"] == "pending"]
+            if scene_cap is not None:
+                if type(scene_cap) is not int or scene_cap < 1:
+                    raise ValueError("scene_cap must be a positive integer.")
+                candidates = [job for job in candidates if job['scene']['ordinal'] < scene_cap]
             if not candidates:
                 return None
             # Long scenes start early; queue identity does not depend on this order.

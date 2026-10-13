@@ -51,7 +51,7 @@ def checked_result(path, identity):
 
 
 def closed_child(cfg_file, weights, root, directory, mode, conditions, args,
-                 scenes=None, period=8, cycle=None, evidence=None):
+                 scenes=None, period=None, cycle=None, evidence=None):
     if stop_mode(root):
         raise EvaluationInterrupted("Stopped before starting another evaluation group.")
     directory.mkdir(parents=True, exist_ok=True)
@@ -61,10 +61,10 @@ def closed_child(cfg_file, weights, root, directory, mode, conditions, args,
                "--episode-timeout", str(args.episode_timeout)]
     if scenes is not None:
         command += ["--scenes-from", str(scenes)]
-    if cycle:
-        command += ["--history-cycle", cycle]
-    else:
-        command += ["--history-period", str(period)]
+    from .history import override_online, online_arguments
+    sampling_cfg = load_config(cfg_file)
+    override_online(sampling_cfg, period=period, cycle=cycle)
+    command += online_arguments(sampling_cfg)
     if evidence:
         command += ["--evidence", str(evidence)]
     if any((directory / name).exists() for name in ("queue.json", "launcher.json", "STOP.json")):
@@ -330,8 +330,11 @@ def upload_compact(cfg, run, root, phase):
     backup_started = time.monotonic()
     try:
         files = [p for p in root.rglob("*") if p.is_file() and
-                 not set(p.relative_to(root).parts) & {"packages", "frames"} and
-                 p.suffix in (".json", ".jsonl", ".csv", ".png", ".pdf", ".log", ".yaml") and p.stat().st_size < 16 * 2**20]
+                 not set(p.relative_to(root).parts) & ({"packages"} if phase == 'diagnosis' else {"packages", "frames"}) and
+                 (p.suffix in (".json", ".jsonl", ".csv", ".png", ".pdf", ".log", ".yaml") or
+                  (phase == 'diagnosis' and 'evidence' in p.relative_to(root).parts and
+                   (p.suffix in ('.py','.sh','.yml','.patch','.txt','.bundle') or p.name in ('simulator_sources.tar.gz','reference_sources.tar.gz'))))
+                 and p.stat().st_size < (64 if phase == 'diagnosis' else 16) * 2**20]
         for path in files:
             target = snapshot / path.relative_to(root)
             target.parent.mkdir(parents=True, exist_ok=True)

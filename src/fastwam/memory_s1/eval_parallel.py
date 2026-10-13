@@ -244,6 +244,7 @@ def prepare_scenes(cfg, mode, gpu_uuids, stop_root):
 
 
 def evaluation_identity(cfg, contract, scenes, conditions, weights, evidence, record_frames):
+    from .history import online_contract
     from .protocol import inference_contract
     root = Path(cfg["root"])
     source = {}
@@ -257,6 +258,7 @@ def evaluation_identity(cfg, contract, scenes, conditions, weights, evidence, re
                       "evidence": evidence, "source": source, "noise_seed": cfg["seed"],
                       "predict": 32, "execute": 16, "denoising_steps": 10, "record_frames": record_frames,
                       "history_sampling": cfg.get("history", {"online_period": 8, "archive_stride": 8}),
+                      "history_algorithm": online_contract(cfg),
                       "inference_contract": inference_contract(), "diagnostic": cfg.get("diagnostic", {}),
                       "selection_runtime": cfg.get("selection_runtime", {})})
 
@@ -319,7 +321,7 @@ def execute_job(model, encoders, cfg, queue, job, gpu_uuid, record_frames, evide
                 service = queue.root / "resident" / str(os.getpid())
                 service.mkdir(parents=True, exist_ok=True)
                 command += ["--service", str(service)]
-            if record_frames:
+            if record_frames or cfg.get('diagnostic',{}).get('capture_evidence',False):
                 command.append("--record-frames")
             diagnostic = cfg.get("diagnostic", {})
             if diagnostic.get("max_targets", 0):
@@ -415,7 +417,7 @@ def execute_job(model, encoders, cfg, queue, job, gpu_uuid, record_frames, evide
         session.reset()
 
 
-def worker_loop(cfg, output, worker, weights=None, resident_model=None, record_frames=False, evidence=None, timeout=2400):
+def worker_loop(cfg, output, worker, weights=None, resident_model=None, record_frames=False, evidence=None, timeout=2400, scene_cap=None):
     import torch
     from .model import S1Model, load_observation_encoders
     queue = EpisodeQueue(output)
@@ -444,7 +446,7 @@ def worker_loop(cfg, output, worker, weights=None, resident_model=None, record_f
         while True:
             if resident_model is not None and (Path(cfg["paths"]["run"]) / "STOP_REQUESTED").exists():
                 durable_json(queue.root / "STOP.json", {"mode": "now", "reason": "training safe stop"})
-            job = queue.claim(worker)
+            job = queue.claim(worker, scene_cap=scene_cap)
             if job is None:
                 break
             print(f"[worker {worker}] start {job['id']} attempt={job['attempt']} GPU={uuid}", flush=True)
@@ -539,17 +541,23 @@ def standalone(args):
     if cfg.get("diagnostic_only") and args.mode != "diagnostic":
         raise ValueError("This configuration is only for base diagnostics.")
     qualification = cfg.get("selection_runtime", {}).get("qualification", False)
-    if diagnostic.get("max_targets", 0) and (args.mode != "diagnostic" or args.weights) and not qualification:
+    s1_prefix = (diagnostic.get('s1_investigation') is True and args.mode == 'diagnostic'
+                 and diagnostic.get('scenes_from') and diagnostic.get('episodes_per_task') == 1
+                 and diagnostic.get('max_targets') == 32)
+    if diagnostic.get("max_targets", 0) and (args.mode != "diagnostic" or args.weights) and not (qualification or s1_prefix):
         raise ValueError("A short prefix is a base diagnostic, not a trained/official evaluation.")
     if diagnostic.get("max_targets", 0) < 0:
         raise ValueError("max-targets cannot be negative.")
     if diagnostic.get("episodes_per_task") and not diagnostic.get("scenes_from"):
         raise ValueError("Pass --scenes-from to select a subset of previously frozen scenes.")
     from .history import override_online
-    override_online(cfg, getattr(args, "history_period", None), getattr(args, "history_cycle", None), getattr(args, "history_phase", None))
+    override_online(cfg, getattr(args, "history_period", None), getattr(args, "history_cycle", None), getattr(args, "history_phase", None), getattr(args, "history_mode", None))
     if not cfg["closed_loop"]["enabled"]:
         raise ValueError("Closed-loop evaluation is disabled in this configuration.")
     output = Path(args.output).resolve()
+    scene_cap = getattr(args, 'scene_cap', None)
+    if scene_cap is not None and (scene_cap < 1 or args.mode != 'internal' or diagnostic.get('max_targets')):
+        raise ValueError('A scene claim cap is only valid for complete internal episodes.')
     output.mkdir(parents=True, exist_ok=True)
     inventory = gpu_inventory()
     uuids = [inventory[int(index)] for index in args.gpus.split(",")]
@@ -600,6 +608,7 @@ def standalone(args):
                 if (source / name).is_file():
                     shutil.copy2(source / name, destination / name)
         durable_json(output / "evaluation.json", {"config": cfg, "mode": args.mode, "conditions": conditions,
+                                                   "scene_cap": scene_cap,
                                                    "weights": str(Path(args.weights).resolve()) if args.weights else None,
                                                    "evidence": evidence, "record_frames": args.record_frames, "scene_manifest": str(manifest),
                                                    "inference_contract": inference_contract()})
@@ -666,7 +675,11 @@ def standalone(args):
                 log.close()
             cleanup_simulators(output)
         summary = summarize(output, args.mode)
-        if not summary["complete"] or (output / "ABORT.json").exists():
+        selected = [j for j in queue.snapshot()['jobs'] if scene_cap is None or j['scene']['ordinal'] < scene_cap]
+        requested_complete = bool(selected) and all(j['state'] == 'complete' for j in selected)
+        durable_json(output / 'REQUESTED_SCOPE.json', {'scene_cap': scene_cap, 'complete': requested_complete,
+                     'requested_episodes': len(selected), 'full_queue_complete': summary['complete']})
+        if not requested_complete or (output / "ABORT.json").exists():
             details = failure_report(output)
             (output / "FAILURE_DETAILS.txt").write_text(details+"\n", encoding="utf-8")
             print(f"[evaluation failure]\n{details}", flush=True)
@@ -674,7 +687,7 @@ def standalone(args):
             upload_results(cfg, output)
         progress(queue, len(uuids))
         print(f"[finish] complete={summary['complete']} completed={summary['completed_episodes']}/{summary['planned_episodes']} output={output}", flush=True)
-        return 0 if summary["complete"] and not (output / "ABORT.json").exists() and not (output / "UPLOAD_FAILED.json").exists() else 2
+        return 0 if requested_complete and not (output / "ABORT.json").exists() and not (output / "UPLOAD_FAILED.json").exists() else 2
 
 
 def distributed_validation(cfg, weights, output, resident_model):
@@ -758,11 +771,13 @@ def main():
     run.add_argument("--mode", choices=("diagnostic", "internal", "official"), required=True)
     run.add_argument("--conditions", nargs="+", default=["gate_zero"])
     run.add_argument("--history-period", type=int)
+    run.add_argument("--history-mode", choices=("fixed", "cycle", "seeded_per_decision"))
     run.add_argument("--history-phase", type=int, help="Override the episode-seeded phase with a fixed residue")
     run.add_argument("--history-cycle", help="Decision periods, e.g. 8,4,16")
     run.add_argument("--weights")
     run.add_argument("--evidence")
-    run.add_argument("--gpus", default="0,1,2,3,4,5,6,7")
+    run.add_argument("--gpus", default="0")
+    run.add_argument("--scene-cap", type=int, help="Claim ordinals below this cap; retain full queue identity for continuation")
     run.add_argument("--resume", action="store_true")
     run.add_argument("--record-frames", action="store_true")
     run.add_argument("--hf-results", action="store_true")
@@ -780,7 +795,7 @@ def main():
         raise SystemExit(standalone(args))
     spec = read(Path(args.output) / "evaluation.json")
     worker_loop(spec["config"], args.output, args.worker, weights=spec["weights"], record_frames=spec["record_frames"],
-                evidence=spec["evidence"], timeout=args.timeout)
+                evidence=spec["evidence"], timeout=args.timeout, scene_cap=spec.get('scene_cap'))
 
 
 if __name__ == "__main__":

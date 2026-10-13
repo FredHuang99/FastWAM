@@ -93,7 +93,8 @@ def run_child(command, log, cwd, env, stop_root, timeout=2400):
                     last_print = time.monotonic()
                 time.sleep(0.5)
             if process.returncode:
-                raise RuntimeError(f"Child exit={process.returncode}; inspect {log}")
+                tail = '\n'.join(Path(log).read_text(errors='replace').splitlines()[-100:])
+                raise RuntimeError(f"Child exit={process.returncode}; {log}\n{tail}")
         finally:
             terminate_owned(process)
 
@@ -181,7 +182,7 @@ def queue_progress(queue, workers):
         if row["state"] == "running":
             seconds = max(0, seconds - (time.time() - row["started"]))
         lanes[min(range(len(lanes)), key=lanes.__getitem__)] += seconds
-    result = {"completed": len(done), "total": len(state["jobs"]), "eta_seconds": max(lanes),
+    result = {"completed": len(done), "total": len(state["jobs"]), "eta_seconds": None if provisional else max(lanes),
         "eta_provisional": provisional, "stop": stop_mode(queue.root),
         "errors": sum(j["state"] == "error" for j in state["jobs"])}
     durable_json(queue.root / "status.json", result)
@@ -221,6 +222,7 @@ def execute_job(policy, cfg, queue, job, uuid, parent_stop):
         "--gpu-uuid", uuid, "--executor", executor, "--stop-root", str(parent_stop)]
     started, process = time.monotonic(), None
     env = simulator_environment(cfg, uuid)
+    env['MEMORY_S1_PROGRESS_ROOT'] = str(directory / 'simulator_progress')
     socket_path = Path("/tmp") / f"mwam-rootcause-{os.getpid()}.sock"
     socket_path.unlink(missing_ok=True)
     key = os.urandom(24)
@@ -344,7 +346,11 @@ def parallel_group(cfg, root, name, scenes, conditions, operation, uuids, resume
                 raise RuntimeError(f"A diagnostic worker failed; inspect {directory / 'workers'}")
             if time.monotonic() - last > 15:
                 status = queue_progress(queue, len(uuids))
-                print(f"[{name}] {status['completed']}/{status['total']} ETA={status['eta_seconds']/60:.1f}min provisional={status['eta_provisional']}", flush=True)
+                eta = 'unknown (no measured duration for pending task)' if status['eta_seconds'] is None else f"{status['eta_seconds']/60:.1f}min"
+                print(f"[{name}] {status['completed']}/{status['total']} elapsed={time.monotonic()-group_started:.0f}s ETA={eta}", flush=True)
+                for job in queue.snapshot()['jobs']:
+                    if job['state']=='running':
+                        print(f"  active={job['id']} age={time.time()-job['started']:.0f}s log={directory/job['directory']/'simulator.log'}",flush=True)
                 last = time.monotonic()
             time.sleep(1)
         if any(process.returncode for process, _ in processes):

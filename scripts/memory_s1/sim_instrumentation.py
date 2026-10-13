@@ -66,6 +66,27 @@ def contact_pairs(scene):
 
 
 
+class PassiveClock:
+    """Count existing scene.step calls only; no reads, rendering, RNG or success calls."""
+    def __init__(self, environment):
+        self.environment = environment
+        self.original = type(environment.scene).step
+        environment._memory_physics_steps = 0
+        environment._memory_physics_dt = float(environment.scene.get_timestep())
+
+    def __enter__(self):
+        def counted(scene, *args, **kwargs):
+            value = self.original(scene, *args, **kwargs)
+            if scene is self.environment.scene:
+                self.environment._memory_physics_steps += 1
+            return value
+        type(self.environment.scene).step = counted
+        return self
+
+    def __exit__(self, *unused):
+        type(self.environment.scene).step = self.original
+
+
 class PhysicalRecorder:
     def __init__(self, environment, output, stop=None):
         self.environment, self.output, self.stop = environment, Path(output), stop

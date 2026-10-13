@@ -79,7 +79,7 @@ def verify_full_inventory(cfg):
     return {"passed": True, "shards": count, "seconds": time.monotonic() - started}
 
 
-def accumulation_check(model, dataset, cfg, device, micro, check_masks=True):
+def accumulation_check(model, dataset, cfg, device, micro, check_masks=True, gradient_sink=None):
     if int(os.environ.get("WORLD_SIZE", "1")) != 1 or dist.is_initialized():
         raise ValueError("Use torchrun --nproc_per_node=1 -m fastwam.memory_s1.train --functional-preflight.")
     if micro not in (1, 2):
@@ -160,6 +160,9 @@ def accumulation_check(model, dataset, cfg, device, micro, check_masks=True):
                                      "frames": len(s["frame_ids"])} for s in longest_samples],
               "peak_gpu_gib": torch.cuda.max_memory_allocated(device) / 2**30,
               "seconds": time.monotonic() - started, "evidence_coverage": "unknown"}
+    if gradient_sink is not None:
+        gradient_sink.update({name: parameter.grad.detach().float().cpu().clone()
+                              for name, parameter in model.memory.named_parameters()})
     model.zero_grad(set_to_none=True)
     del wrapped
     import gc

@@ -170,6 +170,7 @@ def run_episode(args, official):
         config.pop("eval_video_save_dir", None)
         started = time.monotonic()
         timings = {"observation_seconds": 0.0, "policy_seconds": 0.0}
+        passive_clock = None
         try:
             check_stop(args.stop_root)
             before = time.monotonic()
@@ -178,6 +179,10 @@ def run_episode(args, official):
             environment.setup_demo(now_ep_num=scene["ordinal"], seed=scene["seed"], is_test=True, **config)
             environment._memory_seed = scene["seed"]
             environment.set_instruction(instruction=scene["instruction"])
+            if args.record_feedback:
+                from sim_instrumentation import PassiveClock
+                passive_clock = PassiveClock(environment)
+                passive_clock.__enter__()
             gpu = verify_gpu(args.gpu_uuid, environment.scene)
             timings["setup_seconds"] = time.monotonic() - before
             official.eval_function_decorator("deploy_policy", "reset_model")(model)
@@ -225,11 +230,7 @@ def run_episode(args, official):
                 if environment.eval_success:
                     break
             timings["rollout_seconds"] = time.monotonic()-rollout_started
-            if args.max_targets and args.record_frames:
-                before = time.monotonic()
-                final_observation = environment.get_obs()
-                timings["observation_seconds"] += time.monotonic() - before
-                model.capture(environment, final_observation)
+            # Evidence capture uses observations already consumed by the normal loop.
             timings.update(model.timings)
             value = {"status": "complete", "task": task, "seed": scene["seed"], "ordinal": scene["ordinal"],
                      "instruction": scene["instruction"], "condition": job["condition"],
@@ -244,6 +245,8 @@ def run_episode(args, official):
         except Exception:
             value = {"status": "error", "error": traceback.format_exc()}
         finally:
+            if passive_clock is not None:
+                passive_clock.__exit__()
             environment.close_env(clear_cache=True)
         value["simulator_seconds"] = time.monotonic() - started
         event(progress_root, "episode", value["status"], **fields, seconds=value["simulator_seconds"], timings=value.get("timings"))
