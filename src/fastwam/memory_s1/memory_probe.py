@@ -199,8 +199,8 @@ def prepare(root, spec, output):
                 seed = noise_info["seed"]
             else:
                 seed = (seed_for(cfg["seed"], item["seed"], item["anchor"], "closed-loop-noise")
-                        if name == "production" else seed_for(cfg["seed"], item["task"], item["seed"],
-                                                             item["anchor"], "memory-probe-independent-v1"))
+                        if name == "production" else seed_for(cfg["seed"], item["seed"], item["anchor"],
+                                                             "memory-probe-independent-v1:" + item["task"]))
                 directory.mkdir(parents=True, exist_ok=True)
                 noise = torch.randn(1, 32, 14, generator=torch.Generator(device="cpu").manual_seed(seed)).numpy()
                 np.save(directory / f"noise_{name}.npy", noise, allow_pickle=False)
