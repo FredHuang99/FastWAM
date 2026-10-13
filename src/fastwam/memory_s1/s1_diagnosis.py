@@ -20,7 +20,7 @@ from .history import evaluation_phase, select_ids, online_contract, training_per
 
 VERSION = "s1-diagnosis-v1"
 TASKS = ("put_back_block", "swap_blocks")
-STAGES = ("inventory", "offline", "paths", "gradients", "expert", "fixed", "random", "micro", "retest8", "retest40", "report", "backup")
+STAGES = ("inherit", "inventory", "offline", "paths", "gradients", "expert", "fixed", "recorded", "contacts", "phase_trace", "random", "micro", "retest8", "retest40", "report", "backup")
 
 
 def check_stop(root):
@@ -123,7 +123,8 @@ def identity(cfg):
             "environment":{"inference_python":sys.version,"torch":torch.__version__,"cuda":torch.version.cuda,
                 "simulator":simulator,"flags":{k:os.environ.get(k) for k in ('CUDA_LAUNCH_BLOCKING','CUBLAS_WORKSPACE_CONFIG')}},
             "resources": {k: sha256(cfg["paths"][k]) for k in ("base", "stats", "vae", "t5")},
-            "evidence": {str(p): sha256(p) for p in required}, "history": online_contract(cfg)}
+            "evidence": {str(p): sha256(p) for p in required}, "history": online_contract(cfg),
+            "diagnostic_scenes_sha256": sha256(Path(cfg['root'])/cfg['diagnosis']['scenes'])}
 
 
 def inventory(cfg, root, bound):
@@ -337,22 +338,37 @@ def collect_evidence(cfg, root, bound):
 
 
 def require_stage(root, stage):
-    path = Path(root) / f"{stage}.json"
-    if not path.exists() or read_json(path).get("complete") is not True:
-        raise ValueError(f"Finish {stage} first: {path}")
-    if read_json(path).get('identity')!=fingerprint(read_json(Path(root)/'identity.json')):
-        raise ValueError(f'Stale stage identity: {path}')
+    from .diagnosis_followup import stage_record
+    return stage_record(root, stage)
 
 
 def report(cfg, root, bound):
-    matrix = {stage: read_json(root / f"{stage}.json") if (root / f"{stage}.json").exists() else {"status": "not_run"}
-              for stage in STAGES if stage not in ("report", "backup")}
+    from .diagnosis_followup import REQUIRED, stage_record
+    matrix = {}
+    for stage in STAGES:
+        if stage in ("report", "backup"): continue
+        try:
+            matrix[stage] = stage_record(root, stage)
+        except (ValueError, OSError) as error:
+            matrix[stage] = {"complete": False, "status": "not_run" if not (root/f"{stage}.json").exists() else "invalid",
+                             "reason": str(error)}
     for stage in matrix:
         error = root / f"{stage}.error.json"
         if error.exists():
             matrix[stage] = {"status": "error", **read_json(error)}
+    missing = [stage for stage in REQUIRED if matrix[stage].get("complete") is not True]
+    expected_cases = read_json(root/'windows.json')['cases'] if (root/'windows.json').exists() else []
+    case_paths = list((root/'offline_cases').glob('*.json'))
+    counts = {"offline_planned": len(expected_cases), "offline_result_files": len(case_paths),
+              "offline_status": "not_run" if not case_paths else matrix['offline'].get('status','complete' if matrix['offline'].get('complete') else 'incomplete'),
+              "error_stages": [s for s,r in matrix.items() if r.get('status') in ('error','invalid')]}
     atomic_json(root / "status_matrix.json", matrix)
     offline = [read_json(p) for p in sorted((root / "offline_cases").glob("*.json"))]
+    counts.update(offline_action_samples=sum(bool(r.get('sample')) for r in offline),
+                  offline_single_fm=sum(r.get('sample') is False for r in offline),
+                  offline_completed_verified=len(offline) if matrix['offline'].get('complete') else 0,
+                  offline_missing_cases=sorted({c['id'] for c in expected_cases}-{r['id'] for r in offline}),
+                  offline_case_errors=sum(bool(r.get('error')) for r in offline))
     fields = ["window", "split", "stage", "weight", "condition", "T", "phase", "frames", "fm", "fm_unweighted", "sample_mse",
               "left_arm_mae", "right_arm_mae", "left_gripper_mae", "right_gripper_mae", "seconds", "coverage"]
     for row in offline:
@@ -412,7 +428,12 @@ def report(cfg, root, bound):
             if pairs:ax.plot(*zip(*pairs),marker='o',label=label)
         ax.set(xlabel='History period T',ylabel='FM (diagnostic windows; phases listed in CSV)')
         ax.legend();fig.tight_layout();fig.savefig(root/'history_diagnostics.png');fig.savefig(root/'history_diagnostics.pdf');plt.close(fig)
-    return {"complete":True,"root_cause":"No automatic root-cause verdict; inspect first divergences and missing evidence.", "matrix":"status_matrix.json"}
+    value = {"complete": True, "report_generated": True, "required_diagnostics_complete": not missing,
+             "missing_required_stages": missing, "counts": counts,
+             "root_cause":"undetermined; reviewed causal evidence is required", "matrix":"status_matrix.json"}
+    atomic_json(root/'DIAGNOSIS_STATUS.json', value)
+    print(f"[report] generated=True required_complete={not missing} missing={missing} cases={counts}",flush=True)
+    return value
 
 
 def main():
@@ -422,8 +443,11 @@ def main():
     parser.add_argument("--output",required=True)
     parser.add_argument("--resume",action="store_true")
     parser.add_argument("--confirmed-fix",help="Reviewed root-cause/fix JSON, mandatory before retest")
+    parser.add_argument("--parent", help="Original diagnostic directory; read-only historical citations")
     args=parser.parse_args()
-    cfg=load_config(args.config); root=Path(args.output).resolve();root.mkdir(parents=True,exist_ok=True)
+    cfg=load_config(args.config)
+    if args.parent: cfg.setdefault('diagnosis',{})['parent'] = str(Path(args.parent).resolve())
+    root=Path(args.output).resolve();root.mkdir(parents=True,exist_ok=True)
     from .eval_state import locked, process_identity
     with locked(root / "diagnosis.lock",blocking=False):
         if args.resume:
@@ -435,8 +459,18 @@ def main():
         try:
             bound=identity(cfg);immutable_json(root / "identity.json",bound)
             prior=root/f'{args.stage}.json'
+            if args.resume and args.stage not in ('report','backup') and prior.exists():
+                require_stage(root,args.stage)
+                error=root/f'{args.stage}.error.json'
+                if error.exists():error.rename(root/f'{args.stage}.resolved_error_{time.time_ns()}.json')
+                print(f"[already complete] {args.stage}; identity and artifact hashes verified",flush=True)
+                return
             if prior.exists():prior.rename(root/f'{args.stage}.previous_{time.time_ns()}.json')
-            if args.stage=="inventory":
+            if args.stage=="inherit":
+                from .diagnosis_followup import inherit
+                if not cfg.get('diagnosis',{}).get('parent'): raise ValueError('Pass --parent with the original evidence directory')
+                value=inherit(cfg,root,bound)
+            elif args.stage=="inventory":
                 value=inventory(cfg,root,bound)
             elif args.stage=="report":
                 value=report(cfg,root,bound)
@@ -448,7 +482,9 @@ def main():
                 require_stage(root,"inventory")
                 from . import diagnosis_gpu
                 value=diagnosis_gpu.run_stage(args.stage,cfg,root,bound,args)
-            atomic_json(root / f"{args.stage}.json",{**value,"seconds":time.monotonic()-started,"identity":fingerprint(bound)})
+            from .diagnosis_followup import artifact_files
+            atomic_json(root / f"{args.stage}.json",{**value,"seconds":time.monotonic()-started,"identity":fingerprint(bound),
+                       "artifacts":artifact_files(root,args.stage)})
             error=root/f'{args.stage}.error.json'
             if error.exists():error.rename(root/f'{args.stage}.resolved_error_{time.time_ns()}.json')
             print(f"[complete] {args.stage} elapsed={time.monotonic()-started:.1f}s",flush=True)

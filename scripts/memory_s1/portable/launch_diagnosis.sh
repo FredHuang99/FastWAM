@@ -34,7 +34,7 @@ case "$action" in
     printf 'Exit code: %s\n' "$code"
     exit "$code"
     ;;
-  inventory|offline|paths|gradients|expert|fixed|random|micro|retest8|retest40|report|backup) ;;
+  inherit|inventory|offline|paths|gradients|expert|fixed|recorded|contacts|phase_trace|random|micro|retest8|retest40|report|backup) ;;
   *) echo "Unknown stage: $action"; exit 2 ;;
 esac
 mkdir -p "$DIAG_ROOT/launches"
@@ -44,6 +44,7 @@ flock -n 9 || { echo 'Another launch is being prepared.'; exit 1; }
 stamp="$(date -u +%Y%m%dT%H%M%SZ)_$$"
 log="$DIAG_ROOT/launches/${action}_${stamp}.log"
 command=("$PY" -u -m fastwam.memory_s1.s1_diagnosis "$action" --config "$DIAG_CFG" --output "$DIAG_ROOT" --resume "$@")
+if [ -n "${DIAG_PARENT:-}" ]; then command+=(--parent "$DIAG_PARENT"); fi
 printf '%q ' "${command[@]}" > "${log%.log}.command"
 printf '\n' >> "${log%.log}.command"
 printf '%s\n' "$log" > "$DIAG_ROOT/latest_log.txt"

@@ -543,7 +543,8 @@ def standalone(args):
     qualification = cfg.get("selection_runtime", {}).get("qualification", False)
     s1_prefix = (diagnostic.get('s1_investigation') is True and args.mode == 'diagnostic'
                  and diagnostic.get('scenes_from') and diagnostic.get('episodes_per_task') == 1
-                 and diagnostic.get('max_targets') == 32)
+                 and diagnostic.get('max_targets') in (32,160)
+                 and (diagnostic.get('max_targets') == 32 or diagnostic.get('phase_trace') is True))
     if diagnostic.get("max_targets", 0) and (args.mode != "diagnostic" or args.weights) and not (qualification or s1_prefix):
         raise ValueError("A short prefix is a base diagnostic, not a trained/official evaluation.")
     if diagnostic.get("max_targets", 0) < 0:

@@ -52,6 +52,13 @@ class RPCPolicy:
                 Image.fromarray(image).save(directory / f"{name}_{self.frame_id:06d}.png")
             self.timings["image_write_seconds"] += time.monotonic() - write_started
         self.timings["capture_seconds"] += time.monotonic() - started
+        if self.config.get('memory_record_feedback') and self.config.get('memory_record_frames'):
+            row={'frame_id':self.frame_id,'proprio':state.tolist(),
+                 'state_source':'observation.joint_action.vector', 'shapes':[list(i.shape) for i in images],
+                 'physics_step_id':getattr(environment,'_memory_physics_steps',None),
+                 'physics_timestep':getattr(environment,'_memory_physics_dt',None)}
+            with (Path(self.config['memory_output'])/'observations.jsonl').open('a',encoding='utf-8') as stream:
+                stream.write(json.dumps(row,allow_nan=False)+'\n')
         return {"frame_id": self.frame_id, "images": [image.tobytes() for image in images],
                 "shapes": [list(image.shape) for image in images], "proprio": state.tolist()}
 
@@ -86,11 +93,15 @@ class RPCPolicy:
         self.timings["action_execution_seconds"] += time.monotonic() - action_started
         if feedback:
             physical_after = physical_state(environment.robot)
+            from sim_instrumentation import joint_details, contact_pairs, object_contacts
+            contacts=contact_pairs(environment.scene)
             row = {"completed_target_id": self.frame_id + 1, "target": target.tolist(),
                    "physical_before": physical_before.tolist(), "physical_after": physical_after.tolist(),
                    "physical_abs_error": np.abs(physical_after - target).tolist(),
                    "command_echo_before": np.asarray(observation["joint_action"]["vector"]).tolist(),
                    "objects_before": objects_before, "objects_after": object_snapshot(environment),
+                   "joint_details":joint_details(environment.robot),"contacts":contacts,
+                   "object_contacts":object_contacts(environment,contacts),
                    "physics_step_id": getattr(environment, '_memory_physics_steps', None),
                    "physics_steps": None if physics_before is None else environment._memory_physics_steps-physics_before,
                    "physics_timestep": getattr(environment, '_memory_physics_dt', None),

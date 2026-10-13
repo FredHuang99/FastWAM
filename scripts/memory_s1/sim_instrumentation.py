@@ -36,6 +36,46 @@ def joint_details(robot):
     return result
 
 
+def entity_names(actor):
+    """Resolve actual entity/link aliases, without guessing from name substrings."""
+    names = set()
+    for value in (actor, getattr(actor, 'actor', None), getattr(actor, 'entity', None), getattr(actor, 'body', None)):
+        if value is None: continue
+        for entity in (value, getattr(value, 'entity', None)):
+            if entity is None: continue
+            name = entity.get_name() if hasattr(entity, 'get_name') else getattr(entity, 'name', None)
+            if name: names.add(str(name))
+    return names
+
+
+def contact_aliases(environment):
+    fingers = set()
+    for side in ('left','right'):
+        for joint, multiplier, offset in getattr(environment.robot, f'{side}_gripper'):
+            if joint is None: continue
+            child = joint.get_child_link() if hasattr(joint,'get_child_link') else getattr(joint,'child_link',None)
+            fingers.update(entity_names(child))
+    objects = {name: sorted(entity_names(getattr(environment,name)))
+               for name,value in object_snapshot(environment).items() if isinstance(value,dict) and 'p' in value}
+    return {'fingers':sorted(fingers),'objects':objects}
+
+
+def object_contacts(environment, contacts=None, aliases=None):
+    contacts = contact_pairs(environment.scene) if contacts is None else contacts
+    aliases = contact_aliases(environment) if aliases is None else aliases
+    fingers = set(aliases['fingers']); results = {}
+    for name, values in aliases['objects'].items():
+        objects = set(values)
+        hits = [r for r in contacts['pairs'] if
+                (r['a'] in objects and r['b'] in fingers) or (r['b'] in objects and r['a'] in fingers)]
+        mapped = bool(objects and fingers and contacts['available'])
+        results[name] = {'gripper_contact':True if hits else (False if mapped else None),
+                         'matched_pairs':hits,'aliases_resolved':mapped,
+                         'absence_is_task_failure':False}
+    return {'objects':results,'aliases':aliases,'available':contacts['available'],
+            'scope':'Instantaneous contact observation; negative values do not prove absence over an interval'}
+
+
 def contact_pairs(scene):
     try:
         contacts = scene.get_contacts()
@@ -100,6 +140,8 @@ class PhysicalRecorder:
             "max_lift_run": 0, "current_lift_run": 0, "contact_seen": False}
             for name, value in self.initial_objects.items() if isinstance(value, dict) and "p" in value}
         self.contacts_available = True
+        self.contact_aliases = contact_aliases(environment)
+        self.contact_mapping_validated = False
         self.finger_counts = {side: len(joint_details(environment.robot)[side]["finger_qpos"]) for side in ("left", "right")}
         self.original_step = type(environment.scene).step
         self.original_picture = environment._take_picture
@@ -132,12 +174,9 @@ class PhysicalRecorder:
             event["current_lift_run"] = event["current_lift_run"] + 1 if lift >= 0.03 else 0
             event["max_lift_run"] = max(event["max_lift_run"], event["current_lift_run"])
             event["lift_steps"] += int(lift >= 0.03)
-            actor = getattr(self.environment, name)
-            entity = getattr(actor, "actor", getattr(actor, "entity", actor))
-            actor_name = str(entity.get_name() if hasattr(entity, "get_name") else getattr(entity, "name", name))
-            event["contact_seen"] |= any(actor_name in (r["a"], r["b"]) and
-                any(term in (r["a"] + " " + r["b"]).lower() for term in ("finger", "gripper"))
-                for r in contacts["pairs"])
+            contact = object_contacts(self.environment, contacts, self.contact_aliases)['objects'][name]
+            event['contact_seen'] |= contact['gripper_contact'] is True
+            self.contacts_available &= contact['aliases_resolved']
             positions.extend(p.tolist())
         self.samples.append([self.steps, self.steps * self.dt, self.target_id, *physical.tolist(), *velocity, *ee, *fingers, *positions])
 
@@ -194,15 +233,16 @@ class PhysicalRecorder:
                 *[f"{side}_ee_{axis}" for side in ("left", "right") for axis in ("x", "y", "z", "qw", "qx", "qy", "qz")],
                 *[f"{side}_finger_{kind}_{i}" for side in ("left", "right") for kind in ("qpos", "qvel") for i in range(self.finger_counts[side])],
                 *[f"{name}_{axis}" for name in self.events for axis in "xyz"]]))
-        if not self.contacts_available:
-            for event in self.events.values():
-                if not event["contact_seen"]:
-                    event["contact_seen"] = None
+        # A positive observed pair is evidence. Negative conclusions require
+        # independent validation on successful experts, not just resolved names.
+        for event in self.events.values():
+            if not event['contact_seen']: event['contact_seen'] = None
         report = {"physics_steps": self.steps, "timestep": self.dt, "simulated_seconds": self.steps * self.dt,
             "physics_step_origin": "zero immediately after setup_demo; setup physics is outside this trace",
             "executing_target_id_scope": "one-based policy/replay target; zero during live expert continuous execution",
             "initial_objects": self.initial_objects, "final_objects": object_snapshot(self.environment),
             "events": self.events, "contacts_available": self.contacts_available,
+            "contact_aliases":self.contact_aliases, "contact_mapping_validated":self.contact_mapping_validated,
             "collection_boundaries": self.boundaries, "planning": self.planning,
             "planning_exceptions": sum(row["raised"] for row in self.planning),
             "observation_or_rpc_advanced_physics": any(r["physics_steps_during_operation"] for r in self.wall_operations),

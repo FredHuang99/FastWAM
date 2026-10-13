@@ -332,6 +332,7 @@ def upload_compact(cfg, run, root, phase):
         files = [p for p in root.rglob("*") if p.is_file() and
                  not set(p.relative_to(root).parts) & ({"packages"} if phase == 'diagnosis' else {"packages", "frames"}) and
                  (p.suffix in (".json", ".jsonl", ".csv", ".png", ".pdf", ".log", ".yaml") or
+                  (phase == 'diagnosis' and p.suffix in ('.npz','.mp4','.command','.exit')) or
                   (phase == 'diagnosis' and 'evidence' in p.relative_to(root).parts and
                    (p.suffix in ('.py','.sh','.yml','.patch','.txt','.bundle') or p.name in ('simulator_sources.tar.gz','reference_sources.tar.gz'))))
                  and p.stat().st_size < (64 if phase == 'diagnosis' else 16) * 2**20]
@@ -339,6 +340,22 @@ def upload_compact(cfg, run, root, phase):
             target = snapshot / path.relative_to(root)
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(path, target)
+        if phase == 'diagnosis':
+            # New completion records bind physical/video evidence as well as
+            # scalar reports. Never publish a compact package with dangling
+            # artifact hashes or silently omit an oversized dependency.
+            from .diagnosis_followup import validate_manifest
+            for marker in root.glob('*.json'):
+                value = read_json(marker)
+                if not isinstance(value,dict) or value.get('complete') is not True or 'artifacts' not in value:
+                    continue
+                validate_manifest(root,value['artifacts'])
+                for relative in value['artifacts']:
+                    path=root/relative
+                    if path.stat().st_size >= 64*2**20:
+                        raise ValueError(f'Checksummed diagnostic exceeds compact backup limit: {path}; preserve separately before release')
+                    target=snapshot/relative;target.parent.mkdir(parents=True,exist_ok=True)
+                    shutil.copy2(path,target)
         # Capture every checksummed completed-episode dependency, including larger logs.
         from .eval_state import EpisodeQueue
         for queue_path in root.rglob("queue.json"):
@@ -358,7 +375,13 @@ def upload_compact(cfg, run, root, phase):
                     else:
                         job["state"] = "pending"
                         job.pop("owner", None)
-                atomic_json(snapshot / queue_path.relative_to(root), value)
+                if phase == 'diagnosis' and (all(j['state'] == 'complete' for j in value['jobs']) or
+                                              'historical' in queue_path.relative_to(root).parts):
+                    # Historical and completed queues are signed evidence;
+                    # preserve their original bytes, not a reserialization.
+                    shutil.copy2(queue_path, snapshot/queue_path.relative_to(root))
+                else:
+                    atomic_json(snapshot / queue_path.relative_to(root), value)
         # Include partial scene manifests even before the first policy episode exists.
         for plan in root.rglob("planning.json"):
             if "packages" in plan.relative_to(root).parts:
@@ -384,6 +407,11 @@ def upload_compact(cfg, run, root, phase):
             target = snapshot / "weights/best.pt"
             target.parent.mkdir(exist_ok=True)
             shutil.copy2(best_weight, target)
+        if phase == 'diagnosis':
+            for marker in root.glob('*.json'):
+                value=read_json(marker)
+                if isinstance(value,dict) and value.get('complete') is True and 'artifacts' in value:
+                    validate_manifest(snapshot,value['artifacts'])
         files = sorted(p for p in snapshot.rglob("*") if p.is_file())
         manifest = {p.relative_to(snapshot).as_posix(): sha256(p) for p in files}
         atomic_json(directory / "manifest.json", {"files": manifest, "phase": phase, "selection_completed": backed_up})

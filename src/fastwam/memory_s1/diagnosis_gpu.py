@@ -44,7 +44,8 @@ def setup(cfg):
 
 
 def noise_for(cfg, window, device):
-    # Same as the corresponding recorded online request, independent of T and weight.
+    # Synthetic episode seed 0 provides paired offline noise, independent of T
+    # and weight. Actual rollout requests use their recorded episode/noise seed.
     seed = seed_for(cfg['seed'], 0, window['anchor'], 'closed-loop-noise')
     generator = torch.Generator(device='cpu').manual_seed(seed)
     noise = torch.randn(1,32,14,generator=generator).to(device)
@@ -96,6 +97,8 @@ def error_metrics(actions, batch, normalizer, raw_targets=None, raw_state=None):
             'moving':metrics(valid&moving),'near_hold':metrics(valid&~moving),
             'predicted_gripper':prediction[0,:, [6,13]].tolist(),
             'target_gripper':target[0,:, [6,13]].tolist(),
+            'predicted_native':prediction[0].tolist(), 'target_native':target[0].tolist(),
+            'current_state_native':state[0].tolist(), 'action_valid':valid[0].tolist(),
             'units':'joint radians / native gripper units; no Cartesian millimetre interpretation'}
 
 
@@ -174,7 +177,11 @@ def offline(cfg, root, bound):
         else:same_inputs[key]=r
     atomic_json(root/'same_selected_inputs.json',invariants)
     if any(not r['exact'] for r in invariants):raise ValueError('Identical selected inputs/noise gave different outputs; inspect same_selected_inputs.json.')
-    return {'complete':True,'cases':len(reports),'optimizer_updates':0,'root_cause':'not inferred from average FM'}
+    from .diagnosis_followup import offline_analysis
+    offline_analysis(root)
+    return {'complete':True,'cases':len(reports),'planned_cases':len(plan['cases']),
+            'action_samples':sum(r['sample'] for r in reports),'single_fm':sum(not r['sample'] for r in reports),
+            'optimizer_updates':0,'root_cause':'not inferred from average FM'}
 
 
 def exact(a,b):
@@ -298,8 +305,21 @@ def gradients(cfg,root,bound):
         report=accumulation_check(model,datasets['train'],cfg,device,micro,check_masks=index==0,gradient_sink=sink)
         if reference is None:reference=sink
         else:
-            errors={name:{'max_abs':float((sink[name]-value).abs().max()),
-                    'relative_l2':float((sink[name]-value).norm()/(value.norm()+1e-12))} for name,value in reference.items()}
+            errors={}
+            for name,value in reference.items():
+                actual=sink[name]; delta=actual-value; ref_norm=value.norm(); current_norm=actual.norm()
+                cosine=float(torch.nn.functional.cosine_similarity(value.flatten(),actual.flatten(),dim=0)) if ref_norm>1e-12 and current_norm>1e-12 else None
+                errors[name]={'max_abs':float(delta.abs().max()), 'reference_l2':float(ref_norm),
+                    'current_l2':float(current_norm),'delta_l2':float(delta.norm()),'cosine':cosine,
+                    'relative_l2':float(delta.norm()/(ref_norm+1e-12)),
+                    'near_zero_reference':bool(ref_norm<=1e-8)}
+            ref_l2=torch.stack([v.square().sum() for v in reference.values()]).sum().sqrt()
+            actual_l2=torch.stack([v.square().sum() for v in sink.values()]).sum().sqrt()
+            delta_l2=torch.stack([(sink[n]-v).square().sum() for n,v in reference.items()]).sum().sqrt()
+            dot=torch.stack([(sink[n]*v).sum() for n,v in reference.items()]).sum()
+            errors['_overall']={'reference_l2':float(ref_l2),'current_l2':float(actual_l2),'delta_l2':float(delta_l2),
+                                'relative_l2':float(delta_l2/(ref_l2+1e-12)),
+                                'cosine':float(dot/(ref_l2*actual_l2)) if ref_l2>1e-12 and actual_l2>1e-12 else None}
             measured.append(errors)
         reports.append(report)
     value={'complete':True,'optimizer_updates':0,'runs':reports,'repeat_noise':measured[0], 'microbatch_delta':measured[1],
@@ -358,6 +378,8 @@ def evaluation(cfg,root,bound,stage,args):
     qualification=root/'fixed'/'QUALIFICATION.json'
     from types import SimpleNamespace
     if stage=='fixed':
+        if cfg['diagnosis'].get('parent'):
+            require_stage(root,'offline');require_stage(root,'recorded')
         current['history'].update(online_mode='fixed',online_period=8,online_cycle=[],online_phase='episode_seeded')
         arguments=SimpleNamespace(gpus='0',episode_timeout=cfg['rootcause']['episode_timeout'],phase='qualify',hf_results=False,runtime_profile='fused-resident')
         (root/'fixed').mkdir(exist_ok=True)
@@ -370,12 +392,16 @@ def evaluation(cfg,root,bound,stage,args):
     current['selection_runtime']['qualification_report']=str(qualification)
     current['diagnostic']={'scenes_from':str(scenes),'s1_investigation':True}
     current['history'].update(online_mode='seeded_per_decision' if stage=='random' else 'fixed',online_period=8,online_cycle=[],online_phase='episode_seeded')
-    if stage in ('fixed','random'):
-        current['diagnostic'].update(episodes_per_task=1,max_targets=32,record_feedback=True,capture_evidence=True)
+    if stage in ('fixed','random','phase_trace'):
+        current['diagnostic'].update(episodes_per_task=1,max_targets=160 if stage=='phase_trace' else 32,
+                                     record_feedback=True,capture_evidence=True)
+        if stage=='phase_trace':
+            require_stage(root,'offline');require_stage(root,'recorded');require_stage(root,'contacts')
+            current['diagnostic']['phase_trace']=True
         labels=['step_002000'];mode='diagnostic';scope=root/stage
     else:
         if stage=='retest40':require_stage(root,'retest8')
-        for prerequisite in ('offline','paths','gradients','expert','fixed','random'):
+        for prerequisite in ('offline','paths','gradients','expert','fixed','recorded','contacts','phase_trace'):
             require_stage(root,prerequisite)
         if not args.confirmed_fix:
             raise ValueError('Retest requires --confirmed-fix with reviewed reproduction, mechanism, patch and regression evidence.')
@@ -399,7 +425,10 @@ def evaluation(cfg,root,bound,stage,args):
                  '--gpus','0','--episode-timeout',str(cfg['rootcause']['episode_timeout']),'--resume',*online_arguments(current)]
         if stage=='retest8':command+=['--scene-cap','2']
         run_child(command,current,root,directory)
-    return {'complete':True,'scope':'full_task_fixed_T8' if stage.startswith('retest') else '32_target_diagnostic_not_accuracy',
+    if stage=='phase_trace':
+        from .diagnosis_followup import trace_summary
+        trace_summary(root)
+    return {'complete':True,'scope':'full_task_fixed_T8' if stage.startswith('retest') else ('160_target_diagnostic_not_accuracy' if stage=='phase_trace' else '32_target_diagnostic_not_accuracy'),
             'sampling':current['history'],'models':labels,'scene_cap':2 if stage=='retest8' else None}
 
 
@@ -435,8 +464,16 @@ def expert(cfg,root,bound):
 
 
 def run_stage(stage,cfg,root,bound,args):
+    if stage=='contacts':
+        require_stage(root,'expert')
+        from .diagnosis_followup import contacts
+        return contacts(cfg,root,bound)
+    if stage=='recorded':
+        require_stage(root,'offline')
+        from .diagnosis_followup import recorded
+        return recorded(cfg,root,bound)
     if stage in ('offline','paths','gradients','micro'):
         return globals()[stage](cfg,root,bound)
     if stage=='expert':return expert(cfg,root,bound)
-    if stage in ('fixed','random','retest8','retest40'):return evaluation(cfg,root,bound,stage,args)
+    if stage in ('fixed','phase_trace','random','retest8','retest40'):return evaluation(cfg,root,bound,stage,args)
     raise ValueError(stage)

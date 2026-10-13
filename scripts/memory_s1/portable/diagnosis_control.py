@@ -11,6 +11,11 @@ from fastwam.memory_s1.eval_state import is_alive,process_identity
 
 
 def status(root):
+    report=root/'DIAGNOSIS_STATUS.json'
+    if report.exists():
+        value=read_json(report)
+        print(f"Report generated={value.get('report_generated')} required complete={value.get('required_diagnostics_complete')} missing={value.get('missing_required_stages')}")
+        print('Cases:',json.dumps(value.get('counts',{}),ensure_ascii=False))
     for path in (root/'launch.json',root/'owner.json'):
         if path.exists():
             value=read_json(path)
