@@ -6,12 +6,14 @@ import hashlib
 import importlib.util
 import json
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath
+import re
 import shutil
 import signal
 import subprocess
 import sys
 import tarfile
+import tempfile
 import time
 from urllib.parse import urlsplit, parse_qs
 
@@ -20,6 +22,8 @@ RUN = "memory_s1_variable_t_h100_phase_seed17"
 POINTER = "migration/a100_after_h100/LATEST.json"
 HISTORICAL_REVISION = 'c1aaa6dafddc0909cf1d89cacf966eeffbec6b9c'
 SKIP = {".git", ".cache", "__pycache__", "build", "dist", ".pytest_cache", "node_modules", "packages"}
+RMBENCH_RUNTIME_DIRS = {"eval_result", "eval_results", "logs", "outputs"}
+MIGRATION_QUARANTINE = ".migration_runtime_quarantine"
 
 
 def sha(path):
@@ -31,14 +35,14 @@ def sha(path):
 
 
 def read(path):
-    return json.loads(Path(path).read_text())
+    return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
 def write(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".partial")
-    tmp.write_text(json.dumps(value, indent=2, ensure_ascii=False) + "\n")
+    tmp.write_text(json.dumps(value, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     tmp.replace(path)
 
 
@@ -61,12 +65,136 @@ def hub():
     return HfApi(), hf_hub_download
 
 
-def copy_tree(source, target, *, source_only=False):
+def migration_runtime(name):
+    parts = PurePosixPath(name).parts
+    return (len(parts) >= 4 and parts[:3] == ("project", "resources", "RMBench")
+            and parts[3] in RMBENCH_RUNTIME_DIRS)
+
+
+def migration_name(raw):
+    """Keep the portable path policy; only quarantined legacy logs may contain colons."""
+    if not isinstance(raw, str):
+        raise ValueError(f"Invalid migration member name: {raw!r}")
+    name = raw
+    while name.startswith("./"):
+        name = name[2:]
+    path = PurePosixPath(name)
+    if (not name or not path.parts or path.is_absolute() or ".." in path.parts or "\\" in name
+            or any(ord(c) < 32 or ord(c) == 127 for c in name)
+            or path.parts[0] == MIGRATION_QUARANTINE
+            or (":" in name and not migration_runtime(name))):
+        raise ValueError(f"Unsafe migration archive path: {raw}")
+    return path.as_posix()
+
+
+def migration_member_path(package, name):
+    name = migration_name(name)
+    if migration_runtime(name):
+        # Never create legacy timestamp/ADS names or restore logs as simulator source.
+        key = hashlib.sha256(name.encode("utf-8")).hexdigest()
+        relative = Path(MIGRATION_QUARANTINE) / (key + ".blob")
+    else:
+        relative = Path(name)
+    package = Path(package).resolve()
+    candidate = package / relative
+    path = candidate.resolve()
+    if not path.is_relative_to(package) or candidate.is_symlink():
+        raise ValueError(f"Migration destination escapes/is a symlink: {name}")
+    return path
+
+
+def verify_migration_files(package):
+    quarantined = {}
+    for name, row in read(Path(package) / "FILES.json").items():
+        path = migration_member_path(package, name)
+        if not path.is_file() or path.stat().st_size != row["bytes"] or sha(path) != row["sha256"]:
+            raise ValueError(f"Migration member mismatch: {name}")
+        if migration_runtime(name):
+            quarantined[name] = {**row, "stored_as": path.relative_to(Path(package).resolve()).as_posix()}
+    return quarantined
+
+
+def extract_migration_archive(archive, package):
+    """Verify all members; preserve legacy runtime bytes under portable hashed names."""
+    package = Path(package).resolve()
+    with tarfile.open(archive, "r:gz") as tar:
+        members = {}
+        for member in tar.getmembers():
+            if member.isdir() and member.name in ("", ".", "./"):
+                continue
+            name = migration_name(member.name)
+            if member.isdir():
+                continue
+            if not member.isfile() or name in members:
+                raise ValueError(f"Duplicate or non-regular migration member: {member.name}")
+            members[name] = member
+        if "FILES.json" not in members or members["FILES.json"].size > 64 * 1024**2:
+            raise ValueError("Missing/oversized migration FILES.json")
+
+        def unique_object(pairs):
+            value = {}
+            for key, item in pairs:
+                if key in value:
+                    raise ValueError(f"Duplicate migration manifest key: {key}")
+                value[key] = item
+            return value
+
+        with tar.extractfile(members["FILES.json"]) as stream:
+            manifest_bytes = stream.read()
+        manifest = json.loads(manifest_bytes, object_pairs_hook=unique_object)
+        if not isinstance(manifest, dict) or set(members) != set(manifest) | {"FILES.json"}:
+            raise ValueError("Migration archive members differ from FILES.json")
+        for name, row in manifest.items():
+            if (name == "FILES.json" or migration_name(name) != name or not isinstance(row, dict)
+                    or type(row.get("bytes")) is not int or row["bytes"] < 0
+                    or not isinstance(row.get("sha256"), str)
+                    or not re.fullmatch(r"[0-9a-f]{64}", row["sha256"])
+                    or members[name].size != row["bytes"]):
+                raise ValueError(f"Invalid migration manifest member: {name}")
+        expected_files = {**manifest, "FILES.json": {
+            "bytes": len(manifest_bytes), "sha256": hashlib.sha256(manifest_bytes).hexdigest()}}
+        # Validate every destination and existing partial file before writing anything.
+        destinations = {name: migration_member_path(package, name) for name in members}
+        for name, path in destinations.items():
+            if path.exists():
+                expected = expected_files[name]
+                if not path.is_file():
+                    raise ValueError(f"Existing migration destination is not a file: {path}")
+                if path.stat().st_size != expected["bytes"] or sha(path) != expected["sha256"]:
+                    raise ValueError(f"Existing migration file differs; preserve it first: {path}")
+        for name, member in members.items():
+            target = destinations[name]
+            if target.exists():
+                continue
+            target.parent.mkdir(parents=True, exist_ok=True)
+            temporary = None
+            try:
+                with tempfile.NamedTemporaryFile(dir=target.parent, prefix=".migration-restore-", delete=False) as out:
+                    temporary = Path(out.name)
+                    checksum = hashlib.sha256()
+                    with tar.extractfile(member) as stream:
+                        for block in iter(lambda: stream.read(8 * 1024**2), b""):
+                            checksum.update(block)
+                            out.write(block)
+                expected = expected_files[name]
+                if temporary.stat().st_size != expected["bytes"] or checksum.hexdigest() != expected["sha256"]:
+                    raise ValueError(f"Migration archived bytes mismatch: {name}")
+                temporary.chmod(member.mode & 0o777)
+                temporary.replace(target)
+            finally:
+                if temporary is not None and temporary.exists():
+                    temporary.unlink()
+    return verify_migration_files(package)
+
+
+def copy_tree(source, target, *, source_only=False, exclude_top=()):
     source, target = Path(source), Path(target)
     if not source.is_dir():
         raise FileNotFoundError(source)
     for path in sorted(source.rglob("*")):
         rel = path.relative_to(source)
+        if rel.parts[0] in exclude_top:
+            continue
         if path.is_symlink() or not path.is_file() or set(rel.parts) & SKIP:
             continue
         if any(p.endswith(".egg-info") for p in rel.parts) or path.suffix in (".so", ".pyc", ".o", ".a", ".pem", ".key"):
@@ -143,7 +271,8 @@ def export(args):
         if not (source / "setup.py").is_file():
             raise FileNotFoundError(f"Missing actual fused build source: {source}")
         copy_tree(source, payload / "build_sources" / name)
-    copy_tree(root / "resources/RMBench", payload / "project/resources/RMBench", source_only=True)
+    copy_tree(root / "resources/RMBench", payload / "project/resources/RMBench",
+              source_only=True, exclude_top=RMBENCH_RUNTIME_DIRS)
     for name in ("src", "scripts/memory_s1", "configs", "requirements"):
         copy_tree(root / name, payload / "historical_code" / name, source_only=True)
     copy_tree(root / "resources/prepared_dense_h100_v1", payload / "project/resources/prepared_dense_h100_v1")
@@ -192,10 +321,13 @@ def export(args):
     write(payload / "ORIGIN.json", {"commit": run(["git", "-C", root, "rev-parse", "HEAD"]).strip(),
           "run": RUN, "diagnosis": read(evidence), "export_tool_sha256": sha(__file__), "phase": "grasp_bridge_migration_v1",
           "frozen_inputs_sha256":sha(args.frozen/'FILES.json'),"checkpoint_pointer_read_revision":repository_revision,
-          "does_not_include": ["models", "raw_hdf5", "asset_meshes", "dense_cache", "CUDA_binaries", "tokens"],
+          "does_not_include": ["models", "raw_hdf5", "asset_meshes", "dense_cache", "CUDA_binaries", "tokens", "RMBench_runtime_logs"],
           "note": "Historical code is evidence only. It must not overwrite the new A100 entry points."})
     files = {p.relative_to(payload).as_posix(): {"sha256": sha(p), "bytes": p.stat().st_size}
              for p in sorted(payload.rglob("*")) if p.is_file()}
+    for name in files:
+        if migration_name(name) != name or migration_runtime(name):
+            raise ValueError(f"Non-portable/runtime file in new migration payload: {name}")
     write(payload / "FILES.json", files)
     archive = output / "migration.tar.gz"
     with tarfile.open(archive, "w:gz") as tar:
@@ -230,8 +362,11 @@ def fetch(args):
     output = args.root / "outputs/recovery_aws_a100_v1"
     output.mkdir(parents=True, exist_ok=True)
     receipt = output / "MIGRATION_REMOTE.json"
+    selected = output / "MIGRATION_SELECTED.json"
     if receipt.exists():
         pointer = read(receipt)  # A restart never silently selects a newer migration.
+    elif selected.exists():
+        pointer = read(selected)  # Preserve the selection even if extraction fails.
     else:
         revision = api.repo_info(args.repo).sha
         pointer = read(download(args.repo, POINTER, revision=revision))
@@ -240,16 +375,20 @@ def fetch(args):
         raise ValueError("Unverified/mismatched migration pointer")
     if pointer.get('schema') != 'grasp_bridge_migration_v1' or pointer.get('diagnosis_revision') != HISTORICAL_REVISION:
         raise ValueError(f'Stale pinned migration: {receipt}. Preserve it explicitly, then fetch the new verified export; no silent revision switch.')
+    if selected.exists() and read(selected) != pointer:
+        raise ValueError(f'Migration selection differs from the completed receipt: {selected}')
+    if not selected.exists():
+        write(selected, pointer)
     archive = Path(download(args.repo, pointer["package"], revision=pointer["revision"]))
     if sha(archive) != pointer["sha256"] or archive.stat().st_size != pointer["bytes"]:
         raise ValueError("Migration archive checksum mismatch")
-    recovery = tool(args.root, "portable/recovery.py")
     target = output / "migration"
-    recovery.extract_archive(archive, target)
-    for name, row in read(target / "FILES.json").items():
-        path = (target / name).resolve()
-        if not path.is_relative_to(target.resolve()) or sha(path) != row["sha256"] or path.stat().st_size != row["bytes"]:
-            raise ValueError(f"Migration member mismatch: {name}")
+    quarantined = extract_migration_archive(archive, target)
+    write(output / "MIGRATION_RUNTIME_QUARANTINE.json", {
+        "archive_sha256": pointer["sha256"], "revision": pointer["revision"],
+        "policy": "rmb_runtime_quarantine_v1", "files": quarantined,
+        "note": "Original manifest and bytes verified; runtime logs are never restored as source."})
+    print(f"[migration] verified legacy runtime files quarantined={len(quarantined)}; source hashes unchanged", flush=True)
     if (read(target/'ORIGIN.json')['diagnosis']['revision'] != HISTORICAL_REVISION or
             sha(target/'frozen_inputs/FILES.json') != pointer['frozen_inputs_sha256']):
         raise ValueError('Migration historical diagnosis/frozen identity mismatch')
@@ -263,9 +402,10 @@ def restore(args):
     package = root / "outputs/recovery_aws_a100_v1/migration"
     files = read(package / "FILES.json")
     require(args.root, 'payloads')
+    verify_migration_files(package)
     # Never restore live leases, checkpoints or historical code over current code.
     for name, row in files.items():
-        if not name.startswith("project/"):
+        if not name.startswith("project/") or migration_runtime(name):
             continue
         # Download public asset bytes first; apply final URDF/config patches afterwards.
         if name.startswith('project/resources/RMBench/assets/') and not args.overlay_sources:
@@ -425,10 +565,7 @@ def precheck(args):
     for stage in DEPENDENCIES.get(args.stage,[]): require(args.root,stage)
     package=args.root/'outputs/recovery_aws_a100_v1/migration'
     if args.stage not in ('fetch','inventory','system','hf'):
-        for name,row in read(package/'FILES.json').items():
-            path=(package/name).resolve()
-            if not path.is_relative_to(package.resolve()) or sha(path)!=row['sha256']:
-                raise ValueError(f'Migration file changed: {path}')
+        verify_migration_files(package)
     if args.stage in ('training','simulator'):
         source=read(package/'container-host.json')
         current=read(args.root/'outputs/recovery_aws_a100_v1/container-host.json')
