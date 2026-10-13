@@ -403,6 +403,32 @@ def restore(args):
     files = read(package / "FILES.json")
     require(args.root, 'payloads')
     verify_migration_files(package)
+    ready = root / "outputs/recovery_aws_a100_v1/restored"
+    recovery = tool(root, "portable/recovery.py")
+    # pack-ready includes parent_provenance/snapshot.json as historical evidence.
+    # Select the package manifest, never count all nested snapshots or pick the first.
+    snapshot = ready / "snapshot.json"
+    if not snapshot.is_file():
+        snapshot = recovery.unique_file(ready, "snapshot.json")
+    marker = snapshot.parent / "READY.json"
+    if not marker.is_file():
+        raise ValueError(f"Selected snapshot has no adjacent READY.json: {snapshot}")
+    metadata, restored = read(marker), read(snapshot)
+    pointer = read(package / f"project/outputs/{RUN}/LATEST_READY_REMOTE.json")
+    for key, expected in (("schema", "fastwam-s1-ready-v1"),
+                          ("phase", "admitted_not_started"),
+                          ("run_id", RUN), ("snapshot_id", pointer["snapshot_id"])):
+        if metadata.get(key) != expected or restored.get(key) != expected:
+            raise ValueError(f"Ready package identity differs at {key}: {marker}, {snapshot}; expected={expected}")
+    if pointer.get("run_id") != RUN or pointer.get("phase") != "admitted_not_started":
+        raise ValueError("Exported ready pointer does not identify this unstarted run")
+    if metadata.get("startup_identity") != pointer.get("startup_identity"):
+        raise ValueError("Ready metadata startup identity differs from its exported pointer")
+    recovery.verify_files(snapshot.parent, restored["files"])
+    _, old_admission, _ = recovery.admission(snapshot.parent)
+    if restored.get("binding") != old_admission["binding"]:
+        raise ValueError("Ready snapshot binding differs from its historical admission")
+    print(f"[ready-manifest] verified {snapshot}; nested provenance snapshots preserved", flush=True)
     # Never restore live leases, checkpoints or historical code over current code.
     for name, row in files.items():
         if not name.startswith("project/") or migration_runtime(name):
@@ -428,12 +454,7 @@ def restore(args):
         target.parent.mkdir(parents=True, exist_ok=True)
         if not target.exists():
             shutil.copy2(source, target)
-    ready = root / "outputs/recovery_aws_a100_v1/restored"
-    snapshots = list(ready.rglob("snapshot.json"))
-    if len(snapshots) != 1:
-        raise ValueError("Expected one verified ready snapshot before project restoration")
-    snapshot = snapshots[0]
-    for name, row in read(snapshot)["files"].items():
+    for name, row in restored["files"].items():
         # Recover original review references and historical reports at their original paths.
         if not name.startswith("outputs/") or Path(name).name.startswith(("STOP", "launcher")):
             continue
