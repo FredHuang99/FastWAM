@@ -1,7 +1,8 @@
 {
   "schema": "grasp-component-causal-v1",
   "machine": "h100",
-  "output": "outputs/s1_grasp_causal_h100_v1",
+  "output": "outputs/s1_grasp_causal_h100_v2",
+  "rpc_reset_protocol": "idempotent_before_first_decision_v1",
   "repair_output": "outputs/s1_memory_repair_h100_v1",
   "repair_archive_sha256": "d63d46ee8e35748bde6d69c1bd244ee0cec103c01e91cad2a55e6c1196c040c7",
   "task": "swap_blocks",

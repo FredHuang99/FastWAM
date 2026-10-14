@@ -31,7 +31,7 @@ TOOLS = ("configs/memory_s1/grasp_causal_h100.json", "scripts/memory_s1/portable
          "src/fastwam/memory_s1/eval_parallel.py", "src/fastwam/memory_s1/simulator_backend.py",
          "src/fastwam/memory_s1/fused_evaluation.py", "scripts/memory_s1/sim_eval.py",
          "scripts/memory_s1/sim_executor.py", "scripts/memory_s1/sim_feedback.py",
-         "scripts/memory_s1/sim_instrumentation.py")
+         "scripts/memory_s1/sim_instrumentation.py", "scripts/memory_s1/deploy_policy.py")
 
 
 class CausalBlocked(RuntimeError):
@@ -42,7 +42,8 @@ def profile(root):
     spec = read(root / TOOLS[0])
     if (spec["schema"] != "grasp-component-causal-v1" or spec["machine"] != "h100"
             or spec["task"] != "swap_blocks" or spec["checkpoint_step"] != 2000
-            or spec["cases"] != list(MODES) or spec["expert_prefix_targets"] != 48 or spec["target_cap"] != 128):
+            or spec["cases"] != list(MODES) or spec["expert_prefix_targets"] != 48 or spec["target_cap"] != 128
+            or spec.get("rpc_reset_protocol") != "idempotent_before_first_decision_v1"):
         raise ValueError("Expected original step2000, one swap scene, four component conditions, 48/128 targets")
     for key in ("output", "repair_output"):
         if not checked_path(root, spec[key]).is_relative_to(root / "outputs"):
@@ -132,7 +133,8 @@ def prepare(root, spec, output):
             raise ValueError(f"Model resource changed: {cfg['paths'][key]}")
     verify(cfg["paths"]["tokenizer"], prior["tokenizer_files"])
     # Baseline reuse requires exact execution dependencies as well as inputs.
-    execution = {name: sha(root / name) for name in TOOLS if name.startswith("scripts/memory_s1/sim_")}
+    execution = {name: sha(root / name) for name in TOOLS
+                 if name.startswith("scripts/memory_s1/sim_") or name == "scripts/memory_s1/deploy_policy.py"}
     backend_names = [name for name in history_manifest
                      if name.startswith("expert-prefix/swap_blocks/simulator_progress/fused_backend_") and name.endswith(".json")]
     if len(backend_names) < 2:

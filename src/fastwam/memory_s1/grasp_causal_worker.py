@@ -68,15 +68,30 @@ class ComponentRouter:
         self.targets = np.asarray(expert["targets"], np.float32)
         self.next_frame, self.last_observation = 0, -1
         self.prefix_observations, self.reset_seen = [], False
+        self.initial_reset_count = 0
 
     def handle(self, request):
         spec = self.bound["protocol"]
         if request["command"] == "reset":
-            if self.reset_seen or self.next_frame:
-                raise ValueError("Unexpected duplicate/mid-episode reset")
-            if self.session is not None:
+            # RPCPolicy.__init__ and the official episode entry both reset.
+            # Repeats before the first decision are idempotent; never erase a
+            # partially handled observation or restart an active trajectory.
+            if self.next_frame or self.last_observation != -1 or self.prefix_observations:
+                append(self.directory / "rpc_lifecycle.jsonl", {"command": "reset", "accepted": False,
+                       "reason": "decision_started", "next_frame": self.next_frame,
+                       "last_observation": self.last_observation})
+                raise ValueError("Unexpected mid-episode reset after a decision started")
+            repeated = self.reset_seen
+            if self.session is not None and not repeated:
                 self.session.reset()
+            self.initial_reset_count += 1
+            append(self.directory / "rpc_lifecycle.jsonl", {"command": "reset", "accepted": True,
+                   "ordinal": self.initial_reset_count, "idempotent_repeat": repeated,
+                   "next_frame": self.next_frame, "last_observation": self.last_observation,
+                   "protocol": spec["rpc_reset_protocol"]})
             self.reset_seen = True
+            print(f"[rpc] {self.mode} initialization reset={self.initial_reset_count} "
+                  f"idempotent_repeat={repeated}; targets=0", flush=True)
             return {"ok": True}
         if request["command"] != "decide" or not self.reset_seen:
             raise ValueError("Expected reset then decide")
@@ -151,6 +166,19 @@ def summarize_case(directory, mode, bound, expert, source):
             if not np.array_equal(expected, np.asarray(row["actions"], np.float32)):
                 raise ValueError("Component replacement columns differ from the declared intervention")
     metrics, trajectory = physical_metrics(actions, observations, interventions, expert, spec)
+    initialization = {"protocol": spec["rpc_reset_protocol"], "source": source}
+    if source == "fresh":
+        lifecycle = rows(directory / "rpc_lifecycle.jsonl")
+        if (not lifecycle or any(not row.get("accepted") or row.get("command") != "reset"
+                or row.get("ordinal") != index + 1 or row.get("next_frame") != 0
+                or row.get("last_observation") != -1 or row.get("idempotent_repeat") != (index > 0)
+                or row.get("protocol") != spec["rpc_reset_protocol"]
+                for index, row in enumerate(lifecycle))):
+            raise ValueError("Initial RPC resets lack a complete idempotent lifecycle receipt")
+        initialization["reset_requests"] = len(lifecycle)
+    else:
+        initialization["reset_requests"] = None
+        initialization["limitation"] = "RPC lifecycle was not separately recorded in the historical policy case"
     append_path = directory / "trajectory_metrics.jsonl"
     if append_path.exists():
         append_path.unlink()
@@ -159,7 +187,8 @@ def summarize_case(directory, mode, bound, expert, source):
     write(directory / "phase_metrics.json", metrics["phase_metrics"])
     return {"mode": mode, "checkpoint_step": 2000, "source": source, "metrics": metrics,
             "official_success_observed": bool(value["success"]), "termination": value["termination"],
-            "timings": value["timings"], "benchmark_accuracy": None, "optimizer_updates": 0,
+            "timings": value["timings"], "rpc_initialization": initialization,
+            "benchmark_accuracy": None, "optimizer_updates": 0,
             "component_scope": "policy feedback is real; expert fields substituted only in returned commands"}
 
 
