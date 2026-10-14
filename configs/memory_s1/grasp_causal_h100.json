@@ -1,0 +1,21 @@
+{
+  "schema": "grasp-component-causal-v1",
+  "machine": "h100",
+  "output": "outputs/s1_grasp_causal_h100_v1",
+  "repair_output": "outputs/s1_memory_repair_h100_v1",
+  "repair_archive_sha256": "d63d46ee8e35748bde6d69c1bd244ee0cec103c01e91cad2a55e6c1196c040c7",
+  "task": "swap_blocks",
+  "checkpoint_step": 2000,
+  "object": "block1",
+  "cases": ["policy", "expert", "expert_arm", "expert_gripper"],
+  "expert_prefix_targets": 48,
+  "target_cap": 128,
+  "reuse_policy_baseline": true,
+  "handoff_atol": 0.00001,
+  "lift_threshold_m": 0.05,
+  "lift_consecutive_targets": 8,
+  "contact_impulse_threshold": 0.000001,
+  "case_timeout_seconds": 1800,
+  "stage_timeout_seconds": 7200,
+  "local_reserve_gib": 5
+}
