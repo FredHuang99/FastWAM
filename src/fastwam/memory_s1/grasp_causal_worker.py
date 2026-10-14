@@ -14,7 +14,7 @@ import traceback
 
 import numpy as np
 
-from .grasp_bridge import read, write, signature, verify, owned_popen, stop_children
+from .grasp_bridge import checked_path, read, write, signature, verify, owned_popen, stop_children
 from .grasp_causal import (CausalBlocked, case_identity, completed_case, require_prepared, stop_check)
 from .grasp_causal_metrics import MODES, compose, physical_metrics
 from .initial_intervention_worker import append, rows, finish, reuse_or_archive, initial_alignment
@@ -23,6 +23,15 @@ from .initial_intervention_worker import append, rows, finish, reuse_or_archive,
 def progress(output, mode, phase, completed, **extra):
     write(output / "PROGRESS.json", {"mode": mode, "phase": phase, "completed": completed,
                                    "updated_unix": time.time(), **extra})
+
+
+def weight_loader_binding(root, bound):
+    """Adapt immutable relative provenance to the existing strict loader API."""
+    record = bound["weights"]["step_002000"]
+    path = checked_path(root, record["relative"])
+    verify(root, {record["relative"]: record["sha256"]})
+    return {"weights": {"step_002000": {"path": str(path), "sha256": record["sha256"]}},
+            "resources": bound["resources"]}
 
 
 def reference_handoff(output, bound, actual, source):
@@ -160,14 +169,14 @@ def summarize_case(directory, mode, bound, expert, source):
     interventions = rows(directory / "interventions.jsonl")
     if len(actions) != value["executed_targets"]:
         raise ValueError("Simulator count and evidence count differ")
-    if source == "fresh":
+    if source in ("fresh", "verified_previous_expert"):
         for row in interventions:
             expected = compose(mode, row["frame_id"], row["predicted_actions"], expert["targets"], spec["expert_prefix_targets"])
             if not np.array_equal(expected, np.asarray(row["actions"], np.float32)):
                 raise ValueError("Component replacement columns differ from the declared intervention")
     metrics, trajectory = physical_metrics(actions, observations, interventions, expert, spec)
     initialization = {"protocol": spec["rpc_reset_protocol"], "source": source}
-    if source == "fresh":
+    if source in ("fresh", "verified_previous_expert"):
         lifecycle = rows(directory / "rpc_lifecycle.jsonl")
         if (not lifecycle or any(not row.get("accepted") or row.get("command") != "reset"
                 or row.get("ordinal") != index + 1 or row.get("next_frame") != 0
@@ -215,6 +224,39 @@ def inherit_policy(output, bound, expert):
     result["inheritance"] = reuse
     finish(directory, case_identity(bound, "policy"), result)
     print("[reuse] policy baseline authenticated; no model/simulator episode was rerun", flush=True)
+    return True
+
+
+def inherit_expert(output, bound, expert):
+    import shutil
+    reuse = read(output / "EXPERT_REUSE.json")
+    if not reuse["eligible"]:
+        return False
+    directory = output / "cases/expert"
+    if completed_case(output, bound, "expert"):
+        return True
+    prior = reuse["previous_run_identity"]
+    if (signature(prior) != reuse["historical_identity"]
+            or read(output / "baseline_expert/COMPLETE.json")["identity"] != case_identity(prior, "expert")):
+        raise ValueError("Inherited expert provenance differs from its original completion receipt")
+    verify(output / "baseline_expert", reuse["files"])
+    reuse_or_archive(directory, case_identity(bound, "expert"))
+    for name in reuse["files"]:
+        target = directory / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if name in ("COMPLETE.json", "result.json"):
+            target = target.with_name("historical_" + target.name)
+        shutil.copy2(output / "baseline_expert" / name, target)
+    interventions = rows(directory / "interventions.jsonl")
+    if any(row["predicted_actions"] is not None or row["component_mode"] != "expert"
+           for row in interventions):
+        raise ValueError("Inherited pure-expert control contains policy predictions")
+    trace = next(r for r in rows(directory / "qualification_trace.jsonl") if r["target_id"] == 48)
+    write(directory / "handoff_alignment.json", reference_handoff(output, bound, trace, "verified_previous_expert"))
+    result = summarize_case(directory, "expert", bound, expert, "verified_previous_expert")
+    result["inheritance"] = reuse
+    finish(directory, case_identity(bound, "expert"), result)
+    print("[reuse] completed expert control verified and recomputed; no simulator episode was rerun", flush=True)
     return True
 
 
@@ -322,6 +364,7 @@ def main():
     args = parser.parse_args()
     root, output = args.root.resolve(), args.output.resolve()
     bound = require_prepared(root, output)
+    loader_binding = weight_loader_binding(root, bound)
     for sig in (signal.SIGTERM, signal.SIGINT):
         signal.signal(sig, lambda *_: (_ for _ in ()).throw(InterruptedError("Causal worker stopped")))
     folder = output / "frozen"
@@ -331,6 +374,7 @@ def main():
     model, encoders = None, None
     try:
         inherit_policy(output, bound, expert)
+        inherit_expert(output, bound, expert)
         for mode in MODES:
             stop_check(output)
             existing = completed_case(output, bound, mode)
@@ -349,7 +393,7 @@ def main():
                 if not torch.cuda.is_available() or torch.cuda.device_count() != 1:
                     raise ValueError("Expose exactly the bound single H100")
                 model = S1Model(bound["config"], torch.device("cuda:0")).eval()
-                load_weight(model, bound, "step_002000")
+                load_weight(model, loader_binding, "step_002000")
                 encoders = load_observation_encoders(bound["config"], torch.device("cuda:0"))
             run_case(root, output, bound, mode, expert, item, folder, args.gpu_uuid, model, encoders, completed)
         progress(output, "all", "complete", 4, targets=128)

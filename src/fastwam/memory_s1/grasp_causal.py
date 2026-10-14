@@ -45,7 +45,7 @@ def profile(root):
             or spec["cases"] != list(MODES) or spec["expert_prefix_targets"] != 48 or spec["target_cap"] != 128
             or spec.get("rpc_reset_protocol") != "idempotent_before_first_decision_v1"):
         raise ValueError("Expected original step2000, one swap scene, four component conditions, 48/128 targets")
-    for key in ("output", "repair_output"):
+    for key in ("output", "repair_output", "reuse_expert_from"):
         if not checked_path(root, spec[key]).is_relative_to(root / "outputs"):
             raise ValueError(f"Expected outputs directory for {key}")
     return spec
@@ -88,6 +88,52 @@ def reviewed_archive(old, digest):
         if path.is_file() and sha(path) == digest:
             return path
     raise FileNotFoundError(f"Reviewed repair package missing: SHA256={digest}; preserve other packages")
+
+
+def prepare_expert_reuse(root, output, bound):
+    """Authenticate a completed pure-expert control without changing its receipt."""
+    previous = checked_path(root, bound["protocol"]["reuse_expert_from"])
+    if previous == output:
+        raise ValueError("Expert reuse source must be a separate preserved run")
+    folder = previous / "cases/expert"
+    if not (folder / "COMPLETE.json").exists():
+        write(output / "EXPERT_REUSE.json", {"eligible": False,
+              "reason": "No completed prior expert control; run the bounded expert control"})
+        return
+    launch = read(previous / "LAUNCH.json") if (previous / "LAUNCH.json").exists() else {}
+    if alive(launch.get("owner")):
+        raise ValueError("Prior expert source is still active; do not copy changing evidence")
+    prior = read(previous / "IDENTITY.json")
+    prepared = read(previous / "PREPARED.json")
+    if prepared["identity"] != signature(prior):
+        raise ValueError("Prior prepared identity differs")
+    verify(previous, prepared["files"])
+    for key in ("config", "sources", "runtime", "simulator_runtime", "simulator_sources",
+                "simulator_extensions", "weights", "resources", "tokenizer_files",
+                "repair_archive_sha256", "historical_identity", "execution_sources"):
+        if prior[key] != bound[key]:
+            raise ValueError(f"Prior expert control dependency changed: {key}")
+    ignored = {"output", "reuse_expert_from"}
+    if ({k: v for k, v in prior["protocol"].items() if k not in ignored}
+            != {k: v for k, v in bound["protocol"].items() if k not in ignored}):
+        raise ValueError("Prior expert control protocol differs")
+    receipt = read(folder / "COMPLETE.json")
+    if receipt["identity"] != case_identity(prior, "expert"):
+        raise ValueError("Prior expert case identity differs")
+    verify(folder, receipt["files"])
+    result = read(folder / "result.json")
+    if result["mode"] != "expert" or result["checkpoint_step"] != 2000 or result["source"] != "fresh":
+        raise ValueError("Only the completed original pure-expert control can be inherited")
+    result_path = folder / "simulator_result.json"
+    if read(result_path)["status"] != "complete":
+        raise ValueError("Prior expert simulator did not complete")
+    mapping = receipt["files"] | {"COMPLETE.json": sha(folder / "COMPLETE.json")}
+    for name in mapping:
+        copy_verified(folder, name, mapping, output / "baseline_expert" / name)
+    write(output / "EXPERT_REUSE.json", {"eligible": True, "source": str(folder),
+          "historical_identity": signature(prior), "previous_run_identity": prior,
+          "files": files(output / "baseline_expert"),
+          "reason": "same pure-expert treatment, scene, inputs, runtime and execution sources; recompute physical metrics before publication"})
 
 
 def prepare(root, spec, output):
@@ -251,11 +297,14 @@ def prepare(root, spec, output):
               "reason": "exact core/runtime/scene/weight/config and execution source identities; handoff is checked again"})
     else:
         write(output / "BASELINE_REUSE.json", {"eligible": False, "reason": "No exact eligible complete historical policy case; run bounded policy control"})
+    prepare_expert_reuse(root, output, bound)
     write(output / "IDENTITY.json", bound)
     mapping = {name: h for name, h in files(output).items() if not set(Path(name).parts) & {"launches", "tmp", "packages"}
                and name not in ("PREPARED.json", "LAUNCH.json", "STATUS.json", "latest_log.txt", "job.lock")}
     write(output / "PREPARED.json", {"identity": signature(bound), "files": mapping})
-    print(f"[prepared] original step2000; swap seed={item['seed']}; prefix=48 cap=128; policy_reuse={read(output/'BASELINE_REUSE.json')['eligible']}", flush=True)
+    print(f"[prepared] original step2000; swap seed={item['seed']}; prefix=48 cap=128; "
+          f"policy_reuse={read(output/'BASELINE_REUSE.json')['eligible']} "
+          f"expert_reuse={read(output/'EXPERT_REUSE.json')['eligible']}", flush=True)
 
 
 def require_prepared(root, output):
