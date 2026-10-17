@@ -1,0 +1,41 @@
+# memory_v2 default section. train_v2 (written after A/335) merges this with the
+# dense-joint data/image contract; nothing here launches training by itself.
+memory_v2:
+  history:
+    anchor_frames: 1        # initial scene (put_back: original pad; swap: initial assignment)
+    landmark_stride: 24     # = dense-joint decision/execution cadence
+    recent_frames: 2
+    recent_stride: 8
+    max_frames: 48
+    include_current: false  # current frame already reaches ActionDiT through its 30-layer KV
+  memory:
+    video_dim: 3072
+    action_hidden: 1024
+    memory_dim: 1024
+    heads: 8
+    grid: [12, 10]
+    pool: [1, 1]            # [2, 2] -> 30 tokens/frame if long histories become expensive
+    injection_layers: [4, 9, 14, 19, 24, 29]
+    num_action_layers: 30
+    null_tokens: 4
+    time_features: 128
+    spatial_features: 64
+    age_unit: 1.0
+    tau_gate: true
+    tau_gate_hidden: 64
+    zero_init_output: true
+  objective:
+    tau_mode: mixture
+    tau_shift: 1.0
+    high_noise_prob: 0.3
+    high_noise_low: 0.8
+    weight_mode: bell_floor
+    weight_shift: 1.0
+    weight_floor: 0.25
+    endpoint_weight: 1.0
+    memory_dropout: 0.15
+  guidance:
+    steps: 10
+    shift: 1.0
+    scale: 1.0              # sweep {1, 1.5, 2, 3} in Phase 3
+    min_sigma: 0.7
