@@ -69,8 +69,10 @@ cd /workspace/FastWAM && git switch memory2
 export PYTHONPATH=/workspace/FastWAM/src
 PY=/opt/mwam/bin/python
 $PY -m pytest src/fastwam/memory_v2/tests -q
+# Every command writes its own log (path printed first). --background starts it detached on a
+# free GPU of THIS container (--gpus auto[:N] | container index | UUID) and reports after 30 s.
 # 1) frozen post-Video-DiT features of every frame (~35 GiB bf16, once)
-$PY -m fastwam.memory_v2.train_v2 features --config configs/memory_v2/train_v2_A.yaml
+$PY -m fastwam.memory_v2.train_v2 features --config configs/memory_v2/train_v2_A.yaml --background
 # 2) throughput / memory check, no files written except logs
 $PY -m fastwam.memory_v2.train_v2 train --config configs/memory_v2/train_v2_A.yaml --dry-run 3
 # 3) training (N GPUs: torchrun --standalone --nproc_per_node=N -m fastwam.memory_v2.train_v2 train ...)

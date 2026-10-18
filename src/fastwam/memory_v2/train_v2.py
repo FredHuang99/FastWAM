@@ -28,6 +28,7 @@ import math
 import os
 import random
 import shutil
+import sys
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -712,12 +713,7 @@ def logger(output: Optional[Path]):
     def log(message: str):
         if rank != 0:
             return
-        line = time.strftime("%Y-%m-%dT%H:%M:%S") + " " + message
-        print(line, flush=True)
-        if output is not None:
-            output.mkdir(parents=True, exist_ok=True)
-            with (output / "train.log").open("a", encoding="utf-8") as f:
-                f.write(line + "\n")
+        print(time.strftime("%Y-%m-%dT%H:%M:%S") + " " + message, flush=True)   # the log file is the tee'd stdout
     return log
 
 
@@ -784,7 +780,33 @@ def cmd_evaluate(cfg: TrainConfig, args) -> None:
         log(json.dumps(result["overall"], indent=2))
 
 
+def log_path(cfg: TrainConfig, args) -> Path:
+    """Where each command writes its own log (folder created on start)."""
+    if args.command == "features":
+        return Path(cfg.features) / "logs" / "features.log"
+    if args.command == "evaluate":
+        return Path(args.output or (Path(cfg.output) / "eval_full")) / "logs" / "evaluate.log"
+    return Path(cfg.output) / "logs" / ("dry_run.log" if args.dry_run else "train.log")
+
+
+def background(cfg: TrainConfig, args, argv) -> None:
+    """Re-launch this command detached on GPUs chosen inside the container."""
+    from .runlog import choose_gpus, spawn
+    gpus, table = choose_gpus(args.gpus, 1, args.free_mib)
+    print("[launch] GPUs visible in this container:\n" + table)
+    forwarded = [a for a in argv if a != "--background"]
+    if args.command == "train" and len(gpus) > 1:
+        cmd = [sys.executable, "-u", "-m", "torch.distributed.run", "--standalone", f"--nproc_per_node={len(gpus)}",
+               "-m", "fastwam.memory_v2.train_v2", *forwarded]
+    else:
+        if len(gpus) > 1:
+            raise SystemExit(f"`{args.command}` runs on one GPU; use --gpus auto or one id.")
+        cmd = [sys.executable, "-u", "-m", "fastwam.memory_v2.train_v2", *forwarded]
+    spawn(cmd, gpus, log_path(cfg, args), args.check_seconds)
+
+
 def main(argv=None):
+    argv = list(sys.argv[1:] if argv is None else argv)
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("command", choices=("features", "train", "evaluate"))
     parser.add_argument("--config", type=Path, required=True)
@@ -796,8 +818,19 @@ def main(argv=None):
     parser.add_argument("--windows", type=int, help="evaluate: number of windows (0 = all)")
     parser.add_argument("--guidance", type=float, nargs="*", help="evaluate: extra guidance scales")
     parser.add_argument("--output", help="evaluate: output folder")
+    parser.add_argument("--background", action="store_true",
+                        help="start detached on --gpus (chosen inside this container); log path is printed")
+    parser.add_argument("--gpus", default="auto:1", help="with --background: auto[:N] or container indices/UUIDs; "
+                        "N>1 runs train under torchrun")
+    parser.add_argument("--free-mib", type=int, default=2000, help="with --background: a GPU is free below this usage")
+    parser.add_argument("--check-seconds", type=int, default=30, help="with --background: wait before reporting state")
     args = parser.parse_args(argv)
     cfg = load_config(args.config, args.set)
+    if args.background:
+        return background(cfg, args, argv)
+    from .runlog import open_log
+    if int(os.environ.get("RANK", "0")) == 0:
+        print(f"[log] {open_log(log_path(cfg, args))}", flush=True)
     try:
         {"features": cmd_features, "train": cmd_train, "evaluate": cmd_evaluate}[args.command](cfg, args)
     finally:
