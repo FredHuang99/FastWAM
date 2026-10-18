@@ -62,24 +62,60 @@ class DenseSpec:
 
 
 _BOUND: Dict[str, object] = {}
+SOFTWARE_DRIFT: Dict[str, dict] = {}
+
+
+def _software_drift(recorded: dict, actual: dict) -> dict:
+    """Keys of the dense encoder_software receipt that differ on this host."""
+    drift = {}
+    for key in ("python", "executable"):
+        if recorded.get(key) != actual.get(key):
+            drift[key] = {"recorded": recorded.get(key), "actual": actual.get(key)}
+    rp, ap = recorded.get("packages", {}), actual.get("packages", {})
+    for name in sorted(set(rp) | set(ap)):
+        if rp.get(name) != ap.get(name):
+            drift[f"packages.{name}"] = {"recorded": rp.get(name), "actual": ap.get(name)}
+    return drift
 
 
 def bind(spec: DenseSpec):
-    """Import the dense delivery's `common` module and authenticate its output once per process."""
+    """Import the dense delivery's `common` module and authenticate its output once per process.
+
+    Authentication = the dense `identity()` (prepared cache files, delivery code, repo
+    source files). Its encoder_software check is reported instead of enforced: that
+    receipt protects *re-encoding* (VAE/text) with other packages, while memory_v2 only
+    reads the already-authenticated cache. The drift is recorded in SOFTWARE_DRIFT and in
+    every checkpoint/run description.
+    """
     key = str(spec.output.resolve())
     if key in _BOUND:
         return _BOUND[key]
     os.environ.setdefault("FW_ROOT", str(spec.root))
-    for path in (str(spec.root / "src"), str(spec.code)):
-        if path not in sys.path:
-            sys.path.insert(0, path)
+    try:                                   # keep the already-imported fastwam (e.g. a memory2 worktree)
+        import fastwam  # noqa: F401
+    except ImportError:
+        if str(spec.root / "src") not in sys.path:
+            sys.path.insert(0, str(spec.root / "src"))
+    if str(spec.code) not in sys.path:
+        sys.path.insert(0, str(spec.code))
     import common  # noqa: E402  (dense_joint_v1/common.py)
     # STOP ownership belongs to the dense run; memory_v2 runs use their own STOP file.
     common.boundary = lambda *args, **kwargs: None
+    recorded = common.read(spec.output / "IDENTITY.json")
+    drift = _software_drift(recorded.get("encoder_software", {}), common.encoder_software())
     if spec.verify_identity:
-        identity = common.identity(spec.output)
+        original = common.encoder_software
+        common.encoder_software = lambda: recorded["encoder_software"]
+        try:
+            identity = common.identity(spec.output)
+        finally:
+            common.encoder_software = original
     else:
-        identity = common.sig(common.read(spec.output / "IDENTITY.json"))
+        identity = common.sig(recorded)
+    if drift:
+        print("[dense] WARNING runtime packages differ from the dense preparation receipt "
+              "(cache is read, not re-encoded): " + json.dumps(drift), flush=True)
+    SOFTWARE_DRIFT[key] = drift
     _BOUND[key] = (common, identity)
     return common, identity
 
@@ -128,7 +164,9 @@ def load_ab_model(spec: DenseSpec, checkpoint: Optional[str] = "source", device:
     from model_path import load_model  # dense_joint_v1/model_path.py
     model = load_model(spec.output, "A", device)
     source = common.read(spec.output / "IDENTITY.json")["source_checkpoint"]
-    info = {"label": "source", "path": source["relative"], "sha256": source["sha256"], "dense_identity": identity}
+    drift = SOFTWARE_DRIFT.get(str(spec.output.resolve()), {})
+    info = {"label": "source", "path": source["relative"], "sha256": source["sha256"], "dense_identity": identity,
+            "software_drift": drift}
     if checkpoint not in (None, "", "source"):
         path = Path(checkpoint)
         state = torch.load(path, map_location="cpu", mmap=True, weights_only=False)
@@ -141,7 +179,8 @@ def load_ab_model(spec: DenseSpec, checkpoint: Optional[str] = "source", device:
         model.load_state_dict(weights, strict=True)
         del state, weights
         info = {"label": path.parent.name if path.name.startswith("mp_rank") else path.stem, "path": str(path),
-                "sha256": file_sha256(path) if hash_checkpoint else None, "dense_identity": identity}
+                "sha256": file_sha256(path) if hash_checkpoint else None, "dense_identity": identity,
+                "software_drift": drift}
     model.requires_grad_(False)
     model.eval()
     info["video_digest"] = video_digest(model)
