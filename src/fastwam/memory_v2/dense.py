@@ -198,17 +198,30 @@ def video_digest(ab_model) -> str:
     return h.hexdigest()
 
 
+BASE_MEMORY_MODES = ("s1", "none")
+
+
 class DenseActionAdapter(nn.Module):
     """memory_v2 adapter over ABModel's BF16 functional action path.
 
-    With memory bypassed, `MemoryV2Model.velocity(..., memory_mode="off")` performs
-    exactly the calls of `ABModel.velocity(..., scale=0)` (same `call` wrappers, same
-    casts, same activation checkpointing), so the base model is reproduced.
+    base_memory="s1" (default): the frozen memory_s1 reader + injectors of the start
+    checkpoint stay in the graph, exactly as ABModel.velocity(..., scale=1). Phase 0
+    showed the C+256 ActionDiT depends on them (removing them: arm RMSE +316%), so
+    this is the real base model; memory_v2 is added on top of it.
+    base_memory="none": ABModel.velocity(..., scale=0), the damaged gate-0 model; only
+    for diagnostics.
+
+    With memory_v2 bypassed (memory_mode="off") the velocity is the base model's.
     """
 
-    def __init__(self, ab_model, train_action: bool = False):
+    def __init__(self, ab_model, train_action: bool = False, base_memory: str = "s1"):
         super().__init__()
+        if base_memory not in BASE_MEMORY_MODES:
+            raise ValueError(f"base_memory must be one of {BASE_MEMORY_MODES}, got {base_memory!r}")
+        if base_memory == "s1" and getattr(ab_model, "memory", None) is None:
+            raise ValueError("base_memory='s1' needs the checkpoint's memory_s1 modules.")
         self.ab = ab_model
+        self.base_memory = base_memory
         self.num_action_layers = len(ab_model.backbone.mot.mixtures["action"].blocks)
         self.ab.requires_grad_(False)
         self.train_action = bool(train_action)
@@ -219,9 +232,20 @@ class DenseActionAdapter(nn.Module):
         return [(n, p) for n, p in self.ab.backbone.mot.mixtures["action"].named_parameters() if p.requires_grad]
 
     @torch.no_grad()
+    def s1_readout(self, batch, current):
+        """memory_s1 read with the same inputs as ABModel.conditions (current appended last)."""
+        history = torch.cat((batch["s1_history"], current[:, None].to(batch["s1_history"].dtype)), 1)
+        ids = torch.cat((batch["s1_frame_ids"], batch["current_ids"][:, None]), 1)
+        valid = torch.cat((batch["s1_valid"], torch.ones_like(batch["s1_valid"][:, :1])), 1)
+        with torch.autocast("cuda", dtype=torch.bfloat16, enabled=current.is_cuda):
+            return self.ab.memory.read(current, batch["text"], batch["text_valid"], batch["proprio"],
+                                       history, ids, valid)
+
+    @torch.no_grad()
     def encode(self, batch):
-        _, kv, context = self.ab.encode(batch["latent"], batch["text"], batch["proprio"])
-        return kv, context
+        current, kv, context = self.ab.encode(batch["latent"], batch["text"], batch["proprio"])
+        readout = self.s1_readout(batch, current) if self.base_memory == "s1" else None
+        return (kv[0], kv[1], readout), context
 
     def prepare(self, actions, timestep, shared_context):
         context, mask = shared_context
@@ -231,12 +255,34 @@ class DenseActionAdapter(nn.Module):
 
     def block(self, index, x, aux, current_kv):
         mod, ctx, ctx_mask, freqs = aux
-        keys, values = current_kv
-        return self.ab.call("action", x, freqs, mod, ctx, ctx_mask, keys[index], values[index],
-                            index=index, checkpointed=True)
+        keys, values, readout = current_kv
+        x = self.ab.call("action", x, freqs, mod, ctx, ctx_mask, keys[index], values[index],
+                         index=index, checkpointed=True)
+        if readout is not None:
+            x = self.ab.inject(index, x, readout, 1.0)
+        return x
 
     def post(self, x, aux):
         return self.ab.call("post_action", x)
+
+
+@dataclass(frozen=True)
+class S1Policy:
+    """memory_s1's own history selection for the frozen base (dense evaluation: T=8, stride 24)."""
+    period: int = 8
+    decision_stride: int = 24
+
+    def ids(self, anchor: int, phase: int) -> List[int]:
+        from fastwam.memory_s1.history import select_ids
+        return select_ids(range(anchor + 1), anchor, self.period, decision_stride=self.decision_stride, phase=phase)
+
+
+def s1_phase(spec: DenseSpec, row: dict, period: int) -> int:
+    """The phase the dense evaluation uses for this episode (WINDOWS rows carry it)."""
+    if "phase" in row and int(row.get("T", period)) == period:
+        return int(row["phase"])
+    from fastwam.memory_s1.history import evaluation_phase
+    return evaluation_phase(dense_config(spec), period, row["episode_id"], "validation")
 
 
 # ----------------------------------------------------------------------------- data
@@ -370,9 +416,15 @@ def _atomic_json(path: Path, value) -> None:
 
 
 def make_batch(rows: Sequence[dict], episodes: EpisodeStore, features: FeatureStore, policy: HistoryPolicyConfig,
-               device, noise_dtype=torch.float32) -> Dict[str, torch.Tensor]:
-    """rows: [{"episode_id", "anchor"}, ...] -> memory_v2 batch on `device`."""
-    latents, texts, proprio, actions, valid, selections, feats = [], [], [], [], [], [], []
+               device, noise_dtype=torch.float32, s1: Optional[S1Policy] = None,
+               spec: Optional[DenseSpec] = None) -> Dict[str, torch.Tensor]:
+    """rows: [{"episode_id", "anchor"}, ...] -> memory_v2 batch on `device`.
+
+    With `s1`, also the frozen memory_s1 inputs: past frames (excluding the current one,
+    which the adapter appends live), padded right: s1_history [B,P,120,3072],
+    s1_frame_ids [B,P], s1_valid [B,P].
+    """
+    latents, texts, text_valid, proprio, actions, valid, selections, feats, s1_feats, s1_ids = ([] for _ in range(10))
     for row in rows:
         e = episodes(row["episode_id"])
         a = int(row["anchor"])
@@ -383,18 +435,52 @@ def make_batch(rows: Sequence[dict], episodes: EpisodeStore, features: FeatureSt
             raise ValueError(f"Feature/episode length mismatch for {row['episode_id']}.")
         latents.append(e["latent"][a])
         texts.append(e["text"])
+        text_valid.append(e["text_valid"])
         proprio.append(e["proprio"][a])
         actions.append(chunk)
         valid.append(mask)
         selections.append(selection)
         feats.append([f[i] for i in selection.ids])
+        if s1 is not None:
+            ids = s1.ids(a, s1_phase(spec, row, s1.period))
+            if ids[-1] != a:
+                raise ValueError("memory_s1 selection must end at the current frame.")
+            s1_ids.append(ids[:-1])
+            s1_feats.append([f[i] for i in ids[:-1]])
     lengths = {t.shape for t in texts}
     if len(lengths) != 1:
         raise ValueError(f"Text encodings differ in shape across the batch: {lengths}; use micro_batch=1.")
     history = collate_history(feats, selections, tokens_per_frame=120, width=3072, dtype=torch.bfloat16)
-    batch = {"latent": torch.stack(latents), "text": torch.stack(texts), "proprio": torch.stack(proprio),
-             "actions": torch.stack(actions).to(noise_dtype), "action_valid": torch.stack(valid), **history}
+    batch = {"latent": torch.stack(latents), "text": torch.stack(texts), "text_valid": torch.stack(text_valid),
+             "proprio": torch.stack(proprio), "actions": torch.stack(actions).to(noise_dtype),
+             "action_valid": torch.stack(valid), **history}
+    if s1 is not None:
+        longest = max([len(x) for x in s1_ids] + [1])
+        s1_history = torch.zeros(len(rows), longest, 120, 3072, dtype=torch.bfloat16)
+        s1_frame = torch.zeros(len(rows), longest, dtype=torch.long)
+        s1_valid = torch.zeros(len(rows), longest, dtype=torch.bool)
+        for b, (fs, ids) in enumerate(zip(s1_feats, s1_ids)):
+            for j, (feature, frame) in enumerate(zip(fs, ids)):
+                s1_history[b, j] = feature
+                s1_frame[b, j] = frame
+                s1_valid[b, j] = True
+        batch.update(s1_history=s1_history, s1_frame_ids=s1_frame, s1_valid=s1_valid)
     return {k: v.to(device, non_blocking=True) for k, v in batch.items()}
+
+
+def ab_dataset(spec: DenseSpec, identity: str, device):
+    """The dense delivery's own Dataset (ABModel batch format), bound without re-authenticating."""
+    bind(spec)
+    from data_path import Dataset  # dense_joint_v1/data_path.py
+
+    class Bound(Dataset):                       # same as the migration tool's HistoricalDataset
+        def __init__(self):
+            self.out = spec.output
+            self.device = device
+            self.records = {r["episode_id"]: r for r in records(spec)}
+            self.loaded = OrderedDict()
+            self.ident = identity
+    return Bound()
 
 
 # ----------------------------------------------------------------------------- metrics
@@ -423,7 +509,8 @@ def window_metrics(normalised_sample: torch.Tensor, normalised_target: torch.Ten
 def window_noise(row: dict, shape, device) -> torch.Tensor:
     """Same first draw as the dense evaluation (`random_inputs` with the row's action seed)."""
     generator = torch.Generator(device="cpu").manual_seed(int(row["action_seed"]))
-    return torch.randn(shape, generator=generator, dtype=torch.float32).to(device)
+    noise = torch.randn(shape, generator=generator, dtype=torch.float32)
+    return noise.to(torch.bfloat16).float().to(device)      # the dense sampler starts from the BF16 cast
 
 
 def summarise(cases: Iterable[dict], keys: Sequence[str], group_by: Sequence[str] = ("task", "split")) -> List[dict]:

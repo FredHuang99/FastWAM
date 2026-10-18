@@ -10,6 +10,11 @@ seed: 17
 # "source" = C+256 (the dense run's common start). A335 is NOT the default: its own
 # training loss rose 3.8x with the LR warm-up and its offline error is ~3x the source.
 init_checkpoint: source
+# Phase 0: the C+256 ActionDiT depends on its memory_s1 injection (gate 0 -> arm RMSE +316%).
+# s1 keeps the frozen memory_s1 reader/injectors in the base; memory_v2 is added on top.
+# none = gate-0 base, diagnostics only.
+base_memory: s1
+s1_period: 8                 # memory_s1 history period, as in the dense evaluation / online runs
 features: outputs/memory_v2/features_dense_v1
 feature_batch: 16
 

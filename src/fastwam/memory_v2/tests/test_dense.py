@@ -41,6 +41,7 @@ def test_window_metrics_prefixes():
 def test_window_noise_matches_dense_first_draw():
     row = {"action_seed": 1234}
     expected = torch.randn((32, 14), generator=torch.Generator().manual_seed(1234), dtype=torch.float32)
+    expected = expected.to(torch.bfloat16).float()          # dense samples start from the BF16 cast
     assert torch.equal(window_noise(row, (32, 14), "cpu"), expected)
 
 

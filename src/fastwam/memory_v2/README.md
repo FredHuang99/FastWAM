@@ -54,8 +54,11 @@ Evidence that set the defaults (A335 audit, 2026-10-18):
 Hence:
 
 * start from **C+256 (`init_checkpoint: source`)**, not A335;
-* ActionDiT/Video DiT/proprio **frozen**; only memory_v2 trains (zero-init output:
-  INIT_PARITY.json checks memory on == null == off exactly before update 1);
+* ActionDiT/Video DiT/proprio **and the C+256 memory_s1** frozen; only memory_v2 trains.
+  Phase 0 showed the C+256 ActionDiT depends on its memory_s1 injection (gate 0: arm RMSE
+  0.049 -> 0.203), so `base_memory: s1` keeps it in the base. INIT_PARITY.json checks
+  (a) memory_v2 on == null == off exactly (zero-init output) and (b) memory-off velocity ==
+  dense ABModel.velocity(scale=1) on its own inputs within 2% relative L2;
 * ActionDiT co-training is opt-in (`optim.lr_action`), refused above 2e-5 without
   `--allow-high-action-lr`;
 * guards: training FM loss > 2x its initial median, or memory-on offline arm RMSE
@@ -91,6 +94,10 @@ $PY scripts/memory_v2/phase0_protocol.py launch --gpus auto:2 --checkpoint sourc
 $PY scripts/memory_v2/phase0_protocol.py status    --output outputs/memory_v2/phase0   # progress; logs in <output>/logs/
 $PY scripts/memory_v2/phase0_protocol.py summarize --output outputs/memory_v2/phase0
 ```
+
+Phase-0b (does memory_s1 read history?): same command with `--suite s1` (launch/status/summarize);
+it swaps the memory_s1 readout for current-frame-only / another episode's / a constant mean readout
+and writes `S1_SUMMARY.md`.
 
 Per window and checkpoint: inference shift {1, 5} x memory_s1 gate {1, 0}, arm/gripper RMSE,
 executed prefix 16 vs 24, FM error at tau 0.1/0.5/0.9/0.95/1.0. `gate1_shift1` reproduces the

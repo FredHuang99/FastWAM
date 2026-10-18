@@ -55,20 +55,6 @@ def parse_checkpoint(text):
     return label, path
 
 
-def dense_dataset(spec, identity, device):
-    from data_path import Dataset  # dense_joint_v1/data_path.py
-    from collections import OrderedDict
-
-    class Bound(Dataset):                       # same as the migration tool's HistoricalDataset
-        def __init__(self):
-            self.out = spec.output
-            self.device = device
-            self.records = {r["episode_id"]: r for r in json.loads((spec.output / "RECORDS.json").read_text())}
-            self.loaded = OrderedDict()
-            self.ident = identity
-    return Bound()
-
-
 def ab_sample(ab, conditions, noise, shift, gate, steps=10):
     """ABModel.sample with an inference-shift override (identical to it at shift 1, gate 1)."""
     import torch
@@ -128,7 +114,7 @@ def parse_shard(text):
 def run(args):
     index, count = parse_shard(args.shard)
     out = Path(args.output)
-    log = open_log(out, f"run_shard{index}of{count}.log")
+    log = open_log(out, f"run_{args.suite}_shard{index}of{count}.log")
     print(f"[phase0] log: {log}", flush=True)
     import torch
     from fastwam.memory_v2 import dense
@@ -142,7 +128,9 @@ def run(args):
         rows = rows[:args.limit]
     mine = [(i, r) for i, r in enumerate(rows) if i % count == index]
     device = "cuda:0"
-    data = dense_dataset(spec, identity, device)
+    data = dense.ab_dataset(spec, identity, device)
+    if args.suite == "s1":
+        return run_s1(args, spec, identity, normaliser, rows, mine, data, index, count, out, device)
     for text in args.checkpoint:
         label, path = parse_checkpoint(text)
         model, info = dense.load_ab_model(spec, path, device, hash_checkpoint=not args.no_hash)
@@ -193,7 +181,145 @@ def run(args):
     print("[phase0] shard complete", flush=True)
 
 
+S1_VARIANTS = ("real", "gate0", "gate0.5", "current_only", "swap", "mean")
+S1_FM_TAUS = (0.5, 0.9, 1.0)
+
+
+def readout_stats(r):
+    """Collapse geometry of one memory_s1 readout [32, D]."""
+    x = r.float()
+    n = x.norm(dim=1).clamp_min(1e-12)
+    cosine = (x @ x.T) / (n[:, None] * n[None, :])
+    return {"min_slot_cosine": float(cosine.min()),
+            "centred_norm_percent": float(100 * (x - x.mean(0)).norm() / x.norm().clamp_min(1e-12))}
+
+
+def run_s1(args, spec, identity, normaliser, rows, mine, data, index, count, out, device):
+    """Does memory_s1 read history? Same base, its readout replaced in five ways (shift 1)."""
+    import torch
+    from fastwam.memory_v2 import dense
+
+    def partner(i):
+        row = rows[i]
+        for step in range(1, len(rows)):
+            other = rows[(i + step) % len(rows)]
+            if other["episode_id"] != row["episode_id"] and other["task"] == row["task"]:
+                return other
+        return rows[(i + 1) % len(rows)]
+
+    for text in args.checkpoint:
+        label, path = parse_checkpoint(text)
+        model, info = dense.load_ab_model(spec, path, device, hash_checkpoint=not args.no_hash)
+        folder = out / label
+        folder.mkdir(parents=True, exist_ok=True)
+        with torch.no_grad():
+            calibration = [r for r in rows if r["split"] == "train"][:args.calibration]
+            raw = [model.conditions(data.at(r))[2] for r in calibration]
+            model._eval_features.clear()
+            readouts = [r.float() for r in raw]
+            mean_float = torch.stack(readouts).mean(0)
+            spread = float(torch.stack([(r - mean_float).norm() / r.norm() for r in readouts]).mean())
+            mean_readout = mean_float.to(raw[0].dtype)
+        (folder / f"S1_CHECKPOINT.shard{index}.json").write_text(json.dumps(
+            {**info, "calibration_windows": len(calibration), "calibration_mean_relative_spread": spread}, indent=2))
+        started, done = time.monotonic(), 0
+        for i, row in mine:
+            file = folder / "s1_cases" / f"{i:05d}.json"
+            binding = {"window": row["id"], "checkpoint": info["sha256"], "dense": identity, "suite": "s1-v1",
+                       "calibration": args.calibration}
+            if file.is_file() and json.loads(file.read_text()).get("binding") == binding:
+                continue
+            b = data.at(row)
+            with torch.no_grad():
+                an, _, _, _ = model.random_inputs(b, row)
+                kv, ctx, real = model.conditions(b)
+                current_only = dict(b, history_latents=b["latent"], history_proprio=b["proprio"],
+                                    frame_ids=b["t"][None].to(b["frame_ids"].dtype),
+                                    history_valid=torch.ones(1, 1, dtype=torch.bool, device=b["latent"].device))
+                model._eval_features.clear()
+                single = model.conditions(current_only)[2]
+                swapped = model.conditions(data.at(partner(i)))[2]
+                options = {"real": (real, 1.0), "gate0": (real, 0.0), "gate0.5": (real, 0.5),
+                           "current_only": (single, 1.0), "swap": (swapped, 1.0), "mean": (mean_readout, 1.0)}
+                valid = b["action_valid"][0]
+                actions = b["actions"].to(torch.bfloat16)
+                case = {**row, "kind": dense.window_kind(row), "checkpoint": label, "binding": binding,
+                        "variants": {}, "readout": readout_stats(real[0])}
+                for name, (readout, scale) in options.items():
+                    conditions = (kv, ctx, readout)
+                    sample = ab_sample(model, conditions, an, 1.0, scale, steps=args.steps)
+                    metrics = dense.window_metrics(sample[0], b["actions"][0], valid, normaliser)
+                    for tau in S1_FM_TAUS:
+                        t = torch.tensor([1000 * tau], device=actions.device, dtype=torch.bfloat16)
+                        noisy = model.action_scheduler.add_noise(actions, an, t)
+                        pred = model.velocity(noisy, t, conditions, scale)
+                        wanted = model.action_scheduler.training_target(actions, an, t)
+                        metrics[f"fm_tau{tau:g}"] = float((pred.float() - wanted.float()).square()[0, valid].mean())
+                    metrics["readout_relative_change"] = float((readout.float() - real.float()).norm() / real.float().norm())
+                    case["variants"][name] = metrics
+                model._eval_features.clear()
+            file.parent.mkdir(parents=True, exist_ok=True)
+            temp = file.with_name(file.name + ".partial")
+            temp.write_text(json.dumps(case, indent=1))
+            temp.replace(file)
+            done += 1
+            if done % 10 == 0:
+                rate = (time.monotonic() - started) / done
+                print(f"[phase0-s1] {label} shard {index}/{count}: {done}/{len(mine)} windows, {rate:.1f}s/window", flush=True)
+        del model
+        torch.cuda.empty_cache()
+    print("[phase0-s1] shard complete", flush=True)
+
+
+def summarize_s1(out: Path):
+    keys = ("arm_rmse_rad", "gripper_rmse", "prefix24_arm_rmse_rad", "fm_tau0.5", "fm_tau0.9", "fm_tau1",
+            "readout_relative_change")
+    lines = ["# Phase-0b: does memory_s1 read history?", "",
+             "Same base; only the memory_s1 readout fed to its injectors changes. shift 1, same noise as the dense evaluation.",
+             "`current_only` = history of the current frame only; `swap` = readout of a window from another episode "
+             "(same task); `mean` = one constant readout (mean over calibration windows).", ""]
+    report = {}
+    for folder in sorted(p for p in out.iterdir() if (p / "s1_cases").is_dir()):
+        cases = [json.loads(p.read_text()) for p in sorted((folder / "s1_cases").glob("*.json"))]
+        if not cases:
+            continue
+        entry = {"windows": len(cases), "variants": {}}
+        for v in S1_VARIANTS:
+            entry["variants"][v] = {k: sum(c["variants"][v][k] for c in cases) / len(cases) for k in keys}
+            kinds = {}
+            for c in cases:
+                kinds.setdefault(c["kind"], []).append(c["variants"][v]["arm_rmse_rad"])
+            entry["variants"][v]["arm_by_kind"] = {k: sum(x) / len(x) for k, x in kinds.items()}
+        entry["readout"] = {k: sum(c["readout"][k] for c in cases) / len(cases) for k in cases[0]["readout"]}
+        report[folder.name] = entry
+        lines += [f"## {folder.name} ({len(cases)} windows)", "",
+                  "| variant | arm RMSE | gripper | prefix24 arm | FM t0.5 | FM t0.9 | FM t1 | readout change | initial arm |",
+                  "|---|---:|---:|---:|---:|---:|---:|---:|---:|"]
+        for v in S1_VARIANTS:
+            e = entry["variants"][v]
+            lines.append(f"| {v} | {e['arm_rmse_rad']:.4f} | {e['gripper_rmse']:.4f} | {e['prefix24_arm_rmse_rad']:.4f} | "
+                         f"{e['fm_tau0.5']:.4f} | {e['fm_tau0.9']:.4f} | {e['fm_tau1']:.4f} | {e['readout_relative_change']:.3f} | "
+                         f"{e['arm_by_kind'].get('initial', float('nan')):.4f} |")
+        r = entry["readout"]
+        real = entry["variants"]["real"]["arm_rmse_rad"]
+        notes = [f"readout geometry: min slot cosine {r['min_slot_cosine']:.5f}, centred norm {r['centred_norm_percent']:.2f}%"]
+        for v in ("current_only", "swap", "mean"):
+            d = entry["variants"][v]["arm_rmse_rad"] / max(real, 1e-12) - 1
+            notes.append(f"{v} vs real arm RMSE {d:+.1%}")
+        blind = all(abs(entry["variants"][v]["arm_rmse_rad"] / max(real, 1e-12) - 1) < 0.05 for v in ("current_only", "swap", "mean"))
+        notes.append("VERDICT: memory_s1 is history-blind (a constant adapter); keep it frozen as part of the base."
+                     if blind else
+                     "VERDICT: memory_s1 output depends on its inputs; treat the frozen s1 base as a memory baseline too.")
+        entry["notes"] = notes
+        lines += ["", *[f"- {n}" for n in notes], ""]
+    (out / "S1_SUMMARY.json").write_text(json.dumps(report, indent=2))
+    (out / "S1_SUMMARY.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print("\n".join(lines))
+
+
 def summarize(args):
+    if args.suite == "s1":
+        return summarize_s1(Path(args.output))
     out = Path(args.output)
     report = {"checkpoints": {}, "scope": "fixed dense offline windows; same noise as the dense evaluation; not task success"}
     lines = ["# Phase-0 offline protocol check", "",
@@ -262,7 +388,7 @@ def summarize(args):
 
 def common_flags(args):
     flags = ["--output", args.output, "--root", args.root, "--code", args.code, "--dense-output", args.dense_output,
-             "--steps", str(args.steps)]
+             "--steps", str(args.steps), "--suite", args.suite, "--calibration", str(args.calibration)]
     for c in args.checkpoint:
         flags += ["--checkpoint", c]
     if args.limit:
@@ -334,11 +460,13 @@ def launch(args):
         proc = subprocess.Popen(cmd, env=env, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                                 stderr=subprocess.DEVNULL, start_new_session=True, cwd=os.getcwd())
         processes.append({"pid": proc.pid, "gpu": gpu["index"], "uuid": gpu["uuid"], "shard": f"{k}/{total}",
-                          "log": str(out / "logs" / f"run_shard{k}of{total}.log"), "cmd": cmd, "proc": proc})
+                          "log": str(out / "logs" / f"run_{args.suite}_shard{k}of{total}.log"), "cmd": cmd, "proc": proc,
+                          "suite": args.suite})
     launch_file = out / "LAUNCH.json"
     history = json.loads(launch_file.read_text()) if launch_file.is_file() else {"processes": []}
     history.setdefault("processes", [])
-    history["processes"] = [p for p in history["processes"] if p["shard"] not in {q["shard"] for q in processes}]
+    started = {(q["suite"], q["shard"]) for q in processes}
+    history["processes"] = [p for p in history["processes"] if (p.get("suite", "protocol"), p["shard"]) not in started]
     history["processes"] += [{k: v for k, v in p.items() if k != "proc"} for p in processes]
     history["updated"] = time.strftime("%Y-%m-%d %H:%M:%S")
     launch_file.write_text(json.dumps(history, indent=2))
@@ -354,12 +482,21 @@ def launch(args):
     print(f"[launch] progress: python {Path(__file__).name} status --output {out}")
 
 
+def process_alive(pid) -> bool:
+    """True only for a live process (a zombie keeps /proc/<pid> until reaped)."""
+    try:
+        stat = Path(f"/proc/{pid}/stat").read_text()
+    except OSError:
+        return False
+    return stat.rsplit(")", 1)[-1].split()[0] not in ("Z", "X")
+
+
 def status(args):
     out = Path(args.output)
     launch_file = out / "LAUNCH.json"
     if launch_file.is_file():
         for p in json.loads(launch_file.read_text())["processes"]:
-            alive = Path(f"/proc/{p['pid']}").exists()
+            alive = process_alive(p["pid"])
             tail = ""
             log = Path(p["log"])
             if log.is_file():
@@ -376,9 +513,10 @@ def status(args):
             total = min(total, args.limit)
     except Exception:  # noqa: BLE001 - status must work without the dense host
         pass
-    for folder in sorted(p for p in out.iterdir() if (p / "cases").is_dir()) if out.is_dir() else []:
-        done = len(list((folder / "cases").glob("*.json")))
-        print(f"{folder.name}: {done}/{total if total is not None else '?'} windows")
+    sub = "s1_cases" if args.suite == "s1" else "cases"
+    for folder in sorted(p for p in out.iterdir() if (p / sub).is_dir()) if out.is_dir() else []:
+        done = len(list((folder / sub).glob("*.json")))
+        print(f"{folder.name} [{args.suite}]: {done}/{total if total is not None else '?'} windows")
 
 
 def main():
@@ -398,6 +536,9 @@ def main():
     parser.add_argument("--shard", default="0/1", help="i/n: this process handles windows with index %% n == i")
     parser.add_argument("--limit", type=int, default=0, help="first N windows only (quick check)")
     parser.add_argument("--steps", type=int, default=10)
+    parser.add_argument("--suite", choices=("protocol", "s1"), default="protocol",
+                        help="protocol: shift x gate x prefix; s1: does memory_s1 read history (readout swaps)")
+    parser.add_argument("--calibration", type=int, default=32, help="s1: train windows averaged for the constant readout")
     parser.add_argument("--no-verify", action="store_true", help="skip dense identity re-hashing")
     parser.add_argument("--no-hash", action="store_true", help="skip hashing large checkpoint files")
     args = parser.parse_args()

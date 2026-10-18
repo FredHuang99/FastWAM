@@ -42,6 +42,7 @@ from .objectives import compute_loss
 
 TAU_BINS = (0.0, 0.2, 0.4, 0.6, 0.8, 0.95, 1.0 + 1e-9)
 HIGH_ACTION_LR = 2e-5
+BASE_TOLERANCE = 0.02   # relative L2 between memory-off velocity and ABModel's; gate 0 vs 1 differ by O(1)
 
 
 # ============================================================================ config
@@ -92,6 +93,8 @@ class TrainConfig:
     output: str = "outputs/memory_v2/v2_A_memory_only"
     seed: int = 17
     init_checkpoint: str = "source"
+    base_memory: str = "s1"          # s1 = frozen memory_s1 stays in the base (C+256 needs it); none = gate-0 diagnostic
+    s1_period: int = 8               # memory_s1 history period T (dense evaluation/online use 8)
     features: str = "outputs/memory_v2/features_dense_v1"
     feature_batch: int = 16
     dense: dict = field(default_factory=dict)
@@ -104,7 +107,7 @@ class TrainConfig:
     @classmethod
     def from_dict(cls, value: dict) -> "TrainConfig":
         value = dict(value or {})
-        known = {"name", "output", "seed", "init_checkpoint", "features", "feature_batch", "dense",
+        known = {"name", "output", "seed", "init_checkpoint", "base_memory", "s1_period", "features", "feature_batch", "dense",
                  "memory_v2", "optim", "schedule", "eval", "guard"}
         unknown = set(value) - known
         if unknown:
@@ -121,7 +124,8 @@ class TrainConfig:
                     data[name] = tuple(data[name])
             return kind(**data)
 
-        cfg = cls(**{k: value[k] for k in ("name", "output", "seed", "init_checkpoint", "features", "feature_batch", "dense")
+        cfg = cls(**{k: value[k] for k in ("name", "output", "seed", "init_checkpoint", "base_memory", "s1_period",
+                                          "features", "feature_batch", "dense")
                      if k in value})
         cfg.v2 = V2Config.from_dict(value.get("memory_v2"))
         cfg.optim = section(OptimConfig, "optim")
@@ -134,6 +138,7 @@ class TrainConfig:
 
     def to_dict(self) -> dict:
         return {"name": self.name, "output": self.output, "seed": self.seed, "init_checkpoint": self.init_checkpoint,
+                "base_memory": self.base_memory, "s1_period": self.s1_period,
                 "features": self.features, "feature_batch": self.feature_batch, "dense": dict(self.dense),
                 "memory_v2": self.v2.to_dict(), "optim": asdict(self.optim), "schedule": asdict(self.schedule),
                 "eval": asdict(self.eval), "guard": asdict(self.guard)}
@@ -580,6 +585,19 @@ class Trainer:
                 diff = float((v.float() - ref.float()).abs().max())
                 result["max_abs"][f"{mode}@{tau}"] = diff
                 result["exact"] = result["exact"] and bool(torch.equal(v, ref))
+        # The memory-off path must be the start model itself (dense ABModel with its own inputs).
+        reference = getattr(self.backend, "base_reference", None)
+        if reference is not None:
+            result["base_relative_l2"] = {}
+            for tau in (1.0, 0.7, 0.3):
+                t = torch.full((noise.shape[0],), 1000.0 * tau, device=self.device)
+                x = (1 - tau) * batch["actions"].float() + tau * noise
+                ours = model.velocity(x, t, conditions, "off").float()
+                theirs = reference(self.backend.probe_rows(), x, t).float()
+                rel = float((ours - theirs).flatten(1).norm(dim=1).max() / theirs.flatten(1).norm(dim=1).min().clamp_min(1e-6))
+                result["base_relative_l2"][str(tau)] = rel
+                result["exact"] = result["exact"] and rel <= BASE_TOLERANCE
+            result["base_tolerance"] = BASE_TOLERANCE
         model.train()
         return result
 
@@ -593,12 +611,13 @@ class DenseBackend(Backend):
         self.device = device
         self.spec = dense.DenseSpec.from_dict(cfg.dense)
         self.ab, self.info = dense.load_ab_model(self.spec, cfg.init_checkpoint, str(device))
-        if hasattr(self.ab, "memory"):          # memory_s1 modules are not used by memory_v2
-            del self.ab.memory
+        if cfg.base_memory == "none" and hasattr(self.ab, "memory"):
+            del self.ab.memory                  # gate-0 diagnostic base only
+        self.s1 = dense.S1Policy(period=cfg.s1_period) if cfg.base_memory == "s1" else None
         self.features = dense.FeatureStore(Path(cfg.features))
         self.features.require(self.info["video_digest"], self.info["dense_identity"])
         self.episodes = dense.EpisodeStore(self.spec)
-        self.adapter = dense.DenseActionAdapter(self.ab, train_action=train_action)
+        self.adapter = dense.DenseActionAdapter(self.ab, train_action=train_action, base_memory=cfg.base_memory)
         self.model = MemoryV2Model(self.adapter, cfg.v2.memory)
         self.model.memory.to(device=device, dtype=torch.float32)
         from fastwam.memory_s1.common import ReleaseNormalizer
@@ -610,7 +629,27 @@ class DenseBackend(Backend):
                 for a in range(r["length"])]
 
     def batch(self, rows):
-        return self.dense.make_batch(rows, self.episodes, self.features, self.cfg.v2.history, self.device)
+        return self.dense.make_batch(rows, self.episodes, self.features, self.cfg.v2.history, self.device,
+                                     s1=self.s1, spec=self.spec)
+
+    @torch.no_grad()
+    def base_reference(self, rows, noisy, timestep):
+        """ABModel.velocity on its own Dataset.at() inputs (scale 1 with s1, 0 without), row by row."""
+        if not hasattr(self, "_ab_data"):
+            self._ab_data = self.dense.ab_dataset(self.spec, self.info["dense_identity"], str(self.device))
+        was_training = self.ab.training
+        self.ab.eval()
+        out = []
+        for i, row in enumerate(rows):
+            period = self.cfg.s1_period
+            full = dict(row, T=period, phase=self.dense.s1_phase(self.spec, row, period))
+            b = self._ab_data.at(full)
+            conditions = self.ab.conditions(b)
+            out.append(self.ab.velocity(noisy[i:i + 1], timestep[i:i + 1], conditions,
+                                        1.0 if self.cfg.base_memory == "s1" else 0.0))
+        self.ab._eval_features.clear()
+        self.ab.train(was_training)
+        return torch.cat(out)
 
     def probe_rows(self):
         val = [r for r in self._records if r["split"] == "val"]
@@ -649,6 +688,7 @@ class DenseBackend(Backend):
 
     def describe(self):
         return {"kind": "dense", "spec": {k: str(v) for k, v in asdict(self.spec).items()}, "init": self.info,
+                "base_memory": self.cfg.base_memory, "s1_period": self.cfg.s1_period,
                 "features": {k: self.features.manifest.get(k) for k in ("version", "video_digest", "dense_identity")}}
 
 
