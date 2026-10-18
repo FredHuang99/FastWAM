@@ -174,7 +174,7 @@ def run(args):
             temp.write_text(json.dumps(case, indent=1))
             temp.replace(file)
             done += 1
-            if done % 10 == 0:
+            if done == 1 or done % 5 == 0:
                 rate = (time.monotonic() - started) / done
                 print(f"[phase0] {label} shard {index}/{count}: {done}/{len(mine)} windows, {rate:.1f}s/window", flush=True)
         model._eval_features.clear()
@@ -270,7 +270,7 @@ def run_s1(args, spec, identity, normaliser, rows, mine, data, index, count, out
             temp.write_text(json.dumps(case, indent=1))
             temp.replace(file)
             done += 1
-            if done % 10 == 0:
+            if done == 1 or done % 5 == 0:
                 rate = (time.monotonic() - started) / done
                 print(f"[phase0-s1] {label} shard {index}/{count}: {done}/{len(mine)} windows, {rate:.1f}s/window", flush=True)
         del model
@@ -430,7 +430,7 @@ def run_s1c(args, spec, identity, normaliser, rows, mine, data, index, count, ou
             temp.write_text(json.dumps(case, indent=1))
             temp.replace(file)
             done += 1
-            if done % 10 == 0:
+            if done == 1 or done % 5 == 0:
                 rate = (time.monotonic() - started) / done
                 print(f"[phase0-s1c] {label} shard {index}/{count}: {done}/{len(mine)} windows, {rate:.1f}s/window", flush=True)
         del model
@@ -704,7 +704,10 @@ def launch(args):
         print(f"[launch] gpu={p['gpu']} shard={p['shard']} pid={p['pid']} {state}  log={p['log']}")
     if failed:
         print("[launch] a shard stopped early; read its log, or rerun that shard with `run` in the foreground.")
-    print(f"[launch] progress: python {Path(__file__).name} status --output {out}")
+    script = Path(__file__).resolve()
+    print(f"[launch] progress: {sys.executable} {script} status --suite {args.suite} --every {args.every} --output {out}")
+    for p in processes:
+        print(f"[launch] log of shard {p['shard']}: tail -f {p['log']}")
 
 
 def process_alive(pid) -> bool:

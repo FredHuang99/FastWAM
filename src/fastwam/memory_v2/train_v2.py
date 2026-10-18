@@ -131,6 +131,7 @@ class TrainConfig:
         cfg.optim = section(OptimConfig, "optim")
         cfg.schedule = section(ScheduleConfig, "schedule")
         cfg.eval = section(EvalConfig, "eval")
+        cfg.eval.modes = normalise_modes(cfg.eval.modes)
         cfg.guard = section(GuardConfig, "guard")
         if cfg.schedule.global_batch % cfg.schedule.micro_batch:
             raise ValueError("global_batch must be a multiple of micro_batch.")
@@ -142,6 +143,17 @@ class TrainConfig:
                 "features": self.features, "feature_batch": self.feature_batch, "dense": dict(self.dense),
                 "memory_v2": self.v2.to_dict(), "optim": asdict(self.optim), "schedule": asdict(self.schedule),
                 "eval": asdict(self.eval), "guard": asdict(self.guard)}
+
+
+YAML_MODE_ALIASES = {True: "on", False: "off", None: "null"}   # YAML 1.1 reads on/off/null as True/False/None
+
+
+def normalise_modes(modes) -> tuple:
+    out = tuple(YAML_MODE_ALIASES.get(m, m) if not isinstance(m, str) else m for m in modes)
+    bad = [m for m in out if m not in ("on", "null", "off")]
+    if bad:
+        raise ValueError(f"eval.modes must be on/null/off, got {bad}")
+    return out
 
 
 def load_config(path: Path, overrides: Sequence[str] = ()) -> TrainConfig:

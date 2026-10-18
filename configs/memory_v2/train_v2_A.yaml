@@ -76,7 +76,7 @@ schedule:
 eval:
   windows: 96                  # stratified subset during training; `evaluate --windows 0` for all 401
   batch: 8
-  modes: [on, off, null]
+  modes: ["on", "off", "null"]   # quoted: unquoted on/off/null are YAML booleans/None
   guidance_scales: [1.0]
   fm_taus: [0.1, 0.5, 0.9, 1.0]
 

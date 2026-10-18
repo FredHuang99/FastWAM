@@ -184,3 +184,18 @@ def test_evaluate_is_deterministic(tmp_path):
     a = evaluate(backend, backend.eval_rows(0), cfg, log=lambda m: None)
     b = evaluate(backend, backend.eval_rows(0), cfg, log=lambda m: None)
     assert a["overall"] == b["overall"] and a["windows"] == 5
+
+
+def test_eval_modes_survive_yaml(tmp_path):
+    from pathlib import Path
+    yaml = pytest.importorskip("yaml")
+    from fastwam.memory_v2.train_v2 import load_config
+    cfg = TrainConfig.from_dict({"eval": {"modes": [True, False, None]}})
+    assert cfg.eval.modes == ("on", "off", "null")
+    with pytest.raises(ValueError):
+        TrainConfig.from_dict({"eval": {"modes": ["sometimes"]}})
+    shipped = Path(__file__).resolve().parents[4] / "configs" / "memory_v2" / "train_v2_A.yaml"
+    assert load_config(shipped).eval.modes == ("on", "off", "null")
+    raw = tmp_path / "c.yaml"
+    raw.write_text(yaml.safe_dump({"eval": {"modes": ["on"]}}).replace("'on'", "on"))
+    assert load_config(raw).eval.modes == ("on",)
