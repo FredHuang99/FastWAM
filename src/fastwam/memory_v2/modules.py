@@ -100,7 +100,10 @@ class MemoryTokenizer(nn.Module):
         x = self.project(self._pool(self.norm(history.to(self.project.weight.dtype))))   # [B, N, P', D]
         per_frame = x.shape[2]
         age = (current_ids[:, None] - frame_ids).clamp(min=0).float() / cfg.age_unit
-        timing = torch.cat((sinusoid(age, cfg.time_features), sinusoid(frame_ids, cfg.time_features)), -1)
+        absolute = sinusoid(frame_ids, cfg.time_features)
+        if not cfg.absolute_time:          # same parameter shapes; the absolute-index half is zeroed
+            absolute = torch.zeros_like(absolute)
+        timing = torch.cat((sinusoid(age, cfg.time_features), absolute), -1)
         frame_code = self.time(timing.to(x.dtype)) + self.role(roles.clamp(0, NUM_ROLES - 1))  # [B, N, D]
         space_code = self.space(self.spatial_code.to(device=x.device, dtype=x.dtype))          # [P', D]
         x = x + frame_code[:, :, None, :] + space_code[None, None]

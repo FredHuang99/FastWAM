@@ -175,7 +175,7 @@ def test_metrics_run():
     _make_output_nonzero(model)
     batch = make_batch()
     result = history_sensitivity(model, batch, taus=(0.2, 0.9))
-    assert set(result) == {"tau", "null", "shuffle_time", "swap"}
+    assert set(result) == {"tau", "null", "shuffle_time", "swap", "swap_content"}
     assert all(v >= 0 for v in result["null"])
     conditions = model.conditions(batch)
     report = attention_report(model, conditions, torch.randn_like(batch["actions"]), 0.9)
@@ -208,3 +208,28 @@ def test_memory_state_roundtrip():
     t = torch.full((3,), 400.0)
     assert torch.equal(model.velocity(noisy, t, model.conditions(batch)),
                        other.velocity(noisy, t, other.conditions(batch)))
+
+
+def test_swap_content_keeps_clock():
+    from fastwam.memory_v2.metrics import _with_history
+    batch = make_batch()
+    swapped = _with_history(batch, "swap_content", None)
+    assert torch.equal(swapped["frame_ids"], batch["frame_ids"])
+    assert torch.equal(swapped["current_ids"], batch["current_ids"])
+    assert torch.equal(swapped["history"], batch["history"].roll(1, dims=0))
+    assert not bool((swapped["history_valid"] & ~batch["history_valid"]).any())
+
+
+def test_relative_time_only_is_shift_invariant():
+    torch.manual_seed(0)
+    from fastwam.memory_v2.modules import MemoryTokenizer
+    cfg = MemoryV2Config(**{**TINY, "absolute_time": False})
+    tokenizer = MemoryTokenizer(cfg)
+    batch = make_batch()
+    args = (batch["history"], batch["frame_ids"], batch["roles"], batch["history_valid"], batch["current_ids"])
+    shifted = (batch["history"], batch["frame_ids"] + 64, batch["roles"], batch["history_valid"], batch["current_ids"] + 64)
+    a, b = tokenizer(*args), tokenizer(*shifted)
+    assert torch.allclose(a.tokens, b.tokens, atol=1e-5)
+    absolute = MemoryTokenizer(MemoryV2Config(**TINY))
+    absolute.load_state_dict(tokenizer.state_dict())
+    assert not torch.allclose(absolute(*args).tokens, absolute(*shifted).tokens, atol=1e-5)

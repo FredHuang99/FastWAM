@@ -53,6 +53,14 @@ def _with_history(batch: Dict[str, torch.Tensor], variant: str, generator: Optio
             batch[key] = batch[key].roll(1, dims=0)
         # Keep causality for the receiving sample: drop frames from its future.
         batch["history_valid"] = batch["history_valid"] & (batch["frame_ids"] <= batch["current_ids"][:, None])
+    elif variant == "swap_content":
+        # Keep the receiving sample's clock (frame ids, roles, current id); take the
+        # observation content from another sample. Separates content from timing.
+        if batch["history"].shape[0] < 2:
+            raise ValueError("Swapping content needs a batch of at least two samples.")
+        donor_valid = batch["history_valid"].roll(1, dims=0)
+        batch["history"] = batch["history"].roll(1, dims=0)
+        batch["history_valid"] = batch["history_valid"] & donor_valid
     elif variant != "null":
         raise ValueError(f"Unknown history variant {variant}.")
     return batch
@@ -60,7 +68,8 @@ def _with_history(batch: Dict[str, torch.Tensor], variant: str, generator: Optio
 
 @torch.no_grad()
 def history_sensitivity(model, batch: Dict[str, torch.Tensor], taus: Sequence[float] = (0.1, 0.3, 0.5, 0.7, 0.8, 0.9, 0.95, 1.0),
-                        variants: Iterable[str] = ("null", "shuffle_time", "swap"), seed: int = 0) -> Dict[str, List[float]]:
+                        variants: Iterable[str] = ("null", "shuffle_time", "swap", "swap_content"),
+                        seed: int = 0) -> Dict[str, List[float]]:
     """Relative L2 change of the velocity, mean over the batch, for each tau and variant."""
     generator = torch.Generator().manual_seed(seed)
     actions = batch["actions"].float()
@@ -70,7 +79,7 @@ def history_sensitivity(model, batch: Dict[str, torch.Tensor], taus: Sequence[fl
     for variant in variants:
         if variant == "null":
             others[variant] = base.null()
-        elif variant == "swap" and actions.shape[0] < 2:
+        elif variant in ("swap", "swap_content") and actions.shape[0] < 2:
             continue
         else:
             others[variant] = model.conditions(_with_history(batch, variant, generator))

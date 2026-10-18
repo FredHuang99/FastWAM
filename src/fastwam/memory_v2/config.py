@@ -67,6 +67,8 @@ class MemoryV2Config:
     time_features: int = 128        # sinusoid width for each of (age, absolute index)
     spatial_features: int = 64      # sinusoid width for each of (row, col)
     age_unit: float = 1.0           # frames per unit in the age sinusoid
+    absolute_time: bool = True      # also encode the absolute frame index (False: relative age only;
+                                    # ablation against an episode-clock shortcut, see Phase 0c)
     tau_gate: bool = True           # learned per-layer memory strength as a function of the noise level
     tau_gate_hidden: int = 64
     zero_init_output: bool = True   # memory residual starts exactly at zero (base behaviour preserved)
