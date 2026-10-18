@@ -14,8 +14,9 @@ Everything reuses the dense delivery's ABModel, Dataset.at() and random_inputs()
 so `gate1_shift1` reproduces the dense EVALUATION.json numbers exactly.
 Resumable: one JSON per (checkpoint, window). Shardable across GPUs.
 
-    # background, one shard per listed GPU, logs written by the script under <output>/logs/
-    python scripts/memory_v2/phase0_protocol.py launch --gpus 1,4 \
+    # background, one shard per GPU; GPU ids are those visible INSIDE this container (nvidia-smi -L here),
+    # 'auto:N' picks N free ones; logs are written by the script under <output>/logs/
+    python scripts/memory_v2/phase0_protocol.py launch --gpus auto:2 \
         --checkpoint source \
         --checkpoint A335=/migration/runs/a327_gpu4_v1/checkpoints/update_000335/mp_rank_00_model_states.pt \
         --output outputs/memory_v2/phase0
@@ -273,24 +274,74 @@ def common_flags(args):
     return flags
 
 
+def visible_gpus():
+    """GPUs visible in THIS container, in PCI order: [{index, uuid, name, used_mib, total_mib}].
+
+    nvidia-smi on the host numbers all host GPUs; inside a container only the
+    passed-through ones exist and are renumbered from 0, so host ids do not apply.
+    """
+    try:
+        text = subprocess.run(["nvidia-smi", "--query-gpu=index,uuid,name,memory.used,memory.total",
+                               "--format=csv,noheader,nounits"], capture_output=True, text=True, check=True).stdout
+    except (OSError, subprocess.CalledProcessError) as error:
+        raise SystemExit(f"nvidia-smi failed inside this environment: {error}") from None
+    gpus = []
+    for line in text.strip().splitlines():
+        index, uuid, name, used, total = (x.strip() for x in line.split(","))
+        gpus.append({"index": index, "uuid": uuid, "name": name, "used_mib": int(used), "total_mib": int(total)})
+    return gpus
+
+
+def choose_gpus(spec: str, count: int, free_mib: int):
+    gpus = visible_gpus()
+    table = "\n".join(f"  index={g['index']} {g['name']} used={g['used_mib']}/{g['total_mib']} MiB {g['uuid']}" for g in gpus)
+    usable = [g for g in gpus if "A100" in g["name"] or "H100" in g["name"] or "H200" in g["name"]]
+    if spec.startswith("auto"):
+        free = [g for g in usable if g["used_mib"] <= free_mib]
+        want = int(spec.split(":")[1]) if ":" in spec else (count or len(free))
+        if want < 1 or len(free) < want:
+            raise SystemExit(f"Need {want} free GPUs (<= {free_mib} MiB used); visible in this container:\n{table}")
+        return free[:want], table
+    chosen = []
+    for item in (x.strip() for x in spec.split(",") if x.strip()):
+        match = [g for g in gpus if item in (g["index"], g["uuid"])]
+        if not match:
+            raise SystemExit(f"GPU {item!r} is not visible in this container (host nvidia-smi ids do not apply). "
+                             f"Visible:\n{table}\nUse these indices/UUIDs, or --gpus auto.")
+        g = match[0]
+        if g["used_mib"] > free_mib:
+            raise SystemExit(f"GPU {item} already uses {g['used_mib']} MiB; pick a free one or raise --free-mib.\n{table}")
+        chosen.append(g)
+    return chosen, table
+
+
 def launch(args):
     """Start one detached `run` per GPU; each writes <output>/logs/run_shard{k}of{n}.log itself."""
-    gpus = [g.strip() for g in args.gpus.split(",") if g.strip()]
-    if not gpus:
-        raise SystemExit("--gpus needs at least one id, e.g. --gpus 1,4")
+    shard_ids = [int(x) for x in args.shard_ids.split(",")] if args.shard_ids else None
+    gpus, table = choose_gpus(args.gpus, len(shard_ids) if shard_ids else 0, args.free_mib)
+    shard_ids = shard_ids or list(range(len(gpus)))
+    total = args.num_shards or len(shard_ids)
+    if len(shard_ids) != len(gpus) or any(not 0 <= k < total for k in shard_ids):
+        raise SystemExit(f"{len(gpus)} GPU(s) for shard ids {shard_ids} of {total}: need one GPU per shard id, ids < num-shards")
+    print("[launch] GPUs visible in this container:\n" + table)
     out = Path(args.output)
     (out / "logs").mkdir(parents=True, exist_ok=True)
     processes = []
-    for k, gpu in enumerate(gpus):
-        env = dict(os.environ, CUDA_VISIBLE_DEVICES=gpu)
-        cmd = [sys.executable, "-u", str(Path(__file__).resolve()), "run", "--shard", f"{k}/{len(gpus)}", *common_flags(args)]
+    for k, gpu in zip(shard_ids, gpus):
+        # Select by UUID: immune to CUDA vs nvidia-smi ordering differences.
+        env = dict(os.environ, CUDA_VISIBLE_DEVICES=gpu["uuid"], CUDA_DEVICE_ORDER="PCI_BUS_ID")
+        cmd = [sys.executable, "-u", str(Path(__file__).resolve()), "run", "--shard", f"{k}/{total}", *common_flags(args)]
         proc = subprocess.Popen(cmd, env=env, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                                 stderr=subprocess.DEVNULL, start_new_session=True, cwd=os.getcwd())
-        processes.append({"pid": proc.pid, "gpu": gpu, "shard": f"{k}/{len(gpus)}",
-                          "log": str(out / "logs" / f"run_shard{k}of{len(gpus)}.log"), "cmd": cmd, "proc": proc})
-    (out / "LAUNCH.json").write_text(json.dumps(
-        {"started": time.strftime("%Y-%m-%d %H:%M:%S"), "processes": [{k: v for k, v in p.items() if k != "proc"}
-                                                                       for p in processes]}, indent=2))
+        processes.append({"pid": proc.pid, "gpu": gpu["index"], "uuid": gpu["uuid"], "shard": f"{k}/{total}",
+                          "log": str(out / "logs" / f"run_shard{k}of{total}.log"), "cmd": cmd, "proc": proc})
+    launch_file = out / "LAUNCH.json"
+    history = json.loads(launch_file.read_text()) if launch_file.is_file() else {"processes": []}
+    history.setdefault("processes", [])
+    history["processes"] = [p for p in history["processes"] if p["shard"] not in {q["shard"] for q in processes}]
+    history["processes"] += [{k: v for k, v in p.items() if k != "proc"} for p in processes]
+    history["updated"] = time.strftime("%Y-%m-%d %H:%M:%S")
+    launch_file.write_text(json.dumps(history, indent=2))
     time.sleep(args.check_seconds)
     failed = False
     for p in processes:
@@ -333,7 +384,11 @@ def status(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("command", choices=("launch", "run", "status", "summarize"))
-    parser.add_argument("--gpus", default="0", help="launch: comma-separated GPU ids, one shard each (e.g. 1,4)")
+    parser.add_argument("--gpus", default="auto", help="launch: 'auto' / 'auto:N' (free GPUs in this container) "
+                        "or comma-separated container indices/UUIDs, one shard each")
+    parser.add_argument("--shard-ids", default="", help="launch: which shard ids to start (default 0..len(gpus)-1)")
+    parser.add_argument("--num-shards", type=int, default=0, help="launch: total shards n (default: number started)")
+    parser.add_argument("--free-mib", type=int, default=2000, help="launch: a GPU counts as free below this usage")
     parser.add_argument("--check-seconds", type=int, default=30, help="launch: wait before checking the shards")
     parser.add_argument("--checkpoint", action="append", default=[], help="'source' or LABEL=PATH (repeatable)")
     parser.add_argument("--output", default="outputs/memory_v2/phase0")
