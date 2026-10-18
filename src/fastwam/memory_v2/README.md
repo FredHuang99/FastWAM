@@ -39,9 +39,60 @@ python scripts/memory_v2/tau_crossover.py --config configs/memory_s1/s1_variable
 The torch tests were written without a torch runtime in the authoring sandbox; run them on
 the training container before anything else. `test_history.py` was executed (7/7 pass).
 
-## Not here yet (by design)
+## train_v2 (dense-joint data, branch-A layout)
 
-* `train_v2.py` — written after dense-joint A/335 is available, reusing its data/image contract
-  (float two-stage mosaic, predict 32 / execute 24, landmark stride 24) and its trainable-ActionDiT
-  masters through a second adapter.
-* Phase-0 protocol check (shift 1 vs 5, execute 16 vs 24) — run on A/335.
+Evidence that set the defaults (A335 audit, 2026-10-18):
+
+* A335 offline arm RMSE is ~3x the C+256 source on every task/split, **including the
+  train split** (put/train 0.050 -> 0.158 rad), and FM error is 3-7x higher at every tau.
+* A's own training loss rose from median 0.015 (update 1) to ~0.06-0.08 in lock-step with
+  the LR warm-up (Spearman 0.74 during warm-up; sustained >1.5x from update 42, LR 5e-5).
+  `python scripts/memory_v2/loss_vs_lr.py --updates <run>/history --output loss_vs_lr.json --plot loss_vs_lr.png`
+  => optimisation failure of fresh AdamW at peak 1e-4 on an already-converged ActionDiT,
+  not over-fitting and not the last 8 updates.
+
+Hence:
+
+* start from **C+256 (`init_checkpoint: source`)**, not A335;
+* ActionDiT/Video DiT/proprio **frozen**; only memory_v2 trains (zero-init output:
+  INIT_PARITY.json checks memory on == null == off exactly before update 1);
+* ActionDiT co-training is opt-in (`optim.lr_action`), refused above 2e-5 without
+  `--allow-high-action-lr`;
+* guards: training FM loss > 2x its initial median, or memory-on offline arm RMSE
+  > 1.1x memory-off => save + GUARD.json + stop.
+
+```bash
+cd /workspace/FastWAM && git switch memory2
+export PYTHONPATH=/workspace/FastWAM/src
+PY=/opt/mwam/bin/python
+$PY -m pytest src/fastwam/memory_v2/tests -q
+# 1) frozen post-Video-DiT features of every frame (~35 GiB bf16, once)
+$PY -m fastwam.memory_v2.train_v2 features --config configs/memory_v2/train_v2_A.yaml
+# 2) throughput / memory check, no files written except logs
+$PY -m fastwam.memory_v2.train_v2 train --config configs/memory_v2/train_v2_A.yaml --dry-run 3
+# 3) training (N GPUs: torchrun --standalone --nproc_per_node=N -m fastwam.memory_v2.train_v2 train ...)
+$PY -m fastwam.memory_v2.train_v2 train --config configs/memory_v2/train_v2_A.yaml
+# 4) full 401-window evaluation of a checkpoint (modes on/off/null, optional guidance)
+$PY -m fastwam.memory_v2.train_v2 evaluate --config configs/memory_v2/train_v2_A.yaml \
+    --checkpoint outputs/memory_v2/v2_A_memory_only/checkpoints/update_000670.pt --windows 0 --guidance 1.5 2
+```
+
+Run outputs: `CONFIG.json`, `INIT_PARITY.json`, `metrics.jsonl` (loss, FM per tau bin,
+dropped fraction, grad norm, s/update), `probes.jsonl` (tau-gate profile, attention mass per
+role at tau 0.95/0.5/0.1, history sensitivity vs tau), `eval/update_*.json`, `checkpoints/`.
+`touch <output>/STOP.json` stops at the next update boundary with a checkpoint.
+
+## Phase-0 protocol check
+
+```bash
+$PY scripts/memory_v2/phase0_protocol.py run --checkpoint source \
+    --checkpoint A335=/migration/runs/a327_gpu4_v1/checkpoints/update_000335/mp_rank_00_model_states.pt \
+    --output outputs/memory_v2/phase0
+$PY scripts/memory_v2/phase0_protocol.py summarize --output outputs/memory_v2/phase0
+```
+
+Per window and checkpoint: inference shift {1, 5} x memory_s1 gate {1, 0}, arm/gripper RMSE,
+executed prefix 16 vs 24, FM error at tau 0.1/0.5/0.9/0.95/1.0. `gate1_shift1` reproduces the
+dense EVALUATION.json; `gate0` tells whether an A335 regression lives in the ActionDiT or in the
+memory path. Closed-loop {shift} x {execute 16/24} is deferred until a non-regressed base is chosen
+(the dense physical harness hard-codes execute 24 and has two frozen scenes).

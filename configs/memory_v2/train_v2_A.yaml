@@ -1,0 +1,83 @@
+# memory_v2 on the dense-joint data, branch-A layout (visual expert + proprio frozen).
+# Default: ActionDiT frozen at the C+256 source, only memory_v2 trains.
+#
+#   python -m fastwam.memory_v2.train_v2 features --config configs/memory_v2/train_v2_A.yaml
+#   python -m fastwam.memory_v2.train_v2 train    --config configs/memory_v2/train_v2_A.yaml --dry-run 3
+#   python -m fastwam.memory_v2.train_v2 train    --config configs/memory_v2/train_v2_A.yaml
+name: v2_A_memory_only
+output: outputs/memory_v2/v2_A_memory_only
+seed: 17
+# "source" = C+256 (the dense run's common start). A335 is NOT the default: its own
+# training loss rose 3.8x with the LR warm-up and its offline error is ~3x the source.
+init_checkpoint: source
+features: outputs/memory_v2/features_dense_v1
+feature_batch: 16
+
+dense:
+  root: /workspace/FastWAM
+  code: /restore-tmp/dense_joint_v1
+  output: /workspace/FastWAM/outputs/s1_dense_joint_h100_v1
+  verify_identity: true
+
+memory_v2:
+  history:
+    anchor_frames: 1
+    landmark_stride: 24        # = execution interval of the dense/online protocol
+    recent_frames: 2
+    recent_stride: 8           # online observations arrive every step (archive stride 1)
+    max_frames: 48
+    include_current: false
+  memory:
+    pool: [1, 1]               # keep all 120 patches per frame; [2, 2] -> 30 tokens/frame if memory is tight
+    injection_layers: [4, 9, 14, 19, 24, 29]
+    null_tokens: 4
+    tau_gate: true
+    zero_init_output: true
+  objective:
+    tau_mode: mixture
+    tau_shift: 1.0
+    high_noise_prob: 0.3
+    high_noise_low: 0.8
+    weight_mode: bell_floor
+    weight_shift: 1.0
+    weight_floor: 0.25
+    endpoint_weight: 1.0
+    memory_dropout: 0.15
+  guidance:
+    steps: 10
+    shift: 1.0
+    scale: 1.0
+    min_sigma: 0.7
+
+optim:
+  lr_memory: 1.0e-4            # new parameters, zero-initialised output
+  lr_action: 0.0               # ActionDiT frozen; >2e-5 is refused without --allow-high-action-lr
+  betas: [0.9, 0.95]
+  eps: 1.0e-8
+  weight_decay: 0.01
+  warmup_fraction: 0.05
+  min_lr_ratio: 0.01
+  clip: 1.0
+
+schedule:
+  epochs: 2
+  global_batch: 64
+  micro_batch: 8
+  save_every: 50
+  probe_every: 25
+  eval_every: 100
+  keep_last: 2
+
+eval:
+  windows: 96                  # stratified subset during training; `evaluate --windows 0` for all 401
+  batch: 8
+  modes: [on, off, null]
+  guidance_scales: [1.0]
+  fm_taus: [0.1, 0.5, 0.9, 1.0]
+
+guard:
+  loss_factor: 2.0
+  loss_window: 16
+  loss_baseline_updates: 8
+  eval_regression: 0.10
+  start_update: 50
