@@ -85,9 +85,10 @@ role at tau 0.95/0.5/0.1, history sensitivity vs tau), `eval/update_*.json`, `ch
 ## Phase-0 protocol check
 
 ```bash
-$PY scripts/memory_v2/phase0_protocol.py run --checkpoint source \
+$PY scripts/memory_v2/phase0_protocol.py launch --gpus 1,4 --checkpoint source \
     --checkpoint A335=/migration/runs/a327_gpu4_v1/checkpoints/update_000335/mp_rank_00_model_states.pt \
     --output outputs/memory_v2/phase0
+$PY scripts/memory_v2/phase0_protocol.py status    --output outputs/memory_v2/phase0   # progress; logs in <output>/logs/
 $PY scripts/memory_v2/phase0_protocol.py summarize --output outputs/memory_v2/phase0
 ```
 

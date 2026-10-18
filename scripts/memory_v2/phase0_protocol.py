@@ -14,16 +14,23 @@ Everything reuses the dense delivery's ABModel, Dataset.at() and random_inputs()
 so `gate1_shift1` reproduces the dense EVALUATION.json numbers exactly.
 Resumable: one JSON per (checkpoint, window). Shardable across GPUs.
 
-    python scripts/memory_v2/phase0_protocol.py run \
+    # background, one shard per listed GPU, logs written by the script under <output>/logs/
+    python scripts/memory_v2/phase0_protocol.py launch --gpus 1,4 \
         --checkpoint source \
         --checkpoint A335=/migration/runs/a327_gpu4_v1/checkpoints/update_000335/mp_rank_00_model_states.pt \
-        --output outputs/memory_v2/phase0 [--shard 0/2] [--limit 40]
+        --output outputs/memory_v2/phase0
+    python scripts/memory_v2/phase0_protocol.py status    --output outputs/memory_v2/phase0
     python scripts/memory_v2/phase0_protocol.py summarize --output outputs/memory_v2/phase0
+
+    # foreground, one process (same flags; --shard i/n to split by hand, --limit N for a quick check)
+    python scripts/memory_v2/phase0_protocol.py run --checkpoint source --output outputs/memory_v2/phase0
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -71,7 +78,57 @@ def ab_sample(ab, conditions, noise, shift, gate, steps=10):
     return actions.float()
 
 
+class _Tee:
+    """Mirror a stream into a log file owned by this script (no shell redirection needed)."""
+
+    def __init__(self, stream, handle):
+        self.stream, self.handle = stream, handle
+
+    def write(self, text):
+        self.handle.write(text)
+        self.handle.flush()
+        if self.stream is not None:
+            try:
+                self.stream.write(text)
+                self.stream.flush()
+            except (OSError, ValueError):
+                self.stream = None
+        return len(text)
+
+    def flush(self):
+        self.handle.flush()
+
+    def isatty(self):
+        return False
+
+
+def open_log(out: Path, name: str) -> Path:
+    folder = out / "logs"
+    folder.mkdir(parents=True, exist_ok=True)
+    path = folder / name
+    handle = path.open("a", encoding="utf-8", buffering=1)
+    handle.write(f"\n===== {time.strftime('%Y-%m-%d %H:%M:%S')} pid={os.getpid()} "
+                 f"CUDA_VISIBLE_DEVICES={os.environ.get('CUDA_VISIBLE_DEVICES')} argv={sys.argv[1:]}\n")
+    sys.stdout = _Tee(sys.stdout, handle)
+    sys.stderr = _Tee(sys.stderr, handle)
+    return path
+
+
+def parse_shard(text):
+    try:
+        index, count = (int(x) for x in text.split("/"))
+    except ValueError:
+        raise SystemExit(f"--shard must be i/n, got {text!r}") from None
+    if count < 1 or not 0 <= index < count:
+        raise SystemExit(f"--shard {text}: need 0 <= i < n (e.g. 0/2 and 1/2), the GPU id is set by CUDA_VISIBLE_DEVICES")
+    return index, count
+
+
 def run(args):
+    index, count = parse_shard(args.shard)
+    out = Path(args.output)
+    log = open_log(out, f"run_shard{index}of{count}.log")
+    print(f"[phase0] log: {log}", flush=True)
     import torch
     from fastwam.memory_v2 import dense
     spec = dense.DenseSpec(root=Path(args.root), code=Path(args.code), output=Path(args.dense_output),
@@ -82,9 +139,7 @@ def run(args):
     rows = dense.windows(spec)
     if args.limit:
         rows = rows[:args.limit]
-    index, count = (int(x) for x in args.shard.split("/"))
     mine = [(i, r) for i, r in enumerate(rows) if i % count == index]
-    out = Path(args.output)
     device = "cuda:0"
     data = dense_dataset(spec, identity, device)
     for text in args.checkpoint:
@@ -204,9 +259,82 @@ def summarize(args):
     print("\n".join(lines))
 
 
+def common_flags(args):
+    flags = ["--output", args.output, "--root", args.root, "--code", args.code, "--dense-output", args.dense_output,
+             "--steps", str(args.steps)]
+    for c in args.checkpoint:
+        flags += ["--checkpoint", c]
+    if args.limit:
+        flags += ["--limit", str(args.limit)]
+    if args.no_verify:
+        flags.append("--no-verify")
+    if args.no_hash:
+        flags.append("--no-hash")
+    return flags
+
+
+def launch(args):
+    """Start one detached `run` per GPU; each writes <output>/logs/run_shard{k}of{n}.log itself."""
+    gpus = [g.strip() for g in args.gpus.split(",") if g.strip()]
+    if not gpus:
+        raise SystemExit("--gpus needs at least one id, e.g. --gpus 1,4")
+    out = Path(args.output)
+    (out / "logs").mkdir(parents=True, exist_ok=True)
+    processes = []
+    for k, gpu in enumerate(gpus):
+        env = dict(os.environ, CUDA_VISIBLE_DEVICES=gpu)
+        cmd = [sys.executable, "-u", str(Path(__file__).resolve()), "run", "--shard", f"{k}/{len(gpus)}", *common_flags(args)]
+        proc = subprocess.Popen(cmd, env=env, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL, start_new_session=True, cwd=os.getcwd())
+        processes.append({"pid": proc.pid, "gpu": gpu, "shard": f"{k}/{len(gpus)}",
+                          "log": str(out / "logs" / f"run_shard{k}of{len(gpus)}.log"), "cmd": cmd, "proc": proc})
+    (out / "LAUNCH.json").write_text(json.dumps(
+        {"started": time.strftime("%Y-%m-%d %H:%M:%S"), "processes": [{k: v for k, v in p.items() if k != "proc"}
+                                                                       for p in processes]}, indent=2))
+    time.sleep(args.check_seconds)
+    failed = False
+    for p in processes:
+        code = p["proc"].poll()
+        state = "running" if code is None else f"EXITED code={code}"
+        failed |= code not in (None, 0)
+        print(f"[launch] gpu={p['gpu']} shard={p['shard']} pid={p['pid']} {state}  log={p['log']}")
+    if failed:
+        print("[launch] a shard stopped early; read its log, or rerun that shard with `run` in the foreground.")
+    print(f"[launch] progress: python {Path(__file__).name} status --output {out}")
+
+
+def status(args):
+    out = Path(args.output)
+    launch_file = out / "LAUNCH.json"
+    if launch_file.is_file():
+        for p in json.loads(launch_file.read_text())["processes"]:
+            alive = Path(f"/proc/{p['pid']}").exists()
+            tail = ""
+            log = Path(p["log"])
+            if log.is_file():
+                lines = [x for x in log.read_text(errors="replace").splitlines() if x.strip()]
+                tail = lines[-1] if lines else ""
+            print(f"gpu={p['gpu']} shard={p['shard']} pid={p['pid']} {'running' if alive else 'stopped'} | {tail}")
+    total = None
+    try:
+        from fastwam.memory_v2 import dense
+        spec = dense.DenseSpec(root=Path(args.root), code=Path(args.code), output=Path(args.dense_output),
+                               verify_identity=False)
+        total = len(dense.windows(spec))
+        if args.limit:
+            total = min(total, args.limit)
+    except Exception:  # noqa: BLE001 - status must work without the dense host
+        pass
+    for folder in sorted(p for p in out.iterdir() if (p / "cases").is_dir()) if out.is_dir() else []:
+        done = len(list((folder / "cases").glob("*.json")))
+        print(f"{folder.name}: {done}/{total if total is not None else '?'} windows")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("command", choices=("run", "summarize"))
+    parser.add_argument("command", choices=("launch", "run", "status", "summarize"))
+    parser.add_argument("--gpus", default="0", help="launch: comma-separated GPU ids, one shard each (e.g. 1,4)")
+    parser.add_argument("--check-seconds", type=int, default=30, help="launch: wait before checking the shards")
     parser.add_argument("--checkpoint", action="append", default=[], help="'source' or LABEL=PATH (repeatable)")
     parser.add_argument("--output", default="outputs/memory_v2/phase0")
     parser.add_argument("--root", default="/workspace/FastWAM")
@@ -218,12 +346,9 @@ def main():
     parser.add_argument("--no-verify", action="store_true", help="skip dense identity re-hashing")
     parser.add_argument("--no-hash", action="store_true", help="skip hashing large checkpoint files")
     args = parser.parse_args()
-    if args.command == "run":
-        if not args.checkpoint:
-            args.checkpoint = ["source"]
-        run(args)
-    else:
-        summarize(args)
+    if args.command in ("run", "launch") and not args.checkpoint:
+        args.checkpoint = ["source"]
+    {"launch": launch, "run": run, "status": status, "summarize": summarize}[args.command](args)
 
 
 if __name__ == "__main__":
