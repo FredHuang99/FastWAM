@@ -88,6 +88,20 @@ class GuardConfig:
 
 
 @dataclass
+class PairsConfig:
+    """Counterfactual history training on matched-present pairs (scripts/memory_v2/find_pairs.py)."""
+    file: str = ""                     # pairs JSON; empty = off
+    weight: float = 0.0                # loss weight of the swapped-history term (0 = off)
+    per_update: int = 16               # pairs per optimizer update (each used in both directions)
+    max_visual_distance: float = 1e9   # keep only pairs whose current frames also look alike
+    min_delta: float = 0.0             # keep only pairs whose futures differ at least this much
+
+    @property
+    def enabled(self) -> bool:
+        return bool(self.file) and self.weight > 0
+
+
+@dataclass
 class TrainConfig:
     name: str = "v2_A_memory_only"
     output: str = "outputs/memory_v2/v2_A_memory_only"
@@ -103,12 +117,13 @@ class TrainConfig:
     schedule: ScheduleConfig = field(default_factory=ScheduleConfig)
     eval: EvalConfig = field(default_factory=EvalConfig)
     guard: GuardConfig = field(default_factory=GuardConfig)
+    pairs: PairsConfig = field(default_factory=PairsConfig)
 
     @classmethod
     def from_dict(cls, value: dict) -> "TrainConfig":
         value = dict(value or {})
         known = {"name", "output", "seed", "init_checkpoint", "base_memory", "s1_period", "features", "feature_batch", "dense",
-                 "memory_v2", "optim", "schedule", "eval", "guard"}
+                 "memory_v2", "optim", "schedule", "eval", "guard", "pairs"}
         unknown = set(value) - known
         if unknown:
             raise ValueError(f"Unknown train_v2 keys: {sorted(unknown)}")
@@ -133,6 +148,7 @@ class TrainConfig:
         cfg.eval = section(EvalConfig, "eval")
         cfg.eval.modes = normalise_modes(cfg.eval.modes)
         cfg.guard = section(GuardConfig, "guard")
+        cfg.pairs = section(PairsConfig, "pairs")
         if cfg.schedule.global_batch % cfg.schedule.micro_batch:
             raise ValueError("global_batch must be a multiple of micro_batch.")
         return cfg
@@ -142,7 +158,8 @@ class TrainConfig:
                 "base_memory": self.base_memory, "s1_period": self.s1_period,
                 "features": self.features, "feature_batch": self.feature_batch, "dense": dict(self.dense),
                 "memory_v2": self.v2.to_dict(), "optim": asdict(self.optim), "schedule": asdict(self.schedule),
-                "eval": asdict(self.eval), "guard": asdict(self.guard)}
+                "eval": asdict(self.eval), "guard": asdict(self.guard),
+                **({"pairs": asdict(self.pairs)} if asdict(self.pairs) != asdict(PairsConfig()) else {})}
 
 
 YAML_MODE_ALIASES = {True: "on", False: "off", None: "null"}   # YAML 1.1 reads on/off/null as True/False/None
@@ -261,6 +278,21 @@ class Backend:
     def noise(self, row: dict, shape) -> torch.Tensor: ...
     def describe(self) -> dict: ...
 
+    def pair_batches(self, pairs: Sequence[dict], reverse: bool = False):
+        """(own, swapped): own = query current + query history (query targets); swapped = query current +
+        donor history (donor targets). reverse swaps the roles of query and donor."""
+        from .pairs import swap_history
+        q, d = ("donor", "query") if reverse else ("query", "donor")
+        own = self.batch([p[q] for p in pairs])
+        donor = self.batch([p[d] for p in pairs])
+        return own, swap_history(own, donor)
+
+    def pair_noise(self, pair: dict, reverse: bool, shape) -> torch.Tensor:
+        key = "|".join(f"{p['episode_id']}:{p['anchor']}" for p in ((pair["donor"], pair["query"]) if reverse
+                                                                    else (pair["query"], pair["donor"])))
+        g = torch.Generator().manual_seed(stable_seed("pair-noise", key))
+        return torch.randn(shape, generator=g).to(torch.bfloat16).float().to(self.device)
+
 
 # ============================================================================ evaluation
 @torch.no_grad()
@@ -308,6 +340,84 @@ def evaluate(backend: Backend, rows: Sequence[dict], cfg: TrainConfig, log=print
     return {"windows": len(cases), "overall": overall, "groups": summary, "cases": cases}
 
 
+@torch.no_grad()
+def evaluate_pairs(backend: Backend, pairs: Sequence[dict], cfg: TrainConfig, modes=("on", "off", "null"),
+                   batch_size: int = 8, log=print) -> Dict[str, object]:
+    """History-swap response on matched-present pairs, both directions, same noise for own/swapped.
+
+    own_correct : with its own history, the prediction is closer to its own future than to the partner's
+    switch      : with the partner's history (same current frame), it is closer to the partner's future
+    pr          : own_correct and switch                      (history-blind model: switch ~ 1 - own_correct)
+    response    : ||pred(swapped) - pred(own)|| / ||target(partner) - target(own)||   (0 = ignores history)
+    """
+    model = backend.model
+    model.eval()
+    rank, world = rank_world()
+    mine = list(enumerate(pairs))[rank::world]
+    guidance = GuidanceConfig(steps=cfg.v2.guidance.steps, shift=cfg.v2.guidance.shift, scale=1.0,
+                              min_sigma=cfg.v2.guidance.min_sigma)
+    cases = []
+    for start in range(0, len(mine), batch_size):
+        chunk = mine[start:start + batch_size]
+        group = [p for _, p in chunk]
+        for reverse in (False, True):
+            own, swapped = backend.pair_batches(group, reverse)
+            c_own, c_swap = model.conditions(own), model.conditions(swapped)
+            t_own, t_swap = own["actions"].float(), swapped["actions"].float()
+            valid = (own["action_valid"] & swapped["action_valid"]).float()[..., None]
+            noise = torch.stack([backend.pair_noise(p, reverse, t_own.shape[1:]) for p in group])
+            gap = ((t_swap - t_own) * valid).flatten(1).norm(dim=1).clamp_min(1e-6)
+
+            def dist(a, b):
+                return ((a - b) * valid).flatten(1).norm(dim=1)
+
+            rows = [{"pair": i, "reverse": reverse, "task": p["task"], "delta_norm": p["delta_norm"],
+                     "visual_distance": p.get("visual_distance"), "present_rms": p["present_rms"],
+                     "donor_split": p.get("donor_split")} for i, p in chunk]
+            for mode in modes:
+                p_own, _ = model.sample(c_own, noise, guidance, memory_mode=mode)
+                p_swap, _ = model.sample(c_swap, noise, guidance, memory_mode=mode)
+                own_ok = dist(p_own, t_own) < dist(p_own, t_swap)
+                switch = dist(p_swap, t_swap) < dist(p_swap, t_own)
+                response = dist(p_swap, p_own) / gap
+                for b, row in enumerate(rows):
+                    row[f"{mode}/own_correct"] = bool(own_ok[b])
+                    row[f"{mode}/switch"] = bool(switch[b])
+                    row[f"{mode}/pr"] = bool(own_ok[b] and switch[b])
+                    row[f"{mode}/response"] = float(response[b])
+            cases.extend(rows)
+        if rank == 0 and (start // batch_size) % 10 == 0:
+            log(f"[pr] {min(len(mine), start + len(chunk))}/{len(mine)} pairs on rank 0")
+    cases = gather_objects(cases)
+    model.train()
+    return {"pairs": len(pairs), "cases": cases, "summary": summarise_pairs_eval(cases, modes)}
+
+
+def summarise_pairs_eval(cases: Sequence[dict], modes) -> dict:
+    import statistics
+
+    def agg(sub):
+        out = {"n": len(sub)}
+        for mode in modes:
+            if not sub:
+                continue
+            out[mode] = {k: sum(c[f"{mode}/{k}"] for c in sub) / len(sub) for k in ("own_correct", "switch", "pr")}
+            out[mode]["response_median"] = statistics.median(c[f"{mode}/response"] for c in sub)
+        return out
+
+    summary = {"all": agg(list(cases))}
+    for task in sorted({c["task"] for c in cases}):
+        summary[task] = agg([c for c in cases if c["task"] == task])
+    deltas = sorted(c["delta_norm"] for c in cases)
+    if deltas:
+        cuts = [deltas[len(deltas) // 3], deltas[2 * len(deltas) // 3]]
+        for name, lo, hi in (("delta_low", -1, cuts[0]), ("delta_mid", cuts[0], cuts[1]), ("delta_high", cuts[1], 1e18)):
+            summary[name] = agg([c for c in cases if lo < c["delta_norm"] <= hi])
+    for split in sorted({c.get("donor_split") for c in cases if c.get("donor_split")}):
+        summary[f"donor_{split}"] = agg([c for c in cases if c.get("donor_split") == split])
+    return summary
+
+
 # ============================================================================ trainer
 class Trainer:
     def __init__(self, backend: Backend, cfg: TrainConfig, output: Path, log=print):
@@ -340,6 +450,14 @@ class Trainer:
         self.update = 0
         self.loss_history: List[float] = []
         self._probe = None
+        self.pairs: List[dict] = []
+        if cfg.pairs.enabled:
+            from .pairs import load_pairs
+            self.pairs = load_pairs(cfg.pairs.file, "train", cfg.pairs.max_visual_distance, cfg.pairs.min_delta)
+            if not self.pairs:
+                raise ValueError(f"No training pairs left in {cfg.pairs.file} after the filters.")
+            log(f"[pairs] {len(self.pairs)} counterfactual training pairs, weight {cfg.pairs.weight}, "
+                f"{cfg.pairs.per_update}/update")
 
     # ------------------------------------------------------------- checkpoints
     def checkpoint_dir(self) -> Path:
@@ -468,15 +586,36 @@ class Trainer:
             for j in range(len(bins["sum"])):
                 bins["sum"][j] += b["sum"][j]
                 bins["count"][j] += b["count"][j]
+        pair_stats = {"loss": 0.0, "samples": 0}
+        if self.pairs:
+            chosen = random.Random(stable_seed(cfg.seed, "pairs", u)).sample(
+                self.pairs, min(cfg.pairs.per_update, len(self.pairs)))
+            mine_pairs = chosen[self.rank::self.world]
+            pair_total = 2 * len(chosen)
+            for m in range(0, len(mine_pairs), cfg.schedule.micro_batch):
+                group = mine_pairs[m:m + cfg.schedule.micro_batch]
+                for reverse in (False, True):
+                    _, swapped = self.backend.pair_batches(group, reverse)
+                    generator = torch.Generator().manual_seed(stable_seed(cfg.seed, "pair-step", u, self.rank, m, reverse))
+                    out = compute_loss(self.model, swapped, cfg.v2.objective, generator,
+                                       drop=torch.zeros(len(group), dtype=torch.bool))
+                    if not bool(torch.isfinite(out["loss"])):
+                        raise FloatingPointError(f"Non-finite pair loss at update {u}.")
+                    (out["loss"] * cfg.pairs.weight * (len(group) / pair_total)).backward()
+                    pair_stats["loss"] += float(out["loss"]) * len(group)
+                    pair_stats["samples"] += len(group)
         if self.world > 1:
             for p in self.parameters:
                 if p.grad is None:
                     p.grad = torch.zeros_like(p)
                 torch.distributed.all_reduce(p.grad)
             packed = torch.tensor([stats["loss"], stats["fm"], stats["endpoint"], stats["dropped"], stats["samples"],
-                                   *bins["sum"], *bins["count"]], device=self.device, dtype=torch.float64)
+                                   *bins["sum"], *bins["count"], pair_stats["loss"], pair_stats["samples"]],
+                                  device=self.device, dtype=torch.float64)
             torch.distributed.all_reduce(packed)
             values = packed.tolist()
+            pair_stats = {"loss": values[-2], "samples": values[-1]}
+            values = values[:-2]
             stats = dict(zip(("loss", "fm", "endpoint", "dropped", "samples"), values[:5]))
             k = len(bins["sum"])
             bins = {"sum": values[5:5 + k], "count": values[5 + k:5 + 2 * k]}
@@ -496,6 +635,9 @@ class Trainer:
                                 (bins["sum"][j] / bins["count"][j] if bins["count"][j] else None)
                                 for j in range(len(bins["sum"]))},
                   "seconds": time.monotonic() - started}
+        if pair_stats["samples"]:
+            record["pair_loss"] = pair_stats["loss"] / pair_stats["samples"]
+            record["pair_samples"] = int(pair_stats["samples"])
         if torch.cuda.is_available() and self.device.type == "cuda":
             record["peak_gpu_bytes"] = torch.cuda.max_memory_allocated(self.device)
         return record
@@ -554,7 +696,8 @@ class Trainer:
                 return {"stopped": True, "update": self.update}
             record = self.step()
             if self.rank == 0:
-                self.log("[train] " + json.dumps({k: record[k] for k in ("update", "loss", "fm", "endpoint", "grad_norm", "seconds")}))
+                self.log("[train] " + json.dumps({k: record[k] for k in ("update", "loss", "fm", "endpoint", "pair_loss",
+                                                                        "grad_norm", "seconds") if k in record}))
                 if not dry_run:
                     append_jsonl(out / "metrics.jsonl", record)
             trip = self.loss_guard()
@@ -796,9 +939,38 @@ def cmd_evaluate(cfg: TrainConfig, args) -> None:
         log(json.dumps(result["overall"], indent=2))
 
 
+def cmd_pr(cfg: TrainConfig, args) -> None:
+    """PR evaluation of a memory_v2 checkpoint ('init' = the start model, v2 inert) on matched-present pairs."""
+    from .pairs import load_pairs
+    device = setup_distributed()
+    path = args.pairs or cfg.pairs.file
+    if not path:
+        raise SystemExit("Give --pairs <pairs json> (scripts/memory_v2/find_pairs.py output).")
+    pairs = load_pairs(path, args.pair_split, args.max_visual_distance, args.min_delta)
+    if args.limit and args.limit < len(pairs):           # deterministic subset across tasks, not the first N
+        pairs = sorted(random.Random(stable_seed("pr-subset", args.limit)).sample(pairs, args.limit),
+                       key=lambda p: (p["task"], p["query"]["episode_id"], p["query"]["anchor"]))
+    output = Path(args.output or (Path(cfg.output) / "pr"))
+    log = logger(output)
+    backend = DenseBackend(cfg, device, train_action=False)
+    label = "init"
+    if args.checkpoint and args.checkpoint != "init":
+        state = torch.load(args.checkpoint, map_location="cpu", weights_only=False)
+        backend.model.memory.load_state_dict(state["memory"], strict=True)
+        label = Path(args.checkpoint).stem
+    log(f"[pr] {len(pairs)} pairs ({args.pair_split}) from {path}; checkpoint {args.checkpoint or 'init'}")
+    result = evaluate_pairs(backend, pairs, cfg, modes=tuple(cfg.eval.modes), batch_size=cfg.eval.batch, log=log)
+    if rank_world()[0] == 0:
+        result.update(checkpoint=args.checkpoint, pairs_file=str(path), pair_split=args.pair_split,
+                      backend=backend.describe())
+        write_json(output / f"pr_{label}_{args.pair_split}.json", result)
+        log("[pr] summary " + json.dumps(result["summary"], indent=1))
+        log(f"[pr] written {output / f'pr_{label}_{args.pair_split}.json'}")
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("command", choices=("features", "train", "evaluate"))
+    parser.add_argument("command", choices=("features", "train", "evaluate", "pr"))
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--set", action="append", default=[], help="override, e.g. --set optim.lr_memory=5e-5")
     parser.add_argument("--dry-run", type=int, default=0, help="train: run N updates, no saving/eval")
@@ -807,11 +979,16 @@ def main(argv=None):
     parser.add_argument("--checkpoint", help="evaluate: memory_v2 checkpoint or 'init'")
     parser.add_argument("--windows", type=int, help="evaluate: number of windows (0 = all)")
     parser.add_argument("--guidance", type=float, nargs="*", help="evaluate: extra guidance scales")
-    parser.add_argument("--output", help="evaluate: output folder")
+    parser.add_argument("--output", help="evaluate/pr: output folder")
+    parser.add_argument("--pairs", help="pr: pairs JSON (default: pairs.file of the config)")
+    parser.add_argument("--pair-split", default="val", choices=("val", "train"), help="pr: which pair list")
+    parser.add_argument("--max-visual-distance", type=float, default=None, help="pr: filter pairs")
+    parser.add_argument("--min-delta", type=float, default=0.0, help="pr: filter pairs")
+    parser.add_argument("--limit", type=int, default=0, help="pr: first N pairs only")
     args = parser.parse_args(argv)
     cfg = load_config(args.config, args.set)
     try:
-        {"features": cmd_features, "train": cmd_train, "evaluate": cmd_evaluate}[args.command](cfg, args)
+        {"features": cmd_features, "train": cmd_train, "evaluate": cmd_evaluate, "pr": cmd_pr}[args.command](cfg, args)
     finally:
         if torch.distributed.is_available() and torch.distributed.is_initialized():
             torch.distributed.destroy_process_group()

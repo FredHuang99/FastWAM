@@ -199,3 +199,29 @@ def test_eval_modes_survive_yaml(tmp_path):
     raw = tmp_path / "c.yaml"
     raw.write_text(yaml.safe_dump({"eval": {"modes": ["on"]}}).replace("'on'", "on"))
     assert load_config(raw).eval.modes == ("on",)
+
+
+def test_counterfactual_pairs_train_and_pr(tmp_path):
+    import json as _json
+    pairs = [{"task": "t", "query": {"episode_id": 0, "anchor": 20}, "donor": {"episode_id": 1, "anchor": 24},
+              "present_rms": 0.01, "delta_norm": 3.0, "visual_distance": 0.0},
+             {"task": "t", "query": {"episode_id": 2, "anchor": 30}, "donor": {"episode_id": 0, "anchor": 28},
+              "present_rms": 0.02, "delta_norm": 5.0, "visual_distance": 0.5}]
+    path = tmp_path / "pairs.json"
+    path.write_text(_json.dumps({"train": pairs, "val": pairs}))
+    from fastwam.memory_v2.train_v2 import PairsConfig, evaluate_pairs
+    cfg = _cfg(tmp_path)
+    cfg.pairs = PairsConfig(file=str(path), weight=1.0, per_update=2, max_visual_distance=0.4)
+    assert "pairs" in cfg.to_dict() and "pairs" not in _cfg(tmp_path).to_dict()
+    backend = TinyBackend()
+    trainer = Trainer(backend, cfg, tmp_path / "run", log=lambda m: None)
+    assert len(trainer.pairs) == 1                              # visual filter
+    record = trainer.step()
+    assert record["pair_samples"] == 2 and record["pair_loss"] > 0
+    own, swapped = backend.pair_batches(pairs, reverse=False)
+    assert torch.equal(swapped["latent"], own["latent"])         # current frame of the query
+    assert torch.equal(swapped["current_ids"], torch.tensor([24, 28]))
+    result = evaluate_pairs(backend, pairs, cfg, modes=("on", "null"), batch_size=2, log=lambda m: None)
+    assert result["summary"]["all"]["n"] == 4
+    # The null branch never sees history: swapping it changes nothing.
+    assert all(c["null/response"] < 1e-6 for c in result["cases"])

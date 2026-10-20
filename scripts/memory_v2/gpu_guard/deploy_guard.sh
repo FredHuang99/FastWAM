@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 # Run on the HOST (a user that can run docker). Recreates the hhy-gpu2-guard container so it
-# guards host GPUs 1, 2, 4 for the jobs of container $OWNER_REF:
+# guards the GPUs listed in GUARD_UUIDS for the jobs of container $OWNER_REF:
 #   - any compute process on those GPUs that is not from $OWNER_REF is SIGKILLed;
 #   - a GPU is released 10 min after our jobs leave it (or 30 min if they never show up);
-#   - when all three are released the guard exits 0 and, with --restart on-failure, stays stopped.
+#   - when all are released the guard exits 0 and, with --restart on-failure, stays stopped.
+# GPUs are given by UUID (identical on host and in containers; indices differ between them):
+#   GUARD_UUIDS=GPU-aaa,GPU-bbb bash deploy_guard.sh
 # Generated from scripts/memory_v2/gpu_guard/guard.py (embedded below, written to $DIR/guard.py).
 (
 set -euo pipefail
@@ -15,20 +17,19 @@ OWNER_REF="${OWNER_REF:-6e4b37a15066}"     # our training container (id or name)
 RELEASE_AFTER_SECONDS="${RELEASE_AFTER_SECONDS:-600}"
 STARTUP_TIMEOUT_SECONDS="${STARTUP_TIMEOUT_SECONDS:-1800}"
 DRY_RUN="${DRY_RUN:-0}"
+: "${GUARD_UUIDS:?set GUARD_UUIDS=GPU-...,GPU-... (UUIDs from nvidia-smi -L)}"
 
-declare -A EXPECT=([1]="47:00.0" [2]="81:00.0" [4]="C2:00.0")
-UUIDS=()
-for i in 1 2 4; do
-    BUS="$(nvidia-smi -i "$i" --query-gpu=pci.bus_id --format=csv,noheader)"
-    case "$BUS" in
-        *":${EXPECT[$i]}") ;;
-        *) echo "GPU$i PCI 地址不符：$BUS（期望 ${EXPECT[$i]}）；停止。"; exit 1 ;;
+HOST_GPUS="$(nvidia-smi -L)"
+IFS=, read -r -a UUIDS <<< "$GUARD_UUIDS"
+for U in "${UUIDS[@]}"; do
+    LINE="$(grep -F "$U" <<< "$HOST_GPUS" || true)"
+    case "$LINE" in
+        "") echo "UUID $U 不在本机 nvidia-smi -L 中；停止。"; exit 1 ;;
+        *Display*) echo "UUID $U 是显示卡：$LINE；停止。"; exit 1 ;;
+        *) echo "guard: $LINE" ;;
     esac
-    UUIDS+=("$(nvidia-smi -i "$i" --query-gpu=uuid --format=csv,noheader)")
 done
-GUARD_UUIDS="$(IFS=,; echo "${UUIDS[*]}")"
 OWNER="$(docker inspect -f '{{.Id}}' "$OWNER_REF")"
-echo "guard GPUs: $GUARD_UUIDS"
 echo "owner container: $OWNER"
 
 # Install guard.py (old one backed up) and clear a previous DONE marker, via the guard image itself.

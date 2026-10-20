@@ -122,8 +122,8 @@ class ObjectiveConfig:
             raise ValueError(f"Unknown weight_mode={self.weight_mode}.")
         if not 0.0 <= self.high_noise_prob <= 1.0 or not 0.0 <= self.high_noise_low < 1.0:
             raise ValueError("Invalid high-noise mixture.")
-        if not 0.0 <= self.memory_dropout < 1.0:
-            raise ValueError("memory_dropout must be in [0, 1).")
+        if not 0.0 <= self.memory_dropout <= 1.0:
+            raise ValueError("memory_dropout must be in [0, 1] (1 = history never seen: capacity-only control).")
         if self.tau_shift <= 0 or self.weight_shift <= 0:
             raise ValueError("Shifts must be positive.")
         if self.endpoint_weight < 0 or self.weight_floor < 0:

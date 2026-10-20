@@ -9,7 +9,7 @@ and exits 0, and `--restart on-failure` leaves the container stopped (a crash re
 ```bash
 # on the host
 docker cp 6e4b37a15066:/workspace/FastWAM-memory2/scripts/memory_v2/gpu_guard/deploy_guard.sh /tmp/deploy_guard.sh
-bash /tmp/deploy_guard.sh                    # DRY_RUN=1 bash ... to only log what it would kill
+GUARD_UUIDS=GPU-aaa,GPU-bbb bash /tmp/deploy_guard.sh   # UUIDs from nvidia-smi -L; DRY_RUN=1 to only log
 docker logs -f --tail 50 hhy-gpu2-guard      # KILL / RELEASE / 10-min status lines
 # manual teardown at any time
 docker update --restart=no hhy-gpu2-guard && docker stop hhy-gpu2-guard
