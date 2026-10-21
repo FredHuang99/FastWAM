@@ -94,9 +94,10 @@ build() {
 stage()  { step "stage"; $HFPY $HERE/manifest.py stage --mig "$MIG" --workers 8; }
 upload() { step "upload -> $REPO"; $HFPY $HERE/manifest.py upload --mig "$MIG" --repo "$REPO" --workers 8; }
 
-case "${1:?records|trace|build|stage|upload|local|all}" in
+case "${1:?records|trace|build|stage|upload|local|all|finish}" in
   records) records ;; trace) trace ;; build) build ;; stage) stage ;; upload) upload ;;
   local) records; trace; build; stage; step "local done; check the size table above, then: bash $0 upload" ;;
   all) records; trace; build; stage; upload; step "all done" ;;
+  finish) build; stage; upload; step "all done" ;;
   *) echo "unknown step $1"; exit 2 ;;
 esac

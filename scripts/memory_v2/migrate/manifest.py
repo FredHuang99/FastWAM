@@ -147,7 +147,11 @@ def cmd_build(args):
     add("resources", sorted(siblings))
     add("fastwam_traced", [p for p in trace_logical if p.startswith(FW + "/")])
 
+    volatile = {str(mig / n) for n in ("hash_cache.json", "MANIFEST.draft.json")}
+
     def keep_output(p):
+        if p in volatile or (os.path.dirname(p) == str(mig) and p.endswith(".log")):
+            return False                         # files this pipeline is still writing
         parts = p.split("/")
         if "checkpoints" in parts and p.endswith(".pt"):
             return os.path.basename(p) == FINAL_CHECKPOINT or p in trace_logical
@@ -235,7 +239,12 @@ def cmd_stage(args):
     stage = mig / "stage"
     linked = 0
     for f in draft["files"]:
-        f["sha256"] = cache[key(f)]
+        k = key(f)
+        if k not in cache:                       # changed since hashing: hash again
+            print(f"[stage] re-hash (changed while hashing): {f['path']}", flush=True)
+            cache[k] = sha256(f["real"])
+        f["size"] = os.path.getsize(f["real"])   # the size that was hashed, not the build-time size
+        f["sha256"] = cache[k]
         f["stage_path"] = stage_path(f["path"])
         dst = stage / f["stage_path"]
         if dst.exists() or dst.is_symlink():
@@ -248,6 +257,8 @@ def cmd_stage(args):
         except OSError:
             os.symlink(f["real"], dst)
         linked += 1
+    cache_path.write_text(json.dumps(cache))
+    draft["total_bytes"] = sum(f["size"] for f in draft["files"])
     manifest = {k: v for k, v in draft.items() if k != "files"}
     manifest["files"] = [{k: f[k] for k in ("path", "stage_path", "size", "sha256", "group")} for f in draft["files"]]
     (stage / "MANIFEST.json").write_text(json.dumps(manifest, indent=1))
