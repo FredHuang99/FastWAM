@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # A100 container (root@6e4b37a15066): records -> traces -> manifest -> stage -> HF upload.
-#   bash a100_pack.sh records|trace|build|stage|upload|local     (local = records+trace+build+stage)
+#   bash a100_pack.sh records|trace|build|stage|upload|local|all  (local = records+trace+build+stage; all = local+upload)
 # Env: CUDA_VISIBLE_DEVICES (one free GPU, for trace), HF_REPO, SKIP (e.g. "features simulator"), EXCLUDE (fnmatch).
 set -euo pipefail
 cd /workspace/FastWAM-memory2
@@ -14,10 +14,13 @@ O=/workspace/FastWAM-memory2/outputs/memory_v2
 REPO=${HF_REPO:-hhyfred/memwam-h100-migration-v1}
 mkdir -p "$MIG/records" "$MIG/traces"
 step() { echo "[pack] $(date '+%F %T') $*"; }
+trap 'echo "[pack] FAILED (exit $?) at line $LINENO: $BASH_COMMAND" >&2' ERR
+g() { git -c 'safe.directory=*' "$@"; }
 
 records() {
   step "records -> $MIG/records"
   R=$MIG/records
+  set +e +o pipefail; trap - ERR          # best-effort records; the required ones are checked at the end
   $PY - > "$R/runtime.json" <<'PY'
 import json, platform, subprocess, sys
 import numpy, torch
@@ -31,7 +34,7 @@ except OSError:
     pass
 print(json.dumps(out, indent=1))
 PY
-  $PY -m pip freeze --all > "$R/mwam_freeze_all.txt"
+  $PY -m pip freeze --all > "$R/mwam_freeze_all.txt" 2>/dev/null
   $PY - > "$R/mwam_venv_local.txt" <<'PY'
 import importlib.metadata as md, os, sys
 prefix = os.path.realpath(sys.prefix)
@@ -47,20 +50,24 @@ PY
     if [ -x "$env/bin/python" ]; then
       n=$(basename "$env")
       [ -x /opt/miniforge/bin/conda ] && /opt/miniforge/bin/conda list -p "$env" --explicit > "$R/${n}_conda_explicit.txt" || true
-      "$env/bin/python" -m pip freeze --all > "$R/${n}_pip_freeze.txt" || true
+      "$env/bin/python" -m pip freeze --all > "$R/${n}_pip_freeze.txt" 2>/dev/null || true
     fi
   done
   {
-    echo "memory2 HEAD $(git -C /workspace/FastWAM-memory2 rev-parse HEAD)"
-    git -C /workspace/FastWAM-memory2 status --short | head -50
+    echo "memory2 HEAD $(g -C /workspace/FastWAM-memory2 rev-parse HEAD)"
+    g -C /workspace/FastWAM-memory2 status --short 2>&1 | head -50
     if [ -d /workspace/FastWAM/.git ]; then
-      echo "FastWAM HEAD $(git -C /workspace/FastWAM rev-parse HEAD) branch $(git -C /workspace/FastWAM rev-parse --abbrev-ref HEAD)"
-      git -C /workspace/FastWAM status --short | head -50
+      echo "FastWAM HEAD $(g -C /workspace/FastWAM rev-parse HEAD) branch $(g -C /workspace/FastWAM rev-parse --abbrev-ref HEAD)"
+      g -C /workspace/FastWAM status --short 2>&1 | head -50
     fi
     for p in /workspace/FastWAM /workspace/FastWAM-memory2 /restore-tmp /restore-tmp/dense_joint_v1; do echo "realpath $p -> $(readlink -f "$p")"; done
   } > "$R/git_and_roots.txt"
-  df -hT /workspace/FastWAM /workspace/FastWAM-memory2 /restore-tmp > "$R/df.txt" 2>&1 || true
-  ls "$R"
+  df -hT /workspace/FastWAM /workspace/FastWAM-memory2 /restore-tmp > "$R/df.txt" 2>&1
+  set -e -o pipefail; trap 'echo "[pack] FAILED (exit $?) at line $LINENO: $BASH_COMMAND" >&2' ERR
+  for f in runtime.json mwam_venv_local.txt git_and_roots.txt; do
+    [ -s "$R/$f" ] || { echo "[pack] required record $R/$f is missing or empty"; exit 1; }
+  done
+  ls -la "$R"
 }
 
 trace() {
@@ -87,8 +94,9 @@ build() {
 stage()  { step "stage"; $HFPY $HERE/manifest.py stage --mig "$MIG" --workers 8; }
 upload() { step "upload -> $REPO"; $HFPY $HERE/manifest.py upload --mig "$MIG" --repo "$REPO" --workers 8; }
 
-case "${1:?records|trace|build|stage|upload|local}" in
+case "${1:?records|trace|build|stage|upload|local|all}" in
   records) records ;; trace) trace ;; build) build ;; stage) stage ;; upload) upload ;;
   local) records; trace; build; stage; step "local done; check the size table above, then: bash $0 upload" ;;
+  all) records; trace; build; stage; upload; step "all done" ;;
   *) echo "unknown step $1"; exit 2 ;;
 esac

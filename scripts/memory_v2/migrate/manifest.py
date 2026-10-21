@@ -92,8 +92,14 @@ def git_files(repo: str, exclude_prefixes=("resources/", "outputs/"), max_bytes=
         for sub in ("src", "configs", "scripts"):
             yield from walk(os.path.join(repo, sub))
         return
-    out = subprocess.run(["git", "-C", repo, "ls-files", "-co", "--exclude-standard", "-z"],
-                         capture_output=True, check=True).stdout.decode().split("\0")
+    run = subprocess.run(["git", "-c", "safe.directory=*", "-C", repo, "ls-files", "-co", "--exclude-standard", "-z"],
+                         capture_output=True)
+    if run.returncode != 0:                      # e.g. not a usable git checkout: fall back to the source folders
+        print(f"[build] git ls-files failed in {repo}: {run.stderr.decode().strip()[:300]}; walking src/configs/scripts")
+        for sub in ("src", "configs", "scripts"):
+            yield from walk(os.path.join(repo, sub))
+        return
+    out = run.stdout.decode().split("\0")
     for rel in out:
         if not rel or rel.startswith(exclude_prefixes):
             continue

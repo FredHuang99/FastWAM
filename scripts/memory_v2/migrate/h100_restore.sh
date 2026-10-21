@@ -26,6 +26,7 @@ PY
 
 code() {
   step "memory2 code into /workspace/FastWAM-memory2 (outputs/ untouched)"
+  git config --global --add safe.directory /workspace/FastWAM-memory2
   cd /workspace/FastWAM-memory2
   [ -d .git ] || git init -q
   git remote get-url origin >/dev/null 2>&1 || git remote add origin https://github.com/FredHuang99/FastWAM.git
@@ -33,7 +34,6 @@ code() {
   WANT=$(awk '/^memory2 HEAD/{print $3}' "$MIG/records/git_and_roots.txt")
   git checkout -q -f -B memory2 origin/memory2
   echo "HEAD $(git rev-parse HEAD) (A100 was ${WANT:-unknown}; newer is fine, the scripts are backward compatible)"
-  git config --global --add safe.directory /workspace/FastWAM-memory2
 }
 
 system() {
