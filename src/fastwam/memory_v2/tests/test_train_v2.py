@@ -225,3 +225,33 @@ def test_counterfactual_pairs_train_and_pr(tmp_path):
     assert result["summary"]["all"]["n"] == 4
     # The null branch never sees history: swapping it changes nothing.
     assert all(c["null/response"] < 1e-6 for c in result["cases"])
+
+
+def test_pr_swap_content_and_clock(tmp_path):
+    pairs = [{"task": "t", "query": {"episode_id": 0, "anchor": 20}, "donor": {"episode_id": 1, "anchor": 24},
+              "present_rms": 0.01, "delta_norm": 3.0, "visual_distance": 0.0},
+             {"task": "t", "query": {"episode_id": 2, "anchor": 30}, "donor": {"episode_id": 0, "anchor": 28},
+              "present_rms": 0.02, "delta_norm": 5.0, "visual_distance": 0.0}]
+    from fastwam.memory_v2.train_v2 import evaluate_pairs
+    backend = TinyBackend()
+    own, donor = backend.batch([p["query"] for p in pairs]), backend.batch([p["donor"] for p in pairs])
+
+    def ages(b):
+        return torch.where(b["history_valid"], b["current_ids"][:, None] - b["frame_ids"], torch.full_like(b["frame_ids"], -1))
+
+    _, content = backend.pair_batches(pairs, swap="content")
+    assert torch.equal(content["current_ids"], own["current_ids"])            # own clock
+    assert torch.equal(content["history"], donor["history"])                   # donor content
+    keep = content["history_valid"]
+    assert torch.equal(ages(content)[keep], ages(donor)[keep])                 # donor ages kept
+    assert torch.equal(content["actions"], donor["actions"])
+    _, clock = backend.pair_batches(pairs, swap="clock")
+    assert torch.equal(clock["current_ids"], donor["current_ids"])             # donor clock
+    assert torch.equal(clock["history"], own["history"])                       # own content
+    assert torch.equal(ages(clock)[clock["history_valid"]], ages(own)[clock["history_valid"]])
+    assert not bool(((clock["frame_ids"] > clock["current_ids"][:, None]) & clock["history_valid"]).any())
+    cfg = _cfg(tmp_path)
+    for swap in ("content", "clock"):
+        result = evaluate_pairs(backend, pairs, cfg, modes=("on", "null"), batch_size=2, log=lambda m: None, swap=swap)
+        assert result["swap"] == swap and result["summary"]["all"]["n"] == 4
+        assert all(c["null/response"] < 1e-6 and c["history_dropped"] >= 0 for c in result["cases"])

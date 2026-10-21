@@ -113,13 +113,13 @@ def full_evals(root: Path):
 
 def pr(root: Path):
     section("4. PR on matched-present val pairs (own_correct | switch | PR | median response)")
-    files = sorted(glob.glob(str(root / "pr" / "*" / "pr_*_val.json")))
+    files = sorted(glob.glob(str(root / "pr" / "*" / "pr_*_val*.json")))
     if not files:
         print(f"(no files under {root / 'pr'})")
     for f in files:
         value = load(Path(f)) or {}
         s = value.get("summary", {})
-        print(f"\n== {f}   pairs={value.get('pairs')}  checkpoint={value.get('checkpoint')}")
+        print(f"\n== {f}   pairs={value.get('pairs')}  swap={value.get('swap', 'all')}  checkpoint={value.get('checkpoint')}")
         for part in ("all", "put_back_block", "swap_blocks", "delta_low", "delta_mid", "delta_high", "donor_train", "donor_val"):
             if part not in s:
                 continue

@@ -278,14 +278,14 @@ class Backend:
     def noise(self, row: dict, shape) -> torch.Tensor: ...
     def describe(self) -> dict: ...
 
-    def pair_batches(self, pairs: Sequence[dict], reverse: bool = False):
+    def pair_batches(self, pairs: Sequence[dict], reverse: bool = False, swap: str = "all"):
         """(own, swapped): own = query current + query history (query targets); swapped = query current +
         donor history (donor targets). reverse swaps the roles of query and donor."""
         from .pairs import swap_history
         q, d = ("donor", "query") if reverse else ("query", "donor")
         own = self.batch([p[q] for p in pairs])
         donor = self.batch([p[d] for p in pairs])
-        return own, swap_history(own, donor)
+        return own, swap_history(own, donor, swap)
 
     def pair_noise(self, pair: dict, reverse: bool, shape) -> torch.Tensor:
         key = "|".join(f"{p['episode_id']}:{p['anchor']}" for p in ((pair["donor"], pair["query"]) if reverse
@@ -342,13 +342,14 @@ def evaluate(backend: Backend, rows: Sequence[dict], cfg: TrainConfig, log=print
 
 @torch.no_grad()
 def evaluate_pairs(backend: Backend, pairs: Sequence[dict], cfg: TrainConfig, modes=("on", "off", "null"),
-                   batch_size: int = 8, log=print) -> Dict[str, object]:
+                   batch_size: int = 8, log=print, swap: str = "all") -> Dict[str, object]:
     """History-swap response on matched-present pairs, both directions, same noise for own/swapped.
 
     own_correct : with its own history, the prediction is closer to its own future than to the partner's
     switch      : with the partner's history (same current frame), it is closer to the partner's future
     pr          : own_correct and switch                      (history-blind model: switch ~ 1 - own_correct)
     response    : ||pred(swapped) - pred(own)|| / ||target(partner) - target(own)||   (0 = ignores history)
+    swap        : all | content (partner's history re-timed to the own clock) | clock (own history, partner's clock)
     """
     model = backend.model
     model.eval()
@@ -361,7 +362,8 @@ def evaluate_pairs(backend: Backend, pairs: Sequence[dict], cfg: TrainConfig, mo
         chunk = mine[start:start + batch_size]
         group = [p for _, p in chunk]
         for reverse in (False, True):
-            own, swapped = backend.pair_batches(group, reverse)
+            own, swapped = backend.pair_batches(group, reverse, swap)
+            dropped = swapped.get("history_dropped")
             c_own, c_swap = model.conditions(own), model.conditions(swapped)
             t_own, t_swap = own["actions"].float(), swapped["actions"].float()
             valid = (own["action_valid"] & swapped["action_valid"]).float()[..., None]
@@ -373,7 +375,8 @@ def evaluate_pairs(backend: Backend, pairs: Sequence[dict], cfg: TrainConfig, mo
 
             rows = [{"pair": i, "reverse": reverse, "task": p["task"], "delta_norm": p["delta_norm"],
                      "visual_distance": p.get("visual_distance"), "present_rms": p["present_rms"],
-                     "donor_split": p.get("donor_split")} for i, p in chunk]
+                     "donor_split": p.get("donor_split"), "swap": swap,
+                     "history_dropped": 0 if dropped is None else int(dropped[b])} for b, (i, p) in enumerate(chunk)]
             for mode in modes:
                 p_own, _ = model.sample(c_own, noise, guidance, memory_mode=mode)
                 p_swap, _ = model.sample(c_swap, noise, guidance, memory_mode=mode)
@@ -390,7 +393,7 @@ def evaluate_pairs(backend: Backend, pairs: Sequence[dict], cfg: TrainConfig, mo
             log(f"[pr] {min(len(mine), start + len(chunk))}/{len(mine)} pairs on rank 0")
     cases = gather_objects(cases)
     model.train()
-    return {"pairs": len(pairs), "cases": cases, "summary": summarise_pairs_eval(cases, modes)}
+    return {"pairs": len(pairs), "swap": swap, "cases": cases, "summary": summarise_pairs_eval(cases, modes)}
 
 
 def summarise_pairs_eval(cases: Sequence[dict], modes) -> dict:
@@ -959,13 +962,15 @@ def cmd_pr(cfg: TrainConfig, args) -> None:
         backend.model.memory.load_state_dict(state["memory"], strict=True)
         label = Path(args.checkpoint).stem
     log(f"[pr] {len(pairs)} pairs ({args.pair_split}) from {path}; checkpoint {args.checkpoint or 'init'}")
-    result = evaluate_pairs(backend, pairs, cfg, modes=tuple(cfg.eval.modes), batch_size=cfg.eval.batch, log=log)
+    result = evaluate_pairs(backend, pairs, cfg, modes=tuple(cfg.eval.modes), batch_size=cfg.eval.batch, log=log,
+                            swap=args.swap)
+    suffix = "" if args.swap == "all" else f"_{args.swap}"
     if rank_world()[0] == 0:
         result.update(checkpoint=args.checkpoint, pairs_file=str(path), pair_split=args.pair_split,
                       backend=backend.describe())
-        write_json(output / f"pr_{label}_{args.pair_split}.json", result)
+        write_json(output / f"pr_{label}_{args.pair_split}{suffix}.json", result)
         log("[pr] summary " + json.dumps(result["summary"], indent=1))
-        log(f"[pr] written {output / f'pr_{label}_{args.pair_split}.json'}")
+        log(f"[pr] written {output / f'pr_{label}_{args.pair_split}{suffix}.json'}")
 
 
 def main(argv=None):
@@ -985,6 +990,8 @@ def main(argv=None):
     parser.add_argument("--max-visual-distance", type=float, default=None, help="pr: filter pairs")
     parser.add_argument("--min-delta", type=float, default=0.0, help="pr: filter pairs")
     parser.add_argument("--limit", type=int, default=0, help="pr: first N pairs only")
+    parser.add_argument("--swap", default="all", choices=("all", "content", "clock"),
+                        help="pr: what of the partner's history is swapped in (see evaluate_pairs)")
     args = parser.parse_args(argv)
     cfg = load_config(args.config, args.set)
     try:

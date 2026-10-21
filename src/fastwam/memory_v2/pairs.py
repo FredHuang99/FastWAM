@@ -142,12 +142,49 @@ def load_pairs(path, split: str, max_visual_distance: Optional[float] = None, mi
     return out
 
 
-def swap_history(current: dict, donor: dict) -> dict:
-    """Batch with `current`'s observation and `donor`'s history (and donor targets)."""
+SWAPS = ("all", "content", "clock")
+CONTENT_KEYS = ("history", "roles", "history_valid", "s1_history", "s1_valid")
+CLOCK_IDS = (("frame_ids", "history_valid"), ("s1_frame_ids", "s1_valid"))
+
+
+def _shift_clock(out: dict, shift):
+    """Move every frame id (and current_ids) by `shift` [B]; slots pushed before frame 0 become invalid."""
+    out["current_ids"] = out["current_ids"] + shift
+    dropped = 0
+    for ids, valid in CLOCK_IDS:
+        if ids not in out:
+            continue
+        moved = out[ids] + shift[:, None]
+        gone = (moved < 0) & out[valid]
+        dropped = dropped + gone.sum(1)
+        out[ids] = moved.clamp(min=0)
+        out[valid] = out[valid] & ~gone
+    return dropped
+
+
+def swap_history(current: dict, donor: dict, swap: str = "all") -> dict:
+    """Batch with `current`'s observation and the donor's targets, history taken as `swap` says:
+
+      all     : donor history content + donor clock (frame ids, current_ids)            [the PR default]
+      content : donor history content, re-timed to current's clock (same ages as the donor)
+      clock   : current's own history content, re-timed to the donor's clock (same ages as current)
+
+    `history_dropped` [B] counts valid slots that a re-timing pushed before frame 0 (then masked).
+    """
+    if swap not in SWAPS:
+        raise ValueError(f"swap must be one of {SWAPS}")
     out = dict(current)
-    for key in HISTORY_KEYS:
-        if key in donor:
-            out[key] = donor[key]
+    if swap == "all":
+        for key in HISTORY_KEYS:
+            if key in donor:
+                out[key] = donor[key]
+    elif swap == "content":
+        for key in HISTORY_KEYS:
+            if key in donor:
+                out[key] = donor[key]
+        out["history_dropped"] = _shift_clock(out, current["current_ids"] - donor["current_ids"])
+    else:
+        out["history_dropped"] = _shift_clock(out, donor["current_ids"] - current["current_ids"])
     out["actions"] = donor["actions"]
     out["action_valid"] = donor["action_valid"]
     return out

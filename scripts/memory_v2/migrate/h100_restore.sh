@@ -70,6 +70,9 @@ print("\n".join("  " + s for s in skipped))
 PY
   unset PIP_CONSTRAINT PIP_BUILD_CONSTRAINT UV_CONSTRAINT
   PIP_CONFIG_FILE=/dev/null $PY -m pip install --no-deps -r "$MIG/h100_pins.txt"
+  # transformers 4.49 needs huggingface-hub<1 and tokenizers<0.22 (the image has newer): take the A100 versions
+  EXTRA=$(grep -i "^huggingface[-_]hub==\|^tokenizers==" "$MIG/records/mwam_freeze_all.txt" | tr '\n' ' ')
+  [ -n "$EXTRA" ] && PIP_CONFIG_FILE=/dev/null $PY -m pip install --no-deps $EXTRA
   $PY -m pip check || echo "[restore] pip check reported the conflicts above (review; --no-deps install keeps the image's torch stack)"
   $PY -m pip install -q pytest
   $PY - <<'PY'
