@@ -18,6 +18,7 @@ import fnmatch
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -265,24 +266,67 @@ def cmd_stage(args):
     print(f"[stage] {linked} new links; {stage / 'MANIFEST.json'}; total {gib(manifest['total_bytes'])}")
 
 
+def _remote_files(api, repo):
+    out = {}
+    for x in api.list_repo_tree(repo, recursive=True, repo_type="model"):
+        if getattr(x, "size", None) is not None:
+            lfs = getattr(x, "lfs", None)
+            sha = getattr(lfs, "sha256", None) if lfs is not None else None
+            if sha is None and isinstance(lfs, dict):
+                sha = lfs.get("sha256")
+            out[x.path] = (x.size, sha)
+    return out
+
+
+def _batches(files, max_files=400, max_bytes=20 * 2 ** 30):
+    batch, size = [], 0
+    for f in files:
+        if batch and (len(batch) >= max_files or size + f["size"] > max_bytes):
+            yield batch
+            batch, size = [], 0
+        batch.append(f)
+        size += f["size"]
+    if batch:
+        yield batch
+
+
 def cmd_upload(args):
+    import huggingface_hub
     from huggingface_hub import HfApi
     stage = Path(args.mig) / "stage"
     if not (stage / "MANIFEST.json").exists():
         raise SystemExit("run stage first")
-    api = HfApi()
-    print("[upload] as", api.whoami()["name"], "->", args.repo, flush=True)
-    api.create_repo(args.repo, repo_type="model", private=True, exist_ok=True)
-    api.upload_large_folder(repo_id=args.repo, folder_path=str(stage), repo_type="model", private=True,
-                            num_workers=args.workers)
-    remote = {x.path: getattr(x, "lfs", None) for x in api.list_repo_tree(args.repo, recursive=True, repo_type="model")
-              if hasattr(x, "size")}
     manifest = json.loads((stage / "MANIFEST.json").read_text())
-    missing = [f["path"] for f in manifest["files"] if f["stage_path"] not in remote]
-    print(f"[upload] remote files {len(remote)}; manifest files missing remotely: {len(missing)}")
-    for p in missing[:20]:
-        print("  missing", p)
-    if missing:
+    api = HfApi()
+    print(f"[upload] huggingface_hub {huggingface_hub.__version__}; as {api.whoami()['name']} -> {args.repo}", flush=True)
+    api.create_repo(args.repo, repo_type="model", private=True, exist_ok=True)
+
+    def pending():
+        remote = _remote_files(api, args.repo)
+        todo = []
+        for f in manifest["files"]:
+            r = remote.get(f["stage_path"])
+            if r is None or r[0] != f["size"] or (r[1] is not None and r[1] != f["sha256"]):
+                todo.append(f)
+        return remote, todo
+
+    remote, todo = pending()
+    print(f"[upload] {len(manifest['files']) - len(todo)} files already on the hub; {len(todo)} to upload "
+          f"({gib(sum(f['size'] for f in todo))})", flush=True)
+    # Batched commits (<= 400 files / 20 GiB each): every finished batch is permanent, a rerun skips it.
+    batches = list(_batches(todo))
+    for i, batch in enumerate(batches, 1):
+        print(f"[upload] batch {i}/{len(batches)}: {len(batch)} files, {gib(sum(f['size'] for f in batch))}", flush=True)
+        api.upload_folder(repo_id=args.repo, repo_type="model", folder_path=str(stage),
+                          allow_patterns=[re.sub(r"([*?\[])", r"[\1]", f["stage_path"]) for f in batch],
+                          commit_message=f"payload batch {i}/{len(batches)}")
+    api.upload_file(path_or_fileobj=str(stage / "MANIFEST.json"), path_in_repo="MANIFEST.json",
+                    repo_id=args.repo, repo_type="model", commit_message="manifest")
+    remote, todo = pending()
+    print(f"[upload] remote files {len(remote)}; manifest files missing or different remotely: {len(todo)}")
+    for f in todo[:20]:
+        print("  missing", f["path"])
+    if todo or "MANIFEST.json" not in remote:
         raise SystemExit(1)
     print("[upload] complete")
 
