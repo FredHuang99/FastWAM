@@ -135,8 +135,47 @@ simulator() {
   bash scripts/memory_s1/portable/install_environments.sh render
 }
 
-case "${1:?system|download|code|env|verify|test|reference|simulator}" in
+simulator_finish() {
+  # Resume after `simulator` failed at the CuRobo editable install: setuptools-scm cannot see a version in the
+  # .git-less source, and the per-distribution PRETEND variable was not picked up. Set the generic one as well,
+  # only for this single pip call, then run the remaining steps of `simulator`.
+  cd /workspace/FastWAM
+  export FW_ROOT=/workspace/FastWAM CONFIG=configs/memory_s1/s1_variable_t_h100.yaml
+  export RECOVERY_ROOT=/workspace/FastWAM/outputs/recovery_aws_h100 READY_DIR=/workspace/FastWAM/outputs/recovery_aws_h100/restored
+  export CUDA_HOME=/opt/rmbench-env CC=gcc-12 CXX=g++-12 TORCH_CUDA_ARCH_LIST=9.0 MAX_JOBS=${MAX_JOBS:-8}
+  export PATH="/opt/rmbench-env/bin:$PATH"
+  export LD_LIBRARY_PATH="/opt/rmbench-env/lib:/opt/rmbench-env/targets/x86_64-linux/lib:${LD_LIBRARY_PATH:-}"
+  unset PIP_CONSTRAINT PIP_BUILD_CONSTRAINT UV_CONSTRAINT
+  hftools
+  V=$(/opt/rmbench-env/bin/python -c "
+import json, sys
+r = json.load(open('$RECOVERY_ROOT/simulator-recorded-pins.sources.json')).get('source_installed', {})
+v = {r[n] for n in ('nvidia-curobo', 'curobo') if n in r}
+sys.exit('no recorded CuRobo version') if len(v) != 1 else print(v.pop())")
+  step "CuRobo $V editable install (sm90, MAX_JOBS=$MAX_JOBS)"
+  SETUPTOOLS_SCM_PRETEND_VERSION="$V" SETUPTOOLS_SCM_PRETEND_VERSION_FOR_NVIDIA_CUROBO="$V" \
+    /opt/rmbench-env/bin/python -m pip install -e ./resources/RMBench/envs/curobo --no-build-isolation
+  step "simulator imports"
+  /opt/rmbench-env/bin/python - <<'PY'
+import sys
+import torch
+import sapien, mplib, curobo
+from pytorch3d import _C
+assert sys.version_info[:2] == (3, 10)
+assert torch.__version__.split("+")[0] == "2.4.1" and torch.version.cuda == "12.4" and torch.cuda.is_available()
+print("Simulator imports: OK", torch.__version__, torch.cuda.get_device_name(0))
+PY
+  step "saved simulator patches"
+  bash scripts/memory_s1/portable/install_environments.sh patches
+  step "restore simulator sources"
+  $HFPY -u scripts/memory_s1/portable/recovery.py restore-simulator --root "$FW_ROOT" --ready "$READY_DIR" --mode current
+  step "offscreen render probe"
+  bash scripts/memory_s1/portable/install_environments.sh render
+  step "simulator finished"
+}
+
+case "${1:?system|download|code|env|verify|test|reference|simulator|simulator_finish}" in
   system) system ;; download) download ;; code) code ;; env) env_ ;; verify) verify ;; test) test_ ;; reference) reference ;;
-  simulator) simulator ;;
+  simulator) simulator ;; simulator_finish) simulator_finish ;;
   *) echo "unknown step $1"; exit 2 ;;
 esac
