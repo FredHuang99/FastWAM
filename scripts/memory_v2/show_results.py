@@ -12,9 +12,10 @@ import glob
 import json
 from pathlib import Path
 
-RUNS = ("v2_A_memory_only", "v2_A_bfull", "v2_A_noabs", "v2_A_b0", "v2_A_cf")
+RUNS = ("v2_A_memory_only", "v2_A_bfull", "v2_A_noabs", "v2_A_b0", "v2_A_cf", "v2_A_bfull_cf", "v2_A_cf_s18",
+        "v2_A_bfull_s18")
 LABEL = {"v2_A_memory_only": "Ours", "v2_A_bfull": "B-full", "v2_A_noabs": "noabs", "v2_A_b0": "B0(cap)",
-         "v2_A_cf": "D(cf)"}
+         "v2_A_cf": "D(cf)", "v2_A_bfull_cf": "BF+pairs", "v2_A_cf_s18": "D s18", "v2_A_bfull_s18": "BF s18"}
 MODES = ("on", "null", "off")
 
 
