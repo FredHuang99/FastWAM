@@ -230,7 +230,26 @@ PY
     export VK_ICD_FILENAMES=/etc/vulkan/icd.d/nvidia_icd.json
   fi
   step "restore simulator sources"
-  $HFPY -u scripts/memory_s1/portable/recovery.py restore-simulator --root "$FW_ROOT" --ready "$READY_DIR" --mode current
+  # restore-simulator authenticates every file of the recorded RMBench snapshot. The demo data (data/...) was
+  # deliberately not migrated (training reads the dense cache). If the only unavailable files are demo data, every
+  # simulator source/asset that exists matched its recorded SHA-256 exactly -> nothing to restore; continue.
+  if ! $HFPY -u scripts/memory_s1/portable/recovery.py restore-simulator --root "$FW_ROOT" --ready "$READY_DIR" --mode current; then
+    $HFPY - "$RECOVERY_ROOT/SIMULATOR_RESTORE_UNAVAILABLE.json" <<'PY'
+import collections, json, sys
+r = json.load(open(sys.argv[1]))
+names = [u["file"] for u in r["unavailable"]]
+top = collections.Counter("/".join(n.split("/")[:3]) for n in names)
+print(f"[simulator-restore] verified exactly: {r['verified_files']} files; unavailable: {len(names)}")
+for k, v in top.most_common():
+    print(f"   {v:4d}  {k}")
+other = [n for n in names if not n.startswith("data/")]
+if other:
+    print("[simulator-restore] NON-DATA files differ or are missing (cannot continue):")
+    print("\n".join("   " + n for n in other[:40]))
+    sys.exit(1)
+print("[simulator-restore] only demo data (not needed for evaluation) is unavailable; all simulator sources match the record")
+PY
+  fi
   step "offscreen render probe"
   bash scripts/memory_s1/portable/install_environments.sh render
   step "simulator finished"
