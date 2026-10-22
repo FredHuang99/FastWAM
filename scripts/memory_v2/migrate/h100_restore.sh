@@ -154,8 +154,10 @@ simulator_finish() {
   unset C_INCLUDE_PATH CPLUS_INCLUDE_PATH PYTHONPATH PYTHONHOME VIRTUAL_ENV
   unset PIP_CONSTRAINT PIP_BUILD_CONSTRAINT UV_CONSTRAINT
   step "toolchain: nvcc $($N/bin/nvcc --version | grep -o 'release [0-9.]*'); $(/usr/bin/gcc-12 --version | head -1)"
-  ls "$N/targets/x86_64-linux/include/cublas_v2.h" "$N/targets/x86_64-linux/include/cusparse.h" >/dev/null \
-    || { echo "[restore] CUDA development headers missing in $N"; exit 1; }
+  for h in cublas_v2.h cusparse.h cuda_runtime.h; do
+    [ -f "$N/include/$h" ] || [ -f "$N/targets/x86_64-linux/include/$h" ] \
+      || { echo "[restore] CUDA development header $h missing in $N (include/ and targets/x86_64-linux/include/)"; exit 1; }
+  done
   hftools
   V=$(/opt/rmbench-env/bin/python -c "
 import json, sys
