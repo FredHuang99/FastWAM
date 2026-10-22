@@ -122,6 +122,12 @@ simulator() {
   step "ready package from hhyfred/fastwam-memory-s1-backup"
   $HFPY scripts/memory_s1/portable/recovery.py download-ready --repo hhyfred/fastwam-memory-s1-backup \
     --run-id memory_s1_variable_t_seed17_v2 --output "$RECOVERY_ROOT"
+  # The A100 copy of RMBench has no scripts/requirements.txt; the recorded pins (ready package) carry the
+  # exact versions, so a placeholder that only repeats the numpy<2 constraint is enough.
+  if [ ! -f resources/RMBench/scripts/requirements.txt ]; then
+    echo 'numpy<2' > resources/RMBench/scripts/requirements.txt
+    echo "[restore] created placeholder resources/RMBench/scripts/requirements.txt (pins come from the ready package)"
+  fi
   step "simulator env (conda + torch 2.4.1 cu124 + curobo/pytorch3d for sm90)"
   bash scripts/memory_s1/portable/install_environments.sh simulator
   bash scripts/memory_s1/portable/install_environments.sh patches
