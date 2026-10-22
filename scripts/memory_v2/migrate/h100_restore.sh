@@ -164,6 +164,27 @@ import json, sys
 r = json.load(open('$RECOVERY_ROOT/simulator-recorded-pins.sources.json')).get('source_installed', {})
 v = {r[n] for n in ('nvidia-curobo', 'curobo') if n in r}
 sys.exit('no recorded CuRobo version') if len(v) != 1 else print(v.pop())")
+  # The A100 copy of envs/curobo carried only the Python/config files (266 files), not the C++/CUDA sources.
+  # Fill ONLY the missing files from the official NVlabs/curobo release of the same version; files that RMBench
+  # ships (possibly modified) are kept as they are.
+  CU=resources/RMBench/envs/curobo
+  if [ ! -f "$CU/src/curobo/curobolib/cpp/lbfgs_step_cuda.cpp" ]; then
+    TAG=$(git ls-remote --tags https://github.com/NVlabs/curobo.git | awk '{print $2}' | sed 's#refs/tags/##; s#\^{}##' \
+          | grep -E "^v?${V}$" | head -1)
+    if [ -z "$TAG" ]; then
+      echo "[restore] no NVlabs/curobo tag for version $V; available tags:"
+      git ls-remote --tags https://github.com/NVlabs/curobo.git | awk '{print $2}' | tail -n 20
+      exit 1
+    fi
+    rm -rf /mnt/tmp/curobo_upstream
+    git clone -q --depth 1 --branch "$TAG" https://github.com/NVlabs/curobo.git /mnt/tmp/curobo_upstream
+    rm -rf /mnt/tmp/curobo_upstream/.git
+    before=$(find "$CU" -type f | wc -l)
+    cp -rn /mnt/tmp/curobo_upstream/. "$CU"/
+    after=$(find "$CU" -type f | wc -l)
+    step "filled $((after - before)) missing CuRobo files from NVlabs/curobo $TAG (kept RMBench's own $before files)"
+    [ -f "$CU/src/curobo/curobolib/cpp/lbfgs_step_cuda.cpp" ] || { echo "[restore] CuRobo C++ sources still missing"; exit 1; }
+  fi
   step "CuRobo $V editable install (sm90, MAX_JOBS=$MAX_JOBS)"
   BUILDLOG=/mnt/tmp/curobo_build.log
   if ! SETUPTOOLS_SCM_PRETEND_VERSION="$V" SETUPTOOLS_SCM_PRETEND_VERSION_FOR_NVIDIA_CUROBO="$V" \
