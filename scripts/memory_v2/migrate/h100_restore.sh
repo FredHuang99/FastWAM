@@ -142,10 +142,20 @@ simulator_finish() {
   cd /workspace/FastWAM
   export FW_ROOT=/workspace/FastWAM CONFIG=configs/memory_s1/s1_variable_t_h100.yaml
   export RECOVERY_ROOT=/workspace/FastWAM/outputs/recovery_aws_h100 READY_DIR=/workspace/FastWAM/outputs/recovery_aws_h100/restored
-  export CUDA_HOME=/opt/rmbench-env CC=gcc-12 CXX=g++-12 TORCH_CUDA_ARCH_LIST=9.0 MAX_JOBS=${MAX_JOBS:-8}
-  export PATH="/opt/rmbench-env/bin:$PATH"
-  export LD_LIBRARY_PATH="/opt/rmbench-env/lib:/opt/rmbench-env/targets/x86_64-linux/lib:${LD_LIBRARY_PATH:-}"
+  # Toolchain exactly as Codex's working H100 build (prepare_fused_env.sh): conda CUDA headers/libs live under
+  # targets/x86_64-linux, so CPATH/LIBRARY_PATH must point there; host compiler pinned to gcc-12.
+  N=/opt/rmbench-env
+  export CUDA_HOME=$N CC=/usr/bin/gcc-12 CXX=/usr/bin/g++-12 CUDAHOSTCXX=/usr/bin/g++-12
+  export TORCH_CUDA_ARCH_LIST=9.0 MAX_JOBS=${MAX_JOBS:-6} OMP_NUM_THREADS=4
+  export PATH="$N/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+  export LD_LIBRARY_PATH="$N/lib:$N/targets/x86_64-linux/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64"
+  export CPATH="$N/include:$N/targets/x86_64-linux/include"
+  export LIBRARY_PATH="$N/lib:$N/targets/x86_64-linux/lib:$N/targets/x86_64-linux/lib/stubs"
+  unset C_INCLUDE_PATH CPLUS_INCLUDE_PATH PYTHONPATH PYTHONHOME VIRTUAL_ENV
   unset PIP_CONSTRAINT PIP_BUILD_CONSTRAINT UV_CONSTRAINT
+  step "toolchain: nvcc $($N/bin/nvcc --version | grep -o 'release [0-9.]*'); $(/usr/bin/gcc-12 --version | head -1)"
+  ls "$N/targets/x86_64-linux/include/cublas_v2.h" "$N/targets/x86_64-linux/include/cusparse.h" >/dev/null \
+    || { echo "[restore] CUDA development headers missing in $N"; exit 1; }
   hftools
   V=$(/opt/rmbench-env/bin/python -c "
 import json, sys
@@ -153,8 +163,14 @@ r = json.load(open('$RECOVERY_ROOT/simulator-recorded-pins.sources.json')).get('
 v = {r[n] for n in ('nvidia-curobo', 'curobo') if n in r}
 sys.exit('no recorded CuRobo version') if len(v) != 1 else print(v.pop())")
   step "CuRobo $V editable install (sm90, MAX_JOBS=$MAX_JOBS)"
-  SETUPTOOLS_SCM_PRETEND_VERSION="$V" SETUPTOOLS_SCM_PRETEND_VERSION_FOR_NVIDIA_CUROBO="$V" \
-    /opt/rmbench-env/bin/python -m pip install -e ./resources/RMBench/envs/curobo --no-build-isolation
+  BUILDLOG=/mnt/tmp/curobo_build.log
+  if ! SETUPTOOLS_SCM_PRETEND_VERSION="$V" SETUPTOOLS_SCM_PRETEND_VERSION_FOR_NVIDIA_CUROBO="$V" \
+      $N/bin/python -m pip install -v -e ./resources/RMBench/envs/curobo --no-build-isolation > "$BUILDLOG" 2>&1; then
+    echo "[restore] CuRobo build FAILED; full log $BUILDLOG; first compiler errors:"
+    grep -n -m 20 -E "error:|error |FAILED:|fatal" "$BUILDLOG" || tail -n 60 "$BUILDLOG"
+    exit 1
+  fi
+  tail -n 3 "$BUILDLOG"
   step "simulator imports"
   /opt/rmbench-env/bin/python - <<'PY'
 import sys
