@@ -168,7 +168,11 @@ sys.exit('no recorded CuRobo version') if len(v) != 1 else print(v.pop())")
   # Fill ONLY the missing files from the official NVlabs/curobo release of the same version; files that RMBench
   # ships (possibly modified) are kept as they are.
   CU=resources/RMBench/envs/curobo
-  if [ ! -f "$CU/src/curobo/curobolib/cpp/lbfgs_step_cuda.cpp" ]; then
+  if $N/bin/python -c "import curobo.curobolib.lbfgs_step_cu, curobo.curobolib.kinematics_fused_cu, curobo.curobolib.geom_cu" 2>/dev/null; then
+    step "CuRobo already built (compiled extensions import); skipping the build"
+    SKIP_CUROBO=1
+  fi
+  if [ -z "${SKIP_CUROBO:-}" ] && [ ! -f "$CU/src/curobo/curobolib/cpp/lbfgs_step_cuda.cpp" ]; then
     TAG=$(git ls-remote --tags https://github.com/NVlabs/curobo.git | awk '{print $2}' | sed 's#refs/tags/##; s#\^{}##' \
           | grep -E "^v?${V}$" | head -1)
     if [ -z "$TAG" ]; then
@@ -185,15 +189,15 @@ sys.exit('no recorded CuRobo version') if len(v) != 1 else print(v.pop())")
     step "filled $((after - before)) missing CuRobo files from NVlabs/curobo $TAG (kept RMBench's own $before files)"
     [ -f "$CU/src/curobo/curobolib/cpp/lbfgs_step_cuda.cpp" ] || { echo "[restore] CuRobo C++ sources still missing"; exit 1; }
   fi
-  step "CuRobo $V editable install (sm90, MAX_JOBS=$MAX_JOBS)"
   BUILDLOG=/mnt/tmp/curobo_build.log
-  if ! SETUPTOOLS_SCM_PRETEND_VERSION="$V" SETUPTOOLS_SCM_PRETEND_VERSION_FOR_NVIDIA_CUROBO="$V" \
+  [ -n "${SKIP_CUROBO:-}" ] || step "CuRobo $V editable install (sm90, MAX_JOBS=$MAX_JOBS)"
+  if [ -z "${SKIP_CUROBO:-}" ] && ! SETUPTOOLS_SCM_PRETEND_VERSION="$V" SETUPTOOLS_SCM_PRETEND_VERSION_FOR_NVIDIA_CUROBO="$V" \
       $N/bin/python -m pip install -v -e ./resources/RMBench/envs/curobo --no-build-isolation > "$BUILDLOG" 2>&1; then
     echo "[restore] CuRobo build FAILED; full log $BUILDLOG; first compiler errors:"
     grep -n -m 20 -E "error:|error |FAILED:|fatal" "$BUILDLOG" || tail -n 60 "$BUILDLOG"
     exit 1
   fi
-  tail -n 3 "$BUILDLOG"
+  [ -n "${SKIP_CUROBO:-}" ] || tail -n 3 "$BUILDLOG"
   step "simulator imports"
   /opt/rmbench-env/bin/python - <<'PY'
 import sys
@@ -206,6 +210,25 @@ print("Simulator imports: OK", torch.__version__, torch.cuda.get_device_name(0))
 PY
   step "saved simulator patches"
   bash scripts/memory_s1/portable/install_environments.sh patches
+  # restore-simulator records the commit of /workspace/FastWAM (git rev-parse HEAD). The H100 copy is a file
+  # subset without .git: give it the A100 commit as HEAD without touching any file (mixed reset = index only).
+  if ! git -c safe.directory='*' -C /workspace/FastWAM rev-parse HEAD >/dev/null 2>&1; then
+    FW_SHA=$(awk '/^FastWAM HEAD/{print $3}' /workspace/FastWAM-memory2/outputs/migration_h100_v1/records/git_and_roots.txt)
+    step "git provenance for /workspace/FastWAM: commit ${FW_SHA:-memory branch tip} (files untouched)"
+    git config --global --add safe.directory /workspace/FastWAM
+    git -C /workspace/FastWAM init -q
+    git -C /workspace/FastWAM remote add origin https://github.com/FredHuang99/FastWAM.git 2>/dev/null || true
+    if [ -n "$FW_SHA" ] && git -C /workspace/FastWAM fetch -q --depth 1 origin "$FW_SHA"; then
+      git -C /workspace/FastWAM reset -q "$FW_SHA"
+    else
+      git -C /workspace/FastWAM fetch -q --depth 1 origin memory
+      git -C /workspace/FastWAM reset -q FETCH_HEAD
+    fi
+    echo "HEAD $(git -C /workspace/FastWAM rev-parse HEAD); working-tree differences: $(git -C /workspace/FastWAM status --short | wc -l) paths (expected: the copy is a subset)"
+  fi
+  if [ -f /etc/vulkan/icd.d/nvidia_icd.json ] && [ -z "${VK_ICD_FILENAMES:-}" ]; then
+    export VK_ICD_FILENAMES=/etc/vulkan/icd.d/nvidia_icd.json
+  fi
   step "restore simulator sources"
   $HFPY -u scripts/memory_s1/portable/recovery.py restore-simulator --root "$FW_ROOT" --ready "$READY_DIR" --mode current
   step "offscreen render probe"
