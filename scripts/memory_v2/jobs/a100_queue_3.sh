@@ -8,6 +8,9 @@ set -u
 LANE=${1:?lane A|B|C}
 cd /workspace/FastWAM-memory2
 export PYTHONPATH=/workspace/FastWAM-memory2/src
+# 128 host cores shared with other users: PyTorch's default (one thread per core) made three lanes fight over
+# CPU (load ~170, 80-140 s/update). Cap the CPU threads of each lane.
+export OMP_NUM_THREADS=${OMP_NUM_THREADS:-16} MKL_NUM_THREADS=${MKL_NUM_THREADS:-16}
 PY=/opt/mwam/bin/python
 CFG=configs/memory_v2/train_v2_A.yaml
 O=/workspace/FastWAM-memory2/outputs/memory_v2
