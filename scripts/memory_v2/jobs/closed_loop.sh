@@ -7,6 +7,8 @@
 #   bash closed_loop.sh plan    <gpu> [seed] [n]     expert-feasible scene bank (default seed 17, 10 per task)
 #   bash closed_loop.sh bank    <gpu> <run|init> "<modes>" <scenes> [k/n]
 #   bash closed_loop.sh summary [output folder]
+#   bash closed_loop.sh render  <gpu>                SAPIEN offscreen render probe
+#   bash closed_loop.sh chain   <lane> <gpu> [run]   wait for a Phase-3 lane to finish, then parity -> smoke -> bank
 # <gpu> = container GPU index. Simulator overrides (from the preflight):
 #   SIM_PY=/opt/<env>/bin/python  CUROBO=fused_graph_v1|builtin_torch_v1|upstream  EXT_DIR=outputs/<dir>/torch_extensions...
 set -u
@@ -84,6 +86,46 @@ bank)
     --output $CL/bank "${SIM[@]}" ;;
 summary)
   $M summary --output ${2:-$CL/bank} ;;
+chain)
+  # Take over the GPU of a Phase-3 lane the moment its whole queue is done (polls every minute, so the GPU guard
+  # never sees it idle), then: parity -> smoke -> (only if all 4 smoke episodes completed) the scene bank in
+  # modes off+on, or the 2 frozen scenes at full length if the bank is not planned yet.
+  LANE=${2:?lane A|B|C}; G=${3:?container GPU index}; RUN=${4:-v2_A_cf}
+  SELF=/workspace/FastWAM-memory2/scripts/memory_v2/jobs/closed_loop.sh
+  UUID=$(nvidia-smi --query-gpu=index,uuid --format=csv,noheader | awk -F', ' -v i=$G '$1==i{print $2}')
+  echo "[chain] $(date -u '+%F %T') UTC waiting for $O/RESULTS_3_$LANE.txt and no training process on GPU $G ($UUID)"
+  while true; do
+    busy=0
+    for pid in $(pgrep -f "python.*fastwam.memory_v2.train_v2"); do
+      v=$(tr '\0' '\n' < /proc/$pid/environ 2>/dev/null | sed -n 's/^CUDA_VISIBLE_DEVICES=//p')
+      if [ "$v" = "$UUID" ] || [ "$v" = "$G" ]; then busy=1; fi
+    done
+    if [ -f $O/RESULTS_3_$LANE.txt ] && [ $busy = 0 ]; then break; fi
+    sleep 60
+  done
+  echo "[chain] $(date -u '+%F %T') UTC GPU $G is free: parity"
+  bash $SELF parity $G $RUN
+  echo "[chain] $(date -u '+%F %T') UTC smoke"
+  bash $SELF smoke $G $RUN
+  n=$(ls $CL/smoke/*/*/*/seed_*/result.json 2>/dev/null | wc -l)
+  echo "[chain] $(date -u '+%F %T') UTC smoke episodes completed: $n / 4"
+  if [ "$n" -lt 4 ]; then echo "[chain] smoke incomplete: stopping here (errors: ls $CL/smoke/*/*/*/seed_*/ERROR.json)"; exit 1; fi
+  BANK=$CL/scenes_seed17_n10
+  if $PY - $BANK <<'PY'
+import json, sys
+from pathlib import Path
+d = Path(sys.argv[1])
+ok = all((d / f"{t}.json").exists() and json.loads((d / f"{t}.json").read_text()).get("complete") for t in ("put_back_block", "swap_blocks"))
+sys.exit(0 if ok else 1)
+PY
+  then
+    echo "[chain] $(date -u '+%F %T') UTC scene bank $BANK complete: bank run, modes off + on"
+    bash $SELF bank $G $RUN "off on" $BANK
+  else
+    echo "[chain] $(date -u '+%F %T') UTC scene bank not complete: the 2 frozen scenes at full length"
+    bash $SELF frozen $G $RUN
+  fi
+  echo "[chain] $(date -u '+%F %T') UTC chain finished" ;;
 *)
   echo "unknown stage $STAGE"; exit 2 ;;
 esac

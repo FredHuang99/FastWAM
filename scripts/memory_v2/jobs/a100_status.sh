@@ -4,19 +4,22 @@
 #   bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/a100_status.sh
 O=/workspace/FastWAM-memory2/outputs/memory_v2
 echo "== $(date -u '+%F %T') UTC  load average: $(cut -d' ' -f1-3 /proc/loadavg)  cores: $(nproc)"
-echo "-- training processes in this container (pid, GPU, run)"
-for pid in $(pgrep -f "python.*fastwam.memory_v2.train_v2"); do
+echo "-- our processes (container pid, GPU, job)"
+declare -A OURS
+for pid in $(pgrep -f "python.*fastwam.memory_v2.(train_v2|online)"); do
   gpu=$(tr '\0' '\n' < /proc/$pid/environ 2>/dev/null | sed -n 's/^CUDA_VISIBLE_DEVICES=//p')
-  what=$(tr '\0' '\n' < /proc/$pid/cmdline | grep -E '^(train|evaluate|pr|features)$|^name=|^output=' | tr '\n' ' ')
+  what=$(tr '\0' '\n' < /proc/$pid/cmdline | grep -E '^(train|evaluate|pr|features|run|parity|plan)$|^name=|^output=|^--label$|^v2_A' | tr '\n' ' ')
   echo "  pid $pid  CUDA_VISIBLE_DEVICES=$gpu  $what  elapsed $(ps -o etime= -p $pid | tr -d ' ')"
+  [ -n "$gpu" ] && OURS[$gpu]="${OURS[$gpu]:-}$(echo $what | grep -o 'name=[^ ]*\|run\|parity\|plan' | head -1) "
 done
-echo "-- GPUs (index, used, total, util) and compute processes (pid as nvidia-smi reports it)"
-nvidia-smi --query-gpu=index,uuid,memory.used,memory.total,utilization.gpu --format=csv,noheader
-nvidia-smi --query-compute-apps=gpu_uuid,pid,used_memory --format=csv,noheader | while IFS=, read -r uuid pid mem; do
-  pid=$(echo $pid | tr -d ' ')
-  if [ -d /proc/$pid ]; then who="in this container: $(ps -o etime=,args= -p $pid | cut -c1-120)"; else who="NOT in this container (another user/container)"; fi
-  echo "  $uuid pid $pid $mem -> $who"
-done
+echo "-- GPUs: index, uuid, used, total, util -> owner (nvidia-smi shows HOST pids; ownership is matched by GPU)"
+while IFS=, read -r idx uuid used total util; do
+  idx=$(echo $idx | tr -d ' '); uuid=$(echo $uuid | tr -d ' ')
+  owner="${OURS[$uuid]:-}${OURS[$idx]:-}"
+  hostpids=$(nvidia-smi --query-compute-apps=gpu_uuid,pid,used_memory --format=csv,noheader | grep "$uuid" | awk -F', ' '{printf "%s(%s) ", $2, $3}')
+  if [ -n "$owner" ]; then owner="OURS: $owner"; else owner="SOMEONE ELSE (not ours: do not kill)"; fi
+  echo "  GPU $idx $uuid $used /$total util$util  host pids: ${hostpids:-none}  -> $owner"
+done < <(nvidia-smi --query-gpu=index,uuid,memory.used,memory.total,utilization.gpu --format=csv,noheader)
 /opt/mwam/bin/python - <<'PY'
 import json, time
 from pathlib import Path
