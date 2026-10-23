@@ -333,6 +333,9 @@ def cmd_upload(args):
 
 def cmd_verify(args):
     manifest = json.loads(Path(args.manifest).read_text())
+    if args.prefix:
+        manifest["files"] = [f for f in manifest["files"] if any(f["path"].startswith(p) for p in args.prefix)]
+        manifest["total_bytes"] = sum(f["size"] for f in manifest["files"])
     root = Path(args.root)
     bad = []
 
@@ -393,6 +396,7 @@ def main():
     v.add_argument("--root", required=True, help="download folder (contains payload/)")
     v.add_argument("--workers", type=int, default=16)
     v.add_argument("--no-hash", action="store_true")
+    v.add_argument("--prefix", nargs="*", default=[], help="verify only logical paths under these prefixes")
     c = sub.add_parser("compare")
     c.add_argument("a")
     c.add_argument("b")
