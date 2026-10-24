@@ -142,6 +142,9 @@ def main():
     (out / "motion_audit.json").write_text(json.dumps({"settings": settings, "summary": summary,
                                                        "episodes": details}, indent=1), encoding="utf-8")
     (out / "pairs_within.json").write_text(json.dumps(pairs, indent=1), encoding="utf-8")
+    if args.merge and not Path(args.merge).exists():
+        print(f"[motion] WARNING: --merge {args.merge} not found; the merged pairs file is not written")
+        args.merge = ""
     if args.merge:
         cross = json.loads(Path(args.merge).read_text(encoding="utf-8"))
         merged = {"settings": {"cross": cross.get("settings"), "within": pairs["settings"]},
