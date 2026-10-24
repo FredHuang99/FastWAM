@@ -6,6 +6,7 @@
 #   bash closed_loop.sh frozen  <gpu> [run]          2 frozen scenes x (off, on), official 500/1000 caps
 #   bash closed_loop.sh plan    <gpu> [seed] [n]     expert-feasible scene bank (default seed 17, 10 per task)
 #   bash closed_loop.sh bank    <gpu> <run|init> "<modes>" <scenes> [k/n]
+#   bash closed_loop.sh guide   <gpu> <run> <scale> <scenes> [task:seed ...]   memory guidance, mode on, label <run>_g<scale>
 #   bash closed_loop.sh summary [output folder]
 #   bash closed_loop.sh render  <gpu>                SAPIEN offscreen render probe
 #   bash closed_loop.sh chain   <lane> <gpu> [run]   wait for a Phase-3 lane to finish, then parity -> smoke -> bank
@@ -84,6 +85,12 @@ bank)
   gpu ${2:-}; RUN=${3:?run or init}; MODES=${4:?modes, e.g. "on" or "off on"}; SCENES=${5:?scene manifest folder}; SHARD=${6:-0/1}
   $M run --checkpoint $(ck $RUN) --label $RUN --modes $MODES --scenes $SCENES --shard $SHARD --dependence \
     --output $CL/bank "${SIM[@]}" ;;
+guide)
+  # Memory guidance on chosen scenes, mode on only, no --dependence (faster). Label <run>_g<scale> in $CL/bank,
+  # so the summary pairs it scene-by-scene with <run>/on (same noise seeds; only the guidance differs).
+  gpu ${2:-}; RUN=${3:?run}; SCALE=${4:?guidance scale, e.g. 2}; SCENES=${5:?scene manifest folder}; shift 5
+  $M run --checkpoint $(ck $RUN) --label ${RUN}_g${SCALE} --modes on --scenes $SCENES --guidance $SCALE \
+    --seeds "$@" --output $CL/bank "${SIM[@]}" ;;
 summary)
   $M summary --output ${2:-$CL/bank} ;;
 chain)

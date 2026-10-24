@@ -515,7 +515,11 @@ def load_scenes(specs: Sequence[str], root: Path, tasks: Sequence[str]) -> List[
     return sorted(out, key=lambda s: (list(tasks).index(s["task"]), s.get("ordinal", 0), s["seed"]))
 
 
-def select_scenes(scenes: List[dict], limit: int, shard: str) -> List[dict]:
+def select_scenes(scenes: List[dict], limit: int, shard: str, seeds: Sequence[str] = ()) -> List[dict]:
+    """--seeds keeps only the listed scenes: 'task:seed' or a bare seed (any task)."""
+    if seeds:
+        want = {(x.split(":")[0], int(x.split(":")[1])) if ":" in x else (None, int(x)) for x in seeds}
+        scenes = [s for s in scenes if (s["task"], int(s["seed"])) in want or (None, int(s["seed"])) in want]
     if limit:
         count, kept = {}, []
         for s in scenes:
@@ -576,7 +580,8 @@ def cmd_run(args):
     label = args.label or run_label(args.checkpoint)
     out = Path(args.output)
     out.mkdir(parents=True, exist_ok=True)
-    scenes = select_scenes(load_scenes(args.scenes, Path(policy.spec.root), args.tasks), args.limit, args.shard)
+    scenes = select_scenes(load_scenes(args.scenes, Path(policy.spec.root), args.tasks), args.limit, args.shard,
+                           args.seeds)
     labels = {m: (policy.base_label(label) if m == "off" else label) for m in args.modes}
     tag = f"{label}_{'-'.join(args.modes)}_{args.shard.replace('/', 'of')}"
     write(out / "runs" / f"{tag}.json", {"policy": policy.describe(), "labels": labels, "scenes": scenes,
@@ -932,6 +937,7 @@ def main(argv=None):
     ap.add_argument("--scenes", nargs="+", default=["frozen"], help="'frozen' (Codex's 2 scenes) and/or scene manifests/folders")
     ap.add_argument("--tasks", nargs="+", default=list(LIMITS), choices=list(LIMITS))
     ap.add_argument("--limit", type=int, default=0, help="first N scenes per task")
+    ap.add_argument("--seeds", nargs="*", default=[], help="only these scenes: task:seed or seed")
     ap.add_argument("--shard", default="0/1", help="k/n: this process takes scenes[k::n]")
     ap.add_argument("--output", default="outputs/memory_v2/closed_loop")
     ap.add_argument("--steps", type=int, default=0, help="Euler steps (0 = the checkpoint's, 10)")

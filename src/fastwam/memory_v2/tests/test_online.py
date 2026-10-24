@@ -101,6 +101,8 @@ def test_load_select_scenes(tmp_path):
     assert [s["seed"] for s in online.select_scenes(scenes, 0, "1/2")] == [11, 13, 51]
     with pytest.raises(ValueError):
         online.select_scenes(scenes, 0, "2/2")
+    picked = online.select_scenes(scenes, 0, "0/1", ["put_back_block:12", "51", "swap_blocks:10"])
+    assert [(s["task"], s["seed"]) for s in picked] == [("put_back_block", 12), ("swap_blocks", 51)]
 
 
 def test_overrides_labels_and_collect(tmp_path):
