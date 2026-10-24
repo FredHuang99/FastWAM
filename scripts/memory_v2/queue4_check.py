@@ -58,7 +58,9 @@ def processes():
 
 
 def main():
-    print(f"queue4 check  {bj()} (Beijing)")
+    deadline = datetime(2026, 10, 27, 0, 0, tzinfo=BJ).timestamp()
+    left = (deadline - time.time()) / 3600
+    print(f"queue4 check  {bj()} (Beijing)   GPU guard / queue deadline Tue 10-27 00:00 ({left:.1f} h left)")
     procs = processes()
 
     # ------------------------------------------------------------------ lanes

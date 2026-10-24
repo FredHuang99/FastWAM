@@ -13,6 +13,8 @@ GUARD_UUIDS=GPU-aaa,GPU-bbb bash /tmp/deploy_guard.sh   # UUIDs from nvidia-smi 
 docker logs -f --tail 50 hhy-gpu2-guard      # KILL / RELEASE / 10-min status lines
 # a second, independent guard (the existing hhy-gpu2-guard is left alone), e.g. for one more GPU
 GUARD_NAME=hhy-gpu0-guard GUARD_UUIDS=GPU-ccc bash /tmp/deploy_guard.sh
+# hold GPUs until a fixed deadline (idle time ignored; all released at the deadline):
+RELEASE_AT=2026-10-27T00:00:00+08:00 GUARD_UUIDS=GPU-aaa,GPU-bbb bash /tmp/deploy_guard.sh
 # manual teardown at any time
 docker update --restart=no hhy-gpu2-guard && docker stop hhy-gpu2-guard
 ```

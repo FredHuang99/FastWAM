@@ -14,7 +14,10 @@
 # Logs (written by this script):  $Q/base.log  $Q/ablate.log  $Q/watch.log     with Q=outputs/memory_v2/queue4
 # Stop: touch $Q/STOP (lanes stop before their next step); touch outputs/memory_v2/<run>/STOP.json (training saves + stops).
 # Layout from 10-24 21:15 (only container GPUs 1 and 2 are ours, guarded with no release; GPU 0/3 belong to others):
-#   GPU2: base (A2C)  ->  ablate with AFTER=base (A2C_nopairs on the same card)      GPU1: watch (all closed loops)
+#   GPU2: base (A2C)  ->  ablate with AFTER=base (A2C_nopairs on the same card, then its closed loop in mode off)
+#   GPU1: watch (noabs; A2C after every epoch on+off, last epoch +null; A2C_nopairs last epoch mode on)
+# Deadline: no lane starts a new step after QUEUE_DEADLINE (default Tue 2026-10-27 00:00 Beijing, when the GPU guard
+# releases the cards); a step already running is not interrupted.
 # Measured on the A100 (10-24): ActionDiT training 36 s/update at global batch 64 (no pairs), 670 updates/epoch
 # => one epoch ~ 6.7 h (~8 h with pairs). Hence 3 epochs and no 1e-4 probe (A335: 1e-4 raised the loss 3.8x).
 # Env: EPOCHS (3), PROBE_UPDATES (100), LRS ("1e-5 3e-5"), LR_MEMORY (2e-5), MB_TRY ("4 2 1"), NEED_MIB (30000),
@@ -42,13 +45,20 @@ LR_MEMORY=${LR_MEMORY:-2e-5}
 MB_TRY=${MB_TRY:-"4 2 1"}
 mkdir -p $Q $CLOUT
 log() { echo "[$LANE] $(date '+%F %T') $*"; }
-stop_requested() { [ -f $Q/STOP ] && { log "STOP found: lane stops here"; return 0; }; return 1; }
+QUEUE_DEADLINE=${QUEUE_DEADLINE:-"2026-10-27 00:00 +0800"}
+DEADLINE_TS=$(date -d "$QUEUE_DEADLINE" +%s)
+stop_requested() {
+  [ -f $Q/STOP ] && { log "STOP found: lane stops here"; return 0; }
+  [ "$(date +%s)" -ge "$DEADLINE_TS" ] && { log "queue deadline $QUEUE_DEADLINE reached: lane stops here"; return 0; }
+  return 1
+}
 
 gpu_free_mib() { nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits -i "$1" 2>/dev/null | tr -d ' '; }
 NEED_MIB=${NEED_MIB:-30000}
 wait_gpu() {                                   # usable = >= NEED_MIB free, twice, one minute apart (another user's
   log "waiting for container GPU $G to have >= $NEED_MIB MiB free"   # small job may share the card)
   while true; do
+    stop_requested && exit 0
     f=$(gpu_free_mib $G); [ "${f:-0}" -ge $NEED_MIB ] || { sleep 60; continue; }
     sleep 60; f=$(gpu_free_mib $G); [ "${f:-0}" -ge $NEED_MIB ] && break
   done
@@ -171,6 +181,18 @@ ablate)
   train a2C_nopairs $(common_sets $LR $MB) || exit 1
   stop_requested && exit 0
   evaluate_run a2C_nopairs
+  # its closed loop in mode off here (GPU1 runs mode on at the same time) so both finish before the deadline
+  stop_requested && exit 0
+  ck=$(last_ckpt a2C_nopairs); label=a2C_nopairs_e$EPOCHS
+  if [ -f "$ck" ] && [ ! -f $CLOUT/DONE_${label}_off ]; then
+    wait_gpu
+    log "closed loop $label mode off on GPU $G"
+    bash $SCRIPTS/jobs/closed_loop.sh eval $G $ck $label off $BANK $CLOUT
+    touch $CLOUT/DONE_${label}_off
+    $PY -m fastwam.memory_v2.online summary --output $CLOUT > $CLOUT/summary.txt 2>&1
+    $PY $SCRIPTS/closed_loop_stages.py $CLOUT --quiet > $CLOUT/stages.txt 2>&1
+    $PY $SCRIPTS/closed_loop_stages.py $CLOUT --grasps --quiet --expert $O/motion/motion_audit.json > $CLOUT/grasps.txt 2>&1
+  fi
   log "lane done" ;;
 watch)
   G=${2:?container GPU index}
@@ -213,6 +235,7 @@ watch)
           continue
         fi
         modes="on off"; [ "$e" = "$EPOCHS" ] && modes="on off null"
+        [ "$run" = a2C_nopairs ] && modes="on"          # mode off of A2C_nopairs runs on the ablate lane's GPU
         log "closed loop $label modes [$modes]"
         bash $SCRIPTS/jobs/closed_loop.sh eval $G $ck $label "$modes" $BANK $CLOUT
         touch $marker

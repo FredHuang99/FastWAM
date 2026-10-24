@@ -8,6 +8,8 @@ guarded GPUs (nvidia-smi, host PIDs) and
   * releases a GPU once our container has had no process on it for
     RELEASE_AFTER_SECONDS after having used it (or never used it within
     STARTUP_TIMEOUT_SECONDS) - from then on that GPU is not touched;
+  * with RELEASE_AT (a fixed deadline): no GPU is released before it, whatever the idle time; at the deadline
+    every GPU is released at once;
   * when every GPU is released: writes /state/DONE and exits 0. The container runs
     with --restart on-failure, so a clean exit stops it for good (a crash restarts it,
     and a restart that finds /state/DONE exits 0 immediately).
@@ -19,6 +21,8 @@ Environment
   RELEASE_AFTER_SECONDS      default 600
   STARTUP_TIMEOUT_SECONDS    default 1800
   DRY_RUN                    1 = log what would be killed, kill nothing
+  RELEASE_AT                 deadline, ISO 8601 with offset (2026-10-27T00:00:00+08:00) or epoch seconds: hold every
+                             GPU until then (RELEASE_AFTER/STARTUP_TIMEOUT ignored), release all at the deadline
   GRANDFATHER_PIDS           comma-separated host pids that are never killed (another user's job that was
                              already on the GPU when the guard was deployed); a reused pid (different
                              process start time) loses the exemption
@@ -28,6 +32,7 @@ import signal
 import subprocess
 import sys
 import time
+from datetime import datetime
 
 STATE = os.environ.get("STATE_DIR", "/state")
 
@@ -72,13 +77,15 @@ def process_info(pid):
 
 class Guard:
     def __init__(self, uuids, owner, release_after=600.0, startup_timeout=1800.0, dry_run=False,
-                 apps=compute_apps, info=process_info, kill=os.kill, clock=time.time, grandfather=()):
+                 apps=compute_apps, info=process_info, kill=os.kill, clock=time.time, grandfather=(),
+                 release_at=None):
         if len(owner) < 12:
             raise ValueError("OWNER_CONTAINER_ID must be the container id (64 hex chars preferred).")
         self.owner = owner
         self.grandfather = {int(p): None for p in grandfather}      # pid -> process start time once seen
         self.release_after = release_after
         self.startup_timeout = startup_timeout
+        self.release_at = release_at                                 # epoch seconds or None
         self.dry_run = dry_run
         self.apps, self.info, self.kill, self.clock = apps, info, kill, clock
         now = clock()
@@ -89,6 +96,12 @@ class Guard:
 
     def step(self):
         now = self.clock()
+        if self.release_at is not None and now >= self.release_at:
+            for uuid, g in self.gpus.items():
+                if not g["released"]:
+                    g["released"] = True
+                    log(f"RELEASE {uuid}: deadline {fmt(self.release_at)} reached (kills={g['kills']})")
+            return True
         apps = self.apps()
         for uuid, g in self.gpus.items():
             if g["released"]:
@@ -123,6 +136,8 @@ class Guard:
                         pass
                     except PermissionError as error:
                         log(f"cannot kill pid={pid}: {error}")
+            if self.release_at is not None:
+                continue                                             # hold until the deadline
             if g["seen"] and now - g["last_ours"] >= self.release_after:
                 g["released"] = True
                 log(f"RELEASE {uuid}: our jobs left it {now - g['last_ours']:.0f}s ago (kills={g['kills']})")
@@ -138,7 +153,27 @@ class Guard:
             state = "released" if g["released"] else ("guarding" if g["seen"] else "waiting")
             idle = "" if g["last_ours"] is None else f" idle={now - g['last_ours']:.0f}s"
             parts.append(f"{uuid[:12]} {state}{idle} kills={g['kills']}")
+        if self.release_at is not None:
+            parts.append(f"hold until {fmt(self.release_at)} ({(self.release_at - now) / 3600:.1f} h left)")
         return "; ".join(parts)
+
+
+def fmt(ts):
+    return time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime(ts))
+
+
+def parse_deadline(value):
+    value = (value or "").strip()
+    if not value:
+        return None
+    try:
+        return float(value)
+    except ValueError:
+        pass
+    dt = datetime.fromisoformat(value)
+    if dt.tzinfo is None:
+        raise ValueError(f"RELEASE_AT needs a UTC offset, e.g. 2026-10-27T00:00:00+08:00 (got {value!r})")
+    return dt.timestamp()
 
 
 def main():
@@ -151,13 +186,26 @@ def main():
     guard = Guard(uuids, os.environ["OWNER_CONTAINER_ID"].strip(),
                   release_after=float(os.environ.get("RELEASE_AFTER_SECONDS", "600")),
                   startup_timeout=float(os.environ.get("STARTUP_TIMEOUT_SECONDS", "1800")),
-                  dry_run=os.environ.get("DRY_RUN", "0") == "1", grandfather=grandfather)
+                  dry_run=os.environ.get("DRY_RUN", "0") == "1", grandfather=grandfather,
+                  release_at=parse_deadline(os.environ.get("RELEASE_AT")))
     poll = float(os.environ.get("POLL_SECONDS", "2"))
-    log(f"guarding {uuids} for container {guard.owner[:12]} (release after {guard.release_after:.0f}s idle, "
-        f"startup timeout {guard.startup_timeout:.0f}s, dry_run={guard.dry_run}, grandfathered pids {grandfather})")
+    policy = (f"hold every GPU until {fmt(guard.release_at)}" if guard.release_at is not None else
+              f"release after {guard.release_after:.0f}s idle, startup timeout {guard.startup_timeout:.0f}s")
+    log(f"guarding {uuids} for container {guard.owner[:12]} ({policy}, poll {poll:g}s, dry_run={guard.dry_run}, "
+        f"grandfathered pids {grandfather})")
     last_status = 0.0
+    errors = 0
     while True:
-        finished = guard.step()
+        try:
+            finished = guard.step()
+            errors = 0
+        except Exception as error:                     # a transient nvidia-smi / proc failure must not drop the guard
+            errors += 1
+            log(f"step failed ({errors} in a row): {error!r}")
+            if errors >= 300:
+                raise
+            time.sleep(poll)
+            continue
         if time.time() - last_status >= 600:
             log("status: " + guard.status())
             last_status = time.time()
