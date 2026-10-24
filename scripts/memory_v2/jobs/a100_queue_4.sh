@@ -6,12 +6,15 @@
 #   bash a100_queue_4.sh base   <gpu>   unit tests -> lr probe (2 x 100 real updates, no saving) -> pick the lr
 #                                       -> A2C: ActionDiT + memory_v2 (from D) + pairs, EPOCHS epochs -> 401-window eval + PR
 #   bash a100_queue_4.sh ablate <gpu>   waits for the lr choice and a free GPU -> A2C_nopairs (same, pairs off) -> eval + PR
+#                                       AFTER=base: first wait until the base lane has exited (same GPU, run after A2C)
 #   bash a100_queue_4.sh watch  <gpu>   waits for a free GPU -> closed loop of every epoch-end checkpoint as it appears
 #                                       (A2C every epoch on+off, last epoch also null; nopairs last epoch) -> analysis
 #   bash a100_queue_4.sh status         one screen: lanes, probe table, training progress / ETA, closed-loop results
 #
 # Logs (written by this script):  $Q/base.log  $Q/ablate.log  $Q/watch.log     with Q=outputs/memory_v2/queue4
 # Stop: touch $Q/STOP (lanes stop before their next step); touch outputs/memory_v2/<run>/STOP.json (training saves + stops).
+# Layout from 10-24 21:15 (only container GPUs 1 and 2 are ours, guarded with no release; GPU 0/3 belong to others):
+#   GPU2: base (A2C)  ->  ablate with AFTER=base (A2C_nopairs on the same card)      GPU1: watch (all closed loops)
 # Measured on the A100 (10-24): ActionDiT training 36 s/update at global batch 64 (no pairs), 670 updates/epoch
 # => one epoch ~ 6.7 h (~8 h with pairs). Hence 3 epochs and no 1e-4 probe (A335: 1e-4 raised the loss 3.8x).
 # Env: EPOCHS (3), PROBE_UPDATES (100), LRS ("1e-5 3e-5"), LR_MEMORY (2e-5), MB_TRY ("4 2 1"), NEED_MIB (30000),
@@ -150,6 +153,11 @@ ablate)
   G=${2:?container GPU index}; export CUDA_VISIBLE_DEVICES=$G
   exec >> $Q/ablate.log 2>&1
   log "start; waiting for the lr choice ($O/a2probe/CHOICE.json) and GPU $G"
+  if [ -n "${AFTER:-}" ]; then
+    log "waiting for the $AFTER lane to exit first (same GPU)"
+    while pgrep -f "a100_queue_4.sh $AFTER( |\$)" >/dev/null; do stop_requested && exit 0; sleep 120; done
+    if grep -q "lane done" $Q/$AFTER.log 2>/dev/null; then log "$AFTER lane finished"; else log "$AFTER lane exited WITHOUT 'lane done' (see $Q/$AFTER.log); continuing"; fi
+  fi
   while true; do
     LR=$(json_get $O/a2probe/CHOICE.json choice 2>/dev/null)
     [ -n "$LR" ] && [ "$LR" != None ] && break
