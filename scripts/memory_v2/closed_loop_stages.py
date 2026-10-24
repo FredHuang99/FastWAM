@@ -159,6 +159,99 @@ def trace_episode(path: Path, task: str, start: int, every: int = 24):
     return out
 
 
+GRIPPER = {"left": 6, "right": 13}
+
+
+def gripper_closes(path: Path, task: str, open_above=0.75, closed_below=0.62, settle=12):
+    """Every closing of a gripper in one episode (physical joint, 1 = open; ~0.18 = closed on nothing,
+    ~0.5 = closed on a block): when, how far that side's end effector was from the nearest block, whether
+    that side touched a block while closing, and the value it settled at. kind: grasp (settled > 0.3,
+    something between the fingers) | empty-air (settled <= 0.3 and EE > 8 cm from every block) | empty-near."""
+    blocks = ["block"] if task == "put_back_block" else ["block1", "block2"]
+    rows = []
+    with path.open() as f:
+        for line in f:
+            row = json.loads(line)
+            obj = row.get("objects_after") or {}
+            joints = row.get("joint_details") or {}
+            phys = row.get("physical_after") or []
+            contacts = ((row.get("object_contacts") or {}).get("objects") or {})
+            rec = {}
+            for side, col in GRIPPER.items():
+                ee = (joints.get(side) or {}).get("ee_pose")
+                dist = min((math.dist(ee["p"][:3], obj[b]["p"][:3]) for b in blocks if b in obj), default=None) if ee else None
+                touch = any(((contacts.get(b) or {}).get("by_side") or {}).get(side) for b in blocks)
+                rec[side] = (phys[col] if len(phys) > col else None, dist, touch)
+            rows.append(rec)
+    out = []
+    for side in GRIPPER:
+        is_open = True
+        for t, rec in enumerate(rows):
+            g = rec[side][0]
+            if g is None:
+                continue
+            if not is_open and g > open_above:
+                is_open = True
+            elif is_open and g < closed_below:
+                is_open = False
+                window = rows[t:t + settle]
+                settled = min(r[side][0] for r in window if r[side][0] is not None)
+                dists = [r[side][1] for r in window if r[side][1] is not None]
+                dist = min(dists) if dists else None
+                touched = any(r[side][2] for r in window)
+                kind = ("grasp" if settled > 0.3 else
+                        "empty-air" if (dist is not None and dist > 0.08 and not touched) else "empty-near")
+                out.append({"t": t + 1, "side": side, "settled": round(settled, 3),
+                            "ee_block_m": None if dist is None else round(dist, 3), "touched": touched, "kind": kind})
+    return sorted(out, key=lambda e: e["t"])
+
+
+def expert_close_times(audit_path: Path):
+    """From motion_audit.json (expert targets): per task, side and ordinal of the close, the median step."""
+    import statistics
+    value = json.loads(Path(audit_path).read_text())
+    times = defaultdict(list)
+    for ep in value["episodes"]:
+        count = Counter()
+        for e in ep["events"]:
+            if e["kind"] != "close":
+                continue
+            count[e["side"]] += 1
+            times[(ep["task"], e["side"], count[e["side"]])].append(e["t"])
+    return {k: (int(statistics.median(v)), min(v), max(v), len(v)) for k, v in sorted(times.items())}
+
+
+def report_grasps(folders, expert=None, quiet=False):
+    table = defaultdict(list)
+    for folder in folders:
+        for result in sorted(Path(folder).glob("*/*/*/seed_*/result.json")):
+            d = result.parent
+            if not SEED_DIR.fullmatch(d.name) or not (d / "executed_actions.jsonl").exists():
+                continue
+            res = json.loads(result.read_text())
+            closes = gripper_closes(d / "executed_actions.jsonl", res["task"])
+            cond = f"{res['label']}/{res['mode']}"
+            table[(res["task"], cond)].append((res["seed"], closes))
+            if not quiet:
+                cells = " ".join(f"{c['side'][0]}{c['kind'].replace('empty-', 'E-')}@{c['t']}({c['ee_block_m']})" for c in closes)
+                print(f"{cond:<22}{res['task']:<15} seed={res['seed']}  {cells}")
+    if expert:
+        print("\n== expert close times (target step; median [min, max], n episodes)")
+        for (task, side, k), (med, lo, hi, n) in expert_close_times(expert).items():
+            print(f"  {task:<15} {side:<5} close #{k}: {med:>4} [{lo}, {hi}]  n={n}")
+    print("\n== gripper closings per condition: grasp | empty-air (EE > 8 cm from every block, no touch) | empty-near")
+    for (task, cond), eps in sorted(table.items()):
+        n = len(eps)
+        for side in GRIPPER:
+            cs = [c for _, closes in eps for c in closes if c["side"] == side]
+            kinds = Counter(c["kind"] for c in cs)
+            with_air = sum(any(c["side"] == side and c["kind"] == "empty-air" for c in closes) for _, closes in eps)
+            air_t = sorted(c["t"] for c in cs if c["kind"] == "empty-air")
+            print(f"  {cond:<22}{task:<15} {side:<5} n_ep={n:<3} closes {len(cs):<4} grasp {kinds['grasp']:<3} "
+                  f"empty-air {kinds['empty-air']:<3} empty-near {kinds['empty-near']:<3} episodes with empty-air {with_air}/{n}"
+                  f"  air-close steps {air_t[:12]}")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("folders", nargs="*", default=["/workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/bank"])
@@ -166,7 +259,12 @@ def main():
     ap.add_argument("--trace", default="", help="label/mode (e.g. v2_A_cf/on): timeline of episodes that reached "
                                                 "the memory decision (put_back: block in the centre; swap: S1)")
     ap.add_argument("--trace-every", type=int, default=24)
+    ap.add_argument("--grasps", action="store_true", help="every gripper closing: grasp / empty in the air / empty near")
+    ap.add_argument("--expert", default="", help="with --grasps: motion_audit.json for the expert close times")
     args = ap.parse_args()
+    if args.grasps:
+        report_grasps(args.folders, args.expert or None, args.quiet)
+        return
     if args.trace:
         label, mode = args.trace.split("/")
         for folder in args.folders:
