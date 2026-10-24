@@ -6,12 +6,16 @@
 #   - when all are released the guard exits 0 and, with --restart on-failure, stays stopped.
 # GPUs are given by UUID (identical on host and in containers; indices differ between them):
 #   GUARD_UUIDS=GPU-aaa,GPU-bbb bash deploy_guard.sh
+# GUARD_NAME (default hhy-gpu2-guard) names the guard container; a different name starts a second,
+# independent guard (own state dir /var/lib/<name>) and leaves the existing one untouched.
+# It refuses to start while another user's process is on a guarded GPU (the guard would kill it at once);
+# ALLOW_KILL_EXISTING=1 overrides that.
 # Generated from scripts/memory_v2/gpu_guard/guard.py (embedded below, written to $DIR/guard.py).
 (
 set -euo pipefail
 
-NAME=hhy-gpu2-guard
-DIR=/var/lib/hhy-gpu2-guard
+NAME="${GUARD_NAME:-hhy-gpu2-guard}"
+DIR="/var/lib/$NAME"
 IMAGE=eec0906cea58
 OWNER_REF="${OWNER_REF:-6e4b37a15066}"     # our training container (id or name)
 RELEASE_AFTER_SECONDS="${RELEASE_AFTER_SECONDS:-600}"
@@ -31,6 +35,29 @@ for U in "${UUIDS[@]}"; do
 done
 OWNER="$(docker inspect -f '{{.Id}}' "$OWNER_REF")"
 echo "owner container: $OWNER"
+
+# Refuse while another user's compute process is on a guarded GPU: the guard would SIGKILL it immediately.
+BUSY=""
+while IFS=, read -r GU PID; do
+    GU="${GU// /}"; PID="${PID// /}"
+    [[ "$PID" =~ ^[0-9]+$ ]] || continue
+    for U in "${UUIDS[@]}"; do
+        [ "$GU" = "$U" ] || continue
+        if ! grep -qF "$OWNER" "/proc/$PID/cgroup" 2>/dev/null; then
+            WHO="$(ps -o user=,etime=,args= -p "$PID" 2>/dev/null | cut -c1-160 || true)"
+            BUSY+="  $U pid=$PID $WHO"$'\n'
+        fi
+    done
+done < <(nvidia-smi --query-compute-apps=gpu_uuid,pid --format=csv,noheader || true)
+if [ -n "$BUSY" ]; then
+    printf '%s' "$BUSY"
+    if [ "${ALLOW_KILL_EXISTING:-0}" != 1 ]; then
+        echo "上面这些 GPU 上已有别人的进程，守卫一启动就会杀掉它们：未部署 $NAME。"
+        exit 1
+    fi
+    echo "ALLOW_KILL_EXISTING=1：继续部署，上面的进程会被杀掉。"
+fi
+echo "guard container: $NAME (state $DIR)"
 
 # Install guard.py (old one backed up) and clear a previous DONE marker, via the guard image itself.
 docker run --rm -i --network none --user 0:0 --entrypoint python3 -v "$DIR:/d" "$IMAGE" -c '
