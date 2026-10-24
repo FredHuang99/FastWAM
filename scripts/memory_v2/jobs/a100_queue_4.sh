@@ -111,6 +111,7 @@ base)
   log "unit tests (no pytest in /opt/mwam: scripts/memory_v2/minitest.py)"
   $PY $SCRIPTS/minitest.py test_train_v2 test_motion test_pairs test_history 2>&1 | tail -n 15
   stop_requested && exit 0
+  wait_gpu
   # ---- lr probe: 100 real updates per lr from C+256 + D's memory, epochs=1 schedule (warm-up ends at ~34), no saving
   mkdir -p $O/a2probe
   for lr in $LRS; do
