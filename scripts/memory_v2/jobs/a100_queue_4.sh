@@ -12,7 +12,8 @@
 #
 # Logs (written by this script):  $Q/base.log  $Q/ablate.log  $Q/watch.log     with Q=outputs/memory_v2/queue4
 # Stop: touch $Q/STOP (lanes stop before their next step); touch outputs/memory_v2/<run>/STOP.json (training saves + stops).
-# Env: EPOCHS (6), PROBE_UPDATES (100), LRS ("1e-5 3e-5 1e-4"), LR_MEMORY (2e-5), MB_TRY ("4 2 1"), SIM_PY/CUROBO/EXT_DIR/VK_ICD
+# Env: EPOCHS (6), PROBE_UPDATES (100), LRS ("1e-5 3e-5 1e-4"), LR_MEMORY (2e-5), MB_TRY ("4 2 1"), NEED_MIB (30000),
+# SIM_PY/CUROBO/EXT_DIR/VK_ICD
 # (simulator overrides, as closed_loop.sh).
 set -u
 LANE=${1:?lane base|ablate|watch|status}
@@ -38,14 +39,15 @@ mkdir -p $Q $CLOUT
 log() { echo "[$LANE] $(date '+%F %T') $*"; }
 stop_requested() { [ -f $Q/STOP ] && { log "STOP found: lane stops here"; return 0; }; return 1; }
 
-gpu_used_mib() { nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i "$1" 2>/dev/null | tr -d ' '; }
-wait_gpu() {                                   # free = < 2 GB used, twice, one minute apart
-  log "waiting for container GPU $G to be free"
+gpu_free_mib() { nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits -i "$1" 2>/dev/null | tr -d ' '; }
+NEED_MIB=${NEED_MIB:-30000}
+wait_gpu() {                                   # usable = >= NEED_MIB free, twice, one minute apart (another user's
+  log "waiting for container GPU $G to have >= $NEED_MIB MiB free"   # small job may share the card)
   while true; do
-    u=$(gpu_used_mib $G); [ "${u:-99999}" -lt 2000 ] || { sleep 60; continue; }
-    sleep 60; u=$(gpu_used_mib $G); [ "${u:-99999}" -lt 2000 ] && break
+    f=$(gpu_free_mib $G); [ "${f:-0}" -ge $NEED_MIB ] || { sleep 60; continue; }
+    sleep 60; f=$(gpu_free_mib $G); [ "${f:-0}" -ge $NEED_MIB ] && break
   done
-  log "GPU $G is free"
+  log "GPU $G has $f MiB free"
 }
 json_get() { $PY -c "import json,sys; v=json.load(open(sys.argv[1]))
 for k in sys.argv[2].split('.'): v=v[k]

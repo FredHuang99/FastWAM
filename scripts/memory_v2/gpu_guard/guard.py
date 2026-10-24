@@ -19,6 +19,9 @@ Environment
   RELEASE_AFTER_SECONDS      default 600
   STARTUP_TIMEOUT_SECONDS    default 1800
   DRY_RUN                    1 = log what would be killed, kill nothing
+  GRANDFATHER_PIDS           comma-separated host pids that are never killed (another user's job that was
+                             already on the GPU when the guard was deployed); a reused pid (different
+                             process start time) loses the exemption
 """
 import os
 import signal
@@ -69,10 +72,11 @@ def process_info(pid):
 
 class Guard:
     def __init__(self, uuids, owner, release_after=600.0, startup_timeout=1800.0, dry_run=False,
-                 apps=compute_apps, info=process_info, kill=os.kill, clock=time.time):
+                 apps=compute_apps, info=process_info, kill=os.kill, clock=time.time, grandfather=()):
         if len(owner) < 12:
             raise ValueError("OWNER_CONTAINER_ID must be the container id (64 hex chars preferred).")
         self.owner = owner
+        self.grandfather = {int(p): None for p in grandfather}      # pid -> process start time once seen
         self.release_after = release_after
         self.startup_timeout = startup_timeout
         self.dry_run = dry_run
@@ -98,6 +102,14 @@ class Guard:
                 if self.ours(info):
                     g["seen"], g["last_ours"] = True, now
                     continue
+                if pid in self.grandfather:
+                    if self.grandfather[pid] is None:
+                        self.grandfather[pid] = info["start"]
+                        log(f"GRANDFATHER pid={pid} uid={info['uid']} gpu={uuid} cmd={info['cmdline'][:80]!r}: never killed")
+                    if self.grandfather[pid] == info["start"]:
+                        continue
+                    log(f"pid {pid} was reused (new start time): exemption dropped")
+                    del self.grandfather[pid]
                 again = self.info(pid)                 # re-check right before killing (PID reuse)
                 if again is None or self.ours(again) or again["start"] != info["start"]:
                     continue
@@ -135,13 +147,14 @@ def main():
         log(f"{done} exists: guard already finished; exiting 0 (container stays stopped).")
         return 0
     uuids = [u.strip() for u in os.environ["GUARD_GPU_UUIDS"].split(",") if u.strip()]
+    grandfather = [p.strip() for p in os.environ.get("GRANDFATHER_PIDS", "").split(",") if p.strip().isdigit()]
     guard = Guard(uuids, os.environ["OWNER_CONTAINER_ID"].strip(),
                   release_after=float(os.environ.get("RELEASE_AFTER_SECONDS", "600")),
                   startup_timeout=float(os.environ.get("STARTUP_TIMEOUT_SECONDS", "1800")),
-                  dry_run=os.environ.get("DRY_RUN", "0") == "1")
+                  dry_run=os.environ.get("DRY_RUN", "0") == "1", grandfather=grandfather)
     poll = float(os.environ.get("POLL_SECONDS", "2"))
     log(f"guarding {uuids} for container {guard.owner[:12]} (release after {guard.release_after:.0f}s idle, "
-        f"startup timeout {guard.startup_timeout:.0f}s, dry_run={guard.dry_run})")
+        f"startup timeout {guard.startup_timeout:.0f}s, dry_run={guard.dry_run}, grandfathered pids {grandfather})")
     last_status = 0.0
     while True:
         finished = guard.step()

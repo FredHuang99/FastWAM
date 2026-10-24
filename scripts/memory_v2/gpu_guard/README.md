@@ -17,4 +17,5 @@ GUARD_NAME=hhy-gpu0-guard GUARD_UUIDS=GPU-ccc bash /tmp/deploy_guard.sh
 docker update --restart=no hhy-gpu2-guard && docker stop hhy-gpu2-guard
 ```
 It refuses to start while another user's process is already on a guarded GPU (it would be killed at
-once); `ALLOW_KILL_EXISTING=1` overrides. Regenerate `deploy_guard.sh` after editing `guard.py` (the heredoc must match the file).
+once); `GRANDFATHER_EXISTING=1` deploys anyway and never kills those processes (new arrivals still are);
+`ALLOW_KILL_EXISTING=1` deploys and kills them. Regenerate `deploy_guard.sh` after editing `guard.py` (the heredoc must match the file).
