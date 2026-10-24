@@ -93,7 +93,7 @@ evaluate_run() {                               # 401-window eval + PR of the fin
 common_sets() {                                # the A2C recipe, lr from the probe, micro_batch from the probe
   local lr=$1 mb=$2
   echo "--set optim.lr_action=$lr --set optim.lr_memory=$LR_MEMORY --set init_memory=$DCKPT --set schedule.epochs=$EPOCHS" \
-       "--set schedule.micro_batch=$mb --set schedule.eval_every=335 --set schedule.keep_last=2" \
+       "--set schedule.micro_batch=$mb --set schedule.eval_every=335 --set schedule.keep_last=2 --set schedule.save_every=200" \
        "--set guard.loss_factor=2.5 --set guard.start_update=120"
 }
 pair_sets() {
