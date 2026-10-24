@@ -93,7 +93,8 @@ evaluate_run() {                               # 401-window eval + PR of the fin
 common_sets() {                                # the A2C recipe, lr from the probe, micro_batch from the probe
   local lr=$1 mb=$2
   echo "--set optim.lr_action=$lr --set optim.lr_memory=$LR_MEMORY --set init_memory=$DCKPT --set schedule.epochs=$EPOCHS" \
-       "--set schedule.micro_batch=$mb --set schedule.eval_every=335 --set schedule.keep_last=2"
+       "--set schedule.micro_batch=$mb --set schedule.eval_every=335 --set schedule.keep_last=2" \
+       "--set guard.loss_factor=2.5 --set guard.start_update=120"
 }
 pair_sets() {
   local vis; vis=$($PY -c "import json,statistics;p=json.load(open('$PAIRS'))['train'];print(statistics.median(x['visual_distance'] for x in p))")
@@ -163,6 +164,22 @@ watch)
   exec >> $Q/watch.log 2>&1
   log "start; closed loop of epoch-end checkpoints -> $CLOUT (scenes $BANK)"
   wait_gpu
+  # ---- while the first epoch trains: (1) summarise the finished bank (C256 / D on / D null / B0 null), CPU only;
+  # (2) the time-conditioning test: D without absolute time (v2_A_noabs) on the same scenes, mode on.
+  if [ ! -f $CL/bank/bank_summary.txt ]; then
+    log "bank summary + stage/grasp analysis -> $CL/bank/bank_summary.txt"
+    { $PY -m fastwam.memory_v2.online summary --output $CL/bank; $PY $SCRIPTS/closed_loop_stages.py $CL/bank --quiet;
+      $PY $SCRIPTS/closed_loop_stages.py $CL/bank --grasps --quiet --expert $O/motion/motion_audit.json; } > $CL/bank/bank_summary.txt 2>&1
+  fi
+  NOABS=$O/v2_A_noabs/checkpoints/update_001340.pt
+  if [ -f $NOABS ] && [ ! -f $CLOUT/DONE_noabs ]; then
+    stop_requested && exit 0
+    log "closed loop v2_A_noabs/on (D without absolute-time features): does the right gripper still close in the air at the expert's time?"
+    bash $SCRIPTS/jobs/closed_loop.sh eval $G $NOABS noabs on $BANK $CLOUT --set memory_v2.memory.absolute_time=false
+    touch $CLOUT/DONE_noabs
+    $PY $SCRIPTS/closed_loop_stages.py $CLOUT --grasps --quiet --expert $O/motion/motion_audit.json > $CLOUT/grasps.txt 2>&1
+    tail -n 8 $CLOUT/grasps.txt
+  fi
   while true; do
     stop_requested && exit 0
     if [ -f $O/a2probe/CHOICE.json ] && [ "$(json_get $O/a2probe/CHOICE.json choice)" = None ]; then

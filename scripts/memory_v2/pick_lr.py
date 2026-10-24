@@ -43,7 +43,8 @@ def running_median_max(values, window):
     return max(statistics.median(values[i:i + window]) for i in range(0, len(values) - window + 1))
 
 
-def choose(folders, baseline=5, tail=30, window=10, max_final=1.15, max_peak=1.5, tie=0.01, min_updates=40):
+def choose(folders, baseline=5, tail=30, window=10, max_final=1.15, max_peak=1.5, tie=0.01, min_updates=40,
+           fallback_max_final=1.6):
     rows = []
     for folder in folders:
         name = folder.name
@@ -72,14 +73,24 @@ def choose(folders, baseline=5, tail=30, window=10, max_final=1.15, max_peak=1.5
                          f"peak {row['peak_ratio']:.2f}x > {max_peak}" if row["peak_ratio"] > max_peak else "OOM")
         rows.append(row)
     ok = [r for r in rows if r["status"] == "ok"]
-    choice = None
+    choice, fallback = None, False
     if ok:
         best = min(r["final"] for r in ok)
         near = [r for r in ok if r["final"] <= best * (1 + tie)]
         choice = max(near, key=lambda r: r["lr"])
-    return {"choice": None if choice is None else choice["lr"], "probes": sorted(rows, key=lambda r: r["lr"]),
+    elif fallback_max_final:
+        # Nothing met the strict rule (e.g. every lr bumps the loss early and 100 updates are too few to recover):
+        # take the lowest final loss among probes that at least stayed below fallback_max_final x start. The
+        # training run's own loss guard (2x the initial median) still stops a real divergence.
+        soft = [r for r in rows if r.get("final_ratio") is not None and r["final_ratio"] <= fallback_max_final
+                and r["peak_ratio"] <= fallback_max_final + 0.6 and not r["oom"]]
+        if soft:
+            choice, fallback = min(soft, key=lambda r: r["final"]), True
+            choice["status"] = "fallback"
+    return {"choice": None if choice is None else choice["lr"], "fallback": fallback,
+            "probes": sorted(rows, key=lambda r: r["lr"]),
             "rule": {"baseline": baseline, "tail": tail, "window": window, "max_final": max_final, "max_peak": max_peak,
-                     "tie": tie, "min_updates": min_updates}}
+                     "tie": tie, "min_updates": min_updates, "fallback_max_final": fallback_max_final}}
 
 
 def main():
@@ -92,15 +103,16 @@ def main():
     ap.add_argument("--max-final", type=float, default=1.15)
     ap.add_argument("--max-peak", type=float, default=1.5)
     ap.add_argument("--min-updates", type=int, default=40)
+    ap.add_argument("--fallback-max-final", type=float, default=1.6, help="0 = no fallback choice")
     args = ap.parse_args()
     folders = sorted(p for p in args.root.iterdir() if p.is_dir())
     result = choose(folders, args.baseline, args.tail, args.window, args.max_final, args.max_peak,
-                    min_updates=args.min_updates)
+                    min_updates=args.min_updates, fallback_max_final=args.fallback_max_final)
     print(f"{'lr':>8}{'updates':>9}{'start':>9}{'final':>9}{'final/x':>9}{'peak/x':>8}  status")
     for r in result["probes"]:
         print(f"{r['lr']:>8.0e}{r['updates']:>9}{r.get('start', float('nan')):>9.4f}{r.get('final', float('nan')):>9.4f}"
               f"{r.get('final_ratio', float('nan')):>9.2f}{r.get('peak_ratio', float('nan')):>8.2f}  {r['status']} {r.get('reason', '')}")
-    print(f"choice: {result['choice']}")
+    print(f"choice: {result['choice']}" + ("  (FALLBACK: no probe met the strict rule)" if result["fallback"] else ""))
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(json.dumps(result, indent=1), encoding="utf-8")
