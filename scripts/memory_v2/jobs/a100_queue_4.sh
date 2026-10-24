@@ -3,16 +3,18 @@
 # without anybody at the keyboard. One lane per GPU; every lane writes its own log, skips finished steps, resumes
 # interrupted training and stops between steps when $Q/STOP exists.
 #
-#   bash a100_queue_4.sh base   <gpu>   unit tests -> lr probe (3 x 100 real updates, no saving) -> pick the lr
+#   bash a100_queue_4.sh base   <gpu>   unit tests -> lr probe (2 x 100 real updates, no saving) -> pick the lr
 #                                       -> A2C: ActionDiT + memory_v2 (from D) + pairs, EPOCHS epochs -> 401-window eval + PR
 #   bash a100_queue_4.sh ablate <gpu>   waits for the lr choice and a free GPU -> A2C_nopairs (same, pairs off) -> eval + PR
 #   bash a100_queue_4.sh watch  <gpu>   waits for a free GPU -> closed loop of every epoch-end checkpoint as it appears
-#                                       (A2C e2/e4/e6 on+off, e6 also null; nopairs e6) -> stage + grasp analysis + summary
+#                                       (A2C every epoch on+off, last epoch also null; nopairs last epoch) -> analysis
 #   bash a100_queue_4.sh status         one screen: lanes, probe table, training progress / ETA, closed-loop results
 #
 # Logs (written by this script):  $Q/base.log  $Q/ablate.log  $Q/watch.log     with Q=outputs/memory_v2/queue4
 # Stop: touch $Q/STOP (lanes stop before their next step); touch outputs/memory_v2/<run>/STOP.json (training saves + stops).
-# Env: EPOCHS (6), PROBE_UPDATES (100), LRS ("1e-5 3e-5 1e-4"), LR_MEMORY (2e-5), MB_TRY ("4 2 1"), NEED_MIB (30000),
+# Measured on the A100 (10-24): ActionDiT training 36 s/update at global batch 64 (no pairs), 670 updates/epoch
+# => one epoch ~ 6.7 h (~8 h with pairs). Hence 3 epochs and no 1e-4 probe (A335: 1e-4 raised the loss 3.8x).
+# Env: EPOCHS (3), PROBE_UPDATES (100), LRS ("1e-5 3e-5"), LR_MEMORY (2e-5), MB_TRY ("4 2 1"), NEED_MIB (30000),
 # SIM_PY/CUROBO/EXT_DIR/VK_ICD
 # (simulator overrides, as closed_loop.sh).
 set -u
@@ -30,9 +32,9 @@ CLOUT=$CL/a2
 DCKPT=$O/v2_A_cf/checkpoints/update_001340.pt
 PAIRS=$O/pairs/pairs_v1.json
 SCRIPTS=/workspace/FastWAM-memory2/scripts/memory_v2
-EPOCHS=${EPOCHS:-6}
+EPOCHS=${EPOCHS:-3}
 PROBE_UPDATES=${PROBE_UPDATES:-100}
-LRS=${LRS:-"1e-5 3e-5 1e-4"}
+LRS=${LRS:-"1e-5 3e-5"}
 LR_MEMORY=${LR_MEMORY:-2e-5}
 MB_TRY=${MB_TRY:-"4 2 1"}
 mkdir -p $Q $CLOUT
@@ -189,7 +191,7 @@ watch)
       log "the lr probe failed (base lane); nothing to evaluate, lane stops"; exit 1
     fi
     pending=0
-    for spec in "a2C:2 4 6" "a2C_nopairs:6"; do
+    for spec in "a2C:$(seq -s " " 1 $EPOCHS)" "a2C_nopairs:$EPOCHS"; do
       run=${spec%%:*}
       upe=$(run_upe $run); [ -n "$upe" ] || { pending=1; continue; }
       for e in ${spec#*:}; do
