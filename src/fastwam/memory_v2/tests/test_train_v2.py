@@ -1,5 +1,6 @@
 """CPU tests of the train_v2 loop on the tiny backbone (no dense host needed)."""
 import json
+import types
 
 import pytest
 
@@ -255,3 +256,95 @@ def test_pr_swap_content_and_clock(tmp_path):
         result = evaluate_pairs(backend, pairs, cfg, modes=("on", "null"), batch_size=2, log=lambda m: None, swap=swap)
         assert result["swap"] == swap and result["summary"]["all"]["n"] == 4
         assert all(c["null/response"] < 1e-6 and c["history_dropped"] >= 0 for c in result["cases"])
+
+
+class TrainableTinyBackend(TinyBackend):
+    """TinyBackbone whose 'action' part (head + mlps) is trainable, stored in bfloat16 like the released MoT."""
+
+    def __init__(self, dtype=torch.bfloat16):
+        super().__init__()
+        bb = self.model.backbone
+        self.action_modules = [bb.head] + list(bb.mlp)
+        for m in self.action_modules:
+            m.to(dtype)
+            m.requires_grad_(True)
+            m.register_forward_pre_hook(lambda mod, args: (args[0].to(mod.weight.dtype),))
+            m.register_forward_hook(lambda mod, args, out: out.float())
+        bb.named_action_parameters = lambda: [(f"m{i}.{n}", p) for i, m in enumerate(self.action_modules)
+                                              for n, p in m.named_parameters()]
+        self.model.backbone.ab = types.SimpleNamespace(backbone=types.SimpleNamespace(mot=types.SimpleNamespace(
+            mixtures={"action": types.SimpleNamespace(named_parameters=bb.named_action_parameters)})))
+
+
+def _cfg_action(tmp_path, lr_action=1e-3, **extra):
+    cfg = _cfg(tmp_path, **extra)
+    cfg.optim = OptimConfig(lr_memory=1e-3, lr_action=lr_action, warmup_fraction=0.2)
+    return cfg
+
+
+def test_action_training_uses_fp32_masters_and_moves_bf16_weights(tmp_path):
+    backend = TrainableTinyBackend(torch.bfloat16)
+    cfg = _cfg_action(tmp_path)
+    logs = []
+    trainer = Trainer(backend, cfg, tmp_path / "run", log=logs.append)
+    assert len(trainer.master) == len(backend.model.backbone.named_action_parameters()) > 0
+    assert any("fp32 masters" in m for m in logs)
+    head_before = backend.model.backbone.head.weight.detach().clone()
+    for _ in range(3):
+        trainer.step()
+    head = backend.model.backbone.head.weight
+    assert head.dtype == torch.bfloat16 and not torch.equal(head, head_before)
+    master = trainer.master_names["m0.weight"]
+    assert master.dtype == torch.float32 and torch.equal(master.to(torch.bfloat16), head)   # module = rounded master
+    # Checkpoint holds the fp32 masters; a fresh trainer resumes them exactly.
+    trainer.save()
+    state = torch.load(trainer.checkpoint_dir() / "update_000003.pt", map_location="cpu", weights_only=False)
+    assert state["action"]["m0.weight"].dtype == torch.float32
+    again = Trainer(TrainableTinyBackend(torch.bfloat16), cfg, tmp_path / "run", log=lambda m: None)
+    assert again.resume() and torch.equal(again.master_names["m0.weight"], master)
+    assert torch.equal(again.model.backbone.head.weight, head)
+
+
+def test_fp32_action_params_need_no_masters(tmp_path):
+    backend = TrainableTinyBackend(torch.float32)
+    trainer = Trainer(backend, _cfg_action(tmp_path), tmp_path / "run", log=lambda m: None)
+    assert trainer.master == []
+    before = backend.model.backbone.head.weight.detach().clone()
+    trainer.step()
+    assert not torch.equal(before, backend.model.backbone.head.weight)
+
+
+def test_init_memory_stage_two(tmp_path):
+    # Stage 1: memory only. Stage 2: a new run starts from that memory (parity no longer zero-init).
+    cfg1 = _cfg(tmp_path / "s1")
+    first = Trainer(TinyBackend(), cfg1, tmp_path / "s1" / "run", log=lambda m: None)
+    first.run()
+    ckpt = sorted((tmp_path / "s1" / "run" / "checkpoints").glob("update_*.pt"))[-1]
+    cfg2 = _cfg_action(tmp_path / "s2")
+    cfg2.init_memory = str(ckpt)
+    assert TrainConfig.from_dict(cfg2.to_dict()).init_memory == str(ckpt)
+    backend = TrainableTinyBackend(torch.bfloat16)
+    logs = []
+    second = Trainer(backend, cfg2, tmp_path / "s2" / "run", log=logs.append)
+    result = second.run()
+    assert result["complete"] and any("memory-first stage 2" in m for m in logs)
+    parity = json.loads((tmp_path / "s2" / "run" / "INIT_PARITY.json").read_text())
+    assert parity["exact"] and parity["zero_init_required"] is False
+    assert parity["max_abs"]["on@0.3"] > 0                                   # memory was not zero-initialised
+    loaded = torch.load(ckpt, map_location="cpu", weights_only=False)["memory"]
+    first_record = json.loads((tmp_path / "s2" / "run" / "metrics.jsonl").read_text().splitlines()[0])
+    assert first_record["update"] == 1
+    assert set(loaded) == set(second.model.memory.state_dict())
+
+
+def test_set_override_parses_scientific_notation(tmp_path):
+    from fastwam.memory_v2.train_v2 import load_config, parse_override
+    assert parse_override("1e-5") == 1e-5 and parse_override("3e-05") == 3e-5 and parse_override("0.5") == 0.5
+    assert parse_override("16") == 16 and parse_override("outputs/x.pt") == "outputs/x.pt" and parse_override("null") is None
+    assert parse_override('["on","off"]') == ["on", "off"]
+    yaml = pytest.importorskip("yaml")
+    path = tmp_path / "c.yaml"
+    path.write_text(yaml.safe_dump({"optim": {"lr_memory": "1e-4"}}))
+    cfg = load_config(path, ["optim.lr_action=2e-5", "schedule.epochs=3", "init_memory=a/b.pt"])
+    assert cfg.optim.lr_action == 2e-5 and cfg.optim.lr_memory == 1e-4 and cfg.schedule.epochs == 3
+    assert cfg.init_memory == "a/b.pt"

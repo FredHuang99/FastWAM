@@ -7,6 +7,7 @@
 #   bash closed_loop.sh plan    <gpu> [seed] [n]     expert-feasible scene bank (default seed 17, 10 per task)
 #   bash closed_loop.sh bank    <gpu> <run|init> "<modes>" <scenes> [k/n]
 #   bash closed_loop.sh guide   <gpu> <run> <scale> <scenes> [task:seed ...]   memory guidance, mode on, label <run>_g<scale>
+#   bash closed_loop.sh eval    <gpu> <ckpt.pt> <label> "<modes>" <scenes> [out]   any checkpoint, no --dependence
 #   bash closed_loop.sh summary [output folder]
 #   bash closed_loop.sh render  <gpu>                SAPIEN offscreen render probe
 #   bash closed_loop.sh chain   <lane> <gpu> [run]   wait for a Phase-3 lane to finish, then parity -> smoke -> bank
@@ -91,6 +92,10 @@ guide)
   gpu ${2:-}; RUN=${3:?run}; SCALE=${4:?guidance scale, e.g. 2}; SCENES=${5:?scene manifest folder}; shift 5
   $M run --checkpoint $(ck $RUN) --label ${RUN}_g${SCALE} --modes on --scenes $SCENES --guidance $SCALE \
     --seeds "$@" --output $CL/bank "${SIM[@]}" ;;
+eval)
+  # Any checkpoint file, no --dependence (~3x faster per decision). Output folder defaults to $CL/a2.
+  gpu ${2:-}; CKPT=${3:?checkpoint .pt}; LABEL=${4:?label}; MODES=${5:?modes}; SCENES=${6:?scene manifest folder}; OUT=${7:-$CL/a2}
+  $M run --checkpoint $CKPT --label $LABEL --modes $MODES --scenes $SCENES --output $OUT "${SIM[@]}" ;;
 summary)
   $M summary --output ${2:-$CL/bank} ;;
 chain)

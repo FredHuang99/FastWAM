@@ -26,12 +26,13 @@ import hashlib
 import json
 import math
 import os
+import re
 import random
 import shutil
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence
+from typing import Dict, List, Optional, Sequence, Tuple
 
 import torch
 
@@ -107,6 +108,7 @@ class TrainConfig:
     output: str = "outputs/memory_v2/v2_A_memory_only"
     seed: int = 17
     init_checkpoint: str = "source"
+    init_memory: str = ""            # memory-first stage 2: memory_v2 weights loaded from this checkpoint (.pt) at start
     base_memory: str = "s1"          # s1 = frozen memory_s1 stays in the base (C+256 needs it); none = gate-0 diagnostic
     s1_period: int = 8               # memory_s1 history period T (dense evaluation/online use 8)
     features: str = "outputs/memory_v2/features_dense_v1"
@@ -122,8 +124,8 @@ class TrainConfig:
     @classmethod
     def from_dict(cls, value: dict) -> "TrainConfig":
         value = dict(value or {})
-        known = {"name", "output", "seed", "init_checkpoint", "base_memory", "s1_period", "features", "feature_batch", "dense",
-                 "memory_v2", "optim", "schedule", "eval", "guard", "pairs"}
+        known = {"name", "output", "seed", "init_checkpoint", "init_memory", "base_memory", "s1_period", "features",
+                 "feature_batch", "dense", "memory_v2", "optim", "schedule", "eval", "guard", "pairs"}
         unknown = set(value) - known
         if unknown:
             raise ValueError(f"Unknown train_v2 keys: {sorted(unknown)}")
@@ -137,10 +139,14 @@ class TrainConfig:
             for name, f in kind.__dataclass_fields__.items():
                 if name in data and isinstance(f.default, tuple):
                     data[name] = tuple(data[name])
+                elif name in data and isinstance(f.default, float) and isinstance(data[name], (str, int)):
+                    data[name] = float(data[name])
+                elif name in data and isinstance(f.default, int) and not isinstance(f.default, bool) and isinstance(data[name], str):
+                    data[name] = int(float(data[name]))
             return kind(**data)
 
-        cfg = cls(**{k: value[k] for k in ("name", "output", "seed", "init_checkpoint", "base_memory", "s1_period",
-                                          "features", "feature_batch", "dense")
+        cfg = cls(**{k: value[k] for k in ("name", "output", "seed", "init_checkpoint", "init_memory", "base_memory",
+                                          "s1_period", "features", "feature_batch", "dense")
                      if k in value})
         cfg.v2 = V2Config.from_dict(value.get("memory_v2"))
         cfg.optim = section(OptimConfig, "optim")
@@ -155,6 +161,7 @@ class TrainConfig:
 
     def to_dict(self) -> dict:
         return {"name": self.name, "output": self.output, "seed": self.seed, "init_checkpoint": self.init_checkpoint,
+                **({"init_memory": self.init_memory} if self.init_memory else {}),
                 "base_memory": self.base_memory, "s1_period": self.s1_period,
                 "features": self.features, "feature_batch": self.feature_batch, "dense": dict(self.dense),
                 "memory_v2": self.v2.to_dict(), "optim": asdict(self.optim), "schedule": asdict(self.schedule),
@@ -173,16 +180,32 @@ def normalise_modes(modes) -> tuple:
     return out
 
 
+NUMBER = re.compile(r"[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?")
+
+
+def parse_override(raw: str):
+    """YAML value of a --set override; '1e-5' style numbers (a string to YAML 1.1) become floats."""
+    import yaml
+    value = yaml.safe_load(raw)
+    if isinstance(value, str) and NUMBER.fullmatch(value.strip()):
+        return float(value)
+    return value
+
+
+def set_override(value: dict, item: str) -> None:
+    key, _, raw = item.partition("=")
+    target = value
+    parts = key.split(".")
+    for part in parts[:-1]:
+        target = target.setdefault(part, {})
+    target[parts[-1]] = parse_override(raw)
+
+
 def load_config(path: Path, overrides: Sequence[str] = ()) -> TrainConfig:
     import yaml
     value = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
     for item in overrides:                       # key.sub=value (YAML-parsed value)
-        key, _, raw = item.partition("=")
-        target = value
-        parts = key.split(".")
-        for part in parts[:-1]:
-            target = target.setdefault(part, {})
-        target[parts[-1]] = yaml.safe_load(raw)
+        set_override(value, item)
     return TrainConfig.from_dict(value)
 
 
@@ -437,9 +460,26 @@ class Trainer:
             g["lr_base"] = cfg.optim.lr_memory
             g["name"] = "memory"
         named_action = getattr(self.model.backbone, "named_action_parameters", lambda: [])()
+        # Low-precision (bf16/fp16) action parameters get fp32 master copies: AdamW steps on the masters, the
+        # module parameters are overwritten in place after every step (pure-bf16 AdamW loses small updates).
+        self.master: List[Tuple[torch.nn.Parameter, torch.Tensor]] = []
+        self.master_names: Dict[str, torch.Tensor] = {}
+
+        def trainable(name, p):
+            if p.dtype == torch.float32:
+                return p
+            m = p.detach().float().clone().requires_grad_(True)
+            self.master.append((p, m))
+            self.master_names[name] = m
+            return m
+
         if named_action:
-            decay = [p for n, p in named_action if p.ndim >= 2 and "norm" not in n.lower() and not n.endswith("bias")]
-            keep = [p for n, p in named_action if not (p.ndim >= 2 and "norm" not in n.lower() and not n.endswith("bias"))]
+            is_decay = lambda n, p: p.ndim >= 2 and "norm" not in n.lower() and not n.endswith("bias")
+            decay = [trainable(n, p) for n, p in named_action if is_decay(n, p)]
+            keep = [trainable(n, p) for n, p in named_action if not is_decay(n, p)]
+            dtypes = sorted({str(p.dtype) for _, p in named_action})
+            log(f"[action] {sum(p.numel() for _, p in named_action) / 1e6:.1f}M trainable ActionDiT parameters, "
+                f"dtype {dtypes}, fp32 masters: {len(self.master)} tensors")
             groups.append({"params": decay, "weight_decay": cfg.optim.weight_decay,
                            "lr_base": cfg.optim.lr_action, "name": "action"})
             groups.append({"params": keep, "weight_decay": 0.0, "lr_base": cfg.optim.lr_action, "name": "action_no_decay"})
@@ -469,7 +509,8 @@ class Trainer:
     def state(self) -> dict:
         action = None
         if self.cfg.optim.lr_action > 0:
-            action = {n: p.detach().cpu() for n, p in self.model.backbone.ab.backbone.mot.mixtures["action"].named_parameters()}
+            action = {n: self.master_names.get(n, p).detach().cpu()
+                      for n, p in self.model.backbone.ab.backbone.mot.mixtures["action"].named_parameters()}
         return {"update": self.update, "memory": self.model.memory.state_dict(), "action": action,
                 "optimizer": self.optimizer.state_dict(), "loss_history": self.loss_history,
                 "config": self.cfg.to_dict(), "backend": self.backend.describe(),
@@ -515,6 +556,8 @@ class Trainer:
             with torch.no_grad():
                 for n, v in state["action"].items():
                     named[n].copy_(v.to(named[n].device, named[n].dtype))
+                    if n in self.master_names:
+                        self.master_names[n].copy_(v.to(self.master_names[n].device, torch.float32))
         self.optimizer.load_state_dict(state["optimizer"])
         self.update = int(state["update"])
         self.loss_history = list(state.get("loss_history", []))
@@ -607,6 +650,9 @@ class Trainer:
                     (out["loss"] * cfg.pairs.weight * (len(group) / pair_total)).backward()
                     pair_stats["loss"] += float(out["loss"]) * len(group)
                     pair_stats["samples"] += len(group)
+        for p, m in self.master:                       # bf16 grads -> fp32 masters
+            m.grad = None if p.grad is None else p.grad.float()
+            p.grad = None
         if self.world > 1:
             for p in self.parameters:
                 if p.grad is None:
@@ -627,6 +673,10 @@ class Trainer:
             raise FloatingPointError(f"Non-finite gradient norm at update {u}.")
         self.optimizer.step()
         self.optimizer.zero_grad(set_to_none=True)
+        if self.master:
+            with torch.no_grad():
+                for p, m in self.master:
+                    p.copy_(m)
         self.update = u
         count = max(1, stats["samples"])
         fm = stats["fm"] / count
@@ -681,11 +731,20 @@ class Trainer:
                                              "updates_per_epoch": self.updates_per_epoch, "total_updates": self.total,
                                              "train_rows": len(self.rows), "world_size": self.world})
         if not resumed:
-            parity = self.init_parity()
+            if cfg.init_memory:
+                state = torch.load(cfg.init_memory, map_location="cpu", weights_only=False)
+                self.model.memory.load_state_dict(state["memory"], strict=True)
+                if state.get("action") is not None and cfg.optim.lr_action > 0:
+                    self.log("[init] NOTE: init_memory checkpoint also holds ActionDiT weights; they are NOT loaded "
+                             "(the ActionDiT starts from init_checkpoint)")
+                self.log(f"[init] memory_v2 weights from {cfg.init_memory} (update {state.get('update')}); "
+                         "memory-first stage 2")
+                del state
+            parity = self.init_parity(require_zero_init=not cfg.init_memory)
             if self.rank == 0 and not dry_run:
                 write_json(out / "INIT_PARITY.json", parity)
             if not parity["exact"]:
-                raise ValueError(f"Zero-initialised memory does not reproduce the start model: {parity}")
+                raise ValueError(f"Start model not reproduced: {parity}")
             if not dry_run and cfg.schedule.eval_every > 0:
                 result = evaluate(self.backend, self.backend.eval_rows(cfg.eval.windows), cfg, self.log)
                 if self.rank == 0:
@@ -699,8 +758,11 @@ class Trainer:
                 return {"stopped": True, "update": self.update}
             record = self.step()
             if self.rank == 0:
-                self.log("[train] " + json.dumps({k: record[k] for k in ("update", "loss", "fm", "endpoint", "pair_loss",
-                                                                        "grad_norm", "seconds") if k in record}))
+                shown = {k: record[k] for k in ("update", "loss", "fm", "endpoint", "pair_loss", "grad_norm", "seconds")
+                         if k in record}
+                if "peak_gpu_bytes" in record:
+                    shown["peak_gpu_gb"] = round(record["peak_gpu_bytes"] / 2**30, 1)
+                self.log("[train] " + json.dumps(shown))
                 if not dry_run:
                     append_jsonl(out / "metrics.jsonl", record)
             trip = self.loss_guard()
@@ -726,8 +788,9 @@ class Trainer:
         return {"complete": True, "update": self.update}
 
     @torch.no_grad()
-    def init_parity(self) -> dict:
-        """With zero-initialised memory, memory on / null / off must give identical velocities."""
+    def init_parity(self, require_zero_init: bool = True) -> dict:
+        """With zero-initialised memory, memory on / null / off must give identical velocities (require_zero_init);
+        the memory-off path must always reproduce the start model."""
         model = self.model
         model.eval()
         batch = self.backend.batch(self.backend.probe_rows())
@@ -742,7 +805,9 @@ class Trainer:
                 v = model.velocity(x, t, conditions, mode)
                 diff = float((v.float() - ref.float()).abs().max())
                 result["max_abs"][f"{mode}@{tau}"] = diff
-                result["exact"] = result["exact"] and bool(torch.equal(v, ref))
+                if require_zero_init:
+                    result["exact"] = result["exact"] and bool(torch.equal(v, ref))
+        result["zero_init_required"] = require_zero_init
         # The memory-off path must be the start model itself (dense ABModel with its own inputs).
         reference = getattr(self.backend, "base_reference", None)
         if reference is not None:

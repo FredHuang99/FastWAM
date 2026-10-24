@@ -229,6 +229,8 @@ def report_grasps(folders, expert=None, quiet=False):
             if not SEED_DIR.fullmatch(d.name) or not (d / "executed_actions.jsonl").exists():
                 continue
             res = json.loads(result.read_text())
+            if (d / "executed_actions.jsonl").stat().st_size == 0:
+                continue
             closes = gripper_closes(d / "executed_actions.jsonl", res["task"])
             cond = f"{res['label']}/{res['mode']}"
             table[(res["task"], cond)].append((res["seed"], closes))
@@ -296,6 +298,8 @@ def main():
                 continue
             res = json.loads(result.read_text())
             snaps, counters = read_rows(d / "executed_actions.jsonl")
+            if len(snaps) < 2 or not snaps[0]:
+                continue                                           # episode without executed targets
             task = res["task"]
             r = analyse_put_back(snaps, counters) if task == "put_back_block" else analyse_swap(snaps, counters)
             r.update(seed=res["seed"], success=res["success"], cond=f"{res['label']}/{res['mode']}", task=task,

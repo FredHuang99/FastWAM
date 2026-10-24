@@ -72,15 +72,10 @@ def execution_count(frame: int, limit: int) -> int:
 
 def apply_overrides(value: dict, overrides: Sequence[str]) -> dict:
     """key.sub=value (YAML-parsed), the same syntax as train_v2 --set."""
-    import yaml
+    from .train_v2 import set_override
     value = copy.deepcopy(value)
     for item in overrides:
-        key, _, raw = item.partition("=")
-        target = value
-        parts = key.split(".")
-        for part in parts[:-1]:
-            target = target.setdefault(part, {})
-        target[parts[-1]] = yaml.safe_load(raw)
+        set_override(value, item)
     return value
 
 
