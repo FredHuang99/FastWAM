@@ -121,11 +121,75 @@ def analyse_swap(snaps, counters):
     return r
 
 
+def trace_episode(path: Path, task: str, start: int, every: int = 24):
+    """What the robot does from target `start` on: per `every` targets, block / end-effector / gripper / contacts."""
+    blocks = ["block"] if task == "put_back_block" else ["block1", "block2"]
+    out = []
+    with path.open() as f:
+        for i, line in enumerate(f):
+            t = i + 1
+            if t < start or (t - start) % every:
+                continue
+            row = json.loads(line)
+            obj = row.get("objects_after") or {}
+            joints = row.get("joint_details") or {}
+            phys = row.get("physical_after") or [None] * 14
+            contacts = ((row.get("object_contacts") or {}).get("objects") or {})
+            cells = [f"t={t:<4}"]
+            for b in blocks:
+                if b not in obj:
+                    continue
+                bx, by, bz = obj[b]["p"][:3]
+                loc = put_back_location(bx, by) if task == "put_back_block" else swap_location(bx, by)
+                cells.append(f"{b}=({bx:+.3f},{by:+.3f},{bz:.3f}) {loc}")
+                for side in ("left", "right"):
+                    ee = (joints.get(side) or {}).get("ee_pose")
+                    if ee:
+                        d = math.dist(ee["p"][:3], (bx, by, bz))
+                        cells.append(f"{side[0]}EE-{b[-1] if b != 'block' else 'b'}={d:.3f}")
+            for name, c in contacts.items():
+                sides = [s for s, v in (c.get("by_side") or {}).items() if v]
+                if sides:
+                    cells.append(f"touch[{name}]={'+'.join(sides)}")
+            grip = [phys[6], phys[13]] if len(phys) >= 14 and phys[6] is not None else None
+            if grip:
+                cells.append(f"grip L={grip[0]:.2f} R={grip[1]:.2f}")
+            cells.append(f"press={obj.get('press_cnt')} stage={obj.get('stage_id')}")
+            out.append("  ".join(cells))
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("folders", nargs="*", default=["/workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/bank"])
     ap.add_argument("--quiet", action="store_true", help="no per-episode lines")
+    ap.add_argument("--trace", default="", help="label/mode (e.g. v2_A_cf/on): timeline of episodes that reached "
+                                                "the memory decision (put_back: block in the centre; swap: S1)")
+    ap.add_argument("--trace-every", type=int, default=24)
     args = ap.parse_args()
+    if args.trace:
+        label, mode = args.trace.split("/")
+        for folder in args.folders:
+            for result in sorted(Path(folder).glob(f"{label}/{mode}/*/seed_*/result.json")):
+                d = result.parent
+                if not SEED_DIR.fullmatch(d.name):
+                    continue
+                res = json.loads(result.read_text())
+                snaps, counters = read_rows(d / "executed_actions.jsonl")
+                if res["task"] == "put_back_block":
+                    r = analyse_put_back(snaps, counters)
+                    if not r["centre"]:
+                        continue
+                    start = max(1, int(r["events"][0].split("@")[1]) - 24)
+                else:
+                    r = analyse_swap(snaps, counters)
+                    if not r["s1"]:
+                        continue
+                    start = max(1, int(r["events"][0].split("@")[1]) - 24)
+                print(f"\n== {args.trace} {res['task']} seed={res['seed']} furthest={r['furthest']} events={r['events']}")
+                for line in trace_episode(d / "executed_actions.jsonl", res["task"], start, args.trace_every):
+                    print("   " + line)
+        return
     table = defaultdict(list)
     for folder in args.folders:
         for result in sorted(Path(folder).glob("*/*/*/seed_*/result.json")):
