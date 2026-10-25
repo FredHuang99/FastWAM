@@ -53,7 +53,7 @@ def section(title):
 
 
 def processes():
-    out = sh("pgrep -af 'a100_queue_4.sh|fastwam.memory_v2.train_v2|fastwam.memory_v2.online run'")
+    out = sh("pgrep -af 'a100_queue_4.sh|a100_final.sh|fastwam.memory_v2.train_v2|fastwam.memory_v2.online run'")
     return [line for line in out.splitlines() if "pgrep" not in line and "queue4_check" not in line]
 
 
@@ -65,11 +65,17 @@ def main():
 
     # ------------------------------------------------------------------ lanes
     section("lanes")
-    for lane in ("base", "ablate", "watch"):
-        alive = any(re.search(rf"a100_queue_4\.sh {lane}\b", p) for p in procs)
+    for lane in ("base", "ablate", "watch", "final"):
         log = Q / f"{lane}.log"
+        if (Q / f"RETIRED_{lane}").exists():
+            print(f"  {lane:<7} retired (replaced by a100_final.sh)")
+            continue
+        if lane == "final" and not log.exists():
+            continue
+        script = "a100_final\\.sh" if lane == "final" else rf"a100_queue_4\.sh {lane}\b"
+        alive = any(re.search(script, p) for p in procs)
         last = tail(log, 2)
-        done = any("lane done" in line for line in tail(log, 50))
+        done = any("lane done" in line or "final done" in line for line in tail(log, 50))
         failed = [line for line in tail(log, 50) if "PROBE FAILED" in line or "GUARD tripped" in line or "lane stops" in line]
         state = "alive" if alive else ("finished" if done else "NOT RUNNING")
         print(f"  {lane:<7} {state}")
@@ -188,8 +194,10 @@ def main():
         if "online run" in p:
             m = re.search(r"--label (\S+)", p)
             label = m.group(1) if m else "?"
+            shard = re.search(r"--shard (\S+)", p)
+            label_shown = label + (f" shard {shard.group(1)}" if shard else "")
             n = len(list((CLOUT / label).glob("*/*/seed_*/result.json"))) if (CLOUT / label).exists() else 0
-            print(f"  running now: {label}  ({n} episodes finished)")
+            print(f"  running now: {label_shown}  ({n} episodes of {label} finished, all modes/shards)")
     if (CLOUT / "stages.txt").exists():
         lines = (CLOUT / "stages.txt").read_text(errors="replace").splitlines()
         start = next((i for i, l in enumerate(lines) if "stage reach" in l), None)
