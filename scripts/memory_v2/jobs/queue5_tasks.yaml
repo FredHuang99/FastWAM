@@ -54,6 +54,29 @@ tasks:
   on_pass: "G-A PASS on all scenes"
   on_fail: "G-A FAIL on all scenes: report the funnel and the conditional protocol instead of success rates"
 
+- id: GA-x1
+  lane: cpu
+  kind: analysis
+  after: [H8-swap-a, H8-swap-b]
+  requires_pass: [X1-swap]
+  hypothesis: "G-A at the X1 inference setting (same rule as X3, registered before the data)"
+  need_mib: 0
+  folders: [closed_loop/a2_infer/swap_best]
+  label: a2C_e3_x1best
+  modes: ["on", "null"]
+  tasks: [swap_blocks]
+  reference: {folders: [closed_loop/a2, closed_loop/a2_more], label: a2C_e3, modes: ["on", "null"]}
+  min_episodes: 40
+  inconclusive_if: "m['on_vs_null']['swap_blocks']['s2'][2] < 24"
+  pass_if: "sign_p(m['on_vs_null']['swap_blocks']['s2'][0], m['on_vs_null']['swap_blocks']['s2'][1]) < 0.05 and m['on_vs_null']['swap_blocks']['s2'][1] <= 1"
+  failure_explanations:
+    - if: "m['swap_blocks/on']['success'] > r['swap_blocks/on']['success']"
+      then: "the X1 setting raises swap success over execute 24 on the same scenes"
+    - if: "m['swap_blocks/null']['s2'] > r['swap_blocks/null']['s2'] + 3"
+      then: "null reaches S2 more often with frequent replanning: part of the on-null gap at execute 24 was drift, not memory"
+  on_pass: "G-A PASS at the final inference setting: headline table uses this setting"
+  on_fail: "report the per-stage paired tests (S2 / S3 / pressed) with the reverse scenes; G-A strict rule not met"
+
 # ------------------------------------------------------------------------------------------------ loop lane (GPU1)
 - id: X1-smoke
   lane: loop
@@ -202,6 +225,29 @@ tasks:
   on_pass: "put_back memory decision holds in full closed loop (on picks the original mat, null does not)"
   on_fail: "put_back memory decision not shown in full closed loop: X4 (expert prefix -> policy) decides it"
 
+# G-A again at the X1 inference setting (added 10-26 20:00 after X1-exec8 PASS, X3 FAIL; before any X1-swap data):
+# only if X1-swap PASSes (the setting keeps swap S2); shard 0/2 on GPU1 after X1-put-null, shard 1/2 on GPU2 after
+# the nopairs eval (X5 starts after it). X1-swap FAIL -> all SKIPPED, the plan continues unchanged.
+- id: H8-swap-a
+  lane: loop
+  kind: closed_loop
+  after: [X1-put-null]
+  requires_pass: [X1-swap]
+  hypothesis: "headline at the X1 inference setting: a2C_e3 on vs null on every swap scene (shard 0/2; seed-17 on episodes of X1-swap reused)"
+  need_mib: 30000
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3_x1best
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed17_n10, closed_loop/scenes_seed18_n8_swap_blocks, closed_loop/scenes_seed19_n8_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--shard", "0/2"]
+  best_of:
+    ids: [X1-exec8, X1-exec12, X1-steps30]
+    key: "put_back_block/on.regrasp"
+    args: {X1-exec8: ["--execute", "8"], X1-exec12: ["--execute", "12"], X1-steps30: ["--steps", "30"]}
+  output: closed_loop/a2_infer/swap_best
+  min_episodes: 10
+
 # more swap scenes for G-A after X1 (before the X2 closed loop: G-A is the headline)
 - id: X3b-plan
   lane: loop
@@ -314,10 +360,30 @@ tasks:
     - if: "m.get('full_on') and r.get('full_on') and m['full_on'] > 1.05 * r['full_on']"
       then: "offline on-error worse than A2C: pairs also regularise the action pathway"
 
+- id: H8-swap-b
+  lane: train
+  kind: closed_loop
+  after: [X2-eval, X1-swap]
+  requires_pass: [X1-swap]
+  hypothesis: "headline at the X1 inference setting: a2C_e3 on vs null on every swap scene (shard 1/2; seed-17 on episodes of X1-swap reused)"
+  need_mib: 30000
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3_x1best
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed17_n10, closed_loop/scenes_seed18_n8_swap_blocks, closed_loop/scenes_seed19_n8_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--shard", "1/2"]
+  best_of:
+    ids: [X1-exec8, X1-exec12, X1-steps30]
+    key: "put_back_block/on.regrasp"
+    args: {X1-exec8: ["--execute", "8"], X1-exec12: ["--execute", "12"], X1-steps30: ["--steps", "30"]}
+  output: closed_loop/a2_infer/swap_best
+  min_episodes: 10
+
 - id: X5-train
   lane: train
   kind: train
-  after: [X2-eval]
+  after: [X2-eval, X1-swap]
   hypothesis: "a model trained never seeing history (memory_dropout 1.0, no pairs) has a null branch as strong as A2C's null (attribution control)"
   need_mib: 30000
   run: a2B0
