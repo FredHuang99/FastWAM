@@ -275,7 +275,7 @@ tasks:
   kind: train
   hypothesis: "A2C recipe without the counterfactual pairs (second-stage ablation; memory still starts from D, which saw pairs)"
   wait_for_exit: ["a100_final.sh", "closed_loop.sh (plan|eval) 2 "]
-  need_mib: 40000
+  need_mib: 30000
   run: a2C_nopairs
   reference_run: a2C
   sets:
@@ -317,7 +317,7 @@ tasks:
   kind: train
   after: [X2-eval]
   hypothesis: "a model trained never seeing history (memory_dropout 1.0, no pairs) has a null branch as strong as A2C's null (attribution control)"
-  need_mib: 40000
+  need_mib: 30000
   run: a2B0
   reference_run: a2C_nopairs
   sets:

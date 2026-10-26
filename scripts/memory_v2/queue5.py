@@ -9,7 +9,7 @@
     queue5.py check                           preflight: inputs of every task, training sets vs the reference config
 
 Task file (YAML, default scripts/memory_v2/jobs/queue5_tasks.yaml). Each task:
-    id, lane, kind, hypothesis, after: [ids that must be done first], wait_for_exit: [pgrep -f patterns],
+    id, lane, kind, hypothesis, after: [ids that must be done first], wait_for_exit: [regex on process command lines],
     need_mib (free memory on the lane's GPU before starting; 0 = no GPU), timeout_h,
     pass_if / inconclusive_if: Python expressions over m (metrics), r (reference metrics), helpers sign_p(a, b), get(d, "a.b")
     min_episodes, on_pass, on_fail, on_inconclusive, failure_explanations: [{if: expr over m, r, c (class counts), then: text}]
@@ -448,6 +448,28 @@ def judge(task, rc, interrupted):
 
 
 # ============================================================================ running
+VIEWERS = {"pgrep", "pkill", "grep", "egrep", "tail", "less", "more", "cat", "vim", "vi", "nano"}
+
+
+def running(pattern):
+    """Is a process (other than this one, pgrep / grep / tail ... showing the pattern) running whose command line
+    matches `pattern` (regex, like pgrep -f)? Two lanes polling at once would otherwise see each other's pgrep."""
+    rx, me = re.compile(pattern), os.getpid()
+    for d in Path("/proc").iterdir():
+        if not d.name.isdigit() or int(d.name) == me:
+            continue
+        try:
+            raw = (d / "cmdline").read_bytes()
+        except OSError:
+            continue
+        args = raw.rstrip(b"\0").split(b"\0") if raw else []
+        if not args or Path(args[0].decode(errors="replace")).name in VIEWERS:
+            continue
+        if rx.search(" ".join(a.decode(errors="replace") for a in args)):
+            return True
+    return False
+
+
 def gpu_free_mib(gpu):
     try:
         out = subprocess.run(["nvidia-smi", "--query-gpu=memory.free", "--format=csv,noheader,nounits", "-i", str(gpu)],
@@ -465,17 +487,17 @@ def wait_ready(task, gpu):
     while time.time() < DEADLINE:
         if (Q / "STOP").exists():
             return False
-        busy = [p for p in patterns if subprocess.run(["pgrep", "-f", p], capture_output=True).returncode == 0]
+        busy = [p for p in patterns if running(p)]
         use_gpu = gpu is not None and need > 0
         free = gpu_free_mib(gpu) if use_gpu else None
         if not busy and (not use_gpu or free >= need):
             if not use_gpu:
                 time.sleep(min(POLL, 10))
-                if not any(subprocess.run(["pgrep", "-f", p], capture_output=True).returncode == 0 for p in patterns):
+                if not any(running(p) for p in patterns):
                     return True
                 continue
             time.sleep(POLL)
-            busy = [p for p in patterns if subprocess.run(["pgrep", "-f", p], capture_output=True).returncode == 0]
+            busy = [p for p in patterns if running(p)]
             if not busy and gpu_free_mib(gpu) >= need:
                 return True
             continue
