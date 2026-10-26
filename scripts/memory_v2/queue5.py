@@ -6,6 +6,7 @@
     queue5.py verdict --id X1-exec8           recompute metrics + verdict + autopsy of a finished task (new ledger entry)
     queue5.py ledger                          re-render LEDGER.md from LEDGER.jsonl
     queue5.py reset  --id X1-exec8            set a task back to pending (its outputs stay; a closed loop resumes)
+    queue5.py check                           preflight: inputs of every task, training sets vs the reference config
 
 Task file (YAML, default scripts/memory_v2/jobs/queue5_tasks.yaml). Each task:
     id, lane, kind, hypothesis, after: [ids that must be done first], wait_for_exit: [pgrep -f patterns],
@@ -845,6 +846,86 @@ def cmd_verdict(args):
     finish(t, s.get("rc", 0), bool(s.get("interrupted")), s.get("start") or now_bj())
 
 
+def _same(a, b):
+    try:
+        return math.isclose(float(a), float(b), rel_tol=1e-9, abs_tol=0.0)
+    except (TypeError, ValueError):
+        return str(a).strip("\"'") == str(b).strip("\"'")
+
+
+def cmd_check(args):
+    """Preflight before the lanes start: every input a task needs, and training sets vs the reference config."""
+    bad, warn = [], []
+    try:
+        tasks = load_tasks()
+    except Exception as error:                    # noqa: BLE001
+        print(f"FAIL task file {TASKS}: {error!r}")
+        raise SystemExit(1)
+    ids = {t["id"] for t in tasks}
+    produced = {str(resolve(t["output"])) for t in tasks if t.get("output")}
+    trained = {t["run"] for t in tasks if t["kind"] == "train"}
+    print(f"task file {TASKS}: {len(tasks)} tasks; deadline {datetime.fromtimestamp(DEADLINE, BJ):%Y-%m-%d %H:%M} Beijing; "
+          f"outputs {O}")
+    for t in tasks:
+        tid = t["id"]
+        for dep in (t.get("after") or []) + (t.get("requires_pass") or []):
+            if dep not in ids:
+                bad.append(f"{tid}: depends on unknown task {dep}")
+        for key in ("pass_if", "inconclusive_if"):
+            if t.get(key):
+                try:
+                    compile(t[key], key, "eval")
+                except SyntaxError as error:
+                    bad.append(f"{tid}: {key} does not parse: {error}")
+        if t.get("checkpoint"):
+            ck = str(t["checkpoint"])
+            run = ck[:-len("/last")] if ck.endswith("/last") else None
+            if run and run in trained:
+                pass                              # produced by a train task of this queue
+            elif not checkpoint_path(ck).exists():
+                bad.append(f"{tid}: checkpoint {checkpoint_path(ck)} missing")
+        for sc in t.get("scenes") or []:
+            if sc != "frozen" and not resolve(sc).exists():
+                later = any("scenes_seed20" in sc and x["kind"] == "shell" for x in tasks)
+                (warn if later or "seed18" in sc or "seed19" in sc else bad).append(
+                    f"{tid}: scene folder {resolve(sc)} missing (dropped at run time if still missing)")
+        for f in (t.get("folders") or []) + ((t.get("reference") or {}).get("folders") or []):
+            if not resolve(f).exists() and str(resolve(f)) not in produced:
+                warn.append(f"{tid}: folder {resolve(f)} missing")
+        for value in t.get("sets") or []:
+            k, _, v = str(value).replace("{O}", str(O)).partition("=")
+            if v.startswith("/") and not Path(v.split()[0]).exists():
+                bad.append(f"{tid}: --set {k} points to a missing file {v}")
+        if t["kind"] == "train" and t.get("reference_run"):
+            ref = flat((read_json(O / t["reference_run"] / "CONFIG.json", {}) or {}).get("config"))
+            if not ref:
+                warn.append(f"{tid}: reference run {t['reference_run']} has no CONFIG.json yet (compared at run time)")
+            else:
+                for value in t.get("sets") or []:
+                    k, _, v = str(value).replace("{O}", str(O)).partition("=")
+                    v = v.split("#")[0].strip()
+                    if k in ref and not _same(ref[k], v):
+                        print(f"  note {tid}: {k} = {v} (reference {t['reference_run']}: {ref[k]})")
+                    elif k not in ref:
+                        print(f"  note {tid}: {k} = {v} (not in the reference config)")
+                pairs = {k: v for k, v in ref.items() if k.startswith("pairs.") and v not in (None, "", 0, 0.0)}
+                print(f"  {tid}: reference {t['reference_run']} pair settings {pairs or 'none'}")
+        d = O / t["run"] if t.get("run") and t["kind"] == "train" else None
+        if d is not None and d.exists() and not (d / "checkpoints" / "LATEST.json").exists():
+            warn.append(f"{tid}: {d} exists without a checkpoint: it will be moved aside to {d.name}.stale_<time>")
+        if d is not None and (d / "COMPLETE.json").exists():
+            warn.append(f"{tid}: {d} is already complete: the task only records it")
+    for gpu in (1, 2):
+        free = gpu_free_mib(gpu)
+        print(f"  GPU {gpu}: {free} MiB free now (lanes wait for their own threshold)")
+    for line in warn:
+        print(f"WARN {line}")
+    for line in bad:
+        print(f"FAIL {line}")
+    print("CHECK " + ("FAILED" if bad else "OK"))
+    raise SystemExit(1 if bad else 0)
+
+
 def cmd_reset(args):
     set_state(args.id, status="pending", verdict=None, metrics=None, reference=None, waiting=None, override=None)
     print(f"{args.id}: pending")
@@ -861,8 +942,9 @@ def main():
         v = sub.add_parser(name)
         v.add_argument("--id", required=True)
     sub.add_parser("ledger")
+    sub.add_parser("check")
     args = ap.parse_args()
-    {"run": cmd_run, "status": cmd_status, "verdict": cmd_verdict, "reset": cmd_reset,
+    {"run": cmd_run, "status": cmd_status, "verdict": cmd_verdict, "reset": cmd_reset, "check": cmd_check,
      "ledger": lambda a: render_ledger()}[args.cmd](args)
 
 
