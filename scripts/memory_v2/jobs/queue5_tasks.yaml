@@ -3,6 +3,7 @@
 # do not edit a task's pass_if after it started; add a new task id instead.
 #
 # lanes:  loop  = container GPU1 (closed loop)      train = container GPU2 (training, then its own closed loops)
+#         extra = container GPU3 = host GPU4 (from 10-26 20:00: X7, 6-epoch A2C, then its closed loops)
 #         cpu   = no GPU (analyses of existing episodes)
 # paths are relative to outputs/memory_v2 unless absolute; {O} = outputs/memory_v2.
 #
@@ -305,6 +306,7 @@ tasks:
   need_mib: 30000
   run: a2C_nopairs
   reference_run: a2C
+  inconclusive_if: "m.get('pr_all_on') is None or r.get('pr_all_on') is None"
   pass_if: "m.get('pr_all_on') is not None and r.get('pr_all_on') is not None and m['pr_all_on'] < r['pr_all_on'] - 0.05"
   failure_explanations:
     - if: "m.get('pr_all_on') is not None and r.get('pr_all_on') is not None and abs(m['pr_all_on'] - r['pr_all_on']) < 0.03"
@@ -374,3 +376,112 @@ tasks:
     fallback: []
   output: closed_loop/x5_put
   min_episodes: 8
+
+# ------------------------------------------------------------------------------------------------ extra lane (container GPU3 = host GPU4)
+- id: X7-train
+  lane: extra
+  kind: train
+  hypothesis: "training length is a bottleneck (successful RMBench works train 10-100 epochs, RM-WAM 10): the identical A2C recipe for 6 epochs instead of 3"
+  need_mib: 30000
+  run: a2C_6ep
+  reference_run: a2C
+  sets:
+    - optim.lr_action=1e-5
+    - optim.lr_memory=2e-5
+    - init_memory={O}/v2_A_cf/checkpoints/update_001340.pt
+    - schedule.epochs=6
+    - schedule.micro_batch=4
+    - schedule.eval_every=335
+    - schedule.keep_last=2
+    - schedule.save_every=200
+    - guard.loss_factor=2.5
+    - guard.start_update=120
+    - pairs.file={O}/pairs/pairs_v1.json
+    - pairs.weight=0.5
+    - pairs.per_update=8
+    - pairs.max_visual_distance=0.00011537869913136323
+  pass_if: "m.get('complete') and m.get('fm_ratio') is not None and m['fm_ratio'] < 1.0"
+  failure_explanations:
+    - if: "m.get('config_diff') and any(not k.startswith(('schedule.epochs', 'name', 'output')) for k in m['config_diff'])"
+      then: "the config differs from A2C beyond the number of epochs: the comparison is not clean (see config_diff)"
+    - if: "m.get('guard')"
+      then: "the guard stopped the run: see GUARD.json"
+  on_fail: "training did not complete: inspect a2C_6ep/stdout.log; the X7 closed loops wait"
+
+- id: X7-eval
+  lane: extra
+  kind: eval
+  after: [X7-train]
+  hypothesis: "6 epochs lower the offline error of A2C e3 (401 windows) by > 5%"
+  need_mib: 30000
+  run: a2C_6ep
+  reference_run: a2C
+  inconclusive_if: "not m.get('full_on') or not r.get('full_on')"
+  pass_if: "m.get('full_on') and r.get('full_on') and m['full_on'] < 0.95 * r['full_on']"
+  failure_explanations:
+    - if: "m.get('full_on') and r.get('full_on') and m['full_on'] >= r['full_on']"
+      then: "no offline gain from 3 more epochs: the fit saturated at 3 epochs (more data / capacity, not time)"
+    - if: "m.get('pr_all_on') is not None and r.get('pr_all_on') is not None and m['pr_all_on'] < r['pr_all_on'] - 0.05"
+      then: "longer training lowers the PR: the memory use weakens as the ActionDiT fits more (memory-first schedule matters)"
+
+- id: X7-loop-swap
+  lane: extra
+  kind: closed_loop
+  after: [X7-eval]
+  hypothesis: "6-epoch A2C completes swap more often than 3-epoch A2C on the same 10 scenes (success >= 3/10 or S3 >= 6/10)"
+  need_mib: 30000
+  checkpoint: a2C_6ep/last
+  label: a2C6_e6
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed17_n10]
+  tasks: [swap_blocks]
+  output: closed_loop/x7
+  reference: {folders: [closed_loop/a2], label: a2C_e3, modes: ["on", "null"]}
+  min_episodes: 16
+  pass_if: "m['swap_blocks/on']['success'] >= 3 or m['swap_blocks/on']['s3'] >= 6"
+  failure_explanations:
+    - if: "m['swap_blocks/on']['success'] <= r['swap_blocks/on']['success'] and m['swap_blocks/on']['s3'] <= r['swap_blocks/on']['s3']"
+      then: "no closed-loop gain from 3 more epochs: training length is not the bottleneck (with X7-eval: offline gain without closed-loop gain = compounding error)"
+    - if: "m['on_vs_null']['swap_blocks']['s2'][0] - m['on_vs_null']['swap_blocks']['s2'][1] < r['on_vs_null']['swap_blocks']['s2'][0] - r['on_vs_null']['swap_blocks']['s2'][1] - 2"
+      then: "the on-null S2 gap shrinks with longer training: the policy relies less on memory as it fits the demos"
+  on_pass: "train longer: 6 epochs becomes the base recipe for next week (and 10 epochs on the 8-GPU window)"
+  on_fail: "3 epochs is enough for this data: next week's lever is data (X6 / DAgger), not epochs"
+
+- id: X7-loop-put
+  lane: extra
+  kind: closed_loop
+  after: [X7-loop-swap, X1-swap]
+  hypothesis: "6-epoch A2C regrasps after the press (with the X1 setting if one passed)"
+  need_mib: 30000
+  checkpoint: a2C_6ep/last
+  label: a2C6_e6
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed17_n10]
+  tasks: [put_back_block]
+  best_of:
+    ids: [X1-exec8, X1-exec12, X1-steps30]
+    key: "put_back_block/on.regrasp"
+    args: {X1-exec8: ["--execute", "8"], X1-exec12: ["--execute", "12"], X1-steps30: ["--steps", "30"]}
+    fallback: []
+  output: closed_loop/x7_put
+  reference: *put_back_ref
+  min_episodes: 8
+  pass_if: "m['put_back_block/on']['regrasp'] >= 3 or m['put_back_block/on']['success'] >= 2"
+  failure_explanations:
+    - if: "m['put_back_block/on']['regrasp'] <= r['put_back_block/on']['regrasp']"
+      then: "longer training does not fix the post-press drift either: data coverage (X6 / DAgger)"
+
+- id: X7-loop-swap-more
+  lane: extra
+  kind: closed_loop
+  after: [X7-loop-put]
+  hypothesis: "the X7 swap result holds on the seed-18/19 scenes (descriptive; pooled with the seed-17 scenes in its folder)"
+  need_mib: 30000
+  checkpoint: a2C_6ep/last
+  label: a2C6_e6
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed18_n8_swap_blocks, closed_loop/scenes_seed19_n8_swap_blocks]
+  tasks: [swap_blocks]
+  output: closed_loop/x7
+  reference: {folders: [closed_loop/a2, closed_loop/a2_more], label: a2C_e3, modes: ["on", "null"]}
+  min_episodes: 16
