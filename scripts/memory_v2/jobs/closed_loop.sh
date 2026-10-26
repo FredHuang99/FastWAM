@@ -4,7 +4,7 @@
 #   bash closed_loop.sh parity  <gpu> [run]          online path vs offline cache, 8 val windows (default run v2_A_cf)
 #   bash closed_loop.sh smoke   <gpu> [run]          2 frozen scenes x (off, on), first 96 targets, dependence logged
 #   bash closed_loop.sh frozen  <gpu> [run]          2 frozen scenes x (off, on), official 500/1000 caps
-#   bash closed_loop.sh plan    <gpu> [seed] [n]     expert-feasible scene bank (default seed 17, 10 per task)
+#   bash closed_loop.sh plan    <gpu> [seed] [n] [task]  expert-feasible scene bank (default seed 17, 10 per task)
 #   bash closed_loop.sh bank    <gpu> <run|init> "<modes>" <scenes> [k/n]
 #   bash closed_loop.sh guide   <gpu> <run> <scale> <scenes> [task:seed ...]   memory guidance, mode on, label <run>_g<scale>
 #   bash closed_loop.sh eval    <gpu> <ckpt.pt> <label> "<modes>" <scenes> [out] [extra online args]   no --dependence
@@ -80,8 +80,8 @@ frozen)
   gpu ${2:-}; RUN=${3:-v2_A_cf}
   $M run --checkpoint $(ck $RUN) --label $RUN --modes off on --scenes frozen --dependence --output $CL/frozen "${SIM[@]}" ;;
 plan)
-  gpu ${2:-}; SEED=${3:-17}; N=${4:-10}
-  $M plan --seed $SEED --episodes $N --output $CL/scenes_seed${SEED}_n${N} "${SIM[@]}" ;;
+  gpu ${2:-}; SEED=${3:-17}; N=${4:-10}; TASKS=${5:-}          # optional 5th arg: one task, e.g. swap_blocks
+  $M plan --seed $SEED --episodes $N ${TASKS:+--tasks $TASKS} --output $CL/scenes_seed${SEED}_n${N}${TASKS:+_$TASKS} "${SIM[@]}" ;;
 bank)
   gpu ${2:-}; RUN=${3:?run or init}; MODES=${4:?modes, e.g. "on" or "off on"}; SCENES=${5:?scene manifest folder}; SHARD=${6:-0/1}
   $M run --checkpoint $(ck $RUN) --label $RUN --modes $MODES --scenes $SCENES --shard $SHARD --dependence \
