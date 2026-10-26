@@ -64,10 +64,13 @@ def append(path, value):
         f.write(json.dumps(value, allow_nan=False) + "\n")
 
 
-def execution_count(frame: int, limit: int) -> int:
+def execution_count(frame: int, limit: int, execute: int = EXECUTE) -> int:
+    """Targets executed from a decision at `frame`: `execute` (default 24 of the 32 predicted), cut at the cap."""
     if not 0 <= frame < limit:
         raise ValueError("Target outside the official limit")
-    return min(EXECUTE, limit - frame)
+    if not 1 <= int(execute) <= HORIZON:
+        raise ValueError(f"execute must be within [1, {HORIZON}]")
+    return min(int(execute), limit - frame)
 
 
 def apply_overrides(value: dict, overrides: Sequence[str]) -> dict:
@@ -388,7 +391,7 @@ def run_episode(policy: Policy, scene: dict, mode: str, label: str, out: Path, a
                                    "condition": f"memory_v2_{mode}", "run_seed": policy.dense_cfg["seed"],
                                    "causal_case": {"task": task, "fork": 0, "capture": [], "cap": limit},
                                    "max_targets": int(args.max_targets), "record_frames": bool(args.record_frames),
-                                   "policy": policy.describe(), "label": label})
+                                   "execute": int(args.execute), "policy": policy.describe(), "label": label})
     target_limit = min(limit, args.max_targets) if args.max_targets else limit
     session = Session(policy, directory, mode, args.steps, args.guidance, args.dependence,
                       tag=f"{label}/{mode} {task} seed={scene['seed']}", limit=target_limit)
@@ -439,7 +442,7 @@ def run_episode(policy: Policy, scene: dict, mode: str, label: str, out: Path, a
                             if [int(r["frame_id"]) for r in req["observations"]] != list(range(last + 1, frame + 1)):
                                 raise ValueError("Observation gap")
                             actions = session.decide(req)
-                            n = execution_count(frame, limit)
+                            n = execution_count(frame, limit, args.execute)
                             commands.extend(actions[:n])
                             c.send({"ok": True, "actions": actions.tolist(), "execute": n})
                             last, next_frame = frame, next_frame + n
@@ -470,6 +473,7 @@ def run_episode(policy: Policy, scene: dict, mode: str, label: str, out: Path, a
                   "policy_seconds_mean": sum(d["seconds"] for d in decisions) / max(1, len(decisions)),
                   "dependence_mean": {k: sum(v) / len(v) for k, v in dependence.items()},
                   "steps": args.steps or policy.cfg.v2.guidance.steps, "guidance_scale": args.guidance,
+                  "execute": int(args.execute),
                   "simulator_backend": value.get("simulator_backend"), "simulator_seconds": value.get("simulator_seconds"),
                   "wall_seconds": time.monotonic() - start, **episode_metrics(rows)}
         write(directory / "result.json", result)
@@ -936,6 +940,7 @@ def main(argv=None):
     ap.add_argument("--shard", default="0/1", help="k/n: this process takes scenes[k::n]")
     ap.add_argument("--output", default="outputs/memory_v2/closed_loop")
     ap.add_argument("--steps", type=int, default=0, help="Euler steps (0 = the checkpoint's, 10)")
+    ap.add_argument("--execute", type=int, default=EXECUTE, help="targets executed per decision (of 32 predicted)")
     ap.add_argument("--guidance", type=float, default=1.0, help="memory guidance scale (1 = none)")
     ap.add_argument("--dependence", action="store_true", help="also sample the other modes: log the action change")
     ap.add_argument("--max-targets", type=int, default=0, help="smoke runs: stop after N executed targets (0 = official)")

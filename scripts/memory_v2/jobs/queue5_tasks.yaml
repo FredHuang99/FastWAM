@@ -1,0 +1,376 @@
+# queue5 task file (week plan v3, 2026-10-26 -> 10-30 12:00 Beijing). Re-read by every lane before each pick:
+# tasks can be added, edited or put on hold (hold: true) while the lanes run. Thresholds (pass_if) are pre-registered:
+# do not edit a task's pass_if after it started; add a new task id instead.
+#
+# lanes:  loop  = container GPU1 (closed loop)      train = container GPU2 (training, then its own closed loops)
+#         cpu   = no GPU (analyses of existing episodes)
+# paths are relative to outputs/memory_v2 unless absolute; {O} = outputs/memory_v2.
+#
+# D1 (Tue 15:00): if X6 (perturbation-recovery data) is GO, put X6 tasks before X5-train or set X5-train hold: true.
+
+defaults: &put_back_ref
+  folders: [closed_loop/a2]
+  label: a2C_e3
+  modes: ["on"]
+
+tasks:
+# ------------------------------------------------------------------------------------------------ cpu lane
+- id: X3
+  lane: cpu
+  kind: analysis
+  hypothesis: "swap on-vs-null S2 gap seen on 10 scenes (5/0) holds on >= 24 scenes (G-A)"
+  wait_for_exit: ["a100_extra.sh"]
+  need_mib: 0
+  folders: [closed_loop/a2, closed_loop/a2_more]
+  label: a2C_e3
+  modes: ["on", "null"]
+  tasks: [swap_blocks]
+  min_episodes: 20
+  inconclusive_if: "m['on_vs_null']['swap_blocks']['s2'][2] < 24"
+  pass_if: "sign_p(m['on_vs_null']['swap_blocks']['s2'][0], m['on_vs_null']['swap_blocks']['s2'][1]) < 0.05 and m['on_vs_null']['swap_blocks']['s2'][1] <= 1"
+  failure_explanations:
+    - if: "m['swap_blocks/on']['n'] and m['swap_blocks/on']['s2'] / m['swap_blocks/on']['n'] < 0.7"
+      then: "on reaches S2 much less often than on the seed-17 scenes (9/10): the seed-17 bank is easy; record the block layouts"
+    - if: "m['swap_blocks/null']['n'] and m['swap_blocks/null']['s2'] / m['swap_blocks/null']['n'] > 0.5"
+      then: "null also reaches S2 often: the memory effect was over-estimated on 10 scenes"
+  on_pass: "G-A PASS: swap memory effect significant; paper headline = on vs null stage funnel"
+  on_fail: "G-A FAIL: claim becomes 'trend + offline PR'; X3b / next week adds scenes"
+  on_inconclusive: "fewer than 24 paired scenes: X3-final (with the seed-20 scenes of X3b) decides"
+
+- id: X3-final
+  lane: cpu
+  kind: analysis
+  after: [X3b-run]
+  hypothesis: "G-A on every swap scene (seed 17 + 18 + 19 + 20 banks)"
+  need_mib: 0
+  folders: [closed_loop/a2, closed_loop/a2_more]
+  label: a2C_e3
+  modes: ["on", "null"]
+  tasks: [swap_blocks]
+  min_episodes: 20
+  inconclusive_if: "m['on_vs_null']['swap_blocks']['s2'][2] < 24"
+  pass_if: "sign_p(m['on_vs_null']['swap_blocks']['s2'][0], m['on_vs_null']['swap_blocks']['s2'][1]) < 0.05 and m['on_vs_null']['swap_blocks']['s2'][1] <= 1"
+  on_pass: "G-A PASS on all scenes"
+  on_fail: "G-A FAIL on all scenes: report the funnel and the conditional protocol instead of success rates"
+
+# ------------------------------------------------------------------------------------------------ loop lane (GPU1)
+- id: X1-smoke
+  lane: loop
+  kind: closed_loop
+  hypothesis: "--execute 8 is honoured end to end (decisions every 8 targets, commands == executed targets)"
+  wait_for_exit: ["a100_final.sh", "closed_loop.sh (plan|eval) 1 "]
+  need_mib: 30000
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3_smoke8
+  modes: ["on"]
+  scenes: [frozen]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--max-targets", "48"]
+  output: closed_loop/smoke_exec8
+  min_episodes: 1
+  pass_if: "m['decision_gaps'] == [8] and m['command_to_execution_exact']"
+  on_fail: "execute plumbing broken: X1 variants with --execute are skipped (fix online.py / sim_adapter.py)"
+
+- id: X1-exec8
+  lane: loop
+  kind: closed_loop
+  after: [X1-smoke]
+  requires_pass: [X1-smoke]
+  hypothesis: "replanning every 8 targets (MaP-WAM: execute 8 of 32) keeps put_back on the expert manifold after the press -> regrasp"
+  need_mib: 30000
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3_exec8
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed17_n10]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8"]
+  output: closed_loop/a2_infer/exec8
+  reference: *put_back_ref
+  min_episodes: 8
+  pass_if: "m['put_back_block/on']['regrasp'] >= 3 or m['put_back_block/on']['success'] >= 2"
+  failure_explanations: &x1_explanations
+    - if: "m['put_back_block/on']['regrasp'] <= r['put_back_block/on']['regrasp']"
+      then: "no more regrasps than with execute 24: the drift is not caused by the open-loop length (with all X1 variants: X6 / X4)"
+    - if: "m['put_back_block/on']['stage1'] < r['put_back_block/on']['stage1'] - 2"
+      then: "the variant hurts the earlier stages (lift / centre / press): reject it regardless of regrasps"
+    - if: "c['put_back_block/on']['idle'] >= 3"
+      then: "idling rises with replanning frequency (Chen 2025): prefer execute 12"
+    - if: "c['put_back_block/on']['failed'] and c['put_back_block/on']['unseen_state'] >= 0.5 * c['put_back_block/on']['failed']"
+      then: "post-press states are still off the expert distribution: data coverage (X6 perturbation-recovery / DAgger)"
+    - if: "c['put_back_block/on']['phase_regression'] >= 3"
+      then: "after the press the policy goes back to earlier phases: task progress not represented (progress head / memory)"
+    - if: "m['errors'] >= 3"
+      then: "simulator errors: infrastructure; rerun before judging"
+  on_pass: "this setting becomes the default inference (X1-swap checks swap S2 >= 8/10); X6 cancelled; GPU2 does X5"
+  on_fail: "if every X1 variant FAILs: drift is not from the open-loop length -> X6 if feasible, else X5; put_back = drift failure analysis"
+
+- id: X1-exec12
+  lane: loop
+  kind: closed_loop
+  after: [X1-exec8]
+  requires_pass: [X1-smoke]
+  hypothesis: "replanning every 12 targets fixes the post-press drift without the idling of execute 8"
+  need_mib: 30000
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3_exec12
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed17_n10]
+  tasks: [put_back_block]
+  online_args: ["--execute", "12"]
+  output: closed_loop/a2_infer/exec12
+  reference: *put_back_ref
+  min_episodes: 8
+  pass_if: "m['put_back_block/on']['regrasp'] >= 3 or m['put_back_block/on']['success'] >= 2"
+  failure_explanations: *x1_explanations
+  on_pass: "this setting becomes the default inference (if it beats exec8 on regrasp)"
+  on_fail: "see X1-exec8"
+
+- id: X1-steps30
+  lane: loop
+  kind: closed_loop
+  after: [X1-exec12]
+  hypothesis: "30 denoising steps (MemoryWAM / LingBot use 50 in sim) give precise enough actions to regrasp after the press"
+  need_mib: 30000
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3_steps30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed17_n10]
+  tasks: [put_back_block]
+  online_args: ["--steps", "30"]
+  output: closed_loop/a2_infer/steps30
+  reference: *put_back_ref
+  min_episodes: 8
+  pass_if: "m['put_back_block/on']['regrasp'] >= 3 or m['put_back_block/on']['success'] >= 2"
+  failure_explanations: *x1_explanations
+  on_pass: "more denoising steps help: default steps 30"
+  on_fail: "see X1-exec8"
+
+- id: X1-swap
+  lane: loop
+  kind: closed_loop
+  after: [X1-exec8, X1-exec12, X1-steps30]
+  hypothesis: "the winning X1 setting keeps swap S2 (>= 8/10) and improves S3 -> success"
+  need_mib: 30000
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3_x1best
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed17_n10]
+  tasks: [swap_blocks]
+  best_of:
+    ids: [X1-exec8, X1-exec12, X1-steps30]
+    key: "put_back_block/on.regrasp"
+    args: {X1-exec8: ["--execute", "8"], X1-exec12: ["--execute", "12"], X1-steps30: ["--steps", "30"]}
+  output: closed_loop/a2_infer/swap_best
+  reference: {folders: [closed_loop/a2], label: a2C_e3, modes: ["on"]}
+  min_episodes: 8
+  pass_if: "m['swap_blocks/on']['s2'] >= 8"
+  failure_explanations:
+    - if: "m['swap_blocks/on']['s3'] > r['swap_blocks/on']['s3']"
+      then: "S3 improved: the drift fix also helps the third move"
+  on_pass: "X1 PASS overall: the winner is the default inference setting from now on"
+  on_fail: "the winner hurts swap: keep execute 24 for swap, the winner only for put_back (task-specific inference = a caveat)"
+
+- id: X1-put-null
+  lane: loop
+  kind: closed_loop
+  after: [X1-swap]
+  hypothesis: "with the winning setting, the mat the block returns to depends on the history (on vs null, same scenes)"
+  need_mib: 30000
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3_x1best              # replaced by the winner's label / folder: its on episodes are reused, null is new
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed17_n10]
+  tasks: [put_back_block]
+  best_of:
+    ids: [X1-exec8, X1-exec12, X1-steps30]
+    key: "put_back_block/on.regrasp"
+    args: {X1-exec8: ["--execute", "8"], X1-exec12: ["--execute", "12"], X1-steps30: ["--steps", "30"]}
+    use:
+      X1-exec8: {label: a2C_e3_exec8, output: closed_loop/a2_infer/exec8}
+      X1-exec12: {label: a2C_e3_exec12, output: closed_loop/a2_infer/exec12}
+      X1-steps30: {label: a2C_e3_steps30, output: closed_loop/a2_infer/steps30}
+  output: closed_loop/a2_infer/put_null
+  min_episodes: 16
+  inconclusive_if: "m['put_back_block/on']['returned'] < 6"
+  pass_if: "m['put_back_block/on'].get('correct_mat', 0) >= 6 and m['put_back_block/null'].get('correct_mat', 0) <= 3"
+  failure_explanations:
+    - if: "m['put_back_block/null']['regrasp'] >= 3"
+      then: "null also regrasps: the regrasp is a control skill; the memory decision is the returned mat (correct_mat)"
+    - if: "m['put_back_block/on']['returned'] < 6"
+      then: "too few returns to judge the mat choice: the memory decision needs the conditional protocol (X4)"
+  on_pass: "put_back memory decision holds in full closed loop (on picks the original mat, null does not)"
+  on_fail: "put_back memory decision not shown in full closed loop: X4 (expert prefix -> policy) decides it"
+
+# more swap scenes for G-A after X1 (before the X2 closed loop: G-A is the headline)
+- id: X3b-plan
+  lane: loop
+  kind: shell
+  after: [X1-put-null]
+  hypothesis: "8 more expert-feasible swap scenes (seed 20) for G-A"
+  need_mib: 10000
+  command: "test -f {O}/closed_loop/scenes_seed20_n8_swap_blocks/swap_blocks.json || bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/closed_loop.sh plan {GPU} 20 8 swap_blocks"
+  timeout_h: 2
+
+- id: X3b-run
+  lane: loop
+  kind: closed_loop
+  after: [X3b-plan]
+  hypothesis: "a2C_e3 on vs null on the seed-20 swap scenes (pooled by X3-final)"
+  need_mib: 30000
+  timeout_h: 7
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed20_n8_swap_blocks]
+  tasks: [swap_blocks]
+  output: closed_loop/a2_more
+  min_episodes: 6
+
+- id: X2-loop-swap
+  lane: loop
+  kind: closed_loop
+  after: [X2-eval]
+  hypothesis: "the counterfactual pairs are a source of the closed-loop memory effect on swap (G-B)"
+  need_mib: 30000
+  checkpoint: a2C_nopairs/last
+  label: a2C_nopairs_e3
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed17_n10, closed_loop/scenes_seed18_n8_swap_blocks, closed_loop/scenes_seed19_n8_swap_blocks]
+  tasks: [swap_blocks]
+  output: closed_loop/x2
+  reference: {folders: [closed_loop/a2, closed_loop/a2_more], label: a2C_e3, modes: ["on", "null"]}
+  min_episodes: 30
+  pass_if: "(m['swap_blocks/on']['s2'] - m['swap_blocks/null']['s2']) <= 0.5 * (r['swap_blocks/on']['s2'] - r['swap_blocks/null']['s2']) or m['swap_blocks/on']['s2'] <= r['swap_blocks/on']['s2'] - 3"
+  failure_explanations:
+    - if: "abs(m['swap_blocks/on']['s2'] - r['swap_blocks/on']['s2']) <= 1"
+      then: "nopairs ~ A2C: the closed-loop effect comes from memory + joint fine-tuning; pairs only matter offline (rewrite contribution, add X2b from B-full next week)"
+    - if: "r['swap_blocks/on']['s2'] - r['swap_blocks/null']['s2'] <= 2"
+      then: "the A2C reference gap itself is small on these scenes: G-B is not decidable here"
+  on_pass: "G-B PASS: pairs are a source of the closed-loop memory effect; next week a pair-ratio sweep"
+  on_fail: "G-B FAIL: contribution = memory-first joint fine-tuning + leakage diagnostics + conditional protocol; pairs = offline evidence"
+
+- id: X2-loop-put
+  lane: loop
+  kind: closed_loop
+  after: [X2-loop-swap, X1-swap]
+  hypothesis: "nopairs on put_back with the X1 setting (descriptive)"
+  need_mib: 30000
+  checkpoint: a2C_nopairs/last
+  label: a2C_nopairs_e3
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed17_n10]
+  tasks: [put_back_block]
+  best_of:
+    ids: [X1-exec8, X1-exec12, X1-steps30]
+    key: "put_back_block/on.regrasp"
+    args: {X1-exec8: ["--execute", "8"], X1-exec12: ["--execute", "12"], X1-steps30: ["--steps", "30"]}
+    fallback: []
+  output: closed_loop/x2_put
+  reference: *put_back_ref
+  min_episodes: 8
+
+# ------------------------------------------------------------------------------------------------ train lane (GPU2)
+- id: X2-train
+  lane: train
+  kind: train
+  hypothesis: "A2C recipe without the counterfactual pairs (second-stage ablation; memory still starts from D, which saw pairs)"
+  wait_for_exit: ["a100_final.sh", "closed_loop.sh (plan|eval) 2 "]
+  need_mib: 40000
+  run: a2C_nopairs
+  reference_run: a2C
+  sets:
+    - optim.lr_action=1e-5
+    - optim.lr_memory=2e-5
+    - init_memory={O}/v2_A_cf/checkpoints/update_001340.pt
+    - schedule.epochs=3
+    - schedule.micro_batch=4
+    - schedule.eval_every=335
+    - schedule.keep_last=2
+    - schedule.save_every=200
+    - guard.loss_factor=2.5
+    - guard.start_update=120
+  pass_if: "m.get('complete') and m.get('fm_ratio') is not None and m['fm_ratio'] < 1.0"
+  failure_explanations:
+    - if: "m.get('config_diff') and any(not k.startswith(('pairs.', 'name', 'output')) for k in m['config_diff'])"
+      then: "the config differs from A2C beyond the pairs: the ablation is not clean (see config_diff)"
+    - if: "m['guard']"
+      then: "the guard stopped the run: see GUARD.json (loss rise -> lr)"
+  on_fail: "training did not complete / loss rose: inspect stdout.log; the X2 closed loop waits"
+
+- id: X2-eval
+  lane: train
+  kind: eval
+  after: [X2-train]
+  hypothesis: "without pairs the offline PR (val) is lower than A2C's by > 5 points"
+  need_mib: 30000
+  run: a2C_nopairs
+  reference_run: a2C
+  pass_if: "m.get('pr_all_on') is not None and r.get('pr_all_on') is not None and m['pr_all_on'] < r['pr_all_on'] - 0.05"
+  failure_explanations:
+    - if: "m.get('pr_all_on') is not None and r.get('pr_all_on') is not None and abs(m['pr_all_on'] - r['pr_all_on']) < 0.03"
+      then: "PR difference < 3 points: pairs do not change the offline memory use either (memory starts from D, which saw pairs: X2b)"
+    - if: "m.get('full_on') and r.get('full_on') and m['full_on'] > 1.05 * r['full_on']"
+      then: "offline on-error worse than A2C: pairs also regularise the action pathway"
+
+- id: X5-train
+  lane: train
+  kind: train
+  after: [X2-eval]
+  hypothesis: "a model trained never seeing history (memory_dropout 1.0, no pairs) has a null branch as strong as A2C's null (attribution control)"
+  need_mib: 40000
+  run: a2B0
+  reference_run: a2C_nopairs
+  sets:
+    - optim.lr_action=1e-5
+    - optim.lr_memory=2e-5
+    - init_memory={O}/v2_A_cf/checkpoints/update_001340.pt
+    - schedule.epochs=3
+    - schedule.micro_batch=4
+    - schedule.eval_every=335
+    - schedule.keep_last=2
+    - schedule.save_every=200
+    - guard.loss_factor=2.5
+    - guard.start_update=120
+    - guard.eval_regression=1000          # on is never trained: the on-vs-off guard does not apply
+    - memory_v2.objective.memory_dropout=1.0
+  pass_if: "m.get('complete') and m.get('fm_ratio') is not None and m['fm_ratio'] < 1.0"
+
+- id: X5-loop-swap
+  lane: train
+  kind: closed_loop
+  after: [X5-train]
+  hypothesis: "A2C's on-null gap is the history content, not a weak null branch (B0-null ~ A2C-null, A2C-on - B0-null >= 4/10)"
+  need_mib: 30000
+  checkpoint: a2B0/last
+  label: a2B0_e3
+  modes: ["null"]
+  scenes: [closed_loop/scenes_seed17_n10, closed_loop/scenes_seed18_n8_swap_blocks, closed_loop/scenes_seed19_n8_swap_blocks]
+  tasks: [swap_blocks]
+  output: closed_loop/x5
+  reference: {folders: [closed_loop/a2, closed_loop/a2_more], label: a2C_e3, modes: ["on", "null"]}
+  min_episodes: 16
+  pass_if: "(r['swap_blocks/on']['s2'] - m['swap_blocks/null']['s2']) >= 0.4 * m['swap_blocks/null']['n'] and abs(r['swap_blocks/null']['s2'] - m['swap_blocks/null']['s2']) <= 0.2 * m['swap_blocks/null']['n']"
+  failure_explanations:
+    - if: "m['swap_blocks/null']['s2'] - r['swap_blocks/null']['s2'] > 0.2 * m['swap_blocks/null']['n']"
+      then: "B0-null >> A2C-null: A2C's null branch was weakened (dropout 0.15 / pairs); report on - B0 instead of on - null"
+  on_pass: "attribution clean: on - null = history content"
+  on_fail: "report on - B0; the weak null branch goes into the limitations"
+
+- id: X5-loop-put
+  lane: train
+  kind: closed_loop
+  after: [X5-loop-swap, X1-swap]
+  hypothesis: "B0 (history-blind) on put_back with the X1 setting (descriptive: what memory-free control achieves)"
+  need_mib: 30000
+  checkpoint: a2B0/last
+  label: a2B0_e3
+  modes: ["null"]
+  scenes: [closed_loop/scenes_seed17_n10]
+  tasks: [put_back_block]
+  best_of:
+    ids: [X1-exec8, X1-exec12, X1-steps30]
+    key: "put_back_block/on.regrasp"
+    args: {X1-exec8: ["--execute", "8"], X1-exec12: ["--execute", "12"], X1-steps30: ["--steps", "30"]}
+    fallback: []
+  output: closed_loop/x5_put
+  min_episodes: 8

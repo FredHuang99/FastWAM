@@ -86,11 +86,21 @@ def analyse_put_back(snaps, counters):
     centre_t = next((e["t"] for e in ev if e["to"] == "centre"), None)
     after = [e for e in ev if centre_t is not None and e["t"] > centre_t]
     choice = after[-1]["to"] if after else None                     # where the block ends up after the centre
+    z0 = snaps[0]["block"]["p"][2]
+    # snaps[i + 1] is the state after counters[i]: the first snapshot with the button pressed
+    press_t = next((i + 1 for i, c in enumerate(counters) if (c.get("press_cnt") or 0) >= 1), None)
+    since = None if centre_t is None or press_t is None else max(centre_t, press_t)
+    lift_after = (max(s["block"]["p"][2] for s in snaps[since:] if "block" in s) - z0) if since is not None else 0.0
     r = {"original": original, "events": [f"{e['from']}->{e['to']}@{e['t']}" for e in ev],
          "lifted": lift["block"] >= 0.05, "centre": centre_t is not None, "pressed": press >= 1, "stage1": stage >= 1,
+         "press_t": press_t,
+         "regrasp": since is not None and lift_after >= 0.05,         # P4: block lifted again after centre AND press
+         "returned": choice not in (None, "table", "centre"),                    # put down on a mat after the centre
          "choice_after_centre": choice, "choice_correct": None if choice in (None, "table", "centre") else choice == original,
-         "max_lift_m": round(lift["block"], 4)}
-    r["furthest"] = ("success" if stage >= 2 else "stage1" if r["stage1"] else "pressed" if r["pressed"]
+         "max_lift_m": round(lift["block"], 4), "lift_after_press_m": round(lift_after, 4)}
+    r["success"] = stage >= 2
+    r["furthest"] = ("success" if stage >= 2 else "returned" if r["returned"] else "regrasp" if r["regrasp"]
+                     else "stage1" if r["stage1"] else "pressed" if r["pressed"]
                      else "centre" if r["centre"] else "lifted" if r["lifted"] else "none")
     return r
 
@@ -117,7 +127,9 @@ def analyse_swap(snaps, counters):
          "second_move": None if second is None else ("other block" if second["block"] != s1["block"] else "same block again"),
          "max_lift_m": round(max(lift.values()), 4)}
     r["choice_correct"] = None if second is None else second["block"] != s1["block"]
-    r["furthest"] = ("s3" if r["s3"] else "s2" if r["s2"] else "s1" if r["s1"] else "lifted" if r["lifted"] else "none")
+    r["success"] = r["s3"] and r["pressed"]          # reconstruction; the simulator's result.json is authoritative
+    r["furthest"] = ("success" if r["success"] else "s3" if r["s3"] else "s2" if r["s2"] else "s1" if r["s1"]
+                     else "lifted" if r["lifted"] else "none")
     return r
 
 
@@ -167,22 +179,27 @@ def gripper_closes(path: Path, task: str, open_above=0.75, closed_below=0.62, se
     ~0.5 = closed on a block): when, how far that side's end effector was from the nearest block, whether
     that side touched a block while closing, and the value it settled at. kind: grasp (settled > 0.3,
     something between the fingers) | empty-air (settled <= 0.3 and EE > 8 cm from every block) | empty-near."""
+    with path.open() as f:
+        lines = [json.loads(line) for line in f if line.strip()]
+    return gripper_closes_rows(lines, task, open_above, closed_below, settle)
+
+
+def gripper_closes_rows(lines, task: str, open_above=0.75, closed_below=0.62, settle=12):
+    """gripper_closes on already parsed executed_actions.jsonl rows."""
     blocks = ["block"] if task == "put_back_block" else ["block1", "block2"]
     rows = []
-    with path.open() as f:
-        for line in f:
-            row = json.loads(line)
-            obj = row.get("objects_after") or {}
-            joints = row.get("joint_details") or {}
-            phys = row.get("physical_after") or []
-            contacts = ((row.get("object_contacts") or {}).get("objects") or {})
-            rec = {}
-            for side, col in GRIPPER.items():
-                ee = (joints.get(side) or {}).get("ee_pose")
-                dist = min((math.dist(ee["p"][:3], obj[b]["p"][:3]) for b in blocks if b in obj), default=None) if ee else None
-                touch = any(((contacts.get(b) or {}).get("by_side") or {}).get(side) for b in blocks)
-                rec[side] = (phys[col] if len(phys) > col else None, dist, touch)
-            rows.append(rec)
+    for row in lines:
+        obj = row.get("objects_after") or {}
+        joints = row.get("joint_details") or {}
+        phys = row.get("physical_after") or []
+        contacts = ((row.get("object_contacts") or {}).get("objects") or {})
+        rec = {}
+        for side, col in GRIPPER.items():
+            ee = (joints.get(side) or {}).get("ee_pose")
+            dist = min((math.dist(ee["p"][:3], obj[b]["p"][:3]) for b in blocks if b in obj), default=None) if ee else None
+            touch = any(((contacts.get(b) or {}).get("by_side") or {}).get(side) for b in blocks)
+            rec[side] = (phys[col] if len(phys) > col else None, dist, touch)
+        rows.append(rec)
     out = []
     for side in GRIPPER:
         is_open = True
@@ -316,7 +333,8 @@ def main():
         frac = lambda k: sum(bool(r[k]) for r in rs) / n
         decided = [r["choice_correct"] for r in rs if r["choice_correct"] is not None]
         if task == "put_back_block":
-            stages = f"lifted {frac('lifted'):.2f}  centre {frac('centre'):.2f}  pressed {frac('pressed'):.2f}  stage1 {frac('stage1'):.2f}"
+            stages = (f"lifted {frac('lifted'):.2f}  centre {frac('centre'):.2f}  pressed {frac('pressed'):.2f}  "
+                      f"stage1 {frac('stage1'):.2f}  regrasp {frac('regrasp'):.2f}  returned {frac('returned'):.2f}")
             choices = Counter(r["choice_after_centre"] for r in rs if r["centre"])
             decision = f"return mat correct {sum(decided)}/{len(decided)} (chance 1/4)  choices after centre {dict(choices)}"
         else:
@@ -325,7 +343,8 @@ def main():
         print(f"  {folder:<7}{cond:<22}{task:<15} n={n:<3} success {frac('success'):.2f} | {stages} | {decision}")
         print(f"  {'':<7}{'':<22}{'':<15} furthest stage: {dict(Counter(r['furthest'] for r in rs))}")
     print("\n== paired on common scenes: episodes reaching each stage only under A / only under B")
-    keys = {"put_back_block": ("lifted", "centre", "pressed", "stage1"), "swap_blocks": ("lifted", "s1", "s2", "s3", "pressed")}
+    keys = {"put_back_block": ("lifted", "centre", "pressed", "stage1", "regrasp", "returned"),
+            "swap_blocks": ("lifted", "s1", "s2", "s3", "pressed")}
     by = defaultdict(dict)
     for (folder, task, cond), rs in table.items():
         for r in rs:

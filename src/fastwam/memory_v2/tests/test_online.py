@@ -55,6 +55,9 @@ def test_execution_count_and_caps():
     assert online.execution_count(0, 500) == 24
     assert online.execution_count(480, 500) == 20
     assert online.execution_count(984, 1000) == 16
+    assert online.execution_count(0, 500, 8) == 8 and online.execution_count(496, 500, 8) == 4
+    with pytest.raises(ValueError):
+        online.execution_count(0, 500, 33)
     with pytest.raises(ValueError):
         online.execution_count(500, 500)
     assert online.LIMITS == {"put_back_block": 500, "swap_blocks": 1000}

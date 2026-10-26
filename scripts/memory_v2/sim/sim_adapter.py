@@ -6,6 +6,7 @@ job fields that the original fixes:
   * max_targets   : stop after this many executed targets (smoke tests; result termination
                     "diagnostic_target_limit"); 0 = the official 500 / 1000 cap
   * record_frames : save the three camera PNGs of every captured observation (qualitative figures)
+  * execute       : targets executed per decision (default 24 of the 32 predicted; the policy side must agree)
 Nothing is imported from the dense delivery, so its code identity is unchanged.
 """
 from __future__ import annotations
@@ -27,10 +28,12 @@ def append(path, value):
         f.write(json.dumps(value, allow_nan=False) + '\n')
 
 
-def execution_count(frame, limit):
+def execution_count(frame, limit, execute=EXECUTE):
     if not 0 <= frame < limit:
         raise ValueError('Target outside official limit')
-    return min(EXECUTE, limit - frame)
+    if not 1 <= int(execute) <= 32:
+        raise ValueError('execute must be within [1, 32]')
+    return min(int(execute), limit - frame)
 
 
 def main():
@@ -67,7 +70,7 @@ def main():
             # Capture only the ordinary loop observation, once per completed target.
             self.pending.append(self.capture(environment, observation))
             if not self.actions:
-                count = execution_count(self.frame_id, case['cap'])
+                count = execution_count(self.frame_id, case['cap'], int(job.get('execute', EXECUTE)))
                 response = self.request(environment, 'decide')
                 actions = np.asarray(response['actions'], dtype=np.float32)
                 if actions.shape != (32, 14) or not np.isfinite(actions).all() or response['execute'] != count:

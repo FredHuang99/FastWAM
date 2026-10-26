@@ -54,6 +54,82 @@ def put_back_phases(actions: np.ndarray, events) -> np.ndarray:
     return phase
 
 
+class ExpertBank:
+    """Every expert action target (14-d) of the train demonstrations of one task, with its phase; val demos give the
+    in-distribution distance (q50 / q90 / q99). Needs the dense cache (CPU only)."""
+
+    def __init__(self, task="put_back_block", root="/workspace/FastWAM", code="/restore-tmp/dense_joint_v1",
+                 dense_output="/workspace/FastWAM/outputs/s1_dense_joint_h100_v1"):
+        from fastwam.memory_s1.common import ReleaseNormalizer
+        from fastwam.memory_v2 import dense
+        from fastwam.memory_v2.motion import gripper_events, phase_index
+
+        self.task = task
+        spec = dense.DenseSpec(root=Path(root), code=Path(code), output=Path(dense_output), verify_identity=False)
+        episodes = dense.EpisodeStore(spec, capacity=4, verify=False)
+        normaliser = ReleaseNormalizer(dense.dense_config(spec)["paths"]["stats"])
+        records = [r for r in dense.records(spec) if r["task"] == task]
+        bank_x, bank_phase, bank_t, bank_len, val = [], [], [], [], []
+        for r in records:
+            raw = normaliser.denormalize(episodes(r["episode_id"])["actions"].float()).numpy().astype(np.float64)
+            ev = gripper_events(raw)
+            ph = put_back_phases(raw, ev) if task == "put_back_block" else phase_index(len(raw), ev)
+            if r["split"] == "train":
+                bank_x.append(raw); bank_phase.append(ph); bank_t.append(np.arange(len(raw)))
+                bank_len.append(np.full(len(raw), len(raw)))
+            else:
+                val.append(raw)
+        self.n_records, self.n_train, self.n_val = len(records), len(bank_x), len(val)
+        self.X, self.P = np.concatenate(bank_x), np.concatenate(bank_phase)
+        self.T, self.L = np.concatenate(bank_t), np.concatenate(bank_len)
+        self.scale = np.ones(14)
+        self.scale[GRIP] = 0.5                     # gripper command 0..1 counts like 0.5 rad of joint distance
+        ref = [self.nearest(x)[1] for raw in val for x in raw[::8]]
+        self.q50, self.q90, self.q99 = (float(v) for v in np.quantile(ref, [0.5, 0.9, 0.99]))
+        self.names = PUT_BACK_PHASES if task == "put_back_block" else None
+
+    def nearest(self, x, cols=None, phase=None):
+        diff = (self.X - x) * self.scale
+        if cols is not None:
+            diff = diff[:, cols]
+        d = np.sqrt((diff ** 2).sum(1))
+        if phase is not None:
+            d = np.where(self.P == phase, d, np.inf)
+        i = int(np.argmin(d))
+        return i, float(d[i])
+
+    def pname(self, p):
+        return "?" if p < 0 else (self.names[p] if self.names else f"phase {p}")
+
+    def episode(self, rows, every=24):
+        """rows = executed_actions.jsonl lines of one episode. Samples every `every` targets; after the first press
+        (put_back) + 24 targets: phase of the nearest expert frame (both arms, and each arm alone), distances."""
+        press_t = next((i + 1 for i, r in enumerate(rows) if ((r.get("objects_after") or {}).get("press_cnt") or 0) >= 1),
+                       None)
+        samples, after = [], {"phases": Counter(), "dist": [], "dist_p4": [], "far": 0, "n": 0,
+                              "left": Counter(), "right": Counter(), "phase_ids": []}
+        before = []
+        left, right = LEFT_ARM + [6], RIGHT_ARM + [13]
+        for i in range(0, len(rows), every):
+            x = np.asarray(rows[i]["target"], dtype=np.float64)
+            j, dist = self.nearest(x)
+            samples.append({"t": i + 1, "phase": int(self.P[j]), "expert_t": int(self.T[j]), "expert_len": int(self.L[j]),
+                            "dist": dist, "far": dist > self.q99})
+            if press_t is not None and i + 1 <= press_t:
+                before.append(dist)
+            if press_t is not None and i + 1 > press_t + 24:
+                after["phases"][self.pname(int(self.P[j]))] += 1
+                after["phase_ids"].append(int(self.P[j]))
+                after["dist"].append(dist)
+                after["far"] += dist > self.q99
+                after["n"] += 1
+                if self.task == "put_back_block":
+                    after["dist_p4"].append(self.nearest(x, phase=4)[1])
+                for arm, cols in (("left", left), ("right", right)):
+                    after[arm][self.pname(int(self.P[self.nearest(x, cols)[0]]))] += 1
+        return {"press_t": press_t, "samples": samples, "before": before, "after": after}
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("folder", type=Path, help="closed-loop output folder (contains <label>/<mode>/<task>/seed_*)")
@@ -66,55 +142,9 @@ def main():
     ap.add_argument("--dense-output", default="/workspace/FastWAM/outputs/s1_dense_joint_h100_v1")
     args = ap.parse_args()
 
-    from fastwam.memory_s1.common import ReleaseNormalizer
-    from fastwam.memory_v2 import dense
-    from fastwam.memory_v2.motion import gripper_events, phase_index
-
-    spec = dense.DenseSpec(root=Path(args.root), code=Path(args.code), output=Path(args.dense_output),
-                           verify_identity=False)
-    episodes = dense.EpisodeStore(spec, capacity=4, verify=False)
-    normaliser = ReleaseNormalizer(dense.dense_config(spec)["paths"]["stats"])
-    records = [r for r in dense.records(spec) if r["task"] == args.task]
-
-    def expert(r):
-        raw = normaliser.denormalize(episodes(r["episode_id"])["actions"].float()).numpy().astype(np.float64)
-        ev = gripper_events(raw)
-        ph = put_back_phases(raw, ev) if args.task == "put_back_block" else phase_index(len(raw), ev)
-        return raw, ph
-
-    bank_x, bank_phase, bank_t, bank_len = [], [], [], []
-    val = []
-    for r in records:
-        raw, ph = expert(r)
-        if r["split"] == "train":
-            bank_x.append(raw); bank_phase.append(ph); bank_t.append(np.arange(len(raw))); bank_len.append(np.full(len(raw), len(raw)))
-        else:
-            val.append(raw)
-    X = np.concatenate(bank_x); P = np.concatenate(bank_phase); T = np.concatenate(bank_t); L = np.concatenate(bank_len)
-    arms = LEFT_ARM + RIGHT_ARM
-    scale = np.ones(14); scale[GRIP] = 0.5          # gripper command 0..1 counts like 0.5 rad of joint distance
-
-    def nearest(x, cols=None, phase=None):
-        diff = (X - x) * scale
-        if cols is not None:
-            diff = diff[:, cols]
-        d = np.sqrt((diff ** 2).sum(1))
-        if phase is not None:
-            d = np.where(P == phase, d, np.inf)
-        i = int(np.argmin(d))
-        return i, float(d[i])
-
-    LEFT, RIGHT = LEFT_ARM + [6], RIGHT_ARM + [13]
-
-    ref = [nearest(x)[1] for raw in val for x in raw[::8]]
-    q50, q90, q99 = np.quantile(ref, [0.5, 0.9, 0.99])
-    print(f"expert bank: {len(records)} {args.task} demos ({len(bank_x)} train, {len(val)} val), {len(X)} frames")
-    print(f"in-distribution distance (val demos vs train bank): median {q50:.3f}  q90 {q90:.3f}  q99 {q99:.3f}")
-    names = PUT_BACK_PHASES if args.task == "put_back_block" else None
-
-    def pname(p):
-        return "?" if p < 0 else (names[p] if names else f"phase {p}")
-
+    bank = ExpertBank(args.task, args.root, args.code, args.dense_output)
+    print(f"expert bank: {bank.n_records} {args.task} demos ({bank.n_train} train, {bank.n_val} val), {len(bank.X)} frames")
+    print(f"in-distribution distance (val demos vs train bank): median {bank.q50:.3f}  q90 {bank.q90:.3f}  q99 {bank.q99:.3f}")
     for mode in args.modes:
         totals = Counter()
         dist_before, dist_after, dist_p4, arm_phase = [], [], [], {"left": Counter(), "right": Counter()}
@@ -125,29 +155,21 @@ def main():
             rows = [json.loads(l) for l in (d / "executed_actions.jsonl").read_text().splitlines() if l.strip()]
             if not rows:
                 continue
-            press_t = next((i + 1 for i, r in enumerate(rows) if ((r.get("objects_after") or {}).get("press_cnt") or 0) >= 1), None)
+            e = bank.episode(rows, args.every)
             print(f"\n== {res.parent.parent.parent.parent.name}/{mode} {args.task} {d.name}  "
-                  f"targets={len(rows)}  first press at {press_t}")
-            after_press = Counter()
-            for i in range(0, len(rows), args.every):
-                x = np.asarray(rows[i]["target"], dtype=np.float64)
-                j, dist = nearest(x)
-                tag = "FAR" if dist > q99 else ""
-                print(f"   t={i + 1:<4} -> expert {pname(int(P[j])):<20} t={int(T[j]):>4}/{int(L[j])}  dist {dist:.3f} {tag}")
-                if press_t is not None and i + 1 <= press_t:
-                    dist_before.append(dist)
-                if press_t is not None and i + 1 > press_t + 24:
-                    after_press[pname(int(P[j]))] += 1
-                    totals[pname(int(P[j]))] += 1
-                    totals["FAR"] += dist > q99
-                    totals["n"] += 1
-                    dist_after.append(dist)
-                    if args.task == "put_back_block":
-                        dist_p4.append(nearest(x, phase=4)[1])
-                    for arm, cols in (("left", LEFT), ("right", RIGHT)):
-                        arm_phase[arm][pname(int(P[nearest(x, cols)[0]]))] += 1
-            if after_press:
-                print(f"   after the press: {dict(after_press)}")
+                  f"targets={len(rows)}  first press at {e['press_t']}")
+            for s in e["samples"]:
+                tag = "FAR" if s["far"] else ""
+                print(f"   t={s['t']:<4} -> expert {bank.pname(s['phase']):<20} t={s['expert_t']:>4}/{s['expert_len']}  "
+                      f"dist {s['dist']:.3f} {tag}")
+            a = e["after"]
+            if a["n"]:
+                print(f"   after the press: {dict(a['phases'])}")
+                totals.update(a["phases"])
+                totals["FAR"] += a["far"]
+                totals["n"] += a["n"]
+            dist_before += e["before"]; dist_after += a["dist"]; dist_p4 += a["dist_p4"]
+            arm_phase["left"].update(a["left"]); arm_phase["right"].update(a["right"])
         if totals["n"]:
             n = totals.pop("n"); far = totals.pop("FAR")
             print(f"\n## {args.label}/{mode}: decisions after the press ({n}): "
