@@ -94,10 +94,17 @@ def main():
     arms = LEFT_ARM + RIGHT_ARM
     scale = np.ones(14); scale[GRIP] = 0.5          # gripper command 0..1 counts like 0.5 rad of joint distance
 
-    def nearest(x):
-        d = np.sqrt((((X - x) * scale) ** 2).sum(1))
+    def nearest(x, cols=None, phase=None):
+        diff = (X - x) * scale
+        if cols is not None:
+            diff = diff[:, cols]
+        d = np.sqrt((diff ** 2).sum(1))
+        if phase is not None:
+            d = np.where(P == phase, d, np.inf)
         i = int(np.argmin(d))
         return i, float(d[i])
+
+    LEFT, RIGHT = LEFT_ARM + [6], RIGHT_ARM + [13]
 
     ref = [nearest(x)[1] for raw in val for x in raw[::8]]
     q50, q90, q99 = np.quantile(ref, [0.5, 0.9, 0.99])
@@ -110,6 +117,7 @@ def main():
 
     for mode in args.modes:
         totals = Counter()
+        dist_before, dist_after, dist_p4, arm_phase = [], [], [], {"left": Counter(), "right": Counter()}
         for res in sorted(args.folder.glob(f"{args.label}*/{mode}/{args.task}/seed_*/result.json")):
             d = res.parent
             if not re.fullmatch(r"seed_\d+", d.name):
@@ -126,17 +134,32 @@ def main():
                 j, dist = nearest(x)
                 tag = "FAR" if dist > q99 else ""
                 print(f"   t={i + 1:<4} -> expert {pname(int(P[j])):<20} t={int(T[j]):>4}/{int(L[j])}  dist {dist:.3f} {tag}")
+                if press_t is not None and i + 1 <= press_t:
+                    dist_before.append(dist)
                 if press_t is not None and i + 1 > press_t + 24:
                     after_press[pname(int(P[j]))] += 1
                     totals[pname(int(P[j]))] += 1
                     totals["FAR"] += dist > q99
                     totals["n"] += 1
+                    dist_after.append(dist)
+                    if args.task == "put_back_block":
+                        dist_p4.append(nearest(x, phase=4)[1])
+                    for arm, cols in (("left", LEFT), ("right", RIGHT)):
+                        arm_phase[arm][pname(int(P[nearest(x, cols)[0]]))] += 1
             if after_press:
                 print(f"   after the press: {dict(after_press)}")
         if totals["n"]:
             n = totals.pop("n"); far = totals.pop("FAR")
             print(f"\n## {args.label}/{mode}: decisions after the press ({n}): "
                   + "  ".join(f"{k} {v / n:.0%}" for k, v in sorted(totals.items())) + f"   |  beyond expert q99: {far / n:.0%}")
+            q = lambda v: f"median {np.median(v):.3f} q90 {np.quantile(v, 0.9):.3f}" if v else "-"
+            print(f"## {args.label}/{mode}: distance to the nearest expert frame - before the press: {q(dist_before)};"
+                  f" after the press: {q(dist_after)}" + (f"; after the press to the nearest P4 frame: {q(dist_p4)}"
+                                                         if dist_p4 else ""))
+            for arm in ("left", "right"):
+                c = arm_phase[arm]; m = sum(c.values())
+                print(f"## {args.label}/{mode}: {arm} arm alone after the press matches "
+                      + "  ".join(f"{k} {v / m:.0%}" for k, v in sorted(c.items())))
 
 
 if __name__ == "__main__":
