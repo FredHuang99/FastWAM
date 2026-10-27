@@ -1,9 +1,12 @@
-# queue5 task file (week plan v3, 2026-10-26 -> 10-30 12:00 Beijing). Re-read by every lane before each pick:
+# queue5 task file (week plan v3/v4, 2026-10-26 -> 10-31 00:00 Beijing = end of Friday; until 10-28 03:50 the
+# deadline was 10-30 12:00). Re-read by every lane before each pick:
 # tasks can be added, edited or put on hold (hold: true) while the lanes run. Thresholds (pass_if) are pre-registered:
 # do not edit a task's pass_if after it started; add a new task id instead.
 #
 # lanes:  loop  = container GPU1 (closed loop)      train = container GPU2 (training, then its own closed loops)
 #         extra = container GPU3 = host GPU4 (from 10-26 20:00: X7, 6-epoch A2C, then its closed loops)
+#         gpu0  = container GPU0 = host GPU0 (from 10-28 04:00: the U1 arms, then P8b on the A100)
+#         remote = H200 host, container mwam2, GPU0 (self-contained tasks; started by hand)
 #         cpu   = no GPU (analyses of existing episodes)
 # paths are relative to outputs/memory_v2 unless absolute; {O} = outputs/memory_v2.
 #
@@ -110,11 +113,10 @@ tasks:
 - id: PG-A-final
   lane: cpu
   kind: analysis
-  hold: true
-  after: [PG-A]
-  hypothesis: "PG-A on every put_back scene: seeds 17-20 (A100) + 21-22 (H200); each scene's on and null ran on the same GPU type. Release (remove hold) after copying the H200 results back"
+  after: [PG-A, P8b-run]
+  hypothesis: "secondary, pooled (registered 10-28 03:50; PG-A on the 34 scenes stays the primary test): PG-A on every put_back scene, seeds 17-22 (P8 + P8b), all on the A100 (P8b moved from the H200 to GPU0 10-28 04:00)"
   need_mib: 0
-  folders: [closed_loop/a2_infer/exec8, closed_loop/a2_infer/exec8_h200]
+  folders: [closed_loop/a2_infer/exec8, closed_loop/a2_infer/exec8_p8b]
   label: a2C_e3_exec8
   modes: ["on", "null"]
   tasks: [put_back_block]
@@ -489,6 +491,30 @@ tasks:
   inconclusive_if: "m['prog_on_vs_null']['swap_blocks']['n'] < 24"
   pass_if: "m['prog_on_vs_null']['swap_blocks']['p'] < 0.05 and m['prog_on_vs_null']['swap_blocks']['delta'] > 0"
 
+# week plan v4 §5 ("if GPU1 is free on Thursday, add swap 20 scenes"): official-seed swap pilot on the A100, after H8
+- id: X8-swap-plan
+  lane: loop
+  kind: shell
+  after: [H8-null]
+  hypothesis: "20 expert-feasible swap scenes from the official seed 42"
+  need_mib: 10000
+  timeout_h: 3
+  command: "test -f {O}/closed_loop/scenes_seed42_n20_swap_blocks/swap_blocks.json || bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/closed_loop.sh plan {GPU} 42 20 swap_blocks"
+
+- id: X8-swap
+  lane: loop
+  kind: closed_loop
+  after: [X8-swap-plan]
+  hypothesis: "official-seed pilot (descriptive, not for the paper): swap at execute 24, on + null, 20 scenes; cost and variance per episode; caveat: our plan keeps expert-feasible seeds only; run on the A100"
+  need_mib: 30000
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed42_n20_swap_blocks]
+  tasks: [swap_blocks]
+  output: closed_loop/official_pilot
+  min_episodes: 10
+
 # ------------------------------------------------------------------------------------------------ train lane (GPU2)
 - id: X2-train
   lane: train
@@ -729,41 +755,6 @@ tasks:
       then: "the guard stopped the run: see GUARD.json"
   on_fail: "training did not complete: inspect a2C_6ep/stdout.log; the X7 closed loops wait"
 
-- id: U1-smoke
-  lane: extra
-  kind: closed_loop
-  after: [X7-train]
-  hypothesis: "U1 code with 1 candidate reproduces the plain execute-8 closed loop (frozen scene, 48 targets)"
-  need_mib: 30000
-  checkpoint: a2C/checkpoints/update_002010.pt
-  label: a2C_e3_u1smoke
-  modes: ["on"]
-  scenes: [frozen]
-  tasks: [put_back_block]
-  online_args: ["--execute", "8", "--candidates", "1", "--coherence", "overlap", "--max-targets", "48"]
-  output: closed_loop/u1_smoke
-  parity_with: {folders: [closed_loop/smoke_exec8], label: a2C_e3_smoke8, modes: ["on"]}
-  min_episodes: 1
-  pass_if: "m['parity_decisions'] >= 3 and m['parity_first_max_abs'] is not None and m['parity_first_max_abs'] <= 1e-3 and m['parity_max_abs'] <= 0.02 and m['decision_gaps'] == [8]"
-  on_fail: "U1 code changes the plain path: U1 arms are skipped; fix online.py before next week"
-
-- id: U1-smoke4
-  lane: extra
-  kind: closed_loop
-  after: [U1-smoke]
-  requires_pass: [U1-smoke]
-  hypothesis: "cost of 4 candidates per decision (descriptive): policy seconds / decision vs the plain smoke"
-  need_mib: 30000
-  checkpoint: a2C/checkpoints/update_002010.pt
-  label: a2C_e3_u1smoke4
-  modes: ["on"]
-  scenes: [frozen]
-  tasks: [put_back_block]
-  online_args: ["--execute", "8", "--candidates", "4", "--coherence", "overlap", "--max-targets", "48"]
-  output: closed_loop/u1_smoke
-  parity_with: {folders: [closed_loop/smoke_exec8], label: a2C_e3_smoke8, modes: ["on"]}
-  min_episodes: 1
-
 - id: X7-eval
   lane: extra
   kind: eval
@@ -829,81 +820,6 @@ tasks:
     - if: "m['put_back_block/on']['success'] <= r['put_back_block/on']['success']"
       then: "no put_back gain from 3 more epochs: the remaining failures are not a fit problem"
 
-# week plan v4 U1 (inference-time consistency at execute 8, no retraining; 10 + 10 seed-17 scenes). Registered 10-27 14:30.
-# U1b = BID-lite backward coherence with 4 candidates; U1a = one noise vector per episode. Both must keep put_back
-# (success >= 3, progress >= exec8 - 0.05) and win back swap (S2 >= 8, S3 >= 3). X7-loop-swap-more below is the filler.
-- id: U1b-put
-  lane: extra
-  kind: closed_loop
-  after: [X7-loop-put, U1-smoke]
-  requires_pass: [U1-smoke]
-  hypothesis: "U1b (BID-lite, 4 candidates) keeps put_back at execute 8"
-  need_mib: 30000
-  checkpoint: a2C/checkpoints/update_002010.pt
-  label: a2C_e3_u1b
-  modes: ["on"]
-  scenes: [closed_loop/scenes_seed17_n10]
-  tasks: [put_back_block]
-  online_args: ["--execute", "8", "--candidates", "4", "--coherence", "overlap"]
-  output: closed_loop/u1/b
-  reference: {folders: [closed_loop/a2_infer/exec8], label: a2C_e3_exec8, modes: ["on"]}
-  min_episodes: 8
-  pass_if: "m['put_back_block/on']['success'] >= 3 and m['put_back_block/on']['progress_mean'] >= r['put_back_block/on']['progress_mean'] - 0.05"
-
-- id: U1b-swap
-  lane: extra
-  kind: closed_loop
-  after: [X7-loop-put, U1-smoke]
-  requires_pass: [U1-smoke]
-  hypothesis: "U1b (BID-lite, 4 candidates) wins back swap at execute 8 (S2 >= 8, S3 >= 3)"
-  need_mib: 30000
-  checkpoint: a2C/checkpoints/update_002010.pt
-  label: a2C_e3_u1b
-  modes: ["on"]
-  scenes: [closed_loop/scenes_seed17_n10]
-  tasks: [swap_blocks]
-  online_args: ["--execute", "8", "--candidates", "4", "--coherence", "overlap"]
-  output: closed_loop/u1/b
-  reference: {folders: [closed_loop/a2], label: a2C_e3, modes: ["on"]}
-  min_episodes: 8
-  pass_if: "m['swap_blocks/on']['s2'] >= 8 and m['swap_blocks/on']['s3'] >= 3"
-
-- id: U1a-put
-  lane: extra
-  kind: closed_loop
-  after: [X7-loop-put, U1-smoke]
-  requires_pass: [U1-smoke]
-  hypothesis: "U1a (one noise per episode) keeps put_back at execute 8"
-  need_mib: 30000
-  checkpoint: a2C/checkpoints/update_002010.pt
-  label: a2C_e3_u1a
-  modes: ["on"]
-  scenes: [closed_loop/scenes_seed17_n10]
-  tasks: [put_back_block]
-  online_args: ["--execute", "8", "--noise", "per_episode"]
-  output: closed_loop/u1/a
-  reference: {folders: [closed_loop/a2_infer/exec8], label: a2C_e3_exec8, modes: ["on"]}
-  min_episodes: 8
-  pass_if: "m['put_back_block/on']['success'] >= 3 and m['put_back_block/on']['progress_mean'] >= r['put_back_block/on']['progress_mean'] - 0.05"
-
-- id: U1a-swap
-  lane: extra
-  kind: closed_loop
-  after: [X7-loop-put, U1-smoke]
-  requires_pass: [U1-smoke]
-  hypothesis: "U1a (one noise per episode) wins back swap at execute 8 (S2 >= 8, S3 >= 3)"
-  need_mib: 30000
-  checkpoint: a2C/checkpoints/update_002010.pt
-  label: a2C_e3_u1a
-  modes: ["on"]
-  scenes: [closed_loop/scenes_seed17_n10]
-  tasks: [swap_blocks]
-  online_args: ["--execute", "8", "--noise", "per_episode"]
-  output: closed_loop/u1/a
-  reference: {folders: [closed_loop/a2], label: a2C_e3, modes: ["on"]}
-  min_episodes: 8
-  pass_if: "m['swap_blocks/on']['s2'] >= 8 and m['swap_blocks/on']['s3'] >= 3"
-
 - id: X7-loop-swap-more
   lane: extra
   kind: closed_loop
@@ -919,10 +835,161 @@ tasks:
   reference: {folders: [closed_loop/a2, closed_loop/a2_more], label: a2C_e3, modes: ["on", "null"]}
   min_episodes: 16
 
+# ------------------------------------------------------------------------------------------------ gpu0 lane (container GPU0 = host GPU0)
+# Added 10-28 04:00 when GPU0 became free. File order = order: the U1 line (moved from the extra lane, where it waited
+# for X7 until Thursday evening; ids, settings and pass_if unchanged), then P8b (moved from the H200: on the A100
+# every pooled put_back scene of PG-A-final ran on one GPU type), then X2b-loop-swap-more (week plan v4 GPU2 filler).
+# week plan v4 U1 (inference-time consistency at execute 8, no retraining; 10 + 10 seed-17 scenes). Registered 10-27 14:30.
+# U1b = BID-lite backward coherence with 4 candidates; U1a = one noise vector per episode. Both must keep put_back
+# (success >= 3, progress >= exec8 - 0.05) and win back swap (S2 >= 8, S3 >= 3).
+- id: U1-smoke
+  lane: gpu0
+  kind: closed_loop
+  hypothesis: "U1 code with 1 candidate reproduces the plain execute-8 closed loop (frozen scene, 48 targets)"
+  need_mib: 30000
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3_u1smoke
+  modes: ["on"]
+  scenes: [frozen]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--candidates", "1", "--coherence", "overlap", "--max-targets", "48"]
+  output: closed_loop/u1_smoke
+  parity_with: {folders: [closed_loop/smoke_exec8], label: a2C_e3_smoke8, modes: ["on"]}
+  min_episodes: 1
+  pass_if: "m['parity_decisions'] >= 3 and m['parity_first_max_abs'] is not None and m['parity_first_max_abs'] <= 1e-3 and m['parity_max_abs'] <= 0.02 and m['decision_gaps'] == [8]"
+  on_fail: "U1 code changes the plain path: U1 arms are skipped; fix online.py before next week"
+
+- id: U1-smoke4
+  lane: gpu0
+  kind: closed_loop
+  after: [U1-smoke]
+  requires_pass: [U1-smoke]
+  hypothesis: "cost of 4 candidates per decision (descriptive): policy seconds / decision vs the plain smoke"
+  need_mib: 30000
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3_u1smoke4
+  modes: ["on"]
+  scenes: [frozen]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--candidates", "4", "--coherence", "overlap", "--max-targets", "48"]
+  output: closed_loop/u1_smoke
+  parity_with: {folders: [closed_loop/smoke_exec8], label: a2C_e3_smoke8, modes: ["on"]}
+  min_episodes: 1
+
+- id: U1b-put
+  lane: gpu0
+  kind: closed_loop
+  after: [U1-smoke]
+  requires_pass: [U1-smoke]
+  hypothesis: "U1b (BID-lite, 4 candidates) keeps put_back at execute 8"
+  need_mib: 30000
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3_u1b
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed17_n10]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--candidates", "4", "--coherence", "overlap"]
+  output: closed_loop/u1/b
+  reference: {folders: [closed_loop/a2_infer/exec8], label: a2C_e3_exec8, modes: ["on"]}
+  min_episodes: 8
+  pass_if: "m['put_back_block/on']['success'] >= 3 and m['put_back_block/on']['progress_mean'] >= r['put_back_block/on']['progress_mean'] - 0.05"
+
+- id: U1b-swap
+  lane: gpu0
+  kind: closed_loop
+  after: [U1-smoke]
+  requires_pass: [U1-smoke]
+  hypothesis: "U1b (BID-lite, 4 candidates) wins back swap at execute 8 (S2 >= 8, S3 >= 3)"
+  need_mib: 30000
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3_u1b
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed17_n10]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--candidates", "4", "--coherence", "overlap"]
+  output: closed_loop/u1/b
+  reference: {folders: [closed_loop/a2], label: a2C_e3, modes: ["on"]}
+  min_episodes: 8
+  pass_if: "m['swap_blocks/on']['s2'] >= 8 and m['swap_blocks/on']['s3'] >= 3"
+
+- id: U1a-put
+  lane: gpu0
+  kind: closed_loop
+  after: [U1-smoke]
+  requires_pass: [U1-smoke]
+  hypothesis: "U1a (one noise per episode) keeps put_back at execute 8"
+  need_mib: 30000
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3_u1a
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed17_n10]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--noise", "per_episode"]
+  output: closed_loop/u1/a
+  reference: {folders: [closed_loop/a2_infer/exec8], label: a2C_e3_exec8, modes: ["on"]}
+  min_episodes: 8
+  pass_if: "m['put_back_block/on']['success'] >= 3 and m['put_back_block/on']['progress_mean'] >= r['put_back_block/on']['progress_mean'] - 0.05"
+
+- id: U1a-swap
+  lane: gpu0
+  kind: closed_loop
+  after: [U1-smoke]
+  requires_pass: [U1-smoke]
+  hypothesis: "U1a (one noise per episode) wins back swap at execute 8 (S2 >= 8, S3 >= 3)"
+  need_mib: 30000
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3_u1a
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed17_n10]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--noise", "per_episode"]
+  output: closed_loop/u1/a
+  reference: {folders: [closed_loop/a2], label: a2C_e3, modes: ["on"]}
+  min_episodes: 8
+  pass_if: "m['swap_blocks/on']['s2'] >= 8 and m['swap_blocks/on']['s3'] >= 3"
+
+- id: P8b-plan
+  lane: gpu0
+  kind: shell
+  hypothesis: "16 more expert-feasible put_back scenes (seeds 21 / 22)"
+  need_mib: 10000
+  timeout_h: 2
+  command: "for s in 21 22; do test -f {O}/closed_loop/scenes_seed${s}_n8_put_back_block/put_back_block.json || bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/closed_loop.sh plan {GPU} $s 8 put_back_block || exit 1; done"
+
+- id: P8b-run
+  lane: gpu0
+  kind: closed_loop
+  after: [P8b-plan]
+  hypothesis: "put_back at execute 8, on + null, on 16 new scenes (seeds 21 / 22) on the A100 (descriptive here; pooled with P8 by PG-A-final)"
+  need_mib: 30000
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3_exec8
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed21_n8_put_back_block, closed_loop/scenes_seed22_n8_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8"]
+  output: closed_loop/a2_infer/exec8_p8b          # own folder: PG-A (34 scenes, folder exec8) stays as registered
+  min_episodes: 16
+
+- id: X2b-loop-swap-more
+  lane: gpu0
+  kind: closed_loop
+  after: [X2b-eval]
+  hypothesis: "descriptive (week plan v4 GPU2 filler, run on GPU0): X2b (no pairs in either stage) on vs null on the seed-18/19 swap scenes at execute 24"
+  need_mib: 30000
+  checkpoint: a2C_nopairs_ours/last
+  label: a2C_nopairs_ours_e3
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed18_n8_swap_blocks, closed_loop/scenes_seed19_n8_swap_blocks]
+  tasks: [swap_blocks]
+  output: closed_loop/x2b_more
+  reference: {folders: [closed_loop/a2, closed_loop/a2_more], label: a2C_e3, modes: ["on", "null"]}
+  min_episodes: 16
+
 # ------------------------------------------------------------------------------------------------ remote lane (H200 host, container mwam2, GPU0)
 # Added 10-28 03:50. Started by hand when GPU0 is free (guard + lane in one script). Every task here is
 # self-contained on that host (no dependency on the A100 lanes; on and null of a scene both run on the H200).
-# Results are copied back to the A100 host and judged / pooled there (PG-A-final).
+# Results are copied back to the A100 host for the ledger; nothing is pooled with A100 episodes (P8b moved to gpu0).
 - id: R-smoke
   lane: remote
   kind: closed_loop
@@ -965,29 +1032,3 @@ tasks:
   online_args: ["--execute", "8"]
   output: closed_loop/official_pilot
   min_episodes: 10
-
-- id: P8b-plan
-  lane: remote
-  kind: shell
-  after: [X8-put]
-  requires_pass: [R-smoke]
-  hypothesis: "16 more expert-feasible put_back scenes (seeds 21 / 22)"
-  need_mib: 10000
-  timeout_h: 2
-  command: "for s in 21 22; do test -f {O}/closed_loop/scenes_seed${s}_n8_put_back_block/put_back_block.json || bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/closed_loop.sh plan {GPU} $s 8 put_back_block || exit 1; done"
-
-- id: P8b-run
-  lane: remote
-  kind: closed_loop
-  after: [P8b-plan]
-  requires_pass: [R-smoke]
-  hypothesis: "put_back at execute 8, on + null, on 16 new scenes (seeds 21 / 22) on the H200 (descriptive here; pooled into PG-A-final on the A100 host)"
-  need_mib: 30000
-  checkpoint: a2C/checkpoints/update_002010.pt
-  label: a2C_e3_exec8
-  modes: ["on", "null"]
-  scenes: [closed_loop/scenes_seed21_n8_put_back_block, closed_loop/scenes_seed22_n8_put_back_block]
-  tasks: [put_back_block]
-  online_args: ["--execute", "8"]
-  output: closed_loop/a2_infer/exec8_h200
-  min_episodes: 16

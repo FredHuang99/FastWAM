@@ -30,8 +30,8 @@ Verdicts: PASS / FAIL (pass_if) | INCONCLUSIVE (inconclusive_if, too few episode
 DONE (no pass_if: a descriptive run).
 
 Everything lives in outputs/memory_v2/: LEDGER.jsonl / LEDGER.md, queue5/state/<id>.json, queue5/tasks/<id>.log,
-queue5/<lane>.log (from queue5.sh), autopsy/AUTOPSY_<id>.md. Nothing starts after QUEUE_DEADLINE (default 2026-10-30
-12:00 +0800); a task still running then is interrupted (SIGINT -> SIGTERM -> SIGKILL, simulator workers included) and
+queue5/<lane>.log (from queue5.sh), autopsy/AUTOPSY_<id>.md. Nothing starts after QUEUE_DEADLINE (default 2026-10-31
+00:00 +0800 = end of Friday); a task still running then is interrupted (SIGINT -> SIGTERM -> SIGKILL, simulator workers included) and
 judged INCONCLUSIVE. touch outputs/memory_v2/queue5/STOP: the lanes start nothing new.
 """
 from __future__ import annotations
@@ -58,7 +58,7 @@ AUTOPSY = O / "autopsy"
 PY = os.environ.get("MEMV2_PY", "/opt/mwam/bin/python")
 CFG = "configs/memory_v2/train_v2_A.yaml"
 BJ = timezone(timedelta(hours=8))
-DEADLINE = datetime.strptime(os.environ.get("QUEUE_DEADLINE", "2026-10-30 12:00 +0800"), "%Y-%m-%d %H:%M %z").timestamp()
+DEADLINE = datetime.strptime(os.environ.get("QUEUE_DEADLINE", "2026-10-31 00:00 +0800"), "%Y-%m-%d %H:%M %z").timestamp()
 TASKS = Path(os.environ.get("QUEUE5_TASKS", str(REPO / "scripts/memory_v2/jobs/queue5_tasks.yaml")))
 POLL = int(os.environ.get("QUEUE5_POLL", "60"))
 # progress (week plan v4 1.2): the number of these stages reached in order, / 6; a simulator success counts 6 / 6
