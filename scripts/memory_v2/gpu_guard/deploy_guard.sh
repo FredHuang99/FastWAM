@@ -19,7 +19,7 @@ set -euo pipefail
 
 NAME="${GUARD_NAME:-hhy-gpu2-guard}"
 DIR="/var/lib/$NAME"
-IMAGE=eec0906cea58
+IMAGE="${GUARD_IMAGE:-eec0906cea58}"           # any local image with python3 (new host: the image of its own container)
 OWNER_REF="${OWNER_REF:-6e4b37a15066}"     # our training container (id or name)
 RELEASE_AFTER_SECONDS="${RELEASE_AFTER_SECONDS:-600}"
 RELEASE_AT="${RELEASE_AT:-}"                 # fixed deadline (e.g. 2026-10-27T00:00:00+08:00): hold every GPU until then
