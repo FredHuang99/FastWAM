@@ -906,11 +906,13 @@ def cmd_check(args):
                 pass                              # produced by a train task of this queue
             elif not checkpoint_path(ck).exists():
                 bad.append(f"{tid}: checkpoint {checkpoint_path(ck)} missing")
+        planners = [x for x in tasks if x["kind"] == "shell" and "closed_loop.sh plan" in str(x.get("command"))
+                    and state(x["id"])["status"] != "done"]
         for sc in t.get("scenes") or []:
             if sc != "frozen" and not resolve(sc).exists():
-                later = any("scenes_seed20" in sc and x["kind"] == "shell" for x in tasks)
-                (warn if later or "seed18" in sc or "seed19" in sc else bad).append(
-                    f"{tid}: scene folder {resolve(sc)} missing (dropped at run time if still missing)")
+                (warn if planners else bad).append(f"{tid}: scene folder {resolve(sc)} missing "
+                                                   f"(planned by {', '.join(x['id'] for x in planners) or 'nothing'}; "
+                                                   "dropped at run time if still missing)")
         for f in (t.get("folders") or []) + ((t.get("reference") or {}).get("folders") or []):
             if not resolve(f).exists() and str(resolve(f)) not in produced:
                 warn.append(f"{tid}: folder {resolve(f)} missing")
@@ -932,7 +934,7 @@ def cmd_check(args):
                         print(f"  note {tid}: {k} = {v} (not in the reference config)")
                 pairs = {k: v for k, v in ref.items() if k.startswith("pairs.") and v not in (None, "", 0, 0.0)}
                 print(f"  {tid}: reference {t['reference_run']} pair settings {pairs or 'none'}")
-        d = O / t["run"] if t.get("run") and t["kind"] == "train" else None
+        d = O / t["run"] if t.get("run") and t["kind"] == "train" and state(tid)["status"] == "pending" else None
         if d is not None and d.exists() and not (d / "checkpoints" / "LATEST.json").exists():
             warn.append(f"{tid}: {d} exists without a checkpoint: it will be moved aside to {d.name}.stale_<time>")
         if d is not None and (d / "COMPLETE.json").exists():

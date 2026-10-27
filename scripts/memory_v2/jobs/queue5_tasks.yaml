@@ -13,6 +13,11 @@ defaults: &put_back_ref
   folders: [closed_loop/a2]
   label: a2C_e3
   modes: ["on"]
+put8: &put8_ref                     # A2C e3 at execute 8 (X1-exec8 / X1-put-null / P8): the put_back reference from 10-27
+  folders: [closed_loop/a2_infer/exec8]
+  label: a2C_e3_exec8
+  modes: ["on", "null"]
+put_scenes: &put_scenes [closed_loop/scenes_seed17_n10, closed_loop/scenes_seed18_n8_put_back_block, closed_loop/scenes_seed19_n8_put_back_block, closed_loop/scenes_seed20_n8_put_back_block]
 
 tasks:
 # ------------------------------------------------------------------------------------------------ cpu lane
@@ -273,6 +278,42 @@ tasks:
   output: closed_loop/a2_more
   min_episodes: 6
 
+# put_back headline at execute 8 (added 10-27 13:45 after X1: exec8 PASS, exec12 / steps30 / swap FAIL; registered
+# before any new put_back scene exists). Runs on GPU1 before the X2 closed loop.
+- id: P8-plan
+  lane: loop
+  kind: shell
+  hypothesis: "24 more expert-feasible put_back scenes (seeds 18 / 19 / 20, 8 each)"
+  need_mib: 10000
+  timeout_h: 2
+  command: "for s in 18 19 20; do test -f {O}/closed_loop/scenes_seed${s}_n8_put_back_block/put_back_block.json || bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/closed_loop.sh plan {GPU} $s 8 put_back_block || exit 1; done"
+
+- id: P8-run
+  lane: loop
+  kind: closed_loop
+  after: [P8-plan]
+  hypothesis: "put_back at execute 8: memory on succeeds more often than history masked (null), on >= 24 paired scenes (PG-A)"
+  need_mib: 30000
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3_exec8
+  modes: ["on", "null"]
+  scenes: *put_scenes
+  tasks: [put_back_block]
+  online_args: ["--execute", "8"]
+  output: closed_loop/a2_infer/exec8
+  min_episodes: 40
+  inconclusive_if: "m['on_vs_null']['put_back_block']['success'][2] < 24"
+  pass_if: "sign_p(m['on_vs_null']['put_back_block']['success'][0], m['on_vs_null']['put_back_block']['success'][1]) < 0.05"
+  failure_explanations:
+    - if: "m['on_vs_null']['put_back_block']['pressed'][0] >= 3 * max(1, m['on_vs_null']['put_back_block']['pressed'][1])"
+      then: "the on-null gap opens at the press (null centres the block but does not press): history or a weak null branch? X5 (B0 null) decides"
+    - if: "m['put_back_block/on']['n'] and m['put_back_block/on']['success'] / m['put_back_block/on']['n'] < 0.2"
+      then: "on succeeds less on the new scenes than on seed 17 (3/10): the seed-17 put_back scenes are easy"
+    - if: "m['put_back_block/on'].get('decided') and m['put_back_block/on'].get('correct_mat', 0) < m['put_back_block/on']['decided']"
+      then: "some returns go to the wrong mat: the memory decision itself fails sometimes (see the episodes)"
+  on_pass: "PG-A PASS: put_back memory effect significant at execute 8; headline = put_back (exec 8) + swap (exec 24) funnels"
+  on_fail: "put_back on-null gap not significant on 34 scenes: report as trend; the funnel locates where null fails"
+
 - id: X2-loop-swap
   lane: loop
   kind: closed_loop
@@ -300,12 +341,12 @@ tasks:
   lane: loop
   kind: closed_loop
   after: [X2-loop-swap, X1-swap]
-  hypothesis: "nopairs on put_back with the X1 setting (descriptive)"
+  hypothesis: "nopairs on put_back at execute 8 on every put_back scene vs A2C at execute 8 (descriptive)"
   need_mib: 30000
   checkpoint: a2C_nopairs/last
   label: a2C_nopairs_e3
   modes: ["on"]
-  scenes: [closed_loop/scenes_seed17_n10]
+  scenes: *put_scenes
   tasks: [put_back_block]
   best_of:
     ids: [X1-exec8, X1-exec12, X1-steps30]
@@ -313,8 +354,36 @@ tasks:
     args: {X1-exec8: ["--execute", "8"], X1-exec12: ["--execute", "12"], X1-steps30: ["--steps", "30"]}
     fallback: []
   output: closed_loop/x2_put
-  reference: *put_back_ref
+  reference: *put8_ref
   min_episodes: 8
+
+
+# filler for GPU1 (picked only when nothing above in the loop lane is runnable): 16 more put_back scenes for PG-A
+- id: P8b-plan
+  lane: loop
+  kind: shell
+  after: [X2-loop-put]
+  hypothesis: "16 more expert-feasible put_back scenes (seeds 21 / 22)"
+  need_mib: 10000
+  timeout_h: 2
+  command: "for s in 21 22; do test -f {O}/closed_loop/scenes_seed${s}_n8_put_back_block/put_back_block.json || bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/closed_loop.sh plan {GPU} $s 8 put_back_block || exit 1; done"
+
+- id: P8b-run
+  lane: loop
+  kind: closed_loop
+  after: [P8b-plan]
+  hypothesis: "PG-A on every put_back scene (seeds 17-22, execute 8)"
+  need_mib: 30000
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3_exec8
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed17_n10, closed_loop/scenes_seed18_n8_put_back_block, closed_loop/scenes_seed19_n8_put_back_block, closed_loop/scenes_seed20_n8_put_back_block, closed_loop/scenes_seed21_n8_put_back_block, closed_loop/scenes_seed22_n8_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8"]
+  output: closed_loop/a2_infer/exec8
+  min_episodes: 60
+  inconclusive_if: "m['on_vs_null']['put_back_block']['success'][2] < 24"
+  pass_if: "sign_p(m['on_vs_null']['put_back_block']['success'][0], m['on_vs_null']['put_back_block']['success'][1]) < 0.05"
 
 # ------------------------------------------------------------------------------------------------ train lane (GPU2)
 - id: X2-train
@@ -428,12 +497,12 @@ tasks:
   lane: train
   kind: closed_loop
   after: [X5-loop-swap, X1-swap]
-  hypothesis: "B0 (history-blind) on put_back with the X1 setting (descriptive: what memory-free control achieves)"
+  hypothesis: "put_back attribution at execute 8: A2C's on-null gap is the history content (B0-null ~ A2C-null, A2C-on - B0-null >= 0.2n successes)"
   need_mib: 30000
   checkpoint: a2B0/last
   label: a2B0_e3
   modes: ["null"]
-  scenes: [closed_loop/scenes_seed17_n10]
+  scenes: *put_scenes
   tasks: [put_back_block]
   best_of:
     ids: [X1-exec8, X1-exec12, X1-steps30]
@@ -441,7 +510,12 @@ tasks:
     args: {X1-exec8: ["--execute", "8"], X1-exec12: ["--execute", "12"], X1-steps30: ["--steps", "30"]}
     fallback: []
   output: closed_loop/x5_put
-  min_episodes: 8
+  reference: *put8_ref
+  min_episodes: 24
+  pass_if: "(r['put_back_block/on']['success'] - m['put_back_block/null']['success']) >= 0.2 * m['put_back_block/null']['n'] and abs(r['put_back_block/null']['success'] - m['put_back_block/null']['success']) <= 0.1 * m['put_back_block/null']['n']"
+  failure_explanations:
+    - if: "m['put_back_block/null']['pressed'] - r['put_back_block/null']['pressed'] > 0.2 * m['put_back_block/null']['n']"
+      then: "B0 presses far more often than A2C-null: A2C's null branch is weak at the press; the put_back gap is partly a weak null branch"
 
 # ------------------------------------------------------------------------------------------------ extra lane (container GPU3 = host GPU4)
 - id: X7-train
@@ -517,12 +591,12 @@ tasks:
   lane: extra
   kind: closed_loop
   after: [X7-loop-swap, X1-swap]
-  hypothesis: "6-epoch A2C regrasps after the press (with the X1 setting if one passed)"
+  hypothesis: "6-epoch A2C succeeds on put_back at execute 8 more often than 3-epoch A2C (+10 points, every put_back scene)"
   need_mib: 30000
   checkpoint: a2C_6ep/last
   label: a2C6_e6
   modes: ["on"]
-  scenes: [closed_loop/scenes_seed17_n10]
+  scenes: *put_scenes
   tasks: [put_back_block]
   best_of:
     ids: [X1-exec8, X1-exec12, X1-steps30]
@@ -530,12 +604,14 @@ tasks:
     args: {X1-exec8: ["--execute", "8"], X1-exec12: ["--execute", "12"], X1-steps30: ["--steps", "30"]}
     fallback: []
   output: closed_loop/x7_put
-  reference: *put_back_ref
-  min_episodes: 8
-  pass_if: "m['put_back_block/on']['regrasp'] >= 3 or m['put_back_block/on']['success'] >= 2"
+  reference: *put8_ref
+  min_episodes: 24
+  pass_if: "m['put_back_block/on']['success'] >= r['put_back_block/on']['success'] + 0.1 * m['put_back_block/on']['n']"
   failure_explanations:
-    - if: "m['put_back_block/on']['regrasp'] <= r['put_back_block/on']['regrasp']"
-      then: "longer training does not fix the post-press drift either: data coverage (X6 / DAgger)"
+    - if: "m['put_back_block/on']['pressed'] > r['put_back_block/on']['pressed'] + 2"
+      then: "longer training improves the pre-press stages (grasp / centre / press), the remaining put_back bottleneck"
+    - if: "m['put_back_block/on']['success'] <= r['put_back_block/on']['success']"
+      then: "no put_back gain from 3 more epochs: the remaining failures are not a fit problem"
 
 - id: X7-loop-swap-more
   lane: extra
