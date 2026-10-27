@@ -659,12 +659,12 @@ tasks:
       then: "B0 presses far more often than A2C-null: A2C's null branch is weak at the press; the put_back gap is partly a weak null branch"
 
 
-# week plan v4: X2b = the nopairs recipe with a stage-1 memory that never saw pairs. HOLD until the init path is
-# confirmed (Ours = D without pairs; see the run listing); remove `hold: true` then.
+# week plan v4: X2b = the nopairs recipe with a stage-1 memory that never saw pairs. Stage-1 init = v2_A_memory_only
+# ("Ours"): the D recipe (v2_A_cf) without pairs, confirmed from the run listing 10-27 14:39 (mixture tau, endpoint 1,
+# high-noise 0.3, dropout 0.15, memory only, 1340 updates; only pairs differ).
 - id: X2b-train
   lane: train
   kind: train
-  hold: true
   after: [X5-loop-put]
   hypothesis: "pairs act through the stage-1 memory: the A2C recipe without pairs in either stage"
   need_mib: 30000
@@ -673,7 +673,7 @@ tasks:
   sets:
     - optim.lr_action=1e-5
     - optim.lr_memory=2e-5
-    - init_memory={O}/OURS_RUN/checkpoints/update_001340.pt
+    - init_memory={O}/v2_A_memory_only/checkpoints/update_001340.pt
     - schedule.epochs=3
     - schedule.micro_batch=4
     - schedule.eval_every=335

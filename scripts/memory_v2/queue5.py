@@ -532,7 +532,7 @@ def headline(task, m):
         for key, cell in sorted(m.items()):
             if "/" in key and isinstance(cell, dict) and "n" in cell:
                 parts.append(f"{key} n={cell['n']} " + " ".join(f"{k}={cell.get(k, 0)}" for k in STAGES.get(key.split('/')[0], ()))
-                             + f" prog={cell.get('progress_mean', 0):.2f}")
+                             + (f" prog={cell['progress_mean']:.2f}" if "progress_mean" in cell else ""))
         for t, cell in (m.get("on_vs_null") or {}).items():
             key = "s2" if t == "swap_blocks" else "pressed"
             v = cell.get(key)
