@@ -209,9 +209,12 @@ class Session:
     """One episode: raw observation archive -> cached per-frame encodings -> memory_v2 decisions."""
 
     def __init__(self, policy: Policy, directory: Path, mode: str, steps: int, guidance_scale: float, dependence: bool,
-                 tag: str = "", limit: int = 0):
+                 tag: str = "", limit: int = 0, candidates: int = 1, coherence: str = "none", noise: str = "per_decision"):
         self.p, self.directory, self.mode = policy, Path(directory), mode
         self.steps, self.scale, self.dependence, self.tag, self.limit = steps, guidance_scale, dependence, tag, limit
+        if candidates < 1 or coherence not in ("none", "overlap") or noise not in ("per_decision", "per_episode"):
+            raise ValueError(f"bad U1 options candidates={candidates} coherence={coherence} noise={noise}")
+        self.candidates, self.coherence, self.noise_mode = int(candidates), coherence, noise
         self.reset()
 
     def reset(self):
@@ -220,6 +223,7 @@ class Session:
         self.text = self.text_valid = self.instruction = self.seed = self.task = None
         self.decisions = 0
         self.started = time.monotonic()
+        self.previous = None                             # (frame, raw chunk [32, 14]) of the last executed decision
 
     def _encode(self, ids):
         import numpy as np
@@ -271,13 +275,27 @@ class Session:
             batch = assemble(self.encoded, self.text, self.text_valid, current, selection, s1_ids)
             batch = {k: v.to(p.device) for k, v in batch.items()}
             conditions = p.model.conditions(batch)
-            noise_seed = seed_for(p.dense_cfg["seed"], self.seed, current, "closed-loop-noise")
-            noise = diagnostic_action_noise(noise_seed).to(torch.bfloat16).float().to(p.device)   # dense BF16 start
+            # U1: candidate k uses its own noise seed; k = 0 is the original seed, so candidates=1 / coherence none /
+            # per_decision noise is bit-identical to the plain closed loop. per_episode noise reuses frame 0's noise.
+            noise_frame = 0 if self.noise_mode == "per_episode" else current
+            seeds = [seed_for(p.dense_cfg["seed"], self.seed, noise_frame,
+                              "closed-loop-noise" if k == 0 else f"closed-loop-noise-{k}") for k in range(self.candidates)]
             g = p.cfg.v2.guidance
             steps = self.steps or g.steps
             guidance = GuidanceConfig(steps=steps, shift=g.shift, scale=self.scale, min_sigma=g.min_sigma)
-            normalised, _ = p.model.sample(conditions, noise, guidance, memory_mode=self.mode)
+            samples = []
+            for s in seeds:
+                n_k = diagnostic_action_noise(s).to(torch.bfloat16).float().to(p.device)       # dense BF16 start
+                samples.append((n_k, p.model.sample(conditions, n_k, guidance, memory_mode=self.mode)[0]))
+            choice, distances = 0, []
+            if len(samples) > 1 and self.coherence == "overlap" and self.previous is not None:
+                from .coherence import choose
+                raws = [p.normaliser.denormalize(x[0]).float().cpu().numpy() for _, x in samples]
+                choice, distances = choose(self.previous[0], self.previous[1], current, raws)
+            noise, normalised = samples[choice]
+            noise_seed = seeds[choice]
             raw = p.normaliser.denormalize(normalised[0])
+            self.previous = (current, raw.float().cpu().numpy())
             dependence = {}
             if self.dependence:
                 plain = GuidanceConfig(steps=steps, shift=g.shift, scale=1.0, min_sigma=g.min_sigma)
@@ -296,6 +314,8 @@ class Session:
             "frame_id": current, "mode": self.mode, "steps": steps, "guidance_scale": self.scale,
             "v2_frame_ids": list(selection.ids), "v2_roles": list(selection.roles), "s1_frame_ids": s1_ids,
             "s1_sampling": sampling, "noise_seed": noise_seed, "dependence": dependence,
+            "candidates": self.candidates, "coherence": self.coherence, "noise_mode": self.noise_mode,
+            "choice": choice, "candidate_distances": distances,
             "normalized_actions": normalised[0].cpu().tolist(), "actions_after_gripper_clip": actions.cpu().tolist(),
             "encoded_frames": len(self.encoded), "encode_seconds": encode_seconds, "seconds": seconds})
         if self.decisions % 4 == 0:
@@ -391,10 +411,13 @@ def run_episode(policy: Policy, scene: dict, mode: str, label: str, out: Path, a
                                    "condition": f"memory_v2_{mode}", "run_seed": policy.dense_cfg["seed"],
                                    "causal_case": {"task": task, "fork": 0, "capture": [], "cap": limit},
                                    "max_targets": int(args.max_targets), "record_frames": bool(args.record_frames),
-                                   "execute": int(args.execute), "policy": policy.describe(), "label": label})
+                                   "execute": int(args.execute), "candidates": int(args.candidates),
+                                   "coherence": args.coherence, "noise": args.noise,
+                                   "policy": policy.describe(), "label": label})
     target_limit = min(limit, args.max_targets) if args.max_targets else limit
     session = Session(policy, directory, mode, args.steps, args.guidance, args.dependence,
-                      tag=f"{label}/{mode} {task} seed={scene['seed']}", limit=target_limit)
+                      tag=f"{label}/{mode} {task} seed={scene['seed']}", limit=target_limit,
+                      candidates=args.candidates, coherence=args.coherence, noise=args.noise)
     key = os.urandom(24)
     env = simulator_environment(sim_cfg, gpu)
     env.update(FW_CAUSAL_SIM_ROOT=str(root), MEMORY_S1_RPC_KEY=key.hex(), MEMORY_S1_ARCHIVE_STRIDE="1",
@@ -473,7 +496,8 @@ def run_episode(policy: Policy, scene: dict, mode: str, label: str, out: Path, a
                   "policy_seconds_mean": sum(d["seconds"] for d in decisions) / max(1, len(decisions)),
                   "dependence_mean": {k: sum(v) / len(v) for k, v in dependence.items()},
                   "steps": args.steps or policy.cfg.v2.guidance.steps, "guidance_scale": args.guidance,
-                  "execute": int(args.execute),
+                  "execute": int(args.execute), "candidates": int(args.candidates), "coherence": args.coherence,
+                  "noise": args.noise,
                   "simulator_backend": value.get("simulator_backend"), "simulator_seconds": value.get("simulator_seconds"),
                   "wall_seconds": time.monotonic() - start, **episode_metrics(rows)}
         write(directory / "result.json", result)
@@ -941,6 +965,11 @@ def main(argv=None):
     ap.add_argument("--output", default="outputs/memory_v2/closed_loop")
     ap.add_argument("--steps", type=int, default=0, help="Euler steps (0 = the checkpoint's, 10)")
     ap.add_argument("--execute", type=int, default=EXECUTE, help="targets executed per decision (of 32 predicted)")
+    ap.add_argument("--candidates", type=int, default=1, help="U1: chunks sampled per decision (noise seeds; 1 = plain)")
+    ap.add_argument("--coherence", default="none", choices=("none", "overlap"),
+                    help="U1: overlap = execute the candidate closest to the previous chunk's unexecuted part (BID-lite)")
+    ap.add_argument("--noise", default="per_decision", choices=("per_decision", "per_episode"),
+                    help="U1: per_episode = every decision reuses frame 0's noise")
     ap.add_argument("--guidance", type=float, default=1.0, help="memory guidance scale (1 = none)")
     ap.add_argument("--dependence", action="store_true", help="also sample the other modes: log the action change")
     ap.add_argument("--max-targets", type=int, default=0, help="smoke runs: stop after N executed targets (0 = official)")

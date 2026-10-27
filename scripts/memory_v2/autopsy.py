@@ -150,15 +150,41 @@ def section_result(task, s):
         out.append(f"- metric error: {m.get('pass_if_error') or m.get('metrics_error')}")
     cells = [(k, v) for k, v in m.items() if "/" in k and isinstance(v, dict) and "n" in v]
     if cells:
-        out += ["", "| condition | n | " + " | ".join(ORDER[cells[0][0].split('/')[0]]) + " | reference (same scenes) |",
-                "|---|---|" + "---|" * len(ORDER[cells[0][0].split('/')[0]]) + "---|"]
+        out += ["", "| condition | n | " + " | ".join(ORDER[cells[0][0].split('/')[0]]) + " | progress | decision correct | reference (same scenes) |",
+                "|---|---|" + "---|" * len(ORDER[cells[0][0].split('/')[0]]) + "---|---|---|"]
         for k, v in sorted(cells):
             stages = ORDER[k.split("/")[0]]
             ref = r.get(k)
-            refs = " ".join(f"{st}{ref.get(st, 0)}" for st in stages) + f" (n={ref['n']})" if ref else "-"
-            out.append(f"| {k} | {v['n']} | " + " | ".join(str(v.get(st, 0)) for st in stages) + f" | {refs} |")
+            refs = (" ".join(f"{st}={ref.get(st, 0)}" for st in stages) + f" prog={ref.get('progress_mean', 0):.3f} (n={ref['n']})"
+                    if ref else "-")
+            dec = f"{v.get('correct', 0)}/{v.get('decided', 0)}"
+            if v.get("pressed_given_centre") is not None:
+                dec += f"; P(press|centre) {v['pressed_given_centre']:.2f} ({v.get('pressed_after_centre', 0)}/{v.get('centred', 0)})"
+            out.append(f"| {k} | {v['n']} | " + " | ".join(str(v.get(st, 0)) for st in stages)
+                       + f" | {v.get('progress_mean', 0):.3f} | {dec} | {refs} |")
+        prog = []
+        for t, c in (m.get("prog_on_vs_null") or {}).items():
+            prog.append(f"- **{t} progress on - null: {c['delta']:+.3f} (95% CI {c['ci']}), sign-flip p = {c['p']:.4f}, "
+                        f"n = {c['n']} paired scenes** (on {c['mean_a']:.3f} / null {c['mean_b']:.3f})")
+        for mode, cs in (m.get("prog_vs_reference") or {}).items():
+            for t, c in cs.items():
+                prog.append(f"- {t}/{mode} progress this - reference: {c['delta']:+.3f} (95% CI {c['ci']}), p = {c['p']:.4f}, "
+                            f"n = {c['n']} (this {c['mean_a']:.3f} / reference {c['mean_b']:.3f})")
+        for t, c in (r.get("prog_on_vs_null") or {}).items():
+            prog.append(f"- reference {t} progress on - null: {c['delta']:+.3f} (95% CI {c['ci']}), p = {c['p']:.4f}, n = {c['n']}")
+        if prog:
+            out += [""] + prog
     if m.get("errors"):
         out.append(f"\n- episodes with ERROR.json and no result: {m['errors']}")
+    if task["kind"] == "closed_loop":
+        extra = [f"decision gaps {m.get('decision_gaps')}", f"policy {m.get('policy_seconds_mean')} s / decision"]
+        if m.get("candidates_logged"):
+            extra.append(f"{m['candidates_logged']} candidates, non-first chosen in {m.get('choice_nonzero_frac')} of decisions")
+        if m.get("parity_decisions") is not None:
+            extra.append(f"parity vs reference run: {m['parity_decisions']} decisions, first max |diff| "
+                         f"{m.get('parity_first_max_abs')}, max |diff| {m.get('parity_max_abs')}, reference policy "
+                         f"{m.get('policy_seconds_ref')} s / decision")
+        out.append("- " + "; ".join(extra))
     if task["kind"] in ("train", "eval"):
         out.append(f"- headline: {q5.headline(task, m)}")
     return out
@@ -229,7 +255,8 @@ def section_closed_loop(task, s, use_phase):
     for mode, cells in (m.get("vs_reference") or {}).items():
         for t, cell in cells.items():
             out.append(f"- {t}/{mode} vs reference (only this / only reference): "
-                       + "  ".join(f"{k} {v[0]}/{v[1]}" for k, v in cell.items()) + f"  n={next(iter(cell.values()))[2]}")
+                       + "  ".join(f"{k} {v[0]}/{v[1]} (p={q5.sign_p(v[0], v[1]):.3f})" for k, v in cell.items())
+                       + f"  n={next(iter(cell.values()))[2]}")
     # ------------------------------------------------------------------------ section 4
     out += ["", "## 4. Failure classes (automatic, failed episodes only)", ""]
     bank, bank_note = None, ""

@@ -122,3 +122,24 @@ def test_overrides_labels_and_collect(tmp_path):
     (stale / "result.json").write_text(json.dumps({"label": "D", "mode": "on", "task": "swap_blocks", "seed": 5, "success": False}))
     rows = online.collect(tmp_path)
     assert len(rows) == 1 and rows[0]["success"] is True
+
+
+def test_coherence_overlap_and_choice():
+    import numpy as np
+    from fastwam.memory_v2.coherence import choose, overlap_distance
+    prev = np.zeros((32, 14))
+    prev[8:] = 1.0                                        # the previous chunk moves to 1 after its executed part
+    near = np.ones((32, 14))                              # agrees with the unexecuted remainder
+    far = np.zeros((32, 14))
+    assert overlap_distance(0, prev, 8, near) == 0.0
+    assert overlap_distance(0, prev, 8, far) > 0.5
+    assert overlap_distance(0, prev, 32, near) is None and overlap_distance(8, prev, 8, near) is None
+    k, d = choose(0, prev, 8, [far, near, far])
+    assert k == 1 and len(d) == 3 and d[1] == 0.0
+    assert choose(None, None, 0, [far, near]) == (0, [])
+    assert choose(0, prev, 8, [far]) == (0, [])
+    g = np.zeros((32, 14))
+    g[:, 6] = 1.0                                         # a gripper-only difference counts half
+    a = np.zeros((32, 14))
+    a[:, 0] = 1.0
+    assert overlap_distance(0, np.zeros((32, 14)), 8, g) < overlap_distance(0, np.zeros((32, 14)), 8, a)

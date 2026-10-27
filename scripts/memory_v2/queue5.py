@@ -21,6 +21,7 @@ Task file (YAML, default scripts/memory_v2/jobs/queue5_tasks.yaml). Each task:
                               use: {id: {label: .., output: ..}}}
                     (online args of the best PASSing task, and optionally its label / output folder, so episodes
                     already there are reused; no PASS -> fallback, or SKIPPED without one)
+                    parity_with: {folders, label, modes}: per-frame max |action difference| vs that run (U1 smoke)
   kind analysis:    folders: [..], label, modes, tasks, reference   (no GPU: metrics of existing episodes only)
   kind train:       run, sets: [--set values, {O} = outputs/memory_v2]; stdout -> outputs/memory_v2/<run>/stdout.log
   kind eval:        run, checkpoint (default: the run's last), pr (default true), reference_run
@@ -60,6 +61,9 @@ BJ = timezone(timedelta(hours=8))
 DEADLINE = datetime.strptime(os.environ.get("QUEUE_DEADLINE", "2026-10-30 12:00 +0800"), "%Y-%m-%d %H:%M %z").timestamp()
 TASKS = Path(os.environ.get("QUEUE5_TASKS", str(REPO / "scripts/memory_v2/jobs/queue5_tasks.yaml")))
 POLL = int(os.environ.get("QUEUE5_POLL", "60"))
+# progress (week plan v4 1.2): the number of these stages reached in order, / 6; a simulator success counts 6 / 6
+PROGRESS = {"put_back_block": ("lifted", "centre", "pressed", "regrasp", "returned", "success"),
+            "swap_blocks": ("lifted", "s1", "s2", "s3", "pressed", "success")}
 STAGES = {"put_back_block": ("lifted", "centre", "pressed", "stage1", "regrasp", "returned", "success"),
           "swap_blocks": ("lifted", "s1", "s2", "s3", "pressed", "success")}
 
@@ -186,6 +190,57 @@ def sign_p(a, b):
     return min(1.0, 2 * sum(math.comb(n, i) for i in range(k + 1)) / 2 ** n)
 
 
+def perm_p(diffs, rounds=20000):
+    """Two-sided exact sign-flip permutation test of mean(diffs) = 0 (paired differences): enumerated for
+    <= 20 non-zero differences, otherwise `rounds` random flips with seed 0 (p = (hits + 1) / (rounds + 1))."""
+    import itertools
+    import random
+    d = [float(x) for x in diffs if abs(float(x)) > 1e-12]
+    if not d:
+        return 1.0
+    observed = abs(sum(d)) - 1e-12
+    if len(d) <= 20:
+        hits = total = 0
+        for signs in itertools.product((1, -1), repeat=len(d)):
+            total += 1
+            hits += abs(sum(s * x for s, x in zip(signs, d))) >= observed
+        return hits / total
+    rng = random.Random(0)
+    hits = sum(abs(sum(x if rng.random() < 0.5 else -x for x in d)) >= observed for _ in range(rounds))
+    return (hits + 1) / (rounds + 1)
+
+
+def mean(values):
+    values = list(values)
+    return sum(values) / len(values) if values else 0.0
+
+
+def bootstrap_ci(diffs, rounds=10000, level=0.95):
+    import random
+    d = [float(x) for x in diffs]
+    if not d:
+        return [0.0, 0.0]
+    rng = random.Random(0)
+    means = sorted(sum(rng.choice(d) for _ in d) / len(d) for _ in range(rounds))
+    lo, hi = int((1 - level) / 2 * rounds), int((1 + level) / 2 * rounds) - 1
+    return [round(means[lo], 4), round(means[hi], 4)]
+
+
+def progress(task, a):
+    """Fraction of the task's stages reached in order (success = 1)."""
+    stages = PROGRESS.get(task, ())
+    if not stages:
+        return 0.0
+    if a.get("success"):
+        return 1.0
+    n = 0
+    for k in stages:
+        if not a.get(k):
+            break
+        n += 1
+    return n / len(stages)
+
+
 def get(d, dotted, default=0):
     cur = d
     for part in dotted.split("."):
@@ -196,7 +251,7 @@ def get(d, dotted, default=0):
 
 
 SAFE = {"min": min, "max": max, "abs": abs, "len": len, "sum": sum, "any": any, "all": all, "sorted": sorted,
-        "round": round}
+        "round": round, "perm_p": perm_p, "mean": mean}
 
 
 def evaluate_expr(expr, m, r, **extra):
@@ -256,14 +311,24 @@ def error_dirs(folders, label, modes=None, tasks=None):
 def stage_table(eps):
     m = {}
     for (task, mode, seed), a in eps.items():
-        cell = m.setdefault(f"{task}/{mode}", {"n": 0, **{k: 0 for k in STAGES.get(task, ())}})
+        cell = m.setdefault(f"{task}/{mode}", {"n": 0, **{k: 0 for k in STAGES.get(task, ())}, "progress_sum": 0.0,
+                                               "decided": 0, "correct": 0})
         cell["n"] += 1
         for k in STAGES.get(task, ()):
             cell[k] += bool(a.get(k))
+        cell["progress_sum"] += progress(task, a)
         if a.get("choice_correct") is not None:
             name = "correct_mat" if task == "put_back_block" else "second_correct"
             cell[name] = cell.get(name, 0) + bool(a["choice_correct"])
-            cell["decided"] = cell.get("decided", 0) + 1
+            cell["decided"] += 1
+            cell["correct"] += bool(a["choice_correct"])
+        if task == "put_back_block":
+            cell["centred"] = cell.get("centred", 0) + bool(a.get("centre"))
+            cell["pressed_after_centre"] = cell.get("pressed_after_centre", 0) + bool(a.get("centre") and a.get("pressed"))
+    for cell in m.values():
+        cell["progress_mean"] = round(cell.pop("progress_sum") / cell["n"], 4) if cell["n"] else 0.0
+        if "centred" in cell:
+            cell["pressed_given_centre"] = round(cell["pressed_after_centre"] / cell["centred"], 4) if cell["centred"] else None
     return m
 
 
@@ -281,24 +346,91 @@ def paired(eps_a, eps_b, mode_a, mode_b):
     return out
 
 
+def decisions(d):
+    path = Path(d) / "decisions.jsonl"
+    if not path.exists():
+        return []
+    out = []
+    for line in path.read_text().splitlines():
+        if line.strip():
+            try:
+                out.append(json.loads(line))
+            except ValueError:
+                pass
+    return out
+
+
+def parity(eps, spec, tasks=None):
+    """Same scenes, same frames: max |action difference| between these episodes and spec {folders, label}."""
+    ref = episodes(spec["folders"], spec["label"], spec.get("modes"), tasks)
+    first, worst, n, ref_s = [], 0.0, 0, []
+    for key, a in eps.items():
+        if key not in ref:
+            continue
+        mine = {x["frame_id"]: x for x in decisions(a["dir"])}
+        theirs = {x["frame_id"]: x for x in decisions(ref[key]["dir"])}
+        common = sorted(set(mine) & set(theirs))
+        for i, f in enumerate(common):
+            u, v = mine[f]["actions_after_gripper_clip"], theirs[f]["actions_after_gripper_clip"]
+            diff = max(abs(x - y) for ru, rv in zip(u, v) for x, y in zip(ru, rv))
+            worst = max(worst, diff)
+            n += 1
+            if i == 0:
+                first.append(diff)
+        res = read_json(Path(ref[key]["dir"]) / "result.json", {}) or {}
+        if res.get("policy_seconds_mean") is not None:
+            ref_s.append(float(res["policy_seconds_mean"]))
+    return {"parity_decisions": n, "parity_first_max_abs": max(first) if first else None,
+            "parity_max_abs": worst if n else None, "policy_seconds_ref": round(mean(ref_s), 3) if ref_s else None}
+
+
+def progress_pairs(eps_a, eps_b, mode_a, mode_b):
+    """{task: {diffs, mean_a, mean_b, delta, ci, p, n}}: progress a - b on the scenes present in both."""
+    out = {}
+    seeds = {(t, s) for (t, md, s) in eps_a if md == mode_a} & {(t, s) for (t, md, s) in eps_b if md == mode_b}
+    by_task = {}
+    for task, seed in sorted(seeds):
+        by_task.setdefault(task, []).append((progress(task, eps_a[(task, mode_a, seed)]),
+                                             progress(task, eps_b[(task, mode_b, seed)])))
+    for task, rows in by_task.items():
+        diffs = [round(a - b, 6) for a, b in rows]
+        out[task] = {"diffs": diffs, "mean_a": round(mean(a for a, _ in rows), 4), "mean_b": round(mean(b for _, b in rows), 4),
+                     "delta": round(mean(diffs), 4), "ci": bootstrap_ci(diffs), "p": round(perm_p(diffs), 5),
+                     "n": len(rows)}
+    return out
+
+
 def loop_metrics(task):
     folders = task.get("folders") or [task["output"]]
     eps = episodes(folders, task["label"], task.get("modes"), task.get("tasks"))
     m = stage_table(eps)
     m["episodes"] = len(eps)
     m["errors"] = len(error_dirs(folders, task["label"], task.get("modes"), task.get("tasks")))
-    gaps, exact = set(), True
+    gaps, exact, policy_s, choices, n_cand = set(), True, [], [], 0
     for a in eps.values():
         d = Path(a["dir"])
-        frames = [json.loads(l)["frame_id"] for l in (d / "decisions.jsonl").read_text().splitlines() if l.strip()] \
-            if (d / "decisions.jsonl").exists() else []
+        rows = decisions(d)
+        frames = [x["frame_id"] for x in rows]
         gaps |= {b - a_ for a_, b in zip(frames, frames[1:])}
-        exact = exact and bool((read_json(d / "result.json", {}) or {}).get("command_to_execution_exact"))
+        res = read_json(d / "result.json", {}) or {}
+        exact = exact and bool(res.get("command_to_execution_exact"))
+        if res.get("policy_seconds_mean") is not None:
+            policy_s.append(float(res["policy_seconds_mean"]))
+        for x in rows:
+            if x.get("candidate_distances"):
+                choices.append(int(x.get("choice", 0)))
+                n_cand = max(n_cand, len(x["candidate_distances"]))
     m["decision_gaps"] = sorted(gaps)
     m["command_to_execution_exact"] = exact
+    m["policy_seconds_mean"] = round(mean(policy_s), 3) if policy_s else None
+    m["candidates_logged"] = n_cand
+    m["choice_nonzero_frac"] = round(mean(c != 0 for c in choices), 4) if choices else None
+    if task.get("parity_with"):
+        m.update(parity(eps, task["parity_with"], task.get("tasks")))
     modes = task.get("modes") or sorted({md for (_, md, _) in eps})
     if "on" in modes and "null" in modes:
         m["on_vs_null"] = paired(eps, eps, "on", "null")
+        m["prog_on_vs_null"] = progress_pairs(eps, eps, "on", "null")
     r = {}
     ref = task.get("reference")
     if ref:
@@ -310,9 +442,11 @@ def loop_metrics(task):
         ref_modes = ref.get("modes") or sorted({md for (_, md, _) in ref_eps})
         if "on" in ref_modes and "null" in ref_modes:
             r["on_vs_null"] = paired(ref_eps, ref_eps, "on", "null")
+            r["prog_on_vs_null"] = progress_pairs(ref_eps, ref_eps, "on", "null")
         for mode in modes:
             if mode in ref_modes:
                 m.setdefault("vs_reference", {})[mode] = paired(eps, ref_eps, mode, mode)
+                m.setdefault("prog_vs_reference", {})[mode] = progress_pairs(eps, ref_eps, mode, mode)
     return m, r
 
 
@@ -397,12 +531,15 @@ def headline(task, m):
         parts = []
         for key, cell in sorted(m.items()):
             if "/" in key and isinstance(cell, dict) and "n" in cell:
-                parts.append(f"{key} n={cell['n']} " + " ".join(f"{k}={cell.get(k, 0)}" for k in STAGES.get(key.split('/')[0], ())))
+                parts.append(f"{key} n={cell['n']} " + " ".join(f"{k}={cell.get(k, 0)}" for k in STAGES.get(key.split('/')[0], ()))
+                             + f" prog={cell.get('progress_mean', 0):.2f}")
         for t, cell in (m.get("on_vs_null") or {}).items():
-            key = "s2" if t == "swap_blocks" else "regrasp"
+            key = "s2" if t == "swap_blocks" else "pressed"
             v = cell.get(key)
             if v:
                 parts.append(f"{t} on/null only {key} {v[0]}/{v[1]} p={sign_p(v[0], v[1]):.3f}")
+        for t, c in (m.get("prog_on_vs_null") or {}).items():
+            parts.append(f"{t} dprog on-null {c['delta']:+.3f} {c['ci']} p={c['p']:.4f} n={c['n']}")
         if m.get("errors"):
             parts.append(f"errors={m['errors']}")
         return "; ".join(parts)
@@ -742,7 +879,9 @@ def recover(lane):
         if t.get("lane") == lane and s["status"] in ("running", "waiting") and not pid_alive(s.get("pid"), "queue5.py"):
             child = s.get("child_pid")
             if s["status"] == "running" and pid_alive(child):
-                log(f"{t['id']}: its process {child} still runs (lane died): waiting for it to end before re-running")
+                log(f"{t['id']}: its process {child} still runs (lane restarted): waiting for it to end, then the task "
+                    "is re-run (finished work reused) and judged")
+                set_state(t["id"], pid=os.getpid())         # status shows it as running under this lane meanwhile
                 while pid_alive(child):
                     time.sleep(POLL)
             log(f"{t['id']}: was {s['status']} under dead pid {s.get('pid')}: back to pending (finished work is reused)")
@@ -942,6 +1081,10 @@ def cmd_check(args):
     for gpu in (1, 2):
         free = gpu_free_mib(gpu)
         print(f"  GPU {gpu}: {free} MiB free now (lanes wait for their own threshold)")
+    held = {t["id"] for t in tasks if t.get("hold")}
+    for line in [b for b in bad if b.split(":")[0] in held]:
+        warn.append(f"{line} [task on hold: fix before releasing it]")
+    bad = [b for b in bad if b.split(":")[0] not in held]
     for line in warn:
         print(f"WARN {line}")
     for line in bad:
