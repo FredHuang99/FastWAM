@@ -107,6 +107,21 @@ tasks:
   on_fail: "put_back reported with stage pairs + the execute dose curve; the memory claim rests on swap"
   on_inconclusive: "fewer than 24 paired scenes: P8b adds 16"
 
+- id: PG-A-final
+  lane: cpu
+  kind: analysis
+  hold: true
+  after: [PG-A]
+  hypothesis: "PG-A on every put_back scene: seeds 17-20 (A100) + 21-22 (H200); each scene's on and null ran on the same GPU type. Release (remove hold) after copying the H200 results back"
+  need_mib: 0
+  folders: [closed_loop/a2_infer/exec8, closed_loop/a2_infer/exec8_h200]
+  label: a2C_e3_exec8
+  modes: ["on", "null"]
+  tasks: [put_back_block]
+  min_episodes: 60
+  inconclusive_if: "m['prog_on_vs_null']['put_back_block']['n'] < 24"
+  pass_if: "m['prog_on_vs_null']['put_back_block']['p'] < 0.05 and m['prog_on_vs_null']['put_back_block']['delta'] > 0"
+
 - id: S-X3
   lane: cpu
   kind: analysis
@@ -431,39 +446,11 @@ tasks:
   min_episodes: 8
 
 
-# filler for GPU1 (picked only when nothing above in the loop lane is runnable): 16 more put_back scenes for PG-A
-- id: P8b-plan
-  lane: loop
-  kind: shell
-  after: [X2-loop-put]
-  hypothesis: "16 more expert-feasible put_back scenes (seeds 21 / 22)"
-  need_mib: 10000
-  timeout_h: 2
-  command: "for s in 21 22; do test -f {O}/closed_loop/scenes_seed${s}_n8_put_back_block/put_back_block.json || bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/closed_loop.sh plan {GPU} $s 8 put_back_block || exit 1; done"
-
-- id: P8b-run
-  lane: loop
-  kind: closed_loop
-  after: [P8b-plan]
-  hypothesis: "PG-A on every put_back scene (seeds 17-22, execute 8)"
-  need_mib: 30000
-  checkpoint: a2C/checkpoints/update_002010.pt
-  label: a2C_e3_exec8
-  modes: ["on", "null"]
-  scenes: [closed_loop/scenes_seed17_n10, closed_loop/scenes_seed18_n8_put_back_block, closed_loop/scenes_seed19_n8_put_back_block, closed_loop/scenes_seed20_n8_put_back_block, closed_loop/scenes_seed21_n8_put_back_block, closed_loop/scenes_seed22_n8_put_back_block]
-  tasks: [put_back_block]
-  online_args: ["--execute", "8"]
-  output: closed_loop/a2_infer/exec8
-  min_episodes: 60
-  inconclusive_if: "m['on_vs_null']['put_back_block']['success'][2] < 24"
-  pass_if: "sign_p(m['on_vs_null']['put_back_block']['success'][0], m['on_vs_null']['put_back_block']['success'][1]) < 0.05"
-
-
 # week plan v4: does swap lose at execute 8? (non-inferiority on 34 scenes), then the official-seed pilot
 - id: H8-on
   lane: loop
   kind: closed_loop
-  after: [P8b-run]
+  after: [X2-loop-put]
   hypothesis: "swap at execute 8 is not worse than at execute 24 on 34 scenes (S2 >= S2(24) - 2 and progress >= progress(24) - 0.05)"
   need_mib: 30000
   checkpoint: a2C/checkpoints/update_002010.pt
@@ -501,30 +488,6 @@ tasks:
   min_episodes: 60
   inconclusive_if: "m['prog_on_vs_null']['swap_blocks']['n'] < 24"
   pass_if: "m['prog_on_vs_null']['swap_blocks']['p'] < 0.05 and m['prog_on_vs_null']['swap_blocks']['delta'] > 0"
-
-- id: X8-plan
-  lane: loop
-  kind: shell
-  after: [H8-null]
-  hypothesis: "30 expert-feasible put_back scenes from the official seed 42"
-  need_mib: 10000
-  timeout_h: 3
-  command: "test -f {O}/closed_loop/scenes_seed42_n30_put_back_block/put_back_block.json || bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/closed_loop.sh plan {GPU} 42 30 put_back_block"
-
-- id: X8-put
-  lane: loop
-  kind: closed_loop
-  after: [X8-plan]
-  hypothesis: "official-seed pilot (descriptive, not for the paper): put_back at execute 8, on + null, cost and variance per episode; caveat: our plan keeps expert-feasible seeds only"
-  need_mib: 30000
-  checkpoint: a2C/checkpoints/update_002010.pt
-  label: a2C_e3_exec8
-  modes: ["on", "null"]
-  scenes: [closed_loop/scenes_seed42_n30_put_back_block]
-  tasks: [put_back_block]
-  online_args: ["--execute", "8"]
-  output: closed_loop/official_pilot
-  min_episodes: 10
 
 # ------------------------------------------------------------------------------------------------ train lane (GPU2)
 - id: X2-train
@@ -954,4 +917,77 @@ tasks:
   tasks: [swap_blocks]
   output: closed_loop/x7
   reference: {folders: [closed_loop/a2, closed_loop/a2_more], label: a2C_e3, modes: ["on", "null"]}
+  min_episodes: 16
+
+# ------------------------------------------------------------------------------------------------ remote lane (H200 host, container mwam2, GPU0)
+# Added 10-28 03:50. Started by hand when GPU0 is free (guard + lane in one script). Every task here is
+# self-contained on that host (no dependency on the A100 lanes; on and null of a scene both run on the H200).
+# Results are copied back to the A100 host and judged / pooled there (PG-A-final).
+- id: R-smoke
+  lane: remote
+  kind: closed_loop
+  hypothesis: "H200 host: the execute-8 closed loop runs (frozen scene, 48 targets): decisions every 8, commands == executed; rendering and CuRobo (sm90) work; A100-vs-H200 action difference recorded (descriptive)"
+  need_mib: 30000
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3_smoke8_h200
+  modes: ["on"]
+  scenes: [frozen]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--max-targets", "48"]
+  output: closed_loop/h200_smoke
+  parity_with: {folders: [closed_loop/smoke_exec8], label: a2C_e3_smoke8, modes: ["on"]}
+  min_episodes: 1
+  pass_if: "m['decision_gaps'] == [8] and m['command_to_execution_exact'] and m['parity_decisions'] >= 3"
+  on_fail: "the H200 host cannot run the closed loop as is: remote tasks are skipped; see the task log"
+
+- id: X8-plan
+  lane: remote
+  kind: shell
+  after: [R-smoke]
+  requires_pass: [R-smoke]
+  hypothesis: "30 expert-feasible put_back scenes from the official seed 42"
+  need_mib: 10000
+  timeout_h: 3
+  command: "test -f {O}/closed_loop/scenes_seed42_n30_put_back_block/put_back_block.json || bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/closed_loop.sh plan {GPU} 42 30 put_back_block"
+
+- id: X8-put
+  lane: remote
+  kind: closed_loop
+  after: [X8-plan]
+  requires_pass: [R-smoke]
+  hypothesis: "official-seed pilot (descriptive, not for the paper): put_back at execute 8, on + null, cost and variance per episode; caveat: our plan keeps expert-feasible seeds only; run on the H200"
+  need_mib: 30000
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3_exec8
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed42_n30_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8"]
+  output: closed_loop/official_pilot
+  min_episodes: 10
+
+- id: P8b-plan
+  lane: remote
+  kind: shell
+  after: [X8-put]
+  requires_pass: [R-smoke]
+  hypothesis: "16 more expert-feasible put_back scenes (seeds 21 / 22)"
+  need_mib: 10000
+  timeout_h: 2
+  command: "for s in 21 22; do test -f {O}/closed_loop/scenes_seed${s}_n8_put_back_block/put_back_block.json || bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/closed_loop.sh plan {GPU} $s 8 put_back_block || exit 1; done"
+
+- id: P8b-run
+  lane: remote
+  kind: closed_loop
+  after: [P8b-plan]
+  requires_pass: [R-smoke]
+  hypothesis: "put_back at execute 8, on + null, on 16 new scenes (seeds 21 / 22) on the H200 (descriptive here; pooled into PG-A-final on the A100 host)"
+  need_mib: 30000
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3_exec8
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed21_n8_put_back_block, closed_loop/scenes_seed22_n8_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8"]
+  output: closed_loop/a2_infer/exec8_h200
   min_episodes: 16
