@@ -557,22 +557,33 @@ tasks:
 # ---- week plan v5 (10-29 22:30, Fable): official protocol from Friday. F1 plans the official seed-42 banks (100 per
 # task, rule of the official eval_policy.py) and checks that their first 30 / 20 scenes equal the H200 banks of X8 / X9
 # (copied to this host); mismatch -> F1 FAILs and every official task is skipped.
-- id: F1
+# 10-30 00:30: F1 split. F1 (both banks in one task) ERRORed at 00:14 in the swap planner after the put_back bank; its
+# test -f shortcut also skipped re-planning a partial bank. F1-put / F1-swap check the planner's complete flag (a partial
+# bank resumes from its next seed), F1-swap retries the planner 3 times; F3 needs F1-put only, F4 needs F1-swap.
+- id: F1-put
   lane: loop
   kind: shell
-  hypothesis: "official seed-42 banks, 100 put_back + 100 swap scenes; first 30 / 20 identical to the X8 / X9 banks"
+  hypothesis: "official seed-42 put_back bank (100); first 30 identical to X8's bank (H200)"
   need_mib: 10000
-  timeout_h: 3
-  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; for t in put_back_block swap_blocks; do test -f $C/scenes_seed42_n100_$t/$t.json || bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/closed_loop.sh plan {GPU} 42 100 $t || exit 1; done; $P $S check-prefix $C/scenes_seed42_n100_put_back_block $C/scenes_seed42_n30_put_back_block put_back_block || exit 1; $P $S check-prefix $C/scenes_seed42_n100_swap_blocks $C/scenes_seed42_n20_swap_blocks swap_blocks || exit 1; $P $S subset $C/scenes_seed42_n100_put_back_block $C/scenes_seed42_n100_put_back_block_from31 put_back_block --start 30 && $P $S subset $C/scenes_seed42_n100_swap_blocks $C/scenes_seed42_n100_swap_blocks_from21 swap_blocks --start 20"
+  timeout_h: 2
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=put_back_block; $P $S complete $C/scenes_seed42_n100_$t $t 100 || bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/closed_loop.sh plan {GPU} 42 100 $t || exit 1; $P $S complete $C/scenes_seed42_n100_$t $t 100 || exit 1; $P $S check-prefix $C/scenes_seed42_n100_$t $C/scenes_seed42_n30_$t $t || exit 1; $P $S subset $C/scenes_seed42_n100_$t $C/scenes_seed42_n100_put_back_block_from31 $t --start 30"
   pass_if: "m['rc'] == 0"
 
-# F4 = the 01:10 decision of v5 A.1, pre-registered: each shard exists for both branches; X7-H8's verdict picks one
-# (F4-swap8-* need its PASS, F4-swap24-* need it not to PASS), the other is SKIPPED.
+- id: F1-swap
+  lane: loop
+  kind: shell
+  after: [F1-put]
+  hypothesis: "official seed-42 swap bank (100); first 20 identical to X9's bank (H200)"
+  need_mib: 10000
+  timeout_h: 3
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=swap_blocks; for i in 1 2 3; do $P $S complete $C/scenes_seed42_n100_$t $t 100 && break; bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/closed_loop.sh plan {GPU} 42 100 $t || echo \"planner attempt $i failed\"; done; $P $S complete $C/scenes_seed42_n100_$t $t 100 || exit 1; $P $S check-prefix $C/scenes_seed42_n100_$t $C/scenes_seed42_n20_$t $t || exit 1; $P $S subset $C/scenes_seed42_n100_$t $C/scenes_seed42_n100_swap_blocks_from21 $t --start 20"
+  pass_if: "m['rc'] == 0"
+
 - id: F3-put-s0
   lane: loop
   kind: closed_loop
-  after: [F1]
-  requires_pass: [F1]
+  after: [F1-put]
+  requires_pass: [F1-put]
   hypothesis: "official protocol (v5 C): X7 put_back at execute 8, on + null, official scenes 31-100 (1-30 = X9-put on the H200), shard 0/2"
   need_mib: 30000
   checkpoint: a2C_6ep/last
@@ -587,8 +598,8 @@ tasks:
 - id: F4-swap8-s0
   lane: loop
   kind: closed_loop
-  after: [F1, X7-H8]
-  requires_pass: [F1, X7-H8]
+  after: [F1-swap, X7-H8]
+  requires_pass: [F1-swap, X7-H8]
   hypothesis: "official protocol, branch X7-H8 PASS (v5 A.1): X7 swap at execute 8, on + null, all 100 official scenes, shard 0/3"
   need_mib: 30000
   checkpoint: a2C_6ep/last
@@ -603,8 +614,8 @@ tasks:
 - id: F4-swap24-s0
   lane: loop
   kind: closed_loop
-  after: [F1, X7-H8]
-  requires_pass: [F1]
+  after: [F1-swap, X7-H8]
+  requires_pass: [F1-swap]
   requires_not_pass: [X7-H8]
   hypothesis: "official protocol, branch X7-H8 FAIL / INCONCLUSIVE (v5 A.1, default): X7 swap at execute 24, on + null, official scenes 21-100 (1-20 = X9-swap on the H200), shard 0/3"
   need_mib: 30000
@@ -830,8 +841,8 @@ tasks:
 - id: F3-put-s1
   lane: train
   kind: closed_loop
-  after: [F1]
-  requires_pass: [F1]
+  after: [F1-put]
+  requires_pass: [F1-put]
   hypothesis: "official protocol (v5 C): X7 put_back at execute 8, on + null, official scenes 31-100 (1-30 = X9-put on the H200), shard 1/2"
   need_mib: 30000
   checkpoint: a2C_6ep/last
@@ -846,8 +857,8 @@ tasks:
 - id: F4-swap8-s2
   lane: train
   kind: closed_loop
-  after: [F1, X7-H8]
-  requires_pass: [F1, X7-H8]
+  after: [F1-swap, X7-H8]
+  requires_pass: [F1-swap, X7-H8]
   hypothesis: "official protocol, branch X7-H8 PASS (v5 A.1): X7 swap at execute 8, on + null, all 100 official scenes, shard 2/3"
   need_mib: 30000
   checkpoint: a2C_6ep/last
@@ -862,8 +873,8 @@ tasks:
 - id: F4-swap24-s2
   lane: train
   kind: closed_loop
-  after: [F1, X7-H8]
-  requires_pass: [F1]
+  after: [F1-swap, X7-H8]
+  requires_pass: [F1-swap]
   requires_not_pass: [X7-H8]
   hypothesis: "official protocol, branch X7-H8 FAIL / INCONCLUSIVE (v5 A.1, default): X7 swap at execute 24, on + null, official scenes 21-100 (1-20 = X9-swap on the H200), shard 2/3"
   need_mib: 30000
@@ -1280,8 +1291,8 @@ tasks:
 - id: F4-swap8-s1
   lane: gpu0
   kind: closed_loop
-  after: [F1, X7-H8]
-  requires_pass: [F1, X7-H8]
+  after: [F1-swap, X7-H8]
+  requires_pass: [F1-swap, X7-H8]
   hypothesis: "official protocol, branch X7-H8 PASS (v5 A.1): X7 swap at execute 8, on + null, all 100 official scenes, shard 1/3"
   need_mib: 30000
   checkpoint: a2C_6ep/last
@@ -1296,8 +1307,8 @@ tasks:
 - id: F4-swap24-s1
   lane: gpu0
   kind: closed_loop
-  after: [F1, X7-H8]
-  requires_pass: [F1]
+  after: [F1-swap, X7-H8]
+  requires_pass: [F1-swap]
   requires_not_pass: [X7-H8]
   hypothesis: "official protocol, branch X7-H8 FAIL / INCONCLUSIVE (v5 A.1, default): X7 swap at execute 24, on + null, official scenes 21-100 (1-20 = X9-swap on the H200), shard 1/3"
   need_mib: 30000
@@ -1434,7 +1445,7 @@ tasks:
   hypothesis: "official seed-42 put_back bank (100) on the H200; first 30 identical to X8's bank"
   need_mib: 10000
   timeout_h: 2
-  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=put_back_block; test -f $C/scenes_seed42_n100_$t/$t.json || bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/closed_loop.sh plan {GPU} 42 100 $t || exit 1; $P $S check-prefix $C/scenes_seed42_n100_$t $C/scenes_seed42_n30_$t $t && $P $S subset $C/scenes_seed42_n100_$t $C/scenes_seed42_n100_put_back_block_from31 $t --start 30"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=put_back_block; $P $S complete $C/scenes_seed42_n100_$t $t 100 || bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/closed_loop.sh plan {GPU} 42 100 $t || exit 1; $P $S complete $C/scenes_seed42_n100_$t $t 100 || exit 1; $P $S check-prefix $C/scenes_seed42_n100_$t $C/scenes_seed42_n30_$t $t && $P $S subset $C/scenes_seed42_n100_$t $C/scenes_seed42_n100_put_back_block_from31 $t --start 30"
   pass_if: "m['rc'] == 0"
 
 - id: F3-put-A2C

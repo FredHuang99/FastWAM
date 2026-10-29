@@ -6,6 +6,8 @@ increasing seeds). Plain JSON, no project imports.
 
     official_scenes.py check-prefix <full_dir> <prefix_dir> <task>     exit 1 unless the first K scenes are identical
     official_scenes.py subset <full_dir> <out_dir> <task> --start K    scenes[K:] (ordinals kept) -> <out_dir>/<task>.json
+    official_scenes.py complete <dir> <task> <n>                       exit 0 iff the planner marked the bank complete
+                                                                       with >= n scenes (a partial bank resumes on re-plan)
 """
 import argparse
 import json
@@ -46,6 +48,15 @@ def subset(args):
           f"-> {out}")
 
 
+def complete(args):
+    path = Path(args.dir) / f"{args.task}.json"
+    value = json.loads(path.read_text()) if path.exists() else {}
+    n = len(value.get("scenes") or [])
+    ok = bool(value.get("complete")) and n >= args.n
+    print(f"{args.task}: {path} {'complete' if ok else 'NOT complete'} ({n} scenes, next seed {value.get('next_seed')})")
+    sys.exit(0 if ok else 1)
+
+
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -60,6 +71,11 @@ def main():
     b.add_argument("task")
     b.add_argument("--start", type=int, required=True)
     b.set_defaults(fn=subset)
+    c = sub.add_parser("complete")
+    c.add_argument("dir")
+    c.add_argument("task")
+    c.add_argument("n", type=int)
+    c.set_defaults(fn=complete)
     args = ap.parse_args()
     args.fn(args)
 
