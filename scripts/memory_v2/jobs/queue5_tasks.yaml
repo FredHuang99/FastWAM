@@ -491,21 +491,23 @@ tasks:
   inconclusive_if: "m['prog_on_vs_null']['swap_blocks']['n'] < 24"
   pass_if: "m['prog_on_vs_null']['swap_blocks']['p'] < 0.05 and m['prog_on_vs_null']['swap_blocks']['delta'] > 0"
 
-# week plan v4 §5 ("if GPU1 is free on Thursday, add swap 20 scenes"): official-seed swap pilot on the A100, after H8
+# week plan v4 §5 ("if GPU1 is free on Thursday, add swap 20 scenes"): official-seed swap pilot. Moved 10-29 09:00 from
+# GPU1 (after H8-null) to the H200 (idle since X8-put ended 10-29 01:51); on and null both run there.
 - id: X8-swap-plan
-  lane: loop
+  lane: remote
   kind: shell
-  after: [H8-null]
+  requires_pass: [R-smoke]
   hypothesis: "20 expert-feasible swap scenes from the official seed 42"
   need_mib: 10000
   timeout_h: 3
   command: "test -f {O}/closed_loop/scenes_seed42_n20_swap_blocks/swap_blocks.json || bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/closed_loop.sh plan {GPU} 42 20 swap_blocks"
 
 - id: X8-swap
-  lane: loop
+  lane: remote
   kind: closed_loop
   after: [X8-swap-plan]
-  hypothesis: "official-seed pilot (descriptive, not for the paper): swap at execute 24, on + null, 20 scenes; cost and variance per episode; caveat: our plan keeps expert-feasible seeds only; run on the A100"
+  requires_pass: [R-smoke]
+  hypothesis: "official-seed pilot (descriptive, not for the paper): swap at execute 24, on + null, 20 scenes; cost and variance per episode; caveat: our plan keeps expert-feasible seeds only; run on the H200"
   need_mib: 30000
   checkpoint: a2C/checkpoints/update_002010.pt
   label: a2C_e3
@@ -970,6 +972,33 @@ tasks:
   online_args: ["--execute", "8"]
   output: closed_loop/a2_infer/exec8_p8b          # own folder: PG-A (34 scenes, folder exec8) stays as registered
   min_episodes: 16
+
+# 10-29 09:00 (D5, GPU0 idle since P8b ended 00:51): X7 PASSed on swap (6 epochs), so the 6-epoch model is the
+# candidate base for next week; its put_back memory effect at execute 8 is measured before that decision (registered
+# before any X7 null episode exists; same rule as PG-A). The on episodes of X7-loop-put are reused (same folder / label).
+- id: X7-put-null
+  lane: gpu0
+  kind: closed_loop
+  hypothesis: "6-epoch A2C keeps the put_back memory effect at execute 8 (34 scenes): on progresses further than history masked (rule of PG-A)"
+  need_mib: 30000
+  checkpoint: a2C_6ep/last
+  label: a2C6_e6
+  modes: ["on", "null"]
+  scenes: *put_scenes
+  tasks: [put_back_block]
+  online_args: ["--execute", "8"]
+  output: closed_loop/x7_put
+  reference: *put8_ref
+  min_episodes: 48
+  inconclusive_if: "m['prog_on_vs_null']['put_back_block']['n'] < 24"
+  pass_if: "m['prog_on_vs_null']['put_back_block']['p'] < 0.05 and m['prog_on_vs_null']['put_back_block']['delta'] > 0"
+  failure_explanations:
+    - if: "m['put_back_block/null']['pressed'] > r['put_back_block/null']['pressed'] + 3"
+      then: "the 6-epoch null branch presses more often than A2C's: with longer training the current view carries part of the press decision (the memory effect shrinks)"
+    - if: "m['put_back_block/on']['pressed'] <= r['put_back_block/on']['pressed']"
+      then: "longer training does not raise the press rate with memory on: the press decision is not limited by fit"
+  on_pass: "the 6-epoch model keeps the put_back memory effect: it can be next week's base model for both tasks"
+  on_fail: "longer training trades the put_back memory effect for fit: next week's base keeps 3 epochs for put_back or adds pairs / dropout"
 
 - id: X2b-loop-swap-more
   lane: gpu0
