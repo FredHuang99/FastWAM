@@ -12,8 +12,10 @@ for spec in "$@"; do
   pid=$(/opt/mwam/bin/python -c "import json; print(json.load(open('$Q/lanes/$lane.json')).get('pid', ''))" 2>/dev/null)
   if [ -n "$pid" ] && tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null | grep -q "queue5.py run --lane $lane"; then
     kill -TERM "$pid"
-    for _ in $(seq 1 30); do kill -0 "$pid" 2>/dev/null || break; sleep 1; done
-    if kill -0 "$pid" 2>/dev/null; then echo "lane $lane: pid $pid did not exit; NOT restarted"; continue; fi
+    # a killed lane whose parent does not reap it stays a zombie (state Z): that counts as exited
+    alive() { [ -e "/proc/$1" ] && ! awk '{exit ($3 == "Z") ? 0 : 1}' "/proc/$1/stat" 2>/dev/null; }
+    for _ in $(seq 1 30); do alive "$pid" || break; sleep 1; done
+    if alive "$pid"; then echo "lane $lane: pid $pid did not exit; NOT restarted"; continue; fi
     echo "lane $lane: stopped lane process $pid"
   else
     echo "lane $lane: no live lane process (recorded pid '$pid')"
