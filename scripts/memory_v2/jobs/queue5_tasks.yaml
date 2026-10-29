@@ -124,6 +124,28 @@ tasks:
   inconclusive_if: "m['prog_on_vs_null']['put_back_block']['n'] < 24"
   pass_if: "m['prog_on_vs_null']['put_back_block']['p'] < 0.05 and m['prog_on_vs_null']['put_back_block']['delta'] > 0"
 
+- id: X7-H8
+  lane: cpu
+  kind: analysis
+  after: [X7-H8-s0, X7-H8-s1, X7-H8-s2]
+  hypothesis: "6-epoch A2C on swap at execute 8 is not worse than at execute 24 on the common scenes in progress AND success (registered 10-29 16:00 before any X7 execute-8 swap episode)"
+  need_mib: 0
+  folders: [closed_loop/x7_exec8/s0, closed_loop/x7_exec8/s1, closed_loop/x7_exec8/s2]
+  label: a2C6_e6_exec8
+  modes: ["on", "null"]
+  tasks: [swap_blocks]
+  reference: {folders: [closed_loop/x7], label: a2C6_e6, modes: ["on", "null"]}
+  min_episodes: 48
+  inconclusive_if: "m['prog_vs_reference']['on']['swap_blocks']['n'] < 20"
+  pass_if: "m['prog_vs_reference']['on']['swap_blocks']['delta'] >= -0.05 and m['vs_reference']['on']['swap_blocks']['success'][1] - m['vs_reference']['on']['swap_blocks']['success'][0] <= 0.1 * m['vs_reference']['on']['swap_blocks']['success'][2]"
+  failure_explanations:
+    - if: "m['vs_reference']['on']['swap_blocks']['s3'][1] > m['vs_reference']['on']['swap_blocks']['s3'][0] + 2"
+      then: "execute 8 loses the late swap stages (S3 / press) with the 6-epoch model too: chunk-boundary switching after S2 (U1b-type fix or execute 24 for swap)"
+    - if: "m['prog_on_vs_null']['swap_blocks']['p'] >= 0.05"
+      then: "the swap memory effect at execute 8 is not significant with the 6-epoch model"
+  on_pass: "one protocol for next week: 6-epoch model, execute 8 for both tasks"
+  on_fail: "next week's protocol: 6-epoch model with a task-specific execute horizon (put_back 8, swap 24), or U1b for swap"
+
 - id: S-X3
   lane: cpu
   kind: analysis
@@ -517,6 +539,21 @@ tasks:
   output: closed_loop/official_pilot
   min_episodes: 10
 
+# 10-29 16:00: X7-H8 shard 1 on GPU1 (see the gpu0 section)
+- id: X7-H8-s1
+  lane: loop
+  kind: closed_loop
+  hypothesis: "X7-H8 shard 1/3: 6-epoch A2C on swap at execute 8, on + null (34 scenes, scenes[1::3])"
+  need_mib: 30000
+  checkpoint: a2C_6ep/last
+  label: a2C6_e6_exec8
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed17_n10, closed_loop/scenes_seed18_n8_swap_blocks, closed_loop/scenes_seed19_n8_swap_blocks, closed_loop/scenes_seed20_n8_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--shard", "1/3"]
+  output: closed_loop/x7_exec8/s1          # one folder per shard: a finishing shard cleans up only its own simulators
+  min_episodes: 8
+
 # ------------------------------------------------------------------------------------------------ train lane (GPU2)
 - id: X2-train
   lane: train
@@ -837,6 +874,22 @@ tasks:
   reference: {folders: [closed_loop/a2, closed_loop/a2_more], label: a2C_e3, modes: ["on", "null"]}
   min_episodes: 16
 
+# 10-29 16:00: X7-H8 shard 2 on GPU4 after X7-loop-swap-more (see the gpu0 section)
+- id: X7-H8-s2
+  lane: extra
+  kind: closed_loop
+  after: [X7-loop-swap-more]
+  hypothesis: "X7-H8 shard 2/3: 6-epoch A2C on swap at execute 8, on + null (34 scenes, scenes[2::3])"
+  need_mib: 30000
+  checkpoint: a2C_6ep/last
+  label: a2C6_e6_exec8
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed17_n10, closed_loop/scenes_seed18_n8_swap_blocks, closed_loop/scenes_seed19_n8_swap_blocks, closed_loop/scenes_seed20_n8_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--shard", "2/3"]
+  output: closed_loop/x7_exec8/s2          # one folder per shard: a finishing shard cleans up only its own simulators
+  min_episodes: 8
+
 # ------------------------------------------------------------------------------------------------ gpu0 lane (container GPU0 = host GPU0)
 # Added 10-28 04:00 when GPU0 became free. File order = order: the U1 line (moved from the extra lane, where it waited
 # for X7 until Thursday evening; ids, settings and pass_if unchanged), then P8b (moved from the H200: on the A100
@@ -999,6 +1052,23 @@ tasks:
       then: "longer training does not raise the press rate with memory on: the press decision is not limited by fit"
   on_pass: "the 6-epoch model keeps the put_back memory effect: it can be next week's base model for both tasks"
   on_fail: "longer training trades the put_back memory effect for fit: next week's base keeps 3 epochs for put_back or adds pairs / dropout"
+
+# 10-29 16:00 (GPU0 / GPU1 idle): X7 is the candidate base model (X7-loop-swap PASS, X7-put-null PASS). Before next
+# week's protocol is fixed: does the 6-epoch model keep swap at execute 8? Three shards (GPU0, GPU1, GPU4), judged by
+# X7-H8 (cpu). Non-inferiority includes success this time (H8-on passed on S2 / progress while success fell 4 -> 0).
+- id: X7-H8-s0
+  lane: gpu0
+  kind: closed_loop
+  hypothesis: "X7-H8 shard 0/3: 6-epoch A2C on swap at execute 8, on + null (34 scenes, scenes[0::3])"
+  need_mib: 30000
+  checkpoint: a2C_6ep/last
+  label: a2C6_e6_exec8
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed17_n10, closed_loop/scenes_seed18_n8_swap_blocks, closed_loop/scenes_seed19_n8_swap_blocks, closed_loop/scenes_seed20_n8_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--shard", "0/3"]
+  output: closed_loop/x7_exec8/s0          # one folder per shard: a finishing shard cleans up only its own simulators
+  min_episodes: 8
 
 - id: X2b-loop-swap-more
   lane: gpu0
