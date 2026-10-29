@@ -554,6 +554,69 @@ tasks:
   output: closed_loop/x7_exec8/s1          # one folder per shard: a finishing shard cleans up only its own simulators
   min_episodes: 8
 
+# ---- week plan v5 (10-29 22:30, Fable): official protocol from Friday. F1 plans the official seed-42 banks (100 per
+# task, rule of the official eval_policy.py) and checks that their first 30 / 20 scenes equal the H200 banks of X8 / X9
+# (copied to this host); mismatch -> F1 FAILs and every official task is skipped.
+- id: F1
+  lane: loop
+  kind: shell
+  hypothesis: "official seed-42 banks, 100 put_back + 100 swap scenes; first 30 / 20 identical to the X8 / X9 banks"
+  need_mib: 10000
+  timeout_h: 3
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; for t in put_back_block swap_blocks; do test -f $C/scenes_seed42_n100_$t/$t.json || bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/closed_loop.sh plan {GPU} 42 100 $t || exit 1; done; $P $S check-prefix $C/scenes_seed42_n100_put_back_block $C/scenes_seed42_n30_put_back_block put_back_block || exit 1; $P $S check-prefix $C/scenes_seed42_n100_swap_blocks $C/scenes_seed42_n20_swap_blocks swap_blocks || exit 1; $P $S subset $C/scenes_seed42_n100_put_back_block $C/scenes_seed42_n100_put_back_block_from31 put_back_block --start 30 && $P $S subset $C/scenes_seed42_n100_swap_blocks $C/scenes_seed42_n100_swap_blocks_from21 swap_blocks --start 20"
+  pass_if: "m['rc'] == 0"
+
+# F4 = the 01:10 decision of v5 A.1, pre-registered: each shard exists for both branches; X7-H8's verdict picks one
+# (F4-swap8-* need its PASS, F4-swap24-* need it not to PASS), the other is SKIPPED.
+- id: F3-put-s0
+  lane: loop
+  kind: closed_loop
+  after: [F1]
+  requires_pass: [F1]
+  hypothesis: "official protocol (v5 C): X7 put_back at execute 8, on + null, official scenes 31-100 (1-30 = X9-put on the H200), shard 0/2"
+  need_mib: 30000
+  checkpoint: a2C_6ep/last
+  label: a2C6_e6
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block_from31]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--shard", "0/2"]
+  output: closed_loop/official/put_x7_s0
+  min_episodes: 20
+
+- id: F4-swap8-s0
+  lane: loop
+  kind: closed_loop
+  after: [F1, X7-H8]
+  requires_pass: [F1, X7-H8]
+  hypothesis: "official protocol, branch X7-H8 PASS (v5 A.1): X7 swap at execute 8, on + null, all 100 official scenes, shard 0/3"
+  need_mib: 30000
+  checkpoint: a2C_6ep/last
+  label: a2C6_e6_exec8
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--shard", "0/3"]
+  output: closed_loop/official/swap8_x7_s0
+  min_episodes: 10
+
+- id: F4-swap24-s0
+  lane: loop
+  kind: closed_loop
+  after: [F1, X7-H8]
+  requires_pass: [F1]
+  requires_not_pass: [X7-H8]
+  hypothesis: "official protocol, branch X7-H8 FAIL / INCONCLUSIVE (v5 A.1, default): X7 swap at execute 24, on + null, official scenes 21-100 (1-20 = X9-swap on the H200), shard 0/3"
+  need_mib: 30000
+  checkpoint: a2C_6ep/last
+  label: a2C6_e6
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks_from21]
+  tasks: [swap_blocks]
+  online_args: ["--shard", "0/3"]
+  output: closed_loop/official/swap24_x7_s0
+  min_episodes: 10
+
 # ------------------------------------------------------------------------------------------------ train lane (GPU2)
 - id: X2-train
   lane: train
@@ -763,6 +826,56 @@ tasks:
   reference: *put8_ref
   min_episodes: 8
 
+# ---- week plan v5: official protocol on GPU2 after the X2b closed loops
+- id: F3-put-s1
+  lane: train
+  kind: closed_loop
+  after: [F1]
+  requires_pass: [F1]
+  hypothesis: "official protocol (v5 C): X7 put_back at execute 8, on + null, official scenes 31-100 (1-30 = X9-put on the H200), shard 1/2"
+  need_mib: 30000
+  checkpoint: a2C_6ep/last
+  label: a2C6_e6
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block_from31]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--shard", "1/2"]
+  output: closed_loop/official/put_x7_s1
+  min_episodes: 20
+
+- id: F4-swap8-s2
+  lane: train
+  kind: closed_loop
+  after: [F1, X7-H8]
+  requires_pass: [F1, X7-H8]
+  hypothesis: "official protocol, branch X7-H8 PASS (v5 A.1): X7 swap at execute 8, on + null, all 100 official scenes, shard 2/3"
+  need_mib: 30000
+  checkpoint: a2C_6ep/last
+  label: a2C6_e6_exec8
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--shard", "2/3"]
+  output: closed_loop/official/swap8_x7_s2
+  min_episodes: 10
+
+- id: F4-swap24-s2
+  lane: train
+  kind: closed_loop
+  after: [F1, X7-H8]
+  requires_pass: [F1]
+  requires_not_pass: [X7-H8]
+  hypothesis: "official protocol, branch X7-H8 FAIL / INCONCLUSIVE (v5 A.1, default): X7 swap at execute 24, on + null, official scenes 21-100 (1-20 = X9-swap on the H200), shard 2/3"
+  need_mib: 30000
+  checkpoint: a2C_6ep/last
+  label: a2C6_e6
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks_from21]
+  tasks: [swap_blocks]
+  online_args: ["--shard", "2/3"]
+  output: closed_loop/official/swap24_x7_s2
+  min_episodes: 10
+
 # ------------------------------------------------------------------------------------------------ extra lane (container GPU3 = host GPU4)
 - id: X7-train
   lane: extra
@@ -889,6 +1002,84 @@ tasks:
   online_args: ["--execute", "8", "--shard", "2/3"]
   output: closed_loop/x7_exec8/s2          # one folder per shard: a finishing shard cleans up only its own simulators
   min_episodes: 8
+
+# ---- week plan v5 (GPU4): F2 = X7 + U1b on swap at execute 8; then the 08:30 decision (v5 A.1 / B.3): release T1
+# (default: X7 is the base model) or T2 (only if X9-swap shows no memory effect). Both on hold until then.
+- id: F2
+  lane: extra
+  kind: closed_loop
+  after: [X7-H8-s2]
+  hypothesis: "BID-lite (4 candidates) lets X7 recover its execute-24 swap result at execute 8 on the seed-17 scenes (S2 >= 8, S3 >= 6, success >= 4; X7 at execute 24: 9 / 8 / 6)"
+  need_mib: 30000
+  checkpoint: a2C_6ep/last
+  label: a2C6_e6_u1b
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed17_n10]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--candidates", "4", "--coherence", "overlap"]
+  output: closed_loop/u1/x7b
+  reference: {folders: [closed_loop/x7], label: a2C6_e6, modes: ["on"]}
+  min_episodes: 8
+  pass_if: "m['swap_blocks/on']['s2'] >= 8 and m['swap_blocks/on']['s3'] >= 6 and m['swap_blocks/on']['success'] >= 4"
+  failure_explanations:
+    - if: "m['swap_blocks/on']['s3'] <= 3"
+      then: "the execute-8 loss sits after S2 (chunk-boundary switching + late drift): consistent sampling does not recover it; next week RTC / adaptive horizon"
+    - if: "m['swap_blocks/on']['lifted'] <= 7"
+      then: "execute 8 grasps worse with candidates: a control problem"
+  on_pass: "candidate unified setting (execute 8 for both tasks with U1b on swap): confirm next week on 34 scenes + null"
+  on_fail: "task-specific execute horizon is final (put_back 8 / swap 24)"
+
+- id: T1
+  lane: extra
+  kind: train
+  hold: true
+  after: [F2]
+  hypothesis: "attribution control for X7: the B0 recipe (memory_dropout 1.0, never sees history) for 6 epochs; its null branch is compared with X7-null next week"
+  need_mib: 30000
+  run: a2B0_6ep
+  reference_run: a2C_6ep
+  sets:
+    - optim.lr_action=1e-5
+    - optim.lr_memory=2e-5
+    - init_memory={O}/v2_A_cf/checkpoints/update_001340.pt
+    - schedule.epochs=6
+    - schedule.micro_batch=4
+    - schedule.eval_every=335
+    - schedule.keep_last=2
+    - schedule.save_every=200
+    - guard.loss_factor=2.5
+    - guard.start_update=120
+    - guard.eval_regression=1000          # on is never trained: the on-vs-off guard does not apply
+    - memory_v2.objective.memory_dropout=1.0
+  pass_if: "m.get('complete') and m.get('fm_ratio') is not None and m['fm_ratio'] < 1.0"
+  failure_explanations:
+    - if: "m.get('guard')"
+      then: "the guard stopped the run: see GUARD.json"
+  on_fail: "no B0-6ep row next week: report on - null with the 3-epoch B0 attribution only"
+
+- id: T2
+  lane: extra
+  kind: train
+  hold: true
+  after: [F2]
+  hypothesis: "X2c: one-stage joint fine-tuning (no memory-first: zero-initialised memory, no pairs, lr_memory 1e-4), else the X7 recipe, 6 epochs"
+  need_mib: 30000
+  run: a2C_onestage_6ep
+  reference_run: a2C_6ep
+  sets:
+    - optim.lr_action=1e-5
+    - optim.lr_memory=1e-4
+    - schedule.epochs=6
+    - schedule.micro_batch=4
+    - schedule.eval_every=335
+    - schedule.keep_last=2
+    - schedule.save_every=200
+    - guard.loss_factor=2.5
+    - guard.start_update=120
+  pass_if: "m.get('complete') and m.get('fm_ratio') is not None and m['fm_ratio'] < 1.0"
+  failure_explanations:
+    - if: "m.get('config_diff') and any(not k.startswith(('init_memory', 'pairs.', 'optim.lr_memory', 'name', 'output')) for k in m['config_diff'])"
+      then: "the config differs from a2C_6ep beyond init_memory / pairs / lr_memory: not clean"
 
 # ------------------------------------------------------------------------------------------------ gpu0 lane (container GPU0 = host GPU0)
 # Added 10-28 04:00 when GPU0 became free. File order = order: the U1 line (moved from the extra lane, where it waited
@@ -1085,6 +1276,40 @@ tasks:
   reference: {folders: [closed_loop/a2, closed_loop/a2_more], label: a2C_e3, modes: ["on", "null"]}
   min_episodes: 16
 
+# ---- week plan v5: official swap shard 1 on GPU0 after X2b-loop-swap-more
+- id: F4-swap8-s1
+  lane: gpu0
+  kind: closed_loop
+  after: [F1, X7-H8]
+  requires_pass: [F1, X7-H8]
+  hypothesis: "official protocol, branch X7-H8 PASS (v5 A.1): X7 swap at execute 8, on + null, all 100 official scenes, shard 1/3"
+  need_mib: 30000
+  checkpoint: a2C_6ep/last
+  label: a2C6_e6_exec8
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--shard", "1/3"]
+  output: closed_loop/official/swap8_x7_s1
+  min_episodes: 10
+
+- id: F4-swap24-s1
+  lane: gpu0
+  kind: closed_loop
+  after: [F1, X7-H8]
+  requires_pass: [F1]
+  requires_not_pass: [X7-H8]
+  hypothesis: "official protocol, branch X7-H8 FAIL / INCONCLUSIVE (v5 A.1, default): X7 swap at execute 24, on + null, official scenes 21-100 (1-20 = X9-swap on the H200), shard 1/3"
+  need_mib: 30000
+  checkpoint: a2C_6ep/last
+  label: a2C6_e6
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks_from21]
+  tasks: [swap_blocks]
+  online_args: ["--shard", "1/3"]
+  output: closed_loop/official/swap24_x7_s1
+  min_episodes: 10
+
 # ------------------------------------------------------------------------------------------------ remote lane (H200 host, container mwam2, GPU0)
 # Added 10-28 03:50. Started by hand when GPU0 is free (guard + lane in one script). Every task here is
 # self-contained on that host (no dependency on the A100 lanes; on and null of a scene both run on the H200).
@@ -1178,3 +1403,52 @@ tasks:
   failure_explanations:
     - if: "m['prog_vs_reference']['on']['put_back_block']['delta'] < -0.05"
       then: "longer training costs put_back on new scenes: next week's base keeps 3 epochs for put_back or a task-specific checkpoint"
+
+# ---- week plan v5 (H200 after X9-put): F5 hardware check (reference = the A100 X7 episodes of x7_put, copied here),
+# F1h the official put_back bank on this host (prefix check vs X8's 30), then the A2C official put_back row 31-100.
+- id: F5
+  lane: remote
+  kind: closed_loop
+  after: [X9-put]
+  requires_pass: [R-smoke]
+  hypothesis: "hardware: X7 put_back at execute 8 on the seed-17 scenes, H200 vs A100 (same model, same scenes): success differs by <= 2 and |paired progress delta| <= 0.1"
+  need_mib: 30000
+  checkpoint: a2C_6ep/checkpoints/update_004020.pt
+  label: a2C6_e6
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed17_n10]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8"]
+  output: closed_loop/hw_h200
+  reference: {folders: [closed_loop/x7_put], label: a2C6_e6, modes: ["on"]}
+  min_episodes: 8
+  inconclusive_if: "not r.get('put_back_block/on')"
+  pass_if: "abs(m['put_back_block/on']['success'] - r['put_back_block/on']['success']) <= 2 and abs(m['prog_vs_reference']['on']['put_back_block']['delta']) <= 0.1"
+  on_pass: "official tables may mix A100 and H200 scenes (each scene's on and null on one GPU type)"
+  on_fail: "official tables are split by hardware; no pooling across GPU types"
+
+- id: F1h
+  lane: remote
+  kind: shell
+  after: [F5]
+  hypothesis: "official seed-42 put_back bank (100) on the H200; first 30 identical to X8's bank"
+  need_mib: 10000
+  timeout_h: 2
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=put_back_block; test -f $C/scenes_seed42_n100_$t/$t.json || bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/closed_loop.sh plan {GPU} 42 100 $t || exit 1; $P $S check-prefix $C/scenes_seed42_n100_$t $C/scenes_seed42_n30_$t $t && $P $S subset $C/scenes_seed42_n100_$t $C/scenes_seed42_n100_put_back_block_from31 $t --start 30"
+  pass_if: "m['rc'] == 0"
+
+- id: F3-put-A2C
+  lane: remote
+  kind: closed_loop
+  after: [F1h]
+  requires_pass: [R-smoke, F1h]
+  hypothesis: "official protocol: A2C put_back at execute 8, on + null, official scenes 31-100 on the H200 (1-30 = X8-put)"
+  need_mib: 30000
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3_exec8
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block_from31]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8"]
+  output: closed_loop/official_pilot
+  min_episodes: 20

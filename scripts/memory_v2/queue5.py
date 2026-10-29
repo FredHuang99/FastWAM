@@ -14,6 +14,7 @@ Task file (YAML, default scripts/memory_v2/jobs/queue5_tasks.yaml). Each task:
     pass_if / inconclusive_if: Python expressions over m (metrics), r (reference metrics), helpers sign_p(a, b), get(d, "a.b")
     min_episodes, on_pass, on_fail, on_inconclusive, failure_explanations: [{if: expr over m, r, c (class counts), then: text}]
     hold: true (never picked until removed), requires_pass: [ids] (SKIPPED unless every one of them PASSed)
+    requires_not_pass: [ids] (SKIPPED if any of them PASSed: the other branch of a pre-registered decision)
   kind closed_loop: checkpoint (path, or <run>/last = the run's final checkpoint), label, modes, scenes: [..] (missing
                     scene folders are dropped; 'frozen' = Codex's 2 scenes), tasks, seeds, online_args: [..], output,
                     reference: {folders: [..], label, modes}   (paired comparison on the same scenes)
@@ -30,8 +31,8 @@ Verdicts: PASS / FAIL (pass_if) | INCONCLUSIVE (inconclusive_if, too few episode
 DONE (no pass_if: a descriptive run).
 
 Everything lives in outputs/memory_v2/: LEDGER.jsonl / LEDGER.md, queue5/state/<id>.json, queue5/tasks/<id>.log,
-queue5/<lane>.log (from queue5.sh), autopsy/AUTOPSY_<id>.md. Nothing starts after QUEUE_DEADLINE (default 2026-10-31
-00:00 +0800 = end of Friday); a task still running then is interrupted (SIGINT -> SIGTERM -> SIGKILL, simulator workers included) and
+queue5/<lane>.log (from queue5.sh), autopsy/AUTOPSY_<id>.md. Nothing starts after QUEUE_DEADLINE (env, else the
+one-line file queue5/DEADLINE, else 2026-10-31 00:00 +0800); a task still running then is interrupted (SIGINT -> SIGTERM -> SIGKILL, simulator workers included) and
 judged INCONCLUSIVE. touch outputs/memory_v2/queue5/STOP: the lanes start nothing new.
 """
 from __future__ import annotations
@@ -58,7 +59,18 @@ AUTOPSY = O / "autopsy"
 PY = os.environ.get("MEMV2_PY", "/opt/mwam/bin/python")
 CFG = "configs/memory_v2/train_v2_A.yaml"
 BJ = timezone(timedelta(hours=8))
-DEADLINE = datetime.strptime(os.environ.get("QUEUE_DEADLINE", "2026-10-31 00:00 +0800"), "%Y-%m-%d %H:%M %z").timestamp()
+
+
+def _deadline():
+    """QUEUE_DEADLINE (env), else outputs/memory_v2/queue5/DEADLINE (one line, per host), else Friday 24:00; read once
+    when a lane starts (restart the lanes after changing it)."""
+    value = os.environ.get("QUEUE_DEADLINE", "").strip()
+    if not value and (Q / "DEADLINE").exists():
+        value = (Q / "DEADLINE").read_text().strip()
+    return datetime.strptime(value or "2026-10-31 00:00 +0800", "%Y-%m-%d %H:%M %z").timestamp()
+
+
+DEADLINE = _deadline()
 TASKS = Path(os.environ.get("QUEUE5_TASKS", str(REPO / "scripts/memory_v2/jobs/queue5_tasks.yaml")))
 POLL = int(os.environ.get("QUEUE5_POLL", "60"))
 # progress (week plan v4 1.2): the number of these stages reached in order, / 6; a simulator success counts 6 / 6
@@ -925,6 +937,12 @@ def cmd_run(args):
             set_state(tid, status="running", start=now_bj(), lane=lane, gpu=gpu, pid=os.getpid())
             finish(task, "skip", False, now_bj())
             continue
+        passed = [d for d in task.get("requires_not_pass") or [] if state(d).get("verdict") == "PASS"]
+        if passed:                                # the other branch of a pre-registered decision runs instead
+            log(f"{tid}: {passed} PASSed (task requires not PASS): skipped")
+            set_state(tid, status="running", start=now_bj(), lane=lane, gpu=gpu, pid=os.getpid())
+            finish(task, "skip", False, now_bj())
+            continue
         set_state(tid, status="waiting", lane=lane, gpu=gpu, pid=os.getpid())
         if not wait_ready(task, gpu):
             set_state(tid, status="pending")
@@ -1029,7 +1047,7 @@ def cmd_check(args):
           f"outputs {O}")
     for t in tasks:
         tid = t["id"]
-        for dep in (t.get("after") or []) + (t.get("requires_pass") or []):
+        for dep in (t.get("after") or []) + (t.get("requires_pass") or []) + (t.get("requires_not_pass") or []):
             if dep not in ids:
                 bad.append(f"{tid}: depends on unknown task {dep}")
         for key in ("pass_if", "inconclusive_if"):
