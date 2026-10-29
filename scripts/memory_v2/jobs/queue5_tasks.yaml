@@ -1131,3 +1131,50 @@ tasks:
   online_args: ["--execute", "8"]
   output: closed_loop/official_pilot
   min_episodes: 10
+
+# 10-29 16:40: the H200 is idle after X8-swap. X9 = the 6-epoch model (X7) on the same official-seed scenes as X8, on +
+# null, same GPU type -> X7 vs A2C on independent scenes before next week's base-model decision. Registered before any
+# X7 episode exists on these scenes. Needs the slim X7 checkpoint copied to the H200 (a2C_6ep/checkpoints/update_004020.pt).
+- id: X9-swap
+  lane: remote
+  kind: closed_loop
+  requires_pass: [R-smoke]
+  hypothesis: "6-epoch A2C on the official-seed swap scenes (20, execute 24): the memory effect holds (on - null progress p < 0.05) and X7-on progresses further than A2C-on on the same scenes (paired p < 0.05)"
+  need_mib: 30000
+  checkpoint: a2C_6ep/checkpoints/update_004020.pt
+  label: a2C6_e6
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed42_n20_swap_blocks]
+  tasks: [swap_blocks]
+  output: closed_loop/official_pilot
+  reference: {folders: [closed_loop/official_pilot], label: a2C_e3, modes: ["on", "null"]}
+  min_episodes: 30
+  pass_if: "m['prog_on_vs_null']['swap_blocks']['p'] < 0.05 and m['prog_on_vs_null']['swap_blocks']['delta'] > 0 and m['prog_vs_reference']['on']['swap_blocks']['p'] < 0.05 and m['prog_vs_reference']['on']['swap_blocks']['delta'] > 0"
+  failure_explanations:
+    - if: "m['prog_vs_reference']['on']['swap_blocks']['delta'] <= 0"
+      then: "X7's swap gain on the seed-17 scenes (success 1 -> 6/10) does not carry over to the official-seed scenes: the 10-scene result was optimistic"
+    - if: "m['prog_on_vs_null']['swap_blocks']['p'] >= 0.05"
+      then: "with longer training the swap memory effect weakens on new scenes"
+  on_pass: "X7 is the stronger swap model on independent scenes and keeps the memory effect: base model for next week"
+  on_fail: "the base-model choice rests on the dev scenes only; next week's official protocol runs A2C and X7 side by side"
+
+- id: X9-put
+  lane: remote
+  kind: closed_loop
+  after: [X9-swap]
+  requires_pass: [R-smoke]
+  hypothesis: "6-epoch A2C on the official-seed put_back scenes (30, execute 8): the memory effect holds (p < 0.05) and X7-on is not worse than A2C-on on the same scenes (paired progress delta >= -0.05)"
+  need_mib: 30000
+  checkpoint: a2C_6ep/checkpoints/update_004020.pt
+  label: a2C6_e6
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed42_n30_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8"]
+  output: closed_loop/official_pilot
+  reference: {folders: [closed_loop/official_pilot], label: a2C_e3_exec8, modes: ["on", "null"]}
+  min_episodes: 40
+  pass_if: "m['prog_on_vs_null']['put_back_block']['p'] < 0.05 and m['prog_on_vs_null']['put_back_block']['delta'] > 0 and m['prog_vs_reference']['on']['put_back_block']['delta'] >= -0.05"
+  failure_explanations:
+    - if: "m['prog_vs_reference']['on']['put_back_block']['delta'] < -0.05"
+      then: "longer training costs put_back on new scenes: next week's base keeps 3 epochs for put_back or a task-specific checkpoint"
