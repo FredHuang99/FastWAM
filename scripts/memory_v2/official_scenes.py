@@ -8,6 +8,11 @@ increasing seeds). Plain JSON, no project imports.
     official_scenes.py subset <full_dir> <out_dir> <task> --start K    scenes[K:] (ordinals kept) -> <out_dir>/<task>.json
     official_scenes.py complete <dir> <task> <n>                       exit 0 iff the planner marked the bank complete
                                                                        with >= n scenes (a partial bank resumes on re-plan)
+    official_scenes.py skip-expert-error <dir> <task>                  the official rule for a seed whose EXPERT raised
+        (eval_policy.py: expert_check, `except Exception: now_seed += 1`): our planner stops on any exception and keeps
+        the seed (<task>.error.json); when the exception came from the expert demo (play_once), mark that seed rejected
+        and advance next_seed, so a re-plan continues like the official evaluation. Exit 0 if a seed was skipped, 2 if
+        there was nothing to skip, 1 if the error is not an expert error (left for a human).
 """
 import argparse
 import json
@@ -57,6 +62,34 @@ def complete(args):
     sys.exit(0 if ok else 1)
 
 
+def skip_expert_error(args):
+    path = Path(args.dir) / f"{args.task}.json"
+    err_path = path.with_suffix(".error.json")
+    if not err_path.exists():
+        print(f"{args.task}: no {err_path.name}: nothing to skip")
+        sys.exit(2)
+    err = json.loads(err_path.read_text())
+    saved = json.loads(path.read_text())
+    seed, text = int(err["seed"]), str(err.get("error", ""))
+    if saved.get("next_seed") != seed:
+        print(f"{args.task}: error seed {seed} != next_seed {saved.get('next_seed')}: already handled, nothing to skip")
+        err_path.rename(err_path.with_name(f"{args.task}.error.{seed}.handled.json"))
+        sys.exit(2)
+    if "in play_once" not in text:
+        print(f"{args.task}: seed {seed} failed outside the expert demo (not skipped):\n{text[-800:]}")
+        sys.exit(1)
+    last = [x for x in text.strip().splitlines() if x.strip()][-1]
+    saved.setdefault("candidates", []).append({"seed": seed, "accepted": False, "expert_exception": last[:300],
+                                              "rule": "official eval_policy.py expert_check: exception -> next seed"})
+    saved.setdefault("expert_exception_seeds", []).append(seed)
+    saved["next_seed"] = seed + 1
+    tmp = path.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(saved, indent=1))
+    tmp.replace(path)
+    err_path.rename(err_path.with_name(f"{args.task}.error.{seed}.json"))
+    print(f"{args.task}: seed {seed} rejected (expert exception: {last[:160]}); next_seed -> {seed + 1}")
+
+
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -76,6 +109,10 @@ def main():
     c.add_argument("task")
     c.add_argument("n", type=int)
     c.set_defaults(fn=complete)
+    e = sub.add_parser("skip-expert-error")
+    e.add_argument("dir")
+    e.add_argument("task")
+    e.set_defaults(fn=skip_expert_error)
     args = ap.parse_args()
     args.fn(args)
 

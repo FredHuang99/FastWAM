@@ -569,14 +569,18 @@ tasks:
   command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=put_back_block; $P $S complete $C/scenes_seed42_n100_$t $t 100 || bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/closed_loop.sh plan {GPU} 42 100 $t || exit 1; $P $S complete $C/scenes_seed42_n100_$t $t 100 || exit 1; $P $S check-prefix $C/scenes_seed42_n100_$t $C/scenes_seed42_n30_$t $t || exit 1; $P $S subset $C/scenes_seed42_n100_$t $C/scenes_seed42_n100_put_back_block_from31 $t --start 30"
   pass_if: "m['rc'] == 0"
 
-- id: F1-swap
+# 10-30 00:35: F1-swap -> F1-swap2. The swap planner stopped at seed 4300070: the EXPERT demo itself raised
+# (AssertionError: target_pose cannot be None). The official eval_policy.py skips such a seed (expert_check, except
+# Exception -> next seed); our planner keeps it and stops. skip-expert-error applies the official rule (only for
+# exceptions raised in play_once; anything else stops F1-swap2 for a human) and the planner resumes.
+- id: F1-swap2
   lane: loop
   kind: shell
   after: [F1-put]
-  hypothesis: "official seed-42 swap bank (100); first 20 identical to X9's bank (H200)"
+  hypothesis: "official seed-42 swap bank (100, official rule for expert exceptions); first 20 identical to X9's bank (H200)"
   need_mib: 10000
-  timeout_h: 3
-  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=swap_blocks; for i in 1 2 3; do $P $S complete $C/scenes_seed42_n100_$t $t 100 && break; bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/closed_loop.sh plan {GPU} 42 100 $t || echo \"planner attempt $i failed\"; done; $P $S complete $C/scenes_seed42_n100_$t $t 100 || exit 1; $P $S check-prefix $C/scenes_seed42_n100_$t $C/scenes_seed42_n20_$t $t || exit 1; $P $S subset $C/scenes_seed42_n100_$t $C/scenes_seed42_n100_swap_blocks_from21 $t --start 20"
+  timeout_h: 4
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=swap_blocks; B=$C/scenes_seed42_n100_$t; for i in $(seq 1 15); do $P $S complete $B $t 100 && break; bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/closed_loop.sh plan {GPU} 42 100 $t && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100 || exit 1; $P $S check-prefix $B $C/scenes_seed42_n20_$t $t || exit 1; $P $S subset $B $C/scenes_seed42_n100_swap_blocks_from21 $t --start 20"
   pass_if: "m['rc'] == 0"
 
 - id: F3-put-s0
@@ -598,8 +602,8 @@ tasks:
 - id: F4-swap8-s0
   lane: loop
   kind: closed_loop
-  after: [F1-swap, X7-H8]
-  requires_pass: [F1-swap, X7-H8]
+  after: [F1-swap2, X7-H8]
+  requires_pass: [F1-swap2, X7-H8]
   hypothesis: "official protocol, branch X7-H8 PASS (v5 A.1): X7 swap at execute 8, on + null, all 100 official scenes, shard 0/3"
   need_mib: 30000
   checkpoint: a2C_6ep/last
@@ -614,8 +618,8 @@ tasks:
 - id: F4-swap24-s0
   lane: loop
   kind: closed_loop
-  after: [F1-swap, X7-H8]
-  requires_pass: [F1-swap]
+  after: [F1-swap2, X7-H8]
+  requires_pass: [F1-swap2]
   requires_not_pass: [X7-H8]
   hypothesis: "official protocol, branch X7-H8 FAIL / INCONCLUSIVE (v5 A.1, default): X7 swap at execute 24, on + null, official scenes 21-100 (1-20 = X9-swap on the H200), shard 0/3"
   need_mib: 30000
@@ -857,8 +861,8 @@ tasks:
 - id: F4-swap8-s2
   lane: train
   kind: closed_loop
-  after: [F1-swap, X7-H8]
-  requires_pass: [F1-swap, X7-H8]
+  after: [F1-swap2, X7-H8]
+  requires_pass: [F1-swap2, X7-H8]
   hypothesis: "official protocol, branch X7-H8 PASS (v5 A.1): X7 swap at execute 8, on + null, all 100 official scenes, shard 2/3"
   need_mib: 30000
   checkpoint: a2C_6ep/last
@@ -873,8 +877,8 @@ tasks:
 - id: F4-swap24-s2
   lane: train
   kind: closed_loop
-  after: [F1-swap, X7-H8]
-  requires_pass: [F1-swap]
+  after: [F1-swap2, X7-H8]
+  requires_pass: [F1-swap2]
   requires_not_pass: [X7-H8]
   hypothesis: "official protocol, branch X7-H8 FAIL / INCONCLUSIVE (v5 A.1, default): X7 swap at execute 24, on + null, official scenes 21-100 (1-20 = X9-swap on the H200), shard 2/3"
   need_mib: 30000
@@ -1291,8 +1295,8 @@ tasks:
 - id: F4-swap8-s1
   lane: gpu0
   kind: closed_loop
-  after: [F1-swap, X7-H8]
-  requires_pass: [F1-swap, X7-H8]
+  after: [F1-swap2, X7-H8]
+  requires_pass: [F1-swap2, X7-H8]
   hypothesis: "official protocol, branch X7-H8 PASS (v5 A.1): X7 swap at execute 8, on + null, all 100 official scenes, shard 1/3"
   need_mib: 30000
   checkpoint: a2C_6ep/last
@@ -1307,8 +1311,8 @@ tasks:
 - id: F4-swap24-s1
   lane: gpu0
   kind: closed_loop
-  after: [F1-swap, X7-H8]
-  requires_pass: [F1-swap]
+  after: [F1-swap2, X7-H8]
+  requires_pass: [F1-swap2]
   requires_not_pass: [X7-H8]
   hypothesis: "official protocol, branch X7-H8 FAIL / INCONCLUSIVE (v5 A.1, default): X7 swap at execute 24, on + null, official scenes 21-100 (1-20 = X9-swap on the H200), shard 1/3"
   need_mib: 30000
