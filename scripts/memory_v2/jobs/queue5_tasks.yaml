@@ -1044,10 +1044,11 @@ tasks:
   on_pass: "candidate unified setting (execute 8 for both tasks with U1b on swap): confirm next week on 34 scenes + null"
   on_fail: "task-specific execute horizon is final (put_back 8 / swap 24)"
 
+# 10-30 06:15: T1 released (v5 A.1 default branch): X9-swap PASSed at 00:07 (memory effect p = 0.0004 and X7-on > A2C-on
+# on the official scenes), so X7 is the base model and its B0 attribution row is trained; T2 stays on hold (next week).
 - id: T1
   lane: extra
   kind: train
-  hold: true
   after: [F2]
   hypothesis: "attribution control for X7: the B0 recipe (memory_dropout 1.0, never sees history) for 6 epochs; its null branch is compared with X7-null next week"
   need_mib: 30000
