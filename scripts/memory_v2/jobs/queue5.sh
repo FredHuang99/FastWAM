@@ -8,6 +8,7 @@
 #   bash scripts/memory_v2/jobs/queue5.sh status                               one screen (daily check)
 # Logs: outputs/memory_v2/queue5/<lane>.log, per task outputs/memory_v2/queue5/tasks/<id>.log;
 # ledger outputs/memory_v2/LEDGER.md; autopsies outputs/memory_v2/autopsy/. Stop: touch outputs/memory_v2/queue5/STOP
+# Pause lanes to lend their GPUs (task kept for resume): python scripts/memory_v2/queue5_pause.py <lane> ...; resume: queue5_restart.sh
 # Deadline: QUEUE_DEADLINE (default "2026-10-31 00:00 +0800", end of Friday; read when a lane starts);
 # nothing starts after it, running work is interrupted.
 set -u
