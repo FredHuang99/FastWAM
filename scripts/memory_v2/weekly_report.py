@@ -48,6 +48,8 @@ RATE_ROWS = [  # (label, task id, cell)
     ("swap, B0 null, execute 24, 26 dev scenes", "X5-loop-swap", "swap_blocks"),
     ("swap, nopairs (X2), execute 24, 26 dev scenes", "X2-loop-swap", "swap_blocks"),
     ("swap, nopairs both stages (X2b), execute 24, seed 17", "X2b-loop-swap", "swap_blocks"),
+    ("swap, nopairs both stages (X2b), execute 24, seed 18/19", "X2b-loop-swap-more", "swap_blocks"),
+    ("swap, X7 + U1b, execute 8, seed 17", "F2", "swap_blocks"),
 ]
 FAILURE_TASKS = ["PG-A-final", "X8-put", "X9-put", "X7-put-null", "H8-null", "X7-H8", "X7-loop-swap-more", "X8-swap",
                  "X9-swap"]
@@ -204,15 +206,19 @@ def main():
             f"{ref_delta(x5s, 'swap_blocks', 'null')}, put_back {ref_delta(x5p, 'put_back_block', 'null')}); both "
             "pre-registered 'weak null branch' explanations are not supported. The paper reports on - null as the main "
             "effect and on - B0 as secondary; the threshold mistake goes into the methods appendix. The verdict stands.", ""]
-    x2b = led.get("X2b-loop-swap")
-    branch = (x2b or {}).get("verdict")
-    out += [f"**Pairs.** G-B FAIL (stage-2 pairs: no closed-loop effect; nopairs = A2C); X2-eval FAIL (PR 0.845 vs 0.865); "
-            f"X2b-eval {verdict_line(led.get('X2b-eval'))} (no pairs in either stage: PR 0.737); X2b-loop-swap "
-            f"{verdict_line(x2b)}. "
-            + ("Pairs act through the stage-1 memory initialisation: without them in both stages the closed-loop on - null "
-               "gap shrinks (G-B in its stage-1 form)." if branch == "PASS" else
-               "Pairs matter for offline memory use; the closed-loop memory effect comes from memory-first joint "
-               "fine-tuning + the interface."), ""]
+    def gap(rec, task):
+        c = (((rec or {}).get("metrics") or {}).get("prog_on_vs_null") or {}).get(task)
+        return f"{c['delta']:+.3f} (p={c['p']:.3f}, n={c['n']})" if c else "-"
+    x2b, x2bm = led.get("X2b-loop-swap"), led.get("X2b-loop-swap-more")
+    out += [f"**Pairs.** Stage 2: G-B FAIL (nopairs closed loop = A2C; X2-loop-put progress = A2C) and X2-eval FAIL "
+            f"(PR 0.845 vs 0.865). Both stages without pairs (X2b): offline PR drops to 0.737 (X2b-eval "
+            f"{verdict_line(led.get('X2b-eval'))}). Closed loop: X2b-loop-swap {verdict_line(x2b)} only through its second "
+            f"clause (memory-on S2 6 vs A2C 9 on the 10 seed-17 scenes); its on - null gap is not smaller "
+            f"({gap(x2b, 'swap_blocks')} vs A2C +0.217 on the same scenes), and on the 16 seed-18/19 scenes X2b-on equals "
+            f"A2C-on ({ref_delta(x2bm, 'swap_blocks', 'on')}) with on - null {gap(x2bm, 'swap_blocks')}. Reading: pairs "
+            "raise offline memory use, but the closed-loop memory effect does not depend on them; it comes from "
+            "memory-first joint fine-tuning + the interface. Pairs go into the paper as the offline diagnostic / "
+            "training-signal result, not as the source of the closed-loop effect.", ""]
     x7p, x7n = cell(led.get("X7-loop-put"), "put_back_block", "on"), cell(led.get("X7-put-null"), "put_back_block", "on")
     out += ["**Training length.** 6 epochs (X7) raise swap clearly and leave put_back unchanged, with the memory effect "
             "kept in both tasks and PR unchanged (0.867): see section 3 (swap X7 vs A2C rows, X9-swap on the official "
@@ -244,7 +250,8 @@ def main():
             "retrying); since 10-28 18:14 it runs in idle-release mode (frees the GPU 15 min after our jobs leave).",
             "- CuRobo extensions rebuilt for sm90 on the H200 copy of the simulator env; NVML loss fixed by restarting mwam2.",
             "- Official banks: expert exceptions now follow eval_policy.py (seed skipped); first 30 / 20 scenes identical "
-            "across hosts.", "- Deadline: A100 guard and queue until Monday 08:00; H200 queue until Friday 24:00.", ""]
+            "across hosts. Expert demos are not deterministic: swap seed 4300070 raised once and passed on the retry, so "
+            "it is in our bank (at most one scene may differ from a given official run).", "- Deadline: A100 guard and queue until Monday 08:00; H200 queue until Friday 24:00.", ""]
 
     rep = O / "report"
     rep.mkdir(parents=True, exist_ok=True)
