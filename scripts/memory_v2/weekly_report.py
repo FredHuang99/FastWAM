@@ -33,7 +33,7 @@ HEADLINE = [
                                          "X9-swap", "X9-put"]),
 ]
 RATE_ROWS = [  # (label, task id, cell)
-    ("put_back, A2C, execute 24, 10 dev scenes", "X1-put-null", None),
+    ("put_back, A2C, execute 8, 10 seed-17 scenes (X1)", "X1-put-null", None),
     ("put_back, A2C, execute 8, 50 dev scenes", "PG-A-final", "put_back_block"),
     ("put_back, X7, execute 8, 34 dev scenes", "X7-put-null", "put_back_block"),
     ("put_back, A2C, execute 8, official seed 42 (30)", "X8-put", "put_back_block"),
