@@ -1468,3 +1468,37 @@ tasks:
   online_args: ["--execute", "8"]
   output: closed_loop/official_pilot
   min_episodes: 20
+
+# ---- 10-31: use the H200 (pool5, GPU0 only) for the A2C row of the official swap table (week plan v5 C.1 / C.2)
+- id: F7-bank
+  lane: remote
+  kind: shell
+  need_mib: 0
+  hypothesis: "the official swap bank copied from the A100 (scenes_seed42_n100_swap_blocks, the bank of the X7 F4 runs) is complete (100 scenes) and its first 20 scenes are identical to the H200's own n20 bank (X8 / X9)"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=swap_blocks; $P $S complete $C/scenes_seed42_n100_$t $t 100 && $P $S check-prefix $C/scenes_seed42_n100_$t $C/scenes_seed42_n20_$t $t"
+  pass_if: "m['rc'] == 0"
+  on_fail: "copy the bank again from the A100 (do not re-plan on the H200: the expert demo is not fully deterministic, the X7 and A2C rows must use the same 100 scenes)"
+
+- id: F7-swap8-A2C
+  lane: remote
+  kind: closed_loop
+  after: [F7-bank]
+  requires_pass: [R-smoke, F7-bank]
+  hypothesis: "official protocol (v5 C.1): A2C swap at execute 8, on + null, the same 100 official scenes as X7's F4 shards; A2C keeps the swap memory effect on the official scenes (paired progress on - null, p < 0.05). Also the A2C row of O-x7-vs-a2c (X7-on vs A2C-on, judged once F4 is complete; F5 PASS allows mixing A100 / H200)"
+  need_mib: 30000
+  checkpoint: a2C/checkpoints/update_002010.pt
+  label: a2C_e3_exec8
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8"]
+  output: closed_loop/official/swap8_a2c
+  min_episodes: 20
+  pass_if: "m['prog_on_vs_null']['swap_blocks']['p'] < 0.05 and m['prog_on_vs_null']['swap_blocks']['delta'] > 0"
+  failure_explanations:
+    - if: "m['prog_on_vs_null']['swap_blocks']['delta'] <= 0"
+      then: "A2C (3 epochs) has no swap memory effect at execute 8 on the official scenes: the dev-scene result (+0.108, p = 2e-4 on 34 scenes) does not carry over"
+    - if: "m['prog_on_vs_null']['swap_blocks']['p'] >= 0.05 and m['prog_on_vs_null']['swap_blocks']['delta'] > 0"
+      then: "same direction but not significant: A2C's execute-8 swap effect is small (dev: +0.108) and 100 scenes are not enough for it"
+  on_pass: "A2C row of the official swap table is complete; O-x7-vs-a2c can be judged when the three F4 shards are done"
+  on_fail: "report A2C's official swap row as is; the training-length section rests on X7 vs A2C on-vs-on"
