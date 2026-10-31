@@ -75,12 +75,18 @@ def config():
     return cfg
 
 
+SMI_ERROR = [None]
+
+
 def gpu_table():
-    """{index: {"used": MiB, "total": MiB, "util": %}} as this container sees them."""
+    """{index: {"used": MiB, "total": MiB, "util": %}} as this container sees them (SMI_ERROR[0] says why if empty)."""
     try:
-        out = subprocess.run(["nvidia-smi", "--query-gpu=index,memory.used,memory.total,utilization.gpu",
-                              "--format=csv,noheader,nounits"], capture_output=True, text=True, timeout=60).stdout
-    except (OSError, subprocess.SubprocessError):
+        r = subprocess.run(["nvidia-smi", "--query-gpu=index,memory.used,memory.total,utilization.gpu",
+                            "--format=csv,noheader,nounits"], capture_output=True, text=True, timeout=60)
+        out = r.stdout
+        SMI_ERROR[0] = None if r.returncode == 0 else (r.stdout + r.stderr).strip()[:200]
+    except (OSError, subprocess.SubprocessError) as error:
+        SMI_ERROR[0] = repr(error)
         return {}
     table = {}
     for line in out.strip().splitlines():
@@ -402,6 +408,9 @@ def cmd_pool(args):
             stall_check(tasks, cfg)
             last_stall = time.time()
         table = gpu_table()
+        if SMI_ERROR[0] and said.get("_smi") != SMI_ERROR[0]:
+            log(f"nvidia-smi fails inside the container: {SMI_ERROR[0]} (restart the container)")
+        said["_smi"] = SMI_ERROR[0]
         now = time.time()
         for g in cfg["gpus"]:
             g = int(g)
@@ -512,6 +521,9 @@ def status_lines(cfg=None):
                  f"{'ALIVE' if alive else 'NOT RUNNING'} (last beat {info.get('beat')}); allowed GPUs {cfg['gpus']}; "
                  f"lanes {cfg['lanes']}; nothing new starts after {datetime.fromtimestamp(deadline, q.BJ):%m-%d %H:%M}")
     table = gpu_table()
+    if SMI_ERROR[0] or not table:
+        lines.append(f"   !! nvidia-smi inside the container fails ({SMI_ERROR[0]}): no GPU can be used. "
+                     "Fix: restart the container (docker restart <name>), then host_pool.sh start")
     tasks = q.load_tasks()
     ours = {int(q.state(t['id'])['gpu']): t["id"] for t in tasks
             if q.state(t["id"])["status"] == "running" and q.state(t["id"]).get("gpu") is not None}
