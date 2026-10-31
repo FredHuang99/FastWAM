@@ -1,7 +1,10 @@
-"""Hugging Face storage clean-up for hhyfred's backup repos, step 1: read-only inventory + proposed plan.
+"""Hugging Face storage clean-up for hhyfred's backup repos.
 
-    python3 hf_cleanup.py inventory            # every model / dataset repo of the logged-in account
-    python3 hf_cleanup.py inventory --repo hhyfred/fastwam-memory-s1-backup
+    python3 hf_cleanup.py inventory            # step 1, read-only: every model / dataset repo of the account
+    python3 hf_cleanup.py prune --repo R --keep PREFIX [--keep PREFIX ...] [--execute]
+                                               # step 2: keep only PREFIX... at HEAD, purge unneeded LFS objects
+    python3 hf_cleanup.py delete-repo --repo R [--execute]
+    (prune / delete-repo are dry runs unless --execute, and --execute asks to type the repo name)
 
 Nothing is deleted. Output in ~/hf_cleanup/:
     REPORT_<time>.md                     what is stored where, pointers, proposed plan (send this file back)
@@ -300,14 +303,111 @@ def cmd_inventory(args):
     print(f"\nREPORT: {rep}  (nothing was deleted)")
 
 
+# ============================================================================ step 2: apply
+def confirm(text, word):
+    print(text)
+    answer = input(f"Type {word} to go ahead (anything else stops): ").strip()
+    if answer != word:
+        sys.exit("stopped: nothing changed")
+
+
+def cmd_prune(args):
+    """Keep only the --keep prefixes of one repo at HEAD, then permanently delete every LFS object that neither the
+    new HEAD nor a kept pointer's pinned revision needs. Git history is NOT rewritten (pinned revisions stay valid)."""
+    import inspect
+    from huggingface_hub import CommitOperationDelete
+    api = HfApi()
+    purge_api = getattr(api, "permanently_delete_lfs_files", None)
+    if purge_api is None or "rewrite_history" not in inspect.signature(purge_api).parameters:
+        sys.exit("this huggingface_hub cannot purge LFS objects without rewriting history: pip install -U huggingface_hub")
+    login(api)
+    repo, kind, keeps = args.repo, args.type, [k.rstrip("/") for k in args.keep]
+    info = api.repo_info(repo, repo_type=kind)
+    head = tree(api, repo, kind, info.sha)
+    kept = {p for p in head if any(under(p, k) for k in keeps)}
+    drop = sorted(set(head) - kept)
+    missing = [k for k in keeps if not any(under(p, k) for p in head)]
+    if missing:
+        sys.exit(f"keep prefixes not found at HEAD (typo?): {missing}; nothing changed")
+    # pinned revisions named by kept pointers: their files under the kept prefixes must stay downloadable
+    protect = {f["sha"] for p, f in head.items() if p in kept and f["sha"]}
+    with tempfile.TemporaryDirectory() as cache:
+        for p in sorted(kept):
+            if p.endswith(".json") and head[p]["size"] < 2**20:
+                content = read_json(api, repo, kind, p, info.sha, cache)
+                rev = content.get("revision") if isinstance(content, dict) else None
+                if isinstance(rev, str) and HEX40.fullmatch(rev):
+                    at = files_at(api, repo, kind, rev, keeps)
+                    protect |= {f["sha"] for f in at.values() if f["sha"]}
+                    print(f"pointer {p}: pinned revision {rev[:10]} -> {len(at)} kept files protected")
+    lfs = list(api.list_lfs_files(repo, repo_type=kind))
+    ident = lambda x: {getattr(x, "oid", None), getattr(x, "file_oid", None)} - {None}   # noqa: E731
+    purge = [x for x in lfs if not ident(x) & protect]
+    print(f"\n{repo}: HEAD {len(head)} files {gib(sum(f['size'] for f in head.values()))}")
+    print(f"  keep   {len(kept)} files {gib(sum(head[p]['size'] for p in kept))} under {keeps}")
+    print(f"  delete {len(drop)} files {gib(sum(head[p]['size'] for p in drop))} from HEAD (one commit per 1000 files)")
+    agg = defaultdict(lambda: [0, 0])
+    for p in drop:
+        key = "/".join(p.split("/")[:2])
+        agg[key][0] += head[p]["size"]
+        agg[key][1] += 1
+    for key, (b, n) in sorted(agg.items(), key=lambda kv: -kv[1][0]):
+        print(f"      {gib(b):>12}  {n:5d} files  {key}")
+    print(f"  LFS objects: {len(lfs)} ({gib(sum(int(x.size) for x in lfs))}); permanently delete {len(purge)} "
+          f"({gib(sum(int(x.size) for x in purge))}); keep {len(lfs) - len(purge)}")
+    if not args.execute:
+        print("\nDRY RUN: nothing changed (add --execute to do it)")
+        return
+    confirm(f"\nThis permanently deletes the files and LFS objects above from {repo}.", repo.split("/")[-1])
+    for start in range(0, len(drop), 1000):
+        chunk = drop[start:start + 1000]
+        commit = api.create_commit(repo, repo_type=kind, operations=[CommitOperationDelete(path_in_repo=p) for p in chunk],
+                                   commit_message=f"clean-up: keep only {keeps} ({start + 1}-{start + len(chunk)})")
+        print(f"  deleted {start + len(chunk)}/{len(drop)} files (commit {commit.oid[:10]})", flush=True)
+    new_head = tree(api, repo, kind, api.repo_info(repo, repo_type=kind).sha)
+    if set(new_head) != kept:
+        sys.exit(f"HEAD after the commits differs from the plan ({len(new_head)} vs {len(kept)} files): LFS purge NOT done")
+    protect |= {f["sha"] for f in new_head.values() if f["sha"]}
+    purge = [x for x in api.list_lfs_files(repo, repo_type=kind) if not ident(x) & protect]
+    for start in range(0, len(purge), 100):
+        api.permanently_delete_lfs_files(repo, purge[start:start + 100], rewrite_history=False, repo_type=kind)
+        print(f"  purged {min(start + 100, len(purge))}/{len(purge)} LFS objects", flush=True)
+    left = list(api.list_lfs_files(repo, repo_type=kind))
+    print(f"\nDONE {repo}: HEAD {len(new_head)} files {gib(sum(f['size'] for f in new_head.values()))}; "
+          f"LFS left {len(left)} ({gib(sum(int(x.size) for x in left))}). The storage number on the website can lag.")
+
+
+def cmd_delete_repo(args):
+    api = HfApi()
+    login(api)
+    info = api.repo_info(args.repo, repo_type=args.type)
+    size = sum(f["size"] for f in tree(api, args.repo, args.type, info.sha).values())
+    print(f"{args.repo}: {gib(size)} at HEAD")
+    if not args.execute:
+        print("DRY RUN: nothing changed (add --execute to delete the whole repo)")
+        return
+    confirm(f"This permanently deletes the whole repo {args.repo}.", args.repo.split("/")[-1])
+    api.delete_repo(args.repo, repo_type=args.type)
+    print(f"DONE: {args.repo} deleted")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     i = sub.add_parser("inventory")
     i.add_argument("--repo")
     i.add_argument("--type", default="model", choices=("model", "dataset"))
+    pr = sub.add_parser("prune")
+    pr.add_argument("--repo", required=True)
+    pr.add_argument("--type", default="model", choices=("model", "dataset"))
+    pr.add_argument("--keep", action="append", required=True, help="path prefix to keep (repeat)")
+    pr.add_argument("--execute", action="store_true")
+    d = sub.add_parser("delete-repo")
+    d.add_argument("--repo", required=True)
+    d.add_argument("--type", default="model", choices=("model", "dataset"))
+    d.add_argument("--execute", action="store_true")
     args = ap.parse_args()
-    {"inventory": cmd_inventory}[args.cmd](args)
+    {"inventory": cmd_inventory, "prune": cmd_prune, "delete-repo": cmd_delete_repo}[args.cmd](args)
 
 
 if __name__ == "__main__":
