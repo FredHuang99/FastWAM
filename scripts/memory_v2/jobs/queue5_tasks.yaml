@@ -1502,3 +1502,86 @@ tasks:
       then: "same direction but not significant: A2C's execute-8 swap effect is small (dev: +0.108) and 100 scenes are not enough for it"
   on_pass: "A2C row of the official swap table is complete; O-x7-vs-a2c can be judged when the three F4 shards are done"
   on_fail: "report A2C's official swap row as is; the training-length section rests on X7 vs A2C on-vs-on"
+
+# ---- 11-01: B0-6ep null on the official scenes (week plan v5 C.1 attribution row; O-attrib judged by an analysis
+# task once the X7 rows are pooled). Descriptive closed loops; pool5 starts them on any empty GPU, swap first.
+
+- id: F8-swap-B0-s0
+  lane: loop
+  kind: closed_loop
+  after: [T1]
+  requires_pass: [T1]
+  hypothesis: "official protocol (v5 C.1): B0-6ep (never sees history) swap at execute 8, null, the 100 official scenes of X7's F4, shard 0/3; attribution row: X7-null vs B0-6ep-null (O-attrib: paired |dprogress| 95% CI upper <= 0.1 means the null branch is not weak)"
+  need_mib: 30000
+  checkpoint: a2B0_6ep/last
+  label: a2B0_e6_exec8
+  modes: ["null"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--shard", "0/3"]
+  output: closed_loop/official/swap8_b0_s0
+  min_episodes: 10
+
+- id: F8-swap-B0-s1
+  lane: loop
+  kind: closed_loop
+  after: [T1]
+  requires_pass: [T1]
+  hypothesis: "official protocol (v5 C.1): B0-6ep (never sees history) swap at execute 8, null, the 100 official scenes of X7's F4, shard 1/3; attribution row: X7-null vs B0-6ep-null (O-attrib: paired |dprogress| 95% CI upper <= 0.1 means the null branch is not weak)"
+  need_mib: 30000
+  checkpoint: a2B0_6ep/last
+  label: a2B0_e6_exec8
+  modes: ["null"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--shard", "1/3"]
+  output: closed_loop/official/swap8_b0_s1
+  min_episodes: 10
+
+- id: F8-swap-B0-s2
+  lane: loop
+  kind: closed_loop
+  after: [T1]
+  requires_pass: [T1]
+  hypothesis: "official protocol (v5 C.1): B0-6ep (never sees history) swap at execute 8, null, the 100 official scenes of X7's F4, shard 2/3; attribution row: X7-null vs B0-6ep-null (O-attrib: paired |dprogress| 95% CI upper <= 0.1 means the null branch is not weak)"
+  need_mib: 30000
+  checkpoint: a2B0_6ep/last
+  label: a2B0_e6_exec8
+  modes: ["null"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--shard", "2/3"]
+  output: closed_loop/official/swap8_b0_s2
+  min_episodes: 10
+
+- id: F8-put-B0-s0
+  lane: loop
+  kind: closed_loop
+  after: [T1]
+  requires_pass: [T1]
+  hypothesis: "official protocol (v5 C.1): B0-6ep put_back at execute 8, null, all 100 official scenes, shard 0/2; attribution row vs X7-null (X9-put scenes 1-30 on the H200, F3-put 31-100 on the A100)"
+  need_mib: 30000
+  checkpoint: a2B0_6ep/last
+  label: a2B0_e6_exec8
+  modes: ["null"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--shard", "0/2"]
+  output: closed_loop/official/put8_b0_s0
+  min_episodes: 10
+
+- id: F8-put-B0-s1
+  lane: loop
+  kind: closed_loop
+  after: [T1]
+  requires_pass: [T1]
+  hypothesis: "official protocol (v5 C.1): B0-6ep put_back at execute 8, null, all 100 official scenes, shard 1/2; attribution row vs X7-null (X9-put scenes 1-30 on the H200, F3-put 31-100 on the A100)"
+  need_mib: 30000
+  checkpoint: a2B0_6ep/last
+  label: a2B0_e6_exec8
+  modes: ["null"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--shard", "1/2"]
+  output: closed_loop/official/put8_b0_s1
+  min_episodes: 10
