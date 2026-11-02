@@ -1076,7 +1076,7 @@ tasks:
 - id: T2
   lane: extra
   kind: train
-  hold: true
+  # hold released 11-02 (v5 A.2 D1: T1 + T2 in the default branch; X9-swap PASS -> X7 is the base model)
   after: [F2]
   hypothesis: "X2c: one-stage joint fine-tuning (no memory-first: zero-initialised memory, no pairs, lr_memory 1e-4), else the X7 recipe, 6 epochs"
   need_mib: 30000
@@ -1554,33 +1554,41 @@ tasks:
   output: closed_loop/official/swap8_b0_s2
   min_episodes: 10
 
+- id: F8b-bank
+  lane: remote
+  kind: shell
+  need_mib: 0
+  hypothesis: "the A100 official put_back bank (X7's F3-put scenes), copied to the H200 as scenes_seed42_n100_put_back_block_a100, is complete and its first 30 scenes equal the H200 n30 bank (X8 / X9); the full comparison with the H200's own n100 bank (F1h, used by A2C's F3-put-A2C) is printed for the record"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=put_back_block; B=$C/scenes_seed42_n100_${t}_a100; $P $S complete $B $t 100 && $P $S check-prefix $B $C/scenes_seed42_n30_$t $t || exit 1; echo '== A100 bank vs H200 n100 bank (F1h; mismatches = scenes where X7 and A2C put_back rows differ)'; $P $S check-prefix $B $C/scenes_seed42_n100_$t $t; true"
+  pass_if: "m['rc'] == 0"
+
 - id: F8-put-B0-s0
-  lane: loop
+  lane: remote
   kind: closed_loop
-  after: [T1]
-  requires_pass: [T1]
-  hypothesis: "official protocol (v5 C.1): B0-6ep put_back at execute 8, null, all 100 official scenes, shard 0/2; attribution row vs X7-null (X9-put scenes 1-30 on the H200, F3-put 31-100 on the A100)"
+  after: [F8b-bank]
+  requires_pass: [R-smoke, F8b-bank]
+  hypothesis: "official protocol (v5 C.1): B0-6ep put_back at execute 8, null, all 100 official scenes (the A100 bank of X7's F3-put, copied), shard 0/2, on the H200 (moved 11-02: the A100 GPUs are taken by other users); attribution row vs X7-null"
   need_mib: 30000
-  checkpoint: a2B0_6ep/last
+  checkpoint: a2B0_6ep/checkpoints/update_004020.pt
   label: a2B0_e6_exec8
   modes: ["null"]
-  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block_a100]
   tasks: [put_back_block]
   online_args: ["--execute", "8", "--shard", "0/2"]
   output: closed_loop/official/put8_b0_s0
   min_episodes: 10
 
 - id: F8-put-B0-s1
-  lane: loop
+  lane: remote
   kind: closed_loop
-  after: [T1]
-  requires_pass: [T1]
-  hypothesis: "official protocol (v5 C.1): B0-6ep put_back at execute 8, null, all 100 official scenes, shard 1/2; attribution row vs X7-null (X9-put scenes 1-30 on the H200, F3-put 31-100 on the A100)"
+  after: [F8b-bank]
+  requires_pass: [R-smoke, F8b-bank]
+  hypothesis: "official protocol (v5 C.1): B0-6ep put_back at execute 8, null, all 100 official scenes (the A100 bank of X7's F3-put, copied), shard 1/2, on the H200 (moved 11-02: the A100 GPUs are taken by other users); attribution row vs X7-null"
   need_mib: 30000
-  checkpoint: a2B0_6ep/last
+  checkpoint: a2B0_6ep/checkpoints/update_004020.pt
   label: a2B0_e6_exec8
   modes: ["null"]
-  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block_a100]
   tasks: [put_back_block]
   online_args: ["--execute", "8", "--shard", "1/2"]
   output: closed_loop/official/put8_b0_s1
