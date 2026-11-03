@@ -1766,6 +1766,43 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/press/build_dense.py parity"
   pass_if: "m['rc'] == 0"
 
+- id: PB-parity2
+  lane: train
+  kind: shell
+  after: [PB-parity]
+  requires_pass: [PB-fetch]
+  need_mib: 40000
+  timeout_h: 2
+  hypothesis: "PB-parity failed only on latents / text vs the recipe's same-run VAE tolerance (allclose 2e-3), but the reference cache s1_dense_joint_h100_v1 was encoded on an H100 and the rebuild on an A100, where bf16 kernels differ. PB-parity stays FAIL; this task decides with criteria fixed before it runs: C1 proprio / actions / video_valid / text_valid identical; C2 latent, video_latent, text relative L2 vs the H100 cache <= 2e-2; C3 worst single frame <= 5e-2; C4 <= 0.25 x the size of a real bug (off-by-one frame for latents, another instruction for text); C5 features vs features_dense_v1 <= 5e-2 and the memory_v2 bind / store / dataset checks of PB-parity true. Also reported: a second encode on the same GPU type (noise floor of our builder) and the software drift vs the H100 receipt"
+  failure_explanations:
+    - "C1 fails: frame indexing or the normalizer differ, a real builder bug; stop press, compare data_path.window_indices / ReleaseNormalizer use"
+    - "C2 or C3 fails with C4 passing: differences larger than cross-GPU noise but smaller than an off-by-one frame; look at the worst frame and the software drift (VAE / diffusers versions) before building"
+    - "C4 fails: the rebuild differs as much as a wrong frame or prompt; builder bug, do not build the press cache"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/press/parity_explain.py"
+  pass_if: "m['rc'] == 0"
+
+- id: PB-cache2
+  lane: train
+  kind: shell
+  after: [PB-parity2]
+  requires_pass: [PB-fetch, PB-parity2]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "press_button dense cache (50 demos, 45 train / 5 val, seed-17 split) in outputs/memory_v2/press/dense_press_button_v1, same format as the two-task cache (replaces PB-cache, which was skipped because PB-parity failed; gate is PB-parity2)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/press/build_dense.py build --task press_button"
+  pass_if: "m['rc'] == 0"
+
+- id: PB-features2
+  lane: train
+  kind: shell
+  after: [PB-cache2]
+  requires_pass: [PB-cache2]
+  need_mib: 30000
+  timeout_h: 5
+  hypothesis: "frozen Video-DiT history features for the press_button cache (outputs/memory_v2/features_press_v1, ~20 GB); v6 2.5 gate: ready before Thu 11-05 18:00 (replaces PB-features)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python -m fastwam.memory_v2.train_v2 features --config configs/memory_v2/train_v2_press.yaml"
+  pass_if: "m['rc'] == 0"
+
 - id: PB-cache
   lane: train
   kind: shell
