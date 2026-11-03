@@ -1,10 +1,13 @@
 """press_button demos: where the presses are, and whether our history selection can see them (v6 2.5 step 2, Plan v2 E7).
 
-CPU only, reads the downloaded hdf5 (state/left_ee_poses). A press = a dip of the left end effector: a local minimum
-of its height that it reached by going down >= 2 cm and leaves by going up >= 2 cm (the expert presses, then moves
-up 4 cm). The dip's "bottom" = the frames within 1 cm of that minimum. Presses are grouped into buttons by where they
-happen in time and space (the expert presses the left button n1 times, the middle n2 times, then the right button
-once), so every demo yields its counts (n1, n2, 1).
+CPU only, reads the downloaded hdf5 (state/left_ee_poses, state/right_ee_poses). A press = a dip of an end effector:
+a local minimum of its height that it reached by going down >= 2 cm and leaves by going up >= 2 cm (the expert presses,
+then moves up 4 cm). The dip's "bottom" = the frames within 1 cm of that minimum. Presses are grouped into buttons by
+where they happen in time and space. Task: press the left button n1 times, the middle n2 times, then the right button
+once. v1 (11-03 20:52) looked at the left arm only and found two buttons in every demo, so 0/50 matched "3 buttons,
+the last pressed once"; v2 also reads the right arm: plausible = the left arm gives two buttons (n1, n2 >= 1,
+n1 + n2 <= 10) and the right arm presses once, after the last left press (the confirm); the v1 form (three left-arm
+buttons) still counts.
 
 Coverage, at every decision of an online episode (every 8 frames from frame 0), for every press that ended before it:
 is any frame of the dip bottom among the frames the history policy shows (memory_v2 select_history)?
@@ -84,6 +87,8 @@ def coverage(length, ps, policy, extra=()):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--raw", default=str(O / "press/demo_clean/press_button/aloha_agilex/data"))
+    ap.add_argument("--min-plausible", type=float, default=0.0,
+                    help="exit 1 unless at least this share of the demos gives a plausible count pattern")
     args = ap.parse_args()
     import h5py
     from fastwam.memory_v2.config import HistoryPolicyConfig
@@ -94,12 +99,21 @@ def main():
     for f in files:
         with h5py.File(f, "r") as h:
             pose = np.asarray(h["state/left_ee_poses"], dtype=np.float64)
+            rpose = np.asarray(h["state/right_ee_poses"], dtype=np.float64) if "state/right_ee_poses" in h else None
         z, xy = pose[:, 2], pose[:, :2]
         ps = presses(z, xy)
         gs = group(ps)
         counts = [len(g) for g in gs]
-        ok = len(gs) == 3 and counts[2] == 1 and counts[0] + counts[1] <= 10
+        rps = presses(rpose[:, 2], rpose[:, :2]) if rpose is not None else []
+        last_left = ps[-1]["t"] if ps else -1
+        confirm = [p["t"] for p in rps if p["t"] > last_left]
+        ok_v2 = len(gs) == 2 and min(counts) >= 1 and sum(counts) <= 10 and len(rps) == 1 and len(confirm) == 1
+        ok_v1 = len(gs) == 3 and counts[2] == 1 and counts[0] + counts[1] <= 10
+        ok = ok_v2 or ok_v1
         row = {"episode": f.stem, "length": len(z), "presses": len(ps), "buttons": counts, "plausible": ok,
+               "form": "v2 (left n1, n2 + right confirm)" if ok_v2 else ("v1 (three left buttons)" if ok_v1 else None),
+               "right_arm_presses": [p["t"] for p in rps], "confirm_frame": confirm[0] if confirm else None,
+               "frames_after_confirm": (len(z) - 1 - confirm[0]) if confirm else None,
                "press_frames": [p["t"] for p in ps], "bottom_frames": [p["bottom"][1] - p["bottom"][0] + 1 for p in ps],
                "gap_frames": [b["t"] - a["t"] for a, b in zip(ps, ps[1:])]}
         for k, pol, extra in (("A", rule_a, ()), ("B", rule_b, ()), ("C", rule_a, (1,))):
@@ -109,8 +123,9 @@ def main():
         eps.append(row)
     good = [e for e in eps if e["plausible"]]
     lines = [f"# press_button demos: presses and history coverage ({datetime.now(BJ):%F %T})", "",
-             f"{len(eps)} demos from {args.raw}; {len(good)} give a plausible count pattern (3 buttons, the last pressed once, "
-             f"n1 + n2 <= 10).", ""]
+             f"{len(eps)} demos from {args.raw}; {len(good)} give a plausible count pattern "
+             f"({sum(e['form'] == 'v2 (left n1, n2 + right confirm)' for e in eps)} as left-arm n1, n2 + one right-arm "
+             f"confirm press; {sum(e['form'] == 'v1 (three left buttons)' for e in eps)} as three left-arm buttons).", ""]
     if eps:
         n1 = Counter(e["buttons"][0] for e in good)
         n2 = Counter(e["buttons"][1] for e in good)
@@ -119,6 +134,10 @@ def main():
         lines += [f"- presses per demo: median {statistics.median([e['presses'] for e in eps])}, "
                   f"range {min(e['presses'] for e in eps)}-{max(e['presses'] for e in eps)}",
                   f"- left-button count n1: {dict(sorted(n1.items()))}; middle-button count n2: {dict(sorted(n2.items()))}",
+                  f"- (n1, n2) pairs: {dict(sorted(Counter(tuple(e['buttons'][:2]) for e in good).items()))}",
+                  f"- right-arm presses per demo: {dict(sorted(Counter(len(e['right_arm_presses']) for e in eps).items()))}; "
+                  f"frames after the confirm press: median "
+                  f"{statistics.median([e['frames_after_confirm'] for e in eps if e['frames_after_confirm'] is not None] or [0])}",
                   f"- dip bottom lasts median {statistics.median(bot) if bot else '-'} frames (range {min(bot) if bot else '-'}-"
                   f"{max(bot) if bot else '-'}); frames between presses median {statistics.median(gap) if gap else '-'} "
                   f"(range {min(gap) if gap else '-'}-{max(gap) if gap else '-'})", "",
@@ -132,15 +151,16 @@ def main():
                          f"{full}/{dec} = {100 * full / max(1, dec):.0f}% |")
         bad = [e for e in eps if not e["plausible"]]
         if bad:
-            lines += ["", "Demos without a plausible pattern (press detection to check): " +
-                      ", ".join(f"{e['episode']} {e['buttons']}" for e in bad[:12])]
+            lines += ["", "Demos without a plausible pattern (press detection to check; left buttons, right-arm press "
+                      "frames): " + ", ".join(f"{e['episode']} {e['buttons']} R{e['right_arm_presses']}" for e in bad[:12])]
     rep = O / "report" / f"PRESS_EVENTS_{datetime.now(BJ):%Y%m%d_%H%M}.md"
     rep.parent.mkdir(parents=True, exist_ok=True)
     rep.write_text("\n".join(lines) + "\n")
     rep.with_suffix(".json").write_text(json.dumps({"episodes": eps, "totals": totals}, indent=1))
     print("\n".join(lines))
-    print(f"\nPRESS_EVENTS: {rep}")
-    return 0 if eps else 1
+    share = len(good) / max(1, len(eps))
+    print(f"\nPRESS_EVENTS: {rep}  (plausible {len(good)}/{len(eps)} = {share:.0%}, required {args.min_plausible:.0%})")
+    return 0 if eps and share >= args.min_plausible else 1
 
 
 if __name__ == "__main__":

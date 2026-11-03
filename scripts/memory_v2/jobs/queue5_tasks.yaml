@@ -1756,6 +1756,19 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/press/events.py"
   pass_if: "m['rc'] == 0"
 
+- id: PB-events2
+  lane: cpu
+  kind: shell
+  after: [PB-events]
+  requires_pass: [PB-fetch]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "PB-events was judged PASS on its exit code only; its hypothesis did not hold (0/50 plausible patterns, rule A shows 31% of past presses, count recoverable at 3% of decisions). Its press detector read the left arm only and found two buttons in every demo. v2 also reads the right arm: >= 90% of the demos give left-arm (n1, n2), n1 + n2 <= 10, plus one right-arm confirm press after the last left press; the coverage table (rules A / B / C) is reported again for the training history rule"
+  failure_explanations:
+    - "< 90% plausible: the confirm press or the button grouping is not what the task text says; look at the listed demos (left buttons, right-arm press frames) before using press frames as anchors"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/press/events.py --min-plausible 0.9"
+  pass_if: "m['rc'] == 0"
+
 - id: PB-parity
   lane: train
   kind: shell
