@@ -17,6 +17,8 @@
 #                                                            (their jobs keep running; nothing is restarted)
 #   bash /root/mwam_reports/host_pool.sh get BOUNDARY2 PRESS_SOURCE ...   copy the newest outputs/memory_v2/report/
 #                                                            <NAME>_* file of each name here (send me those)
+#   bash /root/mwam_reports/host_pool.sh autopsy PB-events3 ...   rewrite autopsy/AUTOPSY_<id>.md of finished tasks
+#                                                            (verdict and ledger unchanged) and copy each here
 set -u
 C=${C:-$(docker ps --format '{{.ID}} {{.Names}}' | awk '$1 ~ /^6e4b37a15066/ {print $1} $2 == "mwam2" {print $2}' | head -1)}
 [ -n "$C" ] || { echo "no MemWAM container running here (A100: 6e4b37a15066, H200: mwam2)"; exit 1; }
@@ -50,5 +52,10 @@ case "$cmd" in
               if [ -n "$f" ]; then docker cp "$C:$f" "$OUT/" && echo "$n: $OUT/$(basename "$f")  ($(wc -l < "$OUT/$(basename "$f")") lines)"
               else echo "$n: no report yet (task still running? see: bash $OUT/host_pool.sh status)"; fi
             done ;;
-  *)        sed -n '2,21p' "$0" ;;
+  autopsy)  for n in "$@"; do
+              docker exec "$C" bash -lc "cd $R && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/autopsy.py --id $n --no-phase >/dev/null" \
+                && docker cp "$C:$R/outputs/memory_v2/autopsy/AUTOPSY_$n.md" "$OUT/" && echo "$n: $OUT/AUTOPSY_$n.md" \
+                || echo "$n: autopsy failed (see the lines above)"
+            done ;;
+  *)        sed -n '2,23p' "$0" ;;
 esac

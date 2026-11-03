@@ -1765,7 +1765,8 @@ tasks:
   timeout_h: 1
   hypothesis: "PB-events was judged PASS on its exit code only; its hypothesis did not hold (0/50 plausible patterns, rule A shows 31% of past presses, count recoverable at 3% of decisions). Its press detector read the left arm only and found two buttons in every demo. v2 also reads the right arm: >= 90% of the demos give left-arm (n1, n2), n1 + n2 <= 10, plus one right-arm confirm press after the last left press; the coverage table (rules A / B / C) is reported again for the training history rule"
   failure_explanations:
-    - "< 90% plausible: the confirm press or the button grouping is not what the task text says; look at the listed demos (left buttons, right-arm press frames) before using press frames as anchors"
+    - if: "m['rc'] != 0"
+      then: "< 90% plausible (a shell task only records rc; read the report): the confirm press or the button grouping is not what the task text says; look at the listed demos (left buttons, right-arm press frames) before using press frames as anchors"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/press/events.py --min-plausible 0.9"
   pass_if: "m['rc'] == 0"
 
@@ -1778,8 +1779,8 @@ tasks:
   timeout_h: 1
   hypothesis: "PB-events2 (right-arm confirm press that rises again) failed: no right-arm press in any of the 50 demos. The expert script ends AT the check press (play_once returns right after update_press_success(check_button), no move up), so a detector that needs a rise of >= 2 cm cannot see it. v3: >= 90% of the demos give two left-arm buttons within the card limits (1 <= n1 <= 9, 1 <= n2 <= 10 - n1) plus exactly one terminal confirm press (either arm: down >= 2 cm in the last 60 frames, still at the bottom at the last frame) after the last left press; the press x positions should sit near the env's button1 / button2 / check at x -0.15 / 0.0 / 0.15 (end-effector link, so an offset is possible)"
   failure_explanations:
-    - "card limits fail: the grouping into buttons (5 cm) splits or merges buttons; check button_x per demo"
-    - "no terminal press: the confirm press is not at the end of the recording either; read the check-press lines of play_once (envs/press_button.py 171-182) before using press frames"
+    - if: "m['rc'] != 0"
+      then: "< 90% plausible (a shell task only records rc; read the report). If 'two buttons within the card limits' is low: the 5 cm grouping splits or merges buttons, check button_x per demo. If 'terminal confirm press' is low: the confirm press is not at the end of the recording either; read the check-press lines of play_once (envs/press_button.py 171-182) before using press frames"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/press/events.py --min-plausible 0.9 --accept v1,v2,v3"
   pass_if: "m['rc'] == 0"
 
@@ -1802,9 +1803,8 @@ tasks:
   timeout_h: 2
   hypothesis: "PB-parity failed only on latents / text vs the recipe's same-run VAE tolerance (allclose 2e-3), but the reference cache s1_dense_joint_h100_v1 was encoded on an H100 and the rebuild on an A100, where bf16 kernels differ. PB-parity stays FAIL; this task decides with criteria fixed before it runs: C1 proprio / actions / video_valid / text_valid identical; C2 latent, video_latent, text relative L2 vs the H100 cache <= 2e-2; C3 worst single frame <= 5e-2; C4 <= 0.25 x the size of a real bug (off-by-one frame for latents, another instruction for text); C5 features vs features_dense_v1 <= 5e-2 and the memory_v2 bind / store / dataset checks of PB-parity true. Also reported: a second encode on the same GPU type (noise floor of our builder) and the software drift vs the H100 receipt"
   failure_explanations:
-    - "C1 fails: frame indexing or the normalizer differ, a real builder bug; stop press, compare data_path.window_indices / ReleaseNormalizer use"
-    - "C2 or C3 fails with C4 passing: differences larger than cross-GPU noise but smaller than an off-by-one frame; look at the worst frame and the software drift (VAE / diffusers versions) before building"
-    - "C4 fails: the rebuild differs as much as a wrong frame or prompt; builder bug, do not build the press cache"
+    - if: "m['rc'] != 0"
+      then: "a criterion failed (a shell task only records rc; read PARITY_EXPLAIN.md). C1 fails: frame indexing or the normalizer differ, a real builder bug; stop press, compare data_path.window_indices / ReleaseNormalizer use. C2 or C3 fails with C4 passing: larger than cross-GPU noise but smaller than an off-by-one frame; look at the worst frame and the software drift (VAE / diffusers versions) before building. C4 fails: the rebuild differs as much as a wrong frame or prompt; builder bug, do not build the press cache"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/press/parity_explain.py"
   pass_if: "m['rc'] == 0"
 

@@ -336,6 +336,9 @@ def section_explanations(task, s, classes):
         return out + ["(none pre-registered)"]
     env_c = defaultdict(Counter, {k: Counter(v) for k, v in classes.items()})
     for item in items:
+        if not isinstance(item, dict):             # a plain sentence: shown as written, not evaluated
+            out.append(f"- [text only, not evaluated] {item}")
+            continue
         expr, text = item.get("if"), item.get("then", "")
         try:
             hit = q5.evaluate_expr(expr, m, r, c=env_c)
