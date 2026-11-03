@@ -12,6 +12,11 @@
 #   bash /root/mwam_reports/host_pool.sh allow 0,1,2,3       GPUs the pool may use (container indices)
 #   bash /root/mwam_reports/host_pool.sh pause <gpu>         lend a GPU: stop our task on it (kept for a re-run)
 #   bash /root/mwam_reports/host_pool.sh stop                stop the dispatcher only (running tasks continue)
+#   bash /root/mwam_reports/host_pool.sh deadline ["2026-11-10 20:00"]   show / set queue5/DEADLINE (Beijing time) and
+#                                                            move running tasks that kept an older deadline onto it
+#                                                            (their jobs keep running; nothing is restarted)
+#   bash /root/mwam_reports/host_pool.sh get BOUNDARY2 PRESS_SOURCE ...   copy the newest outputs/memory_v2/report/
+#                                                            <NAME>_* file of each name here (send me those)
 set -u
 C=${C:-$(docker ps --format '{{.ID}} {{.Names}}' | awk '$1 ~ /^6e4b37a15066/ {print $1} $2 == "mwam2" {print $2}' | head -1)}
 [ -n "$C" ] || { echo "no MemWAM container running here (A100: 6e4b37a15066, H200: mwam2)"; exit 1; }
@@ -34,5 +39,16 @@ case "$cmd" in
   allow)    pool allow --gpus "$1" ;;
   pause)    pool pause --gpu "$1" ;;
   stop)     docker exec "$C" touch "$Q/POOL_STOP"; sleep 45; pool status | head -1 ;;
-  *)        sed -n '2,16p' "$0" ;;
+  deadline) if [ -n "${1:-}" ]; then
+              docker exec "$C" /opt/mwam/bin/python -c "import sys; from datetime import datetime; v=sys.argv[1].strip()+' +0800'; datetime.strptime(v, '%Y-%m-%d %H:%M %z'); open('$Q/DEADLINE','w').write(v+chr(10)); print('DEADLINE <-', v)" "$1" || exit 1
+              pool readopt --execute
+            else
+              pool readopt
+            fi ;;
+  get)      for n in "$@"; do
+              f=$(docker exec "$C" bash -lc "ls -t $R/outputs/memory_v2/report/${n}_* 2>/dev/null | grep -v '[.]json$' | head -1")
+              if [ -n "$f" ]; then docker cp "$C:$f" "$OUT/" && echo "$n: $OUT/$(basename "$f")  ($(wc -l < "$OUT/$(basename "$f")") lines)"
+              else echo "$n: no report yet (task still running? see: bash $OUT/host_pool.sh status)"; fi
+            done ;;
+  *)        sed -n '2,21p' "$0" ;;
 esac

@@ -12,6 +12,11 @@ runs in its own `exec` process (own session), so the dispatcher can restart with
     python scripts/memory_v2/pool5.py pause --gpu G ...     stop our task(s) on GPU G, keep them for a re-run, and
                                                             remove G from the allowed GPUs (lend it to others)
     python scripts/memory_v2/pool5.py allow --gpus 0,1,2,3  set the allowed GPUs (read by the dispatcher every cycle)
+    python scripts/memory_v2/pool5.py readopt [--execute]   running tasks whose pool process kept an older deadline:
+                                                            stop only that process; the job keeps running and is adopted
+Deadline: queue5/DEADLINE ("YYYY-MM-DD HH:MM +0800"). Nothing starts after it; a job still running then is interrupted.
+Since 11-03 a running job follows a later change of the file (re-read every minute); `readopt` moves older pool
+processes over.
 
 Settings: outputs/memory_v2/queue5/POOL_CONFIG.json (created with defaults, re-read every cycle):
     gpus           allowed GPU indices as this container sees them
@@ -251,7 +256,8 @@ def cmd_exec(args):
     attempt = int(s.get("attempt") or 1)
     started = s.get("start") if args.adopt and s.get("start") else q.now_bj()
     q.set_state(tid, status="running", pid=os.getpid(), gpu=args.gpu, start=started, lane=task.get("lane"),
-                waiting=None, retry_after=None, stall_killed=None, paused=None, host=socket.gethostname())
+                waiting=None, retry_after=None, stall_killed=None, paused=None, host=socket.gethostname(),
+                follows_deadline=True)
     if args.adopt:
         child = s.get("child_pid")
         log(f"{tid}: adopting process group {child} (attempt {attempt}); waiting for it to end")
@@ -295,6 +301,95 @@ def cmd_exec(args):
         log(f"{tid}: attempt {attempt} failed ({failure}); attempts used up: judging what exists")
     q.finish(task, rc, cut, started)
     q.set_state(tid, pid=None)
+
+
+def proc_start(pid):
+    """Start time (epoch seconds) of a process, from /proc (None if unknown)."""
+    try:
+        ticks = int(Path(f"/proc/{pid}/stat").read_text().rsplit(")", 1)[1].split()[19])
+        btime = next(int(x.split()[1]) for x in Path("/proc/stat").read_text().splitlines() if x.startswith("btime"))
+        return btime + ticks / os.sysconf("SC_CLK_TCK")
+    except (OSError, ValueError, IndexError, StopIteration):
+        return None
+
+
+def cmdline(pid):
+    try:
+        return Path(f"/proc/{pid}/cmdline").read_bytes().replace(b"\0", b" ").decode(errors="replace").strip()
+    except OSError:
+        return ""
+
+
+def cmd_readopt(args):
+    """Running tasks whose pool process kept an older deadline (it read DEADLINE once at its start; code before 11-03):
+    stop ONLY that pool process. The job (training / closed loop / shell) runs in its own session and keeps going; the
+    dispatcher sees a live job without a pool process and adopts it within a cycle. An adopted job is waited for with no
+    deadline; when it ends, the task is finished with the current code (which re-reads DEADLINE every minute)."""
+    f = q.Q / "DEADLINE"
+    text = f.read_text().strip() if f.exists() else "(no file)"
+    changed = f.stat().st_mtime if f.exists() else 0.0
+    print(f"DEADLINE file: {text}  (written {datetime.fromtimestamp(changed, q.BJ):%m-%d %H:%M})"
+          + (f"; env QUEUE_DEADLINE={os.environ['QUEUE_DEADLINE']} wins" if os.environ.get("QUEUE_DEADLINE") else ""))
+    pool = q.read_json(POOL, {}) or {}
+    dispatcher = q.pid_alive(pool.get("pid"), "pool5.py pool")
+    print(f"dispatcher: {'pid ' + str(pool.get('pid')) + ' alive' if dispatcher else 'NOT running'}")
+    targets = []
+    for t in q.load_tasks():
+        tid = t["id"]
+        if args.id and tid not in args.id:
+            continue
+        s = q.state(tid)
+        if s["status"] != "running":
+            continue
+        pid, child = s.get("pid"), s.get("child_pid")
+        if not alive_exec(pid):
+            print(f"  {tid:28s} no live pool process (the dispatcher adopts or re-queues it)")
+            continue
+        line = cmdline(pid)
+        started = proc_start(pid)
+        job = group_alive(child)
+        when = f"{datetime.fromtimestamp(started, q.BJ):%m-%d %H:%M}" if started else "?"
+        if "--adopt" in line:
+            why = "adopted: waits for its job with no deadline"
+        elif s.get("follows_deadline"):
+            why = "follows the DEADLINE file"
+        elif started is not None and started >= changed and not args.all:
+            why = "started after the DEADLINE file was written: already holds it"
+        elif not job:
+            why = "its job is not running (between steps / judging): left alone"
+        else:
+            why = "HOLDS AN OLDER DEADLINE"
+            targets.append((tid, pid, line))
+        print(f"  {tid:28s} pool pid {pid} since {when}  job {child} {'alive' if job else 'gone'}  -> {why}")
+    if not targets:
+        print("nothing to do")
+        return
+    if not args.execute:
+        print(f"dry run: {len(targets)} pool process(es) would be stopped (jobs keep running); add --execute")
+        return
+    if not dispatcher:
+        raise SystemExit("the dispatcher is not running: nothing would adopt the jobs. Start it first (host_pool.sh start)")
+    waiting = {}
+    for tid, pid, line in targets:
+        if f"pool5.py exec --id {tid}" not in line or cmdline(pid) != line:
+            print(f"  {tid}: pid {pid} is not its pool process any more: skipped")
+            continue
+        os.kill(int(pid), signal.SIGKILL)
+        msg = f"[pool] {q.now_bj()} {tid}: pool process {pid} held an older deadline: stopped it (job keeps running); adopt next"
+        print(msg)
+        with open(q.Q / "pool.log", "a", encoding="utf-8") as fh:
+            fh.write(msg + "\n")
+        waiting[tid] = pid
+    end = time.time() + 150
+    while waiting and time.time() < end:
+        time.sleep(5)
+        for tid, old in list(waiting.items()):
+            s = q.state(tid)
+            if s.get("pid") and s["pid"] != old and alive_exec(s["pid"]):
+                print(f"  {tid}: adopted by pool process {s['pid']} ({cmdline(s['pid'])[-40:]})")
+                waiting.pop(tid)
+    for tid in waiting:
+        print(f"  {tid}: not adopted after 150 s; check `host_pool.sh pool-log` (the job itself keeps running)")
 
 
 # ============================================================================ the dispatcher
@@ -387,7 +482,7 @@ def cmd_pool(args):
     free_since, last_stall, said = {}, 0.0, {}
     while True:
         cfg = config()
-        deadline = q._deadline()
+        deadline = q.current_deadline()          # a garbled DEADLINE file keeps the last good value
         q.write_json(POOL, {"pid": me, "start": start, "beat": q.now_bj(), "host": socket.gethostname(),
                             "gpus": cfg["gpus"], "lanes": cfg["lanes"],
                             "deadline": datetime.fromtimestamp(deadline, q.BJ).strftime("%Y-%m-%d %H:%M")})
@@ -711,9 +806,13 @@ def main():
     lg.add_argument("--lines", type=int, default=60)
     a = sub.add_parser("allow")
     a.add_argument("--gpus", required=True)
+    ro = sub.add_parser("readopt")
+    ro.add_argument("--id", action="append")
+    ro.add_argument("--all", action="store_true", help="also pool processes started after the DEADLINE file changed")
+    ro.add_argument("--execute", action="store_true")
     args = ap.parse_args()
     {"pool": cmd_pool, "start": cmd_start, "exec": cmd_exec, "status": cmd_status, "report": cmd_report, "pause": cmd_pause,
-     "allow": cmd_allow, "log": cmd_log}[args.cmd](args)
+     "allow": cmd_allow, "log": cmd_log, "readopt": cmd_readopt}[args.cmd](args)
 
 
 if __name__ == "__main__":

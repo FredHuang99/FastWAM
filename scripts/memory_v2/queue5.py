@@ -62,8 +62,8 @@ BJ = timezone(timedelta(hours=8))
 
 
 def _deadline():
-    """QUEUE_DEADLINE (env), else outputs/memory_v2/queue5/DEADLINE (one line, per host), else Friday 24:00; read once
-    when a lane starts (restart the lanes after changing it)."""
+    """QUEUE_DEADLINE (env), else outputs/memory_v2/queue5/DEADLINE (one line, per host), else Friday 24:00. The module
+    reads it at import; execute() / run_cmd follow later changes through current_deadline() (re-read every minute)."""
     value = os.environ.get("QUEUE_DEADLINE", "").strip()
     if not value and (Q / "DEADLINE").exists():
         value = (Q / "DEADLINE").read_text().strip()
@@ -71,6 +71,16 @@ def _deadline():
 
 
 DEADLINE = _deadline()
+_LAST_GOOD = [DEADLINE]
+
+
+def current_deadline():
+    """The deadline as the DEADLINE file says NOW (running jobs follow a later change); a garbled file keeps the last value."""
+    try:
+        _LAST_GOOD[0] = _deadline()
+    except (OSError, ValueError):
+        pass
+    return _LAST_GOOD[0]
 TASKS = Path(os.environ.get("QUEUE5_TASKS", str(REPO / "scripts/memory_v2/jobs/queue5_tasks.yaml")))
 POLL = int(os.environ.get("QUEUE5_POLL", "60"))
 # progress (week plan v4 1.2): the number of these stages reached in order, / 6; a simulator success counts 6 / 6
@@ -674,28 +684,41 @@ def kill_sim_workers(out):
 
 
 def run_cmd(cmd, logfile, env, timeout, tid=None):
-    """Run in its own session; at the timeout SIGINT (the closed loop stops its simulators) -> SIGTERM -> SIGKILL."""
+    """Run in its own session; at the timeout SIGINT (the closed loop stops its simulators) -> SIGTERM -> SIGKILL.
+
+    timeout: seconds, or a function returning the seconds left, asked again every minute (so a DEADLINE file moved
+    later while the job runs is followed; before 11-03 the value read at the start was kept)."""
+    started = time.time()
+
+    def remaining():
+        return timeout() if callable(timeout) else timeout - (time.time() - started)
+
     with open(logfile, "a", encoding="utf-8") as f:
         f.write(f"\n[queue5] {now_bj()} $ {' '.join(map(str, cmd))}\n")
         f.flush()
         p = subprocess.Popen(cmd, stdout=f, stderr=subprocess.STDOUT, env=env, cwd=str(REPO), start_new_session=True)
         if tid:
             set_state(tid, child_pid=p.pid)
-        try:
-            return p.wait(timeout=max(1, timeout)), False
-        except subprocess.TimeoutExpired:
-            for sig, wait in ((signal.SIGINT, 120), (signal.SIGTERM, 60), (signal.SIGKILL, 30)):
-                try:
-                    os.killpg(p.pid, sig)
-                except ProcessLookupError:
-                    break
-                try:
-                    p.wait(timeout=wait)
-                    break
-                except subprocess.TimeoutExpired:
-                    continue
-            f.write(f"\n[queue5] {now_bj()} interrupted at the deadline / timeout\n")
-            return p.returncode, True
+        while True:
+            cap = remaining()
+            if cap <= 0:
+                break
+            try:
+                return p.wait(timeout=max(1, min(cap, 60))), False
+            except subprocess.TimeoutExpired:
+                continue
+        for sig, wait in ((signal.SIGINT, 120), (signal.SIGTERM, 60), (signal.SIGKILL, 30)):
+            try:
+                os.killpg(p.pid, sig)
+            except ProcessLookupError:
+                break
+            try:
+                p.wait(timeout=wait)
+                break
+            except subprocess.TimeoutExpired:
+                continue
+        f.write(f"\n[queue5] {now_bj()} interrupted at the deadline / timeout\n")
+        return p.returncode, True
 
 
 def checkpoint_path(value):
@@ -775,7 +798,7 @@ def execute(task, gpu):
     logfile.parent.mkdir(parents=True, exist_ok=True)
 
     def left():
-        cap = DEADLINE - time.time()
+        cap = current_deadline() - time.time()
         if task.get("timeout_h"):
             cap = min(cap, task_start + float(task["timeout_h"]) * 3600 - time.time())
         return cap
@@ -795,7 +818,7 @@ def execute(task, gpu):
             with open(logfile, "a", encoding="utf-8") as f:
                 f.write(f"[queue5] {now_bj()} missing checkpoint {ck} or no scene folder\n")
             return 1, False
-        rc, cut = run_cmd(closed_loop_cmd(task, extra), logfile, env, left(), tid)
+        rc, cut = run_cmd(closed_loop_cmd(task, extra), logfile, env, left, tid)
         if cut:
             kill_sim_workers(out)
         return rc, cut
@@ -817,7 +840,7 @@ def execute(task, gpu):
                 cmd += ["--set", str(s).replace("{O}", str(O))]
             with open(logfile, "a", encoding="utf-8") as f:
                 f.write(f"[queue5] {now_bj()} train attempt {attempt + 1} {' '.join(resume)}; stdout -> {d / 'stdout.log'}\n")
-            rc, cut = run_cmd(cmd + resume, d / "stdout.log", env, left(), tid)
+            rc, cut = run_cmd(cmd + resume, d / "stdout.log", env, left, tid)
             if cut or (d / "COMPLETE.json").exists() or not (d / "checkpoints" / "LATEST.json").exists():
                 break
             log(f"{tid}: training exited rc={rc}; resuming (attempt {attempt + 2})")
@@ -835,21 +858,21 @@ def execute(task, gpu):
         rc = 0
         if not (O / run / "eval_full" / f"{ck.stem}.json").exists():
             rc, cut = run_cmd([PY, "-m", "fastwam.memory_v2.train_v2", "evaluate", "--config", CFG, "--checkpoint", str(ck),
-                               "--windows", "0", "--output", str(O / run / "eval_full")], logfile, env, left(), tid)
+                               "--windows", "0", "--output", str(O / run / "eval_full")], logfile, env, left, tid)
             if cut:
                 return rc, True
         if task.get("pr", True) and not list((O / "pr" / run).glob("pr_*_val.json")):
             rc2, cut = run_cmd([PY, "-m", "fastwam.memory_v2.train_v2", "pr", "--config", CFG, "--checkpoint", str(ck),
                                 "--pairs", str(O / "pairs" / "pairs_v1.json"), "--limit", "300",
                                 "--set", 'eval.modes=["on","off","null"]', "--output", str(O / "pr" / run)],
-                               logfile, env, left(), tid)
+                               logfile, env, left, tid)
             rc = rc or rc2
             if cut:
                 return rc, True
         return rc, False
     if kind == "shell":
         cmd = ["bash", "-c", task["command"].replace("{GPU}", str(gpu)).replace("{O}", str(O))]
-        rc, cut = run_cmd(cmd, logfile, env, left(), tid)
+        rc, cut = run_cmd(cmd, logfile, env, left, tid)
         if cut and task.get("kill_output"):
             kill_sim_workers(resolve(task["kill_output"]))
         return rc, cut

@@ -1695,3 +1695,42 @@ tasks:
   hypothesis: "failure classes at the two phase boundaries (put_back centre->press, swap s1->s2 and s2->s3) for X7 / A2C / B0-6ep on the 100 official scenes; >= 60% of X7-on's non-press cases are 'placed, released, idle' (v6 2.4 branch A -> X12a)"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/boundary_autopsy.py"
   pass_if: "m['rc'] == 0"
+
+# ==== 11-03 evening: v6 2.4 follow-up (autopsy v2) + v6 2.5 step 1 (press_button download, dense source dump); A100 cpu ====
+# P-boundary (v1) put X7-on in branch B (71% of the no-press episodes had the arm at the button), idle 0% everywhere.
+# Derived from v1's table: once at the button, press success with history 88/141 = 62% vs without 36/131 = 27%
+# (X7-on 57% vs B0-6ep 29%). P-boundary2 checks that and splits the classes. Reading (written before the run):
+#   P2 history effect holds (pooled Fisher p < 0.05, X7-on > B0) AND P3 misses mostly "stayed high" + re-grasped after
+#     -> the arm reached the button and left without pushing, as if already pressed: a progress error at the press step
+#        (the v1 branch-B label "press precision" is wrong for these; the remedy is history pressure there, not recovery data)
+#   P3 misses mostly "off to the side" and no history effect -> aiming precision: branch B stands as written
+#   P3 misses mostly "low and centred" -> the counter did not fire although the arm pushed in place: check the physics
+#     (button cap mass 1e-4, check threshold -5 mm) before blaming the policy
+#   swap: "never reached" with a still arm = the stop v6 1.2 describes; "went back" = repeats a finished step;
+#     "reached, not lifted" / "lifted, misplaced" = execution, not memory
+- id: P-boundary2
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 3
+  hypothesis: "v2 split of the v1 boundary classes (press success at the button with / without history, approach geometry, swap stops by what happened to the next block); reading rules in the comment above"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/boundary_autopsy2.py"
+  pass_if: "m['rc'] == 0"
+
+- id: PB-fetch
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 6
+  hypothesis: "press_button demo_clean (RMBench @ the locked revision 5d8ff210) downloads into outputs/memory_v2/press/demo_clean/press_button/aloha_agilex (native layout); zip sha256 = hub LFS sha256; Codex's data tree is not touched"
+  command: "cd /workspace/FastWAM-memory2 && /opt/mwam/bin/python scripts/memory_v2/press/fetch.py --task press_button"
+  pass_if: "m['rc'] == 0"
+
+- id: PB-source
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "read-only: the dense delivery's data path source + one prepared episode / cache entry schema, for the memory_v2-side press_button cache builder (v6 2.5 step 1)"
+  command: "bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/press_source.sh"
+  pass_if: "m['rc'] == 0"
