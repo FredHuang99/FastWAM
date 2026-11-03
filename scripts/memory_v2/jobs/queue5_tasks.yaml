@@ -1769,6 +1769,20 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/press/events.py --min-plausible 0.9"
   pass_if: "m['rc'] == 0"
 
+- id: PB-events3
+  lane: cpu
+  kind: shell
+  after: [PB-fetch]
+  requires_pass: [PB-fetch]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "PB-events2 (right-arm confirm press that rises again) failed: no right-arm press in any of the 50 demos. The expert script ends AT the check press (play_once returns right after update_press_success(check_button), no move up), so a detector that needs a rise of >= 2 cm cannot see it. v3: >= 90% of the demos give two left-arm buttons within the card limits (1 <= n1 <= 9, 1 <= n2 <= 10 - n1) plus exactly one terminal confirm press (either arm: down >= 2 cm in the last 60 frames, still at the bottom at the last frame) after the last left press; the press x positions should sit near the env's button1 / button2 / check at x -0.15 / 0.0 / 0.15 (end-effector link, so an offset is possible)"
+  failure_explanations:
+    - "card limits fail: the grouping into buttons (5 cm) splits or merges buttons; check button_x per demo"
+    - "no terminal press: the confirm press is not at the end of the recording either; read the check-press lines of play_once (envs/press_button.py 171-182) before using press frames"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/press/events.py --min-plausible 0.9 --accept v1,v2,v3"
+  pass_if: "m['rc'] == 0"
+
 - id: PB-parity
   lane: train
   kind: shell

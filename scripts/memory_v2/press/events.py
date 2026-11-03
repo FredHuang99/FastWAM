@@ -7,7 +7,13 @@ where they happen in time and space. Task: press the left button n1 times, the m
 once. v1 (11-03 20:52) looked at the left arm only and found two buttons in every demo, so 0/50 matched "3 buttons,
 the last pressed once"; v2 also reads the right arm: plausible = the left arm gives two buttons (n1, n2 >= 1,
 n1 + n2 <= 10) and the right arm presses once, after the last left press (the confirm); the v1 form (three left-arm
-buttons) still counts.
+buttons) still counts. v2 (00:36) found no right-arm press in any demo: the expert script ends AT the check press
+(play_once: update_press_success(check_button) and return, no move up afterwards), so the dip never rises and the
+detector, which needs a rise of >= 2 cm, cannot see it. v3 adds a terminal press: within the last 60 frames, an arm
+went down >= 2 cm and is still within 1 cm of its lowest point at the last frame. Plausible (v3) = the left arm gives
+two buttons with the card limits (1 <= n1 <= 9, 1 <= n2 <= 10 - n1) and exactly one terminal press (either arm)
+after the last left press. The report also gives where each button's presses happen (x of the end-effector link;
+the env puts button1 / button2 / check at x -0.15 / 0.0 / 0.15).
 
 Coverage, at every decision of an online episode (every 8 frames from frame 0), for every press that ended before it:
 is any frame of the dip bottom among the frames the history policy shows (memory_v2 select_history)?
@@ -55,6 +61,19 @@ def presses(z, xy, window=40):
     return out
 
 
+def terminal_press(z, xy, tail=60, window=40):
+    """A dip that the episode ends in: lowest point in the last `tail` frames, reached by going down >= DROP, and the
+    last frame still within BOTTOM of it (no rise afterwards). None if there is none."""
+    n = len(z)
+    if n < 3:
+        return None
+    t = n - tail + int(np.argmin(z[-tail:])) if n > tail else int(np.argmin(z))
+    before = z[max(0, t - window):t + 1]
+    if before.max() - z[t] < DROP or z[-1] > z[t] + BOTTOM or z[t:].max() - z[t] >= RISE:
+        return None
+    return {"t": int(t), "frames_after": int(n - 1 - t), "xy": [float(xy[t][0]), float(xy[t][1])]}
+
+
 def group(ps):
     """Consecutive presses at the same place (xy within 5 cm) form one button."""
     groups = []
@@ -89,7 +108,11 @@ def main():
     ap.add_argument("--raw", default=str(O / "press/demo_clean/press_button/aloha_agilex/data"))
     ap.add_argument("--min-plausible", type=float, default=0.0,
                     help="exit 1 unless at least this share of the demos gives a plausible count pattern")
+    ap.add_argument("--accept", default="v1,v2",
+                    help="which pattern forms count as plausible (v1 three left buttons, v2 + a right-arm press that rises "
+                         "again, v3 + a terminal confirm press); default v1,v2 = the PB-events2 hypothesis")
     args = ap.parse_args()
+    accept = {x.strip() for x in args.accept.split(",") if x.strip()}
     import h5py
     from fastwam.memory_v2.config import HistoryPolicyConfig
     rule_a = HistoryPolicyConfig(anchor_frames=1, landmark_stride=24, recent_frames=2, recent_stride=8, max_frames=48)
@@ -109,9 +132,18 @@ def main():
         confirm = [p["t"] for p in rps if p["t"] > last_left]
         ok_v2 = len(gs) == 2 and min(counts) >= 1 and sum(counts) <= 10 and len(rps) == 1 and len(confirm) == 1
         ok_v1 = len(gs) == 3 and counts[2] == 1 and counts[0] + counts[1] <= 10
-        ok = ok_v2 or ok_v1
-        row = {"episode": f.stem, "length": len(z), "presses": len(ps), "buttons": counts, "plausible": ok,
-               "form": "v2 (left n1, n2 + right confirm)" if ok_v2 else ("v1 (three left buttons)" if ok_v1 else None),
+        term = {"left": terminal_press(z, xy)}
+        if rpose is not None:
+            term["right"] = terminal_press(rpose[:, 2], rpose[:, :2])
+        term = {arm: v for arm, v in term.items() if v is not None and v["t"] > last_left}
+        cards = len(gs) == 2 and 1 <= counts[0] <= 9 and 1 <= counts[1] <= 10 - counts[0]
+        ok_v3 = cards and len(term) == 1
+        forms = [k for k, v in (("v3", ok_v3), ("v2", ok_v2), ("v1", ok_v1)) if v]
+        ok = any(k in accept for k in forms)
+        form = next((k for k in forms if k in accept), forms[0] if forms else None)
+        row = {"episode": f.stem, "length": len(z), "presses": len(ps), "buttons": counts, "plausible": ok, "form": form,
+               "forms": forms, "card_limits_ok": cards, "terminal_press": term,
+               "button_x": [statistics.median(p["xy"][0] for p in g) for g in gs],
                "right_arm_presses": [p["t"] for p in rps], "confirm_frame": confirm[0] if confirm else None,
                "frames_after_confirm": (len(z) - 1 - confirm[0]) if confirm else None,
                "press_frames": [p["t"] for p in ps], "bottom_frames": [p["bottom"][1] - p["bottom"][0] + 1 for p in ps],
@@ -123,9 +155,10 @@ def main():
         eps.append(row)
     good = [e for e in eps if e["plausible"]]
     lines = [f"# press_button demos: presses and history coverage ({datetime.now(BJ):%F %T})", "",
-             f"{len(eps)} demos from {args.raw}; {len(good)} give a plausible count pattern "
-             f"({sum(e['form'] == 'v2 (left n1, n2 + right confirm)' for e in eps)} as left-arm n1, n2 + one right-arm "
-             f"confirm press; {sum(e['form'] == 'v1 (three left buttons)' for e in eps)} as three left-arm buttons).", ""]
+             f"{len(eps)} demos from {args.raw}; {len(good)} give a plausible count pattern of the accepted forms "
+             f"{sorted(accept)} (forms found: v3 left-arm n1, n2 within the card limits + one terminal confirm press "
+             f"{sum('v3' in e['forms'] for e in eps)}; v2 + a right-arm press that rises again "
+             f"{sum('v2' in e['forms'] for e in eps)}; v1 three left-arm buttons {sum('v1' in e['forms'] for e in eps)}).", ""]
     if eps:
         n1 = Counter(e["buttons"][0] for e in good)
         n2 = Counter(e["buttons"][1] for e in good)
@@ -135,7 +168,16 @@ def main():
                   f"range {min(e['presses'] for e in eps)}-{max(e['presses'] for e in eps)}",
                   f"- left-button count n1: {dict(sorted(n1.items()))}; middle-button count n2: {dict(sorted(n2.items()))}",
                   f"- (n1, n2) pairs: {dict(sorted(Counter(tuple(e['buttons'][:2]) for e in good).items()))}",
-                  f"- right-arm presses per demo: {dict(sorted(Counter(len(e['right_arm_presses']) for e in eps).items()))}; "
+                  f"- left-arm two buttons within the card limits: {sum(e['card_limits_ok'] for e in eps)}/{len(eps)}",
+                  f"- terminal confirm press by arm: "
+                  f"{dict(sorted(Counter('+'.join(sorted(e['terminal_press'])) or 'none' for e in eps).items()))}; "
+                  f"frames from its bottom to the end: median "
+                  f"{statistics.median([v['frames_after'] for e in eps for v in e['terminal_press'].values()] or [0])}",
+                  f"- end-effector x of the presses (median over demos): first button "
+                  f"{statistics.median([e['button_x'][0] for e in eps if len(e['button_x']) > 0] or [0]):.3f}, second "
+                  f"{statistics.median([e['button_x'][1] for e in eps if len(e['button_x']) > 1] or [0]):.3f}, confirm "
+                  f"{statistics.median([v['xy'][0] for e in eps for v in e['terminal_press'].values()] or [0]):.3f}",
+                  f"- right-arm presses that rise again, per demo: {dict(sorted(Counter(len(e['right_arm_presses']) for e in eps).items()))}; "
                   f"frames after the confirm press: median "
                   f"{statistics.median([e['frames_after_confirm'] for e in eps if e['frames_after_confirm'] is not None] or [0])}",
                   f"- dip bottom lasts median {statistics.median(bot) if bot else '-'} frames (range {min(bot) if bot else '-'}-"
@@ -152,7 +194,9 @@ def main():
         bad = [e for e in eps if not e["plausible"]]
         if bad:
             lines += ["", "Demos without a plausible pattern (press detection to check; left buttons, right-arm press "
-                      "frames): " + ", ".join(f"{e['episode']} {e['buttons']} R{e['right_arm_presses']}" for e in bad[:12])]
+                      "frames, terminal press arms): " + ", ".join(
+                          f"{e['episode']} {e['buttons']} R{e['right_arm_presses']} T{sorted(e['terminal_press'])}"
+                          for e in bad[:12])]
     rep = O / "report" / f"PRESS_EVENTS_{datetime.now(BJ):%Y%m%d_%H%M}.md"
     rep.parent.mkdir(parents=True, exist_ok=True)
     rep.write_text("\n".join(lines) + "\n")
