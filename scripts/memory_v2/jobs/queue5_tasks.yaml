@@ -1807,6 +1807,8 @@ tasks:
       then: "a criterion failed (a shell task only records rc; read PARITY_EXPLAIN.md). C1 fails: frame indexing or the normalizer differ, a real builder bug; stop press, compare data_path.window_indices / ReleaseNormalizer use. C2 or C3 fails with C4 passing: larger than cross-GPU noise but smaller than an off-by-one frame; look at the worst frame and the software drift (VAE / diffusers versions) before building. C4 fails: the rebuild differs as much as a wrong frame or prompt; builder bug, do not build the press cache"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/press/parity_explain.py"
   pass_if: "m['rc'] == 0"
+  on_pass: "the PB-parity mismatch is cross-GPU noise: PB-cache2 builds the press_button cache (record PARITY_EXPLAIN.md in the appendix deviation table)"
+  on_inconclusive: "(shell ERROR) a criterion failed: no press cache; read PARITY_EXPLAIN.md and act per the explanation above"
 
 - id: PB-cache2
   lane: train
@@ -1818,6 +1820,8 @@ tasks:
   hypothesis: "press_button dense cache (50 demos, 45 train / 5 val, seed-17 split) in outputs/memory_v2/press/dense_press_button_v1, same format as the two-task cache (replaces PB-cache, which was skipped because PB-parity failed; gate is PB-parity2)"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/press/build_dense.py build --task press_button"
   pass_if: "m['rc'] == 0"
+  on_pass: "press_button cache complete: PB-features2 builds the history features"
+  on_inconclusive: "(shell ERROR) cache not complete; the build is resumable (finished episodes keep their COMPLETE.json): read the job log, fix, re-run"
 
 - id: PB-features2
   lane: train
@@ -1829,6 +1833,8 @@ tasks:
   hypothesis: "frozen Video-DiT history features for the press_button cache (outputs/memory_v2/features_press_v1, ~20 GB); v6 2.5 gate: ready before Thu 11-05 18:00 (replaces PB-features)"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python -m fastwam.memory_v2.train_v2 features --config configs/memory_v2/train_v2_press.yaml"
   pass_if: "m['rc'] == 0"
+  on_pass: "v6 2.5 data gate met: press training can start once its history rule (B: landmarks every 8 / C: press-anchored) is fixed by Fable"
+  on_inconclusive: "(shell ERROR) features not complete: read the job log; the v6 2.5 gate (Thu 11-05 18:00) decides whether press training starts this week"
 
 - id: PB-cache
   lane: train
