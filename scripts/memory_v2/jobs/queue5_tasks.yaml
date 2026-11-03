@@ -1593,3 +1593,105 @@ tasks:
   online_args: ["--execute", "8", "--shard", "1/2"]
   output: closed_loop/official/put8_b0_s1
   min_episodes: 10
+
+# ==== week plan v6 (11-03): X2b / T2 on the official swap + put_back (H200), phase-boundary autopsy (A100 cpu) ====
+- id: W-x2b-ckpt
+  lane: remote
+  kind: shell
+  need_mib: 0
+  timeout_h: 13
+  hypothesis: "the X2b (no pairs in either stage, 3 epochs) inference checkpoint has arrived from the A100 (jobs/xfer_ckpt.sh) and matches its sha256"
+  command: "CK={O}/a2C_nopairs_ours/checkpoints/update_002010.pt; for i in $(seq 1 720); do [ -f $CK ] && [ -f $CK.sha256 ] && break; [ $((i % 10)) -eq 1 ] && echo \"waiting for $CK(.sha256): $i min\"; sleep 60; done; [ -f $CK.sha256 ] || exit 1; cd $(dirname $CK) && sha256sum -c update_002010.pt.sha256"
+  pass_if: "m['rc'] == 0"
+
+- id: X2b-official-swap
+  lane: remote
+  kind: closed_loop
+  after: [W-x2b-ckpt]
+  requires_pass: [R-smoke, F7-bank, W-x2b-ckpt]
+  hypothesis: "G-B-official (v6 2.1): on the 100 official swap scenes at execute 8, the no-pairs model X2b keeps A2C's closed-loop memory effect (on - null) and A2C's on-level; i.e. the counterfactual pairs raise offline PR (0.865 -> 0.737 without them) but are not the source of the closed-loop effect"
+  need_mib: 30000
+  checkpoint: a2C_nopairs_ours/checkpoints/update_002010.pt
+  label: a2C_nopairs_ours_e3_exec8
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8"]
+  output: closed_loop/official/swap8_x2b
+  reference: {folders: [closed_loop/official/swap8_a2c], label: a2C_e3_exec8, modes: ["on", "null"]}
+  min_episodes: 60
+  pass_if: "m['prog_on_vs_null']['swap_blocks']['p'] < 0.05 and m['prog_on_vs_null']['swap_blocks']['delta'] >= 0.5 * r['prog_on_vs_null']['swap_blocks']['delta'] and abs(m['prog_vs_reference']['on']['swap_blocks']['delta']) <= 0.10"
+  failure_explanations:
+    - if: "m['prog_on_vs_null']['swap_blocks']['delta'] < 0.5 * r['prog_on_vs_null']['swap_blocks']['delta']"
+      then: "pairs DO contribute to the closed-loop memory effect at n=100: the 26-scene dissociation was under-powered; C2' returns to the paper as a closed-loop contribution (on - null halves without pairs)"
+    - if: "m['prog_vs_reference']['on']['swap_blocks']['delta'] < -0.10 and m['prog_on_vs_null']['swap_blocks']['delta'] >= 0.5 * r['prog_on_vs_null']['swap_blocks']['delta']"
+      then: "pairs raise the memory-on policy's capability (on-level) without changing the memory gap: write pairs as a training-signal / capability result, not as the source of history use"
+    - if: "m['prog_vs_reference']['on']['swap_blocks']['delta'] > 0.10"
+      then: "pairs HURT the on-policy at 3 epochs: check whether pair samples (8/update, weight 0.5) displace ordinary samples; re-run the pair-ratio sweep before using pairs in any recipe"
+  on_pass: "paper: pairs = offline diagnostic / training-signal result; the closed-loop memory effect is attributed to memory-first joint fine-tuning + the direct-read interface (pending T2)"
+  on_fail: "see failure_explanations; the training-length and attribution sections are unaffected"
+
+- id: W-t2-ckpt
+  lane: remote
+  kind: shell
+  need_mib: 0
+  timeout_h: 30
+  hypothesis: "the T2 (one-stage, 6 epochs) inference checkpoint and the A100 X7 official episodes (reference, with SYNC_DONE) have arrived on the H200"
+  command: "CK={O}/a2C_onestage_6ep/checkpoints/update_004020.pt; R={O}/closed_loop/a100/official; for i in $(seq 1 1740); do [ -f $CK ] && [ -f $CK.sha256 ] && [ -f $R/SYNC_DONE ] && break; [ $((i % 10)) -eq 1 ] && echo \"waiting for $CK(.sha256) and $R/SYNC_DONE: $i min\"; sleep 60; done; [ -f $R/SYNC_DONE ] && [ -f $CK.sha256 ] || exit 1; cd $(dirname $CK) && sha256sum -c update_004020.pt.sha256 && n=$(find $R/swap8_x7_s0 $R/swap8_x7_s1 $R/swap8_x7_s2 -name result.json | wc -l) && echo \"X7 swap reference episodes: $n\" && [ $n -ge 190 ]"
+  pass_if: "m['rc'] == 0"
+
+- id: T2-official-swap
+  lane: remote
+  kind: closed_loop
+  after: [W-t2-ckpt, X2b-official-swap]
+  requires_pass: [R-smoke, F7-bank, W-t2-ckpt]
+  hypothesis: "memory-first matters (v6 2.2; T2Mem / Mem4Act): one-stage joint training (zero-init memory, no stage-1, no pairs) for the same 6 epochs gives a weaker closed-loop memory effect than X7 on the 100 official swap scenes, and a weaker on-policy"
+  need_mib: 30000
+  checkpoint: a2C_onestage_6ep/checkpoints/update_004020.pt
+  label: a2C_onestage_e6_exec8
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8"]
+  output: closed_loop/official/swap8_t2
+  reference: {folders: [closed_loop/a100/official/swap8_x7_s0, closed_loop/a100/official/swap8_x7_s1, closed_loop/a100/official/swap8_x7_s2], label: a2C6_e6_exec8, modes: ["on", "null"]}
+  min_episodes: 60
+  pass_if: "m['prog_on_vs_null']['swap_blocks']['delta'] < 0.5 * r['prog_on_vs_null']['swap_blocks']['delta'] and m['prog_vs_reference']['on']['swap_blocks']['delta'] < -0.05 and m['prog_vs_reference']['on']['swap_blocks']['p'] < 0.05"
+  failure_explanations:
+    - if: "abs(m['prog_vs_reference']['on']['swap_blocks']['delta']) <= 0.05 and m['prog_on_vs_null']['swap_blocks']['delta'] >= 0.5 * r['prog_on_vs_null']['swap_blocks']['delta']"
+      then: "one-stage joint training is as good as memory-first + pairs at 6 epochs: the two-stage recipe is a convenience, not a contribution (contradicts T2Mem); the paper's method section shrinks to interface + training length"
+    - if: "abs(m['prog_vs_reference']['on']['swap_blocks']['delta']) <= 0.05 and m['prog_on_vs_null']['swap_blocks']['delta'] < 0.5 * r['prog_on_vs_null']['swap_blocks']['delta']"
+      then: "T2 performs like X7 while depending less on history: the on-level is capability, not memory; memory-first buys history dependence, not success - report both"
+    - if: "m['prog_vs_reference']['on']['swap_blocks']['delta'] > 0.05"
+      then: "one-stage training is BETTER: stage-1 initialisation or the pairs hurt; the recipe must be re-derived (X2b-official says whether pairs are the culprit)"
+  on_pass: "paper: memory-first joint fine-tuning is necessary for the closed-loop memory effect on this backbone"
+  on_fail: "see failure_explanations"
+
+- id: T2-official-put
+  lane: remote
+  kind: closed_loop
+  after: [T2-official-swap]
+  requires_pass: [R-smoke, W-t2-ckpt, F8b-bank]
+  hypothesis: "same as T2-official-swap on put_back (reference: X9-put scenes 1-30 on the H200 + F3-put 31-100 synced from the A100)"
+  need_mib: 30000
+  checkpoint: a2C_onestage_6ep/checkpoints/update_004020.pt
+  label: a2C_onestage_e6_exec8
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block_a100]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8"]
+  output: closed_loop/official/put8_t2
+  reference: {folders: [closed_loop/official_pilot, closed_loop/a100/official/put_x7_s0, closed_loop/a100/official/put_x7_s1], label: a2C6_e6, modes: ["on", "null"]}
+  min_episodes: 60
+  pass_if: "m['prog_on_vs_null']['put_back_block']['delta'] < 0.5 * r['prog_on_vs_null']['put_back_block']['delta'] and m['prog_vs_reference']['on']['put_back_block']['delta'] < -0.05 and m['prog_vs_reference']['on']['put_back_block']['p'] < 0.05"
+  on_pass: "memory-first necessary on both tasks"
+  on_fail: "report as is; put_back has the smaller effects, swap is the primary test"
+
+- id: P-boundary
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 3
+  hypothesis: "failure classes at the two phase boundaries (put_back centre->press, swap s1->s2 and s2->s3) for X7 / A2C / B0-6ep on the 100 official scenes; >= 60% of X7-on's non-press cases are 'placed, released, idle' (v6 2.4 branch A -> X12a)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/boundary_autopsy.py"
+  pass_if: "m['rc'] == 0"
