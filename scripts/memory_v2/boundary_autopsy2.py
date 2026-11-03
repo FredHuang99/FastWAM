@@ -133,6 +133,8 @@ def touched_button(rows, start, end=None):
         objs = (r.get("object_contacts") or {}).get("objects")
         if objs is None:
             continue
+        if "button" not in objs:
+            continue                      # contacts are logged for the blocks only: says nothing about the button
         seen = True
         by = ((objs.get("button") or {}).get("by_side") or {})
         if any(by.values()):
@@ -241,7 +243,10 @@ def swap_episode(rows, snaps, boundary, grasp_zone):
     elif dists and grasp_zone is not None and min(dists) <= grasp_zone:
         info["kind"] = "reached_not_lifted"
         closes = cls.gripper_closes_rows(rows[i0:], SWAP)
+        near = [c for c in closes if c.get("ee_block_m") is not None and c["ee_block_m"] <= grasp_zone]
         info["closes"] = len(closes)
+        info["closes_near"] = len(near)
+        info["grasp_tried"] = bool(near)
     else:
         info["kind"] = "never_reached"
     return info
@@ -316,8 +321,10 @@ def put_section(eps, lines, out):
                      f"{share('skipped')} | {share('stuck')} | "
                      f"{r3(statistics.median(sm)) if sm else '-'}, {r3(statistics.median(sf)) if sf else '-'} |")
     ref = [e["motion"]["ee_mm_per_frame"] for es in per.values() for e in es if e["pressed"] and e.get("motion")]
+    ref_still = [e["motion"]["ee_still_frac"] for es in per.values() for e in es if e["pressed"] and e.get("motion")]
     lines += ["", f"Reference: pressing episodes after the centre move their end effector a median "
-                  f"{r3(statistics.median(ref)) if ref else '-'} mm/frame.", ""]
+                  f"{r3(statistics.median(ref)) if ref else '-'} mm/frame, still-frame share "
+                  f"{r3(statistics.median(ref_still)) if ref_still else '-'}.", ""]
 
     lines += ["## P2 put_back: press success once the arm is at the button", "",
               "approach = pressed, or came inside the press zone without a press. [95% Wilson interval]", "",
@@ -406,7 +413,8 @@ def swap_section(eps, lines, out):
     for boundary, need, stop in (("s1->s2", "s1", "s2"), ("s2->s3", "s2", "s3")):
         lines += [f"## S swap {boundary}: {need} done, {stop} not - what happened to the block that had to move next", "",
                   "| condition | stopped | went back to the placed block | lifted, misplaced (ended: table / tray / held) | "
-                  "reached, not lifted | never reached: still / moving |", "|---|---|---|---|---|---|"]
+                  "reached, not lifted (closed the gripper near it / never closed) | never reached: still / moving | "
+                  "frames left after the boundary (median) |", "|---|---|---|---|---|---|---|"]
         res = {}
         for cond in sorted({c for c, _ in loaded}):
             es = []
@@ -421,10 +429,14 @@ def swap_section(eps, lines, out):
             nr = [e for e in es if e["kind"] == "never_reached"]
             still = sum((e["motion"].get("ee_still_frac") or 0) >= 0.5 for e in nr)
             share = lambda x: f"{k[x]} ({100 * k[x] / len(es):.0f}%)" if es else "-"   # noqa: E731
+            rn = [e for e in es if e["kind"] == "reached_not_lifted"]
+            tried = sum(bool(e.get("grasp_tried")) for e in rn)
+            left = [e["motion"]["frames_after"] for e in es if e.get("motion")]
             lines.append(f"| {cond} | {len(es)} | {share('went_back')} | {share('lifted_misplaced')} "
                          f"({ended.get('table', 0)} / {sum(v for w, v in ended.items() if w in cls.TRAYS)} / "
-                         f"{ended.get('held_at_end', 0)}) | {share('reached_not_lifted')} | "
-                         f"{share('never_reached')}: {still} / {len(nr) - still} |")
+                         f"{ended.get('held_at_end', 0)}) | {share('reached_not_lifted')} ({tried} / {len(rn) - tried}) | "
+                         f"{share('never_reached')}: {still} / {len(nr) - still} | "
+                         f"{int(statistics.median(left)) if left else '-'} |")
             res[cond] = es
         lines.append("")
         out["swap"]["boundaries"][boundary] = res

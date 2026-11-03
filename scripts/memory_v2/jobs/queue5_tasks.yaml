@@ -1734,3 +1734,56 @@ tasks:
   hypothesis: "read-only: the dense delivery's data path source + one prepared episode / cache entry schema, for the memory_v2-side press_button cache builder (v6 2.5 step 1)"
   command: "bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/press_source.sh"
   pass_if: "m['rc'] == 0"
+
+# ==== 11-03 night: autopsy v2.1 (swap "reached, not lifted" split by gripper closing) + press_button data pipeline ====
+- id: P-boundary2b
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 3
+  hypothesis: "v2.1 of the boundary split: swap 'reached, not lifted' = closed the gripper near the block (grasp failure) vs never closed (hovered: a decision / progress failure); frames left after each boundary"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/boundary_autopsy2.py"
+  pass_if: "m['rc'] == 0"
+
+- id: PB-events
+  lane: cpu
+  kind: shell
+  after: [PB-fetch]
+  requires_pass: [PB-fetch]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "v6 2.5 step 2: every press_button demo yields a plausible press pattern (n1 left, n2 middle, 1 right); our training history rule shows most past presses (count recoverable at most decisions), else an event-anchored history is needed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/press/events.py"
+  pass_if: "m['rc'] == 0"
+
+- id: PB-parity
+  lane: train
+  kind: shell
+  after: [PB-fetch]
+  need_mib: 40000
+  timeout_h: 3
+  hypothesis: "the memory_v2-side dense builder reproduces the two-task cache of put_back_block/episode_0000000 (proprio / actions / masks exact, latents and text within the recipe's VAE tolerance 2e-3), memory_v2 binds the new output with the identity check, and its history features match features_dense_v1 (relative L2 <= 5e-2)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/press/build_dense.py parity"
+  pass_if: "m['rc'] == 0"
+
+- id: PB-cache
+  lane: train
+  kind: shell
+  after: [PB-parity]
+  requires_pass: [PB-fetch, PB-parity]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "press_button dense cache (50 demos, 45 train / 5 val, seed-17 split) in outputs/memory_v2/press/dense_press_button_v1, same format as the two-task cache"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/press/build_dense.py build --task press_button"
+  pass_if: "m['rc'] == 0"
+
+- id: PB-features
+  lane: train
+  kind: shell
+  after: [PB-cache]
+  requires_pass: [PB-cache]
+  need_mib: 30000
+  timeout_h: 5
+  hypothesis: "frozen Video-DiT history features for the press_button cache (outputs/memory_v2/features_press_v1, ~20 GB); v6 2.5 gate: ready before Thu 11-05 18:00"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python -m fastwam.memory_v2.train_v2 features --config configs/memory_v2/train_v2_press.yaml"
+  pass_if: "m['rc'] == 0"
