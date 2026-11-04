@@ -19,6 +19,8 @@
 #                                                            <NAME>_* file of each name here (send me those)
 #   bash /root/mwam_reports/host_pool.sh autopsy PB-events3 ...   rewrite autopsy/AUTOPSY_<id>.md of finished tasks
 #                                                            (verdict and ledger unchanged) and copy each here
+#   bash /root/mwam_reports/host_pool.sh check [regex]       queue preflight (queue5.py check); with a regex only the
+#                                                            matching lines, e.g. check PB- (sets vs the reference run)
 set -u
 C=${C:-$(docker ps --format '{{.ID}} {{.Names}}' | awk '$1 ~ /^6e4b37a15066/ {print $1} $2 == "mwam2" {print $2}' | head -1)}
 [ -n "$C" ] || { echo "no MemWAM container running here (A100: 6e4b37a15066, H200: mwam2)"; exit 1; }
@@ -57,5 +59,7 @@ case "$cmd" in
                 && docker cp "$C:$R/outputs/memory_v2/autopsy/AUTOPSY_$n.md" "$OUT/" && echo "$n: $OUT/AUTOPSY_$n.md" \
                 || echo "$n: autopsy failed (see the lines above)"
             done ;;
-  *)        sed -n '2,23p' "$0" ;;
+  check)    docker exec "$C" bash -lc "cd $R && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/queue5.py check" 2>&1 \
+              | grep -E -- "${1:-.}|^CHECK" ;;
+  *)        sed -n '2,25p' "$0" ;;
 esac

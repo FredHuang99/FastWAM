@@ -1884,6 +1884,146 @@ tasks:
   on_pass: "press pairs ready; the summary in the job log gives the train / val pair counts"
   on_inconclusive: "(shell ERROR) no press pairs: the press stage-1 / stage-2 runs wait"
 
+# press_button pilot, two history rules side by side (user's choice 11-04 19:28, option 1): A = the training rule
+# (anchor + every 24th + 2 recent; PB-events3: past presses visible 31%, count recoverable at 3% of decisions),
+# B = landmarks every 8th frame (91% / 81%), same cap 48. Recipes copied from the two-task runs (stage 1 = v2_A_cf,
+# stage 2 = X7 a2C_6ep), data paths from configs/memory_v2/train_v2_press.yaml. B uses smaller micro batches
+# (memory: up to 48 history frames instead of ~29); the global batch stays 64, so the optimisation is the same.
+- id: PB-s1-A
+  lane: train
+  kind: train
+  config: configs/memory_v2/train_v2_press.yaml
+  after: [PB-pairs]
+  requires_pass: [PB-pairs]
+  hypothesis: "press stage 1, history rule A: the v2_A_cf recipe (memory only, frozen base, 2 epochs, pairs 0.5 x 16 / update) on the press_button cache completes and lowers the FM loss; keys expected to differ from the reference: name, output, features, dense.output, pairs.file, pairs.max_visual_distance (press median)"
+  need_mib: 30000
+  run: v2_press_cf
+  reference_run: v2_A_cf
+  sets:
+    - pairs.file={O}/pairs/pairs_press_v1.json
+    - pairs.weight=0.5
+    - pairs.per_update=16
+    - pairs.max_visual_distance={MEDIAN_VIS:{O}/pairs/pairs_press_v1.json}
+  pass_if: "m.get('complete') and m.get('fm_ratio') is not None and m['fm_ratio'] < 1.0"
+  failure_explanations:
+    - if: "m.get('config_diff') and any(not k.startswith(('name', 'output', 'features', 'dense.output', 'pairs.file', 'pairs.max_visual_distance')) for k in m['config_diff'])"
+      then: "the config differs from v2_A_cf beyond the press data paths and the pair filter: the recipe is not a copy (see config_diff)"
+    - if: "m.get('guard')"
+      then: "the guard stopped the run: see GUARD.json"
+  on_pass: "PB-s2-A continues from this memory"
+  on_fail: "stage 1 did not complete: inspect v2_press_cf/stdout.log; arm A waits"
+
+- id: PB-B-dry
+  lane: extra
+  kind: shell
+  after: [PB-pairs]
+  requires_pass: [PB-pairs]
+  need_mib: 30000
+  timeout_h: 1
+  hypothesis: "history rule B (landmarks every 8th frame, up to 48 history frames) fits on a 40 GB A100 with micro batch 4 in stage 1 and 2 in stage 2 (3-update dry runs; peak_gpu_gb and seconds per update are printed for the schedule)"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "a dry run failed (a shell task only records rc; read the job log): out of memory -> halve the micro batch of that stage in PB-s1-B / PB-s2-B, or pool 2x2 (that would change a second variable: record it); another error -> fix before arm B starts"
+  command: "cd /workspace/FastWAM-memory2 && bash scripts/memory_v2/press/dry_run.sh B 4 2 --set memory_v2.history.landmark_stride=8"
+  pass_if: "m['rc'] == 0"
+  on_pass: "PB-s1-B starts with micro batch 4 (stage 2: 2)"
+  on_inconclusive: "(shell ERROR) arm B does not start; see the explanation above"
+
+- id: PB-s1-B
+  lane: extra
+  kind: train
+  config: configs/memory_v2/train_v2_press.yaml
+  after: [PB-B-dry]
+  requires_pass: [PB-pairs, PB-B-dry]
+  hypothesis: "press stage 1, history rule B: same as PB-s1-A with landmarks every 8th frame (memory_v2.history.landmark_stride=8, cap 48) and micro batch 4 (global batch 64 unchanged); keys expected to differ from the reference: name, output, features, dense.output, pairs.file, pairs.max_visual_distance (press median), memory_v2.history.landmark_stride, schedule.micro_batch"
+  need_mib: 30000
+  run: v2_press_cf_lm8
+  reference_run: v2_A_cf
+  sets:
+    - memory_v2.history.landmark_stride=8
+    - schedule.micro_batch=4
+    - pairs.file={O}/pairs/pairs_press_v1.json
+    - pairs.weight=0.5
+    - pairs.per_update=16
+    - pairs.max_visual_distance={MEDIAN_VIS:{O}/pairs/pairs_press_v1.json}
+  pass_if: "m.get('complete') and m.get('fm_ratio') is not None and m['fm_ratio'] < 1.0"
+  failure_explanations:
+    - if: "m.get('config_diff') and any(not k.startswith(('name', 'output', 'features', 'dense.output', 'pairs.file', 'pairs.max_visual_distance', 'memory_v2.history.landmark_stride', 'schedule.micro_batch')) for k in m['config_diff'])"
+      then: "the config differs from v2_A_cf beyond the press data paths, the pair filter, the history rule and the micro batch (see config_diff)"
+    - if: "m.get('guard')"
+      then: "the guard stopped the run: see GUARD.json"
+  on_pass: "PB-s2-B continues from this memory"
+  on_fail: "stage 1 did not complete: inspect v2_press_cf_lm8/stdout.log; arm B waits"
+
+- id: PB-s2-A
+  lane: train
+  kind: train
+  config: configs/memory_v2/train_v2_press.yaml
+  after: [PB-s1-A]
+  requires_pass: [PB-s1-A]
+  hypothesis: "press stage 2, history rule A: the X7 recipe (lr_action 1e-5, lr_memory 2e-5, 6 epochs, pairs 0.5 x 8 / update) from the press stage-1 memory completes and lowers the FM loss; keys expected to differ from the reference: name, output, features, dense.output, pairs.file, pairs.max_visual_distance (press median), init_memory"
+  need_mib: 30000
+  run: press_6ep
+  reference_run: a2C_6ep
+  sets:
+    - optim.lr_action=1e-5
+    - optim.lr_memory=2e-5
+    - init_memory={LAST:v2_press_cf}
+    - schedule.epochs=6
+    - schedule.micro_batch=4
+    - schedule.eval_every=335
+    - schedule.keep_last=2
+    - schedule.save_every=200
+    - guard.loss_factor=2.5
+    - guard.start_update=120
+    - pairs.file={O}/pairs/pairs_press_v1.json
+    - pairs.weight=0.5
+    - pairs.per_update=8
+    - pairs.max_visual_distance={MEDIAN_VIS:{O}/pairs/pairs_press_v1.json}
+  pass_if: "m.get('complete') and m.get('fm_ratio') is not None and m['fm_ratio'] < 1.0"
+  failure_explanations:
+    - if: "m.get('config_diff') and any(not k.startswith(('name', 'output', 'features', 'dense.output', 'pairs.file', 'pairs.max_visual_distance', 'init_memory')) for k in m['config_diff'])"
+      then: "the config differs from X7 (a2C_6ep) beyond the press data paths, the pair filter and init_memory (see config_diff)"
+    - if: "m.get('guard')"
+      then: "the guard stopped the run: see GUARD.json"
+  on_pass: "arm A trained; the press closed loop (10 dev scenes, on / null) follows once the press scene bank and counters are in"
+  on_fail: "stage 2 did not complete: inspect press_6ep/stdout.log"
+
+- id: PB-s2-B
+  lane: extra
+  kind: train
+  config: configs/memory_v2/train_v2_press.yaml
+  after: [PB-s1-B]
+  requires_pass: [PB-s1-B]
+  hypothesis: "press stage 2, history rule B: same as PB-s2-A with landmarks every 8th frame and micro batch 2 (global batch 64 unchanged); keys expected to differ from the reference: name, output, features, dense.output, pairs.file, pairs.max_visual_distance (press median), init_memory, memory_v2.history.landmark_stride, schedule.micro_batch"
+  need_mib: 30000
+  run: press_6ep_lm8
+  reference_run: a2C_6ep
+  sets:
+    - memory_v2.history.landmark_stride=8
+    - optim.lr_action=1e-5
+    - optim.lr_memory=2e-5
+    - init_memory={LAST:v2_press_cf_lm8}
+    - schedule.epochs=6
+    - schedule.micro_batch=2
+    - schedule.eval_every=335
+    - schedule.keep_last=2
+    - schedule.save_every=200
+    - guard.loss_factor=2.5
+    - guard.start_update=120
+    - pairs.file={O}/pairs/pairs_press_v1.json
+    - pairs.weight=0.5
+    - pairs.per_update=8
+    - pairs.max_visual_distance={MEDIAN_VIS:{O}/pairs/pairs_press_v1.json}
+  pass_if: "m.get('complete') and m.get('fm_ratio') is not None and m['fm_ratio'] < 1.0"
+  failure_explanations:
+    - if: "m.get('config_diff') and any(not k.startswith(('name', 'output', 'features', 'dense.output', 'pairs.file', 'pairs.max_visual_distance', 'init_memory', 'memory_v2.history.landmark_stride', 'schedule.micro_batch')) for k in m['config_diff'])"
+      then: "the config differs from X7 (a2C_6ep) beyond the press data paths, the pair filter, init_memory, the history rule and the micro batch (see config_diff)"
+    - if: "m.get('guard')"
+      then: "the guard stopped the run: see GUARD.json"
+  on_pass: "arm B trained; the press closed loop (10 dev scenes, on / null) follows once the press scene bank and counters are in"
+  on_fail: "stage 2 did not complete: inspect press_6ep_lm8/stdout.log"
+
 - id: PB-cache
   lane: train
   kind: shell

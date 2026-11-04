@@ -118,6 +118,31 @@ def resolve(p):
     return Path(p) if p.startswith("/") else O / p
 
 
+PLACEHOLDER = re.compile(r"\{(LAST|MEDIAN_VIS):([^{}]+)\}")
+
+
+def expand(value):
+    """A train task's --set value at run time: {O}; {LAST:<run>} = that run's final checkpoint (as <run>/last of a
+    closed loop); {MEDIAN_VIS:<pairs json>} = median visual_distance of its train pairs (the pair filter the
+    two-task recipe used). Deterministic, so a resumed run gets the same value."""
+    value = str(value).replace("{O}", str(O))
+
+    def sub(m):
+        kind, arg = m.group(1), m.group(2)
+        if kind == "LAST":
+            path = checkpoint_path(f"{arg}/last")
+            if not path.exists():
+                raise FileNotFoundError(f"{{LAST:{arg}}}: {path} missing")
+            return str(path)
+        pairs = (read_json(resolve(arg), {}) or {}).get("train") or []
+        dist = sorted(float(x["visual_distance"]) for x in pairs if x.get("visual_distance") is not None)
+        if not dist:
+            raise ValueError(f"{{MEDIAN_VIS:{arg}}}: no train pairs with a visual distance")
+        n = len(dist)
+        return repr(dist[n // 2] if n % 2 else (dist[n // 2 - 1] + dist[n // 2]) / 2)
+    return PLACEHOLDER.sub(sub, value)
+
+
 def pid_alive(pid, expect=None):
     """Running (not a zombie) and, with `expect`, its command line contains that text (guards against pid reuse)."""
     try:
@@ -834,10 +859,15 @@ def execute(task, gpu):
                 break
             d.mkdir(parents=True, exist_ok=True)
             resume = ["--resume"] if (d / "checkpoints" / "LATEST.json").exists() else []
-            cmd = [PY, "-m", "fastwam.memory_v2.train_v2", "train", "--config", CFG, "--allow-high-action-lr",
-                   "--set", f"name={task['run']}", "--set", f"output={d}"]
-            for s in task.get("sets", []):
-                cmd += ["--set", str(s).replace("{O}", str(O))]
+            cmd = [PY, "-m", "fastwam.memory_v2.train_v2", "train", "--config", task.get("config") or CFG,
+                   "--allow-high-action-lr", "--set", f"name={task['run']}", "--set", f"output={d}"]
+            try:
+                for s in task.get("sets", []):
+                    cmd += ["--set", expand(s)]
+            except (OSError, ValueError) as error:
+                with open(logfile, "a", encoding="utf-8") as f:
+                    f.write(f"[queue5] {now_bj()} cannot resolve the sets: {error!r}\n")
+                return 1, False
             with open(logfile, "a", encoding="utf-8") as f:
                 f.write(f"[queue5] {now_bj()} train attempt {attempt + 1} {' '.join(resume)}; stdout -> {d / 'stdout.log'}\n")
             rc, cut = run_cmd(cmd + resume, d / "stdout.log", env, left, tid)
@@ -1096,10 +1126,23 @@ def cmd_check(args):
         for f in (t.get("folders") or []) + ((t.get("reference") or {}).get("folders") or []):
             if not resolve(f).exists() and str(resolve(f)) not in produced:
                 warn.append(f"{tid}: folder {resolve(f)} missing")
+        if t.get("config") and not (REPO / t["config"]).exists() and not Path(t["config"]).exists():
+            bad.append(f"{tid}: config {t['config']} missing")
         for value in t.get("sets") or []:
             k, _, v = str(value).replace("{O}", str(O)).partition("=")
+            for kind, arg in PLACEHOLDER.findall(v):
+                src = f"{arg}/last" if kind == "LAST" else str(resolve(arg))
+                made = (arg in trained) if kind == "LAST" else any(str(resolve(arg)) in str(x.get("command", "")).replace("{O}", str(O)) for x in tasks)
+                if not made and not (checkpoint_path(src) if kind == "LAST" else resolve(arg)).exists():
+                    bad.append(f"{tid}: --set {k} uses {kind} of {arg}, which no task produces and which is missing")
+            if PLACEHOLDER.search(v):
+                continue
             if v.startswith("/") and not Path(v.split()[0]).exists():
-                bad.append(f"{tid}: --set {k} points to a missing file {v}")
+                maker = [x["id"] for x in tasks if v.split()[0] in str(x.get("command", "")).replace("{O}", str(O))]
+                if maker:
+                    warn.append(f"{tid}: --set {k} = {v} does not exist yet (written by {', '.join(maker)})")
+                else:
+                    bad.append(f"{tid}: --set {k} points to a missing file {v}")
         if t["kind"] == "train" and t.get("reference_run"):
             ref = flat((read_json(O / t["reference_run"] / "CONFIG.json", {}) or {}).get("config"))
             if not ref:
