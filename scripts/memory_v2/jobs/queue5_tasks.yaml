@@ -1889,6 +1889,21 @@ tasks:
 # B = landmarks every 8th frame (91% / 81%), same cap 48. Recipes copied from the two-task runs (stage 1 = v2_A_cf,
 # stage 2 = X7 a2C_6ep), data paths from configs/memory_v2/train_v2_press.yaml. B uses smaller micro batches
 # (memory: up to 48 history frames instead of ~29); the global batch stays 64, so the optimisation is the same.
+- id: PB-plan
+  lane: loop
+  kind: shell
+  requires_pass: [PB-fetch]
+  hypothesis: "10 expert-feasible press_button scenes from seed 17 (dev scale, v6 2.5 step 4) via the production planner (frozen sim_eval --operation plan, task-agnostic); written to closed_loop/scenes_seed17_n10_press_button"
+  need_mib: 10000
+  timeout_h: 3
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "planning failed (a shell task only records rc; read the job log and closed_loop/logs): the simulator setup or the expert filter for press_button"
+  command: "test -f {O}/closed_loop/scenes_seed17_n10_press_button/press_button.json || bash /workspace/FastWAM-memory2/scripts/memory_v2/jobs/closed_loop.sh plan {GPU} 17 10 press_button"
+  pass_if: "m['rc'] == 0"
+  on_pass: "press scene bank ready for the dev closed loops of arms A and B"
+  on_inconclusive: "(shell ERROR) no press scene bank: read the simulator log before the closed loops are added"
+
 - id: PB-s1-A
   lane: train
   kind: train
@@ -1906,8 +1921,8 @@ tasks:
     - pairs.max_visual_distance={MEDIAN_VIS:{O}/pairs/pairs_press_v1.json}
   pass_if: "m.get('complete') and m.get('fm_ratio') is not None and m['fm_ratio'] < 1.0"
   failure_explanations:
-    - if: "m.get('config_diff') and any(not k.startswith(('name', 'output', 'features', 'dense.output', 'pairs.file', 'pairs.max_visual_distance')) for k in m['config_diff'])"
-      then: "the config differs from v2_A_cf beyond the press data paths and the pair filter: the recipe is not a copy (see config_diff)"
+    - if: "m.get('config_diff') and any(v[1] is not None and not k.startswith(('name', 'output', 'features', 'dense.output', 'pairs.file', 'pairs.max_visual_distance')) for k, v in m['config_diff'].items())"
+      then: "the config differs from v2_A_cf beyond the press data paths and the pair filter: the recipe is not a copy (see config_diff; keys the reference run did not have are ignored)"
     - if: "m.get('guard')"
       then: "the guard stopped the run: see GUARD.json"
   on_pass: "PB-s2-A continues from this memory"
@@ -1948,8 +1963,8 @@ tasks:
     - pairs.max_visual_distance={MEDIAN_VIS:{O}/pairs/pairs_press_v1.json}
   pass_if: "m.get('complete') and m.get('fm_ratio') is not None and m['fm_ratio'] < 1.0"
   failure_explanations:
-    - if: "m.get('config_diff') and any(not k.startswith(('name', 'output', 'features', 'dense.output', 'pairs.file', 'pairs.max_visual_distance', 'memory_v2.history.landmark_stride', 'schedule.micro_batch')) for k in m['config_diff'])"
-      then: "the config differs from v2_A_cf beyond the press data paths, the pair filter, the history rule and the micro batch (see config_diff)"
+    - if: "m.get('config_diff') and any(v[1] is not None and not k.startswith(('name', 'output', 'features', 'dense.output', 'pairs.file', 'pairs.max_visual_distance', 'memory_v2.history.landmark_stride', 'schedule.micro_batch')) for k, v in m['config_diff'].items())"
+      then: "the config differs from v2_A_cf beyond the press data paths, the pair filter, the history rule and the micro batch (see config_diff; keys the reference run did not have are ignored)"
     - if: "m.get('guard')"
       then: "the guard stopped the run: see GUARD.json"
   on_pass: "PB-s2-B continues from this memory"
@@ -1982,8 +1997,8 @@ tasks:
     - pairs.max_visual_distance={MEDIAN_VIS:{O}/pairs/pairs_press_v1.json}
   pass_if: "m.get('complete') and m.get('fm_ratio') is not None and m['fm_ratio'] < 1.0"
   failure_explanations:
-    - if: "m.get('config_diff') and any(not k.startswith(('name', 'output', 'features', 'dense.output', 'pairs.file', 'pairs.max_visual_distance', 'init_memory')) for k in m['config_diff'])"
-      then: "the config differs from X7 (a2C_6ep) beyond the press data paths, the pair filter and init_memory (see config_diff)"
+    - if: "m.get('config_diff') and any(v[1] is not None and not k.startswith(('name', 'output', 'features', 'dense.output', 'pairs.file', 'pairs.max_visual_distance', 'init_memory')) for k, v in m['config_diff'].items())"
+      then: "the config differs from X7 (a2C_6ep) beyond the press data paths, the pair filter and init_memory (see config_diff; keys the reference run did not have are ignored)"
     - if: "m.get('guard')"
       then: "the guard stopped the run: see GUARD.json"
   on_pass: "arm A trained; the press closed loop (10 dev scenes, on / null) follows once the press scene bank and counters are in"
@@ -2017,8 +2032,8 @@ tasks:
     - pairs.max_visual_distance={MEDIAN_VIS:{O}/pairs/pairs_press_v1.json}
   pass_if: "m.get('complete') and m.get('fm_ratio') is not None and m['fm_ratio'] < 1.0"
   failure_explanations:
-    - if: "m.get('config_diff') and any(not k.startswith(('name', 'output', 'features', 'dense.output', 'pairs.file', 'pairs.max_visual_distance', 'init_memory', 'memory_v2.history.landmark_stride', 'schedule.micro_batch')) for k in m['config_diff'])"
-      then: "the config differs from X7 (a2C_6ep) beyond the press data paths, the pair filter, init_memory, the history rule and the micro batch (see config_diff)"
+    - if: "m.get('config_diff') and any(v[1] is not None and not k.startswith(('name', 'output', 'features', 'dense.output', 'pairs.file', 'pairs.max_visual_distance', 'init_memory', 'memory_v2.history.landmark_stride', 'schedule.micro_batch')) for k, v in m['config_diff'].items())"
+      then: "the config differs from X7 (a2C_6ep) beyond the press data paths, the pair filter, init_memory, the history rule and the micro batch (see config_diff; keys the reference run did not have are ignored)"
     - if: "m.get('guard')"
       then: "the guard stopped the run: see GUARD.json"
   on_pass: "arm B trained; the press closed loop (10 dev scenes, on / null) follows once the press scene bank and counters are in"
