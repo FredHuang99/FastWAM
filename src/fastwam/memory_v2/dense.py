@@ -37,7 +37,7 @@ import torch
 from torch import nn
 
 from .config import HistoryPolicyConfig
-from .history import collate_history, select_history
+from .history import collate_history, row_policy, select_history
 
 ARM_COLUMNS = [0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12]
 GRIPPER_COLUMNS = [6, 13]
@@ -429,7 +429,7 @@ def make_batch(rows: Sequence[dict], episodes: EpisodeStore, features: FeatureSt
         e = episodes(row["episode_id"])
         a = int(row["anchor"])
         chunk, mask = action_window(e["actions"], a)
-        selection = select_history(range(a + 1), a, policy)
+        selection = select_history(range(a + 1), a, row_policy(policy, row))   # mixed-stride rows carry their stride
         f = features(row["episode_id"])
         if len(f) != len(e["actions"]):
             raise ValueError(f"Feature/episode length mismatch for {row['episode_id']}.")

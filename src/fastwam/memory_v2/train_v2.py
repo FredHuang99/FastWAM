@@ -37,6 +37,7 @@ from typing import Dict, List, Optional, Sequence, Tuple
 import torch
 
 from .config import GuidanceConfig, V2Config
+from .history import pairs_with_strides, with_strides
 from .metrics import attention_report, gate_profile, history_sensitivity, summarize_sensitivity
 from .model import MemoryV2Model
 from .objectives import compute_loss
@@ -605,7 +606,7 @@ class Trainer:
             self._epoch = (epoch, epoch_rows(self.rows, epoch, cfg.seed))
         rows = self._epoch[1][index * cfg.schedule.global_batch:(index + 1) * cfg.schedule.global_batch]
         total = len(rows)
-        mine = rows[self.rank::self.world]
+        mine = with_strides(rows[self.rank::self.world], cfg.v2.history.landmark_strides, cfg.seed, epoch)
         lrs = {}
         for group in self.optimizer.param_groups:
             group["lr"] = lr_at(u, self.total, group["lr_base"], cfg.optim.warmup_fraction, cfg.optim.min_lr_ratio)
@@ -636,7 +637,7 @@ class Trainer:
         if self.pairs:
             chosen = random.Random(stable_seed(cfg.seed, "pairs", u)).sample(
                 self.pairs, min(cfg.pairs.per_update, len(self.pairs)))
-            mine_pairs = chosen[self.rank::self.world]
+            mine_pairs = pairs_with_strides(chosen[self.rank::self.world], cfg.v2.history.landmark_strides, cfg.seed, u)
             pair_total = 2 * len(chosen)
             for m in range(0, len(mine_pairs), cfg.schedule.micro_batch):
                 group = mine_pairs[m:m + cfg.schedule.micro_batch]
@@ -978,6 +979,9 @@ def cmd_train(cfg: TrainConfig, args) -> None:
     trainer = Trainer(backend, cfg, output, log)
     log(f"[train] rows={len(trainer.rows)} updates/epoch={trainer.updates_per_epoch} total={trainer.total} "
         f"world={trainer.world} trainable={sum(p.numel() for p in trainer.parameters)}")
+    if cfg.v2.history.landmark_strides:
+        log(f"[history] mixed strides: every training sample / pair draws its landmark stride from "
+            f"{list(cfg.v2.history.landmark_strides)}; evaluation windows use landmark_stride={cfg.v2.history.landmark_stride}")
     result = trainer.run(dry_run=args.dry_run, resume=args.resume)
     log("[train] " + json.dumps(result))
 

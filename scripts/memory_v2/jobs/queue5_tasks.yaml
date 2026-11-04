@@ -2122,6 +2122,126 @@ tasks:
   on_pass: "memory effect on the counting task once the history sees the presses: December, official 100 scenes with the denser / event-anchored selection"
   on_fail: "see failure_explanations"
 
+# press arm C, mixed strides (user's go-ahead 11-04 20:46): every training sample / pair draws its landmark stride
+# from [8, 12, 16, 24, 32] (memory_v2.history.landmark_strides, training only); evaluation windows use landmark_stride 24 (as arm A);
+# at inference the stride is set freely: C is evaluated at 24 (vs arm A) and at 8 (vs arm B). Micro batches as arm B
+# (stride-8 samples hold up to 48 history frames; PB-B-dry measured that fit), global batch 64. Placed after the
+# A / B tasks so that the pool gives a freed GPU to them first.
+- id: PB-s1-C
+  lane: train
+  kind: train
+  config: configs/memory_v2/train_v2_press.yaml
+  after: [PB-pairs]
+  requires_pass: [PB-pairs, PB-B-dry]
+  hypothesis: "press stage 1, mixed strides: the v2_A_cf recipe with a landmark stride drawn per sample from [8, 12, 16, 24, 32] completes and lowers the FM loss; keys expected to differ from v2_A_cf: name, output, features, dense.output, pairs.file, pairs.max_visual_distance, memory_v2.history.landmark_strides, schedule.micro_batch"
+  need_mib: 30000
+  run: v2_press_cf_mix
+  reference_run: v2_A_cf
+  sets:
+    - "memory_v2.history.landmark_strides=[8, 12, 16, 24, 32]"
+    - schedule.micro_batch=4
+    - pairs.file={O}/pairs/pairs_press_v1.json
+    - pairs.weight=0.5
+    - pairs.per_update=16
+    - pairs.max_visual_distance={MEDIAN_VIS:{O}/pairs/pairs_press_v1.json}
+  pass_if: "m.get('complete') and m.get('fm_ratio') is not None and m['fm_ratio'] < 1.0"
+  failure_explanations:
+    - if: "m.get('config_diff') and any(v[1] is not None and not k.startswith(('name', 'output', 'features', 'dense.output', 'pairs.file', 'pairs.max_visual_distance', 'memory_v2.history.landmark_strides', 'schedule.micro_batch')) for k, v in m['config_diff'].items())"
+      then: "the config differs from v2_A_cf beyond the press data, the pair filter, the stride set and the micro batch (see config_diff; keys the reference run did not have are ignored)"
+    - if: "m.get('guard')"
+      then: "the guard stopped the run: see GUARD.json"
+  on_pass: "PB-s2-C continues from this memory"
+  on_fail: "stage 1 did not complete: inspect v2_press_cf_mix/stdout.log; arm C waits"
+
+- id: PB-s2-C
+  lane: train
+  kind: train
+  config: configs/memory_v2/train_v2_press.yaml
+  after: [PB-s1-C]
+  requires_pass: [PB-s1-C]
+  hypothesis: "press stage 2, mixed strides: the X7 recipe with a landmark stride drawn per sample from [8, 12, 16, 24, 32], micro batch 2 (as arm B), completes and lowers the FM loss; keys expected to differ from a2C_6ep: as PB-s1-C plus init_memory"
+  need_mib: 30000
+  run: press_6ep_mix
+  reference_run: a2C_6ep
+  sets:
+    - "memory_v2.history.landmark_strides=[8, 12, 16, 24, 32]"
+    - optim.lr_action=1e-5
+    - optim.lr_memory=2e-5
+    - init_memory={LAST:v2_press_cf_mix}
+    - schedule.epochs=6
+    - schedule.micro_batch=2
+    - schedule.eval_every=335
+    - schedule.keep_last=2
+    - schedule.save_every=200
+    - guard.loss_factor=2.5
+    - guard.start_update=120
+    - pairs.file={O}/pairs/pairs_press_v1.json
+    - pairs.weight=0.5
+    - pairs.per_update=8
+    - pairs.max_visual_distance={MEDIAN_VIS:{O}/pairs/pairs_press_v1.json}
+  pass_if: "m.get('complete') and m.get('fm_ratio') is not None and m['fm_ratio'] < 1.0"
+  failure_explanations:
+    - if: "m.get('config_diff') and any(v[1] is not None and not k.startswith(('name', 'output', 'features', 'dense.output', 'pairs.file', 'pairs.max_visual_distance', 'memory_v2.history.landmark_strides', 'schedule.micro_batch', 'init_memory')) for k, v in m['config_diff'].items())"
+      then: "the config differs from X7 (a2C_6ep) beyond the press data, the pair filter, the stride set, the micro batch and init_memory (see config_diff)"
+    - if: "m.get('guard')"
+      then: "the guard stopped the run: see GUARD.json"
+  on_pass: "arm C trained; PB-loop-C24 / PB-loop-C8 evaluate it at stride 24 and 8"
+  on_fail: "stage 2 did not complete: inspect press_6ep_mix/stdout.log"
+
+- id: PB-loop-C24
+  lane: loop
+  kind: closed_loop
+  after: [PB-s2-C, PB-loop-A]
+  requires_pass: [PB-s2-C, PB-smoke]
+  hypothesis: "one mixed-stride model run at stride 24 counts about as well as the stride-24 specialist (arm A) on the same 10 dev scenes: memory-on count_correct >= arm A's - 1 (free choice of the stride at inference costs at most 1/10 here); null is run once here (masking the history makes the stride irrelevant)"
+  need_mib: 30000
+  checkpoint: press_6ep_mix/last
+  label: press_mix_e6_exec8_at24
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed17_n10_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--set", "memory_v2.history.landmark_stride=24"]
+  output: closed_loop/press_pilot
+  reference: {folders: [closed_loop/press_pilot], label: press_e6_exec8, modes: ["on", "null"]}
+  min_episodes: 16
+  inconclusive_if: "m.get('press_button/on', {}).get('n', 0) < 8 or not r.get('press_button/on')"
+  pass_if: "m['press_button/on']['count_correct'] >= r['press_button/on']['count_correct'] - 1"
+  failure_explanations:
+    - if: "m['press_button/on']['count_correct'] <= r['press_button/on']['count_correct'] - 2"
+      then: "mixing strides costs counting accuracy at stride 24: the free-T model is worse than the stride-24 specialist by >= 2/10"
+    - if: "m['press_button/on']['count_correct'] >= r['press_button/on']['count_correct'] + 2"
+      then: "mixed-stride training helps even at stride 24 (stride augmentation), not only flexibility"
+    - if: "m['press_button/on']['presses_total'] > 0 and abs(m['press_button/on']['count_correct'] - m['press_button/null']['count_correct']) <= 1"
+      then: "at stride 24 the mixed model shows no memory effect (on ~ null), like the expectation for arm A (coverage 31%)"
+  on_pass: "stride 24 at inference is as good as training at 24 only"
+  on_fail: "see failure_explanations"
+
+- id: PB-loop-C8
+  lane: loop
+  kind: closed_loop
+  after: [PB-s2-C, PB-loop-B, PB-loop-C24]
+  requires_pass: [PB-s2-C, PB-smoke]
+  hypothesis: "the same mixed-stride model run at stride 8 counts about as well as the stride-8 specialist (arm B) on the same scenes: memory-on count_correct >= arm B's - 1. Together with PB-loop-C24: one model, the stride chosen at inference (the free-T question of 11-04)"
+  need_mib: 30000
+  checkpoint: press_6ep_mix/last
+  label: press_mix_e6_exec8_at8
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed17_n10_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--set", "memory_v2.history.landmark_stride=8"]
+  output: closed_loop/press_pilot
+  reference: {folders: [closed_loop/press_pilot], label: press_lm8_e6_exec8, modes: ["on"]}
+  min_episodes: 8
+  inconclusive_if: "m.get('press_button/on', {}).get('n', 0) < 8 or not r.get('press_button/on')"
+  pass_if: "m['press_button/on']['count_correct'] >= r['press_button/on']['count_correct'] - 1"
+  failure_explanations:
+    - if: "m['press_button/on']['count_correct'] <= r['press_button/on']['count_correct'] - 2"
+      then: "mixing strides costs counting accuracy at stride 8: the free-T model is worse than the stride-8 specialist by >= 2/10"
+    - if: "m['press_button/on']['count_correct'] >= r['press_button/on']['count_correct'] + 2"
+      then: "mixed-stride training helps at stride 8 too (stride augmentation)"
+  on_pass: "stride 8 at inference is as good as training at 8 only: one model serves both budgets"
+  on_fail: "see failure_explanations"
+
 - id: PB-cache
   lane: train
   kind: shell

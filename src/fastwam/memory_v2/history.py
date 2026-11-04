@@ -7,6 +7,8 @@ whenever the set of available ids is identical.
 """
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
@@ -51,6 +53,45 @@ def _uniform_subset(values: Sequence[int], count: int) -> List[int]:
     while len(chosen) < count and rest:
         chosen.append(rest.pop(0))
     return sorted(chosen)
+
+
+def pick_stride(strides: Sequence[int], *key) -> int:
+    """One landmark stride from `strides`, a pure function of `key` (seed, epoch, row ...): resumable and the
+    same on every rank."""
+    strides = tuple(int(v) for v in strides)
+    if not strides:
+        raise ValueError("pick_stride needs at least one stride.")
+    digest = hashlib.sha256(json.dumps(["memory_v2-landmark-stride-v1", *key], sort_keys=True).encode()).digest()
+    return strides[int.from_bytes(digest[:8], "little") % len(strides)]
+
+
+def with_strides(rows: Sequence[dict], strides: Sequence[int], seed: int, epoch: int) -> List[dict]:
+    """Training rows with a per-row `landmark_stride` (mixed-stride training); unchanged when `strides` is empty."""
+    if not strides:
+        return list(rows)
+    return [dict(r, landmark_stride=pick_stride(strides, seed, "row", epoch, r["episode_id"], int(r["anchor"])))
+            for r in rows]
+
+
+def pairs_with_strides(pairs: Sequence[dict], strides: Sequence[int], seed: int, update: int) -> List[dict]:
+    """Counterfactual pairs with ONE stride for both rows (own and swapped history are then sampled alike)."""
+    if not strides:
+        return list(pairs)
+    out = []
+    for p in pairs:
+        q, d = p["query"], p["donor"]
+        k = pick_stride(strides, seed, "pair", update, q["episode_id"], int(q["anchor"]), d["episode_id"], int(d["anchor"]))
+        out.append({**p, "query": dict(q, landmark_stride=k), "donor": dict(d, landmark_stride=k)})
+    return out
+
+
+def row_policy(policy: HistoryPolicyConfig, row: dict) -> HistoryPolicyConfig:
+    """The row's history policy: its own landmark_stride (mixed-stride training rows), else the configured one."""
+    stride = row.get("landmark_stride")
+    if stride is None or int(stride) == policy.landmark_stride:
+        return policy
+    from dataclasses import replace
+    return replace(policy, landmark_stride=int(stride))
 
 
 def select_history(available: Iterable[int], current: int, policy: HistoryPolicyConfig) -> HistorySelection:

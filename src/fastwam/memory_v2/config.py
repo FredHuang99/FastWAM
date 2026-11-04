@@ -40,11 +40,17 @@ class HistoryPolicyConfig:
     recent_stride: int = 8
     max_frames: int = 48            # hard cap; landmarks are thinned uniformly, anchors/recent always kept
     include_current: bool = False   # the current frame already reaches the action expert through its KV
+    # Training only (mixed-stride arm, 11-04): when non-empty, every TRAINING sample (and every counterfactual
+    # pair, one stride for both of its rows) draws its landmark stride from this set, deterministically from the
+    # seed, epoch and row. Evaluation windows and the online archive always use `landmark_stride`, which can be
+    # set freely at inference (online --set memory_v2.history.landmark_stride=K). () = fixed stride, as before.
+    landmark_strides: tuple = ()
 
     def __post_init__(self):
+        object.__setattr__(self, "landmark_strides", tuple(int(v) for v in (self.landmark_strides or ())))
         if self.anchor_frames < 0 or self.recent_frames < 0:
             raise ValueError("anchor_frames and recent_frames must be non-negative.")
-        if self.landmark_stride < 1 or self.recent_stride < 1:
+        if self.landmark_stride < 1 or self.recent_stride < 1 or any(v < 1 for v in self.landmark_strides):
             raise ValueError("Strides must be positive.")
         minimum = self.anchor_frames + self.recent_frames + int(self.include_current)
         if self.max_frames < max(1, minimum):
