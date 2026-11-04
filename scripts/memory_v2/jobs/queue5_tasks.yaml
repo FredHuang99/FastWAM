@@ -1836,6 +1836,54 @@ tasks:
   on_pass: "v6 2.5 data gate met: press training can start once its history rule (B: landmarks every 8 / C: press-anchored) is fixed by Fable"
   on_inconclusive: "(shell ERROR) features not complete: read the job log; the v6 2.5 gate (Thu 11-05 18:00) decides whether press training starts this week"
 
+- id: PB-cache-a100
+  lane: train
+  kind: shell
+  after: [PB-parity2]
+  requires_pass: [PB-fetch, PB-events3]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "PB-parity2 FAILED on C2 only and stays FAIL: text relative L2 vs the H100 cache 2.92e-2 > 2e-2 (latent 6.85e-3, video_latent 4.82e-3 pass; C1 exact fields, C3 worst frame, C4 <= 0.033 of an off-by-one frame, C5 features 1.6e-2 and memory_v2 checks all pass). Our builder is bit-exact on the A100 (D1 rerun relative L2 0). The difference comes from the encoder environment: the H100 cache was encoded with torch 2.10 nv25.11 / numpy 2.1, this container has torch 2.6 nv24.12 / numpy 1.26, plus the GPU type. Design decision (recorded deviation from v6 2.5, which asked for parity with the two-task cache): the press_button pilot is built, trained and evaluated in ONE encoder environment, this A100 container; the cache is not claimed to match the two-task cache; press models are evaluated on the A100 only; putting press and the two-task cache into one model needs both re-encoded in one environment first. Pass: all 50 episodes cached (CACHE.json)"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "the build stopped (a shell task only records rc; read the job log). It resumes: finished episodes keep their COMPLETE.json as long as the code is unchanged (same identity)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/press/build_dense.py build --task press_button"
+  pass_if: "m['rc'] == 0"
+  on_pass: "press_button cache complete (A100 encoder environment): PB-features-a100 builds the history features"
+  on_inconclusive: "(shell ERROR) cache incomplete: fix and re-run (it resumes); v6 2.5 gate Thu 11-05 18:00"
+
+- id: PB-features-a100
+  lane: train
+  kind: shell
+  after: [PB-cache-a100]
+  requires_pass: [PB-cache-a100]
+  need_mib: 30000
+  timeout_h: 5
+  hypothesis: "frozen Video-DiT history features for the A100-encoded press_button cache (outputs/memory_v2/features_press_v1, ~19 GB, same FeatureStore code as features_dense_v1); v6 2.5 data gate: ready before Thu 11-05 18:00"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "features not complete (a shell task only records rc; read the job log: disk, identity check of the new cache, or the base-model load)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python -m fastwam.memory_v2.train_v2 features --config configs/memory_v2/train_v2_press.yaml"
+  pass_if: "m['rc'] == 0"
+  on_pass: "v6 2.5 data gate met; PB-pairs mines the press pairs; press training starts once its history rule is fixed"
+  on_inconclusive: "(shell ERROR) features not complete; the v6 2.5 gate decides whether press training starts this week"
+
+- id: PB-pairs
+  lane: cpu
+  kind: shell
+  after: [PB-features-a100]
+  requires_pass: [PB-features-a100]
+  need_mib: 0
+  timeout_h: 3
+  hypothesis: "matched-present pairs on press_button with the two-task settings unchanged (anchor stride 8, episode fraction 0.3-1.0, present RMS <= 0.05, future L2 >= 2.0, 3 donors per query; visual distance from features_press_v1) -> outputs/memory_v2/pairs/pairs_press_v1.json, for the X7 recipe's pair term"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "pair mining failed (a shell task only records rc; read the job log)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/find_pairs.py --output {O}/pairs/pairs_press_v1.json --features {O}/features_press_v1 --dense-output {O}/press/dense_press_button_v1"
+  pass_if: "m['rc'] == 0"
+  on_pass: "press pairs ready; the summary in the job log gives the train / val pair counts"
+  on_inconclusive: "(shell ERROR) no press pairs: the press stage-1 / stage-2 runs wait"
+
 - id: PB-cache
   lane: train
   kind: shell

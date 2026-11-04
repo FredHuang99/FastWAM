@@ -1,6 +1,8 @@
 # memory_v2 on the press_button dense cache (week plan v6 2.5): train_v2_A.yaml with only the data paths changed.
 # The cache is built by scripts/memory_v2/press/build_dense.py into outputs/memory_v2/press/dense_press_button_v1
-# (same encoders / image path / normalizer as the two-task output; parity-checked on a put_back episode first).
+# (same encoder code / image path / normalizer as the two-task output). It is encoded in the A100 container
+# (torch 2.6); the two-task cache was encoded on an H100 with torch 2.10, and PB-parity2 found the text encoding
+# 2.9% apart (FAIL, kept). So the press pilot is trained and evaluated on the A100 only (task PB-cache-a100).
 #
 #   python -m fastwam.memory_v2.train_v2 features --config configs/memory_v2/train_v2_press.yaml
 name: v2_press_memory_only
