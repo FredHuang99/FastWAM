@@ -85,9 +85,12 @@ TASKS = Path(os.environ.get("QUEUE5_TASKS", str(REPO / "scripts/memory_v2/jobs/q
 POLL = int(os.environ.get("QUEUE5_POLL", "60"))
 # progress (week plan v4 1.2): the number of these stages reached in order, / 6; a simulator success counts 6 / 6
 PROGRESS = {"put_back_block": ("lifted", "centre", "pressed", "regrasp", "returned", "success"),
-            "swap_blocks": ("lifted", "s1", "s2", "s3", "pressed", "success")}
+            "swap_blocks": ("lifted", "s1", "s2", "s3", "pressed", "success"),
+            # press_button (11-04): counts judged at the first confirm press (closed_loop_stages.analyse_press)
+            "press_button": ("pressed", "n1_correct", "n2_correct", "confirmed", "success")}
 STAGES = {"put_back_block": ("lifted", "centre", "pressed", "stage1", "regrasp", "returned", "success"),
-          "swap_blocks": ("lifted", "s1", "s2", "s3", "pressed", "success")}
+          "swap_blocks": ("lifted", "s1", "s2", "s3", "pressed", "success"),
+          "press_button": ("pressed", "n1_correct", "n2_correct", "confirmed", "count_correct", "success")}
 
 
 def now_bj():
@@ -335,7 +338,7 @@ def episodes(folders, label, modes=None, tasks=None):
             snaps, counters = cls.read_rows(d / "executed_actions.jsonl")
             if len(snaps) < 2 or not snaps[0]:
                 continue
-            a = cls.analyse_put_back(snaps, counters) if r["task"] == "put_back_block" else cls.analyse_swap(snaps, counters)
+            a = cls.analyse(r["task"], snaps, counters)
             a["success"] = bool(r.get("success"))
             a["dir"] = str(d)
             out[(r["task"], r["mode"], int(r["seed"]))] = a
@@ -372,6 +375,12 @@ def stage_table(eps):
         if task == "put_back_block":
             cell["centred"] = cell.get("centred", 0) + bool(a.get("centre"))
             cell["pressed_after_centre"] = cell.get("pressed_after_centre", 0) + bool(a.get("centre") and a.get("pressed"))
+        if task == "press_button":
+            cell["presses_total"] = cell.get("presses_total", 0) + int(a.get("presses") or 0)
+            cell["counters_logged"] = cell.get("counters_logged", 0) + bool(a.get("logged"))
+            cell["over_count"] = cell.get("over_count", 0) + bool((a.get("n1_error") or 0) > 0 or (a.get("n2_error") or 0) > 0)
+            cell["under_count"] = cell.get("under_count", 0) + bool(a.get("confirmed") and ((a.get("n1_error") or 0) < 0
+                                                                                           or (a.get("n2_error") or 0) < 0))
     for cell in m.values():
         cell["progress_mean"] = round(cell.pop("progress_sum") / cell["n"], 4) if cell["n"] else 0.0
         if "centred" in cell:
@@ -581,7 +590,7 @@ def headline(task, m):
                 parts.append(f"{key} n={cell['n']} " + " ".join(f"{k}={cell.get(k, 0)}" for k in STAGES.get(key.split('/')[0], ()))
                              + (f" prog={cell['progress_mean']:.2f}" if "progress_mean" in cell else ""))
         for t, cell in (m.get("on_vs_null") or {}).items():
-            key = "s2" if t == "swap_blocks" else "pressed"
+            key = "s2" if t == "swap_blocks" else "count_correct" if t == "press_button" else "pressed"
             v = cell.get(key)
             if v:
                 parts.append(f"{t} on/null only {key} {v[0]}/{v[1]} p={sign_p(v[0], v[1]):.3f}")

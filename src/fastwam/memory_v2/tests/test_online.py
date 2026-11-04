@@ -60,7 +60,8 @@ def test_execution_count_and_caps():
         online.execution_count(0, 500, 33)
     with pytest.raises(ValueError):
         online.execution_count(500, 500)
-    assert online.LIMITS == {"put_back_block": 500, "swap_blocks": 1000}
+    assert online.LIMITS == {"put_back_block": 500, "swap_blocks": 1000, "press_button": 1500}
+    assert online.DEFAULT_TASKS == ("put_back_block", "swap_blocks")
 
 
 def test_wilson_and_mcnemar():
@@ -97,7 +98,7 @@ def test_load_select_scenes(tmp_path):
     (tmp_path / "swap_blocks.json").write_text(json.dumps(
         {"scenes": [{"task": "swap_blocks", "seed": 50 + i, "ordinal": i, "instruction": f"s{i}", "gpu": {}} for i in range(3)]}))
     (tmp_path / "contract.json").write_text(json.dumps({"seed": 17}))
-    scenes = online.load_scenes([str(tmp_path), str(tmp_path / "put_back_block.json")], tmp_path, list(online.LIMITS))
+    scenes = online.load_scenes([str(tmp_path), str(tmp_path / "put_back_block.json")], tmp_path, list(online.DEFAULT_TASKS))
     assert [s["seed"] for s in scenes] == [10, 11, 12, 13, 50, 51, 52]          # deduplicated, task order
     assert "gpu" not in scenes[-1]
     assert [s["seed"] for s in online.select_scenes(scenes, 2, "0/1")] == [10, 11, 50, 51]

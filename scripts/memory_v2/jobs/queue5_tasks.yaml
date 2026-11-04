@@ -2039,6 +2039,89 @@ tasks:
   on_pass: "arm B trained; the press closed loop (10 dev scenes, on / null) follows once the press scene bank and counters are in"
   on_fail: "stage 2 did not complete: inspect press_6ep_lm8/stdout.log"
 
+# press closed loops (A100 only, see PB-cache-a100). Counts are judged at the first confirm press
+# (closed_loop_stages.analyse_press); count_correct = both counts right = the memory outcome of week plan v6 2.5.
+- id: PB-smoke
+  lane: loop
+  kind: closed_loop
+  after: [PB-plan]
+  requires_pass: [PB-plan]
+  hypothesis: "plumbing only, not a result: the X7 two-task model drives 1 press_button scene for 200 targets (memory on, execute 8); the simulator accepts the 1500-target cap (the adapter refuses a cap that differs from the env's step_lim), the adapter logs the press counters and both cards, and the stage analysis reads them"
+  need_mib: 30000
+  checkpoint: a2C_6ep/last
+  label: x7_press_smoke
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed17_n10_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--max-targets", "200", "--limit", "1"]
+  output: closed_loop/press_smoke
+  min_episodes: 1
+  pass_if: "m['press_button/on']['n'] >= 1 and m['press_button/on']['counters_logged'] == m['press_button/on']['n']"
+  failure_explanations:
+    - if: "m.get('episodes', 0) == 0"
+      then: "no episode finished: read the task log and closed_loop/press_smoke/*/on/press_button/seed_*/simulator.log (cap mismatch, scene setup, policy load)"
+    - if: "m.get('episodes', 0) > 0 and m['press_button/on']['counters_logged'] < m['press_button/on']['n']"
+      then: "the episode ran but the press counters / cards are not in executed_actions.jsonl: the adapter's task_state did not find the env attributes"
+  on_pass: "the press closed loop works end to end; PB-loop-A / PB-loop-B may run once their models are trained"
+  on_fail: "fix the plumbing before the dev loops (they require PB-smoke)"
+
+- id: PB-loop-A
+  lane: loop
+  kind: closed_loop
+  after: [PB-s2-A, PB-smoke]
+  requires_pass: [PB-s2-A, PB-smoke]
+  hypothesis: "press pilot, history rule A (week plan v6 2.5, 10 dev scenes, execute 8, cap 1500): memory on counts correctly (both counts right at the first confirm press) in >= 3/10 episodes and in >= 2 more than history masked (null). Expected NOT to pass: rule A shows 31% of past presses and recovers the count at 3% of decisions (PB-events3)"
+  need_mib: 30000
+  checkpoint: press_6ep/last
+  label: press_e6_exec8
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed17_n10_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8"]
+  output: closed_loop/press_pilot
+  min_episodes: 16
+  inconclusive_if: "m.get('press_button/on', {}).get('n', 0) < 8 or m.get('press_button/null', {}).get('n', 0) < 8"
+  pass_if: "m['press_button/on']['count_correct'] >= 3 and m['press_button/on']['count_correct'] >= m['press_button/null']['count_correct'] + 2"
+  failure_explanations:
+    - if: "m['press_button/on']['presses_total'] == 0"
+      then: "v6 2.5 tier 1: no press at all with memory on: a perception / action problem (reading the cards or reaching the buttons), not memory; press_button is not the next task, try cover_blocks"
+    - if: "m['press_button/on']['presses_total'] > 0 and abs(m['press_button/on']['count_correct'] - m['press_button/null']['count_correct']) <= 1"
+      then: "v6 2.5 tier 2: memory has no effect; coverage of rule A is 31% of past presses (count recoverable at 3% of decisions) < 60%: the history selection misses the presses (compare PB-loop-B; next: press-anchored selection, X14)"
+    - if: "m['press_button/on']['over_count'] > m['press_button/on']['n'] / 2"
+      then: "most episodes press too often with memory on: the policy does not know how many presses it has done (counting failure, not reaching)"
+  on_pass: "memory effect on the counting task with the training selection rule: December, the official 100 scenes"
+  on_fail: "see failure_explanations; PB-loop-B says whether denser history selection fixes it"
+
+- id: PB-loop-B
+  lane: loop
+  kind: closed_loop
+  after: [PB-s2-B, PB-smoke, PB-loop-A]
+  requires_pass: [PB-s2-B, PB-smoke]
+  hypothesis: "press pilot, history rule B (landmarks every 8th frame; 91% of past presses visible, count recoverable at 81% of decisions): memory on counts correctly in >= 3/10 episodes and in >= 2 more than null (v6 2.5 tier 3). Compared with PB-loop-A on the same scenes (reference)"
+  need_mib: 30000
+  checkpoint: press_6ep_lm8/last
+  label: press_lm8_e6_exec8
+  modes: ["on", "null"]
+  scenes: [closed_loop/scenes_seed17_n10_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8"]
+  output: closed_loop/press_pilot
+  reference: {folders: [closed_loop/press_pilot], label: press_e6_exec8, modes: ["on", "null"]}
+  min_episodes: 16
+  inconclusive_if: "m.get('press_button/on', {}).get('n', 0) < 8 or m.get('press_button/null', {}).get('n', 0) < 8"
+  pass_if: "m['press_button/on']['count_correct'] >= 3 and m['press_button/on']['count_correct'] >= m['press_button/null']['count_correct'] + 2"
+  failure_explanations:
+    - if: "m['press_button/on']['presses_total'] == 0"
+      then: "v6 2.5 tier 1: no press at all with memory on: a perception / action problem, not memory"
+    - if: "m['press_button/on']['presses_total'] > 0 and abs(m['press_button/on']['count_correct'] - m['press_button/null']['count_correct']) <= 1"
+      then: "v6 2.5 tier 2 with coverage 81% (count recoverable): the selection sees the presses, so reading / training is the problem; boundary autopsy as in v6 2.4"
+    - if: "r.get('press_button/on') and m['press_button/on']['count_correct'] >= r['press_button/on']['count_correct'] + 2"
+      then: "denser selection helps: rule B counts correctly in >= 2 more episodes than rule A (memory on, same scenes); the selection density is a bottleneck on counting tasks"
+    - if: "r.get('press_button/on') and abs(m['press_button/on']['count_correct'] - r['press_button/on']['count_correct']) <= 1"
+      then: "rule B and rule A count about equally often (memory on): selection density is not what limits counting here"
+  on_pass: "memory effect on the counting task once the history sees the presses: December, official 100 scenes with the denser / event-anchored selection"
+  on_fail: "see failure_explanations"
+
 - id: PB-cache
   lane: train
   kind: shell

@@ -12,6 +12,13 @@ swap_blocks     trays left (-.14) middle (0) right (.14), y -.15; one tray start
   S1 a block into the empty tray -> S2 the OTHER block into the vacated tray -> S3 the first block into the
   other's original tray -> button pressed. MEMORY DECISION: after S1 the scene looks like a fresh start; moving
   the other block (correct) vs. the same block again (loop) needs the episode's history.
+press_button    cards card_id_1 in 1..9, card_id_2 in 1..10-card_id_1; press the left button card_id_1 times, the
+  middle card_id_2 times, then the right (check) button once. Counters press_cnt_1 / press_cnt_2 /
+  press_cnt_check_button are logged by memory_v2's sim_adapter (task_state, from 11-04). Stages in order:
+  pressed (any left / middle press) -> n1_correct -> n2_correct -> confirmed -> success, where n1 / n2 are the
+  counts at the FIRST confirm press (the moment the policy decides it has counted enough; a wrong count does not
+  end the episode, so later presses would blur it), or at the end if it never confirms. count_correct = n1 and n2
+  both right (pre-registered memory outcome, week plan v6 2.5).
 
     /opt/mwam/bin/python scripts/memory_v2/closed_loop_stages.py [results folder ...]
 """
@@ -131,6 +138,66 @@ def analyse_swap(snaps, counters):
     r["furthest"] = ("success" if r["success"] else "s3" if r["s3"] else "s2" if r["s2"] else "s1" if r["s1"]
                      else "lifted" if r["lifted"] else "none")
     return r
+
+
+PRESS_COUNTERS = ("press_cnt_1", "press_cnt_2", "press_cnt_check_button")
+
+
+def analyse_press(snaps, counters):
+    """press_button: the two counts at the first confirm press (else at the end) against the two cards."""
+    first = snaps[0] if snaps else {}
+
+    def card(name):
+        if first.get(name) is not None:
+            return int(first[name])
+        return next((int(c[name]) for c in counters if c.get(name) is not None), None)
+    card1, card2 = card("card_id_1"), card("card_id_2")
+    logged = (("press_cnt_1" in first or any("press_cnt_1" in c for c in counters))       # counters and cards recorded
+              and card1 is not None and card2 is not None)
+    rows = [{k: int(c.get(k) or 0) for k in PRESS_COUNTERS} for c in counters]
+    zero = {k: int(first.get(k) or 0) for k in PRESS_COUNTERS}
+    confirm_t = next((i + 1 for i, c in enumerate(rows) if c["press_cnt_check_button"] >= 1), None)
+    at = rows[confirm_t - 1] if confirm_t else (rows[-1] if rows else zero)
+    final = rows[-1] if rows else zero
+    times = {k: [] for k in ("press_cnt_1", "press_cnt_2")}
+    prev = zero
+    for i, c in enumerate(rows):                       # counters[i] = state after target i + 1
+        for k in times:
+            if c[k] > prev[k]:
+                times[k].append(i + 1)
+        prev = c
+    n1, n2 = at["press_cnt_1"], at["press_cnt_2"]
+    known = card1 is not None and card2 is not None
+    r = {"logged": logged, "card_1": card1, "card_2": card2, "n1": n1, "n2": n2,
+         "n1_final": final["press_cnt_1"], "n2_final": final["press_cnt_2"], "checks_final": final["press_cnt_check_button"],
+         "confirm_t": confirm_t, "confirmed": confirm_t is not None,
+         "presses": final["press_cnt_1"] + final["press_cnt_2"],
+         "press_times_1": times["press_cnt_1"], "press_times_2": times["press_cnt_2"],
+         "n1_error": (n1 - card1) if known else None, "n2_error": (n2 - card2) if known else None}
+    r["pressed"] = r["presses"] >= 1
+    r["n1_correct"] = known and n1 == card1
+    r["n2_correct"] = known and n2 == card2
+    r["count_correct"] = r["n1_correct"] and r["n2_correct"]
+    r["success"] = r["count_correct"] and r["confirmed"]        # reconstruction; the simulator's result.json is authoritative
+    r["choice_correct"] = None                                   # press has its own decision field: count_correct
+    r["events"] = ([f"left@{t}" for t in times["press_cnt_1"]] + [f"middle@{t}" for t in times["press_cnt_2"]]
+                   + ([f"check@{confirm_t}"] if confirm_t else []))
+    r["events"].sort(key=lambda e: int(e.split("@")[1]))
+    r["furthest"] = ("success" if r["success"] else "confirmed" if r["confirmed"] and r["n1_correct"] and r["n2_correct"]
+                     else "n2_correct" if r["n1_correct"] and r["n2_correct"] else "n1_correct" if r["n1_correct"] and r["pressed"]
+                     else "pressed" if r["pressed"] else "none")
+    return r
+
+
+def analyse(task, snaps, counters):
+    """The stage analysis of one episode of `task`."""
+    if task == "put_back_block":
+        return analyse_put_back(snaps, counters)
+    if task == "swap_blocks":
+        return analyse_swap(snaps, counters)
+    if task == "press_button":
+        return analyse_press(snaps, counters)
+    raise ValueError(f"no stage analysis for task {task}")
 
 
 def trace_episode(path: Path, task: str, start: int, every: int = 24):
@@ -292,6 +359,9 @@ def main():
                 if not SEED_DIR.fullmatch(d.name):
                     continue
                 res = json.loads(result.read_text())
+                if res["task"] not in ("put_back_block", "swap_blocks"):
+                    print(f"\n== {args.trace} {res['task']} seed={res['seed']}: no block timeline for this task")
+                    continue
                 snaps, counters = read_rows(d / "executed_actions.jsonl")
                 if res["task"] == "put_back_block":
                     r = analyse_put_back(snaps, counters)
@@ -318,11 +388,15 @@ def main():
             if len(snaps) < 2 or not snaps[0]:
                 continue                                           # episode without executed targets
             task = res["task"]
-            r = analyse_put_back(snaps, counters) if task == "put_back_block" else analyse_swap(snaps, counters)
+            r = analyse(task, snaps, counters)
             r.update(seed=res["seed"], success=res["success"], cond=f"{res['label']}/{res['mode']}", task=task,
                      folder=Path(folder).name, targets=res["executed_targets"])
             table[(Path(folder).name, task, r["cond"])].append(r)
-            if not args.quiet:
+            if not args.quiet and task == "press_button":
+                print(f"{Path(folder).name:<7}{r['cond']:<22}{task:<15} seed={r['seed']} furthest={r['furthest']:<10} "
+                      f"cards=({r['card_1']},{r['card_2']}) at_confirm=({r['n1']},{r['n2']}) confirm_t={r['confirm_t']} "
+                      f"final=({r['n1_final']},{r['n2_final']}) logged={r['logged']}  events={r['events'][:12]}")
+            elif not args.quiet:
                 extra = (f"orig={r['original']} choice={r['choice_after_centre']}" if task == "put_back_block"
                          else f"start={r['start']} empty={r['empty']} second={r['second_move']}")
                 print(f"{Path(folder).name:<7}{r['cond']:<22}{task:<15} seed={r['seed']} furthest={r['furthest']:<8} "
@@ -337,6 +411,12 @@ def main():
                       f"stage1 {frac('stage1'):.2f}  regrasp {frac('regrasp'):.2f}  returned {frac('returned'):.2f}")
             choices = Counter(r["choice_after_centre"] for r in rs if r["centre"])
             decision = f"return mat correct {sum(decided)}/{len(decided)} (chance 1/4)  choices after centre {dict(choices)}"
+        elif task == "press_button":
+            stages = (f"pressed {frac('pressed'):.2f}  n1_correct {frac('n1_correct'):.2f}  n2_correct {frac('n2_correct'):.2f}  "
+                      f"confirmed {frac('confirmed'):.2f}")
+            errors = Counter((r["n1_error"], r["n2_error"]) for r in rs if r["n1_error"] is not None)
+            decision = (f"count correct {sum(r['count_correct'] for r in rs)}/{n}  presses {sum(r['presses'] for r in rs)}  "
+                        f"(n1, n2) errors at confirm {dict(errors)}  counters logged {sum(r['logged'] for r in rs)}/{n}")
         else:
             stages = f"lifted {frac('lifted'):.2f}  S1 {frac('s1'):.2f}  S2 {frac('s2'):.2f}  S3 {frac('s3'):.2f}  pressed {frac('pressed'):.2f}"
             decision = f"second move = other block {sum(decided)}/{len(decided)}"
@@ -344,7 +424,8 @@ def main():
         print(f"  {'':<7}{'':<22}{'':<15} furthest stage: {dict(Counter(r['furthest'] for r in rs))}")
     print("\n== paired on common scenes: episodes reaching each stage only under A / only under B")
     keys = {"put_back_block": ("lifted", "centre", "pressed", "stage1", "regrasp", "returned"),
-            "swap_blocks": ("lifted", "s1", "s2", "s3", "pressed")}
+            "swap_blocks": ("lifted", "s1", "s2", "s3", "pressed"),
+            "press_button": ("pressed", "n1_correct", "n2_correct", "confirmed", "count_correct")}
     by = defaultdict(dict)
     for (folder, task, cond), rs in table.items():
         for r in rs:
