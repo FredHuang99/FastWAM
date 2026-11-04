@@ -176,4 +176,9 @@ class V2Config:
         return cls(**built)
 
     def to_dict(self) -> dict:
-        return {name: asdict(getattr(self, name)) for name in ("history", "memory", "objective", "guidance")}
+        out = {name: asdict(getattr(self, name)) for name in ("history", "memory", "objective", "guidance")}
+        # landmark_strides (11-04) is left out while empty, so configs and checkpoints written before it existed
+        # still compare equal (Trainer.resume requires state["config"] == cfg.to_dict()).
+        if not out["history"].get("landmark_strides"):
+            out["history"].pop("landmark_strides", None)
+        return out
