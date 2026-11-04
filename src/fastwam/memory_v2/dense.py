@@ -506,9 +506,19 @@ def window_metrics(normalised_sample: torch.Tensor, normalised_target: torch.Ten
             "prefix24_gripper_rmse": rmse(v & (steps < 24), GRIPPER_COLUMNS)}
 
 
+def window_action_seed(row: dict) -> int:
+    """The row's action seed. Two-task rows carry Codex's; rows written by memory_v2's press/build_dense.py
+    (single-task caches, e.g. press_button) have none: a fixed 63-bit seed from the row id instead (there is no
+    dense evaluation of those tasks to match, only determinism across runs is needed)."""
+    if row.get("action_seed") is not None:
+        return int(row["action_seed"])
+    digest = hashlib.sha256(f"memory_v2-window-action-v1:{row['id']}".encode("utf-8")).digest()
+    return int.from_bytes(digest[:8], "little") & ((1 << 63) - 1)
+
+
 def window_noise(row: dict, shape, device) -> torch.Tensor:
     """Same first draw as the dense evaluation (`random_inputs` with the row's action seed)."""
-    generator = torch.Generator(device="cpu").manual_seed(int(row["action_seed"]))
+    generator = torch.Generator(device="cpu").manual_seed(window_action_seed(row))
     noise = torch.randn(shape, generator=generator, dtype=torch.float32)
     return noise.to(torch.bfloat16).float().to(device)      # the dense sampler starts from the BF16 cast
 
