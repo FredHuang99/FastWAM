@@ -117,8 +117,12 @@ def main():
     from fastwam.memory_v2.config import HistoryPolicyConfig
     rule_a = HistoryPolicyConfig(anchor_frames=1, landmark_stride=24, recent_frames=2, recent_stride=8, max_frames=48)
     rule_b = HistoryPolicyConfig(anchor_frames=1, landmark_stride=8, recent_frames=2, recent_stride=8, max_frames=48)
+    # 11-06 periodic rule (every frame at current - k*T, frame 0 anchored): granularity T vs frame budget (cap)
+    periodic = {f"P{t}/{cap if cap < 10 ** 6 else 'all'}": HistoryPolicyConfig(mode="periodic", period=t, max_frames=cap)
+                for t, cap in ((8, 48), (4, 48), (4, 96), (2, 96), (2, 10 ** 6))}
+    rules = [("A", rule_a, ()), ("B", rule_b, ()), ("C", rule_a, (1,))] + [(k, v, ()) for k, v in periodic.items()]
     files = sorted(Path(args.raw).glob("*.hdf5"))
-    eps, totals = [], {k: [0, 0, 0, 0] for k in "ABC"}
+    eps, totals = [], {k: [0, 0, 0, 0] for k, _, _ in rules}
     for f in files:
         with h5py.File(f, "r") as h:
             pose = np.asarray(h["state/left_ee_poses"], dtype=np.float64)
@@ -148,7 +152,7 @@ def main():
                "frames_after_confirm": (len(z) - 1 - confirm[0]) if confirm else None,
                "press_frames": [p["t"] for p in ps], "bottom_frames": [p["bottom"][1] - p["bottom"][0] + 1 for p in ps],
                "gap_frames": [b["t"] - a["t"] for a, b in zip(ps, ps[1:])]}
-        for k, pol, extra in (("A", rule_a, ()), ("B", rule_b, ()), ("C", rule_a, (1,))):
+        for k, pol, extra in rules:
             c = coverage(len(z), ps, pol, extra)
             row[f"cov_{k}"] = c
             totals[k] = [x + y for x, y in zip(totals[k], c)]
@@ -187,7 +191,9 @@ def main():
                   "|---|---|---|"]
         names = {"A": "A: training config (anchor + every 24th + 2 recent)", "B": "B: landmarks every 8th frame",
                  "C": "C: A + an anchor frame at every past press (upper bound)"}
-        for k in "ABC":
+        names.update({k: f"{k}: periodic, every frame at current - k*{v.period}, cap "
+                         f"{v.max_frames if v.max_frames < 10 ** 6 else 'none'}" for k, v in periodic.items()})
+        for k, _, _ in rules:
             pairs, seen, dec, full = totals[k]
             lines.append(f"| {names[k]} | {seen}/{pairs} = {100 * seen / max(1, pairs):.0f}% | "
                          f"{full}/{dec} = {100 * full / max(1, dec):.0f}% |")

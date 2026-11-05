@@ -53,7 +53,7 @@ class TinyBackbone(nn.Module):
             out = out + g.to(out.dtype)[:, None, None] * (with_history - out)
         return out
 
-    def encode_history(self, batch, layers, positions, chunk):
+    def encode_history(self, batch, layers, positions, chunk, cache=None):
         """kv_replay: the same per-layer K / V as encode() gives a current frame, per history frame (no RoPE here)."""
         from fastwam.memory_v2.replay import encode_history_frames
 
@@ -65,7 +65,7 @@ class TinyBackbone(nn.Module):
                 keys.append(k)
                 values.append(v)
             return keys, values
-        return encode_history_frames(encode_fn, batch, layers, positions, chunk, None)
+        return encode_history_frames(encode_fn, batch, layers, positions, chunk, None, cache)
 
     def post(self, x, aux):
         return self.head(x)

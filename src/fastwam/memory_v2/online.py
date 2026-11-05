@@ -221,8 +221,14 @@ class Session:
     """One episode: raw observation archive -> cached per-frame encodings -> memory_v2 decisions."""
 
     def __init__(self, policy: Policy, directory: Path, mode: str, steps: int, guidance_scale: float, dependence: bool,
-                 tag: str = "", limit: int = 0, candidates: int = 1, coherence: str = "none", noise: str = "per_decision"):
+                 tag: str = "", limit: int = 0, candidates: int = 1, coherence: str = "none", noise: str = "per_decision",
+                 replay_cache: bool = True):
         self.p, self.directory, self.mode = policy, Path(directory), mode
+        # kv_replay (11-06): history K/V prefilled once per episode and read back at later decisions (model.replay_cache)
+        self.replay = policy.cfg.v2.memory.read == "kv_replay"
+        self.replay_cache = bool(replay_cache) and self.replay
+        # kv_replay without the memory_s1 base needs no post-Video-DiT readout feature per frame (inject / s1 do)
+        self.readout = not (self.replay and policy.s1 is None)
         self.steps, self.scale, self.dependence, self.tag, self.limit = steps, guidance_scale, dependence, tag, limit
         if candidates < 1 or coherence not in ("none", "overlap") or noise not in ("per_decision", "per_episode"):
             raise ValueError(f"bad U1 options candidates={candidates} coherence={coherence} noise={noise}")
@@ -236,6 +242,7 @@ class Session:
         self.decisions = 0
         self.started = time.monotonic()
         self.previous = None                             # (frame, raw chunk [32, 14]) of the last executed decision
+        self.kv_cache: Dict[int, tuple] = {}             # kv_replay: {frame_id: per-layer K/V}, this episode only
 
     def _encode(self, ids):
         import numpy as np
@@ -249,6 +256,9 @@ class Session:
             image = p.mosaic(arrays)[None].to(p.device, torch.bfloat16)
             latent = encode_latent(p.vae, image)                                       # [1, 48, 1, 24, 20]
             proprio = p.normaliser.normalize(torch.tensor(r["proprio"], dtype=torch.float32)[None], "state").to(p.device)
+            if not self.readout:
+                self.encoded[i] = (latent[0].cpu(), proprio[0].cpu(), None)
+                continue
             feature = p.ab.encode(latent, self.text, proprio, keep_kv=False)[0]         # [1, 120, 3072]
             self.encoded[i] = (latent[0].cpu(), proprio[0].cpu(), feature[0].to(torch.bfloat16).cpu())
 
@@ -281,13 +291,23 @@ class Session:
                     raise ValueError("memory_s1 selection must end at the current frame")
                 s1_ids = ids[:-1]
             selection = select_history(range(current + 1), current, p.cfg.v2.history)
+            sync = torch.cuda.synchronize if torch.cuda.is_available() else (lambda: None)
+            sync()
             encode_start = time.monotonic()
             self._encode(sorted(set(s1_ids or []) | set(selection.ids) | {current}))
+            sync()
             encode_seconds = time.monotonic() - encode_start
-            batch = assemble(self.encoded, self.text, self.text_valid, current, selection, s1_ids,
-                             replay=p.cfg.v2.memory.read == "kv_replay")
+            batch = assemble(self.encoded, self.text, self.text_valid, current, selection, s1_ids, replay=self.replay)
             batch = {k: v.to(p.device) for k, v in batch.items()}
-            conditions = p.model.conditions(batch)
+            cached_before = len(self.kv_cache)
+            p.model.replay_cache = self.kv_cache if self.replay_cache else None
+            try:
+                conditions = p.model.conditions(batch)
+            finally:
+                p.model.replay_cache = None
+            sync()
+            conditions_seconds = time.monotonic() - encode_start - encode_seconds
+            prefilled = len(self.kv_cache) - cached_before if self.replay_cache else (len(selection.ids) if self.replay else 0)
             # U1: candidate k uses its own noise seed; k = 0 is the original seed, so candidates=1 / coherence none /
             # per_decision noise is bit-identical to the plain closed loop. per_episode noise reuses frame 0's noise.
             noise_frame = 0 if self.noise_mode == "per_episode" else current
@@ -296,6 +316,7 @@ class Session:
             g = p.cfg.v2.guidance
             steps = self.steps or g.steps
             guidance = GuidanceConfig(steps=steps, shift=g.shift, scale=self.scale, min_sigma=g.min_sigma)
+            sample_start = time.monotonic()
             samples = []
             for s in seeds:
                 n_k = diagnostic_action_noise(s).to(torch.bfloat16).float().to(p.device)       # dense BF16 start
@@ -309,6 +330,8 @@ class Session:
             noise_seed = seeds[choice]
             raw = p.normaliser.denormalize(normalised[0])
             self.previous = (current, raw.float().cpu().numpy())
+            sample_seconds = time.monotonic() - sample_start            # .cpu() above synchronises
+            dependence_start = time.monotonic()
             dependence = {}
             if self.dependence:
                 plain = GuidanceConfig(steps=steps, shift=g.shift, scale=1.0, min_sigma=g.min_sigma)
@@ -318,6 +341,7 @@ class Session:
                     alt, _ = p.model.sample(conditions, noise, plain, memory_mode=other)
                     delta = (raw - p.normaliser.denormalize(alt[0]))[:EXECUTE][:, ARM_COLUMNS]
                     dependence[f"arm_rmse_vs_{other}"] = float(delta.square().mean().sqrt())
+            dependence_seconds = time.monotonic() - dependence_start
             actions = raw.clone()
             actions[:, [6, 13]] = actions[:, [6, 13]].clamp(0, 1)
             if not bool(torch.isfinite(actions).all()):
@@ -330,7 +354,14 @@ class Session:
             "candidates": self.candidates, "coherence": self.coherence, "noise_mode": self.noise_mode,
             "choice": choice, "candidate_distances": distances,
             "normalized_actions": normalised[0].cpu().tolist(), "actions_after_gripper_clip": actions.cpu().tolist(),
-            "encoded_frames": len(self.encoded), "encode_seconds": encode_seconds, "seconds": seconds})
+            "encoded_frames": len(self.encoded), "encode_seconds": encode_seconds, "seconds": seconds,
+            # 11-06 latency breakdown (CUDA-synchronised): seconds = encode + conditions + sample + dependence + rest.
+            # encode = VAE (+ readout) of newly needed frames; conditions = current-frame prefill + history (kv_replay:
+            # prefill of `history_prefilled` frames; the rest come from the episode cache); sample = all denoising
+            # steps of all candidates; dependence = the diagnostic re-sampling (not part of a deployed policy).
+            "conditions_seconds": conditions_seconds, "sample_seconds": sample_seconds,
+            "dependence_seconds": dependence_seconds, "history_frames": len(selection.ids),
+            "history_prefilled": prefilled, "replay_cache": self.replay_cache, "readout": self.readout})
         if self.decisions % 4 == 0:
             dep = " ".join(f"{k[12:]}={v:.4f}" for k, v in dependence.items())
             print(f"[decide] {now()} {self.tag} frame={current}/{self.limit} hist={len(selection.ids)} "
@@ -430,7 +461,8 @@ def run_episode(policy: Policy, scene: dict, mode: str, label: str, out: Path, a
     target_limit = min(limit, args.max_targets) if args.max_targets else limit
     session = Session(policy, directory, mode, args.steps, args.guidance, args.dependence,
                       tag=f"{label}/{mode} {task} seed={scene['seed']}", limit=target_limit,
-                      candidates=args.candidates, coherence=args.coherence, noise=args.noise)
+                      candidates=args.candidates, coherence=args.coherence, noise=args.noise,
+                      replay_cache=not args.no_replay_cache)
     key = os.urandom(24)
     env = simulator_environment(sim_cfg, gpu)
     env.update(FW_CAUSAL_SIM_ROOT=str(root), MEMORY_S1_RPC_KEY=key.hex(), MEMORY_S1_ARCHIVE_STRIDE="1",
@@ -988,6 +1020,8 @@ def main(argv=None):
                     help="U1: per_episode = every decision reuses frame 0's noise")
     ap.add_argument("--guidance", type=float, default=1.0, help="memory guidance scale (1 = none)")
     ap.add_argument("--dependence", action="store_true", help="also sample the other modes: log the action change")
+    ap.add_argument("--no-replay-cache", action="store_true",
+                    help="kv_replay: re-prefill every history frame at every decision (parity / latency reference)")
     ap.add_argument("--max-targets", type=int, default=0, help="smoke runs: stop after N executed targets (0 = official)")
     ap.add_argument("--record-frames", action="store_true", help="save camera PNGs of every frame")
     ap.add_argument("--episode-timeout", type=float, default=5400)

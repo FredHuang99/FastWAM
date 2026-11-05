@@ -58,6 +58,9 @@ class MemoryV2Model(nn.Module):
         self.backbone = backbone
         self.cfg = cfg
         self.memory = MemoryV2Modules(cfg)
+        # kv_replay deployment (11-06): the online session sets a per-episode {frame_id: per-layer K/V} dict here
+        # around conditions(); history frames are then prefilled once per episode instead of at every decision.
+        self.replay_cache: Optional[dict] = None
 
     # ------------------------------------------------------------------ conditions
     def conditions(self, batch: Dict[str, torch.Tensor], drop: Optional[torch.Tensor] = None) -> Conditions:
@@ -85,7 +88,8 @@ class MemoryV2Model(nn.Module):
         valid = batch["history_valid"]
         positions = recency_positions(batch["frame_ids"], valid)
         with PROFILE.section("history_prefill"):
-            keys, values = self.backbone.encode_history(batch, self.memory.replay.layers, positions, cfg.replay_chunk)
+            keys, values = self.backbone.encode_history(batch, self.memory.replay.layers, positions, cfg.replay_chunk,
+                                                        cache=None if self.training else self.replay_cache)
         b, k = valid.shape
         t = keys[0].shape[1] // max(1, k)
         active = valid.any(1)
@@ -199,13 +203,13 @@ class FastWAMActionAdapter(nn.Module):
         _, kv, context = self.inner.encode_observation(batch["latent"], batch["text"], batch["proprio"])
         return kv, context
 
-    def encode_history(self, batch, layers, positions, chunk):
+    def encode_history(self, batch, layers, positions, chunk, cache=None):
         """kv_replay: per-layer K / V of the history frames, each through the same single-frame prefill."""
         from .replay import encode_history_frames
 
         def encode_fn(latent, text, proprio):
             return self.inner.encode_observation(latent, text, proprio)[1]
-        return encode_history_frames(encode_fn, batch, layers, positions, chunk, self.inner.mot.num_heads)
+        return encode_history_frames(encode_fn, batch, layers, positions, chunk, self.inner.mot.num_heads, cache)
 
     @torch.autocast("cuda", enabled=False)
     def prepare(self, actions, timestep, shared_context):

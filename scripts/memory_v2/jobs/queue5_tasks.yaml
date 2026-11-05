@@ -2313,7 +2313,7 @@ tasks:
 - id: S1-offline
   lane: extra
   kind: shell
-  after: [N1-check]
+  after: [LAT-smoke]
   need_mib: 30000
   timeout_h: 4
   hypothesis: "descriptive (plan v7 S1): X7 (a2C_6ep) offline sampled-chunk error on all val windows at 10 / 4 / 2 / 1 Euler steps, memory on vs null, same noise per window, the run's own saved config"
@@ -2392,3 +2392,65 @@ tasks:
       then: "episodes ended with ERROR.json under parallel load (simulator / RPC / memory): read the episode ERROR.json"
   on_pass: "parallel: 3 is the default for H200 / AWS evaluation tasks"
   on_fail: "see failure_explanations"
+
+# ---- 11-06 (Opus, user questions 1-2): deployment latency without the simulator, and how fine the history must be.
+# LAT-smoke checks the new latency script on the A100 (10 min, numbers noisy: the GPU is shared) before S1-offline;
+# LAT-x7 / LAT-n1 measure on the H200 after P0-par3 (GPU otherwise idle). H-cov is CPU only.
+- id: H-cov
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "report only (user question 2, 11-06): on the 50 press demos, past-press visibility and count recoverability for the new periodic history rule (frame 0 + every frame at current - k*T) at T = 8 / 4 / 2 with caps 48 / 96 / none, next to rules A / B / C of PB-events3. Expected: P8/48 equals B (91% / 81%: every decision frame still misses presses shorter than 8 frames); a finer T recovers them only when the cap grows with it (P4/48 below B, P2/all = 100%)"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "the demo scan failed (a shell task only records rc): read the job log"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/press/events.py --min-plausible 0.9 --accept v1,v2,v3"
+  pass_if: "m['rc'] == 0"
+  on_pass: "send report/PRESS_EVENTS_*.md (coverage table with the periodic rows)"
+  on_inconclusive: "(shell ERROR) read the job log"
+
+- id: LAT-smoke
+  lane: extra
+  kind: shell
+  after: [N1-check]
+  need_mib: 40000
+  timeout_h: 1
+  hypothesis: "smoke test of scripts/memory_v2/latency_bench.py on the A100 (numbers are not verdicts: the GPU is shared): X7 (inject) and the untrained kv_replay model built from X7's config (periodic history T = 8, cap 96, gates opened to 0.5) each run 12 decisions of put_back demo 0 at 10 and 1 Euler steps plus the empty-history variants (and no-cache for kv_replay), and write report/LATENCY_*.md"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "the latency script crashed (a shell task only records rc): read the job log and fix before LAT-x7 / LAT-n1 run on the H200"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/latency_bench.py --checkpoint outputs/memory_v2/a2C_6ep/checkpoints/update_004020.pt --demo task:put_back_block --decisions 12 --steps 10 1 --warmup 2 --label smoke_x7 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/latency_bench.py --run a2C_6ep --set memory_v2.memory.read=kv_replay memory_v2.history.mode=periodic memory_v2.history.period=8 memory_v2.history.max_frames=96 --open-gates --demo task:put_back_block --decisions 12 --steps 10 1 --warmup 2 --label smoke_n1"
+  pass_if: "m['rc'] == 0"
+  on_pass: "send report/LATENCY_smoke_*.md (first numbers, shared GPU)"
+  on_inconclusive: "(shell ERROR) read the job log"
+
+- id: LAT-x7
+  lane: remote
+  kind: shell
+  after: [P0-par3]
+  need_mib: 40000
+  timeout_h: 2
+  hypothesis: "descriptive (user question 1, 11-06): per-decision deployment latency of X7 (inject) on an idle H200, no simulator: 70 decisions of swap demo 0 (histories up to the cap), 10 / 4 / 2 / 1 Euler steps and the empty-history variants. Expected: denoising is >= 70% of the 10-step decision and one step cuts the decision latency >= 3x; the inject readout prefill of each new frame is visible in encode"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "the latency script crashed (a shell task only records rc): read the job log"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/latency_bench.py --checkpoint outputs/memory_v2/a2C_6ep/checkpoints/update_004020.pt --demo task:swap_blocks --decisions 70 --steps 10 4 2 1 --label x7_h200"
+  pass_if: "m['rc'] == 0"
+  on_pass: "send report/LATENCY_x7_h200_*.md"
+  on_inconclusive: "(shell ERROR) read the job log"
+
+- id: LAT-n1
+  lane: remote
+  kind: shell
+  after: [LAT-x7]
+  need_mib: 50000
+  timeout_h: 2
+  hypothesis: "descriptive (user questions 1-2, 11-06): the same measurement for kv_replay (untrained model from X7's config, gates opened to 0.5 so the history attention is computed) with every decision frame in history (periodic T = 8, cap 96), with and without the per-episode K/V cache. Expected: with the cache each decision prefills at most one new history frame, and the memory overhead (steps K minus nohist K) stays <= 15% of the no-history decision at K = 1; without the cache the overhead grows with the history length"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "the latency script crashed (a shell task only records rc): read the job log"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/latency_bench.py --run a2C_6ep --set memory_v2.memory.read=kv_replay memory_v2.history.mode=periodic memory_v2.history.period=8 memory_v2.history.max_frames=96 --open-gates --demo task:swap_blocks --decisions 70 --steps 10 4 2 1 --label n1_periodic8_h200"
+  pass_if: "m['rc'] == 0"
+  on_pass: "send report/LATENCY_n1_periodic8_h200_*.md"
+  on_inconclusive: "(shell ERROR) read the job log"

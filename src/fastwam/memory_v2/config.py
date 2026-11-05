@@ -45,13 +45,42 @@ class HistoryPolicyConfig:
     # seed, epoch and row. Evaluation windows and the online archive always use `landmark_stride`, which can be
     # set freely at inference (online --set memory_v2.history.landmark_stride=K). () = fixed stride, as before.
     landmark_strides: tuple = ()
+    # ---- 11-06 periodic mode (the "every decision frame" rule, after memory_s1's modulo-with-decisions rule).
+    #   mode = "landmark": the rule above (anchors + recent window + fixed-stride landmarks), unchanged.
+    #   mode = "periodic": anchors plus EVERY earlier frame a whole number of periods before the current one
+    #       (current - T, current - 2T, ...). With T = the executed steps per decision (8 in the official protocol)
+    #       that is every past decision frame. The `recent_frames` nearest of them carry the recent role;
+    #       landmark_stride / recent_stride / landmark_strides are not used. Above max_frames the older periodic
+    #       frames are thinned uniformly (anchors and the recent ones are always kept).
+    #   period:    T for evaluation windows and the online archive (free at inference: --set memory_v2.history.period=K).
+    #   periods:   training only: every training sample (and every counterfactual pair, one draw for both rows)
+    #              draws its own T from this set, so training has seen every period. () = always `period`.
+    #   irregular: training only: probability that a sample walks back with a fresh gap per step (each drawn from
+    #              `periods`): the history of an irregular / adaptive-execution schedule.
+    mode: str = "landmark"
+    period: int = 8
+    periods: tuple = ()
+    irregular: float = 0.0
 
     def __post_init__(self):
         object.__setattr__(self, "landmark_strides", tuple(int(v) for v in (self.landmark_strides or ())))
+        object.__setattr__(self, "periods", tuple(int(v) for v in (self.periods or ())))
         if self.anchor_frames < 0 or self.recent_frames < 0:
             raise ValueError("anchor_frames and recent_frames must be non-negative.")
         if self.landmark_stride < 1 or self.recent_stride < 1 or any(v < 1 for v in self.landmark_strides):
             raise ValueError("Strides must be positive.")
+        if self.mode not in ("landmark", "periodic"):
+            raise ValueError(f"history.mode must be landmark or periodic, got {self.mode!r}.")
+        if self.period < 1 or any(v < 1 for v in self.periods):
+            raise ValueError("Periods must be positive.")
+        if not 0.0 <= float(self.irregular) <= 1.0:
+            raise ValueError("history.irregular is a probability in [0, 1].")
+        if self.mode == "landmark" and (self.periods or self.irregular):
+            raise ValueError("history.periods / history.irregular need history.mode=periodic.")
+        if self.mode == "periodic" and self.landmark_strides:
+            raise ValueError("history.landmark_strides is the landmark-mode training draw; use history.periods.")
+        if self.irregular and not self.periods:
+            raise ValueError("history.irregular draws its gaps from history.periods; set them.")
         minimum = self.anchor_frames + self.recent_frames + int(self.include_current)
         if self.max_frames < max(1, minimum):
             raise ValueError(f"max_frames={self.max_frames} cannot hold anchors+recent+current={minimum}.")
@@ -208,6 +237,10 @@ class V2Config:
         # still compare equal (Trainer.resume requires state["config"] == cfg.to_dict()).
         if not out["history"].get("landmark_strides"):
             out["history"].pop("landmark_strides", None)
+        # The periodic-mode fields (11-06) are left out in landmark mode for the same reason.
+        if out["history"].get("mode", "landmark") == "landmark":
+            for key in ("mode", "period", "periods", "irregular"):
+                out["history"].pop(key, None)
         # The kv_replay fields (11-05) are left out for read == "inject" for the same reason.
         if out["memory"].get("read", "inject") == "inject":
             for key in ("read", "replay_layers", "replay_rank", "replay_time_buckets", "replay_time_unit", "replay_chunk"):

@@ -348,3 +348,29 @@ def test_set_override_parses_scientific_notation(tmp_path):
     cfg = load_config(path, ["optim.lr_action=2e-5", "schedule.epochs=3", "init_memory=a/b.pt"])
     assert cfg.optim.lr_action == 2e-5 and cfg.optim.lr_memory == 1e-4 and cfg.schedule.epochs == 3
     assert cfg.init_memory == "a/b.pt"
+
+
+def test_periodic_history_rows_reach_the_backend(tmp_path):
+    """11-06 periodic mode: training rows carry their own period / irregular-gap draw into backend.batch, evaluation
+    and probe rows do not (they use history.period)."""
+    from fastwam.memory_v2.history import select_for_row
+    seen = []
+
+    class Recording(TinyBackend):
+        def batch(self, rows):
+            seen.extend(dict(r) for r in rows)
+            return super().batch(rows)
+    cfg = _cfg(tmp_path)
+    periodic = dict(POLICY.__dict__, mode="periodic", period=4, periods=(1, 2, 3, 4, 5, 6), irregular=0.3,
+                    landmark_strides=())
+    cfg.v2 = V2Config.from_dict({"memory": TINY, "history": periodic, "guidance": {"steps": 3}})
+    trainer = Trainer(Recording(), cfg, tmp_path / "run", log=lambda m: None)
+    assert trainer.run()["complete"]
+    train = [r for r in seen if "history_period" in r]
+    assert train and {r["history_period"] for r in train} == {1, 2, 3, 4, 5, 6}
+    assert any("history_gap_seed" in r for r in train) and any("history_gap_seed" not in r for r in train)
+    assert any("history_period" not in r for r in seen)                     # probe / evaluation rows
+    policy = cfg.v2.history
+    for r in train[:40]:
+        s = select_for_row(range(r["anchor"] + 1), r["anchor"], policy, r)
+        assert all(i < r["anchor"] for i in s.ids) and len(s.ids) <= policy.max_frames

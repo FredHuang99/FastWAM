@@ -85,27 +85,118 @@ def pairs_with_strides(pairs: Sequence[dict], strides: Sequence[int], seed: int,
     return out
 
 
+def _draw(*key) -> int:
+    digest = hashlib.sha256(json.dumps(["memory_v2-history-period-v1", *key], sort_keys=True).encode()).digest()
+    return int.from_bytes(digest[:8], "little")
+
+
+def draw_period(policy: HistoryPolicyConfig, *key) -> dict:
+    """Periodic mode, training: this sample's period T (from `periods`) and, with probability `irregular`, the seed
+    of an irregular gap sequence. A pure function of `key` (seed, epoch, row ...): resumable, the same on every rank."""
+    out = {"history_period": policy.periods[_draw("T", *key) % len(policy.periods)]}
+    if policy.irregular and (_draw("irregular", *key) % 1_000_000) / 1_000_000 < float(policy.irregular):
+        out["history_gap_seed"] = _draw("gaps", *key) % (2 ** 31)
+    return out
+
+
+def with_history_draws(rows: Sequence[dict], policy: HistoryPolicyConfig, seed: int, epoch: int) -> List[dict]:
+    """Training rows with their per-row history draw: the landmark stride (landmark mode, `landmark_strides`) or the
+    period / irregular gap seed (periodic mode, `periods`). Unchanged when the policy has no training draw."""
+    if policy.mode == "periodic":
+        if not policy.periods:
+            return list(rows)
+        return [dict(r, **draw_period(policy, seed, "row", epoch, r["episode_id"], int(r["anchor"]))) for r in rows]
+    return with_strides(rows, policy.landmark_strides, seed, epoch)
+
+
+def pairs_with_history_draws(pairs: Sequence[dict], policy: HistoryPolicyConfig, seed: int, update: int) -> List[dict]:
+    """Counterfactual pairs with ONE draw for both rows (own and swapped history are then sampled alike)."""
+    if policy.mode == "periodic":
+        if not policy.periods:
+            return list(pairs)
+        out = []
+        for p in pairs:
+            q, d = p["query"], p["donor"]
+            k = draw_period(policy, seed, "pair", update, q["episode_id"], int(q["anchor"]), d["episode_id"], int(d["anchor"]))
+            out.append({**p, "query": dict(q, **k), "donor": dict(d, **k)})
+        return out
+    return pairs_with_strides(pairs, policy.landmark_strides, seed, update)
+
+
 def row_policy(policy: HistoryPolicyConfig, row: dict) -> HistoryPolicyConfig:
-    """The row's history policy: its own landmark_stride (mixed-stride training rows), else the configured one."""
+    """The row's history policy: its own landmark_stride (mixed-stride training rows) or its own period (periodic
+    training rows), else the configured one."""
+    from dataclasses import replace
+    if policy.mode == "periodic":
+        period = row.get("history_period")
+        if period is None or int(period) == policy.period:
+            return policy
+        return replace(policy, period=int(period))
     stride = row.get("landmark_stride")
     if stride is None or int(stride) == policy.landmark_stride:
         return policy
-    from dataclasses import replace
     return replace(policy, landmark_stride=int(stride))
 
 
-def select_history(available: Iterable[int], current: int, policy: HistoryPolicyConfig) -> HistorySelection:
+def select_for_row(available: Iterable[int], current: int, policy: HistoryPolicyConfig, row: dict) -> HistorySelection:
+    """select_history with the row's own training draw (landmark stride, or period and irregular gap seed)."""
+    return select_history(available, current, row_policy(policy, row), gap_seed=row.get("history_gap_seed"))
+
+
+def periodic_ids(before: Sequence[int], current: int, period: int, gap_seed: Optional[int] = None,
+                 gaps: Sequence[int] = ()) -> List[int]:
+    """Periodic mode: the available ids at current - T, current - 2T, ... (nearest first). With `gap_seed`, each step
+    back takes its own gap drawn from `gaps` (an irregular schedule), reproducibly from the seed."""
+    present = set(before)
+    out: List[int] = []
+    if gap_seed is None:
+        t = current - period
+        while t >= 0:
+            if t in present:
+                out.append(t)
+            t -= period
+        return out
+    if not gaps:
+        raise ValueError("An irregular gap sequence needs the set of gaps to draw from.")
+    import random
+    rng = random.Random(int(gap_seed))
+    t = current
+    while True:
+        t -= int(rng.choice(tuple(gaps)))
+        if t < 0:
+            return out
+        if t in present:
+            out.append(t)
+
+
+def select_history(available: Iterable[int], current: int, policy: HistoryPolicyConfig,
+                   gap_seed: Optional[int] = None) -> HistorySelection:
     """Choose the observations visible at decision `current`.
 
     Never returns an id greater than `current`. Anchors and the recent window are
-    always kept; fixed-stride landmarks are thinned uniformly to respect
-    `max_frames`.
+    always kept; fixed-stride landmarks (landmark mode) or the older periodic frames
+    (periodic mode) are thinned uniformly to respect `max_frames`. `gap_seed`
+    (periodic mode, training rows only) selects an irregular gap sequence.
     """
     past = _validate_available(available, current)
     before = [i for i in past if i < current]
     roles: Dict[int, int] = {}
     for i in before[:policy.anchor_frames]:
         roles[i] = ROLE_ANCHOR
+    if policy.mode == "periodic":
+        chain = [i for i in periodic_ids(before, current, policy.period, gap_seed, policy.periods) if i not in roles]
+        for i in chain[:policy.recent_frames]:
+            roles[i] = ROLE_RECENT
+        older = sorted(chain[policy.recent_frames:])
+        budget = policy.max_frames - len(roles) - int(policy.include_current)
+        for i in _uniform_subset(older, max(0, budget)):
+            roles[i] = ROLE_LANDMARK
+        if policy.include_current:
+            roles[current] = ROLE_CURRENT
+        ids = tuple(sorted(roles))
+        return HistorySelection(ids=ids, roles=tuple(roles[i] for i in ids), current=current)
+    if gap_seed is not None:
+        raise ValueError("gap_seed is a periodic-mode training draw.")
     for k in range(1, policy.recent_frames + 1):
         target = current - k * policy.recent_stride
         candidates = [i for i in before if i <= target]

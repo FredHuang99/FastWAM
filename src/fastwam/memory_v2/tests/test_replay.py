@@ -225,3 +225,45 @@ def test_trainer_runs_kv_replay_with_pairs_probes_and_eval(tmp_path):
     gate = probes[-1]["gate"]["0"]
     assert any(abs(v) > 0 for v in gate)                       # the gates moved away from zero
     assert (tmp_path / "run" / "eval").exists()
+
+
+def test_cross_decision_cache_matches_fresh_prefill_and_prefills_each_frame_once():
+    """Deployment (11-06): with model.replay_cache set, every history frame is prefilled once per episode; the replay
+    state equals the uncached one at every decision (re-rotation to -rank happens after the cache)."""
+    model = _model().eval()
+    _open_gates(model)
+    g = torch.Generator().manual_seed(3)
+    episode = torch.randn(80, 6, 16, generator=g)
+    context = torch.randn(1, 24, generator=g)
+    policy = HistoryPolicyConfig(mode="periodic", period=8, recent_frames=2, max_frames=6)
+    calls = []
+    model.backbone.encoder.register_forward_hook(lambda module, args, out: calls.append(args[0].shape[0]))
+    cache, seen = {}, set()
+    x, t = torch.randn(1, 8, 5, generator=g), torch.full((1,), 600.0)
+    for current in range(8, 80, 8):
+        s = select_history(range(current + 1), current, policy)
+        meta = collate_selection([s])
+        k = meta["frame_ids"].shape[1]
+        hist = torch.stack([episode[i] for i in s.ids])[None]
+        batch = {"latent": episode[current][None], "context": context, "text": torch.zeros(1, 1, 1),
+                 "actions": torch.zeros(1, 8, 5), "action_valid": torch.ones(1, 8, dtype=torch.bool),
+                 "hist_latent": hist, "hist_proprio": torch.zeros(1, k, 1), **meta}
+        with torch.no_grad():
+            fresh = model.conditions(batch)
+            model.replay_cache = cache
+            before = len(calls)
+            cached = model.conditions(batch)
+            model.replay_cache = None
+            new_frames = sum(calls[before:]) - 1                     # minus the current frame's own encode
+            assert new_frames == len([i for i in s.ids if i not in seen])
+            seen = set(cache)
+            for a, b in zip(fresh.replay.keys + fresh.replay.values, cached.replay.keys + cached.replay.values):
+                assert torch.allclose(a, b, atol=1e-6, rtol=1e-5)
+            assert torch.allclose(model.velocity(x, t, fresh, "on"), model.velocity(x, t, cached, "on"), atol=1e-6)
+    assert set(cache) - {-1} == set(range(0, 72, 8)) and len(select_history(range(73), 72, policy).ids) == 6
+    with pytest.raises(ValueError):
+        model.replay_cache = {}
+        try:
+            model.conditions(_batch(model.cfg))                          # batch 3: the cache serves one episode
+        finally:
+            model.replay_cache = None

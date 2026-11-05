@@ -92,3 +92,67 @@ def test_mixed_strides_are_deterministic_and_training_only():
     s8 = select_history(range(301), 300, row_policy(policy, dict(window, landmark_stride=8)))
     s24 = select_history(range(301), 300, row_policy(policy, window))
     assert len(s8.ids) > len(s24.ids) and s24 == select_history(range(301), 300, HistoryPolicyConfig())
+
+
+def test_periodic_mode_every_decision_frame_and_old_configs_unchanged():
+    """11-06 periodic mode: T = executed steps per decision gives every past decision frame; landmark-mode configs
+    serialise exactly as before (resume compares config dicts)."""
+    from fastwam.memory_v2.config import V2Config
+    assert V2Config.from_dict({}).to_dict()["history"] == V2Config().to_dict()["history"]
+    assert "mode" not in V2Config().to_dict()["history"] and "periods" not in V2Config().to_dict()["history"]
+    policy = HistoryPolicyConfig(mode="periodic", period=8, recent_frames=2, max_frames=200)
+    s = select_history(range(161), 160, policy)
+    assert s.ids == tuple(range(0, 160, 8))                                   # frame 0 + every decision frame
+    assert dict(zip(s.ids, s.roles))[0] == ROLE_ANCHOR
+    assert [i for i, r in zip(s.ids, s.roles) if r == ROLE_RECENT] == [144, 152]
+    s3 = select_history(range(101), 100, HistoryPolicyConfig(mode="periodic", period=3, max_frames=200))
+    assert s3.ids == (0,) + tuple(range(1, 100, 3))                           # aligned to the current frame, not to 0
+    capped = select_history(range(801), 800, HistoryPolicyConfig(mode="periodic", period=2, max_frames=48))
+    assert len(capped.ids) == 48 and capped.ids[0] == 0 and capped.ids[-2:] == (796, 798)
+    assert all(i < 800 for i in capped.ids)
+    d = V2Config.from_dict({"history": {"mode": "periodic", "periods": list(range(1, 17)), "irregular": 0.25}}).to_dict()
+    assert d["history"]["mode"] == "periodic" and V2Config.from_dict(d).history.periods == tuple(range(1, 17))
+    for bad in ({"periods": [4]}, {"irregular": 0.5}, {"mode": "periodic", "landmark_strides": [8]},
+                {"mode": "periodic", "irregular": 0.5}, {"mode": "periodic", "period": 0}, {"mode": "every"}):
+        with pytest.raises(ValueError):
+            HistoryPolicyConfig(**bad)
+    with pytest.raises(ValueError):
+        select_history(range(10), 9, HistoryPolicyConfig(), gap_seed=3)
+
+
+def test_periodic_training_draws_cover_all_periods_and_irregular_schedules():
+    from fastwam.memory_v2.history import (pairs_with_history_draws, periodic_ids, row_policy, select_for_row,
+                                           with_history_draws)
+    policy = HistoryPolicyConfig(mode="periodic", period=8, periods=tuple(range(1, 17)), irregular=0.25, max_frames=400)
+    rows = [{"episode_id": f"e{e}", "anchor": a} for e in range(6) for a in range(0, 400, 3)]
+    a, b = with_history_draws(rows, policy, 17, 1), with_history_draws(rows, policy, 17, 1)
+    assert a == b and {r["history_period"] for r in a} == set(range(1, 17))
+    assert with_history_draws(rows, policy, 17, 2) != a
+    share = sum("history_gap_seed" in r for r in a) / len(a)
+    assert 0.18 < share < 0.32, share
+    fixed = HistoryPolicyConfig(mode="periodic", period=8)
+    assert with_history_draws(rows, fixed, 17, 1) == rows                       # no training draw: rows unchanged
+    window = {"episode_id": "e0", "anchor": 300}
+    assert row_policy(policy, window) is policy and select_for_row(range(301), 300, policy, window) == \
+        select_history(range(301), 300, policy)
+    regular = [r for r in a if "history_gap_seed" not in r and r["anchor"] > 100]
+    for r in regular[:50]:
+        s = select_for_row(range(r["anchor"] + 1), r["anchor"], policy, r)
+        T = r["history_period"]
+        assert all((r["anchor"] - i) % T == 0 for i in s.ids if i != 0)
+    irregular = [r for r in a if "history_gap_seed" in r and r["anchor"] > 100]
+    gaps_seen = set()
+    for r in irregular[:50]:
+        s1 = select_for_row(range(r["anchor"] + 1), r["anchor"], policy, r)
+        assert s1 == select_for_row(range(r["anchor"] + 1), r["anchor"], policy, r)      # reproducible
+        chain = [r["anchor"]] + sorted((i for i in s1.ids if i != 0), reverse=True)
+        gaps_seen |= {x - y for x, y in zip(chain, chain[1:])}
+        assert all(i < r["anchor"] for i in s1.ids)
+    assert len(gaps_seen) > 8                                                      # gaps vary within a history
+    assert periodic_ids(range(50), 50, 5) == list(range(45, -1, -5))
+    pairs = [{"query": rows[i], "donor": rows[-1 - i], "task": "t"} for i in range(40)]
+    for p in pairs_with_history_draws(pairs, policy, 17, 3):
+        assert p["query"]["history_period"] == p["donor"]["history_period"]
+        assert p["query"].get("history_gap_seed") == p["donor"].get("history_gap_seed")
+    landmark = HistoryPolicyConfig(landmark_strides=(8, 24))
+    assert {r["landmark_stride"] for r in with_history_draws(rows, landmark, 17, 1)} == {8, 24}

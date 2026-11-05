@@ -144,15 +144,23 @@ class KVReplay(nn.Module):
 
 # ----------------------------------------------------------------------------- history prefill
 @torch.no_grad()
-def encode_history_frames(encode_fn, batch, layers, positions, chunk: int, num_heads: Optional[int]):
+def encode_history_frames(encode_fn, batch, layers, positions, chunk: int, num_heads: Optional[int],
+                          cache: Optional[dict] = None):
     """Per-layer K / V of every valid history frame, each prefilled alone.
 
     encode_fn(latent [n, ...], text [n, L, D], proprio [n, P]) -> (keys, values): lists over ALL action layers of
     [n, T, W] (what the backbone's encode returns for current frames). Returns (keys, values): lists over `layers` of
     [B, K*T, W]; padding slots are zero (masked by token_valid). num_heads=None skips the temporal re-rotation
-    (test backbones without RoPE)."""
+    (test backbones without RoPE).
+
+    cache (deployment, 11-06): {frame_id: (keys [per layer T x W], values)} of ONE episode (batch 1). A frame's K / V
+    depends only on its own latent, proprio and the episode's text, never on the other history frames or on its
+    rank (the re-rotation to -rank happens below, after the cache), so each frame is prefilled once per episode and
+    later decisions only read it back. The caller owns the dict and clears it at every episode reset."""
     valid = batch["history_valid"]
     b, k = valid.shape
+    if cache is not None:
+        return _encode_with_cache(encode_fn, batch, layers, positions, chunk, num_heads, cache)
     index = valid.nonzero(as_tuple=False)
     real = index.shape[0]
     if real == 0:                                     # shapes only: one padding slot, fully masked afterwards
@@ -175,6 +183,43 @@ def encode_history_frames(encode_fn, batch, layers, positions, chunk: int, num_h
     if num_heads is not None:
         out_k = [rerotate_temporal(x, positions, num_heads) for x in out_k]
     return [x.reshape(b, k * t, w) for x in out_k], [x.reshape(b, k * t, w) for x in out_v]
+
+
+def _encode_with_cache(encode_fn, batch, layers, positions, chunk, num_heads, cache: dict):
+    valid, frame_ids = batch["history_valid"], batch["frame_ids"]
+    b, k = valid.shape
+    if b != 1:
+        raise ValueError("The cross-decision replay cache serves one episode at a time (batch 1).")
+    slots = [j for j in range(k) if bool(valid[0, j])]
+    ids = [int(frame_ids[0, j]) for j in slots]
+    missing = [(j, i) for j, i in zip(slots, ids) if i not in cache]
+    latent, proprio, text = batch["hist_latent"], batch["hist_proprio"], batch["text"]
+    for start in range(0, len(missing), chunk):
+        part = missing[start:start + chunk]
+        sel = torch.tensor([j for j, _ in part], dtype=torch.long, device=valid.device)
+        keys, values = encode_fn(latent[0, sel], text[[0] * len(part)], proprio[0, sel])
+        for n, (_, i) in enumerate(part):
+            cache[i] = ([keys[layer][n].clone() for layer in layers], [values[layer][n].clone() for layer in layers])
+    if not slots:                                     # shapes only: one fully masked slot (prefilled once, key -1)
+        if not cache:
+            keys, values = encode_fn(latent[0, :1], text[:1], proprio[0, :1])
+            cache[-1] = ([keys[layer][0].clone() for layer in layers], [values[layer][0].clone() for layer in layers])
+        first_k, first_v = next(iter(cache.values()))
+        out_k = [x.new_zeros((1, k) + tuple(x.shape)) for x in first_k]
+        out_v = [x.new_zeros((1, k) + tuple(x.shape)) for x in first_v]
+    else:
+        first_k, first_v = cache[ids[0]]
+        out_k = [x.new_zeros((1, k) + tuple(x.shape)) for x in first_k]
+        out_v = [x.new_zeros((1, k) + tuple(x.shape)) for x in first_v]
+        for j, i in zip(slots, ids):
+            ck, cv = cache[i]
+            for n in range(len(layers)):
+                out_k[n][0, j] = ck[n]
+                out_v[n][0, j] = cv[n]
+    t, w = out_k[0].shape[2], out_k[0].shape[3]
+    if num_heads is not None:
+        out_k = [rerotate_temporal(x, positions, num_heads) for x in out_k]
+    return [x.reshape(1, k * t, w) for x in out_k], [x.reshape(1, k * t, w) for x in out_v]
 
 
 # ----------------------------------------------------------------------------- the layer delta

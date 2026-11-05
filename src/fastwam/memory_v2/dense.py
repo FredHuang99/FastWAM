@@ -37,7 +37,7 @@ import torch
 from torch import nn
 
 from .config import HistoryPolicyConfig
-from .history import collate_history, row_policy, select_history
+from .history import collate_history, select_for_row, select_history
 from .profiling import PROFILE
 
 ARM_COLUMNS = [0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12]
@@ -251,7 +251,7 @@ class DenseActionAdapter(nn.Module):
         return (kv[0], kv[1], readout), context
 
     @torch.no_grad()
-    def encode_history(self, batch, layers, positions, chunk):
+    def encode_history(self, batch, layers, positions, chunk, cache=None):
         """kv_replay: per-layer video K / V of the history frames, each through ABModel.encode alone (the same
         single-frame prefill the current frame gets), re-rotated to temporal index -rank (replay.py)."""
         from .replay import encode_history_frames
@@ -259,7 +259,7 @@ class DenseActionAdapter(nn.Module):
         def encode_fn(latent, text, proprio):
             _, kv, _ = self.ab.encode(latent, text, proprio)
             return kv[0], kv[1]
-        return encode_history_frames(encode_fn, batch, layers, positions, chunk, self.ab.backbone.mot.num_heads)
+        return encode_history_frames(encode_fn, batch, layers, positions, chunk, self.ab.backbone.mot.num_heads, cache)
 
     def prepare(self, actions, timestep, shared_context):
         context, mask = shared_context
@@ -458,7 +458,7 @@ def make_batch(rows: Sequence[dict], episodes: EpisodeStore, features: FeatureSt
         e = episodes(row["episode_id"])
         a = int(row["anchor"])
         chunk, mask = action_window(e["actions"], a)
-        selection = select_history(range(a + 1), a, row_policy(policy, row))   # mixed-stride rows carry their stride
+        selection = select_for_row(range(a + 1), a, policy, row)   # rows may carry their own stride / period draw
         f = features(row["episode_id"])
         if len(f) != len(e["actions"]):
             raise ValueError(f"Feature/episode length mismatch for {row['episode_id']}.")
