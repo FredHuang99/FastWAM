@@ -2242,6 +2242,21 @@ tasks:
   on_pass: "stride 8 at inference is as good as training at 8 only: one model serves both budgets"
   on_fail: "see failure_explanations"
 
+# plan v7 evidence (11-05): read-only summary of what the existing runs already logged; input for the Fable design pass
+- id: V7-evidence
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "report only: (1) the history sensitivity of the velocity per tau from every run's probes (memory acts at tau >= 0.8 more than at tau <= 0.6 in the runs trained with the high-noise objective; the bell-weighted v2_A_bfull runs are the control), (2) offline FM per tau on vs null, (3) the tau-gate per injected layer, (4) the policy share of closed-loop episode time"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "no probes and no episodes were found (a shell task only records rc; read the job log)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/v7_evidence.py"
+  pass_if: "m['rc'] == 0"
+  on_pass: "send report/V7_EVIDENCE_*.md with the Fable prompt"
+  on_inconclusive: "(shell ERROR) read the job log"
+
 - id: PB-cache
   lane: train
   kind: shell
