@@ -2346,3 +2346,34 @@ tasks:
       then: "one step keeps the ten-step progress level but the gain over B0 shrinks below 60%: report as a negative result (memory gain does not survive one-step decoding)"
   on_pass: "plan v7 Q2 claim stands at X7: with memory, one-step decoding keeps the closed-loop gain; repeat on the final model (E-steps)"
   on_fail: "see failure_explanations; Q2 stays descriptive"
+
+# ---- 11-05 23:00 plan v7 P0 (Opus): acceptance of parallel evaluation on the H200, after the T2 evaluations (the
+# H200 checkout is updated only after T2-official-put; this task starts then).
+- id: P0-par3
+  lane: remote
+  kind: closed_loop
+  after: [T2-official-put]
+  need_mib: 130000
+  hypothesis: "plan v7 P0 acceptance: 3 closed-loop copies on one H200 (parallel: 3) give >= 2.5x the single-process episode throughput, and the first decision of every episode equals the single-process X7 run on the same scene (max |action difference| <= 1e-2). X7, put_back official scenes 1-12, memory on, execute 8; reference = the H200 single-process X7 episodes in official_pilot"
+  checkpoint: a2C_6ep/checkpoints/update_004020.pt
+  label: x7_par3_exec8
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n30_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "12"]
+  parallel: 3
+  output: closed_loop/p0_par3
+  min_episodes: 12
+  parity_with: {folders: [closed_loop/official_pilot], label: a2C6_e6, modes: ["on"]}
+  reference: {folders: [closed_loop/official_pilot], label: a2C6_e6, modes: ["on"]}
+  inconclusive_if: "m.get('wall_span_s') is None or r.get('episode_wall_mean_s') is None"
+  pass_if: "m.get('errors', 0) == 0 and m.get('parity_first_max_abs') is not None and m['parity_first_max_abs'] <= 1e-2 and m['episodes'] * r['episode_wall_mean_s'] / m['wall_span_s'] >= 2.5"
+  failure_explanations:
+    - if: "m.get('wall_span_s') and r.get('episode_wall_mean_s') and m['episodes'] * r['episode_wall_mean_s'] / m['wall_span_s'] < 2.5"
+      then: "3 copies do not give 2.5x (CPU or GPU contention: compare episode_wall_mean_s with the reference, check nproc); evaluation days scale with the real factor; try parallel: 2"
+    - if: "m.get('parity_first_max_abs') is not None and m['parity_first_max_abs'] > 1e-2"
+      then: "the first decision differs from the single-process run on the same scene: nondeterminism under contention or a code change since official_pilot; do not use parallel evaluation for verdicts until explained"
+    - if: "m.get('errors', 0) > 0"
+      then: "episodes ended with ERROR.json under parallel load (simulator / RPC / memory): read the episode ERROR.json"
+  on_pass: "parallel: 3 is the default for H200 / AWS evaluation tasks"
+  on_fail: "see failure_explanations"

@@ -23,6 +23,8 @@ Task file (YAML, default scripts/memory_v2/jobs/queue5_tasks.yaml). Each task:
                     (online args of the best PASSing task, and optionally its label / output folder, so episodes
                     already there are reused; no PASS -> fallback, or SKIPPED without one)
                     parity_with: {folders, label, modes}: per-frame max |action difference| vs that run (U1 smoke)
+                    parallel: k   (11-05) run k shards of this task at once on its GPU (parallel_loop.py, same
+                              output folder; online_args must not carry --shard); need_mib should cover k processes
                     compare: {name: {mode, ref_mode, <task>: {folders, label}, ...}}   (11-05) several paired progress
                               comparisons, each with its own label per task and possibly another mode (e.g. my "on" vs
                               B0's "null"); all of them on the scenes present in this task AND in every compare entry,
@@ -184,6 +186,12 @@ def load_tasks(path=TASKS):
         for holder in (t, t.get("reference") or {}):          # YAML 1.1: unquoted on / off / null are True / False / None
             if "modes" in holder:
                 holder["modes"] = [x if isinstance(x, str) else MODE_WORDS[x] for x in holder["modes"]]
+        if "parallel" in t:
+            k = t["parallel"]
+            if t.get("kind") != "closed_loop" or not isinstance(k, int) or k < 1:
+                raise ValueError(f"task {t.get('id')}: parallel must be an integer >= 1 on a closed_loop task")
+            if k > 1 and "--shard" in [str(a) for a in t.get("online_args") or []]:
+                raise ValueError(f"task {t.get('id')}: parallel > 1 and --shard in online_args")
         for name, spec in (t.get("compare") or {}).items():
             for key in ("mode", "ref_mode"):
                 if key not in spec:
@@ -467,6 +475,26 @@ def progress_pairs(eps_a, eps_b, mode_a, mode_b):
     return out
 
 
+def wall_stats(eps):
+    """Mean episode wall time and the span from the first episode start to the last end (result.json mtime minus
+    its wall_seconds): episodes x mean / span = how many episodes ran at once (parallel throughput)."""
+    walls, starts, ends = [], [], []
+    for a in eps.values():
+        res_path = Path(a["dir"]) / "result.json"
+        res = read_json(res_path, {}) or {}
+        w = res.get("wall_seconds")
+        if w is None or not res_path.exists():
+            continue
+        end = res_path.stat().st_mtime
+        walls.append(float(w))
+        starts.append(end - float(w))
+        ends.append(end)
+    if not walls:
+        return {}
+    return {"episode_wall_mean_s": round(mean(walls), 1), "wall_span_s": round(max(ends) - min(starts), 1),
+            "concurrency": round(sum(walls) / max(1.0, max(ends) - min(starts)), 2)}
+
+
 def compare_metrics(eps, spec):
     """Paired progress comparisons against several references (task field `compare`, see the docstring).
     Every entry is evaluated on the same scene set: the (task, seed) present in this task's episodes (in the entry's
@@ -531,6 +559,7 @@ def loop_metrics(task):
             if x.get("candidate_distances"):
                 choices.append(int(x.get("choice", 0)))
                 n_cand = max(n_cand, len(x["candidate_distances"]))
+    m.update(wall_stats(eps))
     m["decision_gaps"] = sorted(gaps)
     m["command_to_execution_exact"] = exact
     m["policy_seconds_mean"] = round(mean(policy_s), 3) if policy_s else None
@@ -552,6 +581,7 @@ def loop_metrics(task):
         ref_eps = {k: v for k, v in ref_eps.items() if (k[0], k[2]) in mine}      # the same scenes only
         r = stage_table(ref_eps)
         r["episodes"] = len(ref_eps)
+        r.update(wall_stats(ref_eps))
         ref_modes = ref.get("modes") or sorted({md for (_, md, _) in ref_eps})
         if "on" in ref_modes and "null" in ref_modes:
             r["on_vs_null"] = paired(ref_eps, ref_eps, "on", "null")
@@ -848,7 +878,13 @@ def closed_loop_cmd(task, extra):
     sim = [("SIM_PY", "--simulator-python"), ("CUROBO", "--curobo-backend"), ("EXT_DIR", "--extensions-dir"),
            ("VK_ICD", "--vk-icd")]
     cmd += [a for env, flag in sim if os.environ.get(env) for a in (flag, os.environ[env])]
-    return cmd + [str(a) for a in (task.get("online_args") or [])] + [str(a) for a in extra]
+    cmd = cmd + [str(a) for a in (task.get("online_args") or [])] + [str(a) for a in extra]
+    k = int(task.get("parallel", 1))
+    if k > 1:
+        if "--shard" in cmd:
+            raise ValueError(f"{task['id']}: parallel > 1 but the online command carries --shard")
+        cmd = [PY, str(REPO / "scripts" / "memory_v2" / "parallel_loop.py"), "--k", str(k), "--"] + cmd
+    return cmd
 
 
 def best_args(task):
