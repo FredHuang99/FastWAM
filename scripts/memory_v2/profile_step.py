@@ -49,6 +49,7 @@ def main():
     ap.add_argument("--cases", nargs="+", default=list(CASES), choices=list(CASES))
     ap.add_argument("--updates", type=int, default=5, help="dry-run updates per case (the first is warm-up)")
     ap.add_argument("--python", default=sys.executable)
+    ap.add_argument("--tag", default="", help="report name PROFILE_<tag>_<time>.md (keeps it apart from other profiles)")
     args = ap.parse_args()
     env = dict(os.environ, PYTHONPATH=str(REPO / "src"), MEMV2_PROFILE="1", MEMV2_PROFILE_WARMUP="1")
     results = {}
@@ -109,7 +110,7 @@ def main():
     if b and d:
         lines += [f"**x7_distill vs x7_nopairs: {d:.2f} / {b:.2f} s per update = {d / b:.2f}x** "
                   "(plan v8 D7 item 1 expects <= 1.2x)", ""]
-    rep = O / "report" / f"PROFILE_{now:%Y%m%d_%H%M}.md"
+    rep = O / "report" / f"PROFILE_{args.tag + '_' if args.tag else ''}{now:%Y%m%d_%H%M}.md"
     rep.parent.mkdir(parents=True, exist_ok=True)
     rep.write_text("\n".join(lines) + "\n", encoding="utf-8")
     rep.with_suffix(".json").write_text(json.dumps(results, indent=1), encoding="utf-8")

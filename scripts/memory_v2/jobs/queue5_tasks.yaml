@@ -2468,9 +2468,9 @@ tasks:
   failure_explanations:
     - if: "m['rc'] != 0"
       then: "the distillation dry run crashed or a check failed (a shell task only records rc): read profile/x7_distill/DISTILL_CHECK.json and the job log; D2-pilot-train stays SKIPPED"
-  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/profile_step.py --updates 4 --cases x7_nopairs x7_distill --python /opt/mwam/bin/python && /opt/mwam/bin/python -c \"import json,sys; c=json.load(open('{O}/profile/x7_distill/DISTILL_CHECK.json')); print(json.dumps(c, indent=1)); sys.exit(0 if c['start']['ok'] and c['after_first_update']['ok'] else 1)\""
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/profile_step.py --updates 4 --cases x7_nopairs x7_distill --tag D2 --python /opt/mwam/bin/python && /opt/mwam/bin/python -c \"import json,sys; c=json.load(open('{O}/profile/x7_distill/DISTILL_CHECK.json')); print(json.dumps(c, indent=1)); sys.exit(0 if c['start']['ok'] and c['after_first_update']['ok'] else 1)\""
   pass_if: "m['rc'] == 0"
-  on_pass: "send report/PROFILE_*.md (x7_distill vs x7_nopairs step time, peak memory, distillation checks); D2-pilot-train may start"
+  on_pass: "send report/PROFILE_D2_*.md (x7_distill vs x7_nopairs step time, peak memory, distillation checks); D2-pilot-train may start"
   on_inconclusive: "(shell ERROR) read the job log"
 
 - id: D2-pilot-train
