@@ -23,6 +23,11 @@ Task file (YAML, default scripts/memory_v2/jobs/queue5_tasks.yaml). Each task:
                     (online args of the best PASSing task, and optionally its label / output folder, so episodes
                     already there are reused; no PASS -> fallback, or SKIPPED without one)
                     parity_with: {folders, label, modes}: per-frame max |action difference| vs that run (U1 smoke)
+                    compare: {name: {mode, ref_mode, <task>: {folders, label}, ...}}   (11-05) several paired progress
+                              comparisons, each with its own label per task and possibly another mode (e.g. my "on" vs
+                              B0's "null"); all of them on the scenes present in this task AND in every compare entry,
+                              pooled over tasks -> m['compare'][name] = {pooled: {delta, ci, p, n, mean_a, mean_b},
+                              tasks: {task: {...}}} (delta = mine - reference)
   kind analysis:    folders: [..], label, modes, tasks, reference   (no GPU: metrics of existing episodes only)
   kind train:       run, sets: [--set values, {O} = outputs/memory_v2]; stdout -> outputs/memory_v2/<run>/stdout.log
   kind eval:        run, checkpoint (default: the run's last), pr (default true), reference_run
@@ -179,6 +184,12 @@ def load_tasks(path=TASKS):
         for holder in (t, t.get("reference") or {}):          # YAML 1.1: unquoted on / off / null are True / False / None
             if "modes" in holder:
                 holder["modes"] = [x if isinstance(x, str) else MODE_WORDS[x] for x in holder["modes"]]
+        for name, spec in (t.get("compare") or {}).items():
+            for key in ("mode", "ref_mode"):
+                if key not in spec:
+                    raise ValueError(f"task {t.get('id')}: compare.{name} needs {key}")
+                if not isinstance(spec[key], str):
+                    spec[key] = MODE_WORDS[spec[key]]
     return tasks
 
 
@@ -456,6 +467,50 @@ def progress_pairs(eps_a, eps_b, mode_a, mode_b):
     return out
 
 
+def compare_metrics(eps, spec):
+    """Paired progress comparisons against several references (task field `compare`, see the docstring).
+    Every entry is evaluated on the same scene set: the (task, seed) present in this task's episodes (in the entry's
+    mode) and in every entry's reference, so differences between entries are exact on that set."""
+    refs, common = {}, None
+    for name, entry in spec.items():
+        mode, ref_mode = entry["mode"], entry["ref_mode"]
+        ref_eps = {}
+        for task_name, cell in entry.items():
+            if task_name in ("mode", "ref_mode"):
+                continue
+            ref_eps.update(episodes(cell["folders"], cell["label"], [ref_mode], [task_name]))
+        refs[name] = (mode, ref_mode, ref_eps)
+        mine = {(t, s) for (t, md, s) in eps if md == mode}
+        theirs = {(t, s) for (t, md, s) in ref_eps if md == ref_mode}
+        both = mine & theirs
+        common = both if common is None else common & both
+    common = common or set()
+    out = {}
+    for name, (mode, ref_mode, ref_eps) in refs.items():
+        rows = {}
+        for task_name, seed in sorted(common):
+            rows.setdefault(task_name, []).append((progress(task_name, eps[(task_name, mode, seed)]),
+                                                   progress(task_name, ref_eps[(task_name, ref_mode, seed)])))
+        cell = {"tasks": {}}
+        pooled = []
+        for task_name, pairs in rows.items():
+            diffs = [round(a - b, 6) for a, b in pairs]
+            pooled.extend(pairs)
+            cell["tasks"][task_name] = {"mean_a": round(mean(a for a, _ in pairs), 4),
+                                        "mean_b": round(mean(b for _, b in pairs), 4), "delta": round(mean(diffs), 4),
+                                        "ci": bootstrap_ci(diffs), "p": round(perm_p(diffs), 5), "n": len(pairs)}
+        if pooled:
+            diffs = [round(a - b, 6) for a, b in pooled]
+            cell["pooled"] = {"mean_a": round(mean(a for a, _ in pooled), 4), "mean_b": round(mean(b for _, b in pooled), 4),
+                              "delta": round(mean(diffs), 4), "ci": bootstrap_ci(diffs), "p": round(perm_p(diffs), 5),
+                              "n": len(pooled)}
+        else:
+            cell["pooled"] = {"mean_a": None, "mean_b": None, "delta": None, "ci": None, "p": None, "n": 0}
+        cell["mode"], cell["ref_mode"] = mode, ref_mode
+        out[name] = cell
+    return out
+
+
 def loop_metrics(task):
     folders = task.get("folders") or [task["output"]]
     eps = episodes(folders, task["label"], task.get("modes"), task.get("tasks"))
@@ -487,6 +542,8 @@ def loop_metrics(task):
     if "on" in modes and "null" in modes:
         m["on_vs_null"] = paired(eps, eps, "on", "null")
         m["prog_on_vs_null"] = progress_pairs(eps, eps, "on", "null")
+    if task.get("compare"):
+        m["compare"] = compare_metrics(eps, task["compare"])
     r = {}
     ref = task.get("reference")
     if ref:
@@ -596,6 +653,10 @@ def headline(task, m):
                 parts.append(f"{t} on/null only {key} {v[0]}/{v[1]} p={sign_p(v[0], v[1]):.3f}")
         for t, c in (m.get("prog_on_vs_null") or {}).items():
             parts.append(f"{t} dprog on-null {c['delta']:+.3f} {c['ci']} p={c['p']:.4f} n={c['n']}")
+        for name, c in (m.get("compare") or {}).items():
+            p = c.get("pooled") or {}
+            if p.get("n"):
+                parts.append(f"vs {name} ({c['mode']}-{c['ref_mode']}) dprog {p['delta']:+.3f} {p['ci']} p={p['p']:.4f} n={p['n']}")
         if m.get("errors"):
             parts.append(f"errors={m['errors']}")
         return "; ".join(parts)
@@ -1132,7 +1193,9 @@ def cmd_check(args):
                 (warn if planners else bad).append(f"{tid}: scene folder {resolve(sc)} missing "
                                                    f"(planned by {', '.join(x['id'] for x in planners) or 'nothing'}; "
                                                    "dropped at run time if still missing)")
-        for f in (t.get("folders") or []) + ((t.get("reference") or {}).get("folders") or []):
+        compare_folders = [f for entry in (t.get("compare") or {}).values() for k, cell in entry.items()
+                           if k not in ("mode", "ref_mode") for f in cell.get("folders") or []]
+        for f in (t.get("folders") or []) + ((t.get("reference") or {}).get("folders") or []) + compare_folders:
             if not resolve(f).exists() and str(resolve(f)) not in produced:
                 warn.append(f"{tid}: folder {resolve(f)} missing")
         if t.get("config") and not (REPO / t["config"]).exists() and not Path(t["config"]).exists():

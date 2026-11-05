@@ -39,6 +39,7 @@ import torch
 from .config import GuidanceConfig, V2Config
 from .history import pairs_with_strides, with_strides
 from .metrics import attention_report, gate_profile, history_sensitivity, summarize_sensitivity
+from .profiling import PROFILE
 from .model import MemoryV2Model
 from .objectives import compute_loss
 
@@ -598,6 +599,12 @@ class Trainer:
 
     # ------------------------------------------------------------- one update
     def step(self) -> dict:
+        with PROFILE.section("update"):
+            record = self._step()
+        PROFILE.step_done()
+        return record
+
+    def _step(self) -> dict:
         cfg = self.cfg
         u = self.update + 1
         epoch = (u - 1) // self.updates_per_epoch + 1
@@ -617,12 +624,15 @@ class Trainer:
         bins = {"sum": [0.0] * (len(TAU_BINS) - 1), "count": [0] * (len(TAU_BINS) - 1)}
         for m in range(0, len(mine), cfg.schedule.micro_batch):
             micro = mine[m:m + cfg.schedule.micro_batch]
-            batch = self.backend.batch(micro)
+            with PROFILE.section("batch"):
+                batch = self.backend.batch(micro)
             generator = torch.Generator().manual_seed(stable_seed(cfg.seed, u, self.rank, m))
-            out = compute_loss(self.model, batch, cfg.v2.objective, generator)
+            with PROFILE.section("loss"):
+                out = compute_loss(self.model, batch, cfg.v2.objective, generator)
             if not bool(torch.isfinite(out["loss"])):
                 raise FloatingPointError(f"Non-finite loss at update {u}.")
-            (out["loss"] * (len(micro) / total)).backward()
+            with PROFILE.section("backward"):
+                (out["loss"] * (len(micro) / total)).backward()
             n = len(micro)
             stats["loss"] += float(out["loss"]) * n
             stats["fm"] += float(out["fm"]) * n
@@ -642,15 +652,20 @@ class Trainer:
             for m in range(0, len(mine_pairs), cfg.schedule.micro_batch):
                 group = mine_pairs[m:m + cfg.schedule.micro_batch]
                 for reverse in (False, True):
-                    _, swapped = self.backend.pair_batches(group, reverse)
+                    with PROFILE.section("pairs_batch"):
+                        _, swapped = self.backend.pair_batches(group, reverse)
                     generator = torch.Generator().manual_seed(stable_seed(cfg.seed, "pair-step", u, self.rank, m, reverse))
-                    out = compute_loss(self.model, swapped, cfg.v2.objective, generator,
-                                       drop=torch.zeros(len(group), dtype=torch.bool))
+                    with PROFILE.section("pairs_loss"):
+                        out = compute_loss(self.model, swapped, cfg.v2.objective, generator,
+                                           drop=torch.zeros(len(group), dtype=torch.bool))
                     if not bool(torch.isfinite(out["loss"])):
                         raise FloatingPointError(f"Non-finite pair loss at update {u}.")
-                    (out["loss"] * cfg.pairs.weight * (len(group) / pair_total)).backward()
+                    with PROFILE.section("pairs_backward"):
+                        (out["loss"] * cfg.pairs.weight * (len(group) / pair_total)).backward()
                     pair_stats["loss"] += float(out["loss"]) * len(group)
                     pair_stats["samples"] += len(group)
+        sync = PROFILE.section("grad_sync_optim")
+        sync.__enter__()
         for p, m in self.master:                       # bf16 grads -> fp32 masters
             m.grad = None if p.grad is None else p.grad.float()
             p.grad = None
@@ -678,6 +693,7 @@ class Trainer:
             with torch.no_grad():
                 for p, m in self.master:
                     p.copy_(m)
+        sync.__exit__(None, None, None)
         self.update = u
         count = max(1, stats["samples"])
         fm = stats["fm"] / count
@@ -786,6 +802,14 @@ class Trainer:
                 self.save()
         if self.rank == 0 and not dry_run:
             write_json(out / "COMPLETE.json", {"update": self.update, "epochs": cfg.schedule.epochs})
+        if PROFILE.enabled and self.rank == 0:
+            out.mkdir(parents=True, exist_ok=True)
+            write_json(out / "PROFILE.json", {"updates": self.update, "world": self.world,
+                                              "micro_batch": cfg.schedule.micro_batch,
+                                              "global_batch": cfg.schedule.global_batch,
+                                              "pairs_per_update": cfg.pairs.per_update if self.pairs else 0,
+                                              "sections": PROFILE.summary()})
+            self.log("[profile]\n" + PROFILE.table())
         return {"complete": True, "update": self.update}
 
     @torch.no_grad()

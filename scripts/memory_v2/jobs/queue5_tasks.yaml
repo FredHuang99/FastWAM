@@ -2278,3 +2278,71 @@ tasks:
   hypothesis: "frozen Video-DiT history features for the press_button cache (outputs/memory_v2/features_press_v1, ~20 GB); v6 2.5 gate: ready before Thu 11-05 18:00"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python -m fastwam.memory_v2.train_v2 features --config configs/memory_v2/train_v2_press.yaml"
   pass_if: "m['rc'] == 0"
+
+# ---- 11-05 22:30 plan v7 (Fable) P0 + Q2 / S1, chained on the A100 GPU that PB-loop-A frees (Fri ~15:00):
+# P0-profile (dry runs, ~40 min) -> S1-offline (descriptive, ~1 h) -> S1 (pre-registered closed loop, ~22 h).
+- id: P0-profile
+  lane: extra
+  kind: shell
+  after: [PB-loop-A]
+  need_mib: 30000
+  timeout_h: 2
+  hypothesis: "descriptive (plan v7 P0): where a training update spends its time; dry runs (5 updates, first discarded) with the saved configs of X7 (a2C_6ep, with and without pairs) and press stage 2 (stride 24 / 8), MEMV2_PROFILE=1 (CUDA synchronised per section)"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "no case finished (a shell task only records rc): read the job log"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/profile_step.py --updates 5 --python /opt/mwam/bin/python"
+  on_pass: "send report/PROFILE_*.md: decides the cheapest speed-ups before the H200 runs (plan v7 3.3)"
+  on_inconclusive: "(shell ERROR) read the job log"
+
+- id: S1-offline
+  lane: extra
+  kind: shell
+  after: [P0-profile]
+  need_mib: 30000
+  timeout_h: 4
+  hypothesis: "descriptive (plan v7 S1): X7 (a2C_6ep) offline sampled-chunk error on all val windows at 10 / 4 / 2 / 1 Euler steps, memory on vs null, same noise per window, the run's own saved config"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "the sweep did not finish (a shell task only records rc): read the job log; likely the saved CONFIG.json no longer loads with the current code"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/steps_sweep.py --run a2C_6ep --steps 10 4 2 1 --python /opt/mwam/bin/python"
+  on_pass: "send report/STEPS_SWEEP_a2C_6ep_*.md"
+  on_inconclusive: "(shell ERROR) read the job log"
+
+- id: S1
+  lane: extra
+  kind: closed_loop
+  after: [S1-offline]
+  need_mib: 30000
+  hypothesis: "plan v7 Q2 / S1 (pre-registered 11-05): with memory, ONE Euler step keeps the closed-loop gain. X7 (a2C_6ep), memory on, execute 8, steps 1, official put_back scenes 1-50 and swap scenes 1-50; compared on the same scenes with X7 at 10 steps (on) and with B0-6ep (null). Pass: pooled progress (one step - ten steps) >= -0.05 AND (one step - B0) >= 0.6 x (ten steps - B0)"
+  # references: X7 put = H200 official_pilot (scenes 1-30, synced) + official/put_x7_s0/s1 (31-100); B0 put = h200/official/put8_b0_s0/s1 (synced)
+  checkpoint: a2C_6ep/last
+  label: x7_steps1_exec8
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block, closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [put_back_block, swap_blocks]
+  online_args: ["--execute", "8", "--steps", "1", "--limit", "50"]
+  output: closed_loop/s1_steps1
+  min_episodes: 80
+  compare:
+    ten_step:
+      mode: "on"
+      ref_mode: "on"
+      put_back_block: {folders: [closed_loop/h200/official_pilot, closed_loop/official/put_x7_s0, closed_loop/official/put_x7_s1], label: a2C6_e6}
+      swap_blocks: {folders: [closed_loop/official/swap8_x7_s0, closed_loop/official/swap8_x7_s1, closed_loop/official/swap8_x7_s2], label: a2C6_e6_exec8}
+    b0:
+      mode: "on"
+      ref_mode: "null"
+      put_back_block: {folders: [closed_loop/h200/official/put8_b0_s0, closed_loop/h200/official/put8_b0_s1], label: a2B0_e6_exec8}
+      swap_blocks: {folders: [closed_loop/official/swap8_b0_s0, closed_loop/official/swap8_b0_s1, closed_loop/official/swap8_b0_s2], label: a2B0_e6_exec8}
+  inconclusive_if: "m.get('compare', {}).get('ten_step', {}).get('pooled', {}).get('n', 0) < 80"
+  pass_if: "m['compare']['ten_step']['pooled']['delta'] >= -0.05 and m['compare']['b0']['pooled']['delta'] >= 0.6 * (m['compare']['b0']['pooled']['delta'] - m['compare']['ten_step']['pooled']['delta'])"
+  failure_explanations:
+    - if: "m['compare']['ten_step']['pooled']['delta'] < -0.15"
+      then: "one-step decoding itself loses >= 0.15 progress against ten steps: the claim becomes 'few-step' (check 2 / 4 steps in STEPS_SWEEP and on the final model, E-steps), not one-step"
+    - if: "-0.15 <= m['compare']['ten_step']['pooled']['delta'] < -0.05"
+      then: "one step costs 0.05-0.15 progress: report the curve (STEPS_SWEEP + this run) without a claim"
+    - if: "m['compare']['ten_step']['pooled']['delta'] >= -0.05 and m['compare']['b0']['pooled']['delta'] < 0.6 * (m['compare']['b0']['pooled']['delta'] - m['compare']['ten_step']['pooled']['delta'])"
+      then: "one step keeps the ten-step progress level but the gain over B0 shrinks below 60%: report as a negative result (memory gain does not survive one-step decoding)"
+  on_pass: "plan v7 Q2 claim stands at X7: with memory, one-step decoding keeps the closed-loop gain; repeat on the final model (E-steps)"
+  on_fail: "see failure_explanations; Q2 stays descriptive"

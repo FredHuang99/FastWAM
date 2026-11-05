@@ -172,6 +172,16 @@ def section_result(task, s):
                             f"n = {c['n']} (this {c['mean_a']:.3f} / reference {c['mean_b']:.3f})")
         for t, c in (r.get("prog_on_vs_null") or {}).items():
             prog.append(f"- reference {t} progress on - null: {c['delta']:+.3f} (95% CI {c['ci']}), p = {c['p']:.4f}, n = {c['n']}")
+        for name, c in (m.get("compare") or {}).items():      # task field `compare` (11-05): common scene set
+            p = c.get("pooled") or {}
+            if not p.get("n"):
+                prog.append(f"- compare {name}: no common scenes")
+                continue
+            prog.append(f"- **compare {name}** (this {c['mode']} - reference {c['ref_mode']}), pooled: {p['delta']:+.3f} "
+                        f"(95% CI {p['ci']}), p = {p['p']:.4f}, n = {p['n']} (this {p['mean_a']:.3f} / reference {p['mean_b']:.3f})")
+            for t, x in (c.get("tasks") or {}).items():
+                prog.append(f"  - {t}: {x['delta']:+.3f} (95% CI {x['ci']}), p = {x['p']:.4f}, n = {x['n']} "
+                            f"(this {x['mean_a']:.3f} / reference {x['mean_b']:.3f})")
         if prog:
             out += [""] + prog
     if m.get("errors"):

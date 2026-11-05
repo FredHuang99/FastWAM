@@ -26,6 +26,7 @@ from torch import nn
 from .config import GuidanceConfig, MemoryV2Config
 from .modules import MemoryTokens, MemoryV2Modules
 from .objectives import phi
+from .profiling import PROFILE
 
 
 def _autocast(device: torch.device):
@@ -58,9 +59,10 @@ class MemoryV2Model(nn.Module):
     # ------------------------------------------------------------------ conditions
     def conditions(self, batch: Dict[str, torch.Tensor], drop: Optional[torch.Tensor] = None) -> Conditions:
         """Encode the current observation and tokenise the selected history once per decision."""
-        current_kv, context = self.backbone.encode(batch)
+        with PROFILE.section("encode"):
+            current_kv, context = self.backbone.encode(batch)
         device = batch["history"].device
-        with _autocast(device):
+        with PROFILE.section("tokenize"), _autocast(device):
             memory = self.memory.tokenizer(batch["history"], batch["frame_ids"], batch["roles"],
                                            batch["history_valid"], batch["current_ids"])
             if drop is not None:

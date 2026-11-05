@@ -38,6 +38,7 @@ from torch import nn
 
 from .config import HistoryPolicyConfig
 from .history import collate_history, row_policy, select_history
+from .profiling import PROFILE
 
 ARM_COLUMNS = [0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12]
 GRIPPER_COLUMNS = [6, 13]
@@ -243,8 +244,10 @@ class DenseActionAdapter(nn.Module):
 
     @torch.no_grad()
     def encode(self, batch):
-        current, kv, context = self.ab.encode(batch["latent"], batch["text"], batch["proprio"])
-        readout = self.s1_readout(batch, current) if self.base_memory == "s1" else None
+        with PROFILE.section("current_frame"):
+            current, kv, context = self.ab.encode(batch["latent"], batch["text"], batch["proprio"])
+        with PROFILE.section("s1_readout"):
+            readout = self.s1_readout(batch, current) if self.base_memory == "s1" else None
         return (kv[0], kv[1], readout), context
 
     def prepare(self, actions, timestep, shared_context):
@@ -425,6 +428,8 @@ def make_batch(rows: Sequence[dict], episodes: EpisodeStore, features: FeatureSt
     s1_frame_ids [B,P], s1_valid [B,P].
     """
     latents, texts, text_valid, proprio, actions, valid, selections, feats, s1_feats, s1_ids = ([] for _ in range(10))
+    gather = PROFILE.section("gather")
+    gather.__enter__()
     for row in rows:
         e = episodes(row["episode_id"])
         a = int(row["anchor"])
@@ -447,13 +452,17 @@ def make_batch(rows: Sequence[dict], episodes: EpisodeStore, features: FeatureSt
                 raise ValueError("memory_s1 selection must end at the current frame.")
             s1_ids.append(ids[:-1])
             s1_feats.append([f[i] for i in ids[:-1]])
+    gather.__exit__(None, None, None)
     lengths = {t.shape for t in texts}
     if len(lengths) != 1:
         raise ValueError(f"Text encodings differ in shape across the batch: {lengths}; use micro_batch=1.")
-    history = collate_history(feats, selections, tokens_per_frame=120, width=3072, dtype=torch.bfloat16)
+    with PROFILE.section("collate_history"):
+        history = collate_history(feats, selections, tokens_per_frame=120, width=3072, dtype=torch.bfloat16)
     batch = {"latent": torch.stack(latents), "text": torch.stack(texts), "text_valid": torch.stack(text_valid),
              "proprio": torch.stack(proprio), "actions": torch.stack(actions).to(noise_dtype),
              "action_valid": torch.stack(valid), **history}
+    s1_section = PROFILE.section("collate_s1")
+    s1_section.__enter__()
     if s1 is not None:
         longest = max([len(x) for x in s1_ids] + [1])
         s1_history = torch.zeros(len(rows), longest, 120, 3072, dtype=torch.bfloat16)
@@ -465,7 +474,9 @@ def make_batch(rows: Sequence[dict], episodes: EpisodeStore, features: FeatureSt
                 s1_frame[b, j] = frame
                 s1_valid[b, j] = True
         batch.update(s1_history=s1_history, s1_frame_ids=s1_frame, s1_valid=s1_valid)
-    return {k: v.to(device, non_blocking=True) for k, v in batch.items()}
+    s1_section.__exit__(None, None, None)
+    with PROFILE.section("to_device"):
+        return {k: v.to(device, non_blocking=True) for k, v in batch.items()}
 
 
 def ab_dataset(spec: DenseSpec, identity: str, device):
