@@ -2248,7 +2248,7 @@ tasks:
   kind: shell
   need_mib: 0
   timeout_h: 1
-  hypothesis: "report only: (1) the history sensitivity of the velocity per tau from every run's probes (memory acts at tau >= 0.8 more than at tau <= 0.6 in the runs trained with the high-noise objective; the bell-weighted v2_A_bfull runs are the control), (2) offline FM per tau on vs null, (3) the tau-gate per injected layer, (4) the policy share of closed-loop episode time"
+  hypothesis: "report only: (1) the history sensitivity of the velocity per tau from every run's probes (memory acts at tau >= 0.8 more than at tau <= 0.6 in the runs trained with the high-noise objective; the v2_A_bfull runs -- plain flow matching: tau uniform, no endpoint term, no memory dropout -- are the control, read through their shuffle_time / swap rows because their null branch was never trained), (2) offline FM per tau on vs null, (3) the tau-gate per injected layer, (4) the policy share of closed-loop episode time"
   failure_explanations:
     - if: "m['rc'] != 0"
       then: "no probes and no episodes were found (a shell task only records rc; read the job log)"

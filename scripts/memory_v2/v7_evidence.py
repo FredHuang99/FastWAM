@@ -5,8 +5,9 @@
    shuffle_time, swap = another sample's history) at tau in {0.3, 0.6, 0.8, 0.9, 0.95, 1.0}, and the learned
    tau-gate g_l(tau) of each injected layer. Reported: the last probe of each run, plus the objective it was
    trained with (tau_mode / weight_mode / endpoint), so runs trained WITHOUT the high-noise objective
-   (v2_A_bfull*, the released bell weighting) are the control for "memory acts at high noise only because we
-   trained it there".
+   (v2_A_bfull*: plain flow matching, tau uniform, no endpoint term, no memory dropout) are the control for
+   "memory acts at high noise only because we trained it there". Their null branch was never trained, so their
+   null rows are out of distribution: read their shuffle_time / swap rows.
 2. Offline FM error per tau, memory on vs null (the last eval/update_*.json of each run).
 3. Which injected layers carry the memory: g_l(tau) per layer at tau = 1.0 / 0.9 / 0.5 / 0.1.
 4. How much of a closed-loop episode is policy time: result.json policy_seconds_mean x decisions / wall_seconds,
@@ -145,7 +146,9 @@ def main():
     now = datetime.now(BJ)
     lines = [f"# V7 evidence ({now:%F %T}; read-only, from existing probes / evals / episodes)", "",
              "## 1. Memory effect along the noise level: relative change of the velocity when the history is replaced",
-             "(last probe of each run; tau = 1 is pure noise; larger = the velocity depends more on the history)", ""]
+             "(last probe of each run; tau = 1 is pure noise; larger = the velocity depends more on the history)",
+             "Runs with drop=0 never trained the null branch: their null row is out of distribution, compare their "
+             "shuffle_time / swap rows instead.", ""]
     taus = sorted({t for r in rows for t in r["tau"]})
     if rows:
         lines += ["| run | objective | stride | update | variant | " + " | ".join(f"tau {t:g}" for t in taus) + " |",
