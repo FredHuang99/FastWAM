@@ -47,19 +47,22 @@ def _with_history(batch: Dict[str, torch.Tensor], variant: str, generator: Optio
                 ids[b, index] = batch["frame_ids"][b, order]
         batch["frame_ids"] = ids
     elif variant == "swap":
-        if batch["history"].shape[0] < 2:
+        if batch["history_valid"].shape[0] < 2:
             raise ValueError("Swapping histories needs a batch of at least two samples.")
-        for key in ("history", "frame_ids", "roles", "history_valid"):
-            batch[key] = batch[key].roll(1, dims=0)
+        for key in ("history", "hist_latent", "hist_proprio", "frame_ids", "roles", "history_valid"):
+            if key in batch:
+                batch[key] = batch[key].roll(1, dims=0)
         # Keep causality for the receiving sample: drop frames from its future.
         batch["history_valid"] = batch["history_valid"] & (batch["frame_ids"] <= batch["current_ids"][:, None])
     elif variant == "swap_content":
         # Keep the receiving sample's clock (frame ids, roles, current id); take the
         # observation content from another sample. Separates content from timing.
-        if batch["history"].shape[0] < 2:
+        if batch["history_valid"].shape[0] < 2:
             raise ValueError("Swapping content needs a batch of at least two samples.")
         donor_valid = batch["history_valid"].roll(1, dims=0)
-        batch["history"] = batch["history"].roll(1, dims=0)
+        for key in ("history", "hist_latent", "hist_proprio"):
+            if key in batch:
+                batch[key] = batch[key].roll(1, dims=0)
         batch["history_valid"] = batch["history_valid"] & donor_valid
     elif variant != "null":
         raise ValueError(f"Unknown history variant {variant}.")
@@ -119,6 +122,8 @@ def attention_report(model, conditions, actions: torch.Tensor, tau: float) -> Di
             report[layer] = row
         return hook
 
+    if getattr(model.memory, "replay", None) is not None:      # kv_replay has no injectors to hook
+        return report
     for layer, injector in model.memory.injectors.items():
         hooks.append(injector.register_forward_hook(make_hook(int(layer))))
     try:
@@ -145,7 +150,16 @@ def branch_commitment(records: Sequence[Dict], final: torch.Tensor, tolerance: f
 
 @torch.no_grad()
 def gate_profile(model, taus: Sequence[float] = tuple(i / 20 for i in range(21))) -> Dict[str, List[float]]:
-    """Learned memory strength g_l(tau) for every injected layer."""
+    """Learned memory strength g_l(tau) for every injected layer (kv_replay: every replayed layer, 0 at start)."""
+    replay = getattr(model.memory, "replay", None)
+    if replay is not None:
+        device = next(replay.parameters()).device
+        timestep = torch.tensor([1000.0 * t for t in taus], device=device)
+        gates = replay.gates(timestep).float().cpu()
+        out = {"tau": [float(t) for t in taus]}
+        for j, layer in enumerate(replay.layers):
+            out[str(layer)] = gates[:, j].tolist()
+        return out
     if model.memory.tau_gate is None:
         return {}
     device = next(model.memory.parameters()).device

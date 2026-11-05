@@ -35,12 +35,37 @@ class TinyBackbone(nn.Module):
         x = self.action_in(actions) + self.time(timestep.float()[:, None, None] / 1000.0) + context[:, None, :]
         return x, None
 
-    def block(self, index, x, aux, current_kv):
+    def _layer(self, index, x, q, keys, values, mask=None):
+        logits = q @ keys.transpose(1, 2) / q.shape[-1] ** 0.5
+        if mask is not None:
+            logits = logits.masked_fill(~mask[:, None, :], float("-inf"))
+        y = x + logits.softmax(-1) @ values
+        return y + torch.tanh(self.mlp[index](y))
+
+    def block(self, index, x, aux, current_kv, replay=None):
         keys, values = current_kv
         q = self.q[index](x)
-        probs = (q @ keys[index].transpose(1, 2) / q.shape[-1] ** 0.5).softmax(-1)
-        x = x + probs @ values[index]
-        return x + torch.tanh(self.mlp[index](x))
+        out = self._layer(index, x, q, keys[index], values[index])
+        if replay is not None:                       # kv_replay: base + g * (with history - without), like the MoT
+            hk, hv, hvalid, g = replay
+            mask = torch.cat((hvalid, torch.ones(x.shape[0], keys[index].shape[1], dtype=torch.bool)), 1)
+            with_history = self._layer(index, x, q, torch.cat((hk, keys[index]), 1), torch.cat((hv, values[index]), 1), mask)
+            out = out + g.to(out.dtype)[:, None, None] * (with_history - out)
+        return out
+
+    def encode_history(self, batch, layers, positions, chunk):
+        """kv_replay: the same per-layer K / V as encode() gives a current frame, per history frame (no RoPE here)."""
+        from fastwam.memory_v2.replay import encode_history_frames
+
+        def encode_fn(latent, text, proprio):
+            current = self.encoder(latent)
+            keys, values = [], []
+            for layer in self.kv:
+                k, v = layer(current).chunk(2, -1)
+                keys.append(k)
+                values.append(v)
+            return keys, values
+        return encode_history_frames(encode_fn, batch, layers, positions, chunk, None)
 
     def post(self, x, aux):
         return self.head(x)

@@ -25,7 +25,7 @@ from typing import Dict, List, Optional, Sequence
 import numpy as np
 
 HISTORY_KEYS = ("history", "frame_ids", "roles", "history_valid", "current_ids",
-                "s1_history", "s1_frame_ids", "s1_valid")
+                "s1_history", "s1_frame_ids", "s1_valid", "hist_latent", "hist_proprio")   # hist_*: kv_replay
 
 
 def chunk(actions: np.ndarray, anchor: int, horizon: int = 32):

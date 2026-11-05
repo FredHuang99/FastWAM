@@ -79,6 +79,19 @@ class MemoryV2Config:
     tau_gate_hidden: int = 64
     zero_init_output: bool = True   # memory residual starts exactly at zero (base behaviour preserved)
     layer_norm_eps: float = 1e-6
+    # ---- plan v7 N1 (11-05): how the action expert reads history.
+    #   inject    : the tokenizer + read-time injectors above (cached final-layer features, `injection_layers`)
+    #   kv_replay : every replayed action layer's video attention also sees the history frames' OWN per-layer video
+    #               K/V (each history frame prefilled alone, exactly like a current frame), at temporal RoPE
+    #               position -rank (rank 1 = most recent), plus zero-initialised role / elapsed-time key embeddings and
+    #               low-rank K/V adapters; out = base + g_l(tau) * (L(attention over history+current) - L(current only)),
+    #               g_l zero at start (exact base model). See replay.py.
+    read: str = "inject"
+    replay_layers: tuple = ()       # () = every action layer
+    replay_rank: int = 16           # low-rank K / V adapters on history keys (0 = none)
+    replay_time_buckets: int = 12   # log2 buckets of the elapsed time in replay_time_unit frames
+    replay_time_unit: float = 8.0   # one decision (execute 8)
+    replay_chunk: int = 32          # history frames per video prefill call (memory bound)
 
     def __post_init__(self):
         object.__setattr__(self, "grid", _tuple(self.grid, 2, "grid"))
@@ -101,6 +114,20 @@ class MemoryV2Config:
             raise ValueError("At least one null token is required (keeps attention defined for empty history).")
         if self.time_features % 2 or self.spatial_features % 2:
             raise ValueError("Sinusoid widths must be even.")
+        object.__setattr__(self, "replay_layers", _tuple(self.replay_layers, None, "replay_layers"))
+        if self.read not in ("inject", "kv_replay"):
+            raise ValueError(f"Unknown read={self.read} (inject | kv_replay).")
+        rl = self.replay_layers
+        if rl and (len(set(rl)) != len(rl) or list(rl) != sorted(rl) or rl[0] < 0 or rl[-1] >= self.num_action_layers):
+            raise ValueError("replay_layers must be unique, increasing and index existing action blocks.")
+        if self.replay_rank < 0 or self.replay_time_buckets < 1 or self.replay_time_unit <= 0 or self.replay_chunk < 1:
+            raise ValueError("Invalid replay settings.")
+
+    @property
+    def replayed_layers(self) -> tuple:
+        if self.read != "kv_replay":
+            return ()
+        return self.replay_layers or tuple(range(self.num_action_layers))
 
     @property
     def tokens_per_frame(self) -> int:
@@ -181,4 +208,8 @@ class V2Config:
         # still compare equal (Trainer.resume requires state["config"] == cfg.to_dict()).
         if not out["history"].get("landmark_strides"):
             out["history"].pop("landmark_strides", None)
+        # The kv_replay fields (11-05) are left out for read == "inject" for the same reason.
+        if out["memory"].get("read", "inject") == "inject":
+            for key in ("read", "replay_layers", "replay_rank", "replay_time_buckets", "replay_time_unit", "replay_chunk"):
+                out["memory"].pop(key, None)
         return out

@@ -2287,7 +2287,7 @@ tasks:
   after: [PB-loop-A]
   need_mib: 30000
   timeout_h: 2
-  hypothesis: "descriptive (plan v7 P0): where a training update spends its time; dry runs (5 updates, first discarded) with the saved configs of X7 (a2C_6ep, with and without pairs) and press stage 2 (stride 24 / 8), MEMV2_PROFILE=1 (CUDA synchronised per section)"
+  hypothesis: "descriptive (plan v7 P0): where a training update spends its time; dry runs (5 updates, first discarded) with the saved configs of X7 (a2C_6ep, with and without pairs), press stage 2 (stride 24 / 8) and press stage 1 with the current injection vs kv_replay (micro-batch 2 both), MEMV2_PROFILE=1 (CUDA synchronised per section)"
   failure_explanations:
     - if: "m['rc'] != 0"
       then: "no case finished (a shell task only records rc): read the job log"
@@ -2295,10 +2295,25 @@ tasks:
   on_pass: "send report/PROFILE_*.md: decides the cheapest speed-ups before the H200 runs (plan v7 3.3)"
   on_inconclusive: "(shell ERROR) read the job log"
 
-- id: S1-offline
+- id: N1-check
   lane: extra
   kind: shell
   after: [P0-profile]
+  need_mib: 30000
+  timeout_h: 1
+  hypothesis: "plan v7 N1 acceptance on the real dense backbone (press stage-1 config, 2 samples): (1) the MoT-primitive replica of every action layer matches ABModel's 'action' call (relative L2 <= 2e-2), (2) kv_replay starts bit-identical to the base (on == null == off), (3) opened gates change the velocity and put attention mass on history keys, (4) cost vs the current injection"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "check 1 or 2 failed or the script crashed (a shell task only records rc): read report/REPLAY_CHECK_*.md and the job log before any N1 training"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/replay_check.py --run v2_press_cf --micro 2"
+  pass_if: "m['rc'] == 0"
+  on_pass: "send report/REPLAY_CHECK_*.md; N1 training cards (Phase B) may be queued"
+  on_inconclusive: "(shell ERROR) read the job log"
+
+- id: S1-offline
+  lane: extra
+  kind: shell
+  after: [N1-check]
   need_mib: 30000
   timeout_h: 4
   hypothesis: "descriptive (plan v7 S1): X7 (a2C_6ep) offline sampled-chunk error on all val windows at 10 / 4 / 2 / 1 Euler steps, memory on vs null, same noise per window, the run's own saved config"

@@ -195,6 +195,15 @@ class MemoryV2Modules(nn.Module):
     def __init__(self, cfg: MemoryV2Config):
         super().__init__()
         self.cfg = cfg
+        if cfg.read == "kv_replay":                  # plan v7 N1: no tokenizer / injectors, see replay.py
+            from .replay import KVReplay
+            self.tokenizer = None
+            self.injectors = nn.ModuleDict()
+            self.tau_gate = None
+            self.replay = KVReplay(cfg)
+            self._layer_index: Dict[int, int] = {}
+            return
+        self.replay = None
         self.tokenizer = MemoryTokenizer(cfg)
         self.injectors = nn.ModuleDict({str(i): ReadTimeInjector(cfg) for i in cfg.injection_layers})
         self.tau_gate = TauGate(len(cfg.injection_layers), cfg.tau_gate_hidden) if cfg.tau_gate else None
@@ -212,6 +221,7 @@ class MemoryV2Modules(nn.Module):
     def parameter_groups(self, weight_decay: float = 0.01):
         decay, no_decay = [], []
         for name, parameter in self.named_parameters():
-            exclude = parameter.ndim < 2 or "norm" in name or name.endswith("null") or "role" in name
+            exclude = (parameter.ndim < 2 or "norm" in name or name.endswith("null") or "role" in name
+                       or "embedding" in name)
             (no_decay if exclude else decay).append(parameter)
         return [{"params": decay, "weight_decay": weight_decay}, {"params": no_decay, "weight_decay": 0.0}]

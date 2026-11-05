@@ -102,7 +102,7 @@ def run_label(checkpoint: Optional[str]) -> str:
 
 
 def assemble(encoded: Dict[int, tuple], text, text_valid, current: int, selection, s1_ids: Optional[List[int]],
-             tokens_per_frame: int = 120, width: int = 3072) -> dict:
+             tokens_per_frame: int = 120, width: int = 3072, replay: bool = False) -> dict:
     """One decision's memory_v2 batch (CPU), key for key what dense.make_batch builds offline.
 
     encoded[i] = (latent [48,1,24,20], normalised proprio [14], post-Video-DiT feature [120,3072] bf16);
@@ -111,8 +111,18 @@ def assemble(encoded: Dict[int, tuple], text, text_valid, current: int, selectio
     import torch
     from .history import collate_history
     latent, proprio, _ = encoded[current]
-    history = collate_history([[encoded[i][2] for i in selection.ids]], [selection], tokens_per_frame=tokens_per_frame,
-                              width=width, dtype=torch.bfloat16)
+    if replay:                                   # kv_replay: the history frames' own inputs (dense.make_batch replay)
+        from .history import collate_selection
+        history = collate_selection([selection])
+        n = history["frame_ids"].shape[1]
+        hist_latent = torch.zeros((1, n) + tuple(latent.shape), dtype=latent.dtype)
+        hist_proprio = torch.zeros((1, n) + tuple(proprio.shape), dtype=proprio.dtype)
+        for j, i in enumerate(selection.ids):
+            hist_latent[0, j], hist_proprio[0, j] = encoded[i][0], encoded[i][1]
+        history.update(hist_latent=hist_latent, hist_proprio=hist_proprio)
+    else:
+        history = collate_history([[encoded[i][2] for i in selection.ids]], [selection],
+                                  tokens_per_frame=tokens_per_frame, width=width, dtype=torch.bfloat16)
     batch = {"latent": latent[None], "text": text, "text_valid": text_valid, "proprio": proprio[None],
              "actions": torch.zeros(1, HORIZON, 14), "action_valid": torch.ones(1, HORIZON, dtype=torch.bool), **history}
     if s1_ids is not None:
@@ -274,7 +284,8 @@ class Session:
             encode_start = time.monotonic()
             self._encode(sorted(set(s1_ids or []) | set(selection.ids) | {current}))
             encode_seconds = time.monotonic() - encode_start
-            batch = assemble(self.encoded, self.text, self.text_valid, current, selection, s1_ids)
+            batch = assemble(self.encoded, self.text, self.text_valid, current, selection, s1_ids,
+                             replay=p.cfg.v2.memory.read == "kv_replay")
             batch = {k: v.to(p.device) for k, v in batch.items()}
             conditions = p.model.conditions(batch)
             # U1: candidate k uses its own noise seed; k = 0 is the original seed, so candidates=1 / coherence none /
@@ -743,7 +754,9 @@ def cmd_parity(args):
     with torch.no_grad():
         for row in picked:
             a = int(row["anchor"])
-            offline = dense.make_batch([row], episodes, features, cfg.v2.history, device, s1=policy.s1, spec=policy.spec)
+            replay = cfg.v2.memory.read == "kv_replay"
+            offline = dense.make_batch([row], episodes, features, cfg.v2.history, device, s1=policy.s1, spec=policy.spec,
+                                       replay=replay)
             e, f = episodes(row["episode_id"]), features(row["episode_id"])
             selection = select_history(range(a + 1), a, cfg.v2.history)
             s1_ids = None
@@ -757,11 +770,12 @@ def cmd_parity(args):
                 cached = f[i].to(device).float()
                 rel.append(float((feature.float() - cached).norm() / cached.norm().clamp_min(1e-12)))
                 encoded[i] = (latent, proprio, feature.to(torch.bfloat16).cpu())
-            online = assemble(encoded, e["text"][None], e["text_valid"][None], a, selection, s1_ids)
+            online = assemble(encoded, e["text"][None], e["text_valid"][None], a, selection, s1_ids, replay=replay)
             online = {k: v.to(device) for k, v in online.items()}
             mismatched = [k for k in exact_keys if k in offline and not torch.equal(online[k].cpu(), offline[k].cpu())]
             mismatched += [k for k in offline if k not in online] + [k for k in online if k not in offline]
-            float_keys = ("latent", "text", "proprio", "history") + (("s1_history",) if s1_ids is not None else ())
+            float_keys = ("latent", "text", "proprio") + (("hist_latent", "hist_proprio") if replay else ("history",)) \
+                + (("s1_history",) if s1_ids is not None else ())
             float_diff = max(float((online[k].float() - offline[k].float()).abs().max()) for k in float_keys)
             noise = dense.window_noise(row, (HORIZON, 14), device)[None]
             case = {"episode_id": row["episode_id"], "task": row["task"], "anchor": a, "history": len(selection.ids),

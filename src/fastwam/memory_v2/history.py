@@ -183,6 +183,29 @@ def _same_payload(a: Any, b: Any) -> bool:
     return a == b
 
 
+def collate_selection(selections: Sequence[HistorySelection], device=None) -> Dict[str, Any]:
+    """The metadata half of collate_history (frame_ids, roles, history_valid, current_ids), same padding rule;
+    for kv_replay batches, which carry history latents instead of cached features."""
+    import torch
+
+    batch = len(selections)
+    longest = max([len(s) for s in selections] + [1])
+    frame_ids = torch.zeros(batch, longest, dtype=torch.long)
+    roles = torch.zeros(batch, longest, dtype=torch.long)
+    valid = torch.zeros(batch, longest, dtype=torch.bool)
+    current = torch.zeros(batch, dtype=torch.long)
+    for b, selection in enumerate(selections):
+        current[b] = selection.current
+        for j, (frame_id, role) in enumerate(zip(selection.ids, selection.roles)):
+            frame_ids[b, j] = frame_id
+            roles[b, j] = role
+            valid[b, j] = True
+    out = {"frame_ids": frame_ids, "roles": roles, "history_valid": valid, "current_ids": current}
+    if device is not None:
+        out = {k: v.to(device) for k, v in out.items()}
+    return out
+
+
 def collate_history(features: Sequence[Sequence[Any]], selections: Sequence[HistorySelection],
                     tokens_per_frame: int, width: int, dtype=None, device=None) -> Dict[str, Any]:
     """Pad per-sample feature lists to [B, Nmax, P, C] with validity masks.

@@ -250,20 +250,41 @@ class DenseActionAdapter(nn.Module):
             readout = self.s1_readout(batch, current) if self.base_memory == "s1" else None
         return (kv[0], kv[1], readout), context
 
+    @torch.no_grad()
+    def encode_history(self, batch, layers, positions, chunk):
+        """kv_replay: per-layer video K / V of the history frames, each through ABModel.encode alone (the same
+        single-frame prefill the current frame gets), re-rotated to temporal index -rank (replay.py)."""
+        from .replay import encode_history_frames
+
+        def encode_fn(latent, text, proprio):
+            _, kv, _ = self.ab.encode(latent, text, proprio)
+            return kv[0], kv[1]
+        return encode_history_frames(encode_fn, batch, layers, positions, chunk, self.ab.backbone.mot.num_heads)
+
     def prepare(self, actions, timestep, shared_context):
         context, mask = shared_context
         x, _, mod, ctx, ctx_mask, freqs = self.ab.call("prepare_action", actions.to(torch.bfloat16),
                                                        timestep.to(torch.bfloat16), context, mask)
         return x, (mod, ctx, ctx_mask, freqs)
 
-    def block(self, index, x, aux, current_kv):
+    def block(self, index, x, aux, current_kv, replay=None):
         mod, ctx, ctx_mask, freqs = aux
         keys, values, readout = current_kv
-        x = self.ab.call("action", x, freqs, mod, ctx, ctx_mask, keys[index], values[index],
-                         index=index, checkpointed=True)
+        out = self.ab.call("action", x, freqs, mod, ctx, ctx_mask, keys[index], values[index],
+                           index=index, checkpointed=True)
+        if replay is not None:
+            # kv_replay (replay.py): base + g * (layer with history - layer without), the layer rebuilt from the MoT
+            # primitives of the released action path (checked against ABModel 'action' by replay_check.py); added
+            # before memory_s1's injection, like the attention output it changes.
+            from .replay import maybe_checkpoint, mot_replay_delta
+            hk, hv, hvalid, g = replay
+            mot = self.ab.backbone.mot
+            delta = maybe_checkpoint(lambda x_, hk_, hv_: mot_replay_delta(mot, index, x_, aux, keys[index], values[index],
+                                                                             hk_, hv_, hvalid), x, hk, hv)
+            out = out + g.to(out.dtype)[:, None, None] * delta
         if readout is not None:
-            x = self.ab.inject(index, x, readout, 1.0)
-        return x
+            out = self.ab.inject(index, out, readout, 1.0)
+        return out
 
     def post(self, x, aux):
         return self.ab.call("post_action", x)
@@ -420,13 +441,16 @@ def _atomic_json(path: Path, value) -> None:
 
 def make_batch(rows: Sequence[dict], episodes: EpisodeStore, features: FeatureStore, policy: HistoryPolicyConfig,
                device, noise_dtype=torch.float32, s1: Optional[S1Policy] = None,
-               spec: Optional[DenseSpec] = None) -> Dict[str, torch.Tensor]:
+               spec: Optional[DenseSpec] = None, replay: bool = False) -> Dict[str, torch.Tensor]:
     """rows: [{"episode_id", "anchor"}, ...] -> memory_v2 batch on `device`.
 
     With `s1`, also the frozen memory_s1 inputs: past frames (excluding the current one,
     which the adapter appends live), padded right: s1_history [B,P,120,3072],
     s1_frame_ids [B,P], s1_valid [B,P].
+    With `replay` (kv_replay, plan v7 N1): no cached history features; instead the history frames' own inputs
+    hist_latent [B,N,48,1,24,20] and hist_proprio [B,N,14] (the model prefills them like current frames).
     """
+    from .history import collate_selection
     latents, texts, text_valid, proprio, actions, valid, selections, feats, s1_feats, s1_ids = ([] for _ in range(10))
     gather = PROFILE.section("gather")
     gather.__enter__()
@@ -445,7 +469,10 @@ def make_batch(rows: Sequence[dict], episodes: EpisodeStore, features: FeatureSt
         actions.append(chunk)
         valid.append(mask)
         selections.append(selection)
-        feats.append([f[i] for i in selection.ids])
+        if replay:
+            feats.append([(e["latent"][i], e["proprio"][i]) for i in selection.ids])
+        else:
+            feats.append([f[i] for i in selection.ids])
         if s1 is not None:
             ids = s1.ids(a, s1_phase(spec, row, s1.period))
             if ids[-1] != a:
@@ -457,7 +484,18 @@ def make_batch(rows: Sequence[dict], episodes: EpisodeStore, features: FeatureSt
     if len(lengths) != 1:
         raise ValueError(f"Text encodings differ in shape across the batch: {lengths}; use micro_batch=1.")
     with PROFILE.section("collate_history"):
-        history = collate_history(feats, selections, tokens_per_frame=120, width=3072, dtype=torch.bfloat16)
+        if replay:
+            history = collate_selection(selections)
+            longest = history["frame_ids"].shape[1]
+            hist_latent = torch.zeros((len(rows), longest) + tuple(latents[0].shape), dtype=latents[0].dtype)
+            hist_proprio = torch.zeros((len(rows), longest) + tuple(proprio[0].shape), dtype=proprio[0].dtype)
+            for b, frames in enumerate(feats):
+                for j, (lat, pro) in enumerate(frames):
+                    hist_latent[b, j] = torch.as_tensor(lat)
+                    hist_proprio[b, j] = torch.as_tensor(pro)
+            history.update(hist_latent=hist_latent, hist_proprio=hist_proprio)
+        else:
+            history = collate_history(feats, selections, tokens_per_frame=120, width=3072, dtype=torch.bfloat16)
     batch = {"latent": torch.stack(latents), "text": torch.stack(texts), "text_valid": torch.stack(text_valid),
              "proprio": torch.stack(proprio), "actions": torch.stack(actions).to(noise_dtype),
              "action_valid": torch.stack(valid), **history}

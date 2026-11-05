@@ -39,11 +39,14 @@ def _autocast(device: torch.device):
 class Conditions:
     current_kv: Any                                  # backbone-specific current-frame KV
     context: Any                                     # backbone-specific shared context
-    memory: MemoryTokens
+    memory: Optional[MemoryTokens]                   # read == "inject"
     memory_kv: Dict[int, Tuple[torch.Tensor, torch.Tensor]]
+    replay: Any = None                               # read == "kv_replay": replay.ReplayState
 
     def null(self) -> "Conditions":
-        """Same tensors, history tokens masked: the learned no-memory branch."""
+        """Same tensors, history masked: the learned no-memory branch (kv_replay: the base model)."""
+        if self.replay is not None:
+            return replace(self, replay=self.replay.without_history())
         return replace(self, memory=self.memory.without_history())
 
 
@@ -61,6 +64,9 @@ class MemoryV2Model(nn.Module):
         """Encode the current observation and tokenise the selected history once per decision."""
         with PROFILE.section("encode"):
             current_kv, context = self.backbone.encode(batch)
+        if self.memory.replay is not None:
+            return Conditions(current_kv=current_kv, context=context, memory=None, memory_kv={},
+                              replay=self.replay_state(batch, drop))
         device = batch["history"].device
         with PROFILE.section("tokenize"), _autocast(device):
             memory = self.memory.tokenizer(batch["history"], batch["frame_ids"], batch["roles"],
@@ -70,12 +76,34 @@ class MemoryV2Model(nn.Module):
             memory_kv = self.memory.memory_kv(memory)
         return Conditions(current_kv=current_kv, context=context, memory=memory, memory_kv=memory_kv)
 
+    @torch.no_grad()
+    def replay_state(self, batch: Dict[str, torch.Tensor], drop: Optional[torch.Tensor] = None):
+        """kv_replay: per-layer video K/V of the selected history frames (each prefilled alone by the frozen video
+        branch), re-rotated to temporal index -rank. No gradient: the video branch is frozen."""
+        from .replay import ReplayState, recency_positions, time_buckets
+        cfg = self.cfg
+        valid = batch["history_valid"]
+        positions = recency_positions(batch["frame_ids"], valid)
+        with PROFILE.section("history_prefill"):
+            keys, values = self.backbone.encode_history(batch, self.memory.replay.layers, positions, cfg.replay_chunk)
+        b, k = valid.shape
+        t = keys[0].shape[1] // max(1, k)
+        active = valid.any(1)
+        state = ReplayState(keys=keys, values=values, token_valid=valid.repeat_interleave(t, dim=1),
+                            roles=batch["roles"].clamp(0, None),
+                            buckets=time_buckets(batch["frame_ids"], batch["current_ids"], valid,
+                                                 cfg.replay_time_buckets, cfg.replay_time_unit),
+                            active=active, tokens_per_frame=t)
+        return state if drop is None else state.drop(drop)
+
     # ------------------------------------------------------------------ velocity
     def velocity(self, actions: torch.Tensor, timestep: torch.Tensor, conditions: Conditions,
                  memory_mode: str = "on") -> torch.Tensor:
         """memory_mode: on | null (history masked, learned null tokens only) | off (bypass injectors)."""
         if memory_mode not in ("on", "null", "off"):
             raise ValueError(f"Unknown memory_mode={memory_mode}.")
+        if conditions.replay is not None:
+            return self._velocity_replay(actions, timestep, conditions, memory_mode)
         if memory_mode == "null":
             conditions = conditions.null()
         timestep = timestep.reshape(-1)
@@ -95,6 +123,29 @@ class MemoryV2Model(nn.Module):
             gate = None if gates is None else gates[:, slot]
             with _autocast(actions.device):
                 x = injector(x, conditions.memory_kv[index], conditions.memory.valid, gate)
+        return self.backbone.post(x, aux)
+
+    def _velocity_replay(self, actions, timestep, conditions: Conditions, memory_mode: str) -> torch.Tensor:
+        """kv_replay: base layer + g_l(tau) * (layer with history - layer without); null / off = the base model."""
+        timestep = timestep.reshape(-1)
+        if timestep.numel() == 1 and actions.shape[0] > 1:
+            timestep = timestep.expand(actions.shape[0])
+        state = conditions.replay
+        replay = self.memory.replay
+        x, aux = self.backbone.prepare(actions, timestep, conditions.context)
+        gates = None
+        if memory_mode == "on" and bool(state.active.any()):
+            gates = replay.gates(timestep.float()) * state.active.to(timestep.device, torch.float32)[:, None]
+            if not torch.is_grad_enabled() and not bool(gates.any()):
+                gates = None                          # exactly the base model; skip the history attention
+        for index in range(self.backbone.num_action_layers):
+            slot = None if gates is None else replay.slot(index)
+            if slot is None:
+                x = self.backbone.block(index, x, aux, conditions.current_kv)
+                continue
+            k, v = replay.layer_kv(state, slot)
+            x = self.backbone.block(index, x, aux, conditions.current_kv,
+                                    replay=(k, v, state.token_valid, gates[:, slot]))
         return self.backbone.post(x, aux)
 
     # ------------------------------------------------------------------ sampling
@@ -148,6 +199,14 @@ class FastWAMActionAdapter(nn.Module):
         _, kv, context = self.inner.encode_observation(batch["latent"], batch["text"], batch["proprio"])
         return kv, context
 
+    def encode_history(self, batch, layers, positions, chunk):
+        """kv_replay: per-layer K / V of the history frames, each through the same single-frame prefill."""
+        from .replay import encode_history_frames
+
+        def encode_fn(latent, text, proprio):
+            return self.inner.encode_observation(latent, text, proprio)[1]
+        return encode_history_frames(encode_fn, batch, layers, positions, chunk, self.inner.mot.num_heads)
+
     @torch.autocast("cuda", enabled=False)
     def prepare(self, actions, timestep, shared_context):
         context, mask = shared_context
@@ -158,7 +217,7 @@ class FastWAMActionAdapter(nn.Module):
         return x, (mod, ctx, ctx_mask, freqs)
 
     @torch.autocast("cuda", enabled=False)
-    def block(self, index, x, aux, current_kv):
+    def block(self, index, x, aux, current_kv, replay=None):
         from fastwam.models.wan22.wan_video_dit import flash_attention
         mod, ctx, ctx_mask, freqs = aux
         mot = self.inner.mot
@@ -170,9 +229,16 @@ class FastWAMActionAdapter(nn.Module):
         attention_mask = torch.ones((x.shape[1], keys[index].shape[1] + x.shape[1]), device=x.device, dtype=torch.bool)
         mixed = flash_attention(q=q, k=torch.cat((keys[index], k), 1), v=torch.cat((values[index], v), 1),
                                 num_heads=mot.num_heads, ctx_mask=attention_mask)
-        return mot._apply_expert_post_block_tensor(
+        out = mot._apply_expert_post_block_tensor(
             block=block, residual_x=residual, mixed_attn_out=mixed, gate_msa=gate,
             shift_mlp=shift, scale_mlp=scale, gate_mlp=ffn_gate, context=ctx, context_mask=ctx_mask)
+        if replay is not None:                      # kv_replay (replay.py): base + g * (with history - without)
+            from .replay import maybe_checkpoint, mot_replay_delta
+            hk, hv, hvalid, g = replay
+            delta = maybe_checkpoint(lambda x_, hk_, hv_: mot_replay_delta(mot, index, x_, aux, keys[index], values[index],
+                                                                             hk_, hv_, hvalid), x, hk, hv)
+            out = out + g.to(out.dtype)[:, None, None] * delta
+        return out
 
     @torch.autocast("cuda", enabled=False)
     def post(self, x, aux):

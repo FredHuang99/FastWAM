@@ -33,6 +33,9 @@ CASES = {
     "x7_nopairs": ("a2C_6ep", ["pairs.weight=0"]),                 # pairs off (PairsConfig.enabled needs weight > 0)
     "press_a": ("press_6ep", []),                                   # press stage 2, stride 24 (~45 s / update)
     "press_lm8": ("press_6ep_lm8", []),                             # press stage 2, stride 8 (~86 s / update)
+    # plan v7 N1: stage 1 on press, the current 6-layer injection vs kv_replay, same micro-batch (2)
+    "press_s1_m2": ("v2_press_cf", ["schedule.micro_batch=2"]),
+    "press_n1_m2": ("v2_press_cf", ["schedule.micro_batch=2", "memory_v2.memory.read=kv_replay"]),
 }
 
 

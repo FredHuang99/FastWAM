@@ -878,6 +878,7 @@ class DenseBackend(Backend):
 
     def batch(self, rows):
         return self.dense.make_batch(rows, self.episodes, self.features, self.cfg.v2.history, self.device,
+                                     replay=self.cfg.v2.memory.read == "kv_replay",
                                      s1=self.s1, spec=self.spec)
 
     @torch.no_grad()
