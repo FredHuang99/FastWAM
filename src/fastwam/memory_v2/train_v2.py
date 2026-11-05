@@ -79,6 +79,9 @@ class EvalConfig:
     modes: tuple = ("on", "off", "null")
     guidance_scales: tuple = (1.0,)    # extra scales are evaluated with memory_mode="on"
     fm_taus: tuple = (0.1, 0.5, 0.9, 1.0)
+    # 11-06: extra Euler step counts for the sampled-chunk errors (every eval mode, scale 1), reported as
+    # "<mode>_s<K>/<metric>" next to the guidance.steps ones; () = none (left out of the config dict while empty).
+    steps: tuple = ()
 
 
 @dataclass
@@ -105,6 +108,30 @@ class PairsConfig:
 
 
 @dataclass
+class DistillConfig:
+    """Plan v8 D2: memory-aware one-step distillation (distill.py). Off while `teacher` is empty."""
+    teacher: str = ""                  # memory_v2 checkpoint (.pt): memory_v2 + ActionDiT weights of the teacher
+    teacher_steps: int = 10            # Euler steps of the teacher rollout (RealtimeWAM table 4: K = 10)
+    init_student: bool = True          # a fresh run starts the student as the teacher (memory_v2 + ActionDiT)
+    ema: float = 0.995                 # EMA of the student's trainable weights (fp32, CPU); 0 = off.
+                                       # Checkpoints store the EMA as memory / action (what eval and the closed loop
+                                       # load) and the raw weights under "raw" (what resume loads)
+    ema_every: int = 1
+    gt_weight: float = 0.0             # optional plain FM term on the demonstration targets
+    lambda_cd: float = 0.0             # reserved for a consistency term; not implemented (must stay 0)
+
+    @property
+    def enabled(self) -> bool:
+        return bool(self.teacher)
+
+    def validate(self) -> None:
+        if self.lambda_cd != 0:
+            raise ValueError("distill.lambda_cd: the consistency term is not implemented; keep it 0.")
+        if self.teacher_steps < 1 or self.ema_every < 1 or not 0.0 <= self.ema < 1.0 or self.gt_weight < 0:
+            raise ValueError("Invalid distill configuration.")
+
+
+@dataclass
 class TrainConfig:
     name: str = "v2_A_memory_only"
     output: str = "outputs/memory_v2/v2_A_memory_only"
@@ -122,12 +149,13 @@ class TrainConfig:
     eval: EvalConfig = field(default_factory=EvalConfig)
     guard: GuardConfig = field(default_factory=GuardConfig)
     pairs: PairsConfig = field(default_factory=PairsConfig)
+    distill: DistillConfig = field(default_factory=DistillConfig)
 
     @classmethod
     def from_dict(cls, value: dict) -> "TrainConfig":
         value = dict(value or {})
         known = {"name", "output", "seed", "init_checkpoint", "init_memory", "base_memory", "s1_period", "features",
-                 "feature_batch", "dense", "memory_v2", "optim", "schedule", "eval", "guard", "pairs"}
+                 "feature_batch", "dense", "memory_v2", "optim", "schedule", "eval", "guard", "pairs", "distill"}
         unknown = set(value) - known
         if unknown:
             raise ValueError(f"Unknown train_v2 keys: {sorted(unknown)}")
@@ -157,6 +185,11 @@ class TrainConfig:
         cfg.eval.modes = normalise_modes(cfg.eval.modes)
         cfg.guard = section(GuardConfig, "guard")
         cfg.pairs = section(PairsConfig, "pairs")
+        cfg.distill = section(DistillConfig, "distill")
+        cfg.distill.validate()
+        cfg.eval.steps = tuple(int(k) for k in cfg.eval.steps)
+        if any(k < 1 for k in cfg.eval.steps):
+            raise ValueError("eval.steps must be positive step counts.")
         if cfg.schedule.global_batch % cfg.schedule.micro_batch:
             raise ValueError("global_batch must be a multiple of micro_batch.")
         return cfg
@@ -167,8 +200,18 @@ class TrainConfig:
                 "base_memory": self.base_memory, "s1_period": self.s1_period,
                 "features": self.features, "feature_batch": self.feature_batch, "dense": dict(self.dense),
                 "memory_v2": self.v2.to_dict(), "optim": asdict(self.optim), "schedule": asdict(self.schedule),
-                "eval": asdict(self.eval), "guard": asdict(self.guard),
-                **({"pairs": asdict(self.pairs)} if asdict(self.pairs) != asdict(PairsConfig()) else {})}
+                "eval": eval_dict(self.eval), "guard": asdict(self.guard),
+                **({"pairs": asdict(self.pairs)} if asdict(self.pairs) != asdict(PairsConfig()) else {}),
+                # distill / eval.steps (11-06) are left out while off, so older configs and checkpoints still compare
+                # equal (Trainer.resume requires state["config"] == cfg.to_dict()).
+                **({"distill": asdict(self.distill)} if self.distill.enabled else {})}
+
+
+def eval_dict(e: "EvalConfig") -> dict:
+    out = asdict(e)
+    if not out.get("steps"):
+        out.pop("steps", None)
+    return out
 
 
 YAML_MODE_ALIASES = {True: "on", False: "off", None: "null"}   # YAML 1.1 reads on/off/null as True/False/None
@@ -327,7 +370,10 @@ def evaluate(backend: Backend, rows: Sequence[dict], cfg: TrainConfig, log=print
     model.eval()
     rank, world = rank_world()
     mine = list(rows)[rank::world]
-    variants = [(mode, 1.0) for mode in cfg.eval.modes] + [("on", s) for s in cfg.eval.guidance_scales if s != 1.0]
+    base_steps = cfg.v2.guidance.steps
+    variants = ([(mode, 1.0, base_steps) for mode in cfg.eval.modes]
+                + [("on", s, base_steps) for s in cfg.eval.guidance_scales if s != 1.0]
+                + [(mode, 1.0, k) for k in getattr(cfg.eval, "steps", ()) if k != base_steps for mode in cfg.eval.modes])
     cases = []
     for start in range(0, len(mine), cfg.eval.batch):
         chunk = mine[start:start + cfg.eval.batch]
@@ -336,11 +382,13 @@ def evaluate(backend: Backend, rows: Sequence[dict], cfg: TrainConfig, log=print
         actions = batch["actions"].float()
         noise = torch.stack([backend.noise(row, actions.shape[1:]) for row in chunk]).to(actions.device)
         per_row = [dict(row) for row in chunk]
-        for mode, scale in variants:
-            guidance = GuidanceConfig(steps=cfg.v2.guidance.steps, shift=cfg.v2.guidance.shift, scale=scale,
+        for mode, scale, steps in variants:
+            guidance = GuidanceConfig(steps=steps, shift=cfg.v2.guidance.shift, scale=scale,
                                       min_sigma=cfg.v2.guidance.min_sigma)
             sample, _ = model.sample(conditions, noise, guidance, memory_mode=mode)
             label = mode if scale == 1.0 else f"{mode}_cfg{scale:g}"
+            if steps != base_steps:
+                label = f"{label}_s{steps}"
             for b, row in enumerate(per_row):
                 metrics = backend.window_case(row, sample[b], b, batch)
                 row.update({f"{label}/{k}": v for k, v in metrics.items()})
@@ -503,6 +551,128 @@ class Trainer:
                 raise ValueError(f"No training pairs left in {cfg.pairs.file} after the filters.")
             log(f"[pairs] {len(self.pairs)} counterfactual training pairs, weight {cfg.pairs.weight}, "
                 f"{cfg.pairs.per_update}/update")
+        # ---- plan v8 D2 (11-06): one-step distillation from a memory_v2 teacher (distill.py)
+        from .distill import full_names, trainable_weight_names
+        names = full_names(self.model)
+        # bf16 ActionDiT parameters are restored from their fp32 masters after a teacher / EMA swap (bit-exact)
+        self.restore: Dict[str, torch.Tensor] = {names[id(p)]: m for p, m in self.master if id(p) in names}
+        self.memory_names, self.action_names = trainable_weight_names(self.model)
+        self.teacher = None
+        self.ema = None
+        self._teacher_reference = None
+        if cfg.distill.enabled:
+            from .distill import EMA, load_teacher
+            self.teacher = load_teacher(self.model, cfg.distill.teacher)
+            if cfg.optim.lr_action > 0 and not self.teacher.has_action:
+                raise ValueError("The student trains the ActionDiT: the teacher checkpoint must hold ActionDiT weights.")
+            log(f"[distill] teacher {cfg.distill.teacher} (update {self.teacher.update}): {self.teacher.numel() / 1e6:.1f}M "
+                f"weights ({'memory_v2 + ActionDiT' if self.teacher.has_action else 'memory_v2 only'}), "
+                f"{cfg.distill.teacher_steps}-step Euler rollout; student init from teacher: {cfg.distill.init_student}; "
+                f"EMA {cfg.distill.ema or 'off'}; demonstration term {cfg.distill.gt_weight}")
+            if cfg.distill.ema > 0:
+                self.ema = EMA(cfg.distill.ema, cfg.distill.ema_every)
+
+    # ------------------------------------------------------------- distillation helpers
+    def _teacher_guidance(self) -> GuidanceConfig:
+        g = self.cfg.v2.guidance
+        return GuidanceConfig(steps=self.cfg.distill.teacher_steps, shift=g.shift, scale=1.0, min_sigma=g.min_sigma)
+
+    def _loss(self, batch, generator, drop=None):
+        if self.teacher is None:
+            return compute_loss(self.model, batch, self.cfg.v2.objective, generator, drop=drop)
+        from .distill import distill_loss
+        return distill_loss(self.model, self.teacher, batch, self.cfg.v2.objective, self._teacher_guidance(), generator,
+                            restore=self.restore, drop=drop, gt_weight=self.cfg.distill.gt_weight)
+
+    def _trainable_now(self):
+        """(memory params by checkpoint key, ActionDiT fp32 weights by checkpoint key or {}) for the EMA."""
+        memory = dict(self.model.memory.named_parameters())
+        action = {}
+        if self.cfg.optim.lr_action > 0:
+            from .distill import action_module_parameters
+            action = {n: self.master_names.get(n, p) for n, p in action_module_parameters(self.model).items()}
+        return memory, action
+
+    def eval_weights(self):
+        """Context: evaluation sees the EMA weights (what checkpoints store), training resumes on the raw ones."""
+        import contextlib
+        if self.ema is None:
+            return contextlib.nullcontext()
+        from .distill import swapped
+        return swapped(self.model, self.ema.weights(self.memory_names, self.action_names), self.restore)
+
+    @torch.no_grad()
+    def _probe_rollouts(self, weights=None):
+        """(teacher endpoint, student endpoint) on the probe batch, fixed noise, teacher's step count."""
+        from .distill import swapped, teacher_rollout
+        import contextlib
+        model = self.model
+        batch = self.backend.batch(self.backend.probe_rows())
+        noise = torch.randn(batch["actions"].shape, generator=torch.Generator().manual_seed(2)).to(self.device)
+        guidance = self._teacher_guidance()
+        context = swapped(model, weights) if weights is not None else contextlib.nullcontext()
+        with context:
+            teacher = teacher_rollout(model, self.teacher, batch, noise, guidance, None if weights is not None else self.restore)
+            was = model.training
+            model.eval()
+            student, _ = model.sample(model.conditions(batch), noise, guidance)
+            model.train(was)
+        return teacher, student.float()
+
+    def distill_start(self, dry_run: int = 0) -> dict:
+        """Fresh run: student <- teacher, then three checks written to DISTILL_CHECK.json (run aborts on failure):
+        (1) the student reproduces the teacher's rollout; (2) a perturbed student does not leak into the teacher's
+        rollout and is itself visible in the forward (the swap really replaces the weights the backbone reads)."""
+        cfg = self.cfg
+        out = {"teacher": cfg.distill.teacher, "teacher_update": self.teacher.update, "init_student": cfg.distill.init_student}
+        if cfg.distill.init_student:
+            out["weights_copied"] = self.teacher.load_into_student(self.model, self.master_names)
+            self.log(f"[distill] student <- teacher ({out['weights_copied']} tensors)")
+        teacher, student = self._probe_rollouts()
+        self._teacher_reference = teacher
+        scale = float(teacher.abs().max().clamp_min(1e-6))
+        out["tolerance"] = 1e-3 * scale
+        out["student_vs_teacher_max_abs"] = float((student - teacher).abs().max())
+        out["student_equals_teacher"] = bool(torch.equal(student, teacher))
+        perturbed = {n: (v.float() * 1.05).to(v.dtype) for n, v in self.teacher.weights.items()}
+        teacher_again, moved = self._probe_rollouts(perturbed)
+        out["teacher_under_perturbed_student_max_abs"] = float((teacher_again - teacher).abs().max())
+        out["teacher_under_perturbed_student_exact"] = bool(torch.equal(teacher_again, teacher))
+        out["perturbed_student_moves_max_abs"] = float((moved - teacher).abs().max())
+        del perturbed
+        # A leak of the student into the teacher's rollout would show at the size of a 5% weight change; 1e-3 x scale
+        # tolerates kernel nondeterminism (the exact flags are recorded).
+        ok = out["teacher_under_perturbed_student_max_abs"] <= 1e-3 * scale and out["perturbed_student_moves_max_abs"] > 1e-2 * scale
+        if cfg.distill.init_student:
+            ok = ok and out["student_vs_teacher_max_abs"] <= 1e-3 * scale
+        out["ok"] = bool(ok)
+        if self.ema is not None:
+            self.ema.reset(*self._trainable_now())
+        if self.rank == 0:
+            write_json(self.output / "DISTILL_CHECK.json", {"start": out})
+        self.log(f"[distill] start check: {json.dumps(out)}")
+        if not ok:
+            raise RuntimeError(f"Distillation start check failed: {out}")
+        return out
+
+    def distill_after_first_update(self) -> dict:
+        """After this process's first update: the teacher's rollout is unchanged and every bf16 ActionDiT
+        parameter equals its fp32 master rounded (the restore after each teacher swap is exact)."""
+        teacher, _ = self._probe_rollouts()
+        scale = float(self._teacher_reference.abs().max().clamp_min(1e-6))
+        out = {"update": self.update, "teacher_drift_max_abs": float((teacher - self._teacher_reference).abs().max()),
+               "teacher_drift_exact": bool(torch.equal(teacher, self._teacher_reference)), "tolerance": 1e-3 * scale}
+        out["masters_consistent"] = all(bool(torch.equal(p, m.to(p.dtype))) for p, m in self.master)
+        out["ok"] = bool(out["teacher_drift_max_abs"] <= 1e-3 * scale and out["masters_consistent"])
+        if self.rank == 0:
+            path = self.output / "DISTILL_CHECK.json"
+            value = json.loads(path.read_text()) if path.exists() else {}
+            value["after_first_update"] = out
+            write_json(path, value)
+        self.log(f"[distill] first-update check: {json.dumps(out)}")
+        if not out["ok"]:
+            raise RuntimeError(f"Distillation teacher isolation failed: {out}")
+        return out
 
     # ------------------------------------------------------------- checkpoints
     def checkpoint_dir(self) -> Path:
@@ -513,10 +683,19 @@ class Trainer:
         if self.cfg.optim.lr_action > 0:
             action = {n: self.master_names.get(n, p).detach().cpu()
                       for n, p in self.model.backbone.ab.backbone.mot.mixtures["action"].named_parameters()}
-        return {"update": self.update, "memory": self.model.memory.state_dict(), "action": action,
+        memory = self.model.memory.state_dict()
+        extra = {}
+        if self.ema is not None:
+            # Inference / evaluation load memory + action = the EMA; resume loads the raw training weights.
+            extra = {"raw": {"memory": {k: v.detach().cpu() for k, v in memory.items()}, "action": action},
+                     "ema": {"decay": self.ema.decay, "every": self.ema.every}}
+            memory = {k: (self.ema.memory[k].clone() if k in self.ema.memory else v.detach().cpu()) for k, v in memory.items()}
+            if action is not None:
+                action = {k: self.ema.action[k].clone() for k in action}
+        return {"update": self.update, "memory": memory, "action": action,
                 "optimizer": self.optimizer.state_dict(), "loss_history": self.loss_history,
                 "config": self.cfg.to_dict(), "backend": self.backend.describe(),
-                "torch_rng": torch.get_rng_state()}
+                "torch_rng": torch.get_rng_state(), **extra}
 
     def save(self, tag: Optional[str] = None) -> Optional[Path]:
         if self.rank != 0:
@@ -552,14 +731,21 @@ class Trainer:
         state = torch.load(self.checkpoint_dir() / pointer["file"], map_location="cpu", weights_only=False)
         if state["config"] != self.cfg.to_dict():
             raise ValueError("Config differs from the checkpoint; start a new output instead of resuming.")
-        self.model.memory.load_state_dict(state["memory"], strict=True)
-        if state.get("action") is not None:
+        raw = state.get("raw")                       # distillation with EMA: memory / action hold the EMA
+        self.model.memory.load_state_dict((raw or state)["memory"], strict=True)
+        action_state = (raw or state).get("action")
+        if action_state is not None:
             named = dict(self.model.backbone.ab.backbone.mot.mixtures["action"].named_parameters())
             with torch.no_grad():
-                for n, v in state["action"].items():
+                for n, v in action_state.items():
                     named[n].copy_(v.to(named[n].device, named[n].dtype))
                     if n in self.master_names:
                         self.master_names[n].copy_(v.to(self.master_names[n].device, torch.float32))
+        if self.ema is not None:
+            if raw is None:
+                raise ValueError("EMA is on but the checkpoint has no raw weights (it was not written by an EMA run).")
+            memory_keys = set(dict(self.model.memory.named_parameters()))
+            self.ema.reset({k: v for k, v in state["memory"].items() if k in memory_keys}, state.get("action") or {})
         self.optimizer.load_state_dict(state["optimizer"])
         self.update = int(state["update"])
         self.loss_history = list(state.get("loss_history", []))
@@ -620,7 +806,7 @@ class Trainer:
             lrs[group["name"]] = group["lr"]
         self.model.train()
         started = time.monotonic()
-        stats = {"loss": 0.0, "fm": 0.0, "endpoint": 0.0, "dropped": 0, "samples": 0}
+        stats = {"loss": 0.0, "fm": 0.0, "endpoint": 0.0, "dropped": 0, "samples": 0, "teacher_gt": 0.0}
         bins = {"sum": [0.0] * (len(TAU_BINS) - 1), "count": [0] * (len(TAU_BINS) - 1)}
         for m in range(0, len(mine), cfg.schedule.micro_batch):
             micro = mine[m:m + cfg.schedule.micro_batch]
@@ -628,7 +814,7 @@ class Trainer:
                 batch = self.backend.batch(micro)
             generator = torch.Generator().manual_seed(stable_seed(cfg.seed, u, self.rank, m))
             with PROFILE.section("loss"):
-                out = compute_loss(self.model, batch, cfg.v2.objective, generator)
+                out = self._loss(batch, generator)
             if not bool(torch.isfinite(out["loss"])):
                 raise FloatingPointError(f"Non-finite loss at update {u}.")
             with PROFILE.section("backward"):
@@ -637,6 +823,7 @@ class Trainer:
             stats["loss"] += float(out["loss"]) * n
             stats["fm"] += float(out["fm"]) * n
             stats["endpoint"] += float(out.get("endpoint", torch.zeros(()))) * n
+            stats["teacher_gt"] += float(out.get("teacher_gt", torch.zeros(()))) * n
             stats["dropped"] += int(out["memory_dropped"].sum())
             stats["samples"] += n
             b = tau_bin_stats(out["tau"].cpu(), out["fm_unweighted"].cpu())
@@ -656,8 +843,7 @@ class Trainer:
                         _, swapped = self.backend.pair_batches(group, reverse)
                     generator = torch.Generator().manual_seed(stable_seed(cfg.seed, "pair-step", u, self.rank, m, reverse))
                     with PROFILE.section("pairs_loss"):
-                        out = compute_loss(self.model, swapped, cfg.v2.objective, generator,
-                                           drop=torch.zeros(len(group), dtype=torch.bool))
+                        out = self._loss(swapped, generator, drop=torch.zeros(len(group), dtype=torch.bool))
                     if not bool(torch.isfinite(out["loss"])):
                         raise FloatingPointError(f"Non-finite pair loss at update {u}.")
                     with PROFILE.section("pairs_backward"):
@@ -674,16 +860,17 @@ class Trainer:
                 if p.grad is None:
                     p.grad = torch.zeros_like(p)
                 torch.distributed.all_reduce(p.grad)
-            packed = torch.tensor([stats["loss"], stats["fm"], stats["endpoint"], stats["dropped"], stats["samples"],
-                                   *bins["sum"], *bins["count"], pair_stats["loss"], pair_stats["samples"]],
+            keys = ("loss", "fm", "endpoint", "dropped", "samples", "teacher_gt")
+            packed = torch.tensor([stats[x] for x in keys] + [*bins["sum"], *bins["count"], pair_stats["loss"],
+                                                              pair_stats["samples"]],
                                   device=self.device, dtype=torch.float64)
             torch.distributed.all_reduce(packed)
             values = packed.tolist()
             pair_stats = {"loss": values[-2], "samples": values[-1]}
             values = values[:-2]
-            stats = dict(zip(("loss", "fm", "endpoint", "dropped", "samples"), values[:5]))
+            stats = dict(zip(keys, values[:len(keys)]))
             k = len(bins["sum"])
-            bins = {"sum": values[5:5 + k], "count": values[5 + k:5 + 2 * k]}
+            bins = {"sum": values[len(keys):len(keys) + k], "count": values[len(keys) + k:len(keys) + 2 * k]}
         norm = torch.nn.utils.clip_grad_norm_(self.parameters, cfg.optim.clip)
         if not bool(torch.isfinite(norm)):
             raise FloatingPointError(f"Non-finite gradient norm at update {u}.")
@@ -693,6 +880,8 @@ class Trainer:
             with torch.no_grad():
                 for p, m in self.master:
                     p.copy_(m)
+        if self.ema is not None:
+            self.ema.update(*self._trainable_now(), step=u)
         sync.__exit__(None, None, None)
         self.update = u
         count = max(1, stats["samples"])
@@ -705,6 +894,8 @@ class Trainer:
                                 (bins["sum"][j] / bins["count"][j] if bins["count"][j] else None)
                                 for j in range(len(bins["sum"]))},
                   "seconds": time.monotonic() - started}
+        if self.teacher is not None:
+            record["teacher_gt"] = stats["teacher_gt"] / count       # teacher endpoint vs demonstration (diagnostic)
         if pair_stats["samples"]:
             record["pair_loss"] = pair_stats["loss"] / pair_stats["samples"]
             record["pair_samples"] = int(pair_stats["samples"])
@@ -762,10 +953,16 @@ class Trainer:
                 write_json(out / "INIT_PARITY.json", parity)
             if not parity["exact"]:
                 raise ValueError(f"Start model not reproduced: {parity}")
+            if self.teacher is not None:              # parity above is the C+256 start; now student <- teacher
+                self.distill_start(dry_run)
             if not dry_run and cfg.schedule.eval_every > 0:
-                result = evaluate(self.backend, self.backend.eval_rows(cfg.eval.windows), cfg, self.log)
+                with self.eval_weights():
+                    result = evaluate(self.backend, self.backend.eval_rows(cfg.eval.windows), cfg, self.log)
                 if self.rank == 0:
                     write_json(out / "eval" / "update_000000.json", result)
+        elif self.teacher is not None:
+            self._teacher_reference, _ = self._probe_rollouts()
+        first_update = self.update + 1
         target = dry_run if dry_run else self.total
         while self.update < target:
             if self.stop_requested():
@@ -774,9 +971,11 @@ class Trainer:
                 self.log("[stop] STOP.json found; checkpoint saved")
                 return {"stopped": True, "update": self.update}
             record = self.step()
+            if self.teacher is not None and self.update == first_update:
+                self.distill_after_first_update()
             if self.rank == 0:
-                shown = {k: record[k] for k in ("update", "loss", "fm", "endpoint", "pair_loss", "grad_norm", "seconds")
-                         if k in record}
+                shown = {k: record[k] for k in ("update", "loss", "fm", "endpoint", "teacher_gt", "pair_loss", "grad_norm",
+                                                "seconds") if k in record}
                 if "peak_gpu_bytes" in record:
                     shown["peak_gpu_gb"] = round(record["peak_gpu_bytes"] / 2**30, 1)
                 self.log("[train] " + json.dumps(shown))
@@ -788,7 +987,8 @@ class Trainer:
             if cfg.schedule.probe_every and self.update % cfg.schedule.probe_every == 0 and self.rank == 0:
                 append_jsonl(out / "probes.jsonl", self.probe())
             if cfg.schedule.eval_every and (self.update % cfg.schedule.eval_every == 0 or self.update == self.total):
-                result = evaluate(self.backend, self.backend.eval_rows(cfg.eval.windows), cfg, self.log)
+                with self.eval_weights():
+                    result = evaluate(self.backend, self.backend.eval_rows(cfg.eval.windows), cfg, self.log)
                 if self.rank == 0:
                     write_json(out / "eval" / f"update_{self.update:06d}.json", result)
                 trip = trip or self.eval_guard(result)
@@ -808,6 +1008,8 @@ class Trainer:
                                               "micro_batch": cfg.schedule.micro_batch,
                                               "global_batch": cfg.schedule.global_batch,
                                               "pairs_per_update": cfg.pairs.per_update if self.pairs else 0,
+                                              "peak_gpu_gb": (torch.cuda.max_memory_allocated(self.device) / 2 ** 30
+                                                              if self.device.type == "cuda" else None),
                                               "sections": PROFILE.summary()})
             self.log("[profile]\n" + PROFILE.table())
         return {"complete": True, "update": self.update}

@@ -36,6 +36,11 @@ CASES = {
     # plan v7 N1: stage 1 on press, the current 6-layer injection vs kv_replay, same micro-batch (2)
     "press_s1_m2": ("v2_press_cf", ["schedule.micro_batch=2"]),
     "press_n1_m2": ("v2_press_cf", ["schedule.micro_batch=2", "memory_v2.memory.read=kv_replay"]),
+    # plan v8 D2 (11-06): X7 recipe without pairs, as one-step distillation from X7 itself (teacher 10-step rollout
+    # + student FM / endpoint on the teacher's endpoints); compare with x7_nopairs
+    "x7_distill": ("a2C_6ep", ["pairs.weight=0", "init_memory=",
+                               f"distill.teacher={O}/a2C_6ep/checkpoints/update_004020.pt", "distill.teacher_steps=10",
+                               "distill.ema=0.995", "eval.steps=[1]"]),
 }
 
 
@@ -59,6 +64,8 @@ def main():
         cfg = folder / "run_config.yaml"
         cfg.write_text(json.dumps(saved["config"], indent=1), encoding="utf-8")
         sets = [f"output={folder}", f"name=profile_{case}"] + extra
+        for stale in ("PROFILE.json", "DISTILL_CHECK.json"):
+            (folder / stale).unlink(missing_ok=True)
         cmd = [args.python, "-m", "fastwam.memory_v2.train_v2", "train", "--config", str(cfg),
                "--dry-run", str(args.updates)] + [x for s in sets for x in ("--set", s)]
         print(f"[profile] {datetime.now(BJ):%F %T} {case}: {' '.join(cmd)}", flush=True)
@@ -71,6 +78,9 @@ def main():
         results[case] = json.loads(prof.read_text(encoding="utf-8"))
         results[case]["run"] = run
         results[case]["sets"] = extra
+        check = folder / "DISTILL_CHECK.json"
+        if check.exists():
+            results[case]["distill_check"] = json.loads(check.read_text(encoding="utf-8"))
     now = datetime.now(BJ)
     lines = [f"# Training step profile ({now:%F %T}; dry runs of {args.updates} updates, first discarded)", ""]
     for case, r in results.items():
@@ -87,6 +97,18 @@ def main():
             share = f"{v['mean_s'] / step:.1%}" if step else "-"
             lines.append(f"| {name} | {v['mean_s']:.3f} | {share} | {v['calls_per_update']} |")
         lines.append("")
+        if r.get("peak_gpu_gb") is not None:
+            lines += [f"peak GPU memory {r['peak_gpu_gb']:.1f} GiB", ""]
+        if r.get("distill_check"):
+            for stage, v in r["distill_check"].items():
+                lines.append(f"- distillation check, {stage}: " + ", ".join(f"{k} = {x}" for k, x in v.items()))
+            lines.append("")
+    base, dist = results.get("x7_nopairs", {}), results.get("x7_distill", {})
+    b = base.get("sections", {}).get("update", {}).get("mean_s")
+    d = dist.get("sections", {}).get("update", {}).get("mean_s")
+    if b and d:
+        lines += [f"**x7_distill vs x7_nopairs: {d:.2f} / {b:.2f} s per update = {d / b:.2f}x** "
+                  "(plan v8 D7 item 1 expects <= 1.2x)", ""]
     rep = O / "report" / f"PROFILE_{now:%Y%m%d_%H%M}.md"
     rep.parent.mkdir(parents=True, exist_ok=True)
     rep.write_text("\n".join(lines) + "\n", encoding="utf-8")

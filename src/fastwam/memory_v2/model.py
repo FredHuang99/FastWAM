@@ -63,13 +63,30 @@ class MemoryV2Model(nn.Module):
         self.replay_cache: Optional[dict] = None
 
     # ------------------------------------------------------------------ conditions
-    def conditions(self, batch: Dict[str, torch.Tensor], drop: Optional[torch.Tensor] = None) -> Conditions:
-        """Encode the current observation and tokenise the selected history once per decision."""
+    @torch.no_grad()
+    def shared_encoding(self, batch: Dict[str, torch.Tensor]) -> Dict[str, Any]:
+        """The frozen-video part of conditions(): current-frame prefill (+ kv_replay history prefill, undropped).
+        Holds no trainable weight, so one encoding serves several weight sets (distillation teacher and student)."""
         with PROFILE.section("encode"):
-            current_kv, context = self.backbone.encode(batch)
+            encoded = self.backbone.encode(batch)
+        replay = self.replay_state(batch) if self.memory.replay is not None else None
+        return {"encoded": encoded, "replay": replay}
+
+    def conditions(self, batch: Dict[str, torch.Tensor], drop: Optional[torch.Tensor] = None,
+                   shared: Optional[Dict[str, Any]] = None) -> Conditions:
+        """Encode the current observation and tokenise the selected history once per decision.
+        shared: a shared_encoding(batch) result to reuse instead of encoding again."""
+        if shared is not None:
+            current_kv, context = shared["encoded"]
+        else:
+            with PROFILE.section("encode"):
+                current_kv, context = self.backbone.encode(batch)
         if self.memory.replay is not None:
-            return Conditions(current_kv=current_kv, context=context, memory=None, memory_kv={},
-                              replay=self.replay_state(batch, drop))
+            if shared is not None and shared.get("replay") is not None:
+                state = shared["replay"] if drop is None else shared["replay"].drop(drop)
+            else:
+                state = self.replay_state(batch, drop)
+            return Conditions(current_kv=current_kv, context=context, memory=None, memory_kv={}, replay=state)
         device = batch["history"].device
         with PROFILE.section("tokenize"), _autocast(device):
             memory = self.memory.tokenizer(batch["history"], batch["frame_ids"], batch["roles"],

@@ -612,9 +612,18 @@ def train_metrics(run):
         m.update(updates=rows[-1]["update"], fm_first=first, fm_last=last, fm_ratio=last / first if first else None,
                  seconds_per_update=sum(x.get("seconds", 0) for x in tail) / len(tail))
     m["eval_curve"] = []
+    overall = []
     for e in sorted((d / "eval").glob("update_*.json")):
         o = (read_json(e, {}) or {}).get("overall", {})
-        m["eval_curve"].append({"update": int(e.stem.split("_")[1]), **{k: o.get(f"{k}/arm_rmse_rad") for k in ("on", "off", "null")}})
+        overall.append(o)
+        point = {"update": int(e.stem.split("_")[1]), **{k: o.get(f"{k}/arm_rmse_rad") for k in ("on", "off", "null")}}
+        point.update({k.split("/")[0]: v for k, v in o.items() if k.endswith("/arm_rmse_rad") and "_s" in k.split("/")[0]})
+        m["eval_curve"].append(point)
+    if overall:                                   # 11-06: full first / last in-training evals (e.g. on_s1/arm_rmse_rad)
+        m["eval_first"], m["eval_last"] = overall[0], overall[-1]
+    check = read_json(d / "DISTILL_CHECK.json")
+    if check:
+        m["distill_check"] = {k: (v or {}).get("ok") for k, v in check.items()}
     return m
 
 
