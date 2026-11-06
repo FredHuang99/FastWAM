@@ -112,6 +112,8 @@ class DistillConfig:
     """Plan v8 D2: memory-aware one-step distillation (distill.py). Off while `teacher` is empty."""
     teacher: str = ""                  # memory_v2 checkpoint (.pt): memory_v2 + ActionDiT weights of the teacher
     teacher_steps: int = 10            # Euler steps of the teacher rollout (RealtimeWAM table 4: K = 10)
+    teacher_dtype: str = "bf16"        # bf16: fp32 ActionDiT weights held in bf16 (the dense ABModel computes in bf16;
+                                       # 2 GB instead of 4 GB on a 40 GB A100); param: exactly the parameter dtype
     init_student: bool = True          # a fresh run starts the student as the teacher (memory_v2 + ActionDiT)
     ema: float = 0.995                 # EMA of the student's trainable weights (fp32, CPU); 0 = off.
                                        # Checkpoints store the EMA as memory / action (what eval and the closed loop
@@ -129,6 +131,8 @@ class DistillConfig:
             raise ValueError("distill.lambda_cd: the consistency term is not implemented; keep it 0.")
         if self.teacher_steps < 1 or self.ema_every < 1 or not 0.0 <= self.ema < 1.0 or self.gt_weight < 0:
             raise ValueError("Invalid distill configuration.")
+        if self.teacher_dtype not in ("bf16", "param"):
+            raise ValueError("distill.teacher_dtype must be bf16 or param.")
 
 
 @dataclass
@@ -248,7 +252,13 @@ def set_override(value: dict, item: str) -> None:
 
 def load_config(path: Path, overrides: Sequence[str] = ()) -> TrainConfig:
     import yaml
-    value = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+    text = Path(path).read_text(encoding="utf-8")
+    try:
+        # Scripts save a run's CONFIG.json as the config file. JSON writes 1e-06 / 1e-05, which YAML 1.1 (PyYAML)
+        # reads as STRINGS (11-06: layer_norm eps "1e-06" crashed every dry run / evaluation built that way).
+        value = json.loads(text)
+    except ValueError:
+        value = yaml.safe_load(text) or {}
     for item in overrides:                       # key.sub=value (YAML-parsed value)
         set_override(value, item)
     return TrainConfig.from_dict(value)
@@ -554,20 +564,20 @@ class Trainer:
         # ---- plan v8 D2 (11-06): one-step distillation from a memory_v2 teacher (distill.py)
         from .distill import full_names, trainable_weight_names
         names = full_names(self.model)
-        # bf16 ActionDiT parameters are restored from their fp32 masters after a teacher / EMA swap (bit-exact)
-        self.restore: Dict[str, torch.Tensor] = {names[id(p)]: m for p, m in self.master if id(p) in names}
+        del names
         self.memory_names, self.action_names = trainable_weight_names(self.model)
         self.teacher = None
         self.ema = None
         self._teacher_reference = None
         if cfg.distill.enabled:
             from .distill import EMA, load_teacher
-            self.teacher = load_teacher(self.model, cfg.distill.teacher)
+            self.teacher = load_teacher(self.model, cfg.distill.teacher, cfg.distill.teacher_dtype)
             if cfg.optim.lr_action > 0 and not self.teacher.has_action:
                 raise ValueError("The student trains the ActionDiT: the teacher checkpoint must hold ActionDiT weights.")
             log(f"[distill] teacher {cfg.distill.teacher} (update {self.teacher.update}): {self.teacher.numel() / 1e6:.1f}M "
                 f"weights ({'memory_v2 + ActionDiT' if self.teacher.has_action else 'memory_v2 only'}), "
-                f"{cfg.distill.teacher_steps}-step Euler rollout; student init from teacher: {cfg.distill.init_student}; "
+                f"{cfg.distill.teacher_steps}-step Euler rollout, held as {cfg.distill.teacher_dtype}; "
+                f"student init from teacher: {cfg.distill.init_student}; "
                 f"EMA {cfg.distill.ema or 'off'}; demonstration term {cfg.distill.gt_weight}")
             if cfg.distill.ema > 0:
                 self.ema = EMA(cfg.distill.ema, cfg.distill.ema_every)
@@ -582,7 +592,7 @@ class Trainer:
             return compute_loss(self.model, batch, self.cfg.v2.objective, generator, drop=drop)
         from .distill import distill_loss
         return distill_loss(self.model, self.teacher, batch, self.cfg.v2.objective, self._teacher_guidance(), generator,
-                            restore=self.restore, drop=drop, gt_weight=self.cfg.distill.gt_weight)
+                            drop=drop, gt_weight=self.cfg.distill.gt_weight)
 
     def _trainable_now(self):
         """(memory params by checkpoint key, ActionDiT fp32 weights by checkpoint key or {}) for the EMA."""
@@ -599,52 +609,63 @@ class Trainer:
         if self.ema is None:
             return contextlib.nullcontext()
         from .distill import swapped
-        return swapped(self.model, self.ema.weights(self.memory_names, self.action_names), self.restore)
+        return swapped(self.model, self.ema.weights(self.memory_names, self.action_names))   # CPU backup
 
     @torch.no_grad()
-    def _probe_rollouts(self, weights=None):
+    def _probe_rollouts(self):
         """(teacher endpoint, student endpoint) on the probe batch, fixed noise, teacher's step count."""
-        from .distill import swapped, teacher_rollout
-        import contextlib
+        from .distill import teacher_rollout
         model = self.model
         batch = self.backend.batch(self.backend.probe_rows())
         noise = torch.randn(batch["actions"].shape, generator=torch.Generator().manual_seed(2)).to(self.device)
         guidance = self._teacher_guidance()
-        context = swapped(model, weights) if weights is not None else contextlib.nullcontext()
-        with context:
-            teacher = teacher_rollout(model, self.teacher, batch, noise, guidance, None if weights is not None else self.restore)
-            was = model.training
-            model.eval()
-            student, _ = model.sample(model.conditions(batch), noise, guidance)
-            model.train(was)
+        teacher = teacher_rollout(model, self.teacher, batch, noise, guidance)
+        was = model.training
+        model.eval()
+        student, _ = model.sample(model.conditions(batch), noise, guidance)
+        model.train(was)
         return teacher, student.float()
 
     def distill_start(self, dry_run: int = 0) -> dict:
-        """Fresh run: student <- teacher, then three checks written to DISTILL_CHECK.json (run aborts on failure):
-        (1) the student reproduces the teacher's rollout; (2) a perturbed student does not leak into the teacher's
-        rollout and is itself visible in the forward (the swap really replaces the weights the backbone reads)."""
+        """Fresh run: student <- teacher (exact checkpoint values), then checks written to DISTILL_CHECK.json; the run
+        aborts on failure: (1) the student reproduces the teacher's rollout (up to the teacher's bf16 storage);
+        (2) a perturbed student (weights x 1.2 in place, restored exactly from a CPU copy) moves its own rollout and
+        leaves the teacher's unchanged: the weight exchange really replaces what the backbone reads."""
         cfg = self.cfg
-        out = {"teacher": cfg.distill.teacher, "teacher_update": self.teacher.update, "init_student": cfg.distill.init_student}
+        out = {"teacher": cfg.distill.teacher, "teacher_update": self.teacher.update, "init_student": cfg.distill.init_student,
+               "teacher_dtype": cfg.distill.teacher_dtype}
         if cfg.distill.init_student:
             out["weights_copied"] = self.teacher.load_into_student(self.model, self.master_names)
             self.log(f"[distill] student <- teacher ({out['weights_copied']} tensors)")
+        self.teacher.release_exact()
         teacher, student = self._probe_rollouts()
         self._teacher_reference = teacher
         scale = float(teacher.abs().max().clamp_min(1e-6))
-        out["tolerance"] = 1e-3 * scale
+        out["tolerance_scale"] = scale
         out["student_vs_teacher_max_abs"] = float((student - teacher).abs().max())
         out["student_equals_teacher"] = bool(torch.equal(student, teacher))
-        perturbed = {n: (v.float() * 1.05).to(v.dtype) for n, v in self.teacher.weights.items()}
-        teacher_again, moved = self._probe_rollouts(perturbed)
+        params = dict(self.model.named_parameters())
+        names = list(self.teacher.weights)
+        backup = {n: params[n].detach().to("cpu", copy=True) for n in names}
+        with torch.no_grad():
+            for n in names:
+                params[n].mul_(1.2)
+        try:
+            teacher_again, moved = self._probe_rollouts()
+        finally:
+            with torch.no_grad():
+                for n in names:
+                    params[n].copy_(backup[n])
+            del backup
         out["teacher_under_perturbed_student_max_abs"] = float((teacher_again - teacher).abs().max())
         out["teacher_under_perturbed_student_exact"] = bool(torch.equal(teacher_again, teacher))
         out["perturbed_student_moves_max_abs"] = float((moved - teacher).abs().max())
-        del perturbed
-        # A leak of the student into the teacher's rollout would show at the size of a 5% weight change; 1e-3 x scale
-        # tolerates kernel nondeterminism (the exact flags are recorded).
-        ok = out["teacher_under_perturbed_student_max_abs"] <= 1e-3 * scale and out["perturbed_student_moves_max_abs"] > 1e-2 * scale
+        # leak: would show at the size of a 20% weight change; 1e-3 x scale tolerates kernel nondeterminism.
+        # student vs teacher: 2e-2 x scale tolerates the teacher's bf16 storage of fp32 weights (exact flag recorded).
+        ok = (out["teacher_under_perturbed_student_max_abs"] <= 1e-3 * scale
+              and out["perturbed_student_moves_max_abs"] > 5e-2 * scale)
         if cfg.distill.init_student:
-            ok = ok and out["student_vs_teacher_max_abs"] <= 1e-3 * scale
+            ok = ok and out["student_vs_teacher_max_abs"] <= 2e-2 * scale
         out["ok"] = bool(ok)
         if self.ema is not None:
             self.ema.reset(*self._trainable_now())
@@ -961,6 +982,7 @@ class Trainer:
                 if self.rank == 0:
                     write_json(out / "eval" / "update_000000.json", result)
         elif self.teacher is not None:
+            self.teacher.release_exact()
             self._teacher_reference, _ = self._probe_rollouts()
         first_update = self.update + 1
         target = dry_run if dry_run else self.total

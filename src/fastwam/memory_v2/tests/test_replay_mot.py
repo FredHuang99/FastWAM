@@ -96,3 +96,30 @@ def test_history_kv_is_the_frame_prefilled_alone_then_moved_back_in_time():
         assert torch.equal(state.values[layer].reshape(2, 3, 120, -1)[1, 1], kv[1][layer][0])
         assert float(state.keys[layer].reshape(2, 3, 120, -1)[1, 2].abs().sum()) == 0      # padding slot
     assert state.token_valid.shape == (2, 360) and state.token_valid[1, 240:].sum() == 0
+
+
+def test_replica_runs_with_fp32_action_weights_like_the_dense_abmodel():
+    """11-06: the dense ABModel keeps fp32 ActionDiT weights and feeds bf16 tokens; the replica then runs under bf16
+    autocast and stays close to the bf16-weight layer (same rounded weights)."""
+    import copy
+    frozen = _frozen()
+    wide = copy.deepcopy(frozen)
+    wide.mot.mixtures["action"].float()
+    adapter = FastWAMActionAdapter(frozen)
+    model = MemoryV2Model(adapter, _cfg())
+    batch = _batch()
+    x, t = torch.randn(2, 32, 14), torch.full((2,), 700.0)
+    with torch.no_grad():
+        c = model.conditions(batch)
+        h, aux = adapter.prepare(x, t, c.context)
+        keys, values = c.current_kv
+        k, v = model.memory.replay.layer_kv(c.replay, model.memory.replay.slot(1))
+        a_with, a_without = mot_replay_parts(frozen.mot, 1, h, aux, keys[1], values[1], k, v, c.replay.token_valid)
+        b_with, b_without = mot_replay_parts(wide.mot, 1, h, aux, keys[1], values[1], k, v, c.replay.token_valid)
+    for a, b in ((a_with, b_with), (a_without, b_without)):
+        rel = float((a.float() - b.float()).norm() / a.float().norm())
+        assert rel < 2e-2, rel
+    h2 = h.detach().clone().requires_grad_(True)                     # and it differentiates (training path)
+    w, wo = mot_replay_parts(wide.mot, 1, h2, aux, keys[1], values[1], k, v, c.replay.token_valid)
+    (w - wo).float().square().mean().backward()
+    assert h2.grad is not None and float(h2.grad.abs().sum()) > 0

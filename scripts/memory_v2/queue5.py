@@ -1295,8 +1295,14 @@ def cmd_check(args):
 
 
 def cmd_reset(args):
-    set_state(args.id, status="pending", verdict=None, metrics=None, reference=None, waiting=None, override=None)
-    print(f"{args.id}: pending")
+    """Back to pending with a fresh attempt counter (after a code fix). A running task is left alone."""
+    s = state(args.id)
+    if s.get("status") == "running":
+        print(f"{args.id}: running - not reset (pause its GPU first if it must restart)")
+        return
+    set_state(args.id, status="pending", verdict=None, metrics=None, reference=None, waiting=None, override=None,
+              attempt=0, last_failure=None, failures=[], retry_after=None)
+    print(f"{args.id}: pending (attempts reset)")
 
 
 def main():

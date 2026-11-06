@@ -12,9 +12,9 @@ memory dropout are reused unchanged (ObjectiveConfig), so only the target differ
 
 The video branch is frozen and shared: the current-frame prefill (and, for kv_replay, the history prefill) is
 computed once per micro-batch and given to both teacher and student. The teacher's weights are applied to the same
-module tree by in-place swapping (`swapped`) and restored afterwards: bf16 ActionDiT parameters are restored from
-their fp32 optimizer masters (bit-exact: the module copy is the master rounded), everything else from a clone. This
-works whatever the backbone code holds references to, as long as it reads the same Parameter objects.
+module tree by exchanging the parameters' storage (`exchanged`: no copy, no extra memory, exact restore); the backbone
+must read the Parameter objects at call time, which the start check verifies (a perturbed student must move its own
+rollout and leave the teacher's unchanged).
 
 EMA (`EMA`): an fp32 CPU copy of the student's trainable weights; checkpoints store it as "memory" / "action" (what
 evaluation and the closed loop load) and the raw weights under "raw" (what resume loads).
@@ -52,17 +52,15 @@ def trainable_weight_names(model) -> Tuple[Dict[str, str], Dict[str, str]]:
 
 
 @contextlib.contextmanager
-def swapped(model, weights: Dict[str, torch.Tensor], restore: Optional[Dict[str, torch.Tensor]] = None):
-    """Temporarily copy `weights` (full parameter name -> tensor) into the model's parameters, in place.
-
-    restore[name] (optional): the tensor the parameter is restored from afterwards (fp32 masters of bf16 weights;
-    copy_ rounds them exactly as the optimizer step does). Parameters without one are cloned first."""
+def swapped(model, weights: Dict[str, torch.Tensor], backup_device: str = "cpu"):
+    """Temporarily COPY `weights` (full parameter name -> tensor, any device / dtype) into the model's parameters;
+    the originals are backed up on `backup_device` (CPU by default: no GPU memory) and copied back exactly.
+    Used for the EMA during evaluation (rare)."""
     params = dict(model.named_parameters())
     missing = [n for n in weights if n not in params]
     if missing:
         raise KeyError(f"swapped: unknown parameters {missing[:3]}")
-    restore = restore or {}
-    backup = {n: params[n].detach().clone() for n in weights if n not in restore}
+    backup = {n: params[n].detach().to(backup_device, copy=True) for n in weights}
     with torch.no_grad():
         for n, v in weights.items():
             params[n].copy_(v)
@@ -71,26 +69,67 @@ def swapped(model, weights: Dict[str, torch.Tensor], restore: Optional[Dict[str,
     finally:
         with torch.no_grad():
             for n in weights:
-                params[n].copy_(restore[n] if n in restore else backup[n])
+                params[n].copy_(backup[n])
+
+
+@contextlib.contextmanager
+def exchanged(model, tensors: Dict[str, torch.Tensor]):
+    """Temporarily EXCHANGE the storage of parameters with `tensors` (full name -> tensor of the same shape on the
+    same device; the dtype may differ, e.g. a bf16 teacher for fp32 parameters): no copy, no extra memory, exact
+    restore. `tensors` holds the student's storage inside the context (not reentrant)."""
+    params = dict(model.named_parameters())
+    for n, t in tensors.items():
+        p = params.get(n)
+        if p is None:
+            raise KeyError(f"exchanged: unknown parameter {n}")
+        if p.shape != t.shape or p.device != t.device:
+            raise ValueError(f"exchanged: {n} has shape / device {tuple(t.shape)} {t.device}, parameter "
+                             f"{tuple(p.shape)} {p.device}")
+    with torch.no_grad():
+        for n in list(tensors):
+            p = params[n]
+            p.data, tensors[n] = tensors[n], p.data
+    try:
+        yield
+    finally:
+        with torch.no_grad():
+            for n in list(tensors):
+                p = params[n]
+                p.data, tensors[n] = tensors[n], p.data
 
 
 class Teacher:
-    """The teacher's trainable weights (memory_v2 + ActionDiT) as full-name tensors on the model's device."""
+    """The teacher's trainable weights (memory_v2 + ActionDiT) as full-name tensors on the model's device.
 
-    def __init__(self, model, state: dict, source: str = ""):
+    dtype "bf16": fp32 ActionDiT parameters (the dense ABModel keeps them in fp32 and computes in bf16) are held in
+    bf16 (2 GB instead of 4 GB on a 40 GB A100); "param": exactly the parameter dtype. The exact checkpoint values
+    stay on the CPU until the student is initialised from them."""
+
+    def __init__(self, model, state: dict, source: str = "", dtype: str = "bf16"):
+        if dtype not in ("bf16", "param"):
+            raise ValueError("teacher dtype must be bf16 or param")
         memory_names, action_names = trainable_weight_names(model)
         params = dict(model.named_parameters())
         self.source = source
         self.update = state.get("update")
         self.weights: Dict[str, torch.Tensor] = {}
+        self.exact: Optional[Dict[str, torch.Tensor]] = {}
         own = model.memory.state_dict()
         if set(state["memory"]) != set(own):
             raise ValueError(f"Teacher memory keys differ from the student's ({len(state['memory'])} vs {len(own)}); "
                              "the teacher must have the same memory_v2 architecture.")
+
+        def hold(full, value, allow_bf16):
+            p = params[full]
+            runtime = p.dtype
+            if allow_bf16 and dtype == "bf16" and p.dtype == torch.float32:
+                runtime = torch.bfloat16
+            self.weights[full] = value.detach().to(p.device, runtime).clone()
+            self.exact[full] = value.detach().to("cpu", torch.float32).clone()
+
         for key, value in state["memory"].items():
             if key in memory_names:
-                p = params[memory_names[key]]
-                self.weights[memory_names[key]] = value.detach().to(p.device, p.dtype).clone()
+                hold(memory_names[key], value, allow_bf16=False)
             elif not torch.equal(value.cpu(), own[key].cpu()):
                 raise ValueError(f"Teacher buffer {key} differs from the student's; buffers are not swapped.")
         action = state.get("action")
@@ -101,32 +140,37 @@ class Teacher:
                 raise ValueError("Teacher ActionDiT keys differ from the student's.")
             names = full_names(model)
             for key, value in action.items():
-                p = all_action[key]
-                self.weights[names[id(p)]] = value.detach().to(p.device, p.dtype).clone()
+                hold(names[id(all_action[key])], value, allow_bf16=True)
         self.memory_names, self.action_names = memory_names, action_names
+        self.dtype = dtype
 
-    def applied(self, model, restore: Optional[Dict[str, torch.Tensor]] = None):
-        return swapped(model, self.weights, restore)
+    def applied(self, model):
+        return exchanged(model, self.weights)
 
     def numel(self) -> int:
         return sum(v.numel() for v in self.weights.values())
 
     def load_into_student(self, model, masters: Dict[str, torch.Tensor]) -> int:
-        """Start the student as the teacher: module parameters and their fp32 masters (keyed by checkpoint name)."""
+        """Start the student as the teacher (exact checkpoint values): parameters and their fp32 masters."""
+        if self.exact is None:
+            raise RuntimeError("The exact teacher values were already released.")
         params = dict(model.named_parameters())
         inverse = {full: key for key, full in self.action_names.items()}
         with torch.no_grad():
-            for full, value in self.weights.items():
+            for full, value in self.exact.items():
                 params[full].copy_(value)
                 key = inverse.get(full)
                 if key is not None and key in masters:
-                    masters[key].copy_(value.float())
-        return len(self.weights)
+                    masters[key].copy_(value)
+        return len(self.exact)
+
+    def release_exact(self) -> None:
+        self.exact = None
 
 
-def load_teacher(model, path: str) -> Teacher:
+def load_teacher(model, path: str, dtype: str = "bf16") -> Teacher:
     state = torch.load(path, map_location="cpu", weights_only=False)
-    teacher = Teacher(model, state, source=str(path))
+    teacher = Teacher(model, state, source=str(path), dtype=dtype)
     del state
     return teacher
 
@@ -134,8 +178,7 @@ def load_teacher(model, path: str) -> Teacher:
 # ----------------------------------------------------------------------------- the loss
 def distill_loss(model, teacher: Teacher, batch: Dict[str, torch.Tensor], cfg: ObjectiveConfig,
                  guidance: GuidanceConfig, generator: Optional[torch.Generator] = None,
-                 restore: Optional[Dict[str, torch.Tensor]] = None, drop: Optional[torch.Tensor] = None,
-                 gt_weight: float = 0.0) -> Dict[str, torch.Tensor]:
+                 drop: Optional[torch.Tensor] = None, gt_weight: float = 0.0) -> Dict[str, torch.Tensor]:
     """Teacher-anchored one-step distillation for one micro-batch (keys as compute_loss, plus teacher_gt)."""
     actions = batch["actions"].float()
     valid = batch["action_valid"].bool()
@@ -147,7 +190,7 @@ def distill_loss(model, teacher: Teacher, batch: Dict[str, torch.Tensor], cfg: O
         drop = torch.rand(b, generator=generator) < cfg.memory_dropout
     drop = drop.to(device)
     shared = model.shared_encoding(batch)                       # frozen video branch, once for both
-    with torch.no_grad(), teacher.applied(model, restore):
+    with torch.no_grad(), teacher.applied(model):
         was_training = model.training
         model.eval()
         teacher_conditions = model.conditions(batch, drop=drop, shared=shared)
@@ -181,11 +224,10 @@ def distill_loss(model, teacher: Teacher, batch: Dict[str, torch.Tensor], cfg: O
 
 
 @torch.no_grad()
-def teacher_rollout(model, teacher: Teacher, batch, noise, guidance: GuidanceConfig,
-                    restore: Optional[Dict[str, torch.Tensor]] = None) -> torch.Tensor:
+def teacher_rollout(model, teacher: Teacher, batch, noise, guidance: GuidanceConfig) -> torch.Tensor:
     """The teacher's endpoint on a fixed batch / noise (memory on), for the isolation check."""
     shared = model.shared_encoding(batch)
-    with teacher.applied(model, restore):
+    with teacher.applied(model):
         was_training = model.training
         model.eval()
         conditions = model.conditions(batch, shared=shared)

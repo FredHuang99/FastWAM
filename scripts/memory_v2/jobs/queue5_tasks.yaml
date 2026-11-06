@@ -2468,7 +2468,7 @@ tasks:
   failure_explanations:
     - if: "m['rc'] != 0"
       then: "the distillation dry run crashed or a check failed (a shell task only records rc): read profile/x7_distill/DISTILL_CHECK.json and the job log; D2-pilot-train stays SKIPPED"
-  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/profile_step.py --updates 4 --cases x7_nopairs x7_distill --tag D2 --python /opt/mwam/bin/python && /opt/mwam/bin/python -c \"import json,sys; c=json.load(open('{O}/profile/x7_distill/DISTILL_CHECK.json')); print(json.dumps(c, indent=1)); sys.exit(0 if c['start']['ok'] and c['after_first_update']['ok'] else 1)\""
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/profile_step.py --updates 4 --cases x7_nopairs_m2 x7_distill --tag D2 --python /opt/mwam/bin/python && /opt/mwam/bin/python -c \"import json,sys; c=json.load(open('{O}/profile/x7_distill/DISTILL_CHECK.json')); print(json.dumps(c, indent=1)); sys.exit(0 if c['start']['ok'] and c['after_first_update']['ok'] else 1)\""
   pass_if: "m['rc'] == 0"
   on_pass: "send report/PROFILE_D2_*.md (x7_distill vs x7_nopairs step time, peak memory, distillation checks); D2-pilot-train may start"
   on_inconclusive: "(shell ERROR) read the job log"
@@ -2476,17 +2476,17 @@ tasks:
 - id: D2-pilot-train
   lane: train
   kind: train
-  after: [S1-offline]
+  after: [S1-offline, D2-dry]
   requires_pass: [D2-dry]
   need_mib: 34000
   run: x7_distill_e3
   reference_run: a2C_6ep
-  hypothesis: "plan v8 D2 pilot (pre-registered 11-06): one-step distillation of X7 into a student started from X7 (teacher-anchored path: the student regresses the straight velocity eps - a0_T toward the teacher's 10-step endpoint a0_T, plus the tau = 1 term; same history, memory dropout 0.15, no pairs; ActionDiT lr 1e-5, memory lr 2e-5, EMA 0.995 every 4 updates; 3 epochs = 2010 updates). On the 96 in-training val windows, the EMA student's ONE-step sampled-chunk error (on_s1) <= 1.10 x the teacher's TEN-step error (update 0 = the teacher), and its memory gap at one step (null_s1 - on_s1) >= 0.8 x the teacher's ten-step gap (null - on)"
+  hypothesis: "plan v8 D2 pilot (pre-registered 11-06): one-step distillation of X7 into a student started from X7 (teacher-anchored path: the student regresses the straight velocity eps - a0_T toward the teacher's 10-step endpoint a0_T, plus the tau = 1 term; same history, memory dropout 0.15, no pairs; ActionDiT lr 1e-5, memory lr 2e-5, EMA 0.995 every 4 updates; teacher held in bf16; micro batch 2 for the 40 GB A100, global batch 64 as X7; 3 epochs = 2010 updates). On the 96 in-training val windows, the EMA student's ONE-step sampled-chunk error (on_s1) <= 1.10 x the teacher's TEN-step error (update 0 = the teacher), and its memory gap at one step (null_s1 - on_s1) >= 0.8 x the teacher's ten-step gap (null - on)"
   sets:
     - optim.lr_action=1e-5
     - optim.lr_memory=2e-5
     - schedule.epochs=3
-    - schedule.micro_batch=4
+    - schedule.micro_batch=2
     - schedule.eval_every=335
     - schedule.keep_last=1
     - schedule.save_every=335
@@ -2504,7 +2504,7 @@ tasks:
       then: "a distillation check failed (teacher swap / restore): read x7_distill_e3/DISTILL_CHECK.json; a code bug, not a result"
     - if: "m.get('guard')"
       then: "the guard stopped the run: see GUARD.json"
-    - if: "m.get('config_diff') and any(v[1] is not None and not k.startswith(('name', 'output', 'init_memory', 'pairs', 'distill', 'eval.steps', 'schedule.epochs', 'schedule.keep_last', 'schedule.save_every')) for k, v in m['config_diff'].items())"
+    - if: "m.get('config_diff') and any(v[1] is not None and not k.startswith(('name', 'output', 'init_memory', 'pairs', 'distill', 'eval.steps', 'schedule.epochs', 'schedule.keep_last', 'schedule.save_every', 'schedule.micro_batch')) for k, v in m['config_diff'].items())"
       then: "the config differs from X7 beyond the distillation keys (see config_diff): the student is not X7's recipe"
     - if: "m.get('eval_last') and len(m.get('eval_curve', [])) >= 3 and m['eval_curve'][-1].get('on_s1') is not None and m['eval_curve'][-2].get('on_s1') and m['eval_curve'][-1]['on_s1'] < 0.95 * m['eval_curve'][-2]['on_s1']"
       then: "the one-step error was still falling > 5% between the last two evaluations: extend to 6 epochs (new run x7_distill_e6) before judging"

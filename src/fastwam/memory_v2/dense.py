@@ -281,7 +281,7 @@ class DenseActionAdapter(nn.Module):
             mot = self.ab.backbone.mot
             delta = maybe_checkpoint(lambda x_, hk_, hv_: mot_replay_delta(mot, index, x_, aux, keys[index], values[index],
                                                                              hk_, hv_, hvalid), x, hk, hv)
-            out = out + g.to(out.dtype)[:, None, None] * delta
+            out = out + g.to(out.dtype)[:, None, None] * delta.to(out.dtype)     # keep ABModel's token dtype
         if readout is not None:
             out = self.ab.inject(index, out, readout, 1.0)
         return out

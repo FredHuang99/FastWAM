@@ -228,6 +228,13 @@ class V2Config:
             extra = set(section) - allowed
             if extra:
                 raise ValueError(f"Unknown keys in memory_v2.{name}: {sorted(extra)}.")
+            for f in fields(kind):                # YAML 1.1 reads 1e-06 as a string: coerce numeric fields
+                v = section.get(f.name)
+                if isinstance(v, str) and type(f.default) in (float, int) and not isinstance(f.default, bool):
+                    try:
+                        section[f.name] = float(v) if isinstance(f.default, float) else int(float(v))
+                    except ValueError:
+                        raise ValueError(f"memory_v2.{name}.{f.name} must be a number, got {v!r}.") from None
             built[name] = kind(**section)
         return cls(**built)
 

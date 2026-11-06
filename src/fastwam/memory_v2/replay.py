@@ -252,10 +252,16 @@ def mot_replay_parts(mot, index, x, aux, current_k, current_v, hist_k, hist_v, h
     mod, ctx, ctx_mask, freqs = aux
     expert = mot.mixtures["action"]
     block = expert.blocks[index]
-    with torch.autocast(device_type=x.device.type, enabled=False):      # the released path runs without autocast
+    # The released MoT (memory_s1 FrozenBackbone) holds bf16 weights and runs without autocast. The dense ABModel
+    # holds fp32 ActionDiT weights and feeds bf16 tokens (11-06: "mat1 and mat2 must have the same dtype"), so with
+    # non-bf16 weights the replica runs under bf16 autocast (replay_check.py bounds it against ABModel's own call).
+    low = block.self_attn.q.weight.dtype == torch.bfloat16
+    with torch.autocast(device_type=x.device.type, dtype=torch.bfloat16, enabled=not low):
         q, k, v, residual, gate, shift, scale, ffn_gate, _ = mot._build_expert_attention_io(
             expert=expert, block=block, x=x, freqs=freqs, t_mod=mod)
-        rest_k, rest_v = torch.cat((current_k, k), 1), torch.cat((current_v, v), 1)
+        rest_k = torch.cat((current_k.to(k.dtype), k), 1)
+        rest_v = torch.cat((current_v.to(v.dtype), v), 1)
+        q = q.to(k.dtype)
         full = torch.ones((x.shape[1], rest_k.shape[1]), device=x.device, dtype=torch.bool)
         o_a = flash_attention(q=q, k=rest_k, v=rest_v, num_heads=mot.num_heads, ctx_mask=full)
         o_ah = joint_attention(q, hist_k.to(q.dtype), hist_v.to(q.dtype), hist_valid, rest_k, rest_v, mot.num_heads)

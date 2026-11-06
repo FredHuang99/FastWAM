@@ -374,3 +374,18 @@ def test_periodic_history_rows_reach_the_backend(tmp_path):
     for r in train[:40]:
         s = select_for_row(range(r["anchor"] + 1), r["anchor"], policy, r)
         assert all(i < r["anchor"] for i in s.ids) and len(s.ids) <= policy.max_frames
+
+
+def test_saved_json_config_keeps_scientific_numbers(tmp_path):
+    """11-06: scripts save CONFIG.json as the config file; YAML 1.1 read 1e-06 as a string (layer_norm eps crash)."""
+    from fastwam.memory_v2.config import V2Config
+    from fastwam.memory_v2.train_v2 import load_config
+    cfg = _cfg(tmp_path)
+    cfg.optim = OptimConfig(lr_memory=2e-05, lr_action=1e-05)
+    path = tmp_path / "run_config.yaml"
+    path.write_text(json.dumps(cfg.to_dict(), indent=1))
+    assert '1e-06' in path.read_text() and '2e-05' in path.read_text()
+    again = load_config(path, ["schedule.epochs=3"])
+    assert isinstance(again.v2.memory.layer_norm_eps, float) and again.v2.memory.layer_norm_eps == 1e-6
+    assert again.optim.lr_memory == 2e-5 and again.schedule.epochs == 3
+    assert V2Config.from_dict({"memory": dict(TINY, layer_norm_eps="1e-06")}).memory.layer_norm_eps == 1e-6

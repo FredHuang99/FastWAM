@@ -38,7 +38,8 @@ CASES = {
     "press_n1_m2": ("v2_press_cf", ["schedule.micro_batch=2", "memory_v2.memory.read=kv_replay"]),
     # plan v8 D2 (11-06): X7 recipe without pairs, as one-step distillation from X7 itself (teacher 10-step rollout
     # + student FM / endpoint on the teacher's endpoints); compare with x7_nopairs
-    "x7_distill": ("a2C_6ep", ["pairs.weight=0", "init_memory=",
+    "x7_nopairs_m2": ("a2C_6ep", ["pairs.weight=0", "schedule.micro_batch=2"]),
+    "x7_distill": ("a2C_6ep", ["pairs.weight=0", "init_memory=", "schedule.micro_batch=2",
                                f"distill.teacher={O}/a2C_6ep/checkpoints/update_004020.pt", "distill.teacher_steps=10",
                                "distill.ema=0.995", "eval.steps=[1]"]),
 }
@@ -104,11 +105,11 @@ def main():
             for stage, v in r["distill_check"].items():
                 lines.append(f"- distillation check, {stage}: " + ", ".join(f"{k} = {x}" for k, x in v.items()))
             lines.append("")
-    base, dist = results.get("x7_nopairs", {}), results.get("x7_distill", {})
+    base, dist = results.get("x7_nopairs_m2", {}), results.get("x7_distill", {})
     b = base.get("sections", {}).get("update", {}).get("mean_s")
     d = dist.get("sections", {}).get("update", {}).get("mean_s")
     if b and d:
-        lines += [f"**x7_distill vs x7_nopairs: {d:.2f} / {b:.2f} s per update = {d / b:.2f}x** "
+        lines += [f"**x7_distill vs x7_nopairs (both micro batch 2): {d:.2f} / {b:.2f} s per update = {d / b:.2f}x** "
                   "(plan v8 D7 item 1 expects <= 1.2x)", ""]
     rep = O / "report" / f"PROFILE_{args.tag + '_' if args.tag else ''}{now:%Y%m%d_%H%M}.md"
     rep.parent.mkdir(parents=True, exist_ok=True)

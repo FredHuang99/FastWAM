@@ -10,6 +10,7 @@
 #   bash /root/mwam_reports/host_pool.sh update              git pull in the container + refresh this script
 #   bash /root/mwam_reports/host_pool.sh start [--lanes L] [--gpus G]   take over from the queue5 lanes, start dispatcher
 #   bash /root/mwam_reports/host_pool.sh allow 0,1,2,3       GPUs the pool may use (container indices)
+#   bash /root/mwam_reports/host_pool.sh reset A B ...       finished tasks back to pending, attempts reset (after a fix)
 #   bash /root/mwam_reports/host_pool.sh pause <gpu>         lend a GPU: stop our task on it (kept for a re-run)
 #   bash /root/mwam_reports/host_pool.sh stop                stop the dispatcher only (running tasks continue)
 #   bash /root/mwam_reports/host_pool.sh deadline ["2026-11-10 20:00"]   show / set queue5/DEADLINE (Beijing time) and
@@ -41,6 +42,9 @@ case "$cmd" in
               && docker cp "$C:$R/scripts/memory_v2/jobs/host_pool.sh" "$OUT/host_pool.sh" && echo "host_pool.sh refreshed" ;;
   start)    pool start "$@" ;;
   allow)    pool allow --gpus "$1" ;;
+  reset)    for n in "$@"; do
+              docker exec "$C" bash -lc "cd $R && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/queue5.py reset --id $n"
+            done ;;
   pause)    pool pause --gpu "$1" ;;
   stop)     docker exec "$C" touch "$Q/POOL_STOP"; sleep 45; pool status | head -1 ;;
   deadline) if [ -n "${1:-}" ]; then

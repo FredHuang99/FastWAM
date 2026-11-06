@@ -45,7 +45,7 @@ def test_teacher_swap_equals_a_separate_teacher_model_and_restores_the_student(t
     batch = student.backend.batch(student.backend.probe_rows())
     noise = torch.randn(batch["actions"].shape, generator=torch.Generator().manual_seed(5))
     before = {n: p.detach().clone() for n, p in model.named_parameters()}
-    swapped_endpoint = teacher_rollout(model, teacher, batch, noise, GUIDE, student.restore)
+    swapped_endpoint = teacher_rollout(model, teacher, batch, noise, GUIDE)
     for n, p in model.named_parameters():                                  # student restored bit-exactly
         assert torch.equal(p, before[n]), n
     # a separate model that simply holds the teacher's weights (load as the online policy / evaluate do)
@@ -73,7 +73,7 @@ def test_distill_loss_uses_teacher_targets_and_leaves_weights_untouched(tmp_path
     batch = student.backend.batch(student.backend.train_rows()[:4])
     before = {n: p.detach().clone() for n, p in model.named_parameters()}
     cfg = V2Config.from_dict({}).objective
-    out = distill_loss(model, teacher, batch, cfg, GUIDE, torch.Generator().manual_seed(0), restore=student.restore)
+    out = distill_loss(model, teacher, batch, cfg, GUIDE, torch.Generator().manual_seed(0))
     for n, p in model.named_parameters():
         assert torch.equal(p, before[n]), n
     assert {"loss", "fm", "endpoint", "teacher_gt", "tau", "memory_dropped"} <= set(out)
@@ -152,15 +152,51 @@ def test_teacher_without_action_is_refused_when_the_student_trains_it(tmp_path):
         Trainer(TrainableTinyBackend(torch.bfloat16), cfg, tmp_path / "student" / "run", log=lambda m: None)
 
 
-def test_swapped_restores_from_masters_and_clones(tmp_path):
+def test_swapped_and_exchanged_restore_exactly(tmp_path):
+    from fastwam.memory_v2.distill import exchanged
     trainer = Trainer(TrainableTinyBackend(torch.bfloat16), _cfg_action(tmp_path), tmp_path / "run", log=lambda m: None)
     model = trainer.model
     before = {n: p.detach().clone() for n, p in model.named_parameters()}
     weights = {n: torch.zeros_like(p) for n, p in model.named_parameters() if n.startswith(("memory.", "backbone.head"))}
-    with swapped(model, weights, trainer.restore):
+    with swapped(model, weights):
         assert all(float(dict(model.named_parameters())[n].abs().sum()) == 0 for n in weights)
     for n, p in model.named_parameters():
         assert torch.equal(p, before[n]), n
+    other = {n: torch.ones_like(p, dtype=torch.float32 if p.dtype == torch.bfloat16 else torch.bfloat16)
+             for n, p in model.named_parameters() if n.startswith("backbone.head")}
+    with exchanged(model, other):
+        assert all(dict(model.named_parameters())[n].dtype != before[n].dtype for n in other)
+    for n, p in model.named_parameters():
+        assert torch.equal(p, before[n]) and p.dtype == before[n].dtype, n
+    assert all(float(v.float().sum()) == v.numel() for v in other.values())       # the dict got its tensors back
+
+
+def test_bf16_teacher_for_fp32_action_weights_like_the_dense_abmodel(tmp_path):
+    """The dense ABModel keeps fp32 ActionDiT weights: the teacher holds them in bf16 (memory), the student is
+    initialised from the exact fp32 values, every check passes and the student keeps fp32 storage."""
+    cfg_t = _cfg_action(tmp_path / "teacher")
+    t = Trainer(TrainableTinyBackend(torch.float32), cfg_t, tmp_path / "teacher" / "run", log=lambda m: None)
+    for _ in range(3):
+        t.step()
+    ckpt = t.save()
+    cfg = _distill_cfg(tmp_path, ckpt, ema=0.0)
+    cfg.schedule.epochs = 1
+    cfg.schedule.eval_every = 0
+    cfg.schedule.probe_every = 0
+    trainer = Trainer(TrainableTinyBackend(torch.float32), cfg, tmp_path / "student" / "run", log=lambda m: None)
+    head = next(n for n in trainer.teacher.weights if n.startswith("backbone.head"))
+    assert trainer.teacher.weights[head].dtype == torch.bfloat16
+    assert trainer.run()["complete"]
+    check = json.loads((tmp_path / "student" / "run" / "DISTILL_CHECK.json").read_text())
+    assert check["start"]["ok"] and check["after_first_update"]["ok"]
+    assert dict(trainer.model.named_parameters())[head].dtype == torch.float32
+    state = torch.load(ckpt, map_location="cpu", weights_only=False)
+    fresh = Trainer(TrainableTinyBackend(torch.float32), _distill_cfg(tmp_path / "x", ckpt, ema=0.0),
+                    tmp_path / "x" / "run", log=lambda m: None)
+    fresh.teacher.load_into_student(fresh.model, fresh.master_names)
+    key = next(iter(state["action"]))
+    named = dict(fresh.model.backbone.named_action_parameters())
+    assert torch.equal(named[key].float(), state["action"][key])                  # exact fp32 values
 
 
 def test_shared_encoding_reproduces_conditions_for_inject_and_kv_replay():
