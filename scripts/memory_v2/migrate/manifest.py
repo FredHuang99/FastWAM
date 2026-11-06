@@ -262,8 +262,8 @@ def cmd_stage(args):
     draft["total_bytes"] = sum(f["size"] for f in draft["files"])
     manifest = {k: v for k, v in draft.items() if k != "files"}
     manifest["files"] = [{k: f[k] for k in ("path", "stage_path", "size", "sha256", "group")} for f in draft["files"]]
-    (stage / "MANIFEST.json").write_text(json.dumps(manifest, indent=1))
-    print(f"[stage] {linked} new links; {stage / 'MANIFEST.json'}; total {gib(manifest['total_bytes'])}")
+    (stage / args.name).write_text(json.dumps(manifest, indent=1))
+    print(f"[stage] {linked} new links; {stage / args.name}; total {gib(manifest['total_bytes'])}")
 
 
 def _remote_files(api, repo):
@@ -294,9 +294,9 @@ def cmd_upload(args):
     import huggingface_hub
     from huggingface_hub import HfApi
     stage = Path(args.mig) / "stage"
-    if not (stage / "MANIFEST.json").exists():
+    if not (stage / args.name).exists():
         raise SystemExit("run stage first")
-    manifest = json.loads((stage / "MANIFEST.json").read_text())
+    manifest = json.loads((stage / args.name).read_text())
     api = HfApi()
     print(f"[upload] huggingface_hub {huggingface_hub.__version__}; as {api.whoami()['name']} -> {args.repo}", flush=True)
     api.create_repo(args.repo, repo_type="model", private=True, exist_ok=True)
@@ -320,13 +320,13 @@ def cmd_upload(args):
         api.upload_folder(repo_id=args.repo, repo_type="model", folder_path=str(stage),
                           allow_patterns=[re.sub(r"([*?\[])", r"[\1]", f["stage_path"]) for f in batch],
                           commit_message=f"payload batch {i}/{len(batches)}")
-    api.upload_file(path_or_fileobj=str(stage / "MANIFEST.json"), path_in_repo="MANIFEST.json",
+    api.upload_file(path_or_fileobj=str(stage / args.name), path_in_repo=args.name,
                     repo_id=args.repo, repo_type="model", commit_message="manifest")
     remote, todo = pending()
     print(f"[upload] remote files {len(remote)}; manifest files missing or different remotely: {len(todo)}")
     for f in todo[:20]:
         print("  missing", f["path"])
-    if todo or "MANIFEST.json" not in remote:
+    if todo or args.name not in remote:
         raise SystemExit(1)
     print("[upload] complete")
 
@@ -387,10 +387,12 @@ def main():
     s = sub.add_parser("stage")
     s.add_argument("--mig", required=True)
     s.add_argument("--workers", type=int, default=8)
+    s.add_argument("--name", default="MANIFEST.json", help="manifest file name in the stage and the repo")
     u = sub.add_parser("upload")
     u.add_argument("--mig", required=True)
     u.add_argument("--repo", required=True)
     u.add_argument("--workers", type=int, default=8)
+    u.add_argument("--name", default="MANIFEST.json", help="manifest file name in the stage and the repo")
     v = sub.add_parser("verify")
     v.add_argument("--manifest", required=True)
     v.add_argument("--root", required=True, help="download folder (contains payload/)")

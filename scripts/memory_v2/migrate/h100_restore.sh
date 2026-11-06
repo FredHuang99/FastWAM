@@ -32,6 +32,21 @@ print(snapshot_download(repo_id=sys.argv[1], repo_type="model", local_dir=sys.ar
 PY
 }
 
+delta() {
+  # 11-07, 5090 workstation: what the A100 made after the October payload (delta_5090.sh on the A100). Same layout as
+  # the payload, so snapshot_download into $HF puts every file on its logical path through the bind mounts.
+  hftools
+  D=${DELTA_REPO:-hhyfred/memwam-5090-delta-v1}
+  step "download $D -> $HF"
+  $HFPY - "$D" "$HF" <<'PY'
+import sys
+from huggingface_hub import snapshot_download
+print(snapshot_download(repo_id=sys.argv[1], repo_type="model", local_dir=sys.argv[2], max_workers=16))
+PY
+  step "verify the delta (size + sha256)"
+  $HFPY /workspace/FastWAM-memory2/scripts/memory_v2/migrate/manifest.py verify --manifest $HF/MANIFEST_5090_DELTA.json --root $HF
+}
+
 code() {
   step "memory2 code into /workspace/FastWAM-memory2 (outputs/ untouched)"
   git config --global --add safe.directory /workspace/FastWAM-memory2
@@ -263,8 +278,8 @@ PY
   step "simulator finished"
 }
 
-case "${1:?system|download|code|env|verify|test|reference|simulator|simulator_finish}" in
-  system) system ;; download) download ;; code) code ;; env) env_ ;; verify) verify ;; test) test_ ;; reference) reference ;;
+case "${1:?system|download|delta|code|env|verify|test|reference|simulator|simulator_finish}" in
+  system) system ;; download) download ;; delta) delta ;; code) code ;; env) env_ ;; verify) verify ;; test) test_ ;; reference) reference ;;
   simulator) simulator ;; simulator_finish) simulator_finish ;;
   *) echo "unknown step $1"; exit 2 ;;
 esac
