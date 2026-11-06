@@ -1305,6 +1305,43 @@ def cmd_reset(args):
     print(f"{args.id}: pending (attempts reset)")
 
 
+def curve_lines(task):
+    """Monitoring only (11-07): the in-training eval curve of a train task's run, read while it runs. Nothing here is
+    a verdict; the card's pass_if is judged once, on the finished run."""
+    m = train_metrics(task["run"])
+    lines = [f"{task['id']} (run {task['run']}): {m.get('updates', 0)} updates done, "
+             f"{(m.get('seconds_per_update') or 0):.1f} s / update (last 20)"
+             + ("" if m.get("complete") else "; not finished: monitoring only, no verdict")]
+    curve = m.get("eval_curve") or []
+    if not curve:
+        return lines + ["  no in-training evaluation yet"]
+    order = {"on": 0, "null": 1, "off": 2}
+    extra = sorted({k for p in curve for k in p if "_s" in k},
+                   key=lambda k: (k.split("_", 1)[1], order.get(k.split("_", 1)[0], 3)))
+    cols = ["on", "null"] + extra
+    lines.append("  update | " + " | ".join(f"{c:>8}" for c in cols) + " | gap null-on" +
+                 "".join(f" | gap {c.split('_')[1]}" for c in extra if c.startswith("on_")))
+    for p in curve:
+        cells = [f"{p[c]:8.5f}" if isinstance(p.get(c), (int, float)) else f"{'-':>8}" for c in cols]
+        gaps = []
+        for c in ["on"] + [c for c in extra if c.startswith("on_")]:
+            n = "null" + c[2:]
+            gaps.append(f"{p[n] - p[c]:+.5f}" if isinstance(p.get(c), (int, float)) and isinstance(p.get(n), (int, float))
+                        else "-")
+        lines.append(f"  {p['update']:6d} | " + " | ".join(cells) + " | " + " | ".join(f"{g:>10}" for g in gaps))
+    return lines
+
+
+def cmd_curve(args):
+    tasks = {t["id"]: t for t in load_tasks()}
+    for tid in args.ids:
+        t = tasks.get(tid)
+        if not t or not t.get("run"):
+            print(f"{tid}: not a train task with a run")
+            continue
+        print("\n".join(curve_lines(t)))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -1317,9 +1354,11 @@ def main():
         v.add_argument("--id", required=True)
     sub.add_parser("ledger")
     sub.add_parser("check")
+    cv = sub.add_parser("curve")
+    cv.add_argument("ids", nargs="+")
     args = ap.parse_args()
     {"run": cmd_run, "status": cmd_status, "verdict": cmd_verdict, "reset": cmd_reset, "check": cmd_check,
-     "ledger": lambda a: render_ledger()}[args.cmd](args)
+     "curve": cmd_curve, "ledger": lambda a: render_ledger()}[args.cmd](args)
 
 
 if __name__ == "__main__":

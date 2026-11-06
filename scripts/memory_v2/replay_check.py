@@ -133,8 +133,12 @@ def main():
             if index in (0, 15, last):
                 mod, ctx, ctx_mask, freqs = aux
                 expert = mot.mixtures["action"]
-                q = mot._build_expert_attention_io(expert=expert, block=expert.blocks[index], x=h, freqs=freqs,
-                                                   t_mod=mod)[0]
+                block = expert.blocks[index]
+                # 11-07: the dense ABModel keeps fp32 ActionDiT weights (A100 run of 11-06 crashed here with
+                # "mat1 and mat2 must have the same dtype"); same bf16 autocast as replay.mot_replay_parts
+                low = block.self_attn.q.weight.dtype == torch.bfloat16
+                with torch.autocast(device_type=h.device.type, dtype=torch.bfloat16, enabled=not low):
+                    q = mot._build_expert_attention_io(expert=expert, block=block, x=h, freqs=freqs, t_mod=mod)[0]
                 hk, _ = model.memory.replay.layer_kv(state, model.memory.replay.slot(index))
                 k_all = torch.cat((hk, keys[index]), 1).float()
                 nh = mot.num_heads

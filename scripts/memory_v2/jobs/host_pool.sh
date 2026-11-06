@@ -12,6 +12,8 @@
 #   bash /root/mwam_reports/host_pool.sh allow 0,1,2,3       GPUs the pool may use (container indices)
 #   bash /root/mwam_reports/host_pool.sh reset A B ...       finished tasks back to pending, attempts reset (after a fix)
 #   bash /root/mwam_reports/host_pool.sh pause <gpu>         lend a GPU: stop our task on it (kept for a re-run)
+#   bash /root/mwam_reports/host_pool.sh curve D2-pilot-train  in-training eval curve of a running train task
+#                                                            (monitoring only; the verdict is judged once, at the end)
 #   bash /root/mwam_reports/host_pool.sh stop                stop the dispatcher only (running tasks continue)
 #   bash /root/mwam_reports/host_pool.sh deadline ["2026-11-10 20:00"]   show / set queue5/DEADLINE (Beijing time) and
 #                                                            move running tasks that kept an older deadline onto it
@@ -46,6 +48,7 @@ case "$cmd" in
               docker exec "$C" bash -lc "cd $R && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/queue5.py reset --id $n"
             done ;;
   pause)    pool pause --gpu "$1" ;;
+  curve)    docker exec "$C" bash -lc "cd $R && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/queue5.py curve $*" ;;
   stop)     docker exec "$C" touch "$Q/POOL_STOP"; sleep 45; pool status | head -1 ;;
   deadline) if [ -n "${1:-}" ]; then
               docker exec "$C" /opt/mwam/bin/python -c "import sys; from datetime import datetime; v=sys.argv[1].strip()+' +0800'; datetime.strptime(v, '%Y-%m-%d %H:%M %z'); open('$Q/DEADLINE','w').write(v+chr(10)); print('DEADLINE <-', v)" "$1" || exit 1
@@ -65,5 +68,5 @@ case "$cmd" in
             done ;;
   check)    docker exec "$C" bash -lc "cd $R && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/queue5.py check" 2>&1 \
               | grep -E -- "${1:-.}|^CHECK" ;;
-  *)        sed -n '2,25p' "$0" ;;
+  *)        sed -n '2,27p' "$0" ;;
 esac
