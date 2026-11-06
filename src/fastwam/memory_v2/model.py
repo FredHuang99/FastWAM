@@ -119,12 +119,13 @@ class MemoryV2Model(nn.Module):
 
     # ------------------------------------------------------------------ velocity
     def velocity(self, actions: torch.Tensor, timestep: torch.Tensor, conditions: Conditions,
-                 memory_mode: str = "on") -> torch.Tensor:
-        """memory_mode: on | null (history masked, learned null tokens only) | off (bypass injectors)."""
+                 memory_mode: str = "on", return_hidden: bool = False):
+        """memory_mode: on | null (history masked, learned null tokens only) | off (bypass injectors).
+        return_hidden: also return the last action-layer tokens (for the progress head)."""
         if memory_mode not in ("on", "null", "off"):
             raise ValueError(f"Unknown memory_mode={memory_mode}.")
         if conditions.replay is not None:
-            return self._velocity_replay(actions, timestep, conditions, memory_mode)
+            return self._velocity_replay(actions, timestep, conditions, memory_mode, return_hidden)
         if memory_mode == "null":
             conditions = conditions.null()
         timestep = timestep.reshape(-1)
@@ -144,9 +145,10 @@ class MemoryV2Model(nn.Module):
             gate = None if gates is None else gates[:, slot]
             with _autocast(actions.device):
                 x = injector(x, conditions.memory_kv[index], conditions.memory.valid, gate)
-        return self.backbone.post(x, aux)
+        out = self.backbone.post(x, aux)
+        return (out, x) if return_hidden else out
 
-    def _velocity_replay(self, actions, timestep, conditions: Conditions, memory_mode: str) -> torch.Tensor:
+    def _velocity_replay(self, actions, timestep, conditions: Conditions, memory_mode: str, return_hidden: bool = False):
         """kv_replay: base layer + g_l(tau) * (layer with history - layer without); null / off = the base model."""
         timestep = timestep.reshape(-1)
         if timestep.numel() == 1 and actions.shape[0] > 1:
@@ -167,7 +169,8 @@ class MemoryV2Model(nn.Module):
             k, v = replay.layer_kv(state, slot)
             x = self.backbone.block(index, x, aux, conditions.current_kv,
                                     replay=(k, v, state.token_valid, gates[:, slot]))
-        return self.backbone.post(x, aux)
+        out = self.backbone.post(x, aux)
+        return (out, x) if return_hidden else out
 
     # ------------------------------------------------------------------ sampling
     @torch.no_grad()

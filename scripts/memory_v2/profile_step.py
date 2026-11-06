@@ -42,12 +42,16 @@ CASES = {
     "x7_distill": ("a2C_6ep", ["pairs.weight=0", "init_memory=", "schedule.micro_batch=2",
                                f"distill.teacher={O}/a2C_6ep/checkpoints/update_004020.pt", "distill.teacher_steps=10",
                                "distill.ema=0.995", "eval.steps=[1]"]),
+    # plan v8 D5 (11-06): press stage 1 with the progress head (dry run: the head trains, nothing breaks)
+    "press_prog_m2": ("v2_press_cf", ["schedule.micro_batch=2", "memory_v2.memory.progress_head=true",
+                                      "memory_v2.objective.progress_weight=0.1"]),
 }
+P0_CASES = ["x7", "x7_nopairs", "press_a", "press_lm8", "press_s1_m2", "press_n1_m2"]   # plan v7 P0 (the default)
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--cases", nargs="+", default=list(CASES), choices=list(CASES))
+    ap.add_argument("--cases", nargs="+", default=P0_CASES, choices=list(CASES))
     ap.add_argument("--updates", type=int, default=5, help="dry-run updates per case (the first is warm-up)")
     ap.add_argument("--python", default=sys.executable)
     ap.add_argument("--tag", default="", help="report name PROFILE_<tag>_<time>.md (keeps it apart from other profiles)")

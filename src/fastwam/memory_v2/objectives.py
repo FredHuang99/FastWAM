@@ -124,11 +124,21 @@ def compute_loss(model, batch: Dict[str, torch.Tensor], cfg: ObjectiveConfig,
     fm = (weight * error).mean()
     out = {"fm": fm, "fm_unweighted": error.detach(), "tau": tau.detach(), "memory_dropped": drop.detach()}
     loss = fm
-    if cfg.endpoint_weight > 0:
-        endpoint_prediction = model.velocity(noise, torch.full((b,), 1000.0, device=device), conditions)
-        endpoint = masked_mse(endpoint_prediction, target, valid).mean()
-        out["endpoint"] = endpoint
-        loss = loss + cfg.endpoint_weight * endpoint
+    progress = getattr(cfg, "progress_weight", 0.0) > 0 and getattr(model.memory, "progress", None) is not None
+    if cfg.endpoint_weight > 0 or progress:
+        res = model.velocity(noise, torch.full((b,), 1000.0, device=device), conditions, return_hidden=progress)
+        endpoint_prediction, hidden = res if progress else (res, None)
+        if cfg.endpoint_weight > 0:
+            endpoint = masked_mse(endpoint_prediction, target, valid).mean()
+            out["endpoint"] = endpoint
+            loss = loss + cfg.endpoint_weight * endpoint
+        if progress:                                # plan v8 D5: label = frame / episode length (batch["progress"])
+            label = batch["progress"].float().to(device)
+            logit = model.memory.progress_logit(hidden)
+            bce = torch.nn.functional.binary_cross_entropy_with_logits(logit, label)
+            out["progress"] = bce
+            out["progress_abs_err"] = (torch.sigmoid(logit) - label).abs().mean().detach()
+            loss = loss + cfg.progress_weight * bce
     out["loss"] = loss
     return out
 

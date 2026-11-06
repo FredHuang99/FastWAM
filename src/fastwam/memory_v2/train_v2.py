@@ -403,6 +403,13 @@ def evaluate(backend: Backend, rows: Sequence[dict], cfg: TrainConfig, log=print
                 metrics = backend.window_case(row, sample[b], b, batch)
                 row.update({f"{label}/{k}": v for k, v in metrics.items()})
         valid = batch["action_valid"].float()
+        if getattr(model.memory, "progress", None) is not None and "progress" in batch:   # plan v8 D5
+            t1 = torch.full((actions.shape[0],), 1000.0, device=actions.device)
+            for mode in cfg.eval.modes:
+                _, hidden = model.velocity(noise, t1, conditions, mode, return_hidden=True)
+                err = (torch.sigmoid(model.memory.progress_logit(hidden)) - batch["progress"].float().to(actions.device)).abs()
+                for b, row in enumerate(per_row):
+                    row[f"{mode}/progress_abs_err"] = float(err[b])
         for mode in cfg.eval.modes:                      # FM error of the velocity field, per noise level
             for tau in cfg.eval.fm_taus:
                 t = torch.full((actions.shape[0],), 1000.0 * tau, device=actions.device)
@@ -827,7 +834,8 @@ class Trainer:
             lrs[group["name"]] = group["lr"]
         self.model.train()
         started = time.monotonic()
-        stats = {"loss": 0.0, "fm": 0.0, "endpoint": 0.0, "dropped": 0, "samples": 0, "teacher_gt": 0.0}
+        stats = {"loss": 0.0, "fm": 0.0, "endpoint": 0.0, "dropped": 0, "samples": 0, "teacher_gt": 0.0,
+                 "progress": 0.0, "progress_abs_err": 0.0}
         bins = {"sum": [0.0] * (len(TAU_BINS) - 1), "count": [0] * (len(TAU_BINS) - 1)}
         for m in range(0, len(mine), cfg.schedule.micro_batch):
             micro = mine[m:m + cfg.schedule.micro_batch]
@@ -845,6 +853,8 @@ class Trainer:
             stats["fm"] += float(out["fm"]) * n
             stats["endpoint"] += float(out.get("endpoint", torch.zeros(()))) * n
             stats["teacher_gt"] += float(out.get("teacher_gt", torch.zeros(()))) * n
+            stats["progress"] += float(out.get("progress", torch.zeros(()))) * n
+            stats["progress_abs_err"] += float(out.get("progress_abs_err", torch.zeros(()))) * n
             stats["dropped"] += int(out["memory_dropped"].sum())
             stats["samples"] += n
             b = tau_bin_stats(out["tau"].cpu(), out["fm_unweighted"].cpu())
@@ -881,7 +891,7 @@ class Trainer:
                 if p.grad is None:
                     p.grad = torch.zeros_like(p)
                 torch.distributed.all_reduce(p.grad)
-            keys = ("loss", "fm", "endpoint", "dropped", "samples", "teacher_gt")
+            keys = ("loss", "fm", "endpoint", "dropped", "samples", "teacher_gt", "progress", "progress_abs_err")
             packed = torch.tensor([stats[x] for x in keys] + [*bins["sum"], *bins["count"], pair_stats["loss"],
                                                               pair_stats["samples"]],
                                   device=self.device, dtype=torch.float64)
@@ -917,6 +927,9 @@ class Trainer:
                   "seconds": time.monotonic() - started}
         if self.teacher is not None:
             record["teacher_gt"] = stats["teacher_gt"] / count       # teacher endpoint vs demonstration (diagnostic)
+        if cfg.v2.objective.progress_weight > 0:
+            record["progress"] = stats["progress"] / count
+            record["progress_abs_err"] = stats["progress_abs_err"] / count
         if pair_stats["samples"]:
             record["pair_loss"] = pair_stats["loss"] / pair_stats["samples"]
             record["pair_samples"] = int(pair_stats["samples"])
@@ -962,7 +975,14 @@ class Trainer:
         if not resumed:
             if cfg.init_memory:
                 state = torch.load(cfg.init_memory, map_location="cpu", weights_only=False)
-                self.model.memory.load_state_dict(state["memory"], strict=True)
+                own = set(self.model.memory.state_dict())
+                missing = sorted(own - set(state["memory"]))
+                if missing and all(k.startswith("progress.") for k in missing):
+                    # plan v8 D5: a stage-1 memory without the progress head; the head starts at zero
+                    self.model.memory.load_state_dict(state["memory"], strict=False)
+                    self.log(f"[init] progress head not in {cfg.init_memory}: starts from zero")
+                else:
+                    self.model.memory.load_state_dict(state["memory"], strict=True)
                 if state.get("action") is not None and cfg.optim.lr_action > 0:
                     self.log("[init] NOTE: init_memory checkpoint also holds ActionDiT weights; they are NOT loaded "
                              "(the ActionDiT starts from init_checkpoint)")

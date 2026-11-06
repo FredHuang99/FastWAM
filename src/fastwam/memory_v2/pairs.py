@@ -187,4 +187,6 @@ def swap_history(current: dict, donor: dict, swap: str = "all") -> dict:
         out["history_dropped"] = _shift_clock(out, donor["current_ids"] - current["current_ids"])
     out["actions"] = donor["actions"]
     out["action_valid"] = donor["action_valid"]
+    if "progress" in donor:                      # plan v8 D5: the donor's targets come with the donor's progress
+        out["progress"] = donor["progress"]
     return out

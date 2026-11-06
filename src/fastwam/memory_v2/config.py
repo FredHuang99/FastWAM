@@ -121,6 +121,10 @@ class MemoryV2Config:
     replay_time_buckets: int = 12   # log2 buckets of the elapsed time in replay_time_unit frames
     replay_time_unit: float = 8.0   # one decision (execute 8)
     replay_chunk: int = 32          # history frames per video prefill call (memory bound)
+    # ---- plan v8 D5 (11-06): auxiliary task-progress head (TempoWAM-style label: frame / episode length). A linear
+    # head on the mean of the last action-layer tokens of the tau = 1 (pure-noise) forward, which depends only on
+    # the conditions (current frame + history); trained with objective.progress_weight, never used to act.
+    progress_head: bool = False
 
     def __post_init__(self):
         object.__setattr__(self, "grid", _tuple(self.grid, 2, "grid"))
@@ -175,6 +179,7 @@ class ObjectiveConfig:
     weight_shift: float = 1.0       # shift used for the bell normalisation constant (released code: training shift)
     weight_floor: float = 0.25      # bell_floor: max(bell, floor) keeps tau ~ 1 supervised
     endpoint_weight: float = 1.0    # extra tau = 1 (pure noise) term, unit weight; 0 disables
+    progress_weight: float = 0.0    # plan v8 D5: BCE of the progress head (needs memory.progress_head); 0 = off
     memory_dropout: float = 0.15    # probability a sample sees only the null memory tokens (enables guidance)
 
     def __post_init__(self):
@@ -188,7 +193,7 @@ class ObjectiveConfig:
             raise ValueError("memory_dropout must be in [0, 1] (1 = history never seen: capacity-only control).")
         if self.tau_shift <= 0 or self.weight_shift <= 0:
             raise ValueError("Shifts must be positive.")
-        if self.endpoint_weight < 0 or self.weight_floor < 0:
+        if self.endpoint_weight < 0 or self.weight_floor < 0 or self.progress_weight < 0:
             raise ValueError("Weights must be non-negative.")
 
 
@@ -236,6 +241,8 @@ class V2Config:
                     except ValueError:
                         raise ValueError(f"memory_v2.{name}.{f.name} must be a number, got {v!r}.") from None
             built[name] = kind(**section)
+        if built["objective"].progress_weight > 0 and not built["memory"].progress_head:
+            raise ValueError("objective.progress_weight > 0 needs memory.progress_head = true.")
         return cls(**built)
 
     def to_dict(self) -> dict:
@@ -252,4 +259,9 @@ class V2Config:
         if out["memory"].get("read", "inject") == "inject":
             for key in ("read", "replay_layers", "replay_rank", "replay_time_buckets", "replay_time_unit", "replay_chunk"):
                 out["memory"].pop(key, None)
+        # The progress head (11-06) is left out while off, for the same reason.
+        if not out["memory"].get("progress_head"):
+            out["memory"].pop("progress_head", None)
+        if not out["objective"].get("progress_weight"):
+            out["objective"].pop("progress_weight", None)
         return out

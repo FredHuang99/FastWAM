@@ -202,12 +202,26 @@ class MemoryV2Modules(nn.Module):
             self.tau_gate = None
             self.replay = KVReplay(cfg)
             self._layer_index: Dict[int, int] = {}
+            self._add_progress(cfg)
             return
         self.replay = None
         self.tokenizer = MemoryTokenizer(cfg)
         self.injectors = nn.ModuleDict({str(i): ReadTimeInjector(cfg) for i in cfg.injection_layers})
         self.tau_gate = TauGate(len(cfg.injection_layers), cfg.tau_gate_hidden) if cfg.tau_gate else None
         self._layer_index: Dict[int, int] = {layer: j for j, layer in enumerate(cfg.injection_layers)}
+        self._add_progress(cfg)
+
+    def _add_progress(self, cfg: MemoryV2Config) -> None:
+        """plan v8 D5: progress head, created last (the other modules' initialisation is unchanged), zero-initialised
+        (predicts 0.5 at start); it reads the action tokens and never changes the actions."""
+        self.progress = nn.Linear(cfg.action_hidden, 1) if cfg.progress_head else None
+        if self.progress is not None:
+            nn.init.zeros_(self.progress.weight)
+            nn.init.zeros_(self.progress.bias)
+
+    def progress_logit(self, hidden: torch.Tensor) -> torch.Tensor:
+        """hidden: last action-layer tokens [B, T, W] (any dtype) -> progress logits [B] (float32)."""
+        return self.progress(hidden.float().mean(1).to(self.progress.weight.dtype)).squeeze(-1).float()
 
     def layer_slot(self, layer: int) -> Optional[int]:
         return self._layer_index.get(int(layer))

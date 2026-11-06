@@ -452,12 +452,14 @@ def make_batch(rows: Sequence[dict], episodes: EpisodeStore, features: FeatureSt
     """
     from .history import collate_selection
     latents, texts, text_valid, proprio, actions, valid, selections, feats, s1_feats, s1_ids = ([] for _ in range(10))
+    progress: List[float] = []
     gather = PROFILE.section("gather")
     gather.__enter__()
     for row in rows:
         e = episodes(row["episode_id"])
         a = int(row["anchor"])
         chunk, mask = action_window(e["actions"], a)
+        progress.append(a / max(1, len(e["actions"]) - 1))      # plan v8 D5 label: frame / episode length
         selection = select_for_row(range(a + 1), a, policy, row)   # rows may carry their own stride / period draw
         f = features(row["episode_id"])
         if len(f) != len(e["actions"]):
@@ -498,7 +500,7 @@ def make_batch(rows: Sequence[dict], episodes: EpisodeStore, features: FeatureSt
             history = collate_history(feats, selections, tokens_per_frame=120, width=3072, dtype=torch.bfloat16)
     batch = {"latent": torch.stack(latents), "text": torch.stack(texts), "text_valid": torch.stack(text_valid),
              "proprio": torch.stack(proprio), "actions": torch.stack(actions).to(noise_dtype),
-             "action_valid": torch.stack(valid), **history}
+             "action_valid": torch.stack(valid), "progress": torch.tensor(progress, dtype=torch.float32), **history}
     s1_section = PROFILE.section("collate_s1")
     s1_section.__enter__()
     if s1 is not None:

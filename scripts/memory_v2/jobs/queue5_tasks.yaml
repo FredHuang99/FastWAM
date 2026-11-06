@@ -2575,3 +2575,19 @@ tasks:
       then: "one step keeps the ten-step progress level but the gain over B0 shrinks below 60%: report as a negative result (memory gain does not survive one-step decoding)"
   on_pass: "plan v7 Q2 claim stands at X7: with memory, one-step decoding keeps the closed-loop gain; repeat on the final model (E-steps)"
   on_fail: "see failure_explanations; Q2 stays descriptive"
+
+# ---- 11-06 plan v8 D7 item 2: progress head dry run (press stage 1 config + head), any free GPU after S1-offline.
+- id: PH-dry
+  lane: extra
+  kind: shell
+  after: [S1-offline]
+  need_mib: 30000
+  timeout_h: 1
+  hypothesis: "plan v8 D7 item 2 acceptance: the press stage-1 config with the progress head (label = frame / episode length, BCE weight 0.1) runs 3 dry updates; metrics carry progress / progress_abs_err (step time and peak memory in PROFILE_PH)"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "the progress-head dry run crashed (a shell task only records rc): read the job log before any +P arm is queued"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/profile_step.py --updates 3 --cases press_prog_m2 --tag PH --python /opt/mwam/bin/python && grep -q 'sections' {O}/profile/press_prog_m2/PROFILE.json"
+  pass_if: "m['rc'] == 0"
+  on_pass: "send report/PROFILE_PH_*.md; the B-N1+P cards can be queued after DP1"
+  on_inconclusive: "(shell ERROR) read the job log"
