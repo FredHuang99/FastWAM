@@ -222,12 +222,13 @@ def progress(task, s):
     out = q.resolve(q.effective(task)["output"])
     wanted = set(scenes or [])
     done, stamps, errors = 0, [], 0
-    for res in out.glob("*/*/*/seed_*/result.json"):
+    label = q.effective(task).get("label") or "*"      # outputs are shared by several labels (e.g. press_pilot)
+    for res in out.glob(f"{label}/*/*/seed_*/result.json"):
         mode, tname, seed = res.parent.parent.parent.name, res.parent.parent.name, int(res.parent.name.split("_")[1])
         if mode in modes and (not wanted or (tname, seed) in wanted):
             done += 1
             stamps.append(res.stat().st_mtime)
-    for e in out.glob("*/*/*/seed_*/ERROR.json"):
+    for e in out.glob(f"{label}/*/*/seed_*/ERROR.json"):
         if not (e.parent / "result.json").exists():
             errors += 1
     total = len(scenes) * len(modes) if scenes is not None else None

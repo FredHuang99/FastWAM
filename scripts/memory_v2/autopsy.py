@@ -44,7 +44,8 @@ q5 = load("queue5", REPO / "scripts/memory_v2/queue5.py")
 cls = load("closed_loop_stages", REPO / "scripts/memory_v2/closed_loop_stages.py")
 
 ORDER = {"put_back_block": ("lifted", "centre", "pressed", "stage1", "regrasp", "returned", "success"),
-         "swap_blocks": ("lifted", "s1", "s2", "s3", "pressed", "success")}
+         "swap_blocks": ("lifted", "s1", "s2", "s3", "pressed", "success"),
+         "press_button": ("pressed", "n1_correct", "n2_correct", "confirmed", "count_correct", "success")}
 PRIORITY = ("sim_error", "never_lifted", "same_block_again", "unseen_state", "phase_regression", "idle", "empty_air_close")
 CLASS_TEXT = {
     "sim_error": "simulator / worker error (ERROR.json, no result)",
