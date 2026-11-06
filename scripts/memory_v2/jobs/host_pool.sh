@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Host-side helper for pool5 (run as root on the A100 or H200 host; copied to /root/mwam_reports/host_pool.sh).
-# The container is found automatically (A100: 6e4b37a15066, H200: mwam2, AWS: mwam-aws); override with C=<name>.
+# The container is found automatically (A100: 6e4b37a15066, H200: mwam2, AWS: mwam-aws, 5090: mwam5090); override with C=<name>.
 #
 #   bash /root/mwam_reports/host_pool.sh status              one screen: GPUs, running tasks (progress, ETA), queue
 #   bash /root/mwam_reports/host_pool.sh report [hours]      full report -> /root/mwam_reports/REPORT_*.md (send me)
@@ -25,8 +25,8 @@
 #   bash /root/mwam_reports/host_pool.sh check [regex]       queue preflight (queue5.py check); with a regex only the
 #                                                            matching lines, e.g. check PB- (sets vs the reference run)
 set -u
-C=${C:-$(docker ps --format '{{.ID}} {{.Names}}' | awk '$1 ~ /^6e4b37a15066/ {print $1} $2 == "mwam2" || $2 == "mwam-aws" {print $2}' | head -1)}
-[ -n "$C" ] || { echo "no MemWAM container running here (A100: 6e4b37a15066, H200: mwam2, AWS: mwam-aws)"; exit 1; }
+C=${C:-$(docker ps --format '{{.ID}} {{.Names}}' | awk '$1 ~ /^6e4b37a15066/ {print $1} $2 == "mwam2" || $2 == "mwam-aws" || $2 == "mwam5090" {print $2}' | head -1)}
+[ -n "$C" ] || { echo "no MemWAM container running here (A100: 6e4b37a15066, H200: mwam2, AWS: mwam-aws, 5090: mwam5090)"; exit 1; }
 R=/workspace/FastWAM-memory2
 Q=$R/outputs/memory_v2/queue5
 OUT=/root/mwam_reports

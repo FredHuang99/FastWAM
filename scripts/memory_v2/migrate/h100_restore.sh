@@ -1,7 +1,15 @@
 #!/usr/bin/env bash
-# Inside mwam-h100. Steps, in order: system | download | code | env | verify | test | reference | simulator
-# (`/opt/hf-tools/bin/hf auth login` once after `system`). Rerunning a step is safe.
+# Inside mwam-h100 / mwam-aws / mwam5090. Steps, in order: system | download | code | env | verify | test | reference |
+# simulator (`/opt/hf-tools/bin/hf auth login` once after `system`). Rerunning a step is safe.
+# RESTORE_LOG=<file> (11-07): the step also appends everything it prints to that file, so a long step can run detached
+# (docker exec -d) and be followed with tail -f; the last line says the step's exit code.
 set -euo pipefail
+if [ -n "${RESTORE_LOG:-}" ]; then
+  mkdir -p "$(dirname "$RESTORE_LOG")"
+  exec > >(tee -a "$RESTORE_LOG") 2>&1
+  RESTORE_STEP=${1:-?}
+  trap 'rc=$?; echo "[restore] $(date "+%F %T") step $RESTORE_STEP finished, exit code $rc"' EXIT
+fi
 REPO=${HF_REPO:-hhyfred/memwam-h100-migration-v1}
 HF=/mnt/hf
 MIG=/workspace/FastWAM-memory2/outputs/migration_h100_v1
