@@ -36,9 +36,9 @@ def test_assemble_matches_offline_make_batch(anchor):
     encoded = {i: (episode["latent"][i], episode["proprio"][i], features[i])
                for i in sorted(set(s1_ids) | set(selection.ids) | {anchor})}
     batch = online.assemble(encoded, episode["text"][None], episode["text_valid"][None], anchor, selection, s1_ids)
-    assert set(batch) == set(offline)
+    assert set(batch) == set(offline) - {"progress"}          # progress: a training label (plan v8 D5), not an input
     for key in offline:
-        if key in ("actions", "action_valid"):        # targets: offline only
+        if key in ("actions", "action_valid", "progress"):        # targets / labels: offline only
             continue
         assert offline[key].dtype == batch[key].dtype, key
         assert torch.equal(offline[key], batch[key]), key

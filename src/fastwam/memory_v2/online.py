@@ -805,7 +805,7 @@ def cmd_parity(args):
             online = assemble(encoded, e["text"][None], e["text_valid"][None], a, selection, s1_ids, replay=replay)
             online = {k: v.to(device) for k, v in online.items()}
             mismatched = [k for k in exact_keys if k in offline and not torch.equal(online[k].cpu(), offline[k].cpu())]
-            mismatched += [k for k in offline if k not in online] + [k for k in online if k not in offline]
+            mismatched += [k for k in offline if k not in online and k != "progress"] + [k for k in online if k not in offline]
             float_keys = ("latent", "text", "proprio") + (("hist_latent", "hist_proprio") if replay else ("history",)) \
                 + (("s1_history",) if s1_ids is not None else ())
             float_diff = max(float((online[k].float() - offline[k].float()).abs().max()) for k in float_keys)
