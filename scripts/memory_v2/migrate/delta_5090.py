@@ -12,6 +12,7 @@ Groups (logical paths, so the 5090 bind mounts put every file back where the cod
   demos       RMBench demo_clean (the payload left out RMBench data/)
   scenes      closed_loop/scenes_* (scene banks)
   results     closed_loop/**/result.json (what compare / reference read; videos and logs stay on the A100)
+  simkit      outputs/migration_5090_v1/simkit (sim_kit_a100.py): simulator patches, CuRobo / PyTorch3D build sources
   changed     files of the October payload's roots that are new or changed since its manifest (RMBench simulator
               sources, FastWAM repo files), so the 5090 simulator equals the A100's
 
@@ -132,6 +133,10 @@ def cmd_build(args):
         files += [entry(p, "data") for p in walk(f"{OUT}/{name}")]
     for top in DEMOS:
         files += [entry(p, "demos") for p in walk(top)]
+    if (MIG / "simkit" / "KIT.json").exists():            # sim_kit_a100.py output (simulator rebuild on the 5090)
+        files += [entry(p, "simkit") for p in walk(str(MIG / "simkit"))]
+    else:
+        skipped.append("simkit: run sim_kit_a100.py first (needed only for the 5090 simulator)")
     cl = f"{OUT}/closed_loop"
     for name in sorted(os.listdir(cl)):
         if name.startswith("scenes_"):
