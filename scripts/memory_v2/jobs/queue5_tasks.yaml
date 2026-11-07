@@ -2438,6 +2438,7 @@ tasks:
 - id: D2-pilot-train
   lane: train
   kind: train
+  hold: true        # 11-07 14:10: attempt 1 ended rc=1 at update 174 (~06:00); no automatic retry before the cause is known
   after: [S1-offline, D2-dry]
   requires_pass: [D2-dry]
   need_mib: 34000
@@ -2541,6 +2542,8 @@ tasks:
 - id: S1
   lane: ws          # 11-07: RTX 5090 workstation (pool lanes [ws]); A100 lanes skip it
   kind: closed_loop
+  hold: true        # 11-07 14:10: attempt 2 already runs on the A100 (GPU 3 since 06:11, 54/100 at 14:00) and finishes there;
+                    # the 5090 copy is stopped so the same episodes are not run twice (verdict on the A100)
   after: [S1-offline]
   need_mib: 30000
   hypothesis: "plan v7 Q2 / S1 (pre-registered 11-05): with memory, ONE Euler step keeps the closed-loop gain. X7 (a2C_6ep), memory on, execute 8, steps 1, official put_back scenes 1-50 and swap scenes 1-50; compared on the same scenes with X7 at 10 steps (on) and with B0-6ep (null). Pass: pooled progress (one step - ten steps) >= -0.05 AND (one step - B0) >= 0.6 x (ten steps - B0)"
