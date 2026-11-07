@@ -509,6 +509,11 @@ def run_episode(policy: Policy, scene: dict, mode: str, label: str, out: Path, a
                         if not c.poll(60):
                             raise TimeoutError("RPC request timeout")
                         req = c.recv()
+                        if getattr(args, "dump_first", False) and req.get("command") != "reset" \
+                                and int(req.get("current_id", -1)) == 0:
+                            import pickle                     # 11-08 diagnosis: frame 0's request, replayable offline
+                            with (directory / "request_000000.pkl").open("wb") as f:
+                                pickle.dump(req, f)
                         try:
                             if req["command"] == "reset":
                                 if next_frame:
@@ -1042,6 +1047,9 @@ def main(argv=None):
                     help="kv_replay: re-prefill every history frame at every decision (parity / latency reference)")
     ap.add_argument("--max-targets", type=int, default=0, help="smoke runs: stop after N executed targets (0 = official)")
     ap.add_argument("--record-frames", action="store_true", help="save camera PNGs of every frame")
+    ap.add_argument("--dump-first", action="store_true",
+                    help="diagnosis: pickle frame 0's decision request (observations, proprio, instruction) to "
+                         "<episode>/request_000000.pkl (scripts/memory_v2/migrate/first_decision.py replays it)")
     ap.add_argument("--episode-timeout", type=float, default=5400)
     ap.add_argument("--stop-on-error", action="store_true")
     ap.add_argument("--t5", default="auto", choices=("auto", "gpu", "cpu"), help="text encoder placement (auto: CPU on <60 GB cards)")

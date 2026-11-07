@@ -269,6 +269,19 @@ def stable_seed(*parts) -> int:
     return int.from_bytes(hashlib.sha256(json.dumps(parts, sort_keys=True).encode()).digest()[:8], "little") % (2 ** 63 - 1)
 
 
+def backward_if_connected(loss) -> bool:
+    """backward() when a trainable parameter reached the loss; False (nothing done) otherwise.
+
+    11-07 (N1-prof-5090: "element 0 of tensors does not require grad"): with kv_replay and a frozen action expert, a
+    micro-batch whose samples all lack history (no earlier frame, or the history dropped) runs the frozen base model
+    only, so no trainable parameter reaches its loss: its gradient is exactly zero and skipping backward() is the same
+    update. The injection read always reaches the memory module, so it never skips."""
+    if loss.requires_grad:
+        loss.backward()
+        return True
+    return False
+
+
 def lr_at(update: int, total: int, base: float, warmup_fraction: float, min_ratio: float) -> float:
     """Linear warm-up then cosine to min_ratio x base (same shape as the dense recipe)."""
     if base <= 0:
@@ -843,6 +856,7 @@ class Trainer:
         started = time.monotonic()
         stats = {"loss": 0.0, "fm": 0.0, "endpoint": 0.0, "dropped": 0, "samples": 0, "teacher_gt": 0.0,
                  "progress": 0.0, "progress_abs_err": 0.0}
+        connected = skipped = 0
         bins = {"sum": [0.0] * (len(TAU_BINS) - 1), "count": [0] * (len(TAU_BINS) - 1)}
         for m in range(0, len(mine), cfg.schedule.micro_batch):
             micro = mine[m:m + cfg.schedule.micro_batch]
@@ -854,7 +868,10 @@ class Trainer:
             if not bool(torch.isfinite(out["loss"])):
                 raise FloatingPointError(f"Non-finite loss at update {u}.")
             with PROFILE.section("backward"):
-                (out["loss"] * (len(micro) / total)).backward()
+                if backward_if_connected(out["loss"] * (len(micro) / total)):
+                    connected += 1
+                else:
+                    skipped += 1
             n = len(micro)
             stats["loss"] += float(out["loss"]) * n
             stats["fm"] += float(out["fm"]) * n
@@ -885,9 +902,15 @@ class Trainer:
                     if not bool(torch.isfinite(out["loss"])):
                         raise FloatingPointError(f"Non-finite pair loss at update {u}.")
                     with PROFILE.section("pairs_backward"):
-                        (out["loss"] * cfg.pairs.weight * (len(group) / pair_total)).backward()
+                        if backward_if_connected(out["loss"] * cfg.pairs.weight * (len(group) / pair_total)):
+                            connected += 1
+                        else:
+                            skipped += 1
                     pair_stats["loss"] += float(out["loss"]) * len(group)
                     pair_stats["samples"] += len(group)
+        if connected == 0 and self.world == 1:
+            raise RuntimeError(f"Update {u}: no micro-batch reached a trainable parameter ({skipped} skipped): every "
+                               "sample ran the frozen base only (kv_replay: no history or all dropped?).")
         sync = PROFILE.section("grad_sync_optim")
         sync.__enter__()
         for p, m in self.master:                       # bf16 grads -> fp32 masters
@@ -928,6 +951,7 @@ class Trainer:
         record = {"update": u, "epoch": epoch, "lr": lrs, "loss": stats["loss"] / count, "fm": fm,
                   "endpoint": stats["endpoint"] / count, "memory_dropped_fraction": stats["dropped"] / count,
                   "samples": int(stats["samples"]), "grad_norm": float(norm),
+                  "no_grad_micro_batches": skipped,
                   "fm_by_tau": {f"{TAU_BINS[j]:.2f}-{min(1.0, TAU_BINS[j + 1]):.2f}":
                                 (bins["sum"][j] / bins["count"][j] if bins["count"][j] else None)
                                 for j in range(len(bins["sum"]))},

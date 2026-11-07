@@ -11,6 +11,8 @@ written, so it is safe on a RUNNING task's folder.
   --first TASK:SEED             the first 8 executed targets (rad / gripper) of that episode in F, to compare the
                                 same scene across machines (the per-decision noise is CPU-seeded, so the first
                                 decision depends only on frame 0 and the numerics)
+  --first-full TASK:SEED        the same episode's first executed row in full (robot state, object poses), to check that
+                                two machines started the same scene from the same state
   --out FILE                    also write the text there (default: report/LOOP_PEEK_<label>_<time>.txt)
 
   PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/loop_peek.py --folder closed_loop/s2_steps2 --label x7_steps2_exec8
@@ -110,6 +112,25 @@ def first_targets(folder, label, spec_):
                 say(f"  t{row.get('completed_target_id', i + 1):>2} " + " ".join(f"{float(v):+.4f}" for v in row["target"]))
 
 
+def first_full(folder, label, spec_):
+    task, seed = spec_.split(":")
+    for p in q.resolve(folder).glob(f"{label}/*/{task}/seed_{seed}/executed_actions.jsonl"):
+        with p.open() as f:
+            row = json.loads(f.readline())
+
+        def short(v):
+            if isinstance(v, float):
+                return round(v, 4)
+            if isinstance(v, list):
+                return [short(x) for x in v]
+            if isinstance(v, dict):
+                return {k: short(x) for k, x in v.items()}
+            return v
+        say(f"\n== first row {task}:{seed} ({p.parent.parent.parent.name}): {p}")
+        for k in sorted(row):
+            say(f"  {k}: {json.dumps(short(row[k]))[:900]}")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--folder", required=True)
@@ -119,6 +140,7 @@ def main():
     ap.add_argument("--ref-mode", default="on")
     ap.add_argument("--mode", default="on")
     ap.add_argument("--first", nargs="*", default=[])
+    ap.add_argument("--first-full", nargs="*", default=[])
     ap.add_argument("--out", default="")
     args = ap.parse_args()
     say(f"# loop_peek {datetime.now(BJ):%F %T}: {args.folder} label {args.label} (read-only)")
@@ -143,6 +165,8 @@ def main():
             say(f"  paired progress pooled: {statistics.mean(pooled):+.3f} (n={len(pooled)})")
     for f in args.first:
         first_targets(args.folder, args.label, f)
+    for f in args.first_full:
+        first_full(args.folder, args.label, f)
     out = Path(args.out) if args.out else q.O / "report" / f"LOOP_PEEK_{args.label}_{datetime.now(BJ):%Y%m%d_%H%M}.txt"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("\n".join(LINES) + "\n")

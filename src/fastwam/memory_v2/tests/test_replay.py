@@ -267,3 +267,64 @@ def test_cross_decision_cache_matches_fresh_prefill_and_prefills_each_frame_once
             model.conditions(_batch(model.cfg))                          # batch 3: the cache serves one episode
         finally:
             model.replay_cache = None
+
+
+def _replay_backend(anchors):
+    """The tiny kv_replay backend of the trainer test with train rows at the given anchors only."""
+    from fastwam.memory_v2.tests.test_train_v2 import POLICY as TRAIN_POLICY, TinyBackend
+
+    class Backend(TinyBackend):
+        def __init__(self):
+            super().__init__()
+            torch.manual_seed(0)
+            self.cfg_memory = MemoryV2Config(**REPLAY)
+            self.model = MemoryV2Model(TinyBackbone(), self.cfg_memory).float()
+
+        def train_rows(self):
+            return [{"episode_id": e, "anchor": a} for e in range(self.episodes - 1) for a in anchors]
+
+        def batch(self, rows):
+            selections, latent, context, actions, valid = [], [], [], [], []
+            for row in rows:
+                e, a = row["episode_id"], row["anchor"]
+                selections.append(select_history(range(a + 1), a, TRAIN_POLICY))
+                index = torch.clamp(torch.arange(a, a + 8), max=self.length - 1)
+                actions.append(self.actions[e, index])
+                valid.append(torch.arange(a, a + 8) < self.length)
+                latent.append(self.latent[e, a])
+                context.append(self.context[e])
+            meta = collate_selection(selections)
+            k = meta["frame_ids"].shape[1]
+            hist = torch.zeros(len(rows), k, 6, 16)
+            for b, (row, s) in enumerate(zip(rows, selections)):
+                for j, i in enumerate(s.ids):
+                    hist[b, j] = self.latent[row["episode_id"], i]
+            return {"latent": torch.stack(latent), "context": torch.stack(context), "actions": torch.stack(actions),
+                    "action_valid": torch.stack(valid), "text": torch.zeros(len(rows), 1, 1), "hist_latent": hist,
+                    "hist_proprio": torch.zeros(len(rows), k, 1), **meta}
+    return Backend()
+
+
+def test_frozen_kv_replay_skips_micro_batches_without_history(tmp_path):
+    """11-07 (N1-prof-5090 crash): a micro-batch whose samples all lack history reaches no trainable parameter; its
+    gradient is zero, so the step skips backward() for it (counted) instead of raising, and the run trains."""
+    from fastwam.memory_v2.tests.test_train_v2 import POLICY as TRAIN_POLICY, _cfg
+    from fastwam.memory_v2.train_v2 import Trainer
+    cfg = _cfg(tmp_path, micro_batch=1, eval_every=10 ** 6, probe_every=10 ** 6)
+    cfg.v2 = V2Config.from_dict({"memory": REPLAY, "history": TRAIN_POLICY.__dict__, "guidance": {"steps": 3}})
+    backend = _replay_backend([0, 20, 30])                       # anchor 0: no earlier frame -> no history
+    result = Trainer(backend, cfg, tmp_path / "run", log=lambda m: None).run()
+    assert result.get("complete")
+    records = [json.loads(line) for line in (tmp_path / "run" / "metrics.jsonl").read_text().splitlines()
+               if '"update"' in line and '"no_grad_micro_batches"' in line]
+    assert records and sum(r["no_grad_micro_batches"] for r in records) > 0
+
+
+def test_frozen_kv_replay_update_without_any_history_raises(tmp_path):
+    """An update where NO micro-batch reaches a trainable parameter is a broken setup, not a zero step: it raises."""
+    from fastwam.memory_v2.tests.test_train_v2 import POLICY as TRAIN_POLICY, _cfg
+    from fastwam.memory_v2.train_v2 import Trainer
+    cfg = _cfg(tmp_path, micro_batch=2, eval_every=10 ** 6, probe_every=10 ** 6)
+    cfg.v2 = V2Config.from_dict({"memory": REPLAY, "history": TRAIN_POLICY.__dict__, "guidance": {"steps": 3}})
+    with pytest.raises(RuntimeError, match="no micro-batch reached a trainable parameter"):
+        Trainer(_replay_backend([0]), cfg, tmp_path / "run", log=lambda m: None).run()

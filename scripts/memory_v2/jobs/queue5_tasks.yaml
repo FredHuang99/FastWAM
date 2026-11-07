@@ -2614,6 +2614,10 @@ tasks:
 - id: S2
   lane: ws
   kind: closed_loop
+  hold: true        # 11-07 23:35 (Opus): paused at 77/100. The 5090's online path is not equivalent to the A100's: same
+                    # scene / weights / noise, its first chunk = the A100's delayed by 2 targets; S4 / S2 lifted the block
+                    # in 21 / 15 of 50 put scenes (X7 at 10 steps on the A100 / H200: 98/100; S1 = 1 step on the A100:
+                    # 44/50). Its episodes are not used; re-run (fresh folder) after the 5090 passes an online parity.
   after: [S1-offline]
   need_mib: 30000
   hypothesis: "plan v8 fallback 'few-step' (pre-registered 11-07, before any S1 / S2 episode): with memory, TWO Euler steps keep the closed-loop gain. Offline (S1-offline, all val windows): 2 steps raise X7's arm error by 2 % over 10 steps (1 step: 21 %) and keep 90 % of the memory gap. X7 (a2C_6ep), memory on, execute 8, steps 2, official put_back scenes 1-50 and swap scenes 1-50 (same as S1), on the 5090; compared on the same scenes with X7 at 10 steps (on) and with B0-6ep (null). Pass: pooled progress (two steps - ten steps) >= -0.05 AND (two steps - B0) >= 0.6 x (ten steps - B0)"
@@ -2653,13 +2657,19 @@ tasks:
 - id: N1-prof-5090
   lane: ws
   kind: shell
+  # 11-08 00:10 (Opus): attempt set 1 (11-07 17:00-17:34) ended ERROR: press_s1_m2 31.7 s / update, 15.6 GiB (A100: 82.7 s);
+  # press_n1_m2 crashed "element 0 of tensors does not require grad" (a micro-batch without history reaches no trainable
+  # parameter under kv_replay with a frozen action expert; fixed: train_v2.backward_if_connected + 2 tests);
+  # press_n1p_m2 out of memory at 31.1 GB (cap 48); press_s1_m4 / press_n1p_m4 stopped by the start-parity check
+  # (base relative L2 0.0237 > 0.02 at micro 4 on the 5090; micro 2 passes). Re-run after the fix with the cases that
+  # fit: n1 (landmark 24) and periodic at micro 1 (cap 48) / micro 2 (cap 32). Descriptive; reading rule unchanged.
   need_mib: 30000
   timeout_h: 3
   hypothesis: "descriptive (plan v8 section 7 open item, pre-registered 11-07): on the RTX 5090, press stage 1 with kv_replay and the plan v8 periodic history (T = 8 at inference, training T drawn from 1-16, 25 % irregular gaps, cap 48 frames) trains (the 11-06 P0 case press_n1_m2 crashed with the bf16 / fp32 dtype error fixed afterwards in a58b617 and was not re-run), and its step time and peak memory at micro batch 2 and 4 next to the current injection (press_s1) at the same micro batch, plus kv_replay with the old landmark-24 history (press_n1_m2). Reading for the Phase B press cards (plan v8 risk table, fixed now): step time n1p / s1 > 2.0 at the same micro batch -> history cap 32 instead of 48; peak memory at micro 4 > 30 GiB -> micro batch 2 on the 5090"
   failure_explanations:
     - if: "m['rc'] != 0"
       then: "a kv_replay case crashed or press_n1p_m2 has no timing (a shell task only records rc): read report/PROFILE_N1_5090_*.md and the job log before any Phase B N1 card"
-  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/profile_step.py --updates 4 --cases press_s1_m2 press_n1_m2 press_n1p_m2 press_s1_m4 press_n1p_m4 --tag N1_5090 --python /opt/mwam/bin/python && grep -q 'sections' {O}/profile/press_n1p_m2/PROFILE.json"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/profile_step.py --updates 4 --cases press_s1_m2 press_n1_m2 press_n1p_m1 press_n1p32_m2 --tag N1_5090 --python /opt/mwam/bin/python && grep -q 'sections' {O}/profile/press_n1_m2/PROFILE.json"
   pass_if: "m['rc'] == 0"
   on_pass: "send report/PROFILE_N1_5090_*.md: fixes the history cap and micro batch of the Phase B press N1 / N1+P cards (queued after DP1 / DP2)"
   on_inconclusive: "(shell ERROR) read the job log"
@@ -2667,6 +2677,9 @@ tasks:
 - id: S4
   lane: ws
   kind: closed_loop
+  # 11-07 23:35 (Opus): INCONCLUSIVE (recorded, unchanged): no reference episode was comparable on the 5090 (the delta
+  # shipped result.json only, and compare needs executed_actions.jsonl), and its own episodes ran on a 5090 online path
+  # that is not equivalent to the A100's (see S2). Not used; re-run as a new card after the 5090 passes an online parity.
   after: [S1-offline, N1-prof-5090]
   need_mib: 30000
   hypothesis: "plan v8 fallback 'few-step', four steps (pre-registered 11-07 17:00, before any S1 / S2 / S4 verdict): with memory, FOUR Euler steps keep the closed-loop gain. Offline (S1-offline, all val windows): 4 steps give X7's arm error 0.01089 vs 0.01124 at 10 steps (-3 %) and keep 94 % of the memory gap. X7 (a2C_6ep), memory on, execute 8, steps 4, official put_back scenes 1-50 and swap scenes 1-50 (same as S1 / S2), on the 5090; compared on the same scenes with X7 at 10 steps (on) and with B0-6ep (null). Pass: pooled progress (four steps - ten steps) >= -0.05 AND (four steps - B0) >= 0.6 x (ten steps - B0)"

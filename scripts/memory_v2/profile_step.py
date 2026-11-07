@@ -50,6 +50,10 @@ CASES = {
     "press_n1p_m2": ("v2_press_cf", ["schedule.micro_batch=2", "memory_v2.memory.read=kv_replay"] + PERIODIC),
     "press_n1p_m4": ("v2_press_cf", ["schedule.micro_batch=4", "memory_v2.memory.read=kv_replay"] + PERIODIC),
     "press_s1_m4": ("v2_press_cf", ["schedule.micro_batch=4"]),
+    # 11-08: press_n1p_m2 ran out of memory on the 32 GB 5090 (31.1 GB at cap 48); micro 1 at cap 48, and cap 32 at micro 2
+    "press_n1p_m1": ("v2_press_cf", ["schedule.micro_batch=1", "memory_v2.memory.read=kv_replay"] + PERIODIC),
+    "press_n1p32_m2": ("v2_press_cf", ["schedule.micro_batch=2", "memory_v2.memory.read=kv_replay"] + PERIODIC
+                       + ["memory_v2.history.max_frames=32"]),
     # plan v8 D5 (11-06): press stage 1 with the progress head (dry run: the head trains, nothing breaks)
     "press_prog_m2": ("v2_press_cf", ["schedule.micro_batch=2", "memory_v2.memory.progress_head=true",
                                       "memory_v2.objective.progress_weight=0.1"]),
