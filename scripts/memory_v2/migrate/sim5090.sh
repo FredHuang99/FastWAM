@@ -35,6 +35,9 @@ build_env() {   # compiler / CUDA variables for every build or JIT step
   export CPATH="$ENV/include:$ENV/targets/x86_64-linux/include"
   export LIBRARY_PATH="$ENV/lib:$ENV/targets/x86_64-linux/lib:$ENV/targets/x86_64-linux/lib/stubs"
   unset C_INCLUDE_PATH CPLUS_INCLUDE_PATH NVCC_APPEND_FLAGS NVCC_PREPEND_FLAGS
+  # SAPIEN looks for the Vulkan ICD only in its default places; the container's driver ICD is here
+  [ -f /etc/vulkan/icd.d/nvidia_icd.json ] && export VK_ICD_FILENAMES=/etc/vulkan/icd.d/nvidia_icd.json
+  return 0
 }
 
 conda_() {
@@ -179,6 +182,8 @@ gate() {
   # One complete expert episode per task through the production planner (CuRobo, rendering, the fused_graph_v1
   # kernels JIT-built for sm_120 on first use), as sim_ready.sh step 4 on the A100, in a scratch folder.
   build_env
+  local need=/workspace/FastWAM/resources/RMBench/data/decode_image_bit.py
+  [ -f "$need" ] || { step "missing $need (RMBench data/ code; shipped by delta_5090.py since 11-07): rerun h100_restore.sh delta"; exit 1; }
   local T=/workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/sim_ready_5090_$(date -u +%Y%m%d_%H%M%S)
   mkdir -p "$T"
   cd /workspace/FastWAM-memory2
