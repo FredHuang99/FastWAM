@@ -405,6 +405,7 @@ def simulator_config(dense_cfg: dict, root: Path, out: Path, args) -> dict:
 
 
 _WARNED: set = set()
+DRIVER_ICD = "/etc/vulkan/icd.d/nvidia_icd.json"   # mounted by the NVIDIA container toolkit (graphics)
 
 
 def gpu_uuid() -> str:
@@ -469,6 +470,8 @@ def run_episode(policy: Policy, scene: dict, mode: str, label: str, out: Path, a
                MEMORY_S1_PROGRESS_ROOT=str(directory / "simulator_progress"))
     if args.vk_icd and not env.get("VK_ICD_FILENAMES"):
         env["VK_ICD_FILENAMES"] = args.vk_icd
+    elif not env.get("VK_ICD_FILENAMES") and os.path.exists(DRIVER_ICD):
+        env["VK_ICD_FILENAMES"] = DRIVER_ICD      # 11-07 (5090): SAPIEN does not look there by itself
     child, start, next_frame, last, reset, commands = None, time.monotonic(), 0, -1, False, []
     (out / "tmp").mkdir(parents=True, exist_ok=True)
     print(f"[closed-loop] {now()} start {label}/{mode} {task} seed={scene['seed']} target_limit={target_limit} -> {directory}",
@@ -620,6 +623,8 @@ def cmd_plan(args):
     env = simulator_environment(sim_cfg, gpu)
     if args.vk_icd and not env.get("VK_ICD_FILENAMES"):
         env["VK_ICD_FILENAMES"] = args.vk_icd
+    elif not env.get("VK_ICD_FILENAMES") and os.path.exists(DRIVER_ICD):
+        env["VK_ICD_FILENAMES"] = DRIVER_ICD      # 11-07 (5090): SAPIEN does not look there by itself
     for task in args.tasks:
         manifest = out / f"{task}.json"
         contract = out / f"{task}.contract.json"
