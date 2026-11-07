@@ -172,6 +172,7 @@ class Policy:
         self.normaliser = ReleaseNormalizer(self.path("stats"))
         self.vae = self.t5 = self.tokenizer = self.mosaic = None
         self.t5_on_gpu = None
+        self.t5_cpu_encode = False
         if encoders:
             from fastwam.models.wan22.helpers.loader import _load_registered_model
             from fastwam.models.wan22.wan_video_text_encoder import HuggingfaceTokenizer
@@ -180,6 +181,11 @@ class Policy:
             if t5_on_gpu is None:                          # 40 GB cards: park the T5 on the CPU between episodes
                 t5_on_gpu = torch.cuda.get_device_properties(self.device).total_memory > 60 * 2 ** 30
             self.t5_on_gpu = bool(t5_on_gpu)
+            # 11-07: under 36 GB (RTX 5090, 32 GB) the T5 (~11 GB) cannot even visit the GPU next to the policy and the
+            # simulator workers (CUDA OOM at every episode start on the 5090): there it encodes on the CPU (bf16, once
+            # per episode). 40 GB and larger cards keep their path unchanged.
+            self.t5_cpu_encode = (not self.t5_on_gpu
+                                  and torch.cuda.get_device_properties(self.device).total_memory < 36 * 2 ** 30)
             self.t5 = _load_registered_model(self.path("t5"), "wan_video_text_encoder", torch.bfloat16,
                                              str(self.device) if self.t5_on_gpu else "cpu")
             self.t5.eval().requires_grad_(False)
@@ -197,6 +203,12 @@ class Policy:
         from fastwam.memory_s1.model import encode_text
         if self.t5_on_gpu:
             return encode_text(self.t5, self.tokenizer, instruction, self.device)
+        if self.t5_cpu_encode:
+            started = time.monotonic()
+            with self.torch.no_grad():
+                features, valid = encode_text(self.t5, self.tokenizer, instruction, self.torch.device("cpu"))
+            print(f"[closed-loop] {now()} instruction encoded on the CPU in {time.monotonic() - started:.1f} s", flush=True)
+            return features.to(self.device), valid.to(self.device)
         self.t5.to(self.device)
         try:
             return encode_text(self.t5, self.tokenizer, instruction, self.device)
@@ -214,7 +226,8 @@ class Policy:
                 "s1_period": self.cfg.s1_period, "history_policy": dict(self.cfg.v2.history.__dict__),
                 "guidance": dict(self.cfg.v2.guidance.__dict__), "trained_action": self.trained_action,
                 "dense_identity": self.info.get("dense_identity"), "video_digest": self.info.get("video_digest"),
-                "software_drift": self.info.get("software_drift"), "t5_on_gpu": self.t5_on_gpu}
+                "software_drift": self.info.get("software_drift"), "t5_on_gpu": self.t5_on_gpu,
+                "t5_cpu_encode": self.t5_cpu_encode}
 
 
 class Session:
