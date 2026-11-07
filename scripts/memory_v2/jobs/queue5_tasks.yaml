@@ -2189,7 +2189,8 @@ tasks:
   on_fail: "stage 2 did not complete: inspect press_6ep_mix/stdout.log"
 
 - id: PB-loop-C24
-  lane: ws          # 11-07 14:30: RTX 5090 (the A100 GPU 2 goes to D2-pilot-train); card unchanged otherwise
+  lane: loop        # 11-07 16:50: back on the A100. A press closed loop needs ~33 GB (PB-loop-B: 32.9 GB on the A100);
+                    # on the 32 GB RTX 5090 it filled 31.3 GB before the first decision
   kind: closed_loop
   after: [PB-s2-C, PB-loop-A]
   requires_pass: [PB-s2-C, PB-smoke]
@@ -2217,9 +2218,12 @@ tasks:
   on_fail: "see failure_explanations"
 
 - id: PB-loop-C8
-  lane: ws          # 11-07 14:30: RTX 5090 (the A100 GPU 2 goes to D2-pilot-train); card unchanged otherwise
+  lane: loop        # 11-07 16:50: A100 (see PB-loop-C24)
   kind: closed_loop
-  after: [PB-s2-C, PB-loop-B, PB-loop-C24]
+  # 11-07 16:50: after PB-loop-C24 dropped and its own output folder (press_pilot_c8), so it can run on the A100 GPU 3
+  # once S1 ends while C24 runs on GPU 0; C24 / C8 never shared data, only the folder (two loops in one folder
+  # must not run at once). Hypothesis, reference (arm B in press_pilot) and criteria unchanged.
+  after: [PB-s2-C, PB-loop-B]
   requires_pass: [PB-s2-C, PB-smoke]
   hypothesis: "the same mixed-stride model run at stride 8 counts about as well as the stride-8 specialist (arm B) on the same scenes: memory-on count_correct >= arm B's - 1. Together with PB-loop-C24: one model, the stride chosen at inference (the free-T question of 11-04)"
   need_mib: 30000
@@ -2229,7 +2233,7 @@ tasks:
   scenes: [closed_loop/scenes_seed17_n10_press_button]
   tasks: [press_button]
   online_args: ["--execute", "8", "--set", "memory_v2.history.landmark_stride=8"]
-  output: closed_loop/press_pilot
+  output: closed_loop/press_pilot_c8
   reference: {folders: [closed_loop/press_pilot], label: press_lm8_e6_exec8, modes: ["on"]}
   min_episodes: 8
   inconclusive_if: "m.get('press_button/on', {}).get('n', 0) < 8 or not r.get('press_button/on')"
