@@ -12,6 +12,7 @@ Groups (logical paths, so the 5090 bind mounts put every file back where the cod
   demos       RMBench demo_clean (the payload left out RMBench data/)
   scenes      closed_loop/scenes_* (scene banks)
   results     closed_loop/**/result.json (what compare / reference read; videos and logs stay on the A100)
+  queue_state queue5/state/<id>.json of the A100 tasks that are done (dependencies of the 5090 lane [ws])
   rmbench_data  RMBench data/ minus demo_clean / download_cache (python modules the simulator imports)
   simkit      outputs/migration_5090_v1/simkit (sim_kit_a100.py): simulator patches, CuRobo / PyTorch3D build sources
   changed     files of the October payload's roots that are new or changed since its manifest (RMBench simulator
@@ -140,6 +141,17 @@ def cmd_build(args):
     if os.path.isdir(rm_data):
         files += [entry(p, "rmbench_data") for p in walk(rm_data)
                   if not p.startswith((rm_data + "/demo_clean/", rm_data + "/download_cache/"))]
+    # 11-07: states of the A100 tasks that are DONE, so the 5090 pool (lanes [ws]) sees their dependencies met.
+    # Pending / running states are not shipped (the 5090 never runs A100 lanes; its own tasks keep their own states).
+    n_state = 0
+    for p in sorted(Path(OUT, "queue5", "state").glob("*.json")):
+        try:
+            if json.loads(p.read_text()).get("status") == "done":
+                files.append(entry(str(p), "queue_state"))
+                n_state += 1
+        except (OSError, ValueError):
+            pass
+    log(f"queue states shipped (done tasks only): {n_state}")
     if (MIG / "simkit" / "KIT.json").exists():            # sim_kit_a100.py output (simulator rebuild on the 5090)
         files += [entry(p, "simkit") for p in walk(str(MIG / "simkit"))]
     else:

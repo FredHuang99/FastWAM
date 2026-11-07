@@ -2296,7 +2296,7 @@ tasks:
   on_inconclusive: "(shell ERROR) read the job log"
 
 - id: N1-check
-  lane: extra
+  lane: ws          # 11-07: RTX 5090 workstation (pool lanes [ws]); A100 lanes skip it
   kind: shell
   after: [P0-profile]
   need_mib: 30000
@@ -2494,7 +2494,7 @@ tasks:
   on_inconclusive: "(shell ERROR) read the job log"
 
 - id: D2-pilot-loop
-  lane: extra
+  lane: ws          # 11-07: RTX 5090 workstation (pool lanes [ws]); A100 lanes skip it
   kind: closed_loop
   after: [D2-pilot-train, S1]
   requires_pass: [D2-pilot-train]
@@ -2539,7 +2539,7 @@ tasks:
 # S1 moved here on 11-06 19:50 (card unchanged): the pool starts runnable tasks in file order, so D2-pilot-train
 # takes the GPU that S1-offline frees and S1 follows on the next free GPU (D2-pilot-loop needs both).
 - id: S1
-  lane: extra
+  lane: ws          # 11-07: RTX 5090 workstation (pool lanes [ws]); A100 lanes skip it
   kind: closed_loop
   after: [S1-offline]
   need_mib: 30000
@@ -2578,7 +2578,7 @@ tasks:
 
 # ---- 11-06 plan v8 D7 item 2: progress head dry run (press stage 1 config + head), any free GPU after S1-offline.
 - id: PH-dry
-  lane: extra
+  lane: ws          # 11-07: RTX 5090 workstation (pool lanes [ws]); A100 lanes skip it
   kind: shell
   after: [S1-offline]
   need_mib: 30000
@@ -2591,3 +2591,42 @@ tasks:
   pass_if: "m['rc'] == 0"
   on_pass: "send report/PROFILE_PH_*.md; the B-N1+P cards can be queued after DP1"
   on_inconclusive: "(shell ERROR) read the job log"
+
+# ---- 11-07 (Opus): the RTX 5090 workstation (container mwam5090, pool lanes [ws], GPUs 0 / 1). Offline parity with the
+# A100 passed (X7 on all val windows, 10 and 1 steps: worst arm-RMSE difference 0.25 %, tolerance 3 %;
+# parity_5090/PARITY.log); its simulator passed the expert gate. Done states of A100 tasks reach it through
+# delta_5090 (queue_state). N1-check, PH-dry, S1, D2-pilot-loop moved there (cards unchanged except the lane); S2 is new.
+- id: S2
+  lane: ws
+  kind: closed_loop
+  after: [S1-offline]
+  need_mib: 30000
+  hypothesis: "plan v8 fallback 'few-step' (pre-registered 11-07, before any S1 / S2 episode): with memory, TWO Euler steps keep the closed-loop gain. Offline (S1-offline, all val windows): 2 steps raise X7's arm error by 2 % over 10 steps (1 step: 21 %) and keep 90 % of the memory gap. X7 (a2C_6ep), memory on, execute 8, steps 2, official put_back scenes 1-50 and swap scenes 1-50 (same as S1), on the 5090; compared on the same scenes with X7 at 10 steps (on) and with B0-6ep (null). Pass: pooled progress (two steps - ten steps) >= -0.05 AND (two steps - B0) >= 0.6 x (ten steps - B0)"
+  checkpoint: a2C_6ep/last
+  label: x7_steps2_exec8
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block, closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [put_back_block, swap_blocks]
+  online_args: ["--execute", "8", "--steps", "2", "--limit", "50"]
+  output: closed_loop/s2_steps2
+  min_episodes: 80
+  compare:
+    ten_step:
+      mode: "on"
+      ref_mode: "on"
+      put_back_block: {folders: [closed_loop/h200/official_pilot, closed_loop/official/put_x7_s0, closed_loop/official/put_x7_s1], label: a2C6_e6}
+      swap_blocks: {folders: [closed_loop/official/swap8_x7_s0, closed_loop/official/swap8_x7_s1, closed_loop/official/swap8_x7_s2], label: a2C6_e6_exec8}
+    b0:
+      mode: "on"
+      ref_mode: "null"
+      put_back_block: {folders: [closed_loop/h200/official/put8_b0_s0, closed_loop/h200/official/put8_b0_s1], label: a2B0_e6_exec8}
+      swap_blocks: {folders: [closed_loop/official/swap8_b0_s0, closed_loop/official/swap8_b0_s1, closed_loop/official/swap8_b0_s2], label: a2B0_e6_exec8}
+  inconclusive_if: "m.get('compare', {}).get('ten_step', {}).get('pooled', {}).get('n', 0) < 80"
+  pass_if: "m['compare']['ten_step']['pooled']['delta'] >= -0.05 and m['compare']['b0']['pooled']['delta'] >= 0.6 * (m['compare']['b0']['pooled']['delta'] - m['compare']['ten_step']['pooled']['delta'])"
+  failure_explanations:
+    - if: "m['compare']['ten_step']['pooled']['delta'] < -0.05"
+      then: "two-step decoding loses more than 0.05 progress against ten steps: the few-step fallback needs 4 steps (offline 4 steps = 10 steps) or distillation"
+    - if: "m['compare']['ten_step']['pooled']['delta'] >= -0.05 and m['compare']['b0']['pooled']['delta'] < 0.6 * (m['compare']['b0']['pooled']['delta'] - m['compare']['ten_step']['pooled']['delta'])"
+      then: "two steps keep the ten-step progress level but the gain over B0 shrinks below 60 %: memory gain is fragile under few-step decoding (report with S1)"
+  on_pass: "few-step fallback stands at X7: latency table reports 1 / 2 / 10 steps (with S1 and LAT-*); D2 then has to beat two steps, not ten"
+  on_fail: "see failure_explanations"
