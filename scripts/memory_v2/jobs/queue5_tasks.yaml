@@ -2189,7 +2189,7 @@ tasks:
   on_fail: "stage 2 did not complete: inspect press_6ep_mix/stdout.log"
 
 - id: PB-loop-C24
-  lane: loop
+  lane: ws          # 11-07 14:30: RTX 5090 (the A100 GPU 2 goes to D2-pilot-train); card unchanged otherwise
   kind: closed_loop
   after: [PB-s2-C, PB-loop-A]
   requires_pass: [PB-s2-C, PB-smoke]
@@ -2217,7 +2217,7 @@ tasks:
   on_fail: "see failure_explanations"
 
 - id: PB-loop-C8
-  lane: loop
+  lane: ws          # 11-07 14:30: RTX 5090 (the A100 GPU 2 goes to D2-pilot-train); card unchanged otherwise
   kind: closed_loop
   after: [PB-s2-C, PB-loop-B, PB-loop-C24]
   requires_pass: [PB-s2-C, PB-smoke]
@@ -2438,7 +2438,13 @@ tasks:
 - id: D2-pilot-train
   lane: train
   kind: train
-  hold: true        # 11-07 14:10: attempt 1 ended rc=1 at update 174 (~06:00); no automatic retry before the cause is known
+  # 11-07 14:30 (Opus): attempt 1 was stopped at update 174 by the FM loss guard (median of the last 16 updates
+  # 0.00268 > 2.5 x median of the first 8 = 0.00246). A false trip: the distillation FM is heavy-tailed (single
+  # updates 0.0007-0.0115 from the start; 22-24 % of updates > 0.004 both in updates 1-42 and 148-174) and its
+  # median did not rise (updates 1-42: 0.00146; 148-174: 0.00152); endpoint / teacher terms flat, no non-finite
+  # value. The run resumes from its own checkpoint update_000174.pt (train_v2 resume tolerates a changed guard
+  # section only) with medians over 64 updates for both the baseline and the window (factor 2.5 kept).
+  # Recipe, data, teacher and pass_if unchanged. GUARD.json of attempt 1 kept as GUARD_update174.json.
   after: [S1-offline, D2-dry]
   requires_pass: [D2-dry]
   need_mib: 34000
@@ -2460,6 +2466,8 @@ tasks:
     - distill.ema=0.995
     - distill.ema_every=4
     - "eval.steps=[1]"
+    - guard.loss_baseline_updates=64
+    - guard.loss_window=64
   inconclusive_if: "not m.get('eval_first') or 'on_s1/arm_rmse_rad' not in (m.get('eval_last') or {})"
   pass_if: "m.get('complete') and m['eval_last']['on_s1/arm_rmse_rad'] <= 1.10 * m['eval_first']['on/arm_rmse_rad'] and (m['eval_last']['null_s1/arm_rmse_rad'] - m['eval_last']['on_s1/arm_rmse_rad']) >= 0.8 * (m['eval_first']['null/arm_rmse_rad'] - m['eval_first']['on/arm_rmse_rad'])"
   failure_explanations:
@@ -2467,7 +2475,7 @@ tasks:
       then: "a distillation check failed (teacher swap / restore): read x7_distill_e3/DISTILL_CHECK.json; a code bug, not a result"
     - if: "m.get('guard')"
       then: "the guard stopped the run: see GUARD.json"
-    - if: "m.get('config_diff') and any(v[1] is not None and not k.startswith(('name', 'output', 'init_memory', 'pairs', 'distill', 'eval.steps', 'schedule.epochs', 'schedule.keep_last', 'schedule.save_every', 'schedule.micro_batch')) for k, v in m['config_diff'].items())"
+    - if: "m.get('config_diff') and any(v[1] is not None and not k.startswith(('name', 'output', 'init_memory', 'pairs', 'distill', 'eval.steps', 'schedule.epochs', 'schedule.keep_last', 'schedule.save_every', 'schedule.micro_batch', 'guard')) for k, v in m['config_diff'].items())"
       then: "the config differs from X7 beyond the distillation keys (see config_diff): the student is not X7's recipe"
     - if: "m.get('eval_last') and len(m.get('eval_curve', [])) >= 3 and m['eval_curve'][-1].get('on_s1') is not None and m['eval_curve'][-2].get('on_s1') and m['eval_curve'][-1]['on_s1'] < 0.95 * m['eval_curve'][-2]['on_s1']"
       then: "the one-step error was still falling > 5% between the last two evaluations: extend to 6 epochs (new run x7_distill_e6) before judging"

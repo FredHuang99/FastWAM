@@ -757,8 +757,15 @@ class Trainer:
             return False
         pointer = json.loads(latest.read_text(encoding="utf-8"))
         state = torch.load(self.checkpoint_dir() / pointer["file"], map_location="cpu", weights_only=False)
-        if state["config"] != self.cfg.to_dict():
+        # 11-07: the guard section only decides when a run stops, not what it computes, so a resume may change it
+        # (D2-pilot-train: a false trip of the FM-median guard on a heavy-tailed distillation loss). Every other key
+        # must equal the checkpoint's.
+        saved, current = dict(state["config"]), self.cfg.to_dict()
+        old_guard, new_guard = saved.pop("guard", None), current.pop("guard", None)
+        if saved != current:
             raise ValueError("Config differs from the checkpoint; start a new output instead of resuming.")
+        if old_guard != new_guard:
+            self.log(f"[resume] guard settings changed: {old_guard} -> {new_guard}")
         raw = state.get("raw")                       # distillation with EMA: memory / action hold the EMA
         self.model.memory.load_state_dict((raw or state)["memory"], strict=True)
         action_state = (raw or state).get("action")

@@ -157,6 +157,26 @@ def test_resume_continues_identically(tmp_path):
         assert torch.allclose(v, resumed.model.memory.state_dict()[k], atol=1e-6), k
 
 
+def test_resume_allows_a_changed_guard_only(tmp_path):
+    cfg = _cfg(tmp_path)
+    run = tmp_path / "run"
+    run.mkdir(parents=True)
+    part = Trainer(TinyBackend(), cfg, run, log=lambda m: None)
+    for _ in range(3):
+        part.step()
+    part.save()
+    d = cfg.to_dict()
+    d["guard"] = {**d["guard"], "loss_window": 64, "loss_baseline_updates": 64}
+    logs = []
+    resumed = Trainer(TinyBackend(), TrainConfig.from_dict(d), run, log=logs.append)
+    assert resumed.resume() and resumed.update == 3
+    assert any("guard settings changed" in m for m in logs)
+    d2 = cfg.to_dict()
+    d2["optim"] = {**d2["optim"], "lr_memory": d2["optim"]["lr_memory"] * 2}
+    with pytest.raises(ValueError):
+        Trainer(TinyBackend(), TrainConfig.from_dict(d2), run, log=lambda m: None).resume()
+
+
 def test_loss_guard_trips(tmp_path):
     cfg = _cfg(tmp_path)
     cfg.guard = GuardConfig(loss_factor=2.0, loss_window=4, loss_baseline_updates=4, start_update=0)
