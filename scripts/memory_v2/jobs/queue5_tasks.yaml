@@ -2645,3 +2645,56 @@ tasks:
       then: "two steps keep the ten-step progress level but the gain over B0 shrinks below 60 %: memory gain is fragile under few-step decoding (report with S1)"
   on_pass: "few-step fallback stands at X7: latency table reports 1 / 2 / 10 steps (with S1 and LAT-*); D2 then has to beat two steps, not ten"
   on_fail: "see failure_explanations"
+
+# ---- 11-07 17:00 (Opus): the 5090's GPU 0 is free (press closed loops need ~33 GB and stay on the A100; S2 runs on
+# GPU 1). Two pre-registered tasks that need no A100 result: the Phase B N1 profile on press (stage-1 memory training
+# fits the 5090: press_s1_m2 peaked at 15.6 GiB on the A100) and the four-step point of the X7 step curve (S1 = 1, S2 = 2,
+# official = 10), so the few-step fallback of plan v8 D2 is ready before DP-D2 instead of a day after S2.
+- id: N1-prof-5090
+  lane: ws
+  kind: shell
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "descriptive (plan v8 section 7 open item, pre-registered 11-07): on the RTX 5090, press stage 1 with kv_replay and the plan v8 periodic history (T = 8 at inference, training T drawn from 1-16, 25 % irregular gaps, cap 48 frames) trains (the 11-06 P0 case press_n1_m2 crashed with the bf16 / fp32 dtype error fixed afterwards in a58b617 and was not re-run), and its step time and peak memory at micro batch 2 and 4 next to the current injection (press_s1) at the same micro batch, plus kv_replay with the old landmark-24 history (press_n1_m2). Reading for the Phase B press cards (plan v8 risk table, fixed now): step time n1p / s1 > 2.0 at the same micro batch -> history cap 32 instead of 48; peak memory at micro 4 > 30 GiB -> micro batch 2 on the 5090"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "a kv_replay case crashed or press_n1p_m2 has no timing (a shell task only records rc): read report/PROFILE_N1_5090_*.md and the job log before any Phase B N1 card"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/profile_step.py --updates 4 --cases press_s1_m2 press_n1_m2 press_n1p_m2 press_s1_m4 press_n1p_m4 --tag N1_5090 --python /opt/mwam/bin/python && grep -q 'sections' {O}/profile/press_n1p_m2/PROFILE.json"
+  pass_if: "m['rc'] == 0"
+  on_pass: "send report/PROFILE_N1_5090_*.md: fixes the history cap and micro batch of the Phase B press N1 / N1+P cards (queued after DP1 / DP2)"
+  on_inconclusive: "(shell ERROR) read the job log"
+
+- id: S4
+  lane: ws
+  kind: closed_loop
+  after: [S1-offline, N1-prof-5090]
+  need_mib: 30000
+  hypothesis: "plan v8 fallback 'few-step', four steps (pre-registered 11-07 17:00, before any S1 / S2 / S4 verdict): with memory, FOUR Euler steps keep the closed-loop gain. Offline (S1-offline, all val windows): 4 steps give X7's arm error 0.01089 vs 0.01124 at 10 steps (-3 %) and keep 94 % of the memory gap. X7 (a2C_6ep), memory on, execute 8, steps 4, official put_back scenes 1-50 and swap scenes 1-50 (same as S1 / S2), on the 5090; compared on the same scenes with X7 at 10 steps (on) and with B0-6ep (null). Pass: pooled progress (four steps - ten steps) >= -0.05 AND (four steps - B0) >= 0.6 x (ten steps - B0)"
+  checkpoint: a2C_6ep/last
+  label: x7_steps4_exec8
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block, closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [put_back_block, swap_blocks]
+  online_args: ["--execute", "8", "--steps", "4", "--limit", "50"]
+  output: closed_loop/s4_steps4
+  min_episodes: 80
+  compare:
+    ten_step:
+      mode: "on"
+      ref_mode: "on"
+      put_back_block: {folders: [closed_loop/h200/official_pilot, closed_loop/official/put_x7_s0, closed_loop/official/put_x7_s1], label: a2C6_e6}
+      swap_blocks: {folders: [closed_loop/official/swap8_x7_s0, closed_loop/official/swap8_x7_s1, closed_loop/official/swap8_x7_s2], label: a2C6_e6_exec8}
+    b0:
+      mode: "on"
+      ref_mode: "null"
+      put_back_block: {folders: [closed_loop/h200/official/put8_b0_s0, closed_loop/h200/official/put8_b0_s1], label: a2B0_e6_exec8}
+      swap_blocks: {folders: [closed_loop/official/swap8_b0_s0, closed_loop/official/swap8_b0_s1, closed_loop/official/swap8_b0_s2], label: a2B0_e6_exec8}
+  inconclusive_if: "m.get('compare', {}).get('ten_step', {}).get('pooled', {}).get('n', 0) < 80"
+  pass_if: "m['compare']['ten_step']['pooled']['delta'] >= -0.05 and m['compare']['b0']['pooled']['delta'] >= 0.6 * (m['compare']['b0']['pooled']['delta'] - m['compare']['ten_step']['pooled']['delta'])"
+  failure_explanations:
+    - if: "m['compare']['ten_step']['pooled']['delta'] < -0.05"
+      then: "even four steps lose more than 0.05 progress against ten steps although the offline error does not rise: the closed loop is more sensitive to the solver than the offline error shows; the few-step fallback is off, distillation (D2) is the only route to fewer steps"
+    - if: "m['compare']['ten_step']['pooled']['delta'] >= -0.05 and m['compare']['b0']['pooled']['delta'] < 0.6 * (m['compare']['b0']['pooled']['delta'] - m['compare']['ten_step']['pooled']['delta'])"
+      then: "four steps keep the ten-step progress level but the gain over B0 shrinks below 60 %: memory gain is fragile under few-step decoding (report with S1 / S2)"
+  on_pass: "four-step fallback stands at X7: the latency table reports 1 / 2 / 4 / 10 steps (S1, S2, S4, official; LAT-* for the time)"
+  on_fail: "see failure_explanations"

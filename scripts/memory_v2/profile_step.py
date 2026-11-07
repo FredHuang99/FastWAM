@@ -27,6 +27,9 @@ from pathlib import Path
 O = Path(os.environ.get("MEMV2_OUT", "/workspace/FastWAM-memory2/outputs/memory_v2"))
 REPO = Path(__file__).resolve().parents[2]
 BJ = timezone(timedelta(hours=8))
+PERIODIC = ["memory_v2.history.mode=periodic", "memory_v2.history.period=8",
+            "memory_v2.history.periods=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]", "memory_v2.history.irregular=0.25",
+            "memory_v2.history.max_frames=48"]
 # case -> (run whose saved config is used, extra --set overrides)
 CASES = {
     "x7": ("a2C_6ep", []),                                         # stage 2, pairs 0.5 x 8 / update, stride 24
@@ -42,6 +45,11 @@ CASES = {
     "x7_distill": ("a2C_6ep", ["pairs.weight=0", "init_memory=", "schedule.micro_batch=2",
                                f"distill.teacher={O}/a2C_6ep/checkpoints/update_004020.pt", "distill.teacher_steps=10",
                                "distill.ema=0.995", "eval.steps=[1]"]),
+    # 11-07 (RTX 5090): Phase B N1 on press, stage 1: kv_replay with the plan v8 periodic history (T = 8 at inference,
+    # training T in 1..16, 25 % irregular, cap 48), at micro 2 and 4 (does 4 fit in 32 GB?), next to the injection
+    "press_n1p_m2": ("v2_press_cf", ["schedule.micro_batch=2", "memory_v2.memory.read=kv_replay"] + PERIODIC),
+    "press_n1p_m4": ("v2_press_cf", ["schedule.micro_batch=4", "memory_v2.memory.read=kv_replay"] + PERIODIC),
+    "press_s1_m4": ("v2_press_cf", ["schedule.micro_batch=4"]),
     # plan v8 D5 (11-06): press stage 1 with the progress head (dry run: the head trains, nothing breaks)
     "press_prog_m2": ("v2_press_cf", ["schedule.micro_batch=2", "memory_v2.memory.progress_head=true",
                                       "memory_v2.objective.progress_weight=0.1"]),

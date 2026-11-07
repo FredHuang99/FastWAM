@@ -11,6 +11,15 @@ lengths, the instruction file, the datasets that could locate the presses (end-e
 Writes its own report: outputs/memory_v2/report/PRESS_FETCH_<time>.txt
 
     /opt/mwam/bin/python scripts/memory_v2/press/fetch.py [--task press_button] [--inspect-only] [--keep-zip]
+
+11-07 (plan v8 D7-3, the other RMBench tasks; same folder layout, same checks):
+    --list                 every data/<task>/demo_clean.zip at the pinned revision (size, downloaded here or not); nothing
+                           is downloaded
+    --task A B ...         several tasks in a row; a task that fails is reported and the next one still runs (exit code 1
+                           if any failed)
+    --task all             every task on the hub except put_back_block / swap_blocks (those two live in
+                           resources/RMBench/data/demo_clean); tasks already downloaded are only inspected
+    Report: RMB_FETCH_<time>.txt when it is not the single press_button task.
 """
 import argparse
 import hashlib
@@ -60,6 +69,22 @@ def pinned_revision():
         return rev or PINNED
     except (OSError, ValueError):
         return PINNED
+
+
+SKIP_ALL = ("put_back_block", "swap_blocks")
+
+
+def hub_tasks(rev):
+    """[(task, zip bytes)] for every data/<task>/demo_clean.zip at the revision."""
+    from huggingface_hub import HfApi
+    api = HfApi()
+    folders = sorted(e.path.split("/", 1)[1] for e in api.list_repo_tree(REPO_ID, path_in_repo="data", repo_type="dataset",
+                                                                           revision=rev, recursive=False)
+                     if getattr(e, "tree_id", None) is not None or not hasattr(e, "size"))
+    names = [f"data/{t}/demo_clean.zip" for t in folders]
+    info = {i.path: int(getattr(i, "size", 0) or 0)
+            for i in api.get_paths_info(REPO_ID, names, repo_type="dataset", revision=rev)} if names else {}
+    return [(t, info[f"data/{t}/demo_clean.zip"]) for t in folders if f"data/{t}/demo_clean.zip" in info]
 
 
 def download(task, rev, keep_zip):
@@ -166,10 +191,10 @@ def inspect(task):
     press, attrs = describe_h5(files[0])
     put, _ = describe_h5(PUT_EP0) if PUT_EP0.exists() else ([], {})
     pk, uk = {r[0]: r for r in press}, {r[0]: r for r in put}
-    say(f"\n== hdf5 layout: {files[0].name} (press) vs {PUT_EP0.name} (put_back)  attrs {attrs}")
+    say(f"\n== hdf5 layout: {files[0].name} ({task}) vs {PUT_EP0.name} (put_back)  attrs {attrs}")
     for k in sorted(set(pk) | set(uk)):
         a, b = pk.get(k), uk.get(k)
-        say(f"  {k:48s} press {str(a[1:]) if a else '-':34s} put_back {str(b[1:]) if b else '-'}")
+        say(f"  {k:48s} {task[:6]} {str(a[1:]) if a else '-':34s} put_back {str(b[1:]) if b else '-'}")
     lengths = [length_of(f) for f in files]
     ok = [x for x in lengths if x]
     if ok:
@@ -189,28 +214,53 @@ def inspect(task):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--task", default="press_button")
+    ap.add_argument("--task", nargs="+", default=["press_button"])
+    ap.add_argument("--list", action="store_true", help="list the hub's tasks (size, downloaded here or not) and stop")
     ap.add_argument("--inspect-only", action="store_true")
     ap.add_argument("--keep-zip", action="store_true")
     ap.add_argument("--no-report", action="store_true")
     args = ap.parse_args()
-    say(f"== {datetime.now(BJ):%F %T} press fetch: task {args.task}, out {OUT}")
+    prefix = "PRESS_FETCH" if args.task == ["press_button"] and not args.list else "RMB_FETCH"
+    say(f"== {datetime.now(BJ):%F %T} RMBench fetch: task {' '.join(args.task)}, out {OUT}")
+    failed = []
     try:
-        if not args.inspect_only:
-            if (OUT / "demo_clean" / args.task / "DOWNLOAD.json").exists():
-                say("already downloaded (DOWNLOAD.json present): not downloading again")
-            else:
-                download(args.task, pinned_revision(), args.keep_zip)
-        inspect(args.task)
-    except SystemExit as stop:
-        say(f"STOPPED: {stop}")
-        raise
+        rev = pinned_revision()
+        if args.list or args.task == ["all"]:
+            listed = hub_tasks(rev)
+            say(f"hub {REPO_ID} @ {rev[:12]}: {len(listed)} tasks with data/<task>/demo_clean.zip")
+            for t, size in listed:
+                here = (OUT / "demo_clean" / t / "DOWNLOAD.json").exists()
+                say(f"  {t:28s} {size / 1e9:6.2f} GB  {'downloaded here' if here else '-'}"
+                    f"{'  (lives in resources/RMBench/data/demo_clean)' if t in SKIP_ALL else ''}")
+            if args.list:
+                return
+            args.task = [t for t, _ in listed if t not in SKIP_ALL]
+            say(f"all -> {' '.join(args.task)}")
+        for task in args.task:
+            say(f"\n######## {task}")
+            try:
+                if not args.inspect_only:
+                    if (OUT / "demo_clean" / task / "DOWNLOAD.json").exists():
+                        say("already downloaded (DOWNLOAD.json present): not downloading again")
+                    else:
+                        download(task, rev, args.keep_zip)
+                inspect(task)
+            except SystemExit as stop:
+                say(f"STOPPED {task}: {stop}")
+                failed.append(task)
+            except Exception as err:                          # one bad task does not stop the others
+                say(f"FAILED {task}: {type(err).__name__}: {err}")
+                failed.append(task)
+        say(f"\n== {datetime.now(BJ):%F %T} done: {len(args.task) - len(failed)}/{len(args.task)} tasks ok"
+            f"{'; failed: ' + ' '.join(failed) if failed else ''}")
     finally:
         if not args.no_report:
-            rep = OUT.parent / "report" / f"PRESS_FETCH_{datetime.now(BJ):%Y%m%d_%H%M}.txt"
+            rep = OUT.parent / "report" / f"{prefix}_{datetime.now(BJ):%Y%m%d_%H%M}.txt"
             rep.parent.mkdir(parents=True, exist_ok=True)
             rep.write_text("\n".join(LINES) + "\n")
-            print(f"PRESS_FETCH: {rep}")
+            print(f"{prefix}: {rep}")
+    if failed:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
