@@ -54,6 +54,9 @@ CASES = {
     "press_n1p_m1": ("v2_press_cf", ["schedule.micro_batch=1", "memory_v2.memory.read=kv_replay"] + PERIODIC),
     "press_n1p32_m2": ("v2_press_cf", ["schedule.micro_batch=2", "memory_v2.memory.read=kv_replay"] + PERIODIC
                        + ["memory_v2.history.max_frames=32"]),
+    # plan v9 N0 (11-10): does X7's stage 2 (action expert trainable, pairs on) fit the 32 GB 5090 at micro batch 2?
+    # (as saved it is micro batch 4: 30.5-32.5 GiB on the A100)
+    "x7_m2": ("a2C_6ep", ["schedule.micro_batch=2"]),
     # plan v8 D5 (11-06): press stage 1 with the progress head (dry run: the head trains, nothing breaks)
     "press_prog_m2": ("v2_press_cf", ["schedule.micro_batch=2", "memory_v2.memory.progress_head=true",
                                       "memory_v2.objective.progress_weight=0.1"]),
