@@ -2507,7 +2507,9 @@ tasks:
   on_inconclusive: "(shell ERROR) read the job log"
 
 - id: D2-pilot-loop
-  lane: ws          # 11-07: RTX 5090 workstation (pool lanes [ws]); A100 lanes skip it
+  lane: loop        # 11-10 (Opus): back on the A100. The 5090's online path is not equivalent to the A100's (11-07: same
+                    # scene / weights / noise, its first chunk = the A100's delayed by 2 targets; S2 / S4 invalid), so no
+                    # closed loop that a verdict depends on runs there until it passes an online parity. Card unchanged.
   kind: closed_loop
   after: [D2-pilot-train, S1]
   requires_pass: [D2-pilot-train]
