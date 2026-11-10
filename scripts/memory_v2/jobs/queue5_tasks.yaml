@@ -1670,6 +1670,7 @@ tasks:
 - id: T2-official-put
   lane: remote
   kind: closed_loop
+  hold: true        # 11-11 (user): stopped, not deleted - plan v9 section 5 (T2-put: the swap half answered the question; the H200 container lost NVML); P0-par3 / LAT-* wait for it
   after: [T2-official-swap]
   requires_pass: [R-smoke, W-t2-ckpt, F8b-bank]
   hypothesis: "same as T2-official-swap on put_back (reference: X9-put scenes 1-30 on the H200 + F3-put 31-100 synced from the A100)"
@@ -2333,6 +2334,7 @@ tasks:
 - id: P0-par3
   lane: remote
   kind: closed_loop
+  hold: true        # 11-11 (user): stopped, not deleted - plan v9 section 5 (T2-put: the swap half answered the question; the H200 container lost NVML); P0-par3 / LAT-* wait for it
   after: [T2-official-put]
   need_mib: 130000
   hypothesis: "plan v7 P0 acceptance: 3 closed-loop copies on one H200 (parallel: 3) give >= 2.5x the single-process episode throughput, and the first decision of every episode equals the single-process X7 run on the same scene (max |action difference| <= 1e-2). X7, put_back official scenes 1-12, memory on, execute 8; reference = the H200 single-process X7 episodes in official_pilot"
@@ -2394,6 +2396,7 @@ tasks:
 - id: LAT-x7
   lane: remote
   kind: shell
+  hold: true        # 11-11 (user): stopped, not deleted - plan v9 section 5 (T2-put: the swap half answered the question; the H200 container lost NVML); P0-par3 / LAT-* wait for it
   after: [P0-par3]
   need_mib: 40000
   timeout_h: 2
@@ -2409,6 +2412,7 @@ tasks:
 - id: LAT-n1
   lane: remote
   kind: shell
+  hold: true        # 11-11 (user): stopped, not deleted - plan v9 section 5 (T2-put: the swap half answered the question; the H200 container lost NVML); P0-par3 / LAT-* wait for it
   after: [LAT-x7]
   need_mib: 50000
   timeout_h: 2
@@ -2713,3 +2717,211 @@ tasks:
       then: "four steps keep the ten-step progress level but the gain over B0 shrinks below 60 %: memory gain is fragile under few-step decoding (report with S1 / S2)"
   on_pass: "four-step fallback stands at X7: the latency table reports 1 / 2 / 4 / 10 steps (S1, S2, S4, official; LAT-* for the time)"
   on_fail: "see failure_explanations"
+
+# ======================================================================================================================
+# 11-11 (Opus, user OK 00:48; plan v10 preparation, direction-independent): on the A100 (any free GPU) the A100 half of
+# the 5090 first-render diagnosis, then X7 trained 6 more epochs (is training volume still a lever on the frozen-video
+# stack?) and its closed loop; on the 5090 GPU 1 a planning-parity check, then the official seed-42 scene banks of the
+# other seven RMBench tasks. The H200's T2-official-put / P0-par3 / LAT-x7 / LAT-n1 are on hold (user: stopped, kept).
+
+- id: FR-a100
+  lane: extra
+  kind: shell
+  need_mib: 38000
+  timeout_h: 1
+  hypothesis: "descriptive (5090 online diagnosis, script of 11-08, never run): on an EMPTY A100 GPU, X7 renders frame 0 of official put_back seed 4300030, the request is dumped, replayed and relayed to the private HF repo for the 5090 side (firstrender_5090.sh). It only locates the 5090's 2-target delay (rendering vs numerics); EQ5090 (10-step closed loop on the 5090) decides whether the 5090 side is still needed"
+  command: "GPU={GPU} bash /workspace/FastWAM-memory2/scripts/memory_v2/migrate/firstrender_a100.sh"
+  pass_if: "m['rc'] == 0"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "read report/FIRSTRENDER_A100_*.txt: the GPU was not empty (the script refuses a shared GPU and the pool retries), the dump failed, or the relay upload failed (no HF token in the container: the dump under closed_loop/check_a100 is still usable)"
+  on_pass: "send report/FIRSTRENDER_A100_*.txt"
+
+- id: X7-12ep
+  lane: train
+  kind: train
+  need_mib: 34000
+  run: x7_cont12
+  reference_run: a2C_6ep
+  hypothesis: "plan v10 preparation (pre-registered 11-11 00:50; user question: is the gap training volume or design?): X7 trained 6 MORE epochs with its own recipe (same data and pairs, ActionDiT lr 1e-5, memory lr 2e-5, micro batch 4), started from X7's memory_v2 AND ActionDiT weights (init_memory + init_action = a2C_6ep update_004020), fresh optimizer and schedule; epoch checkpoints update_001340 / 002680 / 004020 = 8 / 10 / 12 epochs in total. Training check only: the run completes without a guard trip and its update-0 offline error equals X7's final offline error within 2 % (the start really is X7)"
+  sets:
+    - optim.lr_action=1e-5
+    - optim.lr_memory=2e-5
+    - init_memory={O}/a2C_6ep/checkpoints/update_004020.pt
+    - init_action={O}/a2C_6ep/checkpoints/update_004020.pt
+    - schedule.epochs=6
+    - schedule.micro_batch=4
+    - schedule.eval_every=335
+    - schedule.keep_last=2
+    - schedule.save_every=200
+    - guard.loss_factor=2.5
+    - guard.start_update=120
+    - pairs.file={O}/pairs/pairs_v1.json
+    - pairs.weight=0.5
+    - pairs.per_update=8
+    - pairs.max_visual_distance=0.00011537869913136323
+  inconclusive_if: "not m.get('eval_first') or not r.get('eval_last') or 'on/arm_rmse_rad' not in m['eval_first']"
+  pass_if: "m.get('complete') and not m.get('guard') and abs(m['eval_first']['on/arm_rmse_rad'] - r['eval_last']['on/arm_rmse_rad']) <= 0.02 * r['eval_last']['on/arm_rmse_rad']"
+  failure_explanations:
+    - if: "m.get('eval_first') and r.get('eval_last') and abs(m['eval_first']['on/arm_rmse_rad'] - r['eval_last']['on/arm_rmse_rad']) > 0.02 * r['eval_last']['on/arm_rmse_rad']"
+      then: "the update-0 model is not X7 (init_action / init_memory not applied, or another eval set): the closed loop would not measure 'X7 + 6 epochs'; read the [init] lines of x7_cont12/stdout.log"
+    - if: "m.get('guard')"
+      then: "the guard stopped the run: see GUARD.json (a fresh warm-up on a converged model can raise the FM loss briefly)"
+    - if: "m.get('config_diff') and any(v[1] is not None and not k.startswith(('name', 'output', 'init_memory', 'init_action')) for k, v in m['config_diff'].items())"
+      then: "the config differs from X7 beyond name / output / init_memory / init_action (see config_diff): not X7's recipe"
+  on_pass: "X7-12ep-loop evaluates update_004020 (12 epochs) on the official put / swap scenes 1-50"
+  on_fail: "see failure_explanations; X7-12ep-loop is skipped"
+
+- id: X7-12ep-loop
+  lane: loop
+  kind: closed_loop
+  after: [X7-12ep]
+  requires_pass: [X7-12ep]
+  need_mib: 30000
+  hypothesis: "plan v10 preparation (pre-registered 11-11 00:50, before any training): X7 + 6 epochs (12 in total) vs X7 (6 epochs), memory on, execute 8, 10 Euler steps, official put_back scenes 1-50 and swap scenes 1-50, paired on the same scenes (references: X7's official episodes as in S1). PASS = training volume is still a strong lever on the frozen-video stack: pooled progress delta >= +0.08 and its 95 % CI lower bound > 0. Plateau = delta <= +0.02. In between: evaluate the 8 / 10-epoch checkpoints on the same scenes before reading the curve. The B0 comparison is reported, not judged"
+  checkpoint: x7_cont12/checkpoints/update_004020.pt
+  label: x7c12_exec8
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block, closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [put_back_block, swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50"]
+  output: closed_loop/x7c12
+  min_episodes: 80
+  compare:
+    x7:
+      mode: "on"
+      ref_mode: "on"
+      put_back_block: {folders: [closed_loop/h200/official_pilot, closed_loop/official/put_x7_s0, closed_loop/official/put_x7_s1], label: a2C6_e6}
+      swap_blocks: {folders: [closed_loop/official/swap8_x7_s0, closed_loop/official/swap8_x7_s1, closed_loop/official/swap8_x7_s2], label: a2C6_e6_exec8}
+    b0:
+      mode: "on"
+      ref_mode: "null"
+      put_back_block: {folders: [closed_loop/h200/official/put8_b0_s0, closed_loop/h200/official/put8_b0_s1], label: a2B0_e6_exec8}
+      swap_blocks: {folders: [closed_loop/official/swap8_b0_s0, closed_loop/official/swap8_b0_s1, closed_loop/official/swap8_b0_s2], label: a2B0_e6_exec8}
+  inconclusive_if: "m.get('compare', {}).get('x7', {}).get('pooled', {}).get('n', 0) < 80"
+  pass_if: "m['compare']['x7']['pooled']['delta'] >= 0.08 and m['compare']['x7']['pooled']['ci'][0] > 0"
+  failure_explanations:
+    - if: "m['compare']['x7']['pooled']['delta'] <= 0.02"
+      then: "plateau: 6 more epochs on the frozen-video stack do not move the closed loop; training volume on this stack does not close the gap to MemoryWAM (design: frozen video / action-side read, or the C+256 start) -> the route to near-SOTA goes through the MemoryWAM base or full fine-tuning"
+    - if: "m['compare']['x7']['pooled']['delta'] > 0.02 and (m['compare']['x7']['pooled']['delta'] < 0.08 or m['compare']['x7']['pooled']['ci'][0] <= 0)"
+      then: "between: evaluate x7_cont12 update_001340 / update_002680 (8 / 10 epochs) on the same scenes before reading the curve"
+  on_pass: "training volume is still a strong lever on the cheap stack: plan v10 weighs scaling it (5090, if stage 2 fits) against renting"
+  on_fail: "see failure_explanations"
+
+- id: BANK-check
+  lane: ws
+  kind: shell
+  need_mib: 8000
+  timeout_h: 3
+  hypothesis: "planning parity (11-11): official-rule planning of put_back from seed 42 on the 5090 reproduces the first 20 scenes of the A100 bank closed_loop/scenes_seed42_n100_put_back_block (same seeds, ordinals, instructions). Only then are the other tasks' official banks planned on the 5090"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=put_back_block; B=$C/scenes_seed42_n20_${t}_5090; cd /workspace/FastWAM-memory2; for i in $(seq 1 5); do $P $S complete $B $t 20 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 20 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 20 && $P $S check-prefix $C/scenes_seed42_n100_$t $B $t"
+  pass_if: "m['rc'] == 0"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "planning failed or PREFIX CHECK FAILED (read the job log): expert feasibility differs on the 5090, so official banks must be planned on the A100 / H200 (move the BANK-* cards to lane loop)"
+  on_pass: "the 5090 plans official banks like the A100: the BANK-* cards follow"
+
+- id: BANK-observe_and_pickup
+  lane: ws
+  kind: shell
+  after: [BANK-check]
+  requires_pass: [BANK-check]
+  need_mib: 8000
+  timeout_h: 6
+  hypothesis: "official protocol scene bank (11-11, direction-independent): the first 100 expert-feasible seeds of observe_and_pickup from seed 42 (official eval_policy rule; a seed whose expert demo raises is skipped as the official evaluation does), planned on the 5090 after BANK-check showed that 5090 planning reproduces the A100 put_back bank; written to closed_loop/scenes_seed42_n100_observe_and_pickup"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=observe_and_pickup; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 15); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
+  pass_if: "m['rc'] == 0"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "no complete bank (a shell task only records rc): read the job log and closed_loop/scenes_seed42_n100_observe_and_pickup/observe_and_pickup.error.json - missing task assets in the simulator install, a non-expert exception (left for a human), or the time limit"
+  on_pass: "observe_and_pickup: official scene bank ready for any later evaluation"
+
+- id: BANK-rearrange_blocks
+  lane: ws
+  kind: shell
+  after: [BANK-check]
+  requires_pass: [BANK-check]
+  need_mib: 8000
+  timeout_h: 8
+  hypothesis: "official protocol scene bank (11-11, direction-independent): the first 100 expert-feasible seeds of rearrange_blocks from seed 42 (official eval_policy rule; a seed whose expert demo raises is skipped as the official evaluation does), planned on the 5090 after BANK-check showed that 5090 planning reproduces the A100 put_back bank; written to closed_loop/scenes_seed42_n100_rearrange_blocks"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=rearrange_blocks; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 15); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
+  pass_if: "m['rc'] == 0"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "no complete bank (a shell task only records rc): read the job log and closed_loop/scenes_seed42_n100_rearrange_blocks/rearrange_blocks.error.json - missing task assets in the simulator install, a non-expert exception (left for a human), or the time limit"
+  on_pass: "rearrange_blocks: official scene bank ready for any later evaluation"
+
+- id: BANK-swap_T
+  lane: ws
+  kind: shell
+  after: [BANK-check]
+  requires_pass: [BANK-check]
+  need_mib: 8000
+  timeout_h: 8
+  hypothesis: "official protocol scene bank (11-11, direction-independent): the first 100 expert-feasible seeds of swap_T from seed 42 (official eval_policy rule; a seed whose expert demo raises is skipped as the official evaluation does), planned on the 5090 after BANK-check showed that 5090 planning reproduces the A100 put_back bank; written to closed_loop/scenes_seed42_n100_swap_T"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=swap_T; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 15); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
+  pass_if: "m['rc'] == 0"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "no complete bank (a shell task only records rc): read the job log and closed_loop/scenes_seed42_n100_swap_T/swap_T.error.json - missing task assets in the simulator install, a non-expert exception (left for a human), or the time limit"
+  on_pass: "swap_T: official scene bank ready for any later evaluation"
+
+- id: BANK-battery_try
+  lane: ws
+  kind: shell
+  after: [BANK-check]
+  requires_pass: [BANK-check]
+  need_mib: 8000
+  timeout_h: 10
+  hypothesis: "official protocol scene bank (11-11, direction-independent): the first 100 expert-feasible seeds of battery_try from seed 42 (official eval_policy rule; a seed whose expert demo raises is skipped as the official evaluation does), planned on the 5090 after BANK-check showed that 5090 planning reproduces the A100 put_back bank; written to closed_loop/scenes_seed42_n100_battery_try"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=battery_try; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 15); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
+  pass_if: "m['rc'] == 0"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "no complete bank (a shell task only records rc): read the job log and closed_loop/scenes_seed42_n100_battery_try/battery_try.error.json - missing task assets in the simulator install, a non-expert exception (left for a human), or the time limit"
+  on_pass: "battery_try: official scene bank ready for any later evaluation"
+
+- id: BANK-cover_blocks
+  lane: ws
+  kind: shell
+  after: [BANK-check]
+  requires_pass: [BANK-check]
+  need_mib: 8000
+  timeout_h: 12
+  hypothesis: "official protocol scene bank (11-11, direction-independent): the first 100 expert-feasible seeds of cover_blocks from seed 42 (official eval_policy rule; a seed whose expert demo raises is skipped as the official evaluation does), planned on the 5090 after BANK-check showed that 5090 planning reproduces the A100 put_back bank; written to closed_loop/scenes_seed42_n100_cover_blocks"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=cover_blocks; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 15); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
+  pass_if: "m['rc'] == 0"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "no complete bank (a shell task only records rc): read the job log and closed_loop/scenes_seed42_n100_cover_blocks/cover_blocks.error.json - missing task assets in the simulator install, a non-expert exception (left for a human), or the time limit"
+  on_pass: "cover_blocks: official scene bank ready for any later evaluation"
+
+- id: BANK-press_button
+  lane: ws
+  kind: shell
+  after: [BANK-check]
+  requires_pass: [BANK-check]
+  need_mib: 8000
+  timeout_h: 12
+  hypothesis: "official protocol scene bank (11-11, direction-independent): the first 100 expert-feasible seeds of press_button from seed 42 (official eval_policy rule; a seed whose expert demo raises is skipped as the official evaluation does), planned on the 5090 after BANK-check showed that 5090 planning reproduces the A100 put_back bank; written to closed_loop/scenes_seed42_n100_press_button"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=press_button; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 15); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
+  pass_if: "m['rc'] == 0"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "no complete bank (a shell task only records rc): read the job log and closed_loop/scenes_seed42_n100_press_button/press_button.error.json - missing task assets in the simulator install, a non-expert exception (left for a human), or the time limit"
+  on_pass: "press_button: official scene bank ready for any later evaluation"
+
+- id: BANK-blocks_ranking_try
+  lane: ws
+  kind: shell
+  after: [BANK-check]
+  requires_pass: [BANK-check]
+  need_mib: 8000
+  timeout_h: 20
+  hypothesis: "official protocol scene bank (11-11, direction-independent): the first 100 expert-feasible seeds of blocks_ranking_try from seed 42 (official eval_policy rule; a seed whose expert demo raises is skipped as the official evaluation does), planned on the 5090 after BANK-check showed that 5090 planning reproduces the A100 put_back bank; written to closed_loop/scenes_seed42_n100_blocks_ranking_try"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=blocks_ranking_try; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 15); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
+  pass_if: "m['rc'] == 0"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "no complete bank (a shell task only records rc): read the job log and closed_loop/scenes_seed42_n100_blocks_ranking_try/blocks_ranking_try.error.json - missing task assets in the simulator install, a non-expert exception (left for a human), or the time limit"
+  on_pass: "blocks_ranking_try: official scene bank ready for any later evaluation"

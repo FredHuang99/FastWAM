@@ -221,3 +221,39 @@ def test_shared_encoding_reproduces_conditions_for_inject_and_kv_replay():
         a = m.velocity(x, t, m.conditions(batch, drop=drop), "on")
         b = m.velocity(x, t, m.conditions(batch, drop=drop, shared=shared), "on")
         assert torch.equal(a, b)
+
+
+def test_init_action_continues_a_finished_run_exactly(tmp_path):
+    """11-11 (X7-12ep): init_memory + init_action from one checkpoint restart training from that model exactly:
+    parameters, fp32 masters and the sampled chunk equal the trained model's; config round trip; refused with a
+    frozen ActionDiT or together with a distillation teacher."""
+    ckpt, trained = _teacher_checkpoint(tmp_path)
+    state = torch.load(ckpt, map_location="cpu", weights_only=False)
+    cfg = _cfg_action(tmp_path / "c")
+    cfg.init_memory = cfg.init_action = str(ckpt)
+    cfg.schedule.epochs = 1
+    cfg.schedule.eval_every = 0
+    cfg.schedule.probe_every = 0
+    logs = []
+    cont = Trainer(TrainableTinyBackend(torch.bfloat16), cfg, tmp_path / "c" / "run", log=logs.append)
+    cont.run(dry_run=1)                                     # init (memory, parity, action), then one update
+    assert any("[init] ActionDiT weights from" in m for m in logs)
+    # a fresh copy initialised the same way, without the update, equals the trained model
+    again = Trainer(TrainableTinyBackend(torch.bfloat16), cfg, tmp_path / "c2" / "run", log=lambda m: None)
+    again.model.memory.load_state_dict(state["memory"], strict=True)
+    assert again.load_action(str(ckpt)) == len(state["action"])
+    for key, value in state["action"].items():
+        if key in again.master_names:
+            assert torch.equal(again.master_names[key].cpu(), value.float()), key
+    batch = again.backend.batch(again.backend.probe_rows())
+    noise = torch.randn(batch["actions"].shape, generator=torch.Generator().manual_seed(3))
+    trained.model.eval()
+    again.model.eval()
+    ref, _ = trained.model.sample(trained.model.conditions(batch), noise, GUIDE)
+    out, _ = again.model.sample(again.model.conditions(batch), noise, GUIDE)
+    assert torch.equal(out, ref)
+    assert TrainConfig.from_dict(cfg.to_dict()).init_action == str(ckpt)
+    assert "init_action" not in TrainConfig().to_dict()
+    frozen = _cfg_action(tmp_path / "f", lr_action=0.0)
+    with pytest.raises(ValueError, match="trainable ActionDiT"):
+        Trainer(TrainableTinyBackend(torch.bfloat16), frozen, tmp_path / "f" / "run", log=lambda m: None).load_action(str(ckpt))

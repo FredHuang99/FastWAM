@@ -142,6 +142,8 @@ class TrainConfig:
     seed: int = 17
     init_checkpoint: str = "source"
     init_memory: str = ""            # memory-first stage 2: memory_v2 weights loaded from this checkpoint (.pt) at start
+    init_action: str = ""            # 11-11: continue a finished run: its ActionDiT weights (state["action"]) are loaded
+                                     # after the start-parity check (fresh optimizer and schedule); needs lr_action > 0
     base_memory: str = "s1"          # s1 = frozen memory_s1 stays in the base (C+256 needs it); none = gate-0 diagnostic
     s1_period: int = 8               # memory_s1 history period T (dense evaluation/online use 8)
     features: str = "outputs/memory_v2/features_dense_v1"
@@ -158,7 +160,8 @@ class TrainConfig:
     @classmethod
     def from_dict(cls, value: dict) -> "TrainConfig":
         value = dict(value or {})
-        known = {"name", "output", "seed", "init_checkpoint", "init_memory", "base_memory", "s1_period", "features",
+        known = {"name", "output", "seed", "init_checkpoint", "init_memory", "init_action", "base_memory", "s1_period",
+                 "features",
                  "feature_batch", "dense", "memory_v2", "optim", "schedule", "eval", "guard", "pairs", "distill"}
         unknown = set(value) - known
         if unknown:
@@ -179,8 +182,8 @@ class TrainConfig:
                     data[name] = int(float(data[name]))
             return kind(**data)
 
-        cfg = cls(**{k: value[k] for k in ("name", "output", "seed", "init_checkpoint", "init_memory", "base_memory",
-                                          "s1_period", "features", "feature_batch", "dense")
+        cfg = cls(**{k: value[k] for k in ("name", "output", "seed", "init_checkpoint", "init_memory", "init_action",
+                                          "base_memory", "s1_period", "features", "feature_batch", "dense")
                      if k in value})
         cfg.v2 = V2Config.from_dict(value.get("memory_v2"))
         cfg.optim = section(OptimConfig, "optim")
@@ -201,6 +204,7 @@ class TrainConfig:
     def to_dict(self) -> dict:
         return {"name": self.name, "output": self.output, "seed": self.seed, "init_checkpoint": self.init_checkpoint,
                 **({"init_memory": self.init_memory} if self.init_memory else {}),
+                **({"init_action": self.init_action} if self.init_action else {}),
                 "base_memory": self.base_memory, "s1_period": self.s1_period,
                 "features": self.features, "feature_batch": self.feature_batch, "dense": dict(self.dense),
                 "memory_v2": self.v2.to_dict(), "optim": asdict(self.optim), "schedule": asdict(self.schedule),
@@ -646,6 +650,35 @@ class Trainer:
         model.train(was)
         return teacher, student.float()
 
+    def load_action(self, path: str) -> int:
+        """init_action (11-11): the ActionDiT weights of a memory_v2 checkpoint (state["action"], exact fp32 values)
+        replace the start model's, parameters and fp32 masters alike, so a finished run can be trained further with a
+        fresh optimizer and schedule (the memory_v2 weights come from init_memory). Called after the start-parity check,
+        which is about the C+256 start model."""
+        from .distill import action_module_parameters
+        if self.teacher is not None:
+            raise ValueError("init_action cannot be combined with distill.teacher (the student already starts as the teacher).")
+        if self.cfg.optim.lr_action <= 0:
+            raise ValueError("init_action needs a trainable ActionDiT (optim.lr_action > 0).")
+        state = torch.load(path, map_location="cpu", weights_only=False)
+        action = state.get("action")
+        if action is None:
+            raise ValueError(f"{path} holds no ActionDiT weights (a stage-1 checkpoint?).")
+        params = action_module_parameters(self.model)
+        if set(action) != set(params):
+            raise ValueError(f"ActionDiT keys of {path} differ from the model's ({len(action)} vs {len(params)}).")
+        with torch.no_grad():
+            for key, value in action.items():
+                p = params[key]
+                p.copy_(value.to(device=p.device, dtype=p.dtype))
+                master = self.master_names.get(key)
+                if master is not None:
+                    master.copy_(value.to(device=master.device, dtype=master.dtype))
+        self.log(f"[init] ActionDiT weights from {path} (update {state.get('update')}, {len(action)} tensors): "
+                 "continued training, fresh optimizer and schedule")
+        del state, action
+        return len(params)
+
     def distill_start(self, dry_run: int = 0) -> dict:
         """Fresh run: student <- teacher (exact checkpoint values), then checks written to DISTILL_CHECK.json; the run
         aborts on failure: (1) the student reproduces the teacher's rollout (up to the teacher's bf16 storage);
@@ -1025,6 +1058,8 @@ class Trainer:
                 write_json(out / "INIT_PARITY.json", parity)
             if not parity["exact"]:
                 raise ValueError(f"Start model not reproduced: {parity}")
+            if cfg.init_action:                       # parity above is the C+256 start; now the run's own ActionDiT
+                self.load_action(cfg.init_action)
             if self.teacher is not None:              # parity above is the C+256 start; now student <- teacher
                 self.distill_start(dry_run)
             if not dry_run and cfg.schedule.eval_every > 0:

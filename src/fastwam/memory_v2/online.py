@@ -36,7 +36,10 @@ from pathlib import Path
 from typing import Dict, List, Optional, Sequence
 
 LIMITS = {"put_back_block": 500, "swap_blocks": 1000,        # official target caps (Codex's frozen protocol)
-          "press_button": 1500}                              # RMBench task_config/_eval_step_limit.yml (11-04)
+          "press_button": 1500,                              # RMBench task_config/_eval_step_limit.yml (11-04)
+          # 11-11: the other RMBench tasks, same file (official scene banks first; stage parsing comes later)
+          "observe_and_pickup": 250, "rearrange_blocks": 700, "cover_blocks": 1500, "swap_T": 600,
+          "battery_try": 1000, "blocks_ranking_try": 3500, "place_block_mat": 1500}
 DEFAULT_TASKS = ("put_back_block", "swap_blocks")            # without --tasks: the two-task protocol, as before
 EXECUTE = 24
 HORIZON = 32
