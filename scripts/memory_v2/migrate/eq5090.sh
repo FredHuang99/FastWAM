@@ -21,7 +21,7 @@
 #                      clearly different: s2 < 24 or success <= 3
 #   anything else: undecided until the paired comparison.
 # Own log: /workspace/FastWAM-memory2/outputs/memory_v2/report/EQ5090_<time>.txt
-#   docker exec -d mwam5090 bash /workspace/FastWAM-memory2/scripts/memory_v2/migrate/eq5090.sh      (about 6-8 h)
+#   docker exec -d mwam5090 bash /workspace/FastWAM-memory2/scripts/memory_v2/migrate/eq5090.sh      (about 6-10 h)
 set -u
 R=/workspace/FastWAM-memory2
 O=$R/outputs/memory_v2
@@ -47,13 +47,18 @@ echo "profile exit code $?"
 grep -E '^\[profile\]|s / update|peak GPU memory|FAILED|^PROFILE:' $O/report/eq5090_profile_run.log | tail -n 30
 grep -E 'OutOfMemory|out of memory|No such file|FileNotFoundError|Error:' $O/report/eq5090_profile_run.log | sort | uniq -c | tail -n 8
 
+# The policy (about 24 GiB) and its simulator processes (about 7 GiB) fill the 32 GB card: S1 lost an episode here to an
+# 80 MiB allocation with 0.5 GiB reserved but unallocated. Expandable segments avoid that fragmentation (no effect on
+# the numbers); an episode that still fails is retried once by the second pass (finished episodes are skipped).
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 run_bank() {   # task, scenes folder, first N scenes
   step "2 closed loop $1: X7 on, 10 steps, execute 8, official scenes 1-$3"
   [ -d "$2" ] || [ -f "$2" ] || { echo "scene bank $2 missing: skipped"; return; }
-  $PY -m fastwam.memory_v2.online run --checkpoint $CK --label x7_eq5090 --scenes "$2" --tasks "$1" --limit "$3" \
-    --execute 8 --output $O/closed_loop/eq5090 >> $O/closed_loop/eq5090_run.log 2>&1
-  echo "run exit code $?"
-  grep -cE "^\[closed-loop\].* done .* $1 " $O/closed_loop/eq5090_run.log | sed "s/^/episodes logged as done ($1): /"
+  for pass in 1 2; do
+    $PY -m fastwam.memory_v2.online run --checkpoint $CK --label x7_eq5090 --scenes "$2" --tasks "$1" --limit "$3" \
+      --execute 8 --output $O/closed_loop/eq5090 >> $O/closed_loop/eq5090_run.log 2>&1
+    echo "pass $pass exit code $?; finished episodes: $(ls $O/closed_loop/eq5090/x7_eq5090/on/$1/seed_*/result.json 2>/dev/null | grep -cE 'seed_[0-9]+/result.json')"
+  done
   grep -E "ERROR" $O/closed_loop/eq5090_run.log | tail -n 3
 }
 run_bank put_back_block $O/closed_loop/scenes_seed42_n100_put_back_block 60
