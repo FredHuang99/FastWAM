@@ -9,6 +9,7 @@ increasing seeds). Plain JSON, no project imports.
     official_scenes.py complete <dir> <task> <n>                       exit 0 iff the planner marked the bank complete
                                                                        with >= n scenes (a partial bank resumes on re-plan)
     official_scenes.py skip-expert-error <dir> <task>                  the official rule for a seed whose EXPERT raised
+        or whose scene setup raised UnStableError (11-11)
         (eval_policy.py: expert_check, `except Exception: now_seed += 1`): our planner stops on any exception and keeps
         the seed (<task>.error.json); when the exception came from the expert demo (play_once), mark that seed rejected
         and advance next_seed, so a re-plan continues like the official evaluation. Exit 0 if a seed was skipped, 2 if
@@ -75,13 +76,19 @@ def skip_expert_error(args):
         print(f"{args.task}: error seed {seed} != next_seed {saved.get('next_seed')}: already handled, nothing to skip")
         err_path.rename(err_path.with_name(f"{args.task}.error.{seed}.handled.json"))
         sys.exit(2)
-    if "in play_once" not in text:
+    # 11-11: the official expert_check also skips a seed whose scene SETUP raises UnStableError ("Objects is unstable
+    # in seed(...)", envs/_base_task.py); the planner reports it from setup_demo, outside play_once. Other setup
+    # exceptions (renderer, CUDA, missing assets) stay for a human: skipping them would hide a broken install.
+    unstable = "UnStableError" in text
+    if "in play_once" not in text and not unstable:
         print(f"{args.task}: seed {seed} failed outside the expert demo (not skipped):\n{text[-800:]}")
         sys.exit(1)
     last = [x for x in text.strip().splitlines() if x.strip()][-1]
+    rule = ("official eval_policy.py expert_check: UnStableError -> next seed" if unstable and "in play_once" not in text
+            else "official eval_policy.py expert_check: exception -> next seed")
     saved.setdefault("candidates", []).append({"seed": seed, "accepted": False, "expert_exception": last[:300],
-                                              "rule": "official eval_policy.py expert_check: exception -> next seed"})
-    saved.setdefault("expert_exception_seeds", []).append(seed)
+                                              "rule": rule})
+    saved.setdefault("unstable_seeds" if unstable else "expert_exception_seeds", []).append(seed)
     saved["next_seed"] = seed + 1
     tmp = path.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(saved, indent=1))

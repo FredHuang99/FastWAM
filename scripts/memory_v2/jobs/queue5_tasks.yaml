@@ -2829,7 +2829,7 @@ tasks:
   need_mib: 8000
   timeout_h: 6
   hypothesis: "official protocol scene bank (11-11, direction-independent): the first 100 expert-feasible seeds of observe_and_pickup from seed 42 (official eval_policy rule; a seed whose expert demo raises is skipped as the official evaluation does), planned on the 5090 after BANK-check showed that 5090 planning reproduces the A100 put_back bank; written to closed_loop/scenes_seed42_n100_observe_and_pickup"
-  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=observe_and_pickup; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 15); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=observe_and_pickup; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 60); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
   pass_if: "m['rc'] == 0"
   failure_explanations:
     - if: "m['rc'] != 0"
@@ -2844,7 +2844,7 @@ tasks:
   need_mib: 8000
   timeout_h: 8
   hypothesis: "official protocol scene bank (11-11, direction-independent): the first 100 expert-feasible seeds of rearrange_blocks from seed 42 (official eval_policy rule; a seed whose expert demo raises is skipped as the official evaluation does), planned on the 5090 after BANK-check showed that 5090 planning reproduces the A100 put_back bank; written to closed_loop/scenes_seed42_n100_rearrange_blocks"
-  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=rearrange_blocks; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 15); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=rearrange_blocks; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 60); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
   pass_if: "m['rc'] == 0"
   failure_explanations:
     - if: "m['rc'] != 0"
@@ -2859,7 +2859,7 @@ tasks:
   need_mib: 8000
   timeout_h: 8
   hypothesis: "official protocol scene bank (11-11, direction-independent): the first 100 expert-feasible seeds of swap_T from seed 42 (official eval_policy rule; a seed whose expert demo raises is skipped as the official evaluation does), planned on the 5090 after BANK-check showed that 5090 planning reproduces the A100 put_back bank; written to closed_loop/scenes_seed42_n100_swap_T"
-  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=swap_T; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 15); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=swap_T; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 60); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
   pass_if: "m['rc'] == 0"
   failure_explanations:
     - if: "m['rc'] != 0"
@@ -2874,7 +2874,7 @@ tasks:
   need_mib: 8000
   timeout_h: 10
   hypothesis: "official protocol scene bank (11-11, direction-independent): the first 100 expert-feasible seeds of battery_try from seed 42 (official eval_policy rule; a seed whose expert demo raises is skipped as the official evaluation does), planned on the 5090 after BANK-check showed that 5090 planning reproduces the A100 put_back bank; written to closed_loop/scenes_seed42_n100_battery_try"
-  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=battery_try; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 15); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=battery_try; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 60); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
   pass_if: "m['rc'] == 0"
   failure_explanations:
     - if: "m['rc'] != 0"
@@ -2889,7 +2889,7 @@ tasks:
   need_mib: 8000
   timeout_h: 12
   hypothesis: "official protocol scene bank (11-11, direction-independent): the first 100 expert-feasible seeds of cover_blocks from seed 42 (official eval_policy rule; a seed whose expert demo raises is skipped as the official evaluation does), planned on the 5090 after BANK-check showed that 5090 planning reproduces the A100 put_back bank; written to closed_loop/scenes_seed42_n100_cover_blocks"
-  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=cover_blocks; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 15); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=cover_blocks; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 60); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
   pass_if: "m['rc'] == 0"
   failure_explanations:
     - if: "m['rc'] != 0"
@@ -2904,7 +2904,7 @@ tasks:
   need_mib: 8000
   timeout_h: 12
   hypothesis: "official protocol scene bank (11-11, direction-independent): the first 100 expert-feasible seeds of press_button from seed 42 (official eval_policy rule; a seed whose expert demo raises is skipped as the official evaluation does), planned on the 5090 after BANK-check showed that 5090 planning reproduces the A100 put_back bank; written to closed_loop/scenes_seed42_n100_press_button"
-  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=press_button; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 15); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=press_button; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 60); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
   pass_if: "m['rc'] == 0"
   failure_explanations:
     - if: "m['rc'] != 0"
@@ -2919,7 +2919,7 @@ tasks:
   need_mib: 8000
   timeout_h: 20
   hypothesis: "official protocol scene bank (11-11, direction-independent): the first 100 expert-feasible seeds of blocks_ranking_try from seed 42 (official eval_policy rule; a seed whose expert demo raises is skipped as the official evaluation does), planned on the 5090 after BANK-check showed that 5090 planning reproduces the A100 put_back bank; written to closed_loop/scenes_seed42_n100_blocks_ranking_try"
-  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=blocks_ranking_try; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 15); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=blocks_ranking_try; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 60); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
   pass_if: "m['rc'] == 0"
   failure_explanations:
     - if: "m['rc'] != 0"
