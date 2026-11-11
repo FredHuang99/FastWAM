@@ -422,6 +422,25 @@ def simulator_config(dense_cfg: dict, root: Path, out: Path, args) -> dict:
 
 _WARNED: set = set()
 DRIVER_ICD = "/etc/vulkan/icd.d/nvidia_icd.json"   # mounted by the NVIDIA container toolkit (graphics)
+# 11-11 (5090): SAPIEN 3.0.0b1 bundles Open Image Denoise 2.0.1, which has no CUDA kernels for RTX 50 GPUs, so every
+# RMBench render there was the undenoised 32-sample path-tracing image ("OIDN Error: unsupported device type: CUDA";
+# 3.86 levels from the A100, X7 closed loop collapsed: put lifted 33/60). Intel's OIDN 2.3.3 (first release with
+# Blackwell support), unpacked to OIDN_FIX by migrate/oidn_fix.sh and loaded first in the SIMULATOR process only,
+# brings the frame-0 render to 0.49 levels of the A100 (RENDER_CHECK_20261111_1409). Applied wherever OIDN_FIX exists
+# (only the 5090 has it); MWAM_OIDN=off disables it.
+OIDN_FIX = "/opt/oidn-2.3.3/lib"
+
+
+def apply_denoiser_fix(env: dict) -> dict:
+    lib = Path(OIDN_FIX)
+    if os.environ.get("MWAM_OIDN", "").lower() == "off" or not (lib / "libOpenImageDenoise.so.2").exists():
+        return env
+    env["LD_PRELOAD"] = ":".join(x for x in (str(lib / "libOpenImageDenoise.so.2"), env.get("LD_PRELOAD", "")) if x)
+    env["LD_LIBRARY_PATH"] = ":".join(x for x in (str(lib), env.get("LD_LIBRARY_PATH", "")) if x)
+    if "oidn" not in _WARNED:
+        _WARNED.add("oidn")
+        print(f"[closed-loop] simulator loads Open Image Denoise from {lib} (5090 denoiser fix, 11-11)", flush=True)
+    return env
 
 
 def gpu_uuid() -> str:
@@ -488,6 +507,7 @@ def run_episode(policy: Policy, scene: dict, mode: str, label: str, out: Path, a
         env["VK_ICD_FILENAMES"] = args.vk_icd
     elif not env.get("VK_ICD_FILENAMES") and os.path.exists(DRIVER_ICD):
         env["VK_ICD_FILENAMES"] = DRIVER_ICD      # 11-07 (5090): SAPIEN does not look there by itself
+    apply_denoiser_fix(env)
     child, start, next_frame, last, reset, commands = None, time.monotonic(), 0, -1, False, []
     (out / "tmp").mkdir(parents=True, exist_ok=True)
     print(f"[closed-loop] {now()} start {label}/{mode} {task} seed={scene['seed']} target_limit={target_limit} -> {directory}",
@@ -646,6 +666,7 @@ def cmd_plan(args):
         env["VK_ICD_FILENAMES"] = args.vk_icd
     elif not env.get("VK_ICD_FILENAMES") and os.path.exists(DRIVER_ICD):
         env["VK_ICD_FILENAMES"] = DRIVER_ICD      # 11-07 (5090): SAPIEN does not look there by itself
+    apply_denoiser_fix(env)
     for task in args.tasks:
         manifest = out / f"{task}.json"
         contract = out / f"{task}.contract.json"
