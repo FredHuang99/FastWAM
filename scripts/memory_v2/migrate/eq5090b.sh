@@ -13,6 +13,7 @@
 #   scenes (otherwise no verdict); a scene missing on either side is dropped from the pairing (reported)
 #   equivalent -> the 5090 runs verdict-bearing closed loops (evaluation farm); otherwise -> no verdicts on the 5090,
 #   paired table goes to the autopsy, evaluation stays on the A100 / H200
+# COMPARE_ONLY=1: steps 1 and 4 only (re-read the relayed A100 export and redo the paired table; no GPU needed).
 # GPU ${GPU:-0} only, must be empty. Own log: report/EQ5090B_<time>.txt
 #   docker exec -d mwam5090 bash /workspace/FastWAM-memory2/scripts/memory_v2/migrate/eq5090b.sh     (about 2-3 h)
 set -u
@@ -27,7 +28,7 @@ cd "$R"
 GPU=${GPU:-0}
 used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i "$GPU" | tr -d ' ')
 echo "GPU $GPU: $used MiB in use; checkout $(git -c safe.directory='*' log --oneline -1 | cut -c1-60)"
-[ "$used" -lt 2000 ] || { echo "GPU $GPU is not empty: stopping"; exit 1; }
+[ "${COMPARE_ONLY:-0}" = 1 ] || [ "$used" -lt 2000 ] || { echo "GPU $GPU is not empty: stopping"; exit 1; }
 [ -e /opt/oidn-2.3.3/lib/libOpenImageDenoise.so.2 ] || { echo "OIDN 2.3.3 missing: run migrate/oidn_fix.sh first"; exit 1; }
 export PYTHONPATH=$R/src CUDA_VISIBLE_DEVICES=$GPU PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 PY=/opt/mwam/bin/python
@@ -38,6 +39,7 @@ step "1 relay get the A100's per-scene stages"
 /opt/hf-tools/bin/python scripts/memory_v2/migrate/relay.py get --prefix diag/a100_x7_stages --out $O/closed_loop/check_from_a100 \
   || echo "relay get failed: the paired comparison will be skipped (run export_stages.py on the A100 first)"
 
+if [ "${COMPARE_ONLY:-0}" != 1 ]; then
 step "2 first decision of put_back seed 4300030"
 FIRST=$O/closed_loop/eq5090b_first
 $PY -m fastwam.memory_v2.online run --checkpoint $CK --label x7_first_oidn --scenes $O/closed_loop/scenes_seed42_n100_put_back_block \
@@ -68,6 +70,7 @@ run_bank() {   # task, first N scenes
 run_bank put_back_block 20
 run_bank swap_blocks 20
 echo "OIDN errors in the run log: $(grep -c 'OIDN Error' $O/closed_loop/eq5090b_run.log)"
+fi
 
 step "4 stage tables and the paired comparison"
 $PY scripts/memory_v2/loop_peek.py --folder closed_loop/eq5090b --label x7_eq5090b --out /dev/null
