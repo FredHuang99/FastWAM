@@ -1,0 +1,36 @@
+# plan v10 A.3 / N5, N7, N9: full fine-tuning of the released FastWAM (RoboTwin weights) on put_back_block +
+# swap_blocks, history as gated context frames. Variant per run: --set history.variant=none|ar|event|tw|clk|prop
+# (event / prop also need data.events). Single GPU (H200 143 GB); micro 8 x accumulation 8 = 64 samples / update.
+name: ar_2task
+output: /workspace/FastWAM-memory2/outputs/fullft
+seed: 17
+data:
+  roots: [/workspace/FastWAM/outputs/s1_dense_joint_h100_v1]
+  tasks: [put_back_block, swap_blocks]
+  events: []
+  val_anchors_per_task: 96
+  num_workers: 6
+history:
+  variant: ar
+  recent: [16, 32]
+optim:
+  lr: 1.0e-4
+  weight_decay: 1.0e-2
+  betas: [0.9, 0.999]
+  warmup_steps: 500
+  min_lr_ratio: 0.1
+  grad_clip: 1.0
+schedule:
+  frame_epochs: 30
+  micro_batch: 8
+  accumulation: 8
+  log_every: 10
+  eval_every: 500
+  resume_every: 1000
+  export_at_epochs: [10, 20, 30]
+model:
+  base: /workspace/FastWAM/resources/base/robotwin_uncond_3cam_384.pt
+  architecture: /workspace/FastWAM-memory2/configs/model/fastwam.yaml
+  stats: /workspace/FastWAM/resources/base/robotwin_uncond_3cam_384_dataset_stats.json
+  train_video: full
+  checkpoint_layers: true
