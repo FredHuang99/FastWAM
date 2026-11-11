@@ -43,7 +43,8 @@ FROZEN = Path("/workspace/FastWAM/scripts/memory_s1")
 BJ = timezone(timedelta(hours=8))
 CAMERAS = ("head_camera", "left_camera", "right_camera")
 VARIANTS = {"default": ("rt", 32, "oidn"), "rt32_none": ("rt", 32, "none"), "rt128_oidn": ("rt", 128, "oidn"),
-            "rt256_none": ("rt", 256, "none"), "raster": ("default", None, None)}
+            "rt256_none": ("rt", 256, "none"), "rt512_none": ("rt", 512, "none"), "rt1024_none": ("rt", 1024, "none"),
+            "raster": ("default", None, None)}
 LINES = []
 
 
@@ -129,27 +130,38 @@ def reference_images(path):
 
 
 def demo_images(task, k):
-    """Frame 0 of training demo k (hdf5) and its seed from seed.txt; None when either is missing."""
+    """Frame 0 of training demo k (hdf5) and its seed from seed.txt; (None, None) when either is missing."""
     import h5py
     root = Path.cwd() / "data/demo_clean" / task
     seeds_file = next((p for p in (root / "seed.txt", root / "aloha_agilex/seed.txt") if p.is_file()), None)
     files = sorted((root / "aloha_agilex/data").glob("*.hdf5"))
-    if seeds_file is None or k >= len(files):
+    if seeds_file is None:
+        say(f"  no seed.txt under {root}: " + ", ".join(sorted(p.name for p in root.iterdir())[:12]))
         return None, None
     seeds = [int(x) for x in seeds_file.read_text().split()]
-    if k >= len(seeds):
+    if k >= len(files) or k >= len(seeds):
         return None, None
     images = []
     with h5py.File(files[k], "r") as f:
-        for c in CAMERAS:
-            value = f[f"observation/{c}/rgb"][0]
-            if isinstance(value, (bytes, np.bytes_)) or (isinstance(value, np.ndarray) and value.ndim == 1):
-                import cv2
-                raw = np.frombuffer(bytes(value), dtype=np.uint8)
-                img = cv2.imdecode(raw, cv2.IMREAD_COLOR)
-                images.append(np.ascontiguousarray(img[:, :, ::-1]))       # BGR -> RGB
-            else:
-                images.append(np.asarray(value, dtype=np.uint8))
+        keys = next((ks for ks in ([f"observation/{c}/rgb" for c in CAMERAS],
+                                   [f"vision/{c}/colors" for c in ("cam_head", "cam_left_wrist", "cam_right_wrist")])
+                     if all(x in f for x in ks)), None)
+        if keys is None:
+            say(f"  {files[k].name}: no camera keys; top level {list(f.keys())}")
+            return None, None
+        for key in keys:
+            value = f[key][0]
+            if isinstance(value, np.ndarray) and value.dtype == np.uint8 and value.ndim == 3:
+                images.append(np.ascontiguousarray(value))
+                continue
+            import cv2
+            raw = np.frombuffer(value.tobytes() if isinstance(value, np.ndarray) else bytes(value), dtype=np.uint8)
+            img = cv2.imdecode(raw, cv2.IMREAD_COLOR)
+            if img is None:
+                say(f"  {key}: undecodable frame 0 ({type(value).__name__}, {getattr(value, 'dtype', '')})")
+                return None, None
+            images.append(np.ascontiguousarray(img[:, :, ::-1]))            # BGR -> RGB
+    say(f"  demo {k}: {files[k].name}, keys {keys[0]} ..., shapes {[x.shape for x in images]}, seed {seeds[k]}")
     return images, seeds[k]
 
 
@@ -159,7 +171,8 @@ def main():
     ap.add_argument("--seed", type=int, default=4300030)
     ap.add_argument("--ordinal", type=int, default=0, help="the scene's ordinal in the bank (setup_demo now_ep_num)")
     ap.add_argument("--reference", default=str(O / "closed_loop/check_from_a100/request_000000.pkl"))
-    ap.add_argument("--variants", nargs="+", default=list(VARIANTS), choices=list(VARIANTS))
+    ap.add_argument("--variants", nargs="+", default=["default", "rt32_none", "rt128_oidn", "rt256_none", "raster"],
+                    choices=list(VARIANTS))
     ap.add_argument("--demos", type=int, default=0, help="also compare with frame 0 of the first N training demos")
     args = ap.parse_args()
     stamp = datetime.now(BJ).strftime("%Y%m%d_%H%M")
@@ -195,6 +208,7 @@ def main():
                 results[variant] = {"vs_a100": row(variant, "A100", list(zip(first, ref))),
                                     "vs_self": row(variant, "itself", list(zip(first, second))),
                                     "setup_and_render_seconds": round(seconds, 1)}
+                say(f"|  | setup + first render {seconds:.1f} s |  |  |  |  |")
                 np.savez_compressed(pictures / f"{variant}.npz", *first)
                 if variant == "default":
                     ref_state = np.asarray(sorted(req["observations"], key=lambda r: int(r["frame_id"]))[0]["proprio"])
@@ -203,22 +217,27 @@ def main():
                 say(f"| {variant} | FAILED | {traceback.format_exc().splitlines()[-1][:120]} |  |  |  |")
         np.savez_compressed(pictures / "a100_reference.npz", *ref)
         if args.demos:
-            say("\n## (c) frame 0 of training demos: this machine's render (default settings) vs the hdf5 images")
-            say("| demo | seed | head | left | right | mean |")
+            say("\n## (c) frame 0 of training demos: this machine's render vs the hdf5 images (the training distribution)")
+            say("| render | demo seed | head | left | right | mean |")
             say("|---|---|---|---|---|---|")
-            patch_render("default")
             for k in range(args.demos):
                 try:
                     images, seed = demo_images(args.task, k)
                     if images is None:
-                        say(f"| {k} | no seed.txt / hdf5 found under data/demo_clean/{args.task} |  |  |  |  |")
                         break
-                    rendered, _ = frame0(environment, config, seed, k, False)
-                    results[f"demo{k}"] = row(f"demo {k}", str(seed), list(zip(rendered, images)))
-                    np.savez_compressed(pictures / f"demo{k}_render.npz", *rendered)
+                    for variant in ("default", "rt256_none"):
+                        patch_render(variant)
+                        rendered, _ = frame0(environment, config, seed, k, False)
+                        if [x.shape for x in rendered] != [x.shape for x in images]:
+                            import cv2
+                            images = [cv2.resize(x, (r.shape[1], r.shape[0]), interpolation=cv2.INTER_AREA)
+                                      for x, r in zip(images, rendered)]
+                            say(f"|  | hdf5 images resized to the render size {rendered[0].shape} |  |  |  |  |")
+                        results[f"demo{k}_{variant}"] = row(f"{variant} demo {k}", str(seed), list(zip(rendered, images)))
+                        np.savez_compressed(pictures / f"demo{k}_{variant}.npz", *rendered)
                     np.savez_compressed(pictures / f"demo{k}_hdf5.npz", *images)
                 except Exception:                        # noqa: BLE001
-                    say(f"| {k} | FAILED | {traceback.format_exc().splitlines()[-1][:120]} |  |  |  |")
+                    say(f"| demo {k} | FAILED | {traceback.format_exc().splitlines()[-1][:120]} |  |  |  |")
         return 0, 0, 0
 
     official.eval_policy = probe
