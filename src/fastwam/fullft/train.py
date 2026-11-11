@@ -505,31 +505,69 @@ def nanhunt(cfg: RunConfig, args) -> None:
             bad_batches.append((b, rows, bool(res_h[1]), bool(res_n[1])))
     log(f"non-finite batches: {len(bad_batches)} / {args.batches} "
         f"(with history {sum(x[2] for x in bad_batches)}, without {sum(x[3] for x in bad_batches)})")
-    culprits = []
-    for b, rows, with_h, without_h in bad_batches[:3]:
-        for j, r in enumerate(rows):
-            res = run([r], with_h)
-            info = {"batch": b, "anchor": int(r["anchor"]), "action_valid": int(r["action_valid"].sum()),
-                    "video_valid": r["video_valid"].tolist(),
-                    "hist_ids": r["hist_ids"].tolist() if "hist_ids" in r else None,
-                    "latent_absmax": float(r["video_latent"].float().abs().max()),
-                    "actions_absmax": float(r["actions"].abs().max()), "proprio_absmax": float(r["proprio"].abs().max()),
-                    "non_finite": res[1]}
-            log("single sample", json.dumps(info))
-            if res[1]:
-                culprits.append((r, with_h))
-        if len(rows) > 1 and not any(c for c in culprits):
-            log(f"batch {b}: every single sample is finite -> the failure needs the batch (pairing / padding)")
-    if culprits:
-        r, with_h = culprits[0]
-        model.checkpoint_layers = False
-        try:
-            run([r], with_h, anomaly=True)
-            log("anomaly mode: no error raised")
-        except RuntimeError as error:
-            import traceback
-            log("anomaly:", str(error)[:500])
-            log("".join(traceback.format_exc().splitlines(True)[-14:]))
+    from torch.nn.attention import SDPBackend, sdpa_kernel
+
+    def draws(batch):
+        """The exact random draws model.loss makes after torch.manual_seed(1234) (same order, dtypes, devices)."""
+        torch.manual_seed(1234)
+        clean = batch["video_latent"].to(torch.bfloat16)
+        actions = batch["actions"].to(torch.bfloat16)
+        b = clean.shape[0]
+        nv = torch.randn_like(clean)
+        tv = model.video_scheduler.sample_training_t(b, clean.device, torch.bfloat16)
+        na = torch.randn_like(actions)
+        ta = model.action_scheduler.sample_training_t(b, actions.device, torch.bfloat16)
+        return {"video": nv, "t_video": tv, "action": na, "t_action": ta}
+
+    def run_noise(batch, noise, use_history, backends=None, ckpt=True, anomaly=False):
+        model.zero_grad(set_to_none=True)
+        model.checkpoint_layers = ckpt
+        ctx = sdpa_kernel(backends) if backends else torch.enable_grad()
+        actx = torch.autograd.detect_anomaly(check_nan=True) if anomaly else torch.enable_grad()
+        with ctx, actx:
+            with torch.autocast("cuda", dtype=torch.bfloat16, cache_enabled=False):
+                v, a = model.loss(batch, noise, history="auto" if use_history else None)
+                loss = v.mean() + a.mean()
+            loss.backward()
+        parts = grad_norms(model)
+        model.checkpoint_layers = cfg.model.checkpoint_layers
+        return [k for k, x in parts.items() if not math.isfinite(x)]
+
+    for b, rows, with_h, without_h in bad_batches[:2]:
+        batch = to_device(collate(rows), device)
+        noise = draws(batch)
+        log(f"batch {b}: t_video {[round(float(x), 2) for x in noise['t_video']]}; "
+            f"t_action {[round(float(x), 2) for x in noise['t_action']]}")
+        log(f"batch {b}, explicit draws (must reproduce): non-finite {run_noise(batch, noise, False)}")
+        single = []
+        for j in range(len(rows)):
+            one = {k: v[j:j + 1] for k, v in batch.items()}
+            nj = {k: v[j:j + 1] for k, v in noise.items()}
+            bad = run_noise(one, nj, False)
+            single.append(bad)
+            if bad:
+                log(f"batch {b} sample {j} (anchor {int(rows[j]['anchor'])}, t_video {float(noise['t_video'][j]):.2f}, "
+                    f"t_action {float(noise['t_action'][j]):.2f}) ALONE with its own draws: non-finite {bad}")
+        log(f"batch {b}: samples non-finite alone with their batch draws: {[j for j, x in enumerate(single) if x]}")
+        for label, backends in (("efficient only", [SDPBackend.EFFICIENT_ATTENTION]), ("math only", [SDPBackend.MATH]),
+                                ("cudnn only", [SDPBackend.CUDNN_ATTENTION])):
+            try:
+                log(f"batch {b}, {label}: non-finite {run_noise(batch, noise, False, backends)}")
+            except RuntimeError as error:
+                log(f"batch {b}, {label}: {str(error)[:200]}")
+        log(f"batch {b}, no recompute: non-finite {run_noise(batch, noise, False, ckpt=False)}")
+        culprit = next((j for j, x in enumerate(single) if x), None)
+        if culprit is not None:
+            one = {k: v[culprit:culprit + 1] for k, v in batch.items()}
+            nj = {k: v[culprit:culprit + 1] for k, v in noise.items()}
+            try:
+                run_noise(one, nj, False, ckpt=False, anomaly=True)
+                log("anomaly mode: no error raised")
+            except RuntimeError as error:
+                import traceback
+                log("anomaly:", str(error)[:500])
+                log("".join(traceback.format_exc().splitlines(True)[-14:]))
+            break
 
 
 def main(argv: Optional[List[str]] = None) -> None:
