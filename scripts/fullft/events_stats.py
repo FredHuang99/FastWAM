@@ -18,6 +18,26 @@ reported ("strict" column). Non-degenerate floor: >= 45 demos parsed and every c
 a task below the floor gets no verdict. Tally: >= 5 identifiable tasks -> the tempo shortcut is benchmark-wide;
 3-4 -> the claim is limited to those tasks; <= 2 -> tempo is one section and P1 rests on the weak-task gains.
 
+Plan v11 (11-11): the clock table is background only (it no longer decides the paper's claim). N2 now also picks the
+event rule. Checks added 11-11 17:30, written before the script ran on all demos (a probe of the first demo of
+put_back / press / observe / battery had already shown gripper readings that go to exactly 0.0 while a block is held):
+  rule-B floor   "while an object is held the gripper reading settles between fully closed and open". Every closed
+                 interval of every demo (reading < 0.35 for >= 5 frames) is summarised by the median reading after its
+                 first 8 frames (the closing ramp). An interval "settles in between" if that median is > 0.01. In
+                 put_back / swap / observe / battery / rearrange / swap_T / ranking / cover / place every closed interval
+                 holds an object, so: floor met iff >= 90 % of their closed intervals settle in between; otherwise
+                 rule B is unavailable and rule A is chosen (plan v11 F.1 N2). press_button (closes on nothing) is
+                 reported as the empty-closure reference.
+  press coverage press_button: every press that rises again (scripts/memory_v2/press/events.py `presses`, both arms) is
+                 covered if a rule-A "bottom" event of that arm falls within its bottom frames +-2. Required: >= 95 % of
+                 presses (v11 N2 condition 2). The terminal confirm press (the episode ends in it, it never rises) is
+                 reported separately: it ends the episode, so no later decision can need it.
+  events / demo  per task: demos with <= 32 events (the ledger cap); required >= 45 of 50 (v11 N2).
+  conditions 1 and 3 (rule B vs rule A on demos; B on air-closure segments) need rule B and are skipped when the
+  floor is not met.
+Final line: "RULE CHOICE: A|B (reason)" (B only if the floor, conditions 1-3 are all met; condition 1 / 3 need rule B,
+which is not implemented, so a met floor gives "RULE CHOICE: pending (rule B to implement)").
+
   PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/events_stats.py [--tasks ...] [--out outputs/fullft/events]
 Writes <out>/events_<task>.json, <out>/CLOCK_STATS_<time>.md / .json and <out>/clock_stats_<time>.png.
 """
@@ -38,6 +58,46 @@ sys.path.insert(0, str(REPO / "src"))
 from fastwam.fullft.events import EventRule, detect, summarize  # noqa: E402
 
 BJ = timezone(timedelta(hours=8))
+GRASP_TASKS = ["put_back_block", "swap_blocks", "observe_and_pickup", "rearrange_blocks", "swap_T", "battery_try",
+               "blocks_ranking_try", "cover_blocks", "place_block_mat"]
+LEDGER_CAP = 32
+
+
+def closed_intervals(g, low=0.35, min_len=5, ramp=8):
+    """[(start, end, settled median)] of the stretches where a gripper reading stays below `low` for >= min_len frames."""
+    out, t, n = [], 0, len(g)
+    while t < n:
+        if g[t] < low:
+            a = t
+            while t < n and g[t] < low:
+                t += 1
+            if t - a >= min_len:
+                body = g[a + ramp:t] if t - a > ramp else g[a:t]
+                out.append((a, t, float(np.median(body))))
+        else:
+            t += 1
+    return out
+
+
+def press_module():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("press_events", REPO / "scripts/memory_v2/press/events.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def press_coverage(pos, evs, pm):
+    """(covered, total, terminal) for one press_button demo: presses that rise again, both arms."""
+    covered = total = terminal = 0
+    for arm in (0, 1):
+        z, xy = pos[:, arm, 2], pos[:, arm, :2]
+        for p in pm.presses(z, xy):
+            total += 1
+            a, b = p["bottom"]
+            covered += any(e["arm"] == arm and e["kind"] == "bottom" and a - 2 <= e["frame"] <= b + 2 for e in evs)
+        terminal += pm.terminal_press(z, xy) is not None
+    return covered, total, terminal
 TASKS = ["put_back_block", "swap_blocks", "press_button", "observe_and_pickup", "rearrange_blocks", "swap_T",
          "battery_try", "blocks_ranking_try", "cover_blocks", "place_block_mat"]
 ROOTS = [Path("/workspace/FastWAM/resources/RMBench/data/demo_clean"),
@@ -129,12 +189,16 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(BJ).strftime("%Y%m%d_%H%M")
     rule = EventRule()
-    lines = [f"# CLOCK_STATS {datetime.now(BJ):%Y-%m-%d %H:%M} (plan v10 N2)", "",
+    lines = [f"# CLOCK_STATS {datetime.now(BJ):%Y-%m-%d %H:%M} (plan v10 N2; v11 rule checks)", "",
              f"event rule: {rule}; decision window +-{WINDOW} frames", "",
              "| task | demos | events / demo (median, range) | clock-only accuracy all / decision windows | "
              "median dispersion (k = 1..) | verdict | strict (plan text) |", "|---|---|---|---|---|---|---|"]
     report = {"rule": str(rule), "tasks": {}}
     tally = 0
+    pm = press_module()
+    intervals = {}                     # task -> settled medians of closed intervals
+    press_cov = [0, 0, 0]              # covered, total, terminal
+    within_cap = {}
     for task in args.tasks:
         files = demo_files(task)
         if not files:
@@ -149,6 +213,11 @@ def main():
                 continue
             evs = detect(grip, pos, rule)
             events[f"{task}/{f.stem}"] = evs
+            for side in (0, 1):
+                intervals.setdefault(task, []).extend(m for _, _, m in closed_intervals(grip[:, side]))
+            if task == "press_button":
+                c, n_p, term = press_coverage(pos, evs, pm)
+                press_cov[0] += c; press_cov[1] += n_p; press_cov[2] += term
             curves.append(stage_curve(evs, len(grip)))
         (out / f"events_{task}.json").write_text(json.dumps({"rule": str(rule), "episodes": events}) + "\n")
         counted = [k for k, v in events.items() if len(v) >= 2]
@@ -161,6 +230,7 @@ def main():
         strict = floor and acc_win >= 0.90 and med_disp <= 0.25
         tally += identifiable
         counts = [len(v) for v in evs_list]
+        within_cap[task] = (sum(c <= LEDGER_CAP for c in counts), len(counts))
         verdict = ("no verdict (floor: " + f"{len(events)} demos, {len(events) - len(counted)} with < 2 events)") \
             if not floor else ("clock-identifiable" if identifiable else "not clock-identifiable")
         lines.append(f"| {task} | {len(events)} | {statistics.median(counts) if counts else 0} "
@@ -175,6 +245,35 @@ def main():
               ("the tempo shortcut is benchmark-wide (>= 5)" if tally >= 5 else
                "the claim is limited to these tasks (3-4)" if tally >= 3 else
                "tempo is one section; P1 rests on the weak-task gains (<= 2)"), ""]
+    # ---- plan v11: event rule choice
+    grasp = [m for t in GRASP_TASKS for m in intervals.get(t, [])]
+    settle = sum(m > 0.01 for m in grasp) / len(grasp) if grasp else float("nan")
+    floor_b = bool(grasp) and settle >= 0.90
+    cov = press_cov[0] / press_cov[1] if press_cov[1] else float("nan")
+    cap_ok = {t: k >= 45 for t, (k, n) in within_cap.items()}
+    lines += ["## Plan v11 checks (event rule)", "",
+              f"- rule-B floor: closed intervals of the grasp tasks settling in between (median > 0.01): "
+              f"{sum(m > 0.01 for m in grasp)} / {len(grasp)} = {settle:.3f} (needs >= 0.90) -> "
+              f"{'met' if floor_b else 'NOT met: rule B unavailable'}"]
+    for t in sorted(intervals):
+        ms = intervals[t]
+        lines.append(f"  - {t}: {len(ms)} closed intervals, settled medians min {min(ms):.4f} / median "
+                     f"{float(np.median(ms)):.4f} / max {max(ms):.4f}" if ms else f"  - {t}: no closed interval")
+    lines += [f"- press coverage by rule-A bottom events: {press_cov[0]} / {press_cov[1]} = {cov:.3f} (needs >= 0.95) -> "
+              f"{'met' if cov >= 0.95 else 'NOT met'}; terminal confirm presses (end the episode, not counted): "
+              f"{press_cov[2]}",
+              "- demos with <= 32 events: " + "; ".join(f"{t} {k}/{n}{'' if cap_ok[t] else ' (below 45: ledger keeps the last 32)'}"
+                                                       for t, (k, n) in within_cap.items()),
+              "- conditions 1 and 3 (rule B on demos / on air closures): " +
+              ("need rule B (not implemented)" if floor_b else "skipped (floor not met)")]
+    choice = ("pending (rule B to implement)" if floor_b else "A (rule-B floor not met: the demo gripper readings do not "
+              "settle between closed and open while an object is held)")
+    if not (cov >= 0.95):
+        choice += "; WARNING press coverage below 0.95: fix the rule before W2 (plan v11 F.1 N2)"
+    lines += ["", f"RULE CHOICE: {choice}", ""]
+    report["v11"] = {"settle_share": settle, "floor_b": floor_b, "press_coverage": cov, "press_counts": press_cov,
+                     "within_cap": within_cap, "choice": choice,
+                     "settled_medians": {t: [min(v), float(np.median(v)), max(v)] for t, v in intervals.items() if v}}
     for task, r in report["tasks"].items():
         if r["dispersion"]:
             lines.append(f"- {task}: " + "; ".join(f"k{d['k']} frame {d['median_frame']:.0f} IQR {d['iqr']:.0f} "
@@ -189,7 +288,7 @@ def main():
         figure(report, out / f"clock_stats_{stamp}.png")
     except Exception as e:                                          # noqa: BLE001 (the table is the result)
         print(f"figure skipped: {e}")
-    print("\n".join(lines[-(len(report['tasks']) + 3):]))
+    print("\n".join(lines))
     print(f"CLOCK_STATS: {md}")
 
 
