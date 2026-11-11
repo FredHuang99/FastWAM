@@ -1,0 +1,11 @@
+# plan v12 F.2: H200 GPU0 training queue, read by h200_queue.sh before every pick (first runnable line wins).
+# Fields: run | --set values, space separated (on top of configs/fullft/base_2task.yaml: 30 frame-epochs, lr 1e-4,
+# exports at 10 / 20 / 30) | condition (shell test in the repo; the line waits while it fails).
+# READY_<variant> markers are written by the unit-test command Opus gives (tests pass -> marker).
+obs_ar | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1] data.tasks=[observe_and_pickup] | test -f outputs/memory_v2/press/dense_observe_and_pickup_v1/.verified
+put_arprop | data.tasks=[put_back_block] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_put_back_block.json] | test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json
+press_arprop | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_press_button_v1] data.tasks=[press_button] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_press_button.json] | test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_press_button.json && test -f outputs/memory_v2/press/dense_press_button_v1/.verified
+press_ar | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_press_button_v1] data.tasks=[press_button] | test -f outputs/memory_v2/press/dense_press_button_v1/.verified
+press_arev | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_press_button_v1] data.tasks=[press_button] history.variant=arev history.event_max=12 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_press_button.json] | test -f outputs/fullft/READY_arev && test -f outputs/fullft/events/events_press_button.json && test -f outputs/memory_v2/press/dense_press_button_v1/.verified
+battery_ar | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_battery_try_v1] data.tasks=[battery_try] | test -f outputs/memory_v2/press/dense_battery_try_v1/.verified
+# battery_<winner>: added after the Press arms (G2 rule (c)); then B1: rearrange / swap_T / cover / ranking AR, put + swap none
