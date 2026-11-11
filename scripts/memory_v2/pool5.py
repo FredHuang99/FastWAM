@@ -624,7 +624,10 @@ def status_lines(cfg=None):
     ours = {int(q.state(t['id'])['gpu']): t["id"] for t in tasks
             if q.state(t["id"])["status"] == "running" and q.state(t["id"]).get("gpu") is not None}
     for g, v in sorted(table.items()):
-        who = ours.get(g) or ("empty" if v["used"] < cfg["free_mib"] else "OTHER USER")
+        # 11-12: a busy GPU without a queue task is not necessarily someone else's: our own jobs started outside the
+        # queue (H200 training via h200_queue.sh, 5090 scripts via docker exec -d) show up here too.
+        who = ours.get(g) or ("empty" if v["used"] < cfg["free_mib"] else
+                              "BUSY, not a queue task (another user, or ours started outside the queue)")
         lines.append(f"   GPU {g}: {v['used']:>6}/{v['total']} MiB, {v['util']:>3}% busy  -> {who}"
                      f"{'' if g in [int(x) for x in cfg['gpus']] else '   (not allowed)'}")
     lanes = [f"{f.stem}:{'alive' if alive_lane((q.read_json(f, {}) or {}).get('pid')) else 'stopped'}"
