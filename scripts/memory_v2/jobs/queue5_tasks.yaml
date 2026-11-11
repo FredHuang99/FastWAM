@@ -2740,6 +2740,7 @@ tasks:
 - id: X7-12ep
   lane: train
   kind: train
+  hold: true        # 11-11 20:45 (plan v12, user to confirm): paused to free GPU 2 for AL5 while every other A100 GPU is taken; it resumes from its checkpoint when hold is removed (appendix only)
   need_mib: 34000
   run: x7_cont12
   reference_run: a2C_6ep
@@ -3017,6 +3018,96 @@ tasks:
   pass_if: "m['rc'] == 0"
   on_pass: "read the G1 VERDICT line in outputs/memory_v2/report/G1_ar_2task_e30_verdict_*.txt"
 
+# 11-11 20:45: AL5 before the AL4a pre-reads (AL5 reads a cause; AL4a only pre-reads, its verdict is AL4 at e30)
+- id: AL5-setup
+  lane: extra
+  kind: shell
+  need_mib: 8000
+  timeout_h: 1
+  hypothesis: "plan v12 AL5 setup: OIDN 2.3.3 unpacked to /opt/oidn-2.3.3-al5 (not the folder online.py loads by default), frame 0 rendered with 2.0.1 and with 2.3.3 vs the A100's own reference; PASS = 2.3.3 runs here without OIDN errors"
+  command: "GPU={GPU} bash /workspace/FastWAM-memory2/scripts/fullft/al5_setup.sh"
+  pass_if: "m['rc'] == 0"
+  on_fail: "read outputs/fullft/align/AL5_SETUP_*.txt: download failed, no frame-0 reference, or OIDN 2.3.3 reports errors on the A100 (then AL5 cannot test the hypothesis)"
+
+- id: AL5-put-s0
+  lane: loop
+  kind: closed_loop
+  after: [AL5-setup]
+  requires_pass: [AL5-setup]
+  need_mib: 30000
+  timeout_h: 10
+  env: {MWAM_OIDN_LIB: /opt/oidn-2.3.3-al5/lib}
+  hypothesis: "plan v12 AL5 (pre-registered 11-11 20:30): X7, memory on, execute 8, 10 steps, the A100's simulator loads OIDN 2.3.3 (MWAM_OIDN_LIB) instead of SAPIEN's bundled 2.0.1; official put scenes 31-50 (the eq5090b pairing); shard 0 of 2. Paired with X7's official A100 episodes of the same scenes by AL5-verdict"
+  checkpoint: a2C_6ep/checkpoints/update_004020.pt
+  label: x7_al5_oidn233
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--from-scene", "31", "--limit", "20", "--shard", "0/2"]
+  output: closed_loop/al5
+
+- id: AL5-put-s1
+  lane: loop
+  kind: closed_loop
+  after: [AL5-setup]
+  requires_pass: [AL5-setup]
+  need_mib: 30000
+  timeout_h: 10
+  env: {MWAM_OIDN_LIB: /opt/oidn-2.3.3-al5/lib}
+  hypothesis: "plan v12 AL5 (pre-registered 11-11 20:30): X7, memory on, execute 8, 10 steps, the A100's simulator loads OIDN 2.3.3 (MWAM_OIDN_LIB) instead of SAPIEN's bundled 2.0.1; official put scenes 31-50 (the eq5090b pairing); shard 1 of 2. Paired with X7's official A100 episodes of the same scenes by AL5-verdict"
+  checkpoint: a2C_6ep/checkpoints/update_004020.pt
+  label: x7_al5_oidn233
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--from-scene", "31", "--limit", "20", "--shard", "1/2"]
+  output: closed_loop/al5
+
+- id: AL5-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [AL5-setup]
+  requires_pass: [AL5-setup]
+  need_mib: 30000
+  timeout_h: 10
+  env: {MWAM_OIDN_LIB: /opt/oidn-2.3.3-al5/lib}
+  hypothesis: "plan v12 AL5 (pre-registered 11-11 20:30): X7, memory on, execute 8, 10 steps, the A100's simulator loads OIDN 2.3.3 (MWAM_OIDN_LIB) instead of SAPIEN's bundled 2.0.1; official swap scenes 1-20; shard 0 of 2. Paired with X7's official A100 episodes of the same scenes by AL5-verdict"
+  checkpoint: a2C_6ep/checkpoints/update_004020.pt
+  label: x7_al5_oidn233
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "20", "--shard", "0/2"]
+  output: closed_loop/al5
+
+- id: AL5-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [AL5-setup]
+  requires_pass: [AL5-setup]
+  need_mib: 30000
+  timeout_h: 10
+  env: {MWAM_OIDN_LIB: /opt/oidn-2.3.3-al5/lib}
+  hypothesis: "plan v12 AL5 (pre-registered 11-11 20:30): X7, memory on, execute 8, 10 steps, the A100's simulator loads OIDN 2.3.3 (MWAM_OIDN_LIB) instead of SAPIEN's bundled 2.0.1; official swap scenes 1-20; shard 1 of 2. Paired with X7's official A100 episodes of the same scenes by AL5-verdict"
+  checkpoint: a2C_6ep/checkpoints/update_004020.pt
+  label: x7_al5_oidn233
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "20", "--shard", "1/2"]
+  output: closed_loop/al5
+
+- id: AL5-verdict
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  after: [AL5-put-s0, AL5-put-s1, AL5-swap-s0, AL5-swap-s1]
+  timeout_h: 1
+  hypothesis: "plan v12 AL5 reading per task (pair_eq.py --rule al5): CAUSE = paired progress (2.3.3 - standard) mean <= -0.05 with CI upper < 0; NOT CAUSE = |mean| <= 0.05 with CI containing 0; else UNDETERMINED; floor: the reference's put lifted / swap s1 >= 18/20"
+  command: "cd /workspace/FastWAM-memory2 && export PYTHONPATH=src && P=/opt/mwam/bin/python && $P scripts/fullft/pair_eq.py --name al5_put --rule al5 --a-folders closed_loop/al5 --a-label x7_al5_oidn233 --b-folders closed_loop/official/put_x7_s0 closed_loop/official/put_x7_s1 --b-label a2C6_e6 --tasks put_back_block && $P scripts/fullft/pair_eq.py --name al5_swap --rule al5 --a-folders closed_loop/al5 --a-label x7_al5_oidn233 --b-folders closed_loop/official/swap8_x7_s0 closed_loop/official/swap8_x7_s1 closed_loop/official/swap8_x7_s2 --b-label a2C6_e6_exec8 --tasks swap_blocks"
+  pass_if: "m['rc'] == 0"
+  on_pass: "read the PAIR VERDICT lines in the task log (outputs/memory_v2/queue5/tasks/AL5-verdict.log)"
+
 - id: FT-fetch-e10
   lane: cpu
   kind: shell
@@ -3184,92 +3275,3 @@ tasks:
   hypothesis: "plan v12 AL4a: export the A100's per-scene stages of ar_2task_e20 and relay them (diag/a100_ar_2task_e20_stages) for the paired table on the 5090"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/migrate/export_stages.py --label ar_2task_e20 --mode on --folders /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/g1 --out closed_loop/check_a100/ar_2task_e20_stages.json --relay diag/a100_ar_2task_e20_stages"
   pass_if: "m['rc'] == 0"
-
-- id: AL5-setup
-  lane: extra
-  kind: shell
-  need_mib: 8000
-  timeout_h: 1
-  hypothesis: "plan v12 AL5 setup: OIDN 2.3.3 unpacked to /opt/oidn-2.3.3-al5 (not the folder online.py loads by default), frame 0 rendered with 2.0.1 and with 2.3.3 vs the A100's own reference; PASS = 2.3.3 runs here without OIDN errors"
-  command: "GPU={GPU} bash /workspace/FastWAM-memory2/scripts/fullft/al5_setup.sh"
-  pass_if: "m['rc'] == 0"
-  on_fail: "read outputs/fullft/align/AL5_SETUP_*.txt: download failed, no frame-0 reference, or OIDN 2.3.3 reports errors on the A100 (then AL5 cannot test the hypothesis)"
-
-- id: AL5-put-s0
-  lane: loop
-  kind: closed_loop
-  after: [AL5-setup]
-  requires_pass: [AL5-setup]
-  need_mib: 30000
-  timeout_h: 10
-  env: {MWAM_OIDN_LIB: /opt/oidn-2.3.3-al5/lib}
-  hypothesis: "plan v12 AL5 (pre-registered 11-11 20:30): X7, memory on, execute 8, 10 steps, the A100's simulator loads OIDN 2.3.3 (MWAM_OIDN_LIB) instead of SAPIEN's bundled 2.0.1; official put scenes 31-50 (the eq5090b pairing); shard 0 of 2. Paired with X7's official A100 episodes of the same scenes by AL5-verdict"
-  checkpoint: a2C_6ep/checkpoints/update_004020.pt
-  label: x7_al5_oidn233
-  modes: ["on"]
-  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
-  tasks: [put_back_block]
-  online_args: ["--execute", "8", "--from-scene", "31", "--limit", "20", "--shard", "0/2"]
-  output: closed_loop/al5
-
-- id: AL5-put-s1
-  lane: loop
-  kind: closed_loop
-  after: [AL5-setup]
-  requires_pass: [AL5-setup]
-  need_mib: 30000
-  timeout_h: 10
-  env: {MWAM_OIDN_LIB: /opt/oidn-2.3.3-al5/lib}
-  hypothesis: "plan v12 AL5 (pre-registered 11-11 20:30): X7, memory on, execute 8, 10 steps, the A100's simulator loads OIDN 2.3.3 (MWAM_OIDN_LIB) instead of SAPIEN's bundled 2.0.1; official put scenes 31-50 (the eq5090b pairing); shard 1 of 2. Paired with X7's official A100 episodes of the same scenes by AL5-verdict"
-  checkpoint: a2C_6ep/checkpoints/update_004020.pt
-  label: x7_al5_oidn233
-  modes: ["on"]
-  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
-  tasks: [put_back_block]
-  online_args: ["--execute", "8", "--from-scene", "31", "--limit", "20", "--shard", "1/2"]
-  output: closed_loop/al5
-
-- id: AL5-swap-s0
-  lane: loop
-  kind: closed_loop
-  after: [AL5-setup]
-  requires_pass: [AL5-setup]
-  need_mib: 30000
-  timeout_h: 10
-  env: {MWAM_OIDN_LIB: /opt/oidn-2.3.3-al5/lib}
-  hypothesis: "plan v12 AL5 (pre-registered 11-11 20:30): X7, memory on, execute 8, 10 steps, the A100's simulator loads OIDN 2.3.3 (MWAM_OIDN_LIB) instead of SAPIEN's bundled 2.0.1; official swap scenes 1-20; shard 0 of 2. Paired with X7's official A100 episodes of the same scenes by AL5-verdict"
-  checkpoint: a2C_6ep/checkpoints/update_004020.pt
-  label: x7_al5_oidn233
-  modes: ["on"]
-  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
-  tasks: [swap_blocks]
-  online_args: ["--execute", "8", "--limit", "20", "--shard", "0/2"]
-  output: closed_loop/al5
-
-- id: AL5-swap-s1
-  lane: loop
-  kind: closed_loop
-  after: [AL5-setup]
-  requires_pass: [AL5-setup]
-  need_mib: 30000
-  timeout_h: 10
-  env: {MWAM_OIDN_LIB: /opt/oidn-2.3.3-al5/lib}
-  hypothesis: "plan v12 AL5 (pre-registered 11-11 20:30): X7, memory on, execute 8, 10 steps, the A100's simulator loads OIDN 2.3.3 (MWAM_OIDN_LIB) instead of SAPIEN's bundled 2.0.1; official swap scenes 1-20; shard 1 of 2. Paired with X7's official A100 episodes of the same scenes by AL5-verdict"
-  checkpoint: a2C_6ep/checkpoints/update_004020.pt
-  label: x7_al5_oidn233
-  modes: ["on"]
-  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
-  tasks: [swap_blocks]
-  online_args: ["--execute", "8", "--limit", "20", "--shard", "1/2"]
-  output: closed_loop/al5
-
-- id: AL5-verdict
-  lane: cpu
-  kind: shell
-  need_mib: 0
-  after: [AL5-put-s0, AL5-put-s1, AL5-swap-s0, AL5-swap-s1]
-  timeout_h: 1
-  hypothesis: "plan v12 AL5 reading per task (pair_eq.py --rule al5): CAUSE = paired progress (2.3.3 - standard) mean <= -0.05 with CI upper < 0; NOT CAUSE = |mean| <= 0.05 with CI containing 0; else UNDETERMINED; floor: the reference's put lifted / swap s1 >= 18/20"
-  command: "cd /workspace/FastWAM-memory2 && export PYTHONPATH=src && P=/opt/mwam/bin/python && $P scripts/fullft/pair_eq.py --name al5_put --rule al5 --a-folders closed_loop/al5 --a-label x7_al5_oidn233 --b-folders closed_loop/official/put_x7_s0 closed_loop/official/put_x7_s1 --b-label a2C6_e6 --tasks put_back_block && $P scripts/fullft/pair_eq.py --name al5_swap --rule al5 --a-folders closed_loop/al5 --a-label x7_al5_oidn233 --b-folders closed_loop/official/swap8_x7_s0 closed_loop/official/swap8_x7_s1 closed_loop/official/swap8_x7_s2 --b-label a2C6_e6_exec8 --tasks swap_blocks"
-  pass_if: "m['rc'] == 0"
-  on_pass: "read the PAIR VERDICT lines in the task log (outputs/memory_v2/queue5/tasks/AL5-verdict.log)"
