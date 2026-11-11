@@ -570,7 +570,16 @@ def nanhunt(cfg: RunConfig, args) -> None:
             break
 
 
+def safe_attention_backends() -> None:
+    """11-11 H200 (torch 2.10 nv25.11): the cuDNN attention backward returns NaN for some inputs
+    (ScaledDotProductCudnnAttentionBackward0; nanhunt: a single sample at t_video 552 / t_action 892 fails with cuDNN,
+    the same batch is finite with the efficient or the math kernel). The released FastWAM attention is plain SDPA, so
+    disabling the cuDNN backend changes the kernel, not the computation."""
+    torch.backends.cuda.enable_cudnn_sdp(False)
+
+
 def main(argv: Optional[List[str]] = None) -> None:
+    safe_attention_backends()
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("command", choices=("train", "smoke", "probe", "export", "gradcheck", "nanhunt"))
     ap.add_argument("--batches", type=int, default=24, help="nanhunt: training micro batches to test")

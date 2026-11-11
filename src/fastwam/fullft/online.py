@@ -34,6 +34,7 @@ def is_fullft_export(path: Optional[str]) -> bool:
 
 def load_export(path: str, device="cuda:0") -> tuple:
     from .config import _build, RunConfig
+    torch.backends.cuda.enable_cudnn_sdp(False)                 # as in training (train.safe_attention_backends)
     state = torch.load(path, map_location="cpu", weights_only=False, mmap=True)
     cfg = _build(RunConfig, state["config"])
     rule = cfg.rule
