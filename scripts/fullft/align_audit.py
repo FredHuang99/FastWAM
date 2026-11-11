@@ -102,6 +102,8 @@ def first_steps(pairs):
         base = Path(folder) if Path(folder).is_absolute() else O / folder
         for f in sorted(base.glob(f"{label}/on/*/seed_*/executed_actions.jsonl")):
             task, seed = f.parent.parent.name, f.parent.name.split("_", 1)[1]
+            if not seed.isdigit():                       # seed_<n>_interrupted_<...>: an aborted attempt, not a scene
+                continue
             with open(f, encoding="utf-8") as fh:
                 line = fh.readline()
             if not line.strip():
@@ -211,7 +213,7 @@ def cmd_compare(args):
         for j in range(i + 1, len(docs)):
             a, b = docs[i]["first_steps"], docs[j]["first_steps"]
             for task in sorted(set(a) & set(b)):
-                seeds = sorted(set(a[task]) & set(b[task]), key=int)
+                seeds = sorted((x for x in set(a[task]) & set(b[task]) if x.isdigit()), key=int)
                 if not seeds:
                     continue
                 if i == 0 and j == 1:
