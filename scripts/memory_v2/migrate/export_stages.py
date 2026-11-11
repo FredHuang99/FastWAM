@@ -29,6 +29,7 @@ def main():
     ap.add_argument("--search", default="", help="also every sub-folder of this folder that holds <label>/")
     ap.add_argument("--out", required=True)
     ap.add_argument("--relay", default="", help="HF relay prefix, e.g. diag/a100_x7_stages")
+    ap.add_argument("--merge", action="store_true", help="add these tasks to an existing --out file (other tasks kept)")
     args = ap.parse_args()
     folders = list(args.folders)
     if args.search:
@@ -42,6 +43,11 @@ def main():
         out["episodes"].setdefault(task, {})[str(seed)] = row
     path = q.resolve(args.out)
     path.parent.mkdir(parents=True, exist_ok=True)
+    if args.merge and path.exists():
+        old = json.loads(path.read_text(encoding="utf-8"))
+        for task, rows in old.get("episodes", {}).items():
+            out["episodes"].setdefault(task, rows)
+        out["merged_from"] = {"label": old.get("label"), "folders": old.get("folders")}
     path.write_text(json.dumps(out, indent=1) + "\n", encoding="utf-8")
     for task, rows in out["episodes"].items():
         print(f"{task}: {len(rows)} episodes, mean progress {q.mean(r['progress'] for r in rows.values()):.3f}, "
