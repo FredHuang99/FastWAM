@@ -469,9 +469,73 @@ def gradcheck(cfg: RunConfig, args) -> None:
     model.zero_grad(set_to_none=True)
 
 
+def nanhunt(cfg: RunConfig, args) -> None:
+    """Which training batches give non-finite gradients, with and without history, and which single samples cause
+    it (11-11 smoke: ~70 % of updates non-finite at micro 8 although a 2-sample gradcheck was clean). No optimizer
+    step: the weights stay the released ones throughout."""
+    device = "cuda"
+    log = Logger(cfg.run_dir, "nanhunt")
+    model, train_set, _ = build(cfg, device, log, limit_episodes=1)
+    model.train()
+    micro = args.micro[0]
+    perm = np.random.default_rng(cfg.seed * 1000).permutation(len(train_set)).tolist()
+
+    def run(rows, use_history, anomaly=False):
+        model.zero_grad(set_to_none=True)
+        batch = to_device(collate(rows), device)
+        torch.manual_seed(1234)
+        ctx = torch.autograd.detect_anomaly(check_nan=True) if anomaly else torch.enable_grad()
+        with ctx:
+            with torch.autocast("cuda", dtype=torch.bfloat16, cache_enabled=False):
+                v, a = model.loss(batch, history="auto" if use_history else None)
+                loss = v.mean() + a.mean()
+            loss.backward()
+        parts = grad_norms(model)
+        return bool(torch.isfinite(loss)), [k for k, x in parts.items() if not math.isfinite(x)], float(loss)
+
+    bad_batches = []
+    for b in range(args.batches):
+        rows = [train_set[i] for i in perm[b * micro:(b + 1) * micro]]
+        res_h = run(rows, True)
+        res_n = run(rows, False) if "hist_valid" in rows[0] else res_h
+        anchors = [int(r["anchor"]) for r in rows]
+        log(f"batch {b}: anchors {anchors}; history: loss finite {res_h[0]} non-finite grads {res_h[1]}; "
+            f"no history: loss finite {res_n[0]} non-finite grads {res_n[1]}")
+        if res_h[1] or res_n[1]:
+            bad_batches.append((b, rows, bool(res_h[1]), bool(res_n[1])))
+    log(f"non-finite batches: {len(bad_batches)} / {args.batches} "
+        f"(with history {sum(x[2] for x in bad_batches)}, without {sum(x[3] for x in bad_batches)})")
+    culprits = []
+    for b, rows, with_h, without_h in bad_batches[:3]:
+        for j, r in enumerate(rows):
+            res = run([r], with_h)
+            info = {"batch": b, "anchor": int(r["anchor"]), "action_valid": int(r["action_valid"].sum()),
+                    "video_valid": r["video_valid"].tolist(),
+                    "hist_ids": r["hist_ids"].tolist() if "hist_ids" in r else None,
+                    "latent_absmax": float(r["video_latent"].float().abs().max()),
+                    "actions_absmax": float(r["actions"].abs().max()), "proprio_absmax": float(r["proprio"].abs().max()),
+                    "non_finite": res[1]}
+            log("single sample", json.dumps(info))
+            if res[1]:
+                culprits.append((r, with_h))
+        if len(rows) > 1 and not any(c for c in culprits):
+            log(f"batch {b}: every single sample is finite -> the failure needs the batch (pairing / padding)")
+    if culprits:
+        r, with_h = culprits[0]
+        model.checkpoint_layers = False
+        try:
+            run([r], with_h, anomaly=True)
+            log("anomaly mode: no error raised")
+        except RuntimeError as error:
+            import traceback
+            log("anomaly:", str(error)[:500])
+            log("".join(traceback.format_exc().splitlines(True)[-14:]))
+
+
 def main(argv: Optional[List[str]] = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("command", choices=("train", "smoke", "probe", "export", "gradcheck"))
+    ap.add_argument("command", choices=("train", "smoke", "probe", "export", "gradcheck", "nanhunt"))
+    ap.add_argument("--batches", type=int, default=24, help="nanhunt: training micro batches to test")
     ap.add_argument("--config", required=True)
     ap.add_argument("--set", action="append", default=[], dest="overrides")
     ap.add_argument("--updates", type=int, default=200, help="smoke: number of updates")
@@ -490,6 +554,8 @@ def main(argv: Optional[List[str]] = None) -> None:
         probe(cfg, args)
     elif args.command == "gradcheck":
         gradcheck(cfg, args)
+    elif args.command == "nanhunt":
+        nanhunt(cfg, args)
     else:
         model = FullModel.from_release(cfg.model.architecture, cfg.model.base, cfg.rule.variant, cfg.rule.event_slots)
         model.set_trainable(cfg.model.train_video, cfg.model.lora_rank)
