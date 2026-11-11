@@ -10,6 +10,8 @@ exactly as a current frame is prefilled at inference, no gradient (the weights a
 re-rotated from temporal index 0 to its position (history.py: -rank or -elapsed / 16).
 clk / prop: the elapsed step count / the event proprio states enter through the proprio token: proprio_token +
 extra(feature), extra zero-initialised (exact start).
+arprop (plan v12): the ledger, one token per event = ledger(features) (zero-initialised), ADDED to the last
+event_slots positions of the text context, which are padding zeros (checked): a zero ledger is exactly ar.
 Training loss = the released FastWAM.training_loss (video flow matching on the two noisy latent frames + action flow
 matching), computed on cached clip latents instead of re-encoding the video.
 """
@@ -106,6 +108,12 @@ class FullModel(nn.Module):
         if self.extra is not None:
             nn.init.zeros_(self.extra.weight)
             nn.init.zeros_(self.extra.bias)
+        self.ledger = None
+        if variant == "arprop":
+            from .history import ledger_dim
+            self.ledger = nn.Linear(ledger_dim(event_slots), text_dim)
+            nn.init.zeros_(self.ledger.weight)
+            nn.init.zeros_(self.ledger.bias)
         self.video_scheduler = WanContinuousFlowMatchScheduler(shift=video_shift)
         self.action_scheduler = WanContinuousFlowMatchScheduler(shift=action_shift)
         self.checkpoint_layers = False
@@ -154,9 +162,15 @@ class FullModel(nn.Module):
             add_lora(self.video, lora_rank)          # new LoRA parameters are trainable
 
     # ------------------------------------------------------------------ inputs
-    def context(self, text: torch.Tensor, proprio: torch.Tensor, extra: Optional[torch.Tensor] = None):
+    def context(self, text: torch.Tensor, proprio: torch.Tensor, extra: Optional[torch.Tensor] = None,
+                ledger: Optional[torch.Tensor] = None):
         """Released convention (FrozenBackbone.context / FastWAM._append_proprio_to_context): zero-padded text with
-        an all-true mask, plus one proprio token."""
+        an all-true mask, plus one proprio token. arprop: ledger [B, S, ledger_dim] features -> tokens added to the
+        last S text positions (padding zeros)."""
+        if ledger is not None and self.ledger is not None:
+            tokens = self.ledger(ledger.to(text.dtype))
+            n = tokens.shape[1]
+            text = torch.cat((text[:, :-n], text[:, -n:] + tokens.to(text.dtype)), 1)
         token = self.proprio_encoder(proprio.to(text.dtype).unsqueeze(1))
         if extra is not None and self.extra is not None:
             token = token + self.extra(extra.to(token.dtype)).unsqueeze(1)
@@ -170,6 +184,11 @@ class FullModel(nn.Module):
             v = batch["event_valid"].float()
             return torch.cat((batch["event_proprio"] * v[..., None], v[..., None]), -1).flatten(1)
         return None
+
+    def ledger_input(self, batch: dict) -> Optional[torch.Tensor]:
+        if self.ledger is None or "ledger" not in batch:
+            return None
+        return batch["ledger"] * batch["ledger_valid"][..., None].to(batch["ledger"].dtype)
 
     @staticmethod
     def base_mask(video_len: int, action_len: int, tokens_per_frame: int, device) -> torch.Tensor:
@@ -303,7 +322,8 @@ class FullModel(nn.Module):
               else noise["t_action"].to(actions.device, dtype))
         noisy = self.action_scheduler.add_noise(actions, na, ta)
         target_action = self.action_scheduler.training_target(actions, na, ta)
-        context, cmask = self.context(batch["text"].to(dtype), batch["proprio"], self.extra_feature(batch))
+        context, cmask = self.context(batch["text"].to(dtype), batch["proprio"], self.extra_feature(batch),
+                                      self.ledger_input(batch))
         xv, t_v, mv, cv, cmv, fv, f, hh, ww, tpf = self.video.prepare(
             x=latents, timestep=tv, context=context, context_mask=cmask, fuse_vae_embedding_in_latents=True)
         xa, _, ma, ca, cma, fa = self.action.prepare(action_tokens=noisy, timestep=ta, context=context,
@@ -332,7 +352,8 @@ class FullModel(nn.Module):
     def prefill_current(self, batch: dict, history: Optional[History]):
         """Frame 0 of the clip (the current frame) prefilled with history (its queries see history as in training;
         it never sees future frames): per-layer K / V for the action expert, and the context."""
-        context, cmask = self.context(batch["text"].to(self._dtype()), batch["proprio"], self.extra_feature(batch))
+        context, cmask = self.context(batch["text"].to(self._dtype()), batch["proprio"], self.extra_feature(batch),
+                                      self.ledger_input(batch))
         keys, values = self._prefill_with_context(batch["latent"], context, cmask, history)
         return keys, values, (context, cmask)
 

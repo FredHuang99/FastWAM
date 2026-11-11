@@ -87,6 +87,16 @@ def task_state(environment):
     return out
 
 
+def ee_poses(environment):
+    """11-11 (plan v12): end-effector poses (robot.get_*_ee_pose, the same getter the demos' ee poses came from):
+    online event detection (fullft arprop / arev) and the press part of K0. Passive read, no simulation step."""
+    try:
+        return {side: [float(x) for x in list(getattr(environment.robot, f'get_{side}_ee_pose')())[:7]]
+                for side in ('left', 'right')}
+    except Exception:                                        # noqa: BLE001 (the policy side reports a missing pose)
+        return None
+
+
 def execution_count(frame, limit, execute=EXECUTE):
     if not 0 <= frame < limit:
         raise ValueError('Target outside official limit')
@@ -115,6 +125,13 @@ def main():
     from sim_instrumentation import joint_details, contact_pairs, object_contacts
 
     class BoundedPolicy(deploy_policy.RPCPolicy):
+        def capture(self, environment, observation):
+            item = super().capture(environment, observation)
+            pose = ee_poses(environment)
+            if pose is not None:
+                item['endpose'] = pose
+            return item
+
         def request(self, environment, command):
             start = time.monotonic()
             payload = {'command': command, 'current_id': self.frame_id,
@@ -176,7 +193,7 @@ def main():
             started = time.monotonic(); target = self.actions.popleft(); self.last_target = target
             before_steps = getattr(environment, '_memory_physics_steps', None)
             before = physical_state(environment.robot); objects_before = object_snapshot(environment)
-            objects_before.update(task_state(environment))
+            objects_before.update(task_state(environment)); ee_before = ee_poses(environment)
             environment.take_action(target, action_type='qpos')
             self.timings['action_execution_seconds'] += time.monotonic() - started
             after = physical_state(environment.robot); contacts = contact_pairs(environment.scene)
@@ -188,6 +205,7 @@ def main():
                 'physical_abs_error': np.abs(after - target).tolist(),
                 'command_echo_before': np.asarray(observation['joint_action']['vector']).tolist(),
                 'objects_before': objects_before, 'objects_after': objects_after,
+                'ee_before': ee_before, 'ee_after': ee_poses(environment),
                 'joint_details': joint_details(environment.robot), 'contacts': contacts,
                 'object_contacts': object_contacts(environment, contacts),
                 'physics_step_id': getattr(environment, '_memory_physics_steps', None),

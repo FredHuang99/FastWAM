@@ -18,7 +18,7 @@ from typing import Dict, List, Optional, Sequence, Tuple
 import torch
 
 from .events import event_frames
-from .history import HistoryRule, event_states, select
+from .history import LEDGER_KINDS, HistoryRule, event_states, ledger_dim, ledger_entries, select
 
 HORIZON = 32
 
@@ -93,6 +93,55 @@ def latent_valid(mask: torch.Tensor, polarity: str) -> torch.Tensor:
     return torch.stack([real[0], real[1:5].any(), real[5:9].any()])
 
 
+def ledger_tensor(rule: HistoryRule, entries: Sequence[dict], proprio_of) -> Tuple[torch.Tensor, torch.Tensor]:
+    """(features [event_max, ledger_dim], valid [event_max]) of ledger entries (ascending); proprio_of(frame) ->
+    normalised proprio [14]. Slot j holds entry j; rank 0 = the most recent entry."""
+    slots = rule.event_max
+    feat = torch.zeros(slots, ledger_dim(slots))
+    valid = torch.zeros(slots, dtype=torch.bool)
+    n = len(entries)
+    for j, e in enumerate(entries):
+        feat[j, :14] = proprio_of(int(e["frame"])).float()
+        feat[j, 14 + LEDGER_KINDS.index(e["kind"])] = 1.0
+        feat[j, 18 + int(e["arm"])] = 1.0
+        feat[j, 20 + (n - 1 - j)] = 1.0
+        feat[j, -1] = 1.0
+        valid[j] = True
+    return feat, valid
+
+
+def check_ledger_slots(text: torch.Tensor, slots: int, where: str = "") -> None:
+    """The ledger writes into the last `slots` text positions: they must be padding (exact zeros)."""
+    if text.shape[-2] < slots or bool(text[..., -slots:, :].abs().sum() != 0):
+        raise ValueError(f"the last {slots} text positions are not padding {where}: the instruction is too long for "
+                         "the ledger (shorten event_max)")
+
+
+def match_events(episode_ids: Sequence[str], events: Dict[str, List[dict]]) -> Dict[str, List[dict]]:
+    """Event lists keyed by the dense episode ids. The event files key demos as <task>/<hdf5 stem>; a dense root that
+    names episodes differently (e.g. <task>/episode_0000007 for episode7.hdf5) is matched by (task, episode number)
+    when that mapping is one-to-one and covers every unmatched id; otherwise the unmatched ids stay absent."""
+    import re
+    out = {e: events[e] for e in episode_ids if e in events}
+    missing = [e for e in episode_ids if e not in events]
+    if not missing:
+        return out
+
+    def key(name):
+        task, _, stem = name.partition("/")
+        digits = re.findall(r"\d+", stem)
+        return (task, int(digits[-1])) if digits else None
+    index = {}
+    for name in events:
+        k = key(name)
+        if k is not None:
+            index.setdefault(k, []).append(name)
+    mapped = {e: index.get(key(e), []) for e in missing}
+    if all(len(v) == 1 for v in mapped.values()) and len({v[0] for v in mapped.values()}) == len(mapped):
+        out.update({e: events[v[0]] for e, v in mapped.items()})
+    return out
+
+
 def load_events(paths: Sequence[str]) -> Dict[str, List[dict]]:
     out: Dict[str, List[dict]] = {}
     for p in paths:
@@ -109,7 +158,9 @@ class Samples(torch.utils.data.Dataset):
         self.episodes, self.items, self.rule = episodes, list(items), rule
         self.events, self.polarity, self.augment, self.seed = events, polarity, augment, seed
         self.epoch = 0
-        if rule.variant in ("event", "prop"):
+        self.checked_text: set = set()
+        if rule.variant in ("event", "prop", "arprop", "arev"):
+            self.events = events = match_events(sorted({e for e, _ in self.items}), events)
             absent = sorted({e for e, _ in self.items if e not in events})
             if absent:
                 raise ValueError(f"history '{rule.variant}' needs events for {len(absent)} episodes, e.g. {absent[:3]}")
@@ -122,7 +173,7 @@ class Samples(torch.utils.data.Dataset):
         e = self.episodes(episode_id)
         actions, action_valid = action_window(e["actions"], a)
         rng = random.Random(hash((self.seed, self.epoch, i)) & 0xFFFFFFFF) if self.augment else None
-        known = event_frames(self.events.get(episode_id, []), before=a, known_by=a)
+        known = event_frames(self.events.get(episode_id, []), before=a, known_by=a - int(self.rule.lag))
         ids, pos = select(self.rule, a, known, rng)
         k = self.rule.max_frames
         sample = {
@@ -157,6 +208,13 @@ class Samples(torch.utils.data.Dataset):
                 states[j] = e["proprio"][f].float()
                 valid[j] = True
             sample.update(event_proprio=states, event_valid=valid)
+        if self.rule.variant == "arprop":
+            if episode_id not in self.checked_text:
+                check_ledger_slots(e["text"], self.rule.event_max, f"in {episode_id}")
+                self.checked_text.add(episode_id)
+            entries = ledger_entries(self.rule, a, self.events.get(episode_id, []))
+            feat, valid = ledger_tensor(self.rule, entries, lambda f: e["proprio"][f])
+            sample.update(ledger=feat, ledger_valid=valid)
         return sample
 
 

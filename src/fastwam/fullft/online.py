@@ -90,15 +90,17 @@ def keep_set(rule: HistoryRule, current: int, events: List[int]) -> set:
     keep |= {i for i in range(max(0, current - horizon), current + 1)}
     if rule.variant == "tw":
         keep |= set(range(rule.tw_stride, current + 1, rule.tw_stride))
-    if rule.variant in ("event", "prop"):
+    if rule.variant in ("event", "prop", "arev"):
         keep |= set(int(e) for e in events)
     return keep
 
 
 @torch.no_grad()
 def decide_encoded(model: FullModel, rule: HistoryRule, cache: FrameCache, encoded: Dict[int, tuple], current: int,
-                   text: torch.Tensor, noise: torch.Tensor, steps: int = 10, events: List[int] = ()) -> dict:
-    """One decision from per-frame encodings: encoded[i] = (latent [48, 1, 24, 20], normalised proprio [14])."""
+                   text: torch.Tensor, noise: torch.Tensor, steps: int = 10, events: List[int] = (),
+                   ledger: Optional[tuple] = None) -> dict:
+    """One decision from per-frame encodings: encoded[i] = (latent [48, 1, 24, 20], normalised proprio [14]).
+    events: the KNOWN event frames (lag applied); ledger (arprop): (features [S, F], valid [S]) of data.ledger_tensor."""
     ids, positions = select(rule, current, events)
     cache.ensure(model, ids, encoded, text)
     history = cache.history(model, ids, positions)
@@ -112,6 +114,8 @@ def decide_encoded(model: FullModel, rule: HistoryRule, cache: FrameCache, encod
         for j, f in enumerate(frames):
             states[0, j], valid[0, j] = encoded[f][1].to(device), True
         batch.update(event_proprio=states, event_valid=valid)
+    if ledger is not None:
+        batch.update(ledger=ledger[0][None].to(device), ledger_valid=ledger[1][None].to(device))
     actions = model.sample(batch, noise.to(device), steps, history)
     cache.evict(keep_set(rule, current, events))
     return {"normalised": actions[0], "ids": ids, "positions": positions}
@@ -183,6 +187,10 @@ class FullSession:
         self.reset()
 
     def reset(self):
+        from .events import EventDetector
+        self.detector = EventDetector()
+        self.events: List[dict] = []                  # detected online, each with "confirmed" (= the frame it was seen)
+        self.detected_upto = -1
         self.raw: Dict[int, dict] = {}
         self.encoded: Dict[int, tuple] = {}
         self.cache = FrameCache()
@@ -204,6 +212,27 @@ class FullSession:
             proprio = p.normaliser.normalize(torch.tensor(r["proprio"], dtype=torch.float32)[None], "state")[0]
             self.encoded[i] = (latent, proprio.to(p.device))
 
+    def _proprio(self, frame: int) -> torch.Tensor:
+        """Normalised proprio of an observed frame (as the training caches store it)."""
+        r = self.raw[frame]
+        return self.p.normaliser.normalize(torch.tensor(r["proprio"], dtype=torch.float32)[None], "state")[0]
+
+    def _detect(self, current: int) -> None:
+        """Stream the event detector over the frames not seen yet (commanded gripper = proprio columns 6 / 13, end-
+        effector positions from the adapter's endpose): the same EventDetector the demos' events came from."""
+        import numpy as np
+        for i in range(self.detected_upto + 1, current + 1):
+            r = self.raw[i]
+            pose = r.get("endpose")
+            if not pose:
+                raise ValueError("observation without endpose: the simulator adapter predates 11-11 (event variants)")
+            grip = [float(r["proprio"][6]), float(r["proprio"][13])]
+            pos = np.asarray([pose["left"][:3], pose["right"][:3]], dtype=np.float64)
+            for e in self.detector.step(i, grip, pos):
+                e["confirmed"] = i
+                self.events.append(e)
+            self.detected_upto = i
+
     def decide(self, request: dict):
         import numpy as np
         from fastwam.memory_s1.common import seed_for
@@ -222,27 +251,39 @@ class FullSession:
                 self.raw[int(r["frame_id"])] = r
             if sorted(self.raw) != list(range(current + 1)):
                 raise ValueError("Missing contiguous observations")
-            if p.rule.variant in ("event", "prop"):
-                raise NotImplementedError("online event detection needs end-effector poses in the observations")
-            ids, _ = select(p.rule, current)
-            self._encode(sorted(set(ids) | {current}))
+            known, ledger, entries = [], None, []
+            if p.rule.variant in ("event", "prop", "arprop", "arev"):
+                from .data import check_ledger_slots, ledger_tensor
+                from .events import event_frames
+                from .history import ledger_entries
+                self._detect(current)
+                known = event_frames(self.events, before=current, known_by=current - int(p.rule.lag))
+                if p.rule.variant == "arprop":
+                    if self.decisions == 0:
+                        check_ledger_slots(self.text[0], p.rule.event_max, "(online instruction)")
+                    entries = ledger_entries(p.rule, current, self.events)
+                    ledger = ledger_tensor(p.rule, entries, self._proprio)
+            ids, _ = select(p.rule, current, known)
+            self._encode(sorted(set(ids) | {current} | (set(known) if p.rule.variant == "prop" else set())))
             noise_frame = 0 if self.noise_mode == "per_episode" else int(request.get("noise_frame", current))
             seed = seed_for(p.dense_cfg["seed"], self.seed, noise_frame, "closed-loop-noise")
             noise = diagnostic_action_noise(seed).to(torch.bfloat16).float()[None]
-            out = decide_encoded(p.model, p.rule, self.cache, self.encoded, current, self.text, noise, self.steps)
+            out = decide_encoded(p.model, p.rule, self.cache, self.encoded, current, self.text, noise, self.steps,
+                                 known, ledger)
             raw = p.normaliser.denormalize(out["normalised"].float().cpu())
             actions = raw.clone()
             actions[:, [6, 13]] = actions[:, [6, 13]].clamp(0, 1)
             if not bool(torch.isfinite(actions).all()):
                 raise ValueError("Non-finite action")
-            for i in [i for i in self.encoded if i not in keep_set(p.rule, current, []) and i != current]:
+            for i in [i for i in self.encoded if i not in keep_set(p.rule, current, known) and i != current]:
                 del self.encoded[i]
         seconds = time.monotonic() - start
         append(self.directory / "decisions.jsonl", {
             "frame_id": current, "mode": self.mode, "steps": self.steps, "history_ids": out["ids"],
             "history_positions": out["positions"], "noise_seed": seed, "seconds": seconds,
             "normalized_actions": out["normalised"].float().cpu().tolist(), "actions_after_gripper_clip": actions.tolist(),
-            "cached_frames": len(self.cache.kv)})
+            "cached_frames": len(self.cache.kv), "events_known": known,
+            "ledger": [[int(e["frame"]), int(e["arm"]), e["kind"], int(e["confirmed"])] for e in entries]})
         if self.decisions % 4 == 0:
             print(f"[decide] {now()} {self.tag} frame={current}/{self.limit} hist={len(out['ids'])} "
                   f"policy={seconds:.1f}s elapsed={time.monotonic() - self.started:.0f}s", flush=True)

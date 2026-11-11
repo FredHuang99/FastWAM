@@ -35,7 +35,7 @@ def _model(variant="ar", event_slots=0, seed=0):
     m = FullModel(mot, nn.Linear(14, TEXT), variant=variant, event_slots=event_slots)
     with torch.no_grad():                         # lift zero-initialised output layers so every path does something
         for name, p in m.named_parameters():
-            if p.abs().sum() == 0 and not name.startswith(("hist_gate", "extra")):
+            if p.abs().sum() == 0 and not name.startswith(("hist_gate", "extra", "ledger")):
                 p.normal_(0, 0.02)
     return m.float()
 
