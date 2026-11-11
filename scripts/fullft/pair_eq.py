@@ -46,7 +46,7 @@ OUT = Path(os.environ.get("ALIGN_OUT", "/workspace/FastWAM-memory2/outputs/fullf
 
 
 def side(folders, label, mode, path, tasks):
-    """{task: {seed: {"progress", "success", <stage flags>}}} of one side."""
+    """{task: {seed: {"progress", "success", <stage flags>, "_dir"}}} of one side ("_dir" only for local folders)."""
     rows = {}
     if path:
         data = json.loads(Path(q.resolve(path)).read_text(encoding="utf-8"))
@@ -57,11 +57,30 @@ def side(folders, label, mode, path, tasks):
         for (task, _mode, seed), a in eps.items():
             row = {k: v for k, v in a.items() if k != "dir" and isinstance(v, (bool, int, float, str))}
             row["progress"] = q.progress(task, a)
+            if a.get("dir"):
+                row["_dir"] = str(a["dir"])
             rows.setdefault(task, {})[str(seed)] = row
     return {t: r for t, r in rows.items() if not tasks or t in tasks}
 
 
-def compare(task, a, b):
+def first_divergence(dir_a, dir_b, tol=1e-4):
+    """(identical, first executed target index whose |target difference| > tol, compared length)."""
+    def targets(d):
+        out = []
+        with open(Path(d) / "executed_actions.jsonl", encoding="utf-8") as fh:
+            for line in fh:
+                if line.strip():
+                    out.append(json.loads(line)["target"])
+        return out
+    ta, tb = targets(dir_a), targets(dir_b)
+    n = min(len(ta), len(tb))
+    for i in range(n):
+        if max(abs(x - y) for x, y in zip(ta[i], tb[i])) > tol:
+            return False, i, n
+    return len(ta) == len(tb), n, n
+
+
+def compare(task, a, b, divergence=False):
     seeds = sorted(set(a) & set(b), key=int)
     n = len(seeds)
     out = {"task": task, "n": n, "a_scenes": len(a), "b_scenes": len(b),
@@ -77,6 +96,13 @@ def compare(task, a, b):
     out.update(mean_a=q.mean(float(a[s]["progress"]) for s in seeds), mean_b=q.mean(float(b[s]["progress"]) for s in seeds),
                delta=q.mean(diffs), ci=[float(ci[0]), float(ci[1])], success_a=sa, success_b=sb,
                only_a=only_a, only_b=only_b, sign_p=q.sign_p(only_a, only_b), seeds=seeds)
+    if divergence:
+        found = [first_divergence(a[s]["_dir"], b[s]["_dir"]) for s in seeds if a[s].get("_dir") and b[s].get("_dir")]
+        if found:
+            steps = sorted(f[1] for f in found if not f[0])
+            out.update(identical=sum(f[0] for f in found), divergence_n=len(found),
+                       divergence_median=steps[len(steps) // 2] if steps else None,
+                       divergence_min=steps[0] if steps else None)
     key = KEY.get(task)
     if key:
         out.update(key=key, key_a=sum(bool(a[s].get(key)) for s in seeds), key_b=sum(bool(b[s].get(key)) for s in seeds))
@@ -131,6 +157,8 @@ def main():
     ap.add_argument("--tasks", nargs="*", default=[])
     ap.add_argument("--rule", default="report", choices=("n1", "al4", "al5", "al7", "report"))
     ap.add_argument("--name", required=True)
+    ap.add_argument("--divergence", action="store_true",
+                    help="both sides local: scenes whose executed targets are identical, and the first diverging target")
     args = ap.parse_args()
     a = side(args.a_folders, args.a_label, args.a_mode, args.a_json, args.tasks)
     b = side(args.b_folders, args.b_label, args.b_mode, args.b_json, args.tasks)
@@ -140,7 +168,7 @@ def main():
     print(f"PAIR {args.name}: rule {args.rule}; A = {args.a_json or args.a_folders} {args.a_label}; "
           f"B = {args.b_json or args.b_folders} {args.b_label}")
     for task in tasks:
-        c = compare(task, a.get(task, {}), b.get(task, {}))
+        c = compare(task, a.get(task, {}), b.get(task, {}), args.divergence)
         label, ok, note = reading(args.rule, c)
         c.update(reading=label, ok=ok, note=note)
         report["tasks"][task] = {k: v for k, v in c.items() if k != "seeds"} | {"seeds": c.get("seeds", [])}
@@ -153,6 +181,9 @@ def main():
               f"{c['mean_a']:.3f} B {c['mean_b']:.3f}; delta {c['delta']:+.3f} CI [{c['ci'][0]:+.3f}, {c['ci'][1]:+.3f}]"
               f"{keys}; success A {c['success_a']} B {c['success_b']} (only A {c['only_a']}, only B {c['only_b']}, "
               f"sign p {c['sign_p']:.3f}) -> {label} {note}")
+        if "divergence_n" in c:
+            print(f"    executed targets: identical in {c['identical']}/{c['divergence_n']} scenes; first divergence "
+                  f"median target {c['divergence_median']}, earliest {c['divergence_min']}")
     if args.rule == "report":
         verdict = "REPORT ONLY"
     elif args.rule == "al5":

@@ -2737,42 +2737,6 @@ tasks:
       then: "read report/FIRSTRENDER_A100_*.txt: the GPU was not empty (the script refuses a shared GPU and the pool retries), the dump failed, or the relay upload failed (no HF token in the container: the dump under closed_loop/check_a100 is still usable)"
   on_pass: "send report/FIRSTRENDER_A100_*.txt"
 
-- id: X7-12ep
-  lane: train
-  kind: train
-  hold: true        # 11-11 20:45 (plan v12, user to confirm): paused to free GPU 2 for AL5 while every other A100 GPU is taken; it resumes from its checkpoint when hold is removed (appendix only)
-  need_mib: 34000
-  run: x7_cont12
-  reference_run: a2C_6ep
-  hypothesis: "plan v10 preparation (pre-registered 11-11 00:50; user question: is the gap training volume or design?): X7 trained 6 MORE epochs with its own recipe (same data and pairs, ActionDiT lr 1e-5, memory lr 2e-5, micro batch 4), started from X7's memory_v2 AND ActionDiT weights (init_memory + init_action = a2C_6ep update_004020), fresh optimizer and schedule; epoch checkpoints update_001340 / 002680 / 004020 = 8 / 10 / 12 epochs in total. Training check only: the run completes without a guard trip and its update-0 offline error equals X7's final offline error within 2 % (the start really is X7)"
-  sets:
-    - optim.lr_action=1e-5
-    - optim.lr_memory=2e-5
-    - init_memory={O}/a2C_6ep/checkpoints/update_004020.pt
-    - init_action={O}/a2C_6ep/checkpoints/update_004020.pt
-    - schedule.epochs=6
-    - schedule.micro_batch=4
-    - schedule.eval_every=335
-    - schedule.keep_last=2
-    - schedule.save_every=200
-    - guard.loss_factor=2.5
-    - guard.start_update=120
-    - pairs.file={O}/pairs/pairs_v1.json
-    - pairs.weight=0.5
-    - pairs.per_update=8
-    - pairs.max_visual_distance=0.00011537869913136323
-  inconclusive_if: "not m.get('eval_first') or not r.get('eval_last') or 'on/arm_rmse_rad' not in m['eval_first']"
-  pass_if: "m.get('complete') and not m.get('guard') and abs(m['eval_first']['on/arm_rmse_rad'] - r['eval_last']['on/arm_rmse_rad']) <= 0.02 * r['eval_last']['on/arm_rmse_rad']"
-  failure_explanations:
-    - if: "m.get('eval_first') and r.get('eval_last') and abs(m['eval_first']['on/arm_rmse_rad'] - r['eval_last']['on/arm_rmse_rad']) > 0.02 * r['eval_last']['on/arm_rmse_rad']"
-      then: "the update-0 model is not X7 (init_action / init_memory not applied, or another eval set): the closed loop would not measure 'X7 + 6 epochs'; read the [init] lines of x7_cont12/stdout.log"
-    - if: "m.get('guard')"
-      then: "the guard stopped the run: see GUARD.json (a fresh warm-up on a converged model can raise the FM loss briefly)"
-    - if: "m.get('config_diff') and any(v[1] is not None and not k.startswith(('name', 'output', 'init_memory', 'init_action')) for k, v in m['config_diff'].items())"
-      then: "the config differs from X7 beyond name / output / init_memory / init_action (see config_diff): not X7's recipe"
-  on_pass: "X7-12ep-loop evaluates update_004020 (12 epochs) on the official put / swap scenes 1-50"
-  on_fail: "see failure_explanations; X7-12ep-loop is skipped"
-
 - id: X7-12ep-loop
   lane: loop
   kind: closed_loop
@@ -3104,7 +3068,7 @@ tasks:
   after: [AL5-put-s0, AL5-put-s1, AL5-swap-s0, AL5-swap-s1]
   timeout_h: 1
   hypothesis: "plan v12 AL5 reading per task (pair_eq.py --rule al5): CAUSE = paired progress (2.3.3 - standard) mean <= -0.05 with CI upper < 0; NOT CAUSE = |mean| <= 0.05 with CI containing 0; else UNDETERMINED; floor: the reference's put lifted / swap s1 >= 18/20"
-  command: "cd /workspace/FastWAM-memory2 && export PYTHONPATH=src && P=/opt/mwam/bin/python && $P scripts/fullft/pair_eq.py --name al5_put --rule al5 --a-folders closed_loop/al5 --a-label x7_al5_oidn233 --b-folders closed_loop/official/put_x7_s0 closed_loop/official/put_x7_s1 --b-label a2C6_e6 --tasks put_back_block && $P scripts/fullft/pair_eq.py --name al5_swap --rule al5 --a-folders closed_loop/al5 --a-label x7_al5_oidn233 --b-folders closed_loop/official/swap8_x7_s0 closed_loop/official/swap8_x7_s1 closed_loop/official/swap8_x7_s2 --b-label a2C6_e6_exec8 --tasks swap_blocks"
+  command: "cd /workspace/FastWAM-memory2 && export PYTHONPATH=src && P=/opt/mwam/bin/python && $P scripts/fullft/pair_eq.py --name al5_put --rule al5 --divergence --a-folders closed_loop/al5 --a-label x7_al5_oidn233 --b-folders closed_loop/official/put_x7_s0 closed_loop/official/put_x7_s1 --b-label a2C6_e6 --tasks put_back_block && $P scripts/fullft/pair_eq.py --name al5_swap --rule al5 --divergence --a-folders closed_loop/al5 --a-label x7_al5_oidn233 --b-folders closed_loop/official/swap8_x7_s0 closed_loop/official/swap8_x7_s1 closed_loop/official/swap8_x7_s2 --b-label a2C6_e6_exec8 --tasks swap_blocks"
   pass_if: "m['rc'] == 0"
   on_pass: "read the PAIR VERDICT lines in the task log (outputs/memory_v2/queue5/tasks/AL5-verdict.log)"
 
@@ -3275,3 +3239,79 @@ tasks:
   hypothesis: "plan v12 AL4a: export the A100's per-scene stages of ar_2task_e20 and relay them (diag/a100_ar_2task_e20_stages) for the paired table on the 5090"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/migrate/export_stages.py --label ar_2task_e20 --mode on --folders /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/g1 --out closed_loop/check_a100/ar_2task_e20_stages.json --relay diag/a100_ar_2task_e20_stages"
   pass_if: "m['rc'] == 0"
+
+# ---------------------------------------------------------------- fillers (lowest priority, 11-11 21:00)
+- id: AL5-ctrl-put-s0
+  lane: loop
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v12 AL5 control (filler, added 11-11 21:00 before any run): X7 on the A100's STANDARD pipeline (bundled OIDN 2.0.1), put scenes 31-50, shard 0 of 2: does the A100 reproduce its own official closed loop (11-03) episode by episode? Descriptive (pair_eq --rule report --divergence); it tells whether AL5's paired differences can contain chance divergence and is the A100 floor that AL1 needs"
+  checkpoint: a2C_6ep/checkpoints/update_004020.pt
+  label: x7_al5_ctrl
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--from-scene", "31", "--limit", "20", "--shard", "0/2"]
+  output: closed_loop/al5
+
+- id: AL5-ctrl-put-s1
+  lane: loop
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v12 AL5 control (filler, added 11-11 21:00 before any run): X7 on the A100's STANDARD pipeline (bundled OIDN 2.0.1), put scenes 31-50, shard 1 of 2: does the A100 reproduce its own official closed loop (11-03) episode by episode? Descriptive (pair_eq --rule report --divergence); it tells whether AL5's paired differences can contain chance divergence and is the A100 floor that AL1 needs"
+  checkpoint: a2C_6ep/checkpoints/update_004020.pt
+  label: x7_al5_ctrl
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--from-scene", "31", "--limit", "20", "--shard", "1/2"]
+  output: closed_loop/al5
+
+- id: AL5-ctrl-report
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  after: [AL5-ctrl-put-s0, AL5-ctrl-put-s1]
+  timeout_h: 1
+  hypothesis: "plan v12 AL5 control: the A100 standard-pipeline rerun vs the official 11-03 episodes of put 31-50 (numbers only: paired progress, identical executed targets, first divergence)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/pair_eq.py --name al5_ctrl_put --rule report --divergence --a-folders closed_loop/al5 --a-label x7_al5_ctrl --b-folders closed_loop/official/put_x7_s0 closed_loop/official/put_x7_s1 --b-label a2C6_e6 --tasks put_back_block"
+  pass_if: "m['rc'] == 0"
+
+- id: X7-12ep
+  lane: train
+  kind: train
+  # 11-11 20:45 paused on GPU 2 for AL5 (user OK); 21:00 moved to the END of the file = the lowest-priority filler:
+  # it resumes from its checkpoint on a GPU that nothing else in the queue can use
+  need_mib: 34000
+  run: x7_cont12
+  reference_run: a2C_6ep
+  hypothesis: "plan v10 preparation (pre-registered 11-11 00:50; user question: is the gap training volume or design?): X7 trained 6 MORE epochs with its own recipe (same data and pairs, ActionDiT lr 1e-5, memory lr 2e-5, micro batch 4), started from X7's memory_v2 AND ActionDiT weights (init_memory + init_action = a2C_6ep update_004020), fresh optimizer and schedule; epoch checkpoints update_001340 / 002680 / 004020 = 8 / 10 / 12 epochs in total. Training check only: the run completes without a guard trip and its update-0 offline error equals X7's final offline error within 2 % (the start really is X7)"
+  sets:
+    - optim.lr_action=1e-5
+    - optim.lr_memory=2e-5
+    - init_memory={O}/a2C_6ep/checkpoints/update_004020.pt
+    - init_action={O}/a2C_6ep/checkpoints/update_004020.pt
+    - schedule.epochs=6
+    - schedule.micro_batch=4
+    - schedule.eval_every=335
+    - schedule.keep_last=2
+    - schedule.save_every=200
+    - guard.loss_factor=2.5
+    - guard.start_update=120
+    - pairs.file={O}/pairs/pairs_v1.json
+    - pairs.weight=0.5
+    - pairs.per_update=8
+    - pairs.max_visual_distance=0.00011537869913136323
+  inconclusive_if: "not m.get('eval_first') or not r.get('eval_last') or 'on/arm_rmse_rad' not in m['eval_first']"
+  pass_if: "m.get('complete') and not m.get('guard') and abs(m['eval_first']['on/arm_rmse_rad'] - r['eval_last']['on/arm_rmse_rad']) <= 0.02 * r['eval_last']['on/arm_rmse_rad']"
+  failure_explanations:
+    - if: "m.get('eval_first') and r.get('eval_last') and abs(m['eval_first']['on/arm_rmse_rad'] - r['eval_last']['on/arm_rmse_rad']) > 0.02 * r['eval_last']['on/arm_rmse_rad']"
+      then: "the update-0 model is not X7 (init_action / init_memory not applied, or another eval set): the closed loop would not measure 'X7 + 6 epochs'; read the [init] lines of x7_cont12/stdout.log"
+    - if: "m.get('guard')"
+      then: "the guard stopped the run: see GUARD.json (a fresh warm-up on a converged model can raise the FM loss briefly)"
+    - if: "m.get('config_diff') and any(v[1] is not None and not k.startswith(('name', 'output', 'init_memory', 'init_action')) for k, v in m['config_diff'].items())"
+      then: "the config differs from X7 beyond name / output / init_memory / init_action (see config_diff): not X7's recipe"
+  on_pass: "X7-12ep-loop evaluates update_004020 (12 epochs) on the official put / swap scenes 1-50"
+  on_fail: "see failure_explanations; X7-12ep-loop is skipped"
