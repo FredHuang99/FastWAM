@@ -14,12 +14,18 @@
 #   equivalent -> the 5090 runs verdict-bearing closed loops (evaluation farm); otherwise -> no verdicts on the 5090,
 #   paired table goes to the autopsy, evaluation stays on the A100 / H200
 # COMPARE_ONLY=1: steps 1 and 4 only (re-read the relayed A100 export and redo the paired table; no GPU needed).
+# RERUN=1 (11-11 17:40): the first run paired nothing on put: the A100's official X7 put episodes are scenes 31-100
+#   (scenes 1-30 of that table ran on the H200), and this script ran put 1-20. The criterion is "same scenes as the
+#   A100", so RERUN=1 skips step 2 and runs put on the first 20 put scenes (bank order) that the A100 export holds
+#   (= scenes 31-50); swap 1-20 is already finished (resumed, nothing to do). The put 1-20 episodes are kept; they have
+#   no A100 partner and are left out of the pairing (reported). Step 4 now reports "no paired scenes" instead of failing.
 # GPU ${GPU:-0} only, must be empty. Own log: report/EQ5090B_<time>.txt
 #   docker exec -d mwam5090 bash /workspace/FastWAM-memory2/scripts/memory_v2/migrate/eq5090b.sh     (about 2-3 h)
 set -u
 R=/workspace/FastWAM-memory2
 O=$R/outputs/memory_v2
-LOG=$O/report/EQ5090B_$(date +%Y%m%d_%H%M).txt
+MODE=""; [ "${COMPARE_ONLY:-0}" = 1 ] && MODE="compare_"; [ "${RERUN:-0}" = 1 ] && MODE="rerun_"
+LOG=$O/report/EQ5090B_${MODE}$(date +%Y%m%d_%H%M).txt
 mkdir -p "$O/report" "$O/closed_loop"
 exec > >(tee -a "$LOG") 2>&1
 trap 'rc=$?; echo "[eq5090b] $(date "+%F %T") finished, exit code $rc; log $LOG"' EXIT
@@ -40,6 +46,7 @@ step "1 relay get the A100's per-scene stages"
   || echo "relay get failed: the paired comparison will be skipped (run export_stages.py on the A100 first)"
 
 if [ "${COMPARE_ONLY:-0}" != 1 ]; then
+if [ "${RERUN:-0}" != 1 ]; then
 step "2 first decision of put_back seed 4300030"
 FIRST=$O/closed_loop/eq5090b_first
 $PY -m fastwam.memory_v2.online run --checkpoint $CK --label x7_first_oidn --scenes $O/closed_loop/scenes_seed42_n100_put_back_block \
@@ -58,16 +65,36 @@ for s in range(4):
     d = (np.asarray(ref[:n]) - np.asarray(rows[s:s + n]))[:, ARM]
     print(f"  lag {s}: arm RMSE {float(np.sqrt((d ** 2).mean())):.4f}")
 EOF
+fi
 
-run_bank() {   # task, first N scenes
-  step "3 closed loop $1: X7 on, 10 steps, execute 8, official scenes 1-$2"
+run_bank() {   # task, first N scenes, optional "task:seed ..." list (only these scenes)
+  step "3 closed loop $1: X7 on, 10 steps, execute 8, official scenes: ${3:-1-$2}"
   for pass in 1 2; do
     $PY -m fastwam.memory_v2.online run --checkpoint $CK --label x7_eq5090b --scenes $O/closed_loop/scenes_seed42_n100_$1 \
-      --tasks "$1" --limit "$2" --execute 8 --output $O/closed_loop/eq5090b >> $O/closed_loop/eq5090b_run.log 2>&1
+      --tasks "$1" --limit "$2" ${3:+--seeds $3} --execute 8 --output $O/closed_loop/eq5090b >> $O/closed_loop/eq5090b_run.log 2>&1
     echo "pass $pass exit code $?; finished: $(ls $O/closed_loop/eq5090b/x7_eq5090b/on/$1/seed_*/result.json 2>/dev/null | grep -cE 'seed_[0-9]+/result.json')"
   done
 }
-run_bank put_back_block 20
+PUT_SEEDS=""
+if [ "${RERUN:-0}" = 1 ]; then
+  PUT_SEEDS=$($PY - <<'PYSEEDS'
+import json
+from pathlib import Path
+O = Path("/workspace/FastWAM-memory2/outputs/memory_v2")
+ref = json.loads((O / "closed_loop/check_from_a100/x7_official_stages.json").read_text())["episodes"]["put_back_block"]
+order = []
+for f in sorted((O / "closed_loop/scenes_seed42_n100_put_back_block").glob("*.json")):
+    v = json.loads(f.read_text())
+    sc = v.get("scenes") if isinstance(v, dict) else v
+    order += [int(s["seed"]) for s in (sc if isinstance(sc, list) else []) if s["task"] == "put_back_block"]
+pick = [s for s in order if str(s) in ref][:20]
+print(" ".join(f"put_back_block:{s}" for s in pick))
+PYSEEDS
+)
+  echo "put scenes that the A100 export holds (first 20 in bank order): $PUT_SEEDS"
+  [ -n "$PUT_SEEDS" ] || { echo "no A100 put scenes found: stopping"; exit 1; }
+fi
+run_bank put_back_block 20 "$PUT_SEEDS"
 run_bank swap_blocks 20
 echo "OIDN errors in the run log: $(grep -c 'OIDN Error' $O/closed_loop/eq5090b_run.log)"
 fi
@@ -88,10 +115,17 @@ for (task, mode, seed), a in eps.items():
 if not ref_path.exists():
     print("no A100 export: paired comparison skipped; verdict pending"); raise SystemExit
 ref = json.loads(ref_path.read_text())["episodes"]
-verdict = True
+verdict, missing = True, []
 for task, key, floor in (("put_back_block", "lifted", 18), ("swap_blocks", "s1", 18)):
     m, r = mine.get(task, {}), ref.get(task, {})
     seeds = sorted(set(m) & set(r), key=int)
+    if not seeds:
+        print(f"{task}: 5090 scenes {len(m)}, A100 scenes {len(r)}, paired n=0: no scene on both machines -> no verdict")
+        verdict, missing = False, missing + [task]
+        continue
+    unpaired = len(set(m) - set(r))
+    if unpaired:
+        print(f"{task}: {unpaired} 5090 scenes have no A100 partner and are left out of the pairing")
     diffs = [q.progress(task, m[s]) - r[s]["progress"] for s in seeds]
     ci = q.bootstrap_ci(diffs) if diffs else [None, None]
     mine_n = sum(bool(m[s].get(key)) for s in seeds)
@@ -105,5 +139,6 @@ for task, key, floor in (("put_back_block", "lifted", 18), ("swap_blocks", "s1",
           f"{key}: 5090 {mine_n}/{len(seeds)}, A100 {ref_n}/{len(seeds)}; success 5090 "
           f"{sum(bool(m[s].get('success')) for s in seeds)} vs A100 {sum(bool(r[s].get('success')) for s in seeds)}; "
           f"{'floor ok' if ok_floor else 'FLOOR NOT MET (no verdict)'}; {'equivalent' if ok else 'NOT equivalent'}")
-print("EQ5090B VERDICT:", "EQUIVALENT" if verdict else "NOT EQUIVALENT (or no verdict)")
+print("EQ5090B VERDICT:", f"NO VERDICT (no paired scenes: {missing})" if missing else
+      ("EQUIVALENT" if verdict else "NOT EQUIVALENT (or no verdict)"))
 EOF
