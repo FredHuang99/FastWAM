@@ -91,7 +91,7 @@ def touching(row, name, side):
     return bool((cell.get("by_side") or {}).get(side))
 
 
-def analyse(rows):
+def analyse(rows, settle=SETTLE):
     if not rows:
         return []
     target = np.asarray([r["target"] for r in rows], dtype=float)
@@ -111,7 +111,7 @@ def analyse(rows):
                     if name in z0 and z - z0[name] >= 0.02 and touching(rows[u], name, side):
                         achieved = True
             retry = any(t < c <= t + WINDOW_RETRY for c in closes)
-            s = min(len(rows) - 1, t + SETTLE)
+            s = min(len(rows) - 1, t + settle)
             attempts.append({"arm": arm, "t": t, "achieved": achieved, "retry": retry,
                              "echo_settled": float(echo[s, col]), "phys_settled": float(phys[s, col])})
     return sorted(attempts, key=lambda a: a["t"])
@@ -133,6 +133,8 @@ def main():
     ap.add_argument("--folder", nargs="*", default=[])
     ap.add_argument("--search", default="")
     ap.add_argument("--out", default="/workspace/FastWAM-memory2/outputs/fullft/k0")
+    ap.add_argument("--settle", type=int, default=SETTLE,
+                    help="targets after the close at which the readings are taken (11-11: 4 = the ledger write lag k)")
     args = ap.parse_args()
     folders = [resolve(f) for f in args.folder]
     if args.search:
@@ -141,10 +143,10 @@ def main():
     per_task = {}
     for task, seed, d in episodes(folders, args.label):
         result = json.loads((d / "result.json").read_text())
-        att = analyse(load_rows(d / "executed_actions.jsonl"))
+        att = analyse(load_rows(d / "executed_actions.jsonl"), args.settle)
         per_task.setdefault(task, []).append({"seed": seed, "success": bool(result.get("success")), "attempts": att})
     report = {"label": args.label, "folders": [str(f) for f in folders], "tasks": {}}
-    print(f"K0 grasp attempts, label {args.label} ({len(folders)} folders)")
+    print(f"K0 grasp attempts, label {args.label} ({len(folders)} folders); readings {args.settle} targets after the close")
     print("| task | episodes (success) | attempts | failed | failed -> retry / move on | failed episodes whose first "
           "failed attempt moved on | AUC policy-visible gripper | AUC physical fingers |")
     print("|---|---|---|---|---|---|---|---|")
@@ -180,7 +182,7 @@ def main():
     print("press attempts: not measured (no end-effector height in the logs)")
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
-    path = out / f"SELF_FAIL_{args.label}_{datetime.now(BJ):%Y%m%d_%H%M}.json"
+    path = out / f"SELF_FAIL_{args.label}_settle{args.settle}_{datetime.now(BJ):%Y%m%d_%H%M}.json"
     path.write_text(json.dumps(report, indent=1) + "\n")
     print(f"K0: {path}")
 
