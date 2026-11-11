@@ -10,6 +10,7 @@ exec > >(tee -a "$LOG") 2>&1
 trap 'rc=$?; echo "[relay] $(date "+%F %T") finished, exit code $rc; log $LOG"' EXIT
 F=$OUT/${RUN:?}/export_${TAG:?}.pt
 ls -la "$F" || { echo "missing export $F"; exit 1; }
-sha256sum "$F" | tee "$F.sha256"
-cd $R && /opt/hf-tools/bin/python scripts/memory_v2/migrate/relay.py put "$F" "$F.sha256" \
+HFPY=/opt/hf-tools/bin/python; [ -x $HFPY ] || HFPY=/opt/mwam/bin/python      # the H200 has no separate HF venv
+(cd $(dirname "$F") && sha256sum $(basename "$F")) | tee "$F.sha256"
+cd $R && $HFPY scripts/memory_v2/migrate/relay.py put "$F" "$F.sha256" \
   --prefix exports/${RUN}_${TAG} --repo hhyfred/memwam-fullft 2>&1 | grep -v "Processing\|Upload\|Validating\|%|"

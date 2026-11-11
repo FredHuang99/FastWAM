@@ -4,6 +4,7 @@ The machines cannot reach each other; each has `hf auth login` done in its conta
 by huggingface_hub and never printed or written by this script).
   put FILE ... --prefix diag/<tag>      upload the files to <repo>/<prefix>/<file name> (repo created private if missing)
   get --prefix diag/<tag> --out DIR     download every file under <prefix> into DIR (flat)
+  ls  --prefix diag/<tag>               print "<name> <bytes>" of every file under <prefix> (nothing = absent)
 Run with the HF tools python: /opt/hf-tools/bin/python scripts/memory_v2/migrate/relay.py ...
 """
 from __future__ import annotations
@@ -17,7 +18,7 @@ REPO = "hhyfred/memwam-diag-v1"
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("cmd", choices=("put", "get"))
+    ap.add_argument("cmd", choices=("put", "get", "ls"))
     ap.add_argument("files", nargs="*")
     ap.add_argument("--prefix", required=True)
     ap.add_argument("--out", default=".")
@@ -33,6 +34,15 @@ def main():
             api.upload_file(path_or_fileobj=str(p), path_in_repo=f"{prefix}/{p.name}", repo_id=args.repo,
                             repo_type="model", commit_message=f"{prefix}/{p.name}")
             print(f"[relay] put {p} ({p.stat().st_size} bytes) -> {args.repo}/{prefix}/{p.name}", flush=True)
+        return
+    if args.cmd == "ls":
+        try:
+            rows = [x for x in api.list_repo_tree(args.repo, path_in_repo=prefix, repo_type="model", recursive=True)
+                    if hasattr(x, "size")]
+        except Exception:                                   # noqa: BLE001 (absent prefix or repo = nothing listed)
+            rows = []
+        for x in rows:
+            print(f"{Path(x.path).name} {x.size}")
         return
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
