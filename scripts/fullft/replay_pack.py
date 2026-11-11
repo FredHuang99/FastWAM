@@ -60,7 +60,8 @@ def steps(path):
             if not line.strip():
                 continue
             r = json.loads(line)
-            targets.append([round(float(x), 7) for x in r["target"]])
+            targets.append([float(x) for x in r["target"]])        # EXACT (11-11: rounding to 7 decimals changed
+            #                                                         the float32 targets by an ulp; the replay drifted mm)
             joints.append([round(float(x), 7) for x in (r.get("physical_after") or [])])
             objects.append({k: [round(float(x), 7) for x in v["p"][:3]] for k, v in (r.get("objects_after") or {}).items()
                             if isinstance(v, dict) and isinstance(v.get("p"), list)})

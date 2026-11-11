@@ -7,6 +7,7 @@
 #   3 the 5090 replays the A100 episodes (put 31-50, swap 1-20), execute 8, resumable (two passes)
 #   4 compare -> AL1 reading (replay_pack.py: CONSISTENT / PARTIAL / INCONSISTENT; the floor = the A100 replaying its
 #     own episodes, queue card AL1-a100-self, judged on the A100)
+# 11-11 22:00: v2 names (exact targets in the packs; the first self-check failed on rounded targets).
 # GPU ${GPU:-0}, must be empty. Own log: outputs/fullft/align/AL1_5090_<time>.txt
 #   docker exec -d -e GPU=0 mwam5090 bash /workspace/FastWAM-memory2/scripts/fullft/al1_5090.sh
 set -u
@@ -30,31 +31,31 @@ PUTB=$O/closed_loop/scenes_seed42_n100_put_back_block
 SWAPB=$O/closed_loop/scenes_seed42_n100_swap_blocks
 
 step "1 the A100 pack"
-[ -f $P/a100_x7.json.gz ] || /opt/hf-tools/bin/python scripts/memory_v2/migrate/relay.py get --prefix diag/al1_pack --out $P \
+[ -f $P/a100_x7v2.json.gz ] || /opt/hf-tools/bin/python scripts/memory_v2/migrate/relay.py get --prefix diag/al1_pack_v2 --out $P \
   2>&1 | tail -1
-ls -la $P/a100_x7.json.gz || { echo "no A100 pack on the relay yet: stopping"; exit 1; }
+ls -la $P/a100_x7v2.json.gz || { echo "no A100 pack on the relay yet: stopping"; exit 1; }
 
 step "2 tool acceptance: the 5090 replays 5 of its own eq5090b put episodes (scenes 31-35)"
-$PY scripts/fullft/replay_pack.py pack --name self_5090 --folders closed_loop/eq5090b --label x7_eq5090b \
+$PY scripts/fullft/replay_pack.py pack --name self_5090v2 --folders closed_loop/eq5090b --label x7_eq5090b \
   --task put_back_block --bank $PUTB --from-scene 31 --limit 5
 for pass in 1 2; do
-  $PY -m fastwam.memory_v2.online run --checkpoint replay:$P/self_5090.json.gz --label replay_self --scenes $PUTB \
+  $PY -m fastwam.memory_v2.online run --checkpoint replay:$P/self_5090v2.json.gz --label replay_self_v2 --scenes $PUTB \
     --tasks put_back_block --from-scene 31 --limit 5 --execute 8 --output $O/closed_loop/al1 >> $O/closed_loop/al1_run.log 2>&1
 done
-OUTC=$($PY scripts/fullft/replay_pack.py compare --pack $P/self_5090.json.gz --folder closed_loop/al1 --label replay_self \
-  --name self_5090 --self-check 2>&1)
+OUTC=$($PY scripts/fullft/replay_pack.py compare --pack $P/self_5090v2.json.gz --folder closed_loop/al1 --label replay_self_v2 \
+  --name self_5090v2 --self-check 2>&1)
 echo "$OUTC" | tail -n 10
-echo "$OUTC" | grep -q "REPLAY READING self_5090: SELF-CHECK PASS" \
+echo "$OUTC" | grep -q "REPLAY READING self_5090v2: SELF-CHECK PASS" \
   || { echo "the 5090 does not reproduce its own episodes under replay (tool or 5090 physics not deterministic): stopping"; exit 1; }
 
 step "3 the 5090 replays the A100's episodes"
 for pass in 1 2; do
-  $PY -m fastwam.memory_v2.online run --checkpoint replay:$P/a100_x7.json.gz --label replay_a100 --scenes $PUTB \
+  $PY -m fastwam.memory_v2.online run --checkpoint replay:$P/a100_x7v2.json.gz --label replay_a100_v2 --scenes $PUTB \
     --tasks put_back_block --from-scene 31 --limit 20 --execute 8 --output $O/closed_loop/al1 >> $O/closed_loop/al1_run.log 2>&1
-  $PY -m fastwam.memory_v2.online run --checkpoint replay:$P/a100_x7.json.gz --label replay_a100 --scenes $SWAPB \
+  $PY -m fastwam.memory_v2.online run --checkpoint replay:$P/a100_x7v2.json.gz --label replay_a100_v2 --scenes $SWAPB \
     --tasks swap_blocks --limit 20 --execute 8 --output $O/closed_loop/al1 >> $O/closed_loop/al1_run.log 2>&1
-  echo "pass $pass: finished $(ls $O/closed_loop/al1/replay_a100/on/*/seed_*/result.json 2>/dev/null | grep -cE 'seed_[0-9]+/result.json')"
+  echo "pass $pass: finished $(ls $O/closed_loop/al1/replay_a100_v2/on/*/seed_*/result.json 2>/dev/null | grep -cE 'seed_[0-9]+/result.json')"
 done
 
 step "4 AL1 reading (the floor = the A100 self-replay, judged on the A100)"
-$PY scripts/fullft/replay_pack.py compare --pack $P/a100_x7.json.gz --folder closed_loop/al1 --label replay_a100 --name al1_5090
+$PY scripts/fullft/replay_pack.py compare --pack $P/a100_x7v2.json.gz --folder closed_loop/al1 --label replay_a100_v2 --name al1_5090
