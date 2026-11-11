@@ -537,7 +537,8 @@ def run_episode(policy: Policy, scene: dict, mode: str, label: str, out: Path, a
                                    "coherence": args.coherence, "noise": args.noise,
                                    "policy": policy.describe(), "label": label, "stress": stress})
     target_limit = min(limit, args.max_targets) if args.max_targets else limit
-    session = Session(policy, directory, mode, args.steps, args.guidance, args.dependence,
+    session_cls = getattr(policy, "session_cls", None) or Session        # fullft exports bring their own session
+    session = session_cls(policy, directory, mode, args.steps, args.guidance, args.dependence,
                       tag=f"{label}/{mode} {task} seed={scene['seed']}", limit=target_limit,
                       candidates=args.candidates, coherence=args.coherence, noise=args.noise,
                       replay_cache=not args.no_replay_cache)
@@ -737,10 +738,16 @@ def cmd_plan(args):
 def cmd_run(args):
     import torch
     torch.set_num_threads(int(os.environ.get("OMP_NUM_THREADS", "8")))
-    cfg, state = policy_config(args.config, args.checkpoint, args.set)
-    policy = Policy(cfg, state, args.checkpoint, "cuda:0", encoders=True,
-                    t5_on_gpu={"auto": None, "gpu": True, "cpu": False}[args.t5])
-    del state
+    from fastwam.fullft.online import FullPolicy, is_fullft_export
+    if is_fullft_export(args.checkpoint):                                 # plan v10 item 7: full fine-tuning exports
+        if args.modes != ["on"]:
+            raise ValueError("fullft exports run mode 'on' only (their no-history rows are separate models)")
+        policy = FullPolicy(args.checkpoint, "cuda:0", t5_on_gpu={"auto": None, "gpu": True, "cpu": False}[args.t5])
+    else:
+        cfg, state = policy_config(args.config, args.checkpoint, args.set)
+        policy = Policy(cfg, state, args.checkpoint, "cuda:0", encoders=True,
+                        t5_on_gpu={"auto": None, "gpu": True, "cpu": False}[args.t5])
+        del state
     label = args.label or run_label(args.checkpoint)
     out = Path(args.output)
     out.mkdir(parents=True, exist_ok=True)

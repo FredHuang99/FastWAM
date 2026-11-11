@@ -321,3 +321,29 @@ def test_dense_samples_and_config(tmp_path):
     cfg = load(str(cfg_path), ["schedule.micro_batch=4", "data.tasks=[put_back_block]"])
     assert cfg.rule.index == "time" and cfg.optim.betas == (0.9, 0.95) and cfg.schedule.micro_batch == 4
     assert cfg.data.tasks == ["put_back_block"]
+
+
+def test_online_decision_equals_offline_sampling():
+    """The closed-loop assembly (per-frame K/V cache, selection, re-rotation, eviction) gives exactly the chunk that
+    FullModel.sample gives on the training-style batch of the same inputs."""
+    from fastwam.fullft.online import FrameCache, decide_encoded
+    m = _model("ar")
+    with torch.no_grad():
+        m.hist_gate.fill_(0.5)
+    g = torch.Generator().manual_seed(5)
+    encoded = {i: (torch.randn(48, 1, 8, 6, generator=g), torch.randn(14, generator=g)) for i in range(60)}
+    text = torch.randn(1, 5, TEXT, generator=g)
+    rule = HistoryRule("ar")
+    cache = FrameCache()
+    for current in (40, 48, 56):
+        noise = torch.randn(1, 32, 14, generator=g)
+        out = decide_encoded(m, rule, cache, encoded, current, text, noise, steps=3)
+        ids, pos = select(rule, current)
+        batch = {"latent": encoded[current][0][None], "text": text, "proprio": encoded[current][1][None],
+                 "anchor": torch.tensor([current]),
+                 "hist_latent": torch.stack([encoded[i][0] for i in ids])[None],
+                 "hist_proprio": torch.stack([encoded[i][1] for i in ids])[None],
+                 "hist_valid": torch.ones(1, len(ids), dtype=torch.bool), "hist_pos": torch.tensor([pos])}
+        ref = m.sample(batch, noise, steps=3)
+        assert out["ids"] == ids and torch.allclose(out["normalised"], ref[0], atol=1e-6)
+        assert set(cache.kv) <= {0} | set(range(current - 32, current + 1))
