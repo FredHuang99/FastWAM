@@ -466,19 +466,44 @@ DRIVER_ICD = "/etc/vulkan/icd.d/nvidia_icd.json"   # mounted by the NVIDIA conta
 # Blackwell support), unpacked to OIDN_FIX by migrate/oidn_fix.sh and loaded first in the SIMULATOR process only,
 # brings the frame-0 render to 0.49 levels of the A100 (RENDER_CHECK_20261111_1409). Applied wherever OIDN_FIX exists
 # (only the 5090 has it); MWAM_OIDN=off disables it.
+# 11-11 (plan v12 AL5): MWAM_OIDN_LIB=<folder> loads the OIDN library from that folder instead (explicit; a missing
+# library is an error, never a silent fall-back). The A100 keeps 2.3.3 OUTSIDE OIDN_FIX (/opt/oidn-2.3.3-al5) so only
+# runs that ask for it get it; every other A100 run keeps SAPIEN's bundled 2.0.1 (the reference pipeline).
 OIDN_FIX = "/opt/oidn-2.3.3/lib"
 
 
+def denoiser_library() -> str:
+    """Which Open Image Denoise the simulator process will load: a folder, or SAPIEN's bundled one, or 'off'."""
+    if os.environ.get("MWAM_OIDN", "").lower() == "off":
+        return "off (MWAM_OIDN=off: SAPIEN's bundled library, no preload)"
+    explicit = os.environ.get("MWAM_OIDN_LIB", "").strip()
+    if explicit:
+        if not (Path(explicit) / "libOpenImageDenoise.so.2").exists():
+            raise FileNotFoundError(f"MWAM_OIDN_LIB={explicit} has no libOpenImageDenoise.so.2")
+        return explicit
+    return OIDN_FIX if (Path(OIDN_FIX) / "libOpenImageDenoise.so.2").exists() else "bundled (SAPIEN)"
+
+
 def apply_denoiser_fix(env: dict) -> dict:
-    lib = Path(OIDN_FIX)
-    if os.environ.get("MWAM_OIDN", "").lower() == "off" or not (lib / "libOpenImageDenoise.so.2").exists():
+    choice = denoiser_library()
+    if not choice.startswith("/"):
         return env
+    lib = Path(choice)
     env["LD_PRELOAD"] = ":".join(x for x in (str(lib / "libOpenImageDenoise.so.2"), env.get("LD_PRELOAD", "")) if x)
     env["LD_LIBRARY_PATH"] = ":".join(x for x in (str(lib), env.get("LD_LIBRARY_PATH", "")) if x)
     if "oidn" not in _WARNED:
         _WARNED.add("oidn")
-        print(f"[closed-loop] simulator loads Open Image Denoise from {lib} (5090 denoiser fix, 11-11)", flush=True)
+        print(f"[closed-loop] simulator loads Open Image Denoise from {lib} (denoiser override, 11-11)", flush=True)
     return env
+
+
+def pipeline_record() -> dict:
+    """Machine and render pipeline of a run (plan v12: one table never mixes pipelines)."""
+    import socket
+    import torch
+    gpu = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "none"
+    return {"host": socket.gethostname(), "gpu": gpu, "denoiser": denoiser_library(), "torch": torch.__version__,
+            "MWAM_OIDN": os.environ.get("MWAM_OIDN", ""), "MWAM_OIDN_LIB": os.environ.get("MWAM_OIDN_LIB", "")}
 
 
 def gpu_uuid() -> str:
@@ -677,8 +702,16 @@ def load_scenes(specs: Sequence[str], root: Path, tasks: Sequence[str]) -> List[
     return sorted(out, key=lambda s: (list(tasks).index(s["task"]), s.get("ordinal", 0), s["seed"]))
 
 
-def select_scenes(scenes: List[dict], limit: int, shard: str, seeds: Sequence[str] = ()) -> List[dict]:
-    """--seeds keeps only the listed scenes: 'task:seed' or a bare seed (any task)."""
+def select_scenes(scenes: List[dict], limit: int, shard: str, seeds: Sequence[str] = (), start: int = 1) -> List[dict]:
+    """--seeds keeps only the listed scenes: 'task:seed' or a bare seed (any task). start (--from-scene, 1-based, per
+    task, bank order) drops the scenes before it, then --limit counts from there: --from-scene 31 --limit 20 = 31-50."""
+    if start > 1:
+        count, kept = {}, []
+        for s in scenes:
+            count[s["task"]] = count.get(s["task"], 0) + 1
+            if count[s["task"]] >= start:
+                kept.append(s)
+        scenes = kept
     if seeds:
         want = {(x.split(":")[0], int(x.split(":")[1])) if ":" in x else (None, int(x)) for x in seeds}
         scenes = [s for s in scenes if (s["task"], int(s["seed"])) in want or (None, int(s["seed"])) in want]
@@ -752,10 +785,11 @@ def cmd_run(args):
     out = Path(args.output)
     out.mkdir(parents=True, exist_ok=True)
     scenes = select_scenes(load_scenes(args.scenes, Path(policy.spec.root), args.tasks), args.limit, args.shard,
-                           args.seeds)
+                           args.seeds, args.from_scene)
     labels = {m: (policy.base_label(label) if m == "off" else label) for m in args.modes}
     tag = f"{label}_{'-'.join(args.modes)}_{args.shard.replace('/', 'of')}"
-    write(out / "runs" / f"{tag}.json", {"policy": policy.describe(), "labels": labels, "scenes": scenes,
+    write(out / "runs" / f"{tag}.json", {"policy": policy.describe(), "pipeline": pipeline_record(), "labels": labels,
+                                         "scenes": scenes,
                                          "args": {k: (str(v) if isinstance(v, Path) else v) for k, v in vars(args).items()},
                                          "started": now()})
     print(f"[closed-loop] {now()} {len(scenes)} scenes x modes {args.modes} -> labels {labels}; checkpoint {args.checkpoint}; "
@@ -1111,6 +1145,7 @@ def main(argv=None):
     ap.add_argument("--scenes", nargs="+", default=["frozen"], help="'frozen' (Codex's 2 scenes) and/or scene manifests/folders")
     ap.add_argument("--tasks", nargs="+", default=list(DEFAULT_TASKS), choices=list(LIMITS))
     ap.add_argument("--limit", type=int, default=0, help="first N scenes per task")
+    ap.add_argument("--from-scene", type=int, default=1, help="1-based scene number per task to start from (bank order)")
     ap.add_argument("--seeds", nargs="*", default=[], help="only these scenes: task:seed or seed")
     ap.add_argument("--shard", default="0/1", help="k/n: this process takes scenes[k::n]")
     ap.add_argument("--output", default="outputs/memory_v2/closed_loop")

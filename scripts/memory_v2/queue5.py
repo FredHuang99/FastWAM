@@ -14,6 +14,7 @@ Task file (YAML, default scripts/memory_v2/jobs/queue5_tasks.yaml). Each task:
     pass_if / inconclusive_if: Python expressions over m (metrics), r (reference metrics), helpers sign_p(a, b), get(d, "a.b")
     min_episodes, on_pass, on_fail, on_inconclusive, failure_explanations: [{if: expr over m, r, c (class counts), then: text}]
     hold: true (never picked until removed), requires_pass: [ids] (SKIPPED unless every one of them PASSed)
+    env: {NAME: value}   (11-11) extra environment for the task's process ({O} expanded), e.g. MWAM_OIDN_LIB
     requires_not_pass: [ids] (SKIPPED if any of them PASSed: the other branch of a pre-registered decision)
   kind closed_loop: checkpoint (path, or <run>/last = the run's final checkpoint), label, modes, scenes: [..] (missing
                     scene folders are dropped; 'frozen' = Codex's 2 scenes), tasks, seeds, online_args: [..], output,
@@ -934,6 +935,8 @@ def execute(task, gpu):
                OMP_NUM_THREADS=os.environ.get("OMP_NUM_THREADS", "16"), MKL_NUM_THREADS=os.environ.get("MKL_NUM_THREADS", "16"))
     if gpu is not None:
         env["CUDA_VISIBLE_DEVICES"] = str(gpu)
+    for key, value in (task.get("env") or {}).items():     # 11-11 (plan v12 AL5): per-task environment, {O} expanded
+        env[str(key)] = str(value).replace("{O}", str(O))
     logfile = Q / "tasks" / f"{tid}.log"
     logfile.parent.mkdir(parents=True, exist_ok=True)
 

@@ -2775,7 +2775,7 @@ tasks:
 - id: X7-12ep-loop
   lane: loop
   kind: closed_loop
-  after: [X7-12ep]
+  after: [X7-12ep, G1-a100-verdict]   # 11-11 (plan v12): an appendix filler; it waits until the A100 G1 is judged
   requires_pass: [X7-12ep]
   need_mib: 30000
   hypothesis: "plan v10 preparation (pre-registered 11-11 00:50, before any training): X7 + 6 epochs (12 in total) vs X7 (6 epochs), memory on, execute 8, 10 Euler steps, official put_back scenes 1-50 and swap scenes 1-50, paired on the same scenes (references: X7's official episodes as in S1). PASS = training volume is still a strong lever on the frozen-video stack: pooled progress delta >= +0.08 and its 95 % CI lower bound > 0. Plateau = delta <= +0.02. In between: evaluate the 8 / 10-epoch checkpoints on the same scenes before reading the curve. The B0 comparison is reported, not judged"
@@ -2925,3 +2925,351 @@ tasks:
     - if: "m['rc'] != 0"
       then: "no complete bank (a shell task only records rc): read the job log and closed_loop/scenes_seed42_n100_blocks_ranking_try/blocks_ranking_try.error.json - missing task assets in the simulator install, a non-expert exception (left for a human), or the time limit"
   on_pass: "blocks_ranking_try: official scene bank ready for any later evaluation"
+
+# ================================================================================================ plan v12 (11-11 20:40)
+# A100: all four GPUs may be used (user 11-11 19:27); the pool takes any empty GPU (POOL_CONFIG gpus [0,1,2,3]).
+# Priority = file order among ready tasks: G1 (verdict) > AL4a (alignment pre-read) > AL5 (alignment). X7-12ep-loop
+# (appendix filler) now waits for G1-a100-verdict. Verdict rules are the plan's (v12 F.1), applied by the verdict
+# cards; the closed-loop cards themselves are descriptive (DONE).
+
+- id: FT-fetch-e30
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 40
+  hypothesis: "plan v12: fetch the N7 export ar_2task_e30 from the HF relay as soon as the H200 uploads it (sha256 checked)"
+  command: "RUN=ar_2task TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+  on_fail: "the export never arrived or its sha256 failed: read the task log; the closed loops of e30 are skipped"
+
+- id: G1-a100-e30-put-s0
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e30]
+  requires_pass: [FT-fetch-e30]
+  need_mib: 30000
+  timeout_h: 20
+  hypothesis: "plan v12 N8 (G1, A100 = the verdict machine): N7 epoch 30, official scenes 1-50, execute 8, 10 steps; shard 0 of 2. The verdict is G1-a100-verdict (rule unchanged: PASS put >= 43/50 and swap >= 43/50; PARTIAL both >= 30; floor lifted >= 48/50 and finished >= 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/2"]
+  output: closed_loop/g1
+
+- id: G1-a100-e30-put-s1
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e30]
+  requires_pass: [FT-fetch-e30]
+  need_mib: 30000
+  timeout_h: 20
+  hypothesis: "plan v12 N8 (G1, A100 = the verdict machine): N7 epoch 30, official scenes 1-50, execute 8, 10 steps; shard 1 of 2. The verdict is G1-a100-verdict (rule unchanged: PASS put >= 43/50 and swap >= 43/50; PARTIAL both >= 30; floor lifted >= 48/50 and finished >= 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/2"]
+  output: closed_loop/g1
+
+- id: G1-a100-e30-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e30]
+  requires_pass: [FT-fetch-e30]
+  need_mib: 30000
+  timeout_h: 20
+  hypothesis: "plan v12 N8 (G1, A100 = the verdict machine): N7 epoch 30, official scenes 1-50, execute 8, 10 steps; shard 0 of 2. The verdict is G1-a100-verdict (rule unchanged: PASS put >= 43/50 and swap >= 43/50; PARTIAL both >= 30; floor lifted >= 48/50 and finished >= 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/2"]
+  output: closed_loop/g1
+
+- id: G1-a100-e30-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e30]
+  requires_pass: [FT-fetch-e30]
+  need_mib: 30000
+  timeout_h: 20
+  hypothesis: "plan v12 N8 (G1, A100 = the verdict machine): N7 epoch 30, official scenes 1-50, execute 8, 10 steps; shard 1 of 2. The verdict is G1-a100-verdict (rule unchanged: PASS put >= 43/50 and swap >= 43/50; PARTIAL both >= 30; floor lifted >= 48/50 and finished >= 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/2"]
+  output: closed_loop/g1
+
+- id: G1-a100-verdict
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  after: [G1-a100-e30-put-s0, G1-a100-e30-put-s1, G1-a100-e30-swap-s0, G1-a100-e30-swap-s1]
+  timeout_h: 1
+  hypothesis: "plan v12 N8: the G1 verdict over the A100's epoch-30 episodes only (g1_loop.sh VERDICT_ONLY, rule unchanged), then their per-scene stages exported and relayed (diag/a100_ar_2task_e30_stages) for AL4 on the 5090"
+  command: "cd /workspace/FastWAM-memory2 && RUN=ar_2task TAG=e30 N=50 VERDICT_ONLY=1 bash scripts/fullft/g1_loop.sh && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/migrate/export_stages.py --label ar_2task_e30 --mode on --folders /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/g1 --out closed_loop/check_a100/ar_2task_e30_stages.json --relay diag/a100_ar_2task_e30_stages"
+  pass_if: "m['rc'] == 0"
+  on_pass: "read the G1 VERDICT line in outputs/memory_v2/report/G1_ar_2task_e30_verdict_*.txt"
+
+- id: FT-fetch-e10
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 40
+  hypothesis: "plan v12: fetch the N7 export ar_2task_e10 from the HF relay as soon as the H200 uploads it (sha256 checked)"
+  command: "RUN=ar_2task TAG=e10 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+  on_fail: "the export never arrived or its sha256 failed: read the task log; the closed loops of e10 are skipped"
+
+- id: AL4a-e10-put-s0
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e10]
+  requires_pass: [FT-fetch-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v12 AL4a (pre-read, no verdict): N7 epoch e10, official scenes 1-20 (the 5090 screening runs the same scenes), shard 0 of 2; paired with the 5090 by pair_eq.py --rule report"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "20", "--shard", "0/2"]
+  output: closed_loop/g1
+
+- id: AL4a-e10-put-s1
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e10]
+  requires_pass: [FT-fetch-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v12 AL4a (pre-read, no verdict): N7 epoch e10, official scenes 1-20 (the 5090 screening runs the same scenes), shard 1 of 2; paired with the 5090 by pair_eq.py --rule report"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "20", "--shard", "1/2"]
+  output: closed_loop/g1
+
+- id: AL4a-e10-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e10]
+  requires_pass: [FT-fetch-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v12 AL4a (pre-read, no verdict): N7 epoch e10, official scenes 1-20 (the 5090 screening runs the same scenes), shard 0 of 2; paired with the 5090 by pair_eq.py --rule report"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "20", "--shard", "0/2"]
+  output: closed_loop/g1
+
+- id: AL4a-e10-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e10]
+  requires_pass: [FT-fetch-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v12 AL4a (pre-read, no verdict): N7 epoch e10, official scenes 1-20 (the 5090 screening runs the same scenes), shard 1 of 2; paired with the 5090 by pair_eq.py --rule report"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "20", "--shard", "1/2"]
+  output: closed_loop/g1
+
+- id: AL4a-e10-export
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  after: [AL4a-e10-put-s0, AL4a-e10-put-s1, AL4a-e10-swap-s0, AL4a-e10-swap-s1]
+  timeout_h: 1
+  hypothesis: "plan v12 AL4a: export the A100's per-scene stages of ar_2task_e10 and relay them (diag/a100_ar_2task_e10_stages) for the paired table on the 5090"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/migrate/export_stages.py --label ar_2task_e10 --mode on --folders /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/g1 --out closed_loop/check_a100/ar_2task_e10_stages.json --relay diag/a100_ar_2task_e10_stages"
+  pass_if: "m['rc'] == 0"
+
+- id: FT-fetch-e20
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 40
+  hypothesis: "plan v12: fetch the N7 export ar_2task_e20 from the HF relay as soon as the H200 uploads it (sha256 checked)"
+  command: "RUN=ar_2task TAG=e20 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+  on_fail: "the export never arrived or its sha256 failed: read the task log; the closed loops of e20 are skipped"
+
+- id: AL4a-e20-put-s0
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e20]
+  requires_pass: [FT-fetch-e20]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v12 AL4a (pre-read, no verdict): N7 epoch e20, official scenes 1-20 (the 5090 screening runs the same scenes), shard 0 of 2; paired with the 5090 by pair_eq.py --rule report"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "20", "--shard", "0/2"]
+  output: closed_loop/g1
+
+- id: AL4a-e20-put-s1
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e20]
+  requires_pass: [FT-fetch-e20]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v12 AL4a (pre-read, no verdict): N7 epoch e20, official scenes 1-20 (the 5090 screening runs the same scenes), shard 1 of 2; paired with the 5090 by pair_eq.py --rule report"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "20", "--shard", "1/2"]
+  output: closed_loop/g1
+
+- id: AL4a-e20-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e20]
+  requires_pass: [FT-fetch-e20]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v12 AL4a (pre-read, no verdict): N7 epoch e20, official scenes 1-20 (the 5090 screening runs the same scenes), shard 0 of 2; paired with the 5090 by pair_eq.py --rule report"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "20", "--shard", "0/2"]
+  output: closed_loop/g1
+
+- id: AL4a-e20-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e20]
+  requires_pass: [FT-fetch-e20]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v12 AL4a (pre-read, no verdict): N7 epoch e20, official scenes 1-20 (the 5090 screening runs the same scenes), shard 1 of 2; paired with the 5090 by pair_eq.py --rule report"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "20", "--shard", "1/2"]
+  output: closed_loop/g1
+
+- id: AL4a-e20-export
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  after: [AL4a-e20-put-s0, AL4a-e20-put-s1, AL4a-e20-swap-s0, AL4a-e20-swap-s1]
+  timeout_h: 1
+  hypothesis: "plan v12 AL4a: export the A100's per-scene stages of ar_2task_e20 and relay them (diag/a100_ar_2task_e20_stages) for the paired table on the 5090"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/migrate/export_stages.py --label ar_2task_e20 --mode on --folders /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/g1 --out closed_loop/check_a100/ar_2task_e20_stages.json --relay diag/a100_ar_2task_e20_stages"
+  pass_if: "m['rc'] == 0"
+
+- id: AL5-setup
+  lane: extra
+  kind: shell
+  need_mib: 8000
+  timeout_h: 1
+  hypothesis: "plan v12 AL5 setup: OIDN 2.3.3 unpacked to /opt/oidn-2.3.3-al5 (not the folder online.py loads by default), frame 0 rendered with 2.0.1 and with 2.3.3 vs the A100's own reference; PASS = 2.3.3 runs here without OIDN errors"
+  command: "GPU={GPU} bash /workspace/FastWAM-memory2/scripts/fullft/al5_setup.sh"
+  pass_if: "m['rc'] == 0"
+  on_fail: "read outputs/fullft/align/AL5_SETUP_*.txt: download failed, no frame-0 reference, or OIDN 2.3.3 reports errors on the A100 (then AL5 cannot test the hypothesis)"
+
+- id: AL5-put-s0
+  lane: loop
+  kind: closed_loop
+  after: [AL5-setup]
+  requires_pass: [AL5-setup]
+  need_mib: 30000
+  timeout_h: 10
+  env: {MWAM_OIDN_LIB: /opt/oidn-2.3.3-al5/lib}
+  hypothesis: "plan v12 AL5 (pre-registered 11-11 20:30): X7, memory on, execute 8, 10 steps, the A100's simulator loads OIDN 2.3.3 (MWAM_OIDN_LIB) instead of SAPIEN's bundled 2.0.1; official put scenes 31-50 (the eq5090b pairing); shard 0 of 2. Paired with X7's official A100 episodes of the same scenes by AL5-verdict"
+  checkpoint: a2C_6ep/checkpoints/update_004020.pt
+  label: x7_al5_oidn233
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--from-scene", "31", "--limit", "20", "--shard", "0/2"]
+  output: closed_loop/al5
+
+- id: AL5-put-s1
+  lane: loop
+  kind: closed_loop
+  after: [AL5-setup]
+  requires_pass: [AL5-setup]
+  need_mib: 30000
+  timeout_h: 10
+  env: {MWAM_OIDN_LIB: /opt/oidn-2.3.3-al5/lib}
+  hypothesis: "plan v12 AL5 (pre-registered 11-11 20:30): X7, memory on, execute 8, 10 steps, the A100's simulator loads OIDN 2.3.3 (MWAM_OIDN_LIB) instead of SAPIEN's bundled 2.0.1; official put scenes 31-50 (the eq5090b pairing); shard 1 of 2. Paired with X7's official A100 episodes of the same scenes by AL5-verdict"
+  checkpoint: a2C_6ep/checkpoints/update_004020.pt
+  label: x7_al5_oidn233
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--from-scene", "31", "--limit", "20", "--shard", "1/2"]
+  output: closed_loop/al5
+
+- id: AL5-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [AL5-setup]
+  requires_pass: [AL5-setup]
+  need_mib: 30000
+  timeout_h: 10
+  env: {MWAM_OIDN_LIB: /opt/oidn-2.3.3-al5/lib}
+  hypothesis: "plan v12 AL5 (pre-registered 11-11 20:30): X7, memory on, execute 8, 10 steps, the A100's simulator loads OIDN 2.3.3 (MWAM_OIDN_LIB) instead of SAPIEN's bundled 2.0.1; official swap scenes 1-20; shard 0 of 2. Paired with X7's official A100 episodes of the same scenes by AL5-verdict"
+  checkpoint: a2C_6ep/checkpoints/update_004020.pt
+  label: x7_al5_oidn233
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "20", "--shard", "0/2"]
+  output: closed_loop/al5
+
+- id: AL5-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [AL5-setup]
+  requires_pass: [AL5-setup]
+  need_mib: 30000
+  timeout_h: 10
+  env: {MWAM_OIDN_LIB: /opt/oidn-2.3.3-al5/lib}
+  hypothesis: "plan v12 AL5 (pre-registered 11-11 20:30): X7, memory on, execute 8, 10 steps, the A100's simulator loads OIDN 2.3.3 (MWAM_OIDN_LIB) instead of SAPIEN's bundled 2.0.1; official swap scenes 1-20; shard 1 of 2. Paired with X7's official A100 episodes of the same scenes by AL5-verdict"
+  checkpoint: a2C_6ep/checkpoints/update_004020.pt
+  label: x7_al5_oidn233
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "20", "--shard", "1/2"]
+  output: closed_loop/al5
+
+- id: AL5-verdict
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  after: [AL5-put-s0, AL5-put-s1, AL5-swap-s0, AL5-swap-s1]
+  timeout_h: 1
+  hypothesis: "plan v12 AL5 reading per task (pair_eq.py --rule al5): CAUSE = paired progress (2.3.3 - standard) mean <= -0.05 with CI upper < 0; NOT CAUSE = |mean| <= 0.05 with CI containing 0; else UNDETERMINED; floor: the reference's put lifted / swap s1 >= 18/20"
+  command: "cd /workspace/FastWAM-memory2 && export PYTHONPATH=src && P=/opt/mwam/bin/python && $P scripts/fullft/pair_eq.py --name al5_put --rule al5 --a-folders closed_loop/al5 --a-label x7_al5_oidn233 --b-folders closed_loop/official/put_x7_s0 closed_loop/official/put_x7_s1 --b-label a2C6_e6 --tasks put_back_block && $P scripts/fullft/pair_eq.py --name al5_swap --rule al5 --a-folders closed_loop/al5 --a-label x7_al5_oidn233 --b-folders closed_loop/official/swap8_x7_s0 closed_loop/official/swap8_x7_s1 closed_loop/official/swap8_x7_s2 --b-label a2C6_e6_exec8 --tasks swap_blocks"
+  pass_if: "m['rc'] == 0"
+  on_pass: "read the PAIR VERDICT lines in the task log (outputs/memory_v2/queue5/tasks/AL5-verdict.log)"
