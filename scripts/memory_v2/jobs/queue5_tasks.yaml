@@ -3072,6 +3072,46 @@ tasks:
   pass_if: "m['rc'] == 0"
   on_pass: "read the PAIR VERDICT lines in the task log (outputs/memory_v2/queue5/tasks/AL5-verdict.log)"
 
+# 11-11 22:00 plan v12 AL1 floor: the A100 replays its own X7 episodes (targets only, no model)
+- id: AL1-a100-self-put
+  lane: loop
+  kind: closed_loop
+  need_mib: 12000
+  timeout_h: 10
+  hypothesis: "plan v12 AL1 floor (written 11-11 22:00 before any replay): the A100 replays the executed targets of its own official X7 put_back_block episodes (scenes 31-50) from the pack a100_x7 (no model, online.py --checkpoint replay:); read by AL1-a100-floor"
+  checkpoint: "replay:/workspace/FastWAM-memory2/outputs/fullft/align/replay/a100_x7.json.gz"
+  label: replay_self_a100
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--from-scene", "31", "--limit", "20"]
+  output: closed_loop/al1
+
+- id: AL1-a100-self-swap
+  lane: loop
+  kind: closed_loop
+  need_mib: 12000
+  timeout_h: 10
+  hypothesis: "plan v12 AL1 floor (written 11-11 22:00 before any replay): the A100 replays the executed targets of its own official X7 swap_blocks episodes (scenes 1-20) from the pack a100_x7 (no model, online.py --checkpoint replay:); read by AL1-a100-floor"
+  checkpoint: "replay:/workspace/FastWAM-memory2/outputs/fullft/align/replay/a100_x7.json.gz"
+  label: replay_self_a100
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "20"]
+  output: closed_loop/al1
+
+- id: AL1-a100-floor
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  after: [AL1-a100-self-put, AL1-a100-self-swap]
+  timeout_h: 1
+  hypothesis: "plan v12 AL1 floor: the A100 self-replay must read CONSISTENT (outcome equal >= 95 %, median max object deviation <= 2 mm) for the 5090's AL1 reading to count as a verdict"
+  command: "cd /workspace/FastWAM-memory2 && /opt/mwam/bin/python scripts/fullft/replay_pack.py compare --pack /workspace/FastWAM-memory2/outputs/fullft/align/replay/a100_x7.json.gz --folder closed_loop/al1 --label replay_self_a100 --name al1_a100_self"
+  pass_if: "m['rc'] == 0"
+  on_pass: "read the REPLAY READING line in outputs/memory_v2/queue5/tasks/AL1-a100-floor.log"
+
 - id: FT-fetch-e10
   lane: cpu
   kind: shell

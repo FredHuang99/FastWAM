@@ -856,6 +856,15 @@ def run_cmd(cmd, logfile, env, timeout, tid=None):
         return p.returncode, True
 
 
+def checkpoint_arg(value):
+    """What --checkpoint gets: a resolved path, or 'replay:<pack>' as is (plan v12 AL1 target replay)."""
+    return value if str(value).startswith("replay:") else str(checkpoint_path(value))
+
+
+def checkpoint_exists(value):
+    return Path(str(value)[len("replay:"):]).exists() if str(value).startswith("replay:") else checkpoint_path(value).exists()
+
+
 def checkpoint_path(value):
     value = str(value)
     if value.endswith("/last"):
@@ -878,7 +887,7 @@ def scene_args(task):
 
 
 def closed_loop_cmd(task, extra):
-    cmd = [PY, "-m", "fastwam.memory_v2.online", "run", "--checkpoint", str(checkpoint_path(task["checkpoint"])),
+    cmd = [PY, "-m", "fastwam.memory_v2.online", "run", "--checkpoint", checkpoint_arg(task["checkpoint"]),
            "--label", task["label"], "--modes", *task["modes"], "--scenes", *scene_args(task),
            "--output", str(resolve(task["output"]))]
     if task.get("tasks"):
@@ -956,8 +965,8 @@ def execute(task, gpu):
         task = effective(task)
         out = resolve(task["output"])
         out.mkdir(parents=True, exist_ok=True)
-        ck = checkpoint_path(task["checkpoint"])
-        if not ck.exists() or not scene_args(task):
+        ck = task["checkpoint"]
+        if not checkpoint_exists(ck) or not scene_args(task):
             with open(logfile, "a", encoding="utf-8") as f:
                 f.write(f"[queue5] {now_bj()} missing checkpoint {ck} or no scene folder\n")
             return 1, False

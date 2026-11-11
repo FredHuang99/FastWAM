@@ -534,6 +534,16 @@ def episode_metrics(rows: List[dict]) -> dict:
             "lifted_5cm": None if top is None else bool(top >= 0.05)}
 
 
+def default_steps(policy) -> int:
+    """Euler steps when --steps is 0: memory_v2 policies carry them in cfg; fullft exports in their run config (the
+    session's default, 10); a target replay has none. (11-11: fullft has no `cfg`, the summary line raised.)"""
+    cfg = getattr(policy, "cfg", None)
+    if cfg is not None:
+        return cfg.v2.guidance.steps
+    run_cfg = getattr(policy, "run_cfg", None)
+    return int(getattr(getattr(run_cfg, "model", None), "sample_steps", 10)) if run_cfg is not None else 0
+
+
 def run_episode(policy: Policy, scene: dict, mode: str, label: str, out: Path, args) -> dict:
     import numpy as np
     from multiprocessing.connection import Listener
@@ -659,7 +669,7 @@ def run_episode(policy: Policy, scene: dict, mode: str, label: str, out: Path, a
                   "command_to_execution_exact": True, "decisions": len(decisions),
                   "policy_seconds_mean": sum(d["seconds"] for d in decisions) / max(1, len(decisions)),
                   "dependence_mean": {k: sum(v) / len(v) for k, v in dependence.items()},
-                  "steps": args.steps or policy.cfg.v2.guidance.steps, "guidance_scale": args.guidance,
+                  "steps": args.steps or default_steps(policy), "guidance_scale": args.guidance,
                   "execute": int(args.execute), "candidates": int(args.candidates), "coherence": args.coherence,
                   "noise": args.noise, "stress": stress, "stress_frames_shown": stress_state["offset"],
                   "simulator_backend": value.get("simulator_backend"), "simulator_seconds": value.get("simulator_seconds"),
@@ -772,7 +782,10 @@ def cmd_run(args):
     import torch
     torch.set_num_threads(int(os.environ.get("OMP_NUM_THREADS", "8")))
     from fastwam.fullft.online import FullPolicy, is_fullft_export
-    if is_fullft_export(args.checkpoint):                                 # plan v10 item 7: full fine-tuning exports
+    from .target_replay import ReplayPolicy, is_replay
+    if is_replay(args.checkpoint):                                       # plan v12 AL1: replay a pack's targets
+        policy = ReplayPolicy(args.checkpoint)
+    elif is_fullft_export(args.checkpoint):                               # plan v10 item 7: full fine-tuning exports
         if args.modes != ["on"]:
             raise ValueError("fullft exports run mode 'on' only (their no-history rows are separate models)")
         policy = FullPolicy(args.checkpoint, "cuda:0", t5_on_gpu={"auto": None, "gpu": True, "cpu": False}[args.t5])
