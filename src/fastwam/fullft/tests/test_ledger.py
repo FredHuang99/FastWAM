@@ -192,3 +192,72 @@ def test_session_streaming_detection_equals_demo_detector(tmp_path):
     session.raw[n] = {"proprio": [0.0] * 14}
     with pytest.raises(ValueError):
         session._detect(n)
+
+
+@pytest.mark.parametrize("variant", ["ar", "arprop"])
+def test_session_decide_end_to_end(tmp_path, variant):
+    """FullSession.decide as the closed loop calls it (observation batches, identity checks, detection, ledger,
+    selection, eviction, the decision log), with the image / text encoders stubbed: it equals decide_encoded on the
+    same encodings and logs the ledger it used."""
+    import json as _json
+    import sys
+    try:
+        import h5py  # noqa: F401
+    except ImportError:                                # the dev machine has no h5py; nothing here reads hdf5
+        sys.modules["h5py"] = types.ModuleType("h5py")
+    from fastwam.fullft.online import FrameCache, FullSession, decide_encoded
+    from fastwam.memory_s1.common import seed_for
+    from fastwam.memory_s1.sim_bridge import diagnostic_action_noise
+    rule = HistoryRule(variant, event_max=4, lag=4)
+    m = _model(variant, event_slots=rule.event_slots)
+    with torch.no_grad():
+        m.hist_gate.fill_(0.5)
+        if m.ledger is not None:
+            m.ledger.weight.normal_(0, 0.3)
+    g = torch.Generator().manual_seed(3)
+    lat = {i: torch.randn(48, 1, 8, 6, generator=g) for i in range(80)}
+    text = torch.cat((torch.randn(1, 2, TEXT, generator=g), torch.zeros(1, 4, TEXT)), 1)
+    identity = types.SimpleNamespace(normalize=lambda x, kind: x, denormalize=lambda x: x)
+    policy = types.SimpleNamespace(rule=rule, model=m, normaliser=identity, device=torch.device("cpu"),
+                                   dense_cfg={"seed": 42}, encode_text=lambda s: (text, None))
+    session = FullSession(policy, tmp_path, "on", 3, 1.0, False, tag="t", limit=80)
+
+    def fake_encode(ids):
+        for i in ids:
+            r = session.raw[i]
+            session.encoded[i] = (lat[i], torch.tensor(r["proprio"], dtype=torch.float32))
+    session._encode = fake_encode
+    grip = np.ones(80)
+    grip[12:] = 0.0                                    # left arm closes at frame 12 -> one 'close' event
+    pos = np.zeros((80, 2, 3))
+    pos[:, 0, 0] = np.arange(80) * 0.01
+    obs = []
+    for i in range(80):
+        p = [0.1 * (i % 7)] * 14
+        p[6], p[13] = float(grip[i]), 1.0
+        obs.append({"frame_id": i, "proprio": p, "endpose": {"left": list(pos[i, 0]) + [1, 0, 0, 0],
+                                                            "right": list(pos[i, 1]) + [1, 0, 0, 0]}})
+    ref_cache, ref_encoded = FrameCache(), {}
+    last = -1
+    for current in (0, 8, 16, 24, 40):
+        req = {"current_id": current, "instruction": "x", "episode_seed": 5, "task": "put_back_block",
+               "observations": obs[last + 1:current + 1]}
+        last = current
+        out = session.decide(req)
+        noise = diagnostic_action_noise(seed_for(42, 5, current, "closed-loop-noise")).to(torch.bfloat16).float()
+        for i in range(current + 1):
+            ref_encoded.setdefault(i, (lat[i], torch.tensor(obs[i]["proprio"], dtype=torch.float32)))
+        ledger = None
+        if variant == "arprop":
+            evs = detect(np.stack([grip[:current + 1], np.ones(current + 1)], 1), pos[:current + 1])
+            ledger = ledger_tensor(rule, ledger_entries(rule, current, evs), lambda f: ref_encoded[f][1])
+        ref = decide_encoded(m, rule, ref_cache, ref_encoded, current, text, noise, 3, [], ledger)
+        want = ref["normalised"].clone()
+        want[:, [6, 13]] = want[:, [6, 13]].clamp(0, 1)            # the session clips the grippers after denormalising
+        assert np.allclose(out, want.numpy(), atol=1e-5)
+    rows = [_json.loads(x) for x in (tmp_path / "decisions.jsonl").read_text().splitlines()]
+    assert len(rows) == 5 and rows[0]["ledger"] == []
+    if variant == "arprop":
+        assert rows[1]["frame_id"] == 8 and rows[1]["ledger"] == []                  # close at 12 not seen yet
+        assert rows[2]["frame_id"] == 16 and rows[2]["ledger"] == [[12, 0, "close", 12]]   # written at 12 + 4 = 16
+        assert rows[2]["events_known"] == [12]

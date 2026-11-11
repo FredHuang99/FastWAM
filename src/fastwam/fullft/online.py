@@ -267,7 +267,8 @@ class FullSession:
             self._encode(sorted(set(ids) | {current} | (set(known) if p.rule.variant == "prop" else set())))
             noise_frame = 0 if self.noise_mode == "per_episode" else int(request.get("noise_frame", current))
             seed = seed_for(p.dense_cfg["seed"], self.seed, noise_frame, "closed-loop-noise")
-            noise = diagnostic_action_noise(seed).to(torch.bfloat16).float()[None]
+            noise = diagnostic_action_noise(seed).to(torch.bfloat16).float()      # [1, 32, 14] (11-11: was [None]-ed
+                                                                                   # to [1, 1, 32, 14] and crashed)
             out = decide_encoded(p.model, p.rule, self.cache, self.encoded, current, self.text, noise, self.steps,
                                  known, ledger)
             raw = p.normaliser.denormalize(out["normalised"].float().cpu())
