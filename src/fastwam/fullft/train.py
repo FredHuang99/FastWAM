@@ -437,7 +437,22 @@ def gradcheck(cfg: RunConfig, args) -> None:
         if bad and first_bad is None:
             first_bad = (name, use_history, ckpt)
     if first_bad is not None:
+        from torch.nn.attention import SDPBackend, sdpa_kernel
         name, use_history, ckpt = first_bad
+        for label, backends in (("no cuDNN attention", [SDPBackend.EFFICIENT_ATTENTION, SDPBackend.MATH]),
+                                ("math attention only", [SDPBackend.MATH])):
+            model.zero_grad(set_to_none=True)
+            model.checkpoint_layers = ckpt
+            try:
+                with sdpa_kernel(backends), torch.autocast("cuda", dtype=torch.bfloat16, cache_enabled=False):
+                    v, a = model.loss(batch, history="auto" if use_history else None)
+                    loss = v.mean() + a.mean()
+                loss.backward()
+                parts = grad_norms(model)
+                log(f"{name}, {label}: grads {json.dumps(parts)}; non-finite parts "
+                    f"{[k for k, x in parts.items() if not math.isfinite(x)]}")
+            except RuntimeError as error:
+                log(f"{name}, {label}: {str(error)[:300]}")
         log(f"anomaly mode on: {name} (no recompute, to name the forward op)")
         model.zero_grad(set_to_none=True)
         model.checkpoint_layers = False
