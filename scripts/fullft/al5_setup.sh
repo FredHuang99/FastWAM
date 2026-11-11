@@ -28,7 +28,12 @@ step() { echo; echo "[al5] $(date '+%F %T') ===== $*"; }
 GPU=${GPU:-0}
 used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i "$GPU" | tr -d ' ')
 echo "GPU $GPU: $used MiB in use; checkout $(git -C $R -c safe.directory='*' log --oneline -1 | cut -c1-60)"
-[ "$used" -lt 2000 ] || { echo "GPU $GPU is not empty: stopping"; exit 1; }
+total=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits -i "$GPU" | tr -d ' ')
+if [ "$used" -ge 2000 ]; then                            # FORCE_SHARED=1 (user's OK only): a short frame-0 check on a
+  [ "${FORCE_SHARED:-0}" = 1 ] && [ $((total - used)) -ge 12000 ] \
+    || { echo "GPU $GPU is not empty: stopping"; exit 1; }  # shared GPU with >= 12 GB free; the closed loops never share
+  echo "FORCE_SHARED: GPU $GPU is shared ($used MiB used by others, $((total - used)) MiB free); renders only"
+fi
 DEST=/opt/oidn-2.3.3-al5
 URL=https://github.com/RenderKit/oidn/releases/download/v2.3.3/oidn-2.3.3.x86_64.linux.tar.gz
 REF=$O/closed_loop/check_a100/x7_first_a100/on/put_back_block/seed_4300030/request_000000.pkl
