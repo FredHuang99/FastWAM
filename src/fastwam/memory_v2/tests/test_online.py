@@ -60,7 +60,9 @@ def test_execution_count_and_caps():
         online.execution_count(0, 500, 33)
     with pytest.raises(ValueError):
         online.execution_count(500, 500)
-    assert online.LIMITS == {"put_back_block": 500, "swap_blocks": 1000, "press_button": 1500}
+    assert {k: online.LIMITS[k] for k in ("put_back_block", "swap_blocks", "press_button")} == \
+        {"put_back_block": 500, "swap_blocks": 1000, "press_button": 1500}
+    assert online.LIMITS["observe_and_pickup"] == 250 and online.LIMITS["blocks_ranking_try"] == 3500   # 11-11: all tasks
     assert online.DEFAULT_TASKS == ("put_back_block", "swap_blocks")
 
 
