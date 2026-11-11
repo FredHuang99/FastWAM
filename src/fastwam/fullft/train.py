@@ -149,7 +149,7 @@ def evaluate(model: FullModel, val: Samples, device, micro: int, sample_windows:
                               model, device) for j, r in enumerate(rows)]
         noise = {k: torch.stack([n[k] for n in noises]).squeeze(1) if k.startswith("t_") else
                  torch.stack([n[k] for n in noises]) for k in noises[0]}
-        with torch.autocast("cuda", dtype=torch.bfloat16, enabled=batch["actions"].is_cuda):
+        with torch.autocast("cuda", dtype=torch.bfloat16, enabled=batch["actions"].is_cuda, cache_enabled=False):
             history = model.history(batch)
             v, a = model.loss(batch, noise, history)
             vids += v.float().tolist()
@@ -223,6 +223,7 @@ def train(cfg: RunConfig, args, smoke: bool = False) -> dict:
     t0 = time.monotonic()
     seen = 0
     running = []
+    grad_parts: Dict[str, float] = {}
     while state["update"] < total:
         train_set.epoch = state["epoch"]
         perm = np.random.default_rng(cfg.seed * 1000 + state["epoch"]).permutation(len(train_set))[state["position"]:]
@@ -233,7 +234,7 @@ def train(cfg: RunConfig, args, smoke: bool = False) -> dict:
         micro = 0
         for batch in loader:
             batch = to_device(batch, device)
-            with torch.autocast("cuda", dtype=torch.bfloat16):
+            with torch.autocast("cuda", dtype=torch.bfloat16, cache_enabled=False):
                 v, a = model.loss(batch)
                 loss = (cfg.model.video_loss * v.mean() + cfg.model.action_loss * a.mean()) / s.accumulation
             loss.backward()
@@ -246,6 +247,9 @@ def train(cfg: RunConfig, args, smoke: bool = False) -> dict:
             lr = lr_at(state["update"], total, cfg)
             for g in opt.param_groups:
                 g["lr"] = lr * g["lr_scale"]
+            if state["update"] == 0:
+                grad_parts = grad_norms(model)
+                log("first update gradient norms per part:", json.dumps(grad_parts))
             norm = torch.nn.utils.clip_grad_norm_([p for p in model.parameters() if p.requires_grad], cfg.optim.grad_clip)
             opt.step()
             opt.zero_grad(set_to_none=True)
@@ -298,8 +302,10 @@ def train(cfg: RunConfig, args, smoke: bool = False) -> dict:
         summary["step0_eval"] = base
         drop = 1 - summary["final_eval"]["val_action"] / max(1e-12, base["val_action"])
         summary["action_loss_drop"] = drop
-        ok = (start_check["max_abs_diff"] == 0.0 and summary["peak_gib"] <= 135 and drop >= 0.8
-              and all(math.isfinite(x) for x in summary["final_eval"].values()))
+        summary["first_grad_norms"] = grad_parts
+        video_ok = cfg.model.train_video == "frozen" or grad_parts.get("video", 0.0) > 0
+        ok = (start_check["max_abs_diff"] == 0.0 and summary["peak_gib"] <= 135 and drop >= 0.8 and video_ok
+              and grad_parts.get("action", 0.0) > 0 and all(math.isfinite(x) for x in summary["final_eval"].values()))
         summary["pass"] = bool(ok)
         log(f"SMOKE {'PASS' if ok else 'FAIL'}: step-0 history == none: {start_check}; peak {summary['peak_gib']:.1f} GiB "
             f"(<= 135); {summary['samples_per_s']:.1f} samples/s; fixed-noise action loss drop {drop:.1%} (>= 80 %)")
@@ -308,6 +314,20 @@ def train(cfg: RunConfig, args, smoke: bool = False) -> dict:
     write_json(run / ("SMOKE.json" if smoke else "SUMMARY.json"), summary)
     log("summary", json.dumps(summary))
     return summary
+
+
+@torch.no_grad()
+def grad_norms(model: FullModel) -> Dict[str, float]:
+    """L2 norm of the gradients per part (video / action / proprio / gate / extra): a part that should train must not be
+    0 (11-11 smoke: autocast's weight-cast cache made the video expert's casts outside autograd)."""
+    out: Dict[str, float] = {}
+    for name, p in model.named_parameters():
+        if p.grad is None:
+            continue
+        part = ("video" if name.startswith("mot.mixtures.video") else "action" if name.startswith("mot.mixtures.action")
+                else name.split(".")[0])
+        out[part] = out.get(part, 0.0) + float(p.grad.float().square().sum())
+    return {k: v ** 0.5 for k, v in out.items()}
 
 
 @torch.no_grad()
@@ -320,7 +340,7 @@ def step0_check(model: FullModel, val: Samples, device, log) -> dict:
     noise = {k: torch.stack([n[k] for n in noise]).squeeze(1) if k.startswith("t_") else torch.stack([n[k] for n in noise])
              for k in noise[0]}
     model.eval()
-    with torch.autocast("cuda", dtype=torch.bfloat16):
+    with torch.autocast("cuda", dtype=torch.bfloat16, cache_enabled=False):
         h = model.history(batch)
         v1, a1 = model.loss(batch, noise, h)
         v0, a0 = model.loss(batch, noise, None)
@@ -357,7 +377,7 @@ def probe(cfg: RunConfig, args) -> None:
                 batch = to_device(collate(rows), device)
                 torch.cuda.synchronize()
                 t = time.monotonic()
-                with torch.autocast("cuda", dtype=torch.bfloat16):
+                with torch.autocast("cuda", dtype=torch.bfloat16, cache_enabled=False):
                     v, a = model.loss(batch)
                     (v.mean() + a.mean()).backward()
                 opt.step()
