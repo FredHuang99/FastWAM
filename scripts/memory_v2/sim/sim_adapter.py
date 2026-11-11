@@ -105,6 +105,8 @@ def main():
     args = parser.parse_args()
     root = args.root.resolve(); directory = args.output.resolve()
     job = read(directory / 'job.json'); case = job['causal_case']
+    stress = job.get('stress') or {}
+    hold_at = {int(x) for x in stress.get('at', [])} if stress.get('kind') == 'hold' else set()
     sys.path.insert(0, str(root / 'scripts/memory_s1'))
     import sim_eval
     import deploy_policy
@@ -115,12 +117,44 @@ def main():
     class BoundedPolicy(deploy_policy.RPCPolicy):
         def request(self, environment, command):
             start = time.monotonic()
-            response = self.call({'command': command, 'current_id': self.frame_id,
+            payload = {'command': command, 'current_id': self.frame_id,
                 'observations': self.pending, 'task': self.config['task_name'],
-                'episode_seed': environment._memory_seed, 'instruction': environment.get_instruction()})
+                'episode_seed': environment._memory_seed, 'instruction': environment.get_instruction()}
+            if getattr(self, 'inserted', None):
+                payload['inserted'] = self.inserted
+            response = self.call(payload)
             self.pending = []
+            self.inserted = []
             self.timings['rpc_seconds'] += time.monotonic() - start
             return response
+
+        def hold(self, environment, observation):
+            """Tempo stress (plan v10 D.3): hold the last commanded position for k targets before this decision.
+            Budget-neutral (the official cap counts policy targets only); the current frame is re-captured after the
+            pause. 'history': the k hold frames go to the policy as req['inserted']; 'hidden': they are not shown."""
+            held = getattr(self, 'held', set())
+            if self.frame_id in held:
+                return
+            held.add(self.frame_id); self.held = held
+            k, arm = int(stress['k']), stress['arm']
+            last = getattr(self, 'last_target', None)
+            target = np.asarray(last if last is not None else observation['joint_action']['vector'], dtype=np.float32)
+            before = object_snapshot(environment); count_before = environment.take_action_cnt
+            started = time.monotonic(); frames = []
+            for _ in range(k):
+                environment.take_action(target, action_type='qpos')
+                environment.take_action_cnt = count_before                  # holds do not use the official budget
+                if arm == 'history':
+                    item = self.capture(environment, environment.get_obs())
+                    item['frame_id'] = None; item['inserted'] = True
+                    frames.append(item)
+            self.pending[-1] = self.capture(environment, environment.get_obs())
+            self.inserted = frames
+            append(directory / 'stress.jsonl', {'frame': self.frame_id, 'k': k, 'arm': arm, 'target': target.tolist(),
+                'objects_before': before, 'objects_after': object_snapshot(environment),
+                'physical_after': physical_state(environment.robot).tolist(), 'shown': len(frames),
+                'seconds': time.monotonic() - started})
+            print(f'[stress] frame={self.frame_id} hold {k} ({arm}) shown={len(frames)}', flush=True)
 
         def execute(self, environment, observation):
             sim_eval.check_stop(self.config.get('memory_stop_root'))
@@ -128,6 +162,8 @@ def main():
             if self.frame_id >= case['cap']: raise ValueError('Attempted action beyond official limit')
             # Capture only the ordinary loop observation, once per completed target.
             self.pending.append(self.capture(environment, observation))
+            if not self.actions and self.frame_id in hold_at:
+                self.hold(environment, observation)
             if not self.actions:
                 count = execution_count(self.frame_id, case['cap'], int(job.get('execute', EXECUTE)))
                 response = self.request(environment, 'decide')
@@ -137,7 +173,7 @@ def main():
                 self.actions.extend(actions[:count])
                 print(f'[decision] frame={self.frame_id} execute={count} cap={case["cap"]}', flush=True)
             sim_eval.check_stop(self.config.get('memory_stop_root'))
-            started = time.monotonic(); target = self.actions.popleft()
+            started = time.monotonic(); target = self.actions.popleft(); self.last_target = target
             before_steps = getattr(environment, '_memory_physics_steps', None)
             before = physical_state(environment.robot); objects_before = object_snapshot(environment)
             objects_before.update(task_state(environment))

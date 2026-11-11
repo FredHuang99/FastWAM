@@ -224,6 +224,7 @@ def train(cfg: RunConfig, args, smoke: bool = False) -> dict:
     seen = 0
     running = []
     grad_parts: Dict[str, float] = {}
+    bad_steps = skipped = 0
     while state["update"] < total:
         train_set.epoch = state["epoch"]
         perm = np.random.default_rng(cfg.seed * 1000 + state["epoch"]).permutation(len(train_set))[state["position"]:]
@@ -238,7 +239,7 @@ def train(cfg: RunConfig, args, smoke: bool = False) -> dict:
                 v, a = model.loss(batch)
                 loss = (cfg.model.video_loss * v.mean() + cfg.model.action_loss * a.mean()) / s.accumulation
             loss.backward()
-            running.append((float(v.mean()), float(a.mean())))
+            running.append((float(v.detach().mean()), float(a.detach().mean())))
             micro += 1
             state["position"] += s.micro_batch
             seen += s.micro_batch
@@ -251,7 +252,19 @@ def train(cfg: RunConfig, args, smoke: bool = False) -> dict:
                 grad_parts = grad_norms(model)
                 log("first update gradient norms per part:", json.dumps(grad_parts))
             norm = torch.nn.utils.clip_grad_norm_([p for p in model.parameters() if p.requires_grad], cfg.optim.grad_clip)
-            opt.step()
+            if torch.isfinite(norm):
+                opt.step()
+                bad_steps = 0
+            else:                                          # never let a non-finite gradient reach the weights
+                bad_steps += 1
+                skipped += 1
+                log(f"non-finite gradient norm at update {state['update'] + 1}: step skipped ({skipped} so far)")
+                if bad_steps >= 5:
+                    opt.zero_grad(set_to_none=True)
+                    log("5 consecutive non-finite gradients: stopping (run the gradcheck command)")
+                    write_json(run / ("SMOKE.json" if smoke else "SUMMARY.json"),
+                               {"status": "nonfinite_gradients", "update": state["update"], "pass": False})
+                    return {"status": "nonfinite_gradients", "pass": False}
             opt.zero_grad(set_to_none=True)
             state["update"] += 1
             u = state["update"]
@@ -395,9 +408,55 @@ def probe(cfg: RunConfig, args) -> None:
     write_json(cfg.run_dir / "PROBE.json", {"history": str(cfg.rule), "rows": report})
 
 
+def gradcheck(cfg: RunConfig, args) -> None:
+    """One micro batch, forward + backward under each setting; per-part gradient norms; for the first setting with a
+    non-finite gradient, autograd anomaly mode names the operation that produced it."""
+    device = "cuda"
+    log = Logger(cfg.run_dir, "gradcheck")
+    model, train_set, _ = build(cfg, device, log, limit_episodes=1)
+    model.train()
+    rows = [train_set[(97 * j) % len(train_set)] for j in range(args.micro[0])]
+    batch = to_device(collate(rows), device)
+    log(f"batch: anchors {batch['anchor'].tolist()}, history frames "
+        f"{int(batch['hist_valid'].sum()) if 'hist_valid' in batch else 0}")
+    settings = [("no history, recompute", False, True), ("history, recompute", True, True),
+                ("no history, no recompute", False, False), ("history, no recompute", True, False)]
+    first_bad = None
+    for name, use_history, ckpt in settings:
+        model.zero_grad(set_to_none=True)
+        model.checkpoint_layers = ckpt
+        torch.manual_seed(0)
+        with torch.autocast("cuda", dtype=torch.bfloat16, cache_enabled=False):
+            v, a = model.loss(batch, history="auto" if use_history else None)
+            loss = v.mean() + a.mean()
+        loss.backward()
+        parts = grad_norms(model)
+        bad = [k for k, x in parts.items() if not math.isfinite(x)]
+        log(f"{name}: loss video {float(v.detach().mean()):.4f} action {float(a.detach().mean()):.4f} finite "
+            f"{bool(torch.isfinite(loss))}; grads {json.dumps(parts)}; non-finite parts {bad}")
+        if bad and first_bad is None:
+            first_bad = (name, use_history, ckpt)
+    if first_bad is not None:
+        name, use_history, ckpt = first_bad
+        log(f"anomaly mode on: {name} (no recompute, to name the forward op)")
+        model.zero_grad(set_to_none=True)
+        model.checkpoint_layers = False
+        try:
+            with torch.autograd.detect_anomaly(check_nan=True):
+                with torch.autocast("cuda", dtype=torch.bfloat16, cache_enabled=False):
+                    v, a = model.loss(batch, history="auto" if use_history else None)
+                (v.mean() + a.mean()).backward()
+            log("anomaly mode: no error raised")
+        except RuntimeError as error:
+            import traceback
+            log("anomaly:", str(error)[:600])
+            log("".join(traceback.format_exc().splitlines(True)[-12:]))
+    model.zero_grad(set_to_none=True)
+
+
 def main(argv: Optional[List[str]] = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("command", choices=("train", "smoke", "probe", "export"))
+    ap.add_argument("command", choices=("train", "smoke", "probe", "export", "gradcheck"))
     ap.add_argument("--config", required=True)
     ap.add_argument("--set", action="append", default=[], dest="overrides")
     ap.add_argument("--updates", type=int, default=200, help="smoke: number of updates")
@@ -414,6 +473,8 @@ def main(argv: Optional[List[str]] = None) -> None:
         sys.exit(0 if s.get("pass") else 1)
     elif args.command == "probe":
         probe(cfg, args)
+    elif args.command == "gradcheck":
+        gradcheck(cfg, args)
     else:
         model = FullModel.from_release(cfg.model.architecture, cfg.model.base, cfg.rule.variant, cfg.rule.event_slots)
         model.set_trainable(cfg.model.train_video, cfg.model.lora_rank)

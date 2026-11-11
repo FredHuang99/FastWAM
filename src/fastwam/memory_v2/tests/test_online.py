@@ -146,3 +146,25 @@ def test_coherence_overlap_and_choice():
     a = np.zeros((32, 14))
     a[:, 0] = 1.0
     assert overlap_distance(0, np.zeros((32, 14)), 8, g) < overlap_distance(0, np.zeros((32, 14)), 8, a)
+
+
+def test_tempo_stress_remap_and_triggers():
+    assert online.parse_stress("") is None
+    s = online.parse_stress("hold:32:history")
+    assert s == {"kind": "hold", "k": 32, "arm": "history"}
+    with pytest.raises(ValueError):
+        online.parse_stress("hold:32:sideways")
+    t = online.stress_triggers(4300030, 500, 8, 2)
+    assert t == online.stress_triggers(4300030, 500, 8, 2) and len(t) == 2
+    assert all(f % 8 == 0 and 40 <= f < 300 for f in t)
+    state = {"offset": 0}
+    obs = lambda ids: [{"frame_id": i, "images": [i]} for i in ids]          # noqa: E731
+    r1 = online.remap_stressed({"observations": obs(range(0, 9)), "current_id": 8}, 8, state)
+    assert [o["frame_id"] for o in r1["observations"]] == list(range(9)) and r1["current_id"] == 8
+    ins = [{"frame_id": None, "images": ["h"]} for _ in range(3)]
+    r2 = online.remap_stressed({"observations": obs(range(9, 17)), "current_id": 16, "inserted": ins}, 16, state)
+    ids = [o["frame_id"] for o in r2["observations"]]
+    assert ids == list(range(9, 20)) and r2["current_id"] == 19 and r2["noise_frame"] == 16
+    assert r2["observations"][-1]["images"] == [16] and r2["observations"][-2]["images"] == ["h"]
+    r3 = online.remap_stressed({"observations": obs(range(17, 25)), "current_id": 24}, 24, state)
+    assert [o["frame_id"] for o in r3["observations"]] == list(range(20, 28)) and r3["current_id"] == 27

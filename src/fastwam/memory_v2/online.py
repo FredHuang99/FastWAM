@@ -78,6 +78,44 @@ def execution_count(frame: int, limit: int, execute: int = EXECUTE) -> int:
     return min(int(execute), limit - frame)
 
 
+# ----------------------------------------------------------------------------- tempo stress (plan v10 D.3 / N3)
+def parse_stress(value: str) -> Optional[dict]:
+    """'' -> None; 'hold:K:history' / 'hold:K:hidden' -> {"kind": "hold", "k": K, "arm": ...}.
+
+    hold: at N decision frames fixed by the scene seed, the robot holds its last commanded position for K simulator
+    targets BEFORE the decision (budget-neutral: the simulator does not count them against the official cap).
+      history  the K hold frames are shown to the policy as ordinary past frames (its clock advances by K)
+      hidden   the K hold frames are executed but never shown (only the state after the pause is)."""
+    if not value:
+        return None
+    parts = value.split(":")
+    if len(parts) != 3 or parts[0] != "hold" or parts[2] not in ("history", "hidden") or int(parts[1]) < 1:
+        raise ValueError(f"--stress expects hold:K:history|hidden, got {value!r}")
+    return {"kind": "hold", "k": int(parts[1]), "arm": parts[2]}
+
+
+def stress_triggers(seed: int, limit: int, execute: int, n: int) -> List[int]:
+    """N decision frames in [5 decisions, 0.6 x cap), drawn from the scene seed only (identical across arms/models)."""
+    import random as _random
+    lo, hi = 5 * execute, int(0.6 * limit) // execute * execute
+    frames = list(range(lo, hi, execute))
+    return sorted(_random.Random(int(seed) * 7919 + 13).sample(frames, min(n, len(frames))))
+
+
+def remap_stressed(req: dict, frame: int, state: dict) -> dict:
+    """Protocol frames -> the policy's clock: hold frames shown in the 'history' arm arrive as req['inserted'] (just
+    before the current frame) and become ordinary contiguous frames; every later frame shifts by their count.
+    Noise seeds keep the protocol frame (req['noise_frame']) so the arms differ only in what the policy sees."""
+    inserted = req.get("inserted") or []
+    offset = state.get("offset", 0)
+    obs = [dict(r, frame_id=int(r["frame_id"]) + offset) for r in req["observations"][:-1]]
+    for j, r in enumerate(inserted):
+        obs.append(dict(r, frame_id=frame + offset + j))
+    state["offset"] = offset + len(inserted)
+    obs.append(dict(req["observations"][-1], frame_id=frame + state["offset"]))
+    return dict(req, observations=obs, current_id=frame + state["offset"], noise_frame=frame)
+
+
 def apply_overrides(value: dict, overrides: Sequence[str]) -> dict:
     """key.sub=value (YAML-parsed), the same syntax as train_v2 --set."""
     from .train_v2 import set_override
@@ -326,7 +364,7 @@ class Session:
             prefilled = len(self.kv_cache) - cached_before if self.replay_cache else (len(selection.ids) if self.replay else 0)
             # U1: candidate k uses its own noise seed; k = 0 is the original seed, so candidates=1 / coherence none /
             # per_decision noise is bit-identical to the plain closed loop. per_episode noise reuses frame 0's noise.
-            noise_frame = 0 if self.noise_mode == "per_episode" else current
+            noise_frame = 0 if self.noise_mode == "per_episode" else int(request.get("noise_frame", current))
             seeds = [seed_for(p.dense_cfg["seed"], self.seed, noise_frame,
                               "closed-loop-noise" if k == 0 else f"closed-loop-noise-{k}") for k in range(self.candidates)]
             g = p.cfg.v2.guidance
@@ -487,13 +525,17 @@ def run_episode(policy: Policy, scene: dict, mode: str, label: str, out: Path, a
     root = Path(policy.spec.root)
     gpu = gpu_uuid()
     sim_cfg = simulator_config(policy.dense_cfg, root, out, args)
+    stress = parse_stress(getattr(args, "stress", ""))
+    if stress:
+        stress["at"] = stress_triggers(int(scene["seed"]), limit, int(args.execute), int(args.stress_n))
+    stress_state = {"offset": 0}
     write(directory / "job.json", {"id": f"{label}:{mode}:{task}:{scene['seed']}", "attempt": 1, "scene": scene,
                                    "condition": f"memory_v2_{mode}", "run_seed": policy.dense_cfg["seed"],
                                    "causal_case": {"task": task, "fork": 0, "capture": [], "cap": limit},
                                    "max_targets": int(args.max_targets), "record_frames": bool(args.record_frames),
                                    "execute": int(args.execute), "candidates": int(args.candidates),
                                    "coherence": args.coherence, "noise": args.noise,
-                                   "policy": policy.describe(), "label": label})
+                                   "policy": policy.describe(), "label": label, "stress": stress})
     target_limit = min(limit, args.max_targets) if args.max_targets else limit
     session = Session(policy, directory, mode, args.steps, args.guidance, args.dependence,
                       tag=f"{label}/{mode} {task} seed={scene['seed']}", limit=target_limit,
@@ -553,7 +595,14 @@ def run_episode(policy: Policy, scene: dict, mode: str, label: str, out: Path, a
                                 raise ValueError(f"Scene identity mismatch between job and simulator: {identity}")
                             if [int(r["frame_id"]) for r in req["observations"]] != list(range(last + 1, frame + 1)):
                                 raise ValueError("Observation gap")
-                            actions = session.decide(req)
+                            if stress:
+                                if req.get("inserted") and stress["arm"] != "history":
+                                    raise ValueError("Hold frames sent in the hidden arm")
+                                actions = session.decide(remap_stressed(req, frame, stress_state))
+                            else:
+                                if req.get("inserted"):
+                                    raise ValueError("Inserted frames without a stress setting")
+                                actions = session.decide(req)
                             n = execution_count(frame, limit, args.execute)
                             commands.extend(actions[:n])
                             c.send({"ok": True, "actions": actions.tolist(), "execute": n})
@@ -586,7 +635,7 @@ def run_episode(policy: Policy, scene: dict, mode: str, label: str, out: Path, a
                   "dependence_mean": {k: sum(v) / len(v) for k, v in dependence.items()},
                   "steps": args.steps or policy.cfg.v2.guidance.steps, "guidance_scale": args.guidance,
                   "execute": int(args.execute), "candidates": int(args.candidates), "coherence": args.coherence,
-                  "noise": args.noise,
+                  "noise": args.noise, "stress": stress, "stress_frames_shown": stress_state["offset"],
                   "simulator_backend": value.get("simulator_backend"), "simulator_seconds": value.get("simulator_seconds"),
                   "wall_seconds": time.monotonic() - start, **episode_metrics(rows)}
         write(directory / "result.json", result)
@@ -1071,6 +1120,8 @@ def main(argv=None):
                     help="kv_replay: re-prefill every history frame at every decision (parity / latency reference)")
     ap.add_argument("--max-targets", type=int, default=0, help="smoke runs: stop after N executed targets (0 = official)")
     ap.add_argument("--record-frames", action="store_true", help="save camera PNGs of every frame")
+    ap.add_argument("--stress", default="", help="tempo stress hold:K:history|hidden (plan v10 D.3); '' = none")
+    ap.add_argument("--stress-n", type=int, default=2, help="pauses per episode (decision frames from the scene seed)")
     ap.add_argument("--dump-first", action="store_true",
                     help="diagnosis: pickle frame 0's decision request (observations, proprio, instruction) to "
                          "<episode>/request_000000.pkl (scripts/memory_v2/migrate/first_decision.py replays it)")

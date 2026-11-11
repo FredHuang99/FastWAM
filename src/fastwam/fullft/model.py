@@ -253,10 +253,14 @@ class FullModel(nn.Module):
         if history is not None:
             hk = history.keys[layer].to(k.dtype)
             hv = history.values[layer].to(v.dtype)
-            full = torch.cat((history.valid[:, None, None, :].expand(b, 1, s, hk.shape[1]),
-                              mask[None, None].expand(b, 1, s, mask.shape[1])), -1)
+            # additive, materialised (no stride-0 broadcast) mask with a finite floor: 11-11 H200 smoke gave NaN
+            # gradients with the expanded boolean mask
+            allowed = torch.cat((history.valid[:, None, None, :].expand(b, 1, s, hk.shape[1]),
+                                 mask[None, None].expand(b, 1, s, mask.shape[1])), -1)
+            bias = torch.zeros(allowed.shape, dtype=qh.dtype, device=qh.device)
+            bias.masked_fill_(~allowed, torch.finfo(qh.dtype).min)
             mixed = F.scaled_dot_product_attention(qh, heads(torch.cat((hk, k), 1)), heads(torch.cat((hv, v), 1)),
-                                                   attn_mask=full)
+                                                   attn_mask=bias)
             g = self.hist_gate[layer].to(base.dtype).view(1, h, 1, 1)
             base = base + g * (mixed - base)
         return base.transpose(1, 2).reshape(b, s, w)
