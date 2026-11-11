@@ -21,6 +21,7 @@ Descriptive only for old models (X7, B0): the v11 K0 reading (>= 40 % "common") 
 
   PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/self_fail.py --folder closed_loop/eq5090b --label x7_eq5090b
   ... --search closed_loop/official --label a2C6_e6   (every sub-folder of the search folder that holds <label>/)
+Rows are per task AND mode (11-11 19:00: the first A100 run pooled X7 "on" with X7 "masked" episodes of the same label).
 Writes outputs/fullft/k0/SELF_FAIL_<label>_<time>.json and prints the table.
 """
 from __future__ import annotations
@@ -49,7 +50,7 @@ def episodes(folders, label):
         for d in sorted(folder.glob(f"{label}/*/*/seed_*")):
             f = d / "executed_actions.jsonl"
             if (d / "result.json").exists() and f.exists():
-                yield d.parts[-2], d.name, d
+                yield f"{d.parts[-2]} ({d.parts[-3]})", d.name, d      # "task (mode)": memory on / masked apart
 
 
 def load_rows(path: Path):
