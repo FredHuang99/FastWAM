@@ -2931,6 +2931,7 @@ tasks:
   tasks: [put_back_block]
   online_args: ["--execute", "8", "--limit", "50", "--shard", "0/2"]
   output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}     # 11-12 12:35 (user: 改): instruction text from the training cache, identical on both machines
 
 - id: G1-a100-e30-put-s1
   lane: loop
@@ -2947,6 +2948,7 @@ tasks:
   tasks: [put_back_block]
   online_args: ["--execute", "8", "--limit", "50", "--shard", "1/2"]
   output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}     # 11-12 12:35 (user: 改): instruction text from the training cache, identical on both machines
 
 - id: G1-a100-e30-swap-s0
   lane: loop
@@ -2963,6 +2965,7 @@ tasks:
   tasks: [swap_blocks]
   online_args: ["--execute", "8", "--limit", "50", "--shard", "0/2"]
   output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}     # 11-12 12:35 (user: 改): instruction text from the training cache, identical on both machines
 
 - id: G1-a100-e30-swap-s1
   lane: loop
@@ -2979,6 +2982,7 @@ tasks:
   tasks: [swap_blocks]
   online_args: ["--execute", "8", "--limit", "50", "--shard", "1/2"]
   output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}     # 11-12 12:35 (user: 改): instruction text from the training cache, identical on both machines
 
 - id: G1-a100-verdict
   lane: cpu
@@ -3230,6 +3234,7 @@ tasks:
   tasks: [put_back_block]
   online_args: ["--execute", "8", "--limit", "20", "--shard", "0/2"]
   output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}     # 11-12 12:35 (user: 改): instruction text from the training cache, identical on both machines
 
 - id: AL4a-e20-put-s1
   lane: loop
@@ -3246,6 +3251,7 @@ tasks:
   tasks: [put_back_block]
   online_args: ["--execute", "8", "--limit", "20", "--shard", "1/2"]
   output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}     # 11-12 12:35 (user: 改): instruction text from the training cache, identical on both machines
 
 - id: AL4a-e20-swap-s0
   lane: loop
@@ -3262,6 +3268,7 @@ tasks:
   tasks: [swap_blocks]
   online_args: ["--execute", "8", "--limit", "20", "--shard", "0/2"]
   output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}     # 11-12 12:35 (user: 改): instruction text from the training cache, identical on both machines
 
 - id: AL4a-e20-swap-s1
   lane: loop
@@ -3278,6 +3285,7 @@ tasks:
   tasks: [swap_blocks]
   online_args: ["--execute", "8", "--limit", "20", "--shard", "1/2"]
   output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}     # 11-12 12:35 (user: 改): instruction text from the training cache, identical on both machines
 
 - id: AL4a-e20-export
   lane: cpu

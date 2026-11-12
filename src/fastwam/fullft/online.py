@@ -151,11 +151,14 @@ class FullPolicy:
         if self.text_source not in ("t5", "cache"):
             raise ValueError(f"MWAM_TEXT_SOURCE must be t5 or cache, got {self.text_source!r}")
         self._text_memo: Dict[str, tuple] = {}
-        self.t5 = _load_registered_model(self.path("t5"), "wan_video_text_encoder", torch.bfloat16,
-                                         str(self.device) if self.t5_on_gpu else "cpu")
-        self.t5.eval().requires_grad_(False)
-        self.tokenizer = HuggingfaceTokenizer(self.path("tokenizer"), seq_len=128, clean="whitespace",
-                                              local_files_only=True)
+        self.text_fingerprints: Dict[str, str] = {}
+        self.t5 = self.tokenizer = None
+        if self.text_source == "t5":                                       # cache: T5 is never called, not loaded
+            self.t5 = _load_registered_model(self.path("t5"), "wan_video_text_encoder", torch.bfloat16,
+                                             str(self.device) if self.t5_on_gpu else "cpu")
+            self.t5.eval().requires_grad_(False)
+            self.tokenizer = HuggingfaceTokenizer(self.path("tokenizer"), seq_len=128, clean="whitespace",
+                                                  local_files_only=True)
         dense.bind(self.spec)
         from data_path import mosaic                                       # the training caches' image contract
         self.mosaic = mosaic
@@ -186,9 +189,16 @@ class FullPolicy:
         recs = [r for r in dense.records(self.spec) if r.get("instruction") == instruction]
         if not recs:
             raise ValueError(f"MWAM_TEXT_SOURCE=cache: no training episode has the instruction {instruction!r}")
+        import hashlib
         enc = dense.EpisodeStore(self.spec, verify=False)(recs[0]["episode_id"])
-        print(f"[fullft] text from the training cache ({recs[0]['episode_id']}, {len(recs)} episodes share it)", flush=True)
-        return (enc["text"][None].to(self.device, torch.bfloat16), enc["text_valid"][None].bool().to(self.device))
+        text = enc["text"].to(torch.bfloat16).contiguous()
+        valid = enc["text_valid"].bool().contiguous()
+        # fingerprint of exactly what the model gets: the same 12 hex characters on two machines = identical text input
+        fp = hashlib.sha256(text.view(torch.int16).cpu().numpy().tobytes() + valid.cpu().numpy().tobytes()).hexdigest()[:12]
+        self.text_fingerprints[instruction] = f"{recs[0]['episode_id']}:{fp}"
+        print(f"[fullft] text from the training cache ({recs[0]['episode_id']}, {len(recs)} episodes share it; "
+              f"fingerprint {fp})", flush=True)
+        return text[None].to(self.device), valid[None].to(self.device)
 
     def base_label(self, label: str) -> str:
         return f"{label}_off"
@@ -196,7 +206,8 @@ class FullPolicy:
     def describe(self) -> dict:
         return {"checkpoint": self.checkpoint, "kind": "fullft", "history": str(self.rule),
                 "train_video": self.run_cfg.model.train_video, "run": self.run_cfg.name,
-                "export_state": self.export_state, "t5_on_gpu": self.t5_on_gpu, "text_source": self.text_source}
+                "export_state": self.export_state, "t5_on_gpu": self.t5_on_gpu, "text_source": self.text_source,
+                "text_fingerprints": dict(self.text_fingerprints)}
 
 
 class FullSession:
