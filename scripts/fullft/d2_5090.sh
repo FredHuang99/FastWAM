@@ -9,6 +9,7 @@
 #   Nnum >= 0.75 N                            -> the residual is the policy numerics (VAE / T5 / DiT on the two GPUs)
 #   between                                   -> both
 #   docker exec -d -e GPU=0 mwam5090 bash /workspace/FastWAM-memory2/scripts/fullft/d2_5090.sh
+#   step 3 only, any free GPU: docker exec -d -e STEP3_ONLY=1 mwam5090 bash /workspace/FastWAM-memory2/scripts/fullft/d2_5090.sh
 set -u
 R=/workspace/FastWAM-memory2
 O=$R/outputs/memory_v2
@@ -17,12 +18,24 @@ LOG=$R/outputs/fullft/align/D2_5090_$(date +%Y%m%d_%H%M).txt
 exec > >(tee -a "$LOG") 2>&1
 trap 'rc=$?; echo "[d2] $(date "+%F %T") finished, exit code $rc; log $LOG"' EXIT
 cd $R
-GPU=${GPU:-0}
 export PYTHONPATH=$R/src
 PY=/opt/mwam/bin/python
+HF=/opt/hf-tools/bin/python
 E10=$R/outputs/fullft/exports/ar_2task_e10/export_e10.pt
-used() { nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i $GPU | tr -d ' '; }
-until [ "$(used)" -lt 2000 ]; do echo "[d2] $(date '+%F %T') GPU $GPU busy; waiting"; sleep 300; done
+# 11-12 14:00: STEP3_ONLY=1 = steps 1-2 are done (D2_5090_20261112_0311: probe = closed loop, 15/15 identical); wait
+# (up to 6 h) until the A100's requests are on the relay, then for whichever of GPU ${GPUS:-0 1} is empty first.
+if [ "${STEP3_ONLY:-0}" = 1 ]; then
+  for i in $(seq 72); do
+    $HF scripts/memory_v2/migrate/relay.py ls --prefix diag/first_requests 2>/dev/null | grep -q "^dumpfirst_a100.tgz " && break
+    echo "[d2] $(date '+%F %T') the A100's requests are not on the relay yet; waiting"; sleep 300
+  done
+fi
+free_gpu() { for g in ${GPUS:-0 1}; do u=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i $g | tr -d ' ');
+             [ "$u" -lt 2000 ] && { echo $g; return 0; }; done; return 1; }
+if [ -n "${GPU:-}" ]; then GPUS=$GPU; fi
+until GPU=$(free_gpu); do echo "[d2] $(date '+%F %T') GPU ${GPUS:-0 1} busy; waiting"; sleep 300; done
+echo "[d2] $(date '+%F %T') GPU $GPU"
+if [ "${STEP3_ONLY:-0}" != 1 ]; then
 echo "[d2] $(date '+%F %T') ===== 1 dump this machine's frame-0 requests"
 MACHINE=5090 GPU=$GPU bash scripts/fullft/dump_first.sh > /dev/null 2>&1; tail -n 3 $(ls -t $R/outputs/fullft/align/DUMP_FIRST_5090_*.txt | head -1)
 OWN="closed_loop/dumpfirst/dumpfirst_5090/on/*/seed_*/request_000000.pkl"
@@ -32,9 +45,10 @@ CUDA_VISIBLE_DEVICES=$GPU $PY scripts/fullft/numerics_probe.py --name probe_5090
 CUDA_VISIBLE_DEVICES=$GPU $PY scripts/fullft/numerics_probe.py --name probe_5090own_e10 --policy $E10 --requests "$OWN" | tail -n 1
 cmpf 5090_x7 probe_5090own_x7
 cmpf 5090_e10 probe_5090own_e10
+fi
 echo "[d2] $(date '+%F %T') ===== 3 the A100's requests (numerics only)"
 mkdir -p $O/closed_loop/dumpfirst_in
-/opt/hf-tools/bin/python scripts/memory_v2/migrate/relay.py get --prefix diag/first_requests --out /tmp/d2_in 2>&1 | tail -1
+$HF scripts/memory_v2/migrate/relay.py get --prefix diag/first_requests --out /tmp/d2_in 2>&1 | tail -1
 if [ -f /tmp/d2_in/dumpfirst_a100.tgz ]; then
   tar xzf /tmp/d2_in/dumpfirst_a100.tgz -C $O/closed_loop/dumpfirst_in
   IN="closed_loop/dumpfirst_in/dumpfirst_a100/on/*/seed_*/request_000000.pkl"

@@ -187,6 +187,14 @@ def loop_scenes(task):
             scenes.append(s)
     scenes.sort(key=lambda s: (wanted.index(s["task"]), s.get("ordinal", 0), int(s["seed"])))
     args = [str(a) for a in (task.get("online_args") or [])]
+    start = int(_opt(args, "--from-scene", 1) or 1)          # 11-12: as online.select_scenes (per task, bank order)
+    if start > 1:
+        count, kept = {}, []
+        for s in scenes:
+            count[s["task"]] = count.get(s["task"], 0) + 1
+            if count[s["task"]] >= start:
+                kept.append(s)
+        scenes = kept
     seeds = [str(x) for x in task.get("seeds") or []]
     if seeds:
         want = {(x.split(":")[0], int(x.split(":")[1])) if ":" in x else (None, int(x)) for x in seeds}

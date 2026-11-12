@@ -3297,6 +3297,67 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/migrate/export_stages.py --label ar_2task_e20 --mode on --folders /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/g1 --out closed_loop/check_a100/ar_2task_e20_stages.json --relay diag/a100_ar_2task_e20_stages"
   pass_if: "m['rc'] == 0"
 
+- id: AL4a-e20b-put-s0
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e20]
+  requires_pass: [FT-fetch-e20]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "plan v12 AL4a extension (11-12 14:00, pre-read, no verdict): N7 epoch e20, put scenes 21-50, shard 0 of 3 (~1 h each on the A100 with cache text); with AL4a-e20 gives 50 put pairs against the 5090's e20 (cache text + OIDN 2.0.1 = the fixed pipeline) before the AL4 verdict at e30; sized to end near the e30 export so G1 is not held up"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--from-scene", "21", "--limit", "30", "--shard", "0/3"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: AL4a-e20b-put-s1
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e20]
+  requires_pass: [FT-fetch-e20]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "plan v12 AL4a extension (11-12 14:00, pre-read, no verdict): N7 epoch e20, put scenes 21-50, shard 1 of 3 (~1 h each on the A100 with cache text); with AL4a-e20 gives 50 put pairs against the 5090's e20 (cache text + OIDN 2.0.1 = the fixed pipeline) before the AL4 verdict at e30; sized to end near the e30 export so G1 is not held up"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--from-scene", "21", "--limit", "30", "--shard", "1/3"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: AL4a-e20b-put-s2
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e20]
+  requires_pass: [FT-fetch-e20]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "plan v12 AL4a extension (11-12 14:00, pre-read, no verdict): N7 epoch e20, put scenes 21-50, shard 2 of 3 (~1 h each on the A100 with cache text); with AL4a-e20 gives 50 put pairs against the 5090's e20 (cache text + OIDN 2.0.1 = the fixed pipeline) before the AL4 verdict at e30; sized to end near the e30 export so G1 is not held up"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--from-scene", "21", "--limit", "30", "--shard", "2/3"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: AL4a-e20b-export
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  after: [AL4a-e20-put-s0, AL4a-e20-put-s1, AL4a-e20-swap-s0, AL4a-e20-swap-s1, AL4a-e20b-put-s0, AL4a-e20b-put-s1, AL4a-e20b-put-s2]
+  timeout_h: 1
+  hypothesis: "plan v12 AL4a extension: export the A100's per-scene stages of ar_2task_e20 (put 1-50, swap 1-20) and relay them (diag/a100_ar_2task_e20_stages50) for the paired table on the 5090"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/migrate/export_stages.py --label ar_2task_e20 --mode on --folders /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/g1 --out closed_loop/check_a100/ar_2task_e20_stages50.json --relay diag/a100_ar_2task_e20_stages50"
+  pass_if: "m['rc'] == 0"
+
 - id: AL4a-e10b-put-s0
   lane: loop
   kind: closed_loop
@@ -3330,6 +3391,7 @@ tasks:
   output: closed_loop/g1
 
 - id: AL4a-e10b-swap-s0
+  hold: true     # 11-12 14:00: ~3.5 h each on the one free A100 GPU; would delay G1 at e30 by ~2 h; the 5090 partner ran the old pipeline
   lane: loop
   kind: closed_loop
   after: [AL4a-e10-export]
@@ -3346,6 +3408,7 @@ tasks:
   output: closed_loop/g1
 
 - id: AL4a-e10b-swap-s1
+  hold: true     # 11-12 14:00: ~3.5 h each on the one free A100 GPU; would delay G1 at e30 by ~2 h; the 5090 partner ran the old pipeline
   lane: loop
   kind: closed_loop
   after: [AL4a-e10-export]
@@ -3365,7 +3428,7 @@ tasks:
   lane: cpu
   kind: shell
   need_mib: 0
-  after: [AL4a-e10b-put-s0, AL4a-e10b-put-s1, AL4a-e10b-swap-s0, AL4a-e10b-swap-s1]
+  after: [AL4a-e10b-put-s0, AL4a-e10b-put-s1]   # 11-12 14:00: swap shards on hold
   timeout_h: 1
   hypothesis: "plan v12 AL4a extension: export the A100's per-scene stages of ar_2task_e10, scenes 1-50, and relay them (diag/a100_ar_2task_e10_stages50) for the paired 50 + 50 table on the 5090"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/migrate/export_stages.py --label ar_2task_e10 --mode on --folders /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/g1 --out closed_loop/check_a100/ar_2task_e10_stages50.json --relay diag/a100_ar_2task_e10_stages50"

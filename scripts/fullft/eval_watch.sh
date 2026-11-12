@@ -3,7 +3,8 @@
 # the keyboard. For each tag in order:
 #   1 wait until the relay lists exports/<RUN>_<TAG>/export_<TAG>.pt.sha256 (export_watch.sh on the H200 uploads it
 #     last), fetch the export once and check its sha256
-#   2 e10, e20: N=20 (progress checks, no verdict), put then swap on the first GPU that is empty (< 2000 MiB)
+#   2 e10, e20: progress checks, no verdict, put then swap on the first GPU that is empty (< 2000 MiB): e10 ran N=20;
+#     from 11-12 14:00 N=NPRE (50) as two one-task runs
 #     e30: N=50 = G1. put on GPU0 and swap on GPU1 in parallel (each waits for its GPU), then the verdict pass
 #     (g1_loop.sh VERDICT_ONLY=1, pre-registered G1 rule unchanged)
 # Resumable: finished episodes are kept; a tag with its marker outputs/fullft/exports/<RUN>_<TAG>/.evaluated is skipped.
@@ -43,8 +44,14 @@ for TAG in $TAGS; do
   (cd $E && sha256sum -c export_${TAG}.pt.sha256) || { echo "[eval] $TAG sha256 mismatch: delete $E, the next run refetches"; exit 1; }
   if [ "$TAG" != e30 ]; then
     until G=$(free_gpu 0 1); do echo "[eval] $(date '+%F %T') $TAG: no empty GPU yet"; sleep $POLL; done
-    echo "[eval] $(date '+%F %T') $TAG: N=20 on GPU $G"
-    RUN=$RUN TAG=$TAG N=20 GPU=$G bash scripts/fullft/g1_loop.sh > /dev/null 2>&1
+    # 11-12 14:00: progress checks run scenes 1-NPRE (50) as two one-task runs (no G1 line before e30): 1-20 stay the
+    # screening; 21-50 pair with the A100's AL4a-e20b put shards (AL4 pre-read with the fixed pipeline)
+    NPRE=${NPRE:-50}
+    echo "[eval] $(date '+%F %T') $TAG: N=$NPRE, put then swap, on GPU $G"
+    for t in put_back_block swap_blocks; do
+      RUN=$RUN TAG=$TAG N=$NPRE GPU=$G TASKS=$t SKIP_SMOKE=$([ $t = swap_blocks ] && echo 1 || echo 0) \
+        bash scripts/fullft/g1_loop.sh > /dev/null 2>&1
+    done
   else
     pids=""
     for pair in "0 put_back_block" "1 swap_blocks"; do
