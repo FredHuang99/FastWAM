@@ -20,7 +20,7 @@ export PYTHONPATH=$R/src CUDA_VISIBLE_DEVICES=${GPU:-0} PYTORCH_CUDA_ALLOC_CONF=
 PY=/opt/mwam/bin/python
 PUTB=$O/closed_loop/scenes_seed42_n100_put_back_block
 SWAPB=$O/closed_loop/scenes_seed42_n100_swap_blocks
-NAME=dumpfirst_$MACHINE
+NAME=${NAME:-dumpfirst_$MACHINE}
 if [ "$MACHINE" = a100 ]; then X7F="closed_loop/official/put_x7_s0 closed_loop/official/put_x7_s1"; X7L=a2C6_e6
 else X7F=closed_loop/eq5090b; X7L=x7_eq5090b; fi
 $PY scripts/fullft/replay_pack.py pack --name $NAME --folders $X7F --label $X7L --task put_back_block --bank $PUTB --from-scene 31 --limit 5
