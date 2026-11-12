@@ -44,8 +44,9 @@ grep -n "OIDN_NVCC_SM.._FLAGS \"" devices/cuda/CMakeLists.txt
 grep -q "maxSMArch = 999" devices/cuda/cuda_device.h && grep -q "$EXTRA" devices/cuda/CMakeLists.txt || { echo "patch did not apply: stopping"; exit 1; }
 
 step "3 build (CPU only)"
+export CUDACXX=/usr/local/cuda/bin/nvcc PATH=/usr/local/cuda/bin:$PATH     # the CUDA device is a sub-build that finds nvcc itself
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DOIDN_DEVICE_CPU=OFF -DOIDN_DEVICE_CUDA=ON -DOIDN_APPS=OFF \
-  -DOIDN_FILTER_RTLIGHTMAP=OFF -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc \
+  -DOIDN_FILTER_RTLIGHTMAP=OFF -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc -DCUDAToolkit_ROOT=/usr/local/cuda \
   > $SRC/cmake_$ARCH.log 2>&1 || { echo "cmake failed:"; tail -n 40 $SRC/cmake_$ARCH.log; exit 1; }
 ninja -C build -j ${JOBS:-24} > $SRC/ninja_$ARCH.log 2>&1 || { echo "build failed:"; grep -m 15 -E "error" $SRC/ninja_$ARCH.log; tail -n 25 $SRC/ninja_$ARCH.log; exit 1; }
 ninja -C build install > $SRC/install_$ARCH.log 2>&1 || { tail -n 20 $SRC/install_$ARCH.log; exit 1; }
