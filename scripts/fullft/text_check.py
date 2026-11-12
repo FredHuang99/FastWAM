@@ -2,6 +2,8 @@
 Every official scene bank has one instruction per task. Per task: the bank's instruction, how many training episodes in
 the dense cache carry exactly that string, and (--t5) the relative L2 between this machine's own T5 encoding (as the
 closed loop does it: CPU bf16 on < 60 GB cards) and the cached features. CPU only. Read-only.
+11-12: also the fingerprint of the cached text exactly as MWAM_TEXT_SOURCE=cache feeds it (same on two machines =
+bit-identical text input); without --t5 this takes seconds.
   PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/text_check.py [--t5] [--tasks put_back_block swap_blocks]
 """
 from __future__ import annotations
@@ -50,6 +52,13 @@ def main():
         for instr in bank_instruction(task):
             same = [r for r in recs if r.get("instruction") == instr]
             line = f"{task}: bank instruction {instr!r}; training episodes with exactly this string: {len(same)}"
+            if same:                                               # what MWAM_TEXT_SOURCE=cache feeds the model
+                import hashlib
+                enc0 = store(same[0]["episode_id"])
+                t = enc0["text"].to(torch.bfloat16).contiguous()
+                v = enc0["text_valid"].bool().contiguous()
+                fp = hashlib.sha256(t.view(torch.int16).cpu().numpy().tobytes() + v.cpu().numpy().tobytes()).hexdigest()[:12]
+                line += f"; cache text {same[0]['episode_id']} fingerprint {fp}"
             if same and t5 is not None:
                 from fastwam.memory_s1.model import encode_text
                 enc = store(same[0]["episode_id"])
