@@ -38,14 +38,16 @@ for TAG in $TAGS; do
     echo "[eval] $(date '+%F %T') $TAG: N=20 on GPU $G"
     RUN=$RUN TAG=$TAG N=20 GPU=$G bash scripts/fullft/g1_loop.sh > /dev/null 2>&1
   else
+    pids=""
     for pair in "0 put_back_block" "1 swap_blocks"; do
       set -- $pair
       ( until [ -n "$(free_gpu $1)" ]; do sleep $POLL; done
         echo "[eval] $(date '+%F %T') e30: $2 on GPU $1"
         RUN=$RUN TAG=$TAG N=50 GPU=$1 TASKS=$2 SKIP_SMOKE=$([ $2 = swap_blocks ] && echo 1 || echo 0) \
           bash scripts/fullft/g1_loop.sh > /dev/null 2>&1 ) &
+      pids="$pids $!"
     done
-    wait
+    wait $pids      # 11-12: a bare `wait` also waits for the tee process substitution of `exec > >(tee)` and never returns
     RUN=$RUN TAG=$TAG N=50 VERDICT_ONLY=1 bash scripts/fullft/g1_loop.sh > /dev/null 2>&1
   fi
   touch $E/.evaluated

@@ -61,8 +61,10 @@ PYTHONPATH=src $PY scripts/fullft/pair_eq.py --name s1pre_e10 --rule report --a-
   --a-label ar_2task_e10_oidnoff --b-folders closed_loop/g1 --b-label ar_2task_e10
 until empty 0; do sleep 120; done
 ( RUN=ar_2task TAG=e10 N=50 GPU=0 TASKS=put_back_block SKIP_SMOKE=1 bash scripts/fullft/g1_loop.sh > /dev/null 2>&1 ) &
+P1=$!
 ( RUN=ar_2task TAG=e10 N=50 GPU=1 TASKS=swap_blocks SKIP_SMOKE=1 bash scripts/fullft/g1_loop.sh > /dev/null 2>&1 ) &
-wait
+P2=$!
+wait $P1 $P2      # 11-12: a bare `wait` also waits for the tee process substitution and never returns (hung here 11-12 05:18)
 for t in put_back_block swap_blocks; do
   echo "[night] e10 $t finished: $(ls $O/closed_loop/g1/ar_2task_e10/on/$t/seed_*/result.json 2>/dev/null | grep -cE 'seed_[0-9]+/result.json')"
 done
