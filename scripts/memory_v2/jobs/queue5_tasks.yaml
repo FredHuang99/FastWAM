@@ -2907,6 +2907,15 @@ tasks:
   pass_if: "m['rc'] == 0"
   on_fail: "the export never arrived or its sha256 failed: read the task log; the closed loops of e30 are skipped"
 
+- id: D2-a100-dump
+  lane: extra
+  kind: shell
+  need_mib: 8000
+  timeout_h: 1
+  hypothesis: "5090 diagnosis D2 (11-12): frame-0 requests of put 31-35, put 1-5 and swap 1-5 as the A100 reference pipeline renders them, dumped by the closed loop with the replay policy (no model loaded) and relayed (diag/first_requests) for the numerics probe on the 5090; ahead of G1 so it takes the first empty GPU (a few minutes)"
+  command: "GPU={GPU} MACHINE=a100 RELAY=1 bash /workspace/FastWAM-memory2/scripts/fullft/dump_first.sh"
+  pass_if: "m['rc'] == 0"
+
 - id: G1-a100-e30-put-s0
   lane: loop
   kind: closed_loop
