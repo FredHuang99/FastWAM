@@ -41,7 +41,7 @@ if [ "$ARCH" = ptx80 ]; then EXTRA="-gencode arch=compute_80,code=compute_80"; e
 sed -i "s/set(OIDN_NVCC_SM90_FLAGS \"-gencode arch=compute_90,code=sm_90\")/set(OIDN_NVCC_SM90_FLAGS \"-gencode arch=compute_90,code=sm_90 $EXTRA\")/" devices/cuda/CMakeLists.txt
 grep -n "maxSMArch" devices/cuda/cuda_device.h
 grep -n "OIDN_NVCC_SM.._FLAGS \"" devices/cuda/CMakeLists.txt
-grep -q "maxSMArch = 999" devices/cuda/cuda_device.h && grep -q "$EXTRA" devices/cuda/CMakeLists.txt || { echo "patch did not apply: stopping"; exit 1; }
+grep -q "maxSMArch = 999" devices/cuda/cuda_device.h && grep -qF -- "$EXTRA" devices/cuda/CMakeLists.txt || { echo "patch did not apply: stopping"; exit 1; }
 
 step "3 build (CPU only)"
 export CUDACXX=/usr/local/cuda/bin/nvcc PATH=/usr/local/cuda/bin:$PATH     # the CUDA device is a sub-build that finds nvcc itself

@@ -146,6 +146,11 @@ class FullPolicy:
             t5_on_gpu = torch.cuda.get_device_properties(self.device).total_memory > 60 * 2 ** 30
         self.t5_on_gpu = bool(t5_on_gpu)
         self.t5_cpu_encode = not self.t5_on_gpu
+        import os
+        self.text_source = os.environ.get("MWAM_TEXT_SOURCE", "t5").strip().lower() or "t5"
+        if self.text_source not in ("t5", "cache"):
+            raise ValueError(f"MWAM_TEXT_SOURCE must be t5 or cache, got {self.text_source!r}")
+        self._text_memo: Dict[str, tuple] = {}
         self.t5 = _load_registered_model(self.path("t5"), "wan_video_text_encoder", torch.bfloat16,
                                          str(self.device) if self.t5_on_gpu else "cpu")
         self.t5.eval().requires_grad_(False)
@@ -160,10 +165,30 @@ class FullPolicy:
         return str(value if value.is_absolute() else Path(self.spec.root) / value)
 
     def encode_text(self, instruction: str):
-        from fastwam.memory_s1.model import encode_text
-        dev = self.device if self.t5_on_gpu else torch.device("cpu")
-        features, valid = encode_text(self.t5, self.tokenizer, instruction, dev)
-        return features.to(self.device), valid.to(self.device)
+        """11-12: every official scene bank has ONE instruction per task, and T5 runs on the CPU on < 60 GB cards
+        (bf16 on the A100 host's EPYC 7742 takes ~380 s per episode). Encoded once per process (same numbers).
+        MWAM_TEXT_SOURCE=cache: the dense training cache's text of an episode with the same instruction instead of
+        T5 here (identical on every machine, and what training saw); an instruction the cache lacks is an error."""
+        hit = self._text_memo.get(instruction)
+        if hit is None:
+            if self.text_source == "cache":
+                hit = self._cache_text(instruction)
+            else:
+                from fastwam.memory_s1.model import encode_text
+                dev = self.device if self.t5_on_gpu else torch.device("cpu")
+                features, valid = encode_text(self.t5, self.tokenizer, instruction, dev)
+                hit = (features.to(self.device), valid.to(self.device))
+            self._text_memo[instruction] = hit
+        return hit[0].clone(), hit[1].clone()
+
+    def _cache_text(self, instruction: str):
+        from fastwam.memory_v2 import dense
+        recs = [r for r in dense.records(self.spec) if r.get("instruction") == instruction]
+        if not recs:
+            raise ValueError(f"MWAM_TEXT_SOURCE=cache: no training episode has the instruction {instruction!r}")
+        enc = dense.EpisodeStore(self.spec, verify=False)(recs[0]["episode_id"])
+        print(f"[fullft] text from the training cache ({recs[0]['episode_id']}, {len(recs)} episodes share it)", flush=True)
+        return (enc["text"][None].to(self.device, torch.bfloat16), enc["text_valid"][None].bool().to(self.device))
 
     def base_label(self, label: str) -> str:
         return f"{label}_off"
@@ -171,7 +196,7 @@ class FullPolicy:
     def describe(self) -> dict:
         return {"checkpoint": self.checkpoint, "kind": "fullft", "history": str(self.rule),
                 "train_video": self.run_cfg.model.train_video, "run": self.run_cfg.name,
-                "export_state": self.export_state, "t5_on_gpu": self.t5_on_gpu}
+                "export_state": self.export_state, "t5_on_gpu": self.t5_on_gpu, "text_source": self.text_source}
 
 
 class FullSession:
