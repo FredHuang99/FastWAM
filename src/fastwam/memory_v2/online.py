@@ -242,6 +242,15 @@ class Policy:
 
     def encode_text(self, instruction: str):
         from fastwam.memory_s1.model import encode_text
+        text_file = os.environ.get("MWAM_TEXT_FILE", "").strip()
+        if text_file:          # 11-12 (5090 T-test): features encoded once beforehand (scripts/fullft/text_dump.py)
+            if getattr(self, "_text_file", None) is None:
+                self._text_file = self.torch.load(text_file, map_location="cpu")
+                print(f"[closed-loop] {now()} instruction text from {text_file} (MWAM_TEXT_FILE)", flush=True)
+            if instruction not in self._text_file:
+                raise KeyError(f"MWAM_TEXT_FILE={text_file} has no entry for {instruction!r}")
+            hit = self._text_file[instruction]
+            return hit["text"].to(self.device), hit["valid"].to(self.device)
         if self.t5_on_gpu:
             return encode_text(self.t5, self.tokenizer, instruction, self.device)
         if self.t5_cpu_encode:
@@ -268,7 +277,7 @@ class Policy:
                 "guidance": dict(self.cfg.v2.guidance.__dict__), "trained_action": self.trained_action,
                 "dense_identity": self.info.get("dense_identity"), "video_digest": self.info.get("video_digest"),
                 "software_drift": self.info.get("software_drift"), "t5_on_gpu": self.t5_on_gpu,
-                "t5_cpu_encode": self.t5_cpu_encode}
+                "t5_cpu_encode": self.t5_cpu_encode, "text_file": os.environ.get("MWAM_TEXT_FILE", "")}
 
 
 class Session:
