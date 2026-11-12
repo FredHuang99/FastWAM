@@ -8,7 +8,7 @@
 #     (g1_loop.sh VERDICT_ONLY=1, pre-registered G1 rule unchanged)
 # Resumable: finished episodes are kept; a tag with its marker outputs/fullft/exports/<RUN>_<TAG>/.evaluated is skipped.
 #   docker exec -d mwam5090 bash /workspace/FastWAM-memory2/scripts/fullft/eval_watch.sh
-# Env: RUN (ar_2task), TAGS ("e10 e20 e30"), POLL seconds (300), MWAM_TEXT_SOURCE (cache). Own log: outputs/memory_v2/report/EVAL_WATCH_<time>.txt
+# Env: RUN (ar_2task), TAGS ("e10 e20 e30"), POLL seconds (300), MWAM_TEXT_SOURCE (cache), MWAM_OIDN_LIB (2.0.1 sass120 if built). Own log: outputs/memory_v2/report/EVAL_WATCH_<time>.txt
 set -u
 R=/workspace/FastWAM-memory2
 O=$R/outputs/memory_v2
@@ -21,7 +21,11 @@ HFPY=/opt/hf-tools/bin/python
 # 11-12 12:35 (user: 改): from e20 on, the instruction's text features come from the dense TRAINING cache on both machines
 # (identical inputs, and what training saw) instead of this machine's CPU T5 (2.4% off the cache). Inherited by g1_loop.sh.
 export MWAM_TEXT_SOURCE=${MWAM_TEXT_SOURCE:-cache}
-echo "[eval] $(date '+%F %T') start; tags $TAGS; text source $MWAM_TEXT_SOURCE"
+# 11-12 13:50: the simulator loads the OIDN 2.0.1 built here for RTX 50 (oidn201_build.sh; frame 0 vs the A100's 2.0.1:
+# 0.062 levels, 0.00 % > 8 levels; 2.3.3 had 0.49 / 0.5 %) instead of 2.3.3. MWAM_OIDN_LIB set by the caller wins.
+NEWLIB=/opt/oidn-2.0.1-sass120/lib
+[ -z "${MWAM_OIDN_LIB:-}" ] && [ -e $NEWLIB/libOpenImageDenoise.so.2 ] && export MWAM_OIDN_LIB=$NEWLIB
+echo "[eval] $(date '+%F %T') start; tags $TAGS; text source $MWAM_TEXT_SOURCE; denoiser ${MWAM_OIDN_LIB:-default (2.3.3 fix folder)}"
 cd $R
 free_gpu() { for g in "$@"; do u=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i $g | tr -d ' ');
              [ "$u" -lt 2000 ] && { echo $g; return 0; }; done; return 1; }

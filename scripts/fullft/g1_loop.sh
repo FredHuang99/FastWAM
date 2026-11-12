@@ -26,7 +26,7 @@ trap 'rc=$?; echo "[g1] $(date "+%F %T") finished, exit code $rc; log $LOG"' EXI
 step() { echo; echo "[g1] $(date '+%F %T') ===== $*"; }
 cd $R
 used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i "$GPU" | tr -d ' ')
-echo "GPU $GPU: $used MiB in use; checkout $(git -c safe.directory='*' log --oneline -1 | cut -c1-60); text source ${MWAM_TEXT_SOURCE:-t5}"
+echo "GPU $GPU: $used MiB in use; checkout $(git -c safe.directory='*' log --oneline -1 | cut -c1-60); text source ${MWAM_TEXT_SOURCE:-t5}; denoiser ${MWAM_OIDN_LIB:-default}"
 [ "$VERDICT_ONLY" = 1 ] || [ "$used" -lt 2000 ] || { echo "GPU $GPU is not empty: stopping"; exit 1; }
 export PYTHONPATH=$R/src CUDA_VISIBLE_DEVICES=$GPU PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 PY=/opt/mwam/bin/python
