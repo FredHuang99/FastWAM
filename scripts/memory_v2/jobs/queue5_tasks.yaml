@@ -3280,6 +3280,80 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/migrate/export_stages.py --label ar_2task_e20 --mode on --folders /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/g1 --out closed_loop/check_a100/ar_2task_e20_stages.json --relay diag/a100_ar_2task_e20_stages"
   pass_if: "m['rc'] == 0"
 
+- id: AL4a-e10b-put-s0
+  lane: loop
+  kind: closed_loop
+  after: [AL4a-e10-export]
+  requires_pass: [FT-fetch-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v12 AL4a extension (11-12 10:30, pre-read, no verdict; also keeps A100 GPUs busy until e20): N7 epoch e10, official scenes 21-50 (the 5090 ran 21-50 in its night chain), shard 0 of 2; paired with the 5090 by pair_eq.py --rule report"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--from-scene", "21", "--limit", "30", "--shard", "0/2"]
+  output: closed_loop/g1
+
+- id: AL4a-e10b-put-s1
+  lane: loop
+  kind: closed_loop
+  after: [AL4a-e10-export]
+  requires_pass: [FT-fetch-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v12 AL4a extension (11-12 10:30, pre-read, no verdict; also keeps A100 GPUs busy until e20): N7 epoch e10, official scenes 21-50 (the 5090 ran 21-50 in its night chain), shard 1 of 2; paired with the 5090 by pair_eq.py --rule report"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--from-scene", "21", "--limit", "30", "--shard", "1/2"]
+  output: closed_loop/g1
+
+- id: AL4a-e10b-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [AL4a-e10-export]
+  requires_pass: [FT-fetch-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v12 AL4a extension (11-12 10:30, pre-read, no verdict; also keeps A100 GPUs busy until e20): N7 epoch e10, official scenes 21-50 (the 5090 ran 21-50 in its night chain), shard 0 of 2; paired with the 5090 by pair_eq.py --rule report"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--from-scene", "21", "--limit", "30", "--shard", "0/2"]
+  output: closed_loop/g1
+
+- id: AL4a-e10b-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [AL4a-e10-export]
+  requires_pass: [FT-fetch-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v12 AL4a extension (11-12 10:30, pre-read, no verdict; also keeps A100 GPUs busy until e20): N7 epoch e10, official scenes 21-50 (the 5090 ran 21-50 in its night chain), shard 1 of 2; paired with the 5090 by pair_eq.py --rule report"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--from-scene", "21", "--limit", "30", "--shard", "1/2"]
+  output: closed_loop/g1
+
+- id: AL4a-e10b-export
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  after: [AL4a-e10b-put-s0, AL4a-e10b-put-s1, AL4a-e10b-swap-s0, AL4a-e10b-swap-s1]
+  timeout_h: 1
+  hypothesis: "plan v12 AL4a extension: export the A100's per-scene stages of ar_2task_e10, scenes 1-50, and relay them (diag/a100_ar_2task_e10_stages50) for the paired 50 + 50 table on the 5090"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/migrate/export_stages.py --label ar_2task_e10 --mode on --folders /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/g1 --out closed_loop/check_a100/ar_2task_e10_stages50.json --relay diag/a100_ar_2task_e10_stages50"
+  pass_if: "m['rc'] == 0"
+
 # ---------------------------------------------------------------- fillers (lowest priority, 11-11 21:00)
 - id: AL5-ctrl-put-s0
   lane: loop
