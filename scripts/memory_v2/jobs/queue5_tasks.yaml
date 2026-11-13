@@ -2923,6 +2923,440 @@ tasks:
   pass_if: "m['rc'] == 0"
   on_fail: "the export never arrived or its sha256 failed: read the task log; the closed loops of e30 are skipped"
 
+# 11-13 18:20: AL4 (e30) = NOT EQUIVALENT -> the registered AR+PROP vs AR comparison is judged on the A100 (fallback
+# agreed 13:21). Priority in file order: e30 > e20 > e10 > the AR control on scenes 51-100 (gap filler, 10-scene shards).
+
+- id: FT-fetch-ar2p-e30
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 60
+  hypothesis: "fetch the AR+PROP export ar2_prop_e30 (H200 ar2_prop, user choice B 11-13) from the HF relay when it appears (sha256 checked)"
+  command: "RUN=ar2_prop TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: LV-a100-e30-put-s0
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-ar2p-e30]
+  requires_pass: [FT-fetch-ar2p-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "AR+PROP (ar2_prop) e30, official scenes 1-50, execute 8, 10 steps, text from the training cache (as the AR control ar_2task_e30 / e20 / e10 on this machine), shard 0 of 2; the registered verdict is LV-a100-e30-verdict"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/2"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: LV-a100-e30-put-s1
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-ar2p-e30]
+  requires_pass: [FT-fetch-ar2p-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "AR+PROP (ar2_prop) e30, official scenes 1-50, execute 8, 10 steps, text from the training cache (as the AR control ar_2task_e30 / e20 / e10 on this machine), shard 1 of 2; the registered verdict is LV-a100-e30-verdict"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/2"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: LV-a100-e30-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-ar2p-e30]
+  requires_pass: [FT-fetch-ar2p-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "AR+PROP (ar2_prop) e30, official scenes 1-50, execute 8, 10 steps, text from the training cache (as the AR control ar_2task_e30 / e20 / e10 on this machine), shard 0 of 2; the registered verdict is LV-a100-e30-verdict"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/2"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: LV-a100-e30-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-ar2p-e30]
+  requires_pass: [FT-fetch-ar2p-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "AR+PROP (ar2_prop) e30, official scenes 1-50, execute 8, 10 steps, text from the training cache (as the AR control ar_2task_e30 / e20 / e10 on this machine), shard 1 of 2; the registered verdict is LV-a100-e30-verdict"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/2"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: LV-a100-e30-verdict
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  after: [LV-a100-e30-put-s0, LV-a100-e30-put-s1, LV-a100-e30-swap-s0, LV-a100-e30-swap-s1]
+  timeout_h: 2
+  hypothesis: "the registered AR+PROP vs AR verdict (rule agreed 11-13 13:21, code scripts/fullft/ledger_verdict.py written 18:20 before any ar2_prop result): USEFUL / NULL / EXTEND / NO VERDICT, plus put kept or HARMS PUT; then the stage export relayed to diag/a100_ar2_prop_e30_stages"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/ledger_verdict.py --folder closed_loop/g1 --arm ar2_prop_e30 --control ar_2task_e30 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/migrate/export_stages.py --label ar2_prop_e30 --mode on --folders /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/g1 --out closed_loop/check_a100/ar2_prop_e30_stages.json --relay diag/a100_ar2_prop_e30_stages"
+  pass_if: "m['rc'] == 0"
+
+- id: FT-fetch-ar2p-e20
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 60
+  hypothesis: "fetch the AR+PROP export ar2_prop_e20 (H200 ar2_prop, user choice B 11-13) from the HF relay when it appears (sha256 checked)"
+  command: "RUN=ar2_prop TAG=e20 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: LV-a100-e20-put-s0
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-ar2p-e20]
+  requires_pass: [FT-fetch-ar2p-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "AR+PROP (ar2_prop) e20, official scenes 1-50, execute 8, 10 steps, text from the training cache (as the AR control ar_2task_e30 / e20 / e10 on this machine), shard 0 of 2; progress only, no verdict"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/2"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: LV-a100-e20-put-s1
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-ar2p-e20]
+  requires_pass: [FT-fetch-ar2p-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "AR+PROP (ar2_prop) e20, official scenes 1-50, execute 8, 10 steps, text from the training cache (as the AR control ar_2task_e30 / e20 / e10 on this machine), shard 1 of 2; progress only, no verdict"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/2"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: LV-a100-e20-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-ar2p-e20]
+  requires_pass: [FT-fetch-ar2p-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "AR+PROP (ar2_prop) e20, official scenes 1-50, execute 8, 10 steps, text from the training cache (as the AR control ar_2task_e30 / e20 / e10 on this machine), shard 0 of 2; progress only, no verdict"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/2"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: LV-a100-e20-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-ar2p-e20]
+  requires_pass: [FT-fetch-ar2p-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "AR+PROP (ar2_prop) e20, official scenes 1-50, execute 8, 10 steps, text from the training cache (as the AR control ar_2task_e30 / e20 / e10 on this machine), shard 1 of 2; progress only, no verdict"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/2"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: LV-a100-e20-progress
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  after: [LV-a100-e20-put-s0, LV-a100-e20-put-s1, LV-a100-e20-swap-s0, LV-a100-e20-swap-s1]
+  timeout_h: 2
+  hypothesis: "progress numbers of ar2_prop e20 vs ar_2task_e20 (the A100 AR control at e20 has swap 1-20 only), no verdict; then the stage export relayed to diag/a100_ar2_prop_e20_stages"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/ledger_verdict.py --folder closed_loop/g1 --arm ar2_prop_e20 --control ar_2task_e20 --progress --n 20 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/migrate/export_stages.py --label ar2_prop_e20 --mode on --folders /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/g1 --out closed_loop/check_a100/ar2_prop_e20_stages.json --relay diag/a100_ar2_prop_e20_stages"
+  pass_if: "m['rc'] == 0"
+
+- id: FT-fetch-ar2p-e10
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 60
+  hypothesis: "fetch the AR+PROP export ar2_prop_e10 (H200 ar2_prop, user choice B 11-13) from the HF relay when it appears (sha256 checked)"
+  command: "RUN=ar2_prop TAG=e10 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: LV-a100-e10-put-s0
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-ar2p-e10]
+  requires_pass: [FT-fetch-ar2p-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "AR+PROP (ar2_prop) e10, official scenes 1-50, execute 8, 10 steps, text from the training cache (as the AR control ar_2task_e30 / e20 / e10 on this machine), shard 0 of 2; progress only, no verdict"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/2"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: LV-a100-e10-put-s1
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-ar2p-e10]
+  requires_pass: [FT-fetch-ar2p-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "AR+PROP (ar2_prop) e10, official scenes 1-50, execute 8, 10 steps, text from the training cache (as the AR control ar_2task_e30 / e20 / e10 on this machine), shard 1 of 2; progress only, no verdict"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/2"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: LV-a100-e10-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-ar2p-e10]
+  requires_pass: [FT-fetch-ar2p-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "AR+PROP (ar2_prop) e10, official scenes 1-50, execute 8, 10 steps, text from the training cache (as the AR control ar_2task_e30 / e20 / e10 on this machine), shard 0 of 2; progress only, no verdict"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/2"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: LV-a100-e10-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-ar2p-e10]
+  requires_pass: [FT-fetch-ar2p-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "AR+PROP (ar2_prop) e10, official scenes 1-50, execute 8, 10 steps, text from the training cache (as the AR control ar_2task_e30 / e20 / e10 on this machine), shard 1 of 2; progress only, no verdict"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/2"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: LV-a100-e10-progress
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  after: [LV-a100-e10-put-s0, LV-a100-e10-put-s1, LV-a100-e10-swap-s0, LV-a100-e10-swap-s1]
+  timeout_h: 2
+  hypothesis: "progress numbers of ar2_prop e10 vs ar_2task_e10 (the A100 AR control at e10 has swap 1-20 only), no verdict; then the stage export relayed to diag/a100_ar2_prop_e10_stages"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/ledger_verdict.py --folder closed_loop/g1 --arm ar2_prop_e10 --control ar_2task_e10 --progress --n 20 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/migrate/export_stages.py --label ar2_prop_e10 --mode on --folders /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/g1 --out closed_loop/check_a100/ar2_prop_e10_stages.json --relay diag/a100_ar2_prop_e10_stages"
+  pass_if: "m['rc'] == 0"
+
+- id: N7x-a100-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e30]
+  requires_pass: [FT-fetch-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "AR control N7 e30 (ar_2task_e30) on swap_blocks scenes 51-100, shard 0 of 5 (10 scenes): the 100-scene official table on the judging machine, and the AR arm of the registered EXTEND branch; gap filler between the ar2_prop exports"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--from-scene", "51", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: N7x-a100-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e30]
+  requires_pass: [FT-fetch-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "AR control N7 e30 (ar_2task_e30) on swap_blocks scenes 51-100, shard 1 of 5 (10 scenes): the 100-scene official table on the judging machine, and the AR arm of the registered EXTEND branch; gap filler between the ar2_prop exports"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--from-scene", "51", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: N7x-a100-swap-s2
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e30]
+  requires_pass: [FT-fetch-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "AR control N7 e30 (ar_2task_e30) on swap_blocks scenes 51-100, shard 2 of 5 (10 scenes): the 100-scene official table on the judging machine, and the AR arm of the registered EXTEND branch; gap filler between the ar2_prop exports"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--from-scene", "51", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: N7x-a100-swap-s3
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e30]
+  requires_pass: [FT-fetch-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "AR control N7 e30 (ar_2task_e30) on swap_blocks scenes 51-100, shard 3 of 5 (10 scenes): the 100-scene official table on the judging machine, and the AR arm of the registered EXTEND branch; gap filler between the ar2_prop exports"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--from-scene", "51", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: N7x-a100-swap-s4
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e30]
+  requires_pass: [FT-fetch-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "AR control N7 e30 (ar_2task_e30) on swap_blocks scenes 51-100, shard 4 of 5 (10 scenes): the 100-scene official table on the judging machine, and the AR arm of the registered EXTEND branch; gap filler between the ar2_prop exports"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--from-scene", "51", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: N7x-a100-put-s0
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e30]
+  requires_pass: [FT-fetch-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "AR control N7 e30 (ar_2task_e30) on put_back_block scenes 51-100, shard 0 of 5 (10 scenes): the 100-scene official table on the judging machine, and the AR arm of the registered EXTEND branch; gap filler between the ar2_prop exports"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--from-scene", "51", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: N7x-a100-put-s1
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e30]
+  requires_pass: [FT-fetch-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "AR control N7 e30 (ar_2task_e30) on put_back_block scenes 51-100, shard 1 of 5 (10 scenes): the 100-scene official table on the judging machine, and the AR arm of the registered EXTEND branch; gap filler between the ar2_prop exports"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--from-scene", "51", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: N7x-a100-put-s2
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e30]
+  requires_pass: [FT-fetch-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "AR control N7 e30 (ar_2task_e30) on put_back_block scenes 51-100, shard 2 of 5 (10 scenes): the 100-scene official table on the judging machine, and the AR arm of the registered EXTEND branch; gap filler between the ar2_prop exports"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--from-scene", "51", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: N7x-a100-put-s3
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e30]
+  requires_pass: [FT-fetch-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "AR control N7 e30 (ar_2task_e30) on put_back_block scenes 51-100, shard 3 of 5 (10 scenes): the 100-scene official table on the judging machine, and the AR arm of the registered EXTEND branch; gap filler between the ar2_prop exports"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--from-scene", "51", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
+- id: N7x-a100-put-s4
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-e30]
+  requires_pass: [FT-fetch-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "AR control N7 e30 (ar_2task_e30) on put_back_block scenes 51-100, shard 4 of 5 (10 scenes): the 100-scene official table on the judging machine, and the AR arm of the registered EXTEND branch; gap filler between the ar2_prop exports"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--from-scene", "51", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: cache}
+
 - id: D2-a100-dump
   lane: extra
   kind: shell
