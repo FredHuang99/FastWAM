@@ -2773,6 +2773,22 @@ tasks:
   on_pass: "training volume is still a strong lever on the cheap stack: plan v10 weighs scaling it (5090, if stage 2 fits) against renting"
   on_fail: "see failure_explanations"
 
+- id: X7-12ep-loop-b
+  lane: loop
+  kind: closed_loop
+  after: [X7-12ep]
+  requires_pass: [X7-12ep]
+  need_mib: 30000
+  timeout_h: 14
+  hypothesis: "11-13 13:05 helper of X7-12ep-loop (no verdict of its own; the verdict stays on X7-12ep-loop): the same checkpoint, label and folder, swap scenes 26-50, on the GPU G1 frees (~16:20). The main card runs put 1-50 then swap 1-50 in one process on GPU3 and reaches swap 26 around 11-14 08:00, after this card ends (~11-14 01:00); finished episodes are skipped there (result.json), so the two never run the same scene and the main card ends about 8 h earlier"
+  checkpoint: x7_cont12/checkpoints/update_004020.pt
+  label: x7c12_exec8
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--from-scene", "26", "--limit", "25"]
+  output: closed_loop/x7c12
+
 - id: BANK-check
   lane: ws
   kind: shell
