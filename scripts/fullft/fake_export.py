@@ -23,10 +23,11 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--config", default=str(R / "configs/fullft/base_2task.yaml"))
     ap.add_argument("--check-cpu", action="store_true")
+    ap.add_argument("--set", nargs="*", default=[], help="11-13: config overrides, e.g. history.variant=arprop")
     args = ap.parse_args()
     from fastwam.fullft.config import load
     from fastwam.fullft.model import FullModel
-    cfg = load(args.config, ["name=release_smoke"])
+    cfg = load(args.config, ["name=release_smoke"] + list(args.set))
     for name in ("base", "architecture", "stats"):
         path = Path(getattr(cfg.model, name))
         print(f"model.{name}: {'OK     ' if path.exists() else 'MISSING'} {path}", flush=True)
