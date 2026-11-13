@@ -13,6 +13,7 @@ inputs, which is how training draws its samples.
 from __future__ import annotations
 
 import copy
+import os
 import time
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -217,7 +218,7 @@ class FullPolicy:
         return {"checkpoint": self.checkpoint, "kind": "fullft", "history": str(self.rule),
                 "train_video": self.run_cfg.model.train_video, "run": self.run_cfg.name,
                 "export_state": self.export_state, "t5_on_gpu": self.t5_on_gpu, "text_source": self.text_source,
-                "text_fingerprints": dict(self.text_fingerprints)}
+                "text_fingerprints": dict(self.text_fingerprints), "noise_salt": os.environ.get("MWAM_NOISE_SALT", "")}
 
 
 class FullSession:
@@ -312,7 +313,8 @@ class FullSession:
             ids, _ = select(p.rule, current, known)
             self._encode(sorted(set(ids) | {current} | (set(known) if p.rule.variant == "prop" else set())))
             noise_frame = 0 if self.noise_mode == "per_episode" else int(request.get("noise_frame", current))
-            seed = seed_for(p.dense_cfg["seed"], self.seed, noise_frame, "closed-loop-noise")
+            salt = os.environ.get("MWAM_NOISE_SALT", "").strip()   # 11-13: replicate runs (same scenes, other noise)
+            seed = seed_for(p.dense_cfg["seed"], self.seed, noise_frame, "closed-loop-noise" + (f"-{salt}" if salt else ""))
             noise = diagnostic_action_noise(seed).to(torch.bfloat16).float()      # [1, 32, 14] (11-11: was [None]-ed
                                                                                    # to [1, 1, 32, 14] and crashed)
             out = decide_encoded(p.model, p.rule, self.cache, self.encoded, current, self.text, noise, self.steps,
