@@ -2780,13 +2780,13 @@ tasks:
   requires_pass: [X7-12ep]
   need_mib: 30000
   timeout_h: 14
-  hypothesis: "11-13 13:05 helper of X7-12ep-loop (no verdict of its own; the verdict stays on X7-12ep-loop): the same checkpoint, label and folder, swap scenes 26-50, on the GPU G1 frees (~16:20). The main card runs put 1-50 then swap 1-50 in one process on GPU3 and reaches swap 26 around 11-14 08:00, after this card ends (~11-14 01:00); finished episodes are skipped there (result.json), so the two never run the same scene and the main card ends about 8 h earlier"
+  hypothesis: "11-13 13:05 helper of X7-12ep-loop (no verdict of its own; the verdict stays on X7-12ep-loop): the same checkpoint, label and folder, swap scenes 31-50, on the GPU G1 frees (~16:20). The main card runs put 1-50 then swap 1-50 in one process on GPU3; at ~5 min per put and ~10 min per swap episode it reaches swap 31 around 22:00, about 2 h after this card ends (~20:00); finished episodes are skipped there (result.json), so the two never run the same scene and the main card ends about 3 h earlier"
   checkpoint: x7_cont12/checkpoints/update_004020.pt
   label: x7c12_exec8
   modes: ["on"]
   scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
   tasks: [swap_blocks]
-  online_args: ["--execute", "8", "--from-scene", "26", "--limit", "25"]
+  online_args: ["--execute", "8", "--from-scene", "31", "--limit", "20"]
   output: closed_loop/x7c12
 
 - id: BANK-check
