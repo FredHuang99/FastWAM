@@ -2740,7 +2740,7 @@ tasks:
 - id: X7-12ep-loop
   lane: loop
   kind: closed_loop
-  after: [X7-12ep, G1-a100-verdict]   # 11-11 (plan v12): an appendix filler; it waits until the A100 G1 is judged
+  after: [X7-12ep]   # 11-13 12:50: G1 needs only GPU0 for its last shard; this filler starts on the idle GPU3 now (was: after G1-a100-verdict)
   requires_pass: [X7-12ep]
   need_mib: 30000
   hypothesis: "plan v10 preparation (pre-registered 11-11 00:50, before any training): X7 + 6 epochs (12 in total) vs X7 (6 epochs), memory on, execute 8, 10 Euler steps, official put_back scenes 1-50 and swap scenes 1-50, paired on the same scenes (references: X7's official episodes as in S1). PASS = training volume is still a strong lever on the frozen-video stack: pooled progress delta >= +0.08 and its 95 % CI lower bound > 0. Plateau = delta <= +0.02. In between: evaluate the 8 / 10-epoch checkpoints on the same scenes before reading the curve. The B0 comparison is reported, not judged"

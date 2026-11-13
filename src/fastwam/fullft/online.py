@@ -187,10 +187,20 @@ class FullPolicy:
     def _cache_text(self, instruction: str):
         from fastwam.memory_v2 import dense
         recs = [r for r in dense.records(self.spec) if r.get("instruction") == instruction]
+        if recs:
+            enc = dense.EpisodeStore(self.spec, verify=False)(recs[0]["episode_id"])
+        else:      # 11-13: a model trained on other caches (C1: press/dense_<task>_v1) -> its own training roots
+            import json
+            for root in getattr(self.run_cfg.data, "roots", []) or []:
+                rows = json.loads((Path(root) / "RECORDS.json").read_text(encoding="utf-8"))
+                recs = [r for r in rows if r.get("instruction") == instruction]
+                if recs:
+                    path = Path(root) / "cache" / recs[0]["episode_id"].replace("/", "_") / "encodings.pt"
+                    enc = torch.load(path, map_location="cpu", weights_only=True, mmap=True)
+                    break
         if not recs:
             raise ValueError(f"MWAM_TEXT_SOURCE=cache: no training episode has the instruction {instruction!r}")
         import hashlib
-        enc = dense.EpisodeStore(self.spec, verify=False)(recs[0]["episode_id"])
         text = enc["text"].to(torch.bfloat16).contiguous()
         valid = enc["text_valid"].bool().contiguous()
         # fingerprint of exactly what the model gets: the same 12 hex characters on two machines = identical text input
