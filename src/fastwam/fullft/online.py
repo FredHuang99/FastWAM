@@ -49,6 +49,26 @@ def load_export(path: str, device="cuda:0") -> tuple:
     return model, cfg, state
 
 
+def count_counterfactual(entries: List[dict], mode: str) -> List[dict]:
+    """11-14 test-time ledger counterfactuals on the number of completed moves (a move = a close followed by an open of
+    the same arm). dropfirst: the first completed move is removed (close + its open) -> one move fewer counted from the
+    moment it is complete. addmove: the first completed move is entered twice -> one move more counted. Other entries
+    (top / bottom) and moves in progress are untouched; before the first move completes nothing changes."""
+    first_close = next((i for i, e in enumerate(entries) if e["kind"] == "close"), None)
+    if first_close is None:
+        return entries
+    arm = int(entries[first_close]["arm"])
+    first_open = next((i for i in range(first_close + 1, len(entries))
+                       if entries[i]["kind"] == "open" and int(entries[i]["arm"]) == arm), None)
+    if first_open is None:
+        return entries
+    if mode == "dropfirst":
+        return [e for i, e in enumerate(entries) if i not in (first_close, first_open)]
+    out = list(entries)
+    out[first_open + 1:first_open + 1] = [dict(entries[first_close]), dict(entries[first_open])]
+    return out
+
+
 class FrameCache:
     """Per-episode history K / V per frame id (before re-rotation), kept on the model's device."""
 
@@ -315,6 +335,8 @@ class FullSession:
                         entries = []                     # no entry = what the model sees before the first event
                     elif mode == "drop1":
                         entries = entries[:-1]           # the most recent event withheld: one event fewer counted
+                    elif mode in ("dropfirst", "addmove"):
+                        entries = count_counterfactual(entries, mode)[-int(p.rule.event_max):]
                     ledger = ledger_tensor(p.rule, entries, self._proprio)
             ids, _ = select(p.rule, current, known)
             self._encode(sorted(set(ids) | {current} | (set(known) if p.rule.variant == "prop" else set())))
