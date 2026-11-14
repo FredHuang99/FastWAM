@@ -35,7 +35,10 @@ CAP = 4 * 2 ** 20
 PRUNE = re.compile(r"^(seed_.*|checkpoints?|ckpt.*|exports|caches?|replay|dumpfirst.*|frames|videos|__pycache__|\.git|"
                    r"dense.*|text|collect|hf_cache|wandb)$")
 FOLDERS = ["closed_loop/g1", "closed_loop/textab", "closed_loop/al3", "closed_loop/al3b", "closed_loop/al3b_first",
-           "closed_loop/execlen", "closed_loop/x7c12", "closed_loop/s1pre", "closed_loop/al5"]
+           "closed_loop/execlen", "closed_loop/x7c12", "closed_loop/s1pre", "closed_loop/al5", "closed_loop/rep",
+           "closed_loop/w1"]
+PAIRS = [("ar2_prop_e10", "ar_2task_e10_fx"), ("ar2_prop_e10", "ar_2task_e10"), ("ar2_prop_e20", "ar_2task_e20"),
+         ("ar2_prop_e30", "ar_2task_e30")]          # 11-14: ledger arm vs AR control on the same machine (progress)
 PY = sys.executable
 HFPY = "/opt/hf-tools/bin/python" if Path("/opt/hf-tools/bin/python").exists() else PY
 SECRET = re.compile(r"(?i)(hf_[A-Za-z0-9]{8,}|token\S*|password\S*)")
@@ -113,7 +116,7 @@ def analyses(machine, since, bundle, manifest):
                            f"--folders {O / folder} --out {a / (tag + '_stages.json')}"),
                 ("peek", f"{PY} scripts/memory_v2/loop_peek.py --folder {folder} --label {label} --out /dev/null"),
                 ("first", f"{PY} scripts/fullft/first_actions.py export --name {machine}__{tag} --folders {folder} --label {label}")]
-        if label.startswith("ar_2task"):
+        if label.startswith(("ar_2task", "ar2_")):
             jobs.append(("press_gap", f"{PY} scripts/fullft/press_gap.py --folder {folder} --label {label}"))
         for kind, cmd in jobs:
             start = time.monotonic()
@@ -122,6 +125,18 @@ def analyses(machine, since, bundle, manifest):
                 (a / f"{tag}_{kind}.txt").write_text(f"$ {cmd}\n(rc {rc})\n{out}", encoding="utf-8")
             manifest.append(f"analysis {tag} {kind}: rc {rc} ({time.monotonic() - start:.0f} s)")
             print(f"  {tag} {kind}: rc {rc}", flush=True)
+
+
+def ledger_progress(bundle, manifest):
+    a = bundle / "analysis"
+    for arm, ctrl in PAIRS:
+        if (O / "closed_loop/g1" / arm).is_dir() and (O / "closed_loop/g1" / ctrl).is_dir():
+            cmd = (f"{PY} scripts/fullft/ledger_verdict.py --folder closed_loop/g1 --arm {arm} --control {ctrl} "
+                   f"--progress --n 100")
+            rc, out = sh(cmd)
+            (a / f"LEDGER_PROGRESS_{arm}_vs_{ctrl}.txt").write_text(f"$ {cmd}\n(rc {rc})\n{out}", encoding="utf-8")
+            manifest.append(f"analysis ledger progress {arm} vs {ctrl}: rc {rc}")
+            print(f"  ledger progress {arm} vs {ctrl}: rc {rc}", flush=True)
 
 
 def zip_dir(src, dest, prefix):
@@ -153,6 +168,7 @@ def main():
     sweep(since, bundle, manifest)
     print(f"[collect] {args.machine}: analyses of the closed-loop labels written since then", flush=True)
     analyses(args.machine, since, bundle, manifest)
+    ledger_progress(bundle, manifest)
     (bundle / "MANIFEST.txt").write_text("\n".join(manifest) + "\n", encoding="utf-8")
     own = OUTPUTS / "collect" / f"collect_{args.machine}_{stamp}.zip"
     zip_dir(bundle, own, args.machine)
