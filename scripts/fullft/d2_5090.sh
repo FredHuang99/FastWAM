@@ -30,6 +30,8 @@ if [ "${STEP3_ONLY:-0}" = 1 ]; then
     echo "[d2] $(date '+%F %T') the A100's requests are not on the relay yet; waiting"; sleep 300
   done
 fi
+# 11-14: defined before the STEP3_ONLY branch (it was inside the skipped block: 'cmpf: command not found')
+cmpf() { $PY scripts/fullft/first_actions.py compare $1.json $2.json 2>&1 | grep -vE "^  timing"; }
 free_gpu() { for g in ${GPUS:-0 1}; do u=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i $g | tr -d ' ');
              [ "$u" -lt 2000 ] && { echo $g; return 0; }; done; return 1; }
 if [ -n "${GPU:-}" ]; then GPUS=$GPU; fi
@@ -39,7 +41,6 @@ if [ "${STEP3_ONLY:-0}" != 1 ]; then
 echo "[d2] $(date '+%F %T') ===== 1 dump this machine's frame-0 requests"
 MACHINE=5090 GPU=$GPU bash scripts/fullft/dump_first.sh > /dev/null 2>&1; tail -n 3 $(ls -t $R/outputs/fullft/align/DUMP_FIRST_5090_*.txt | head -1)
 OWN="closed_loop/dumpfirst/dumpfirst_5090/on/*/seed_*/request_000000.pkl"
-cmpf() { $PY scripts/fullft/first_actions.py compare $1.json $2.json 2>&1 | grep -vE "^  timing"; }
 echo "[d2] $(date '+%F %T') ===== 2 sanity: the probe on the 5090's own requests vs the 5090's logged decision 0"
 CUDA_VISIBLE_DEVICES=$GPU $PY scripts/fullft/numerics_probe.py --name probe_5090own_x7 --policy x7 --requests "$OWN" | tail -n 1
 CUDA_VISIBLE_DEVICES=$GPU $PY scripts/fullft/numerics_probe.py --name probe_5090own_e10 --policy $E10 --requests "$OWN" | tail -n 1

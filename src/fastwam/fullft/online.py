@@ -218,7 +218,8 @@ class FullPolicy:
         return {"checkpoint": self.checkpoint, "kind": "fullft", "history": str(self.rule),
                 "train_video": self.run_cfg.model.train_video, "run": self.run_cfg.name,
                 "export_state": self.export_state, "t5_on_gpu": self.t5_on_gpu, "text_source": self.text_source,
-                "text_fingerprints": dict(self.text_fingerprints), "noise_salt": os.environ.get("MWAM_NOISE_SALT", "")}
+                "text_fingerprints": dict(self.text_fingerprints), "noise_salt": os.environ.get("MWAM_NOISE_SALT", ""),
+                "ledger_ablation": os.environ.get("MWAM_LEDGER", "")}
 
 
 class FullSession:
@@ -309,6 +310,11 @@ class FullSession:
                     if self.decisions == 0:
                         check_ledger_slots(self.text[0], p.rule.event_max, "(online instruction)")
                     entries = ledger_entries(p.rule, current, self.events)
+                    mode = os.environ.get("MWAM_LEDGER", "").strip().lower()      # 11-14: test-time ablations
+                    if mode == "off":
+                        entries = []                     # no entry = what the model sees before the first event
+                    elif mode == "drop1":
+                        entries = entries[:-1]           # the most recent event withheld: one event fewer counted
                     ledger = ledger_tensor(p.rule, entries, self._proprio)
             ids, _ = select(p.rule, current, known)
             self._encode(sorted(set(ids) | {current} | (set(known) if p.rule.variant == "prop" else set())))
