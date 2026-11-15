@@ -118,6 +118,8 @@ def analyses(machine, since, bundle, manifest):
                 ("first", f"{PY} scripts/fullft/first_actions.py export --name {machine}__{tag} --folders {folder} --label {label}")]
         if label.startswith(("ar_2task", "ar2_")):
             jobs.append(("press_gap", f"{PY} scripts/fullft/press_gap.py --folder {folder} --label {label}"))
+        if label.startswith("press_"):           # 11-15: press_button count errors (first / second count, by number shown)
+            jobs.append(("press_err", f"{PY} scripts/fullft/press_errors.py --folder {folder} {label}"))
         for kind, cmd in jobs:
             start = time.monotonic()
             rc, out = sh(cmd, env={"FIRST_OUT": str(a / "first")})
