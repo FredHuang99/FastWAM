@@ -27,7 +27,7 @@
 #   bash /root/mwam_reports/host_pool.sh check [regex]       queue preflight (queue5.py check); with a regex only the
 #                                                            matching lines, e.g. check PB- (sets vs the reference run)
 set -u
-C=${C:-$(docker ps --format '{{.ID}} {{.Names}}' | awk '$1 ~ /^6e4b37a15066/ {print $1} $2 == "mwam2" || $2 == "mwam-aws" || $2 == "mwam5090" {print $2}' | head -1)}
+C=${C:-$(docker ps --format '{{.ID}} {{.Names}}' | awk '$1 ~ /^6e4b37a15066/ {print $1} $2 == "mwam2" || $2 == "mwam-aws" || $2 == "mwam5090" || $2 == "mwam-a40" || $2 == "mwam-h100n" {print $2}' | head -1)}
 [ -n "$C" ] || { echo "no MemWAM container running here (A100: 6e4b37a15066, H200: mwam2, AWS: mwam-aws, 5090: mwam5090)"; exit 1; }
 R=/workspace/FastWAM-memory2
 Q=$R/outputs/memory_v2/queue5
