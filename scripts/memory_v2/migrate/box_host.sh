@@ -43,9 +43,18 @@ SUBS="hf/payload/workspace/FastWAM hf/payload/workspace/FastWAM-memory2 hf/paylo
       hf/payload/root/dot-cache-huggingface tmp envs/mwam envs/hf-tools envs/miniforge envs/rmbench-env"
 docker run --rm -v "$VOL:/v" "$IMAGE" bash -c "cd /v && mkdir -p $(echo $SUBS) && chmod 1777 tmp && ls"
 m() { echo "--mount type=volume,src=$VOL,dst=$2,volume-subpath=$1"; }
+# 11-15 (GPU18): the toolkit injects the driver libraries but not these three files; without them SAPIEN's Vulkan
+# finds no driver (vk_icdGetInstanceProcAddr fails until glvnd's EGL can find the NVIDIA vendor). Mounted read-only.
+GFX=""
+for f in /usr/share/vulkan/icd.d/nvidia_icd.json:/etc/vulkan/icd.d/nvidia_icd.json \
+         /usr/share/glvnd/egl_vendor.d/10_nvidia.json:/usr/share/glvnd/egl_vendor.d/10_nvidia.json \
+         /usr/share/vulkan/implicit_layer.d/nvidia_layers.json:/usr/share/vulkan/implicit_layer.d/nvidia_layers.json; do
+  [ -f "${f%%:*}" ] && GFX="$GFX -v $f:ro"
+done
+echo "[box] graphics files mounted from the host:${GFX:- none}"
 docker run -d --name "$NAME" --restart unless-stopped --gpus all --ipc=host --network=host \
   --ulimit memlock=-1 --ulimit stack=67108864 \
-  -e NVIDIA_DRIVER_CAPABILITIES=all -e TMPDIR=/mnt/tmp \
+  -e NVIDIA_DRIVER_CAPABILITIES=all -e TMPDIR=/mnt/tmp $GFX \
   $(m hf /mnt/hf) $(m tmp /mnt/tmp) \
   $(m hf/payload/workspace/FastWAM /workspace/FastWAM) \
   $(m hf/payload/workspace/FastWAM-memory2 /workspace/FastWAM-memory2) \
