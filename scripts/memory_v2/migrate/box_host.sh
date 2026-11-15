@@ -21,8 +21,15 @@ case "$PROFILE" in
 esac
 echo "[box] $(date '+%F %T') host $(hostname); user $(id -un); docker $(docker version --format '{{.Server.Version}}')"
 nvidia-smi --query-gpu=index,name,memory.total,memory.used,driver_version --format=csv,noheader
-echo "CPU cores: $(nproc); RAM: $(free -g | awk '/Mem:/{print $2}') GiB; docker root: $(docker info --format '{{.DockerRootDir}}')"
-df -h "$(docker info --format '{{.DockerRootDir}}')" | tail -1
+ROOT=$(docker info --format '{{.DockerRootDir}}')
+echo "CPU cores: $(nproc); RAM: $(free -g | awk '/Mem:/{print $2}') GiB; docker root: $ROOT"
+# the docker root itself may not be readable for us (gpu24): fall back to its parent (a mount point we can stat)
+FREE_GB=$( (df -BG --output=avail "$ROOT" 2>/dev/null || df -BG --output=avail "$(dirname "$ROOT")" 2>/dev/null) \
+           | tail -1 | tr -dc '0-9' || true)
+(df -h "$ROOT" 2>/dev/null || df -h "$(dirname "$ROOT")" 2>/dev/null || true) | tail -1
+if [ -z "$FREE_GB" ]; then echo "[box] cannot read the free space of the docker root $ROOT: send: df -h /mnt/*"; exit 1; fi
+if [ "$FREE_GB" -lt 150 ]; then echo "[box] only ${FREE_GB} GB free on the docker root: stop (the image + our data need >= 150 GB)"; exit 1; fi
+echo "[box] docker root has ${FREE_GB} GB free"
 echo "[box] Vulkan / GL driver pieces on the host (the container gets them through NVIDIA_DRIVER_CAPABILITIES=all):"
 ls /usr/share/vulkan/icd.d/ /etc/vulkan/icd.d/ 2>&1 | sed 's/^/   /' || true
 ldconfig -p | grep -E "libGLX_nvidia|libEGL_nvidia|libnvidia-glcore" | sed 's/^/   /' || echo "   (no NVIDIA GL / Vulkan driver libraries registered)"
