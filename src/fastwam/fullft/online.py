@@ -69,6 +69,25 @@ def count_counterfactual(entries: List[dict], mode: str) -> List[dict]:
     return out
 
 
+def freeze_counterfactual(entries: List[dict], k: int) -> List[dict]:
+    """11-15 test-time counterfactual 'freezeK': the ledger stops being written once K moves are complete (a move = a
+    close followed by an open of the same arm): everything after the open that completes move K is withheld, so a
+    later move (e.g. the third block move of a swap) happens but is never recorded. Before move K completes the
+    ledger is unchanged. Applied to the full list of written entries, before the event_max cut."""
+    holding = {}
+    done = 0
+    for i, e in enumerate(entries):
+        arm = int(e["arm"])
+        if e["kind"] == "close":
+            holding[arm] = True
+        elif e["kind"] == "open" and holding.get(arm):
+            holding[arm] = False
+            done += 1
+            if done == int(k):
+                return entries[:i + 1]
+    return entries
+
+
 class FrameCache:
     """Per-episode history K / V per frame id (before re-rotation), kept on the model's device."""
 
@@ -337,6 +356,12 @@ class FullSession:
                         entries = entries[:-1]           # the most recent event withheld: one event fewer counted
                     elif mode in ("dropfirst", "addmove"):
                         entries = count_counterfactual(entries, mode)[-int(p.rule.event_max):]
+                    elif mode.startswith("freeze") and mode[6:].isdigit():   # 11-15: freezeK (ledger stops at move K)
+                        import dataclasses
+                        full = ledger_entries(dataclasses.replace(p.rule, event_max=10 ** 6), current, self.events)
+                        entries = freeze_counterfactual(full, int(mode[6:]))[-int(p.rule.event_max):]
+                    elif mode:
+                        raise ValueError(f"unknown MWAM_LEDGER mode {mode!r} (off | drop1 | dropfirst | addmove | freezeK)")
                     ledger = ledger_tensor(p.rule, entries, self._proprio)
             ids, _ = select(p.rule, current, known)
             self._encode(sorted(set(ids) | {current} | (set(known) if p.rule.variant == "prop" else set())))
