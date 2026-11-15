@@ -23,6 +23,9 @@ Settings: outputs/memory_v2/queue5/POOL_CONFIG.json (created with defaults, re-r
     lanes          the queue5 lanes the pool runs (tasks of other lanes are left to their lane processes)
     free_mib       a GPU counts as empty below this memory use (any process, any user)
     free_seconds   ... continuously for this long before a task is started on it
+    share_mib      11-15, opt-in (0 = off, the default): a GPU that another user occupies also counts as usable when
+                   that use is <= share_mib MiB AND at least share_free_mib MiB stay free (default 28000); their process
+                   is never touched, ours runs next to it (still one task of ours per GPU). `pool5.py share --mib N`
     max_attempts   failures (incl. stalls and non-graceful exits) before a task is judged as it is
     retry_minutes  wait before a failed task is tried again (any empty GPU)
     stall_minutes  no log / output written for this long -> the task is stopped and retried
@@ -59,7 +62,18 @@ POOL = q.Q / "pool.json"
 EXEC = q.Q / "exec"
 REPORTS = q.Q / "report"
 DEFAULTS = {"gpus": [], "lanes": ["loop", "train", "extra", "gpu0", "cpu"], "free_mib": 1000, "free_seconds": 180,
-            "max_attempts": 3, "retry_minutes": 10, "stall_minutes": 120, "poll_seconds": 30}
+            "max_attempts": 3, "retry_minutes": 10, "stall_minutes": 120, "poll_seconds": 30,
+            "share_mib": 0, "share_free_mib": 28000}
+
+
+def usable(v, cfg):
+    """'empty' (below free_mib) or, with share_mib > 0, 'shareable' (11-15: another user's light process leaves room)."""
+    if v["used"] < int(cfg["free_mib"]):
+        return "empty"
+    if int(cfg.get("share_mib") or 0) > 0 and v["used"] <= int(cfg["share_mib"]) \
+            and v["total"] - v["used"] >= int(cfg.get("share_free_mib") or 28000):
+        return "shareable"
+    return ""
 SELF = str(Path(__file__).resolve())
 FAIL_HINTS = [("CUDA out of memory", "GPU out of memory"), ("OutOfMemoryError", "GPU out of memory"),
               ("CUDA error", "CUDA error"), ("no kernel image", "CUDA kernels not built for this GPU"),
@@ -518,7 +532,7 @@ def cmd_pool(args):
         now = time.time()
         for g in cfg["gpus"]:
             g = int(g)
-            empty = g in table and table[g]["used"] < int(cfg["free_mib"]) and g not in occupied
+            empty = g in table and bool(usable(table[g], cfg)) and g not in occupied
             free_since[g] = free_since.get(g) or now if empty else None
         ready = [int(g) for g in cfg["gpus"] if free_since.get(int(g)) and now - free_since[int(g)] >= cfg["free_seconds"]]
         running_any = any(q.state(t["id"])["status"] == "running" for t in tasks if t.get("lane") in cfg["lanes"])
@@ -572,6 +586,15 @@ def cmd_pool(args):
 
 
 # ============================================================================ pause / allow
+def cmd_share(args):
+    cfg = config()
+    cfg["share_mib"] = int(args.mib)
+    cfg["share_free_mib"] = int(args.free)
+    q.write_json(CFG_PATH, cfg)
+    print(f"share_mib {cfg['share_mib']} (0 = off), share_free_mib {cfg['share_free_mib']} ({CFG_PATH}); "
+          "read by the dispatcher every cycle")
+
+
 def cmd_allow(args):
     cfg = config()
     cfg["gpus"] = [int(x) for x in args.gpus.split(",") if x.strip() != ""]
@@ -634,7 +657,9 @@ def status_lines(cfg=None):
     for g, v in sorted(table.items()):
         # 11-12: a busy GPU without a queue task is not necessarily someone else's: our own jobs started outside the
         # queue (H200 training via h200_queue.sh, 5090 scripts via docker exec -d) show up here too.
-        who = ours.get(g) or ("empty" if v["used"] < cfg["free_mib"] else
+        kind = usable(v, cfg)
+        who = ours.get(g) or ("empty" if kind == "empty" else
+                              "shared: another user's light process, room for one task of ours" if kind == "shareable" else
                               "BUSY, not a queue task (another user, or ours started outside the queue)")
         lines.append(f"   GPU {g}: {v['used']:>6}/{v['total']} MiB, {v['util']:>3}% busy  -> {who}"
                      f"{'' if g in [int(x) for x in cfg['gpus']] else '   (not allowed)'}")
@@ -818,13 +843,16 @@ def main():
     lg.add_argument("--lines", type=int, default=60)
     a = sub.add_parser("allow")
     a.add_argument("--gpus", required=True)
+    sh = sub.add_parser("share")
+    sh.add_argument("--mib", type=int, required=True, help="0 = off")
+    sh.add_argument("--free", type=int, default=28000)
     ro = sub.add_parser("readopt")
     ro.add_argument("--id", action="append")
     ro.add_argument("--all", action="store_true", help="also pool processes started after the DEADLINE file changed")
     ro.add_argument("--execute", action="store_true")
     args = ap.parse_args()
     {"pool": cmd_pool, "start": cmd_start, "exec": cmd_exec, "status": cmd_status, "report": cmd_report, "pause": cmd_pause,
-     "allow": cmd_allow, "log": cmd_log, "readopt": cmd_readopt}[args.cmd](args)
+     "allow": cmd_allow, "share": cmd_share, "log": cmd_log, "readopt": cmd_readopt}[args.cmd](args)
 
 
 if __name__ == "__main__":

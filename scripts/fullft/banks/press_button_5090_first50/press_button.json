@@ -1,0 +1,306 @@
+{
+ "scenes": [
+  {
+   "task": "press_button",
+   "seed": 4300000,
+   "ordinal": 0,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300001,
+   "ordinal": 1,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300002,
+   "ordinal": 2,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300003,
+   "ordinal": 3,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300004,
+   "ordinal": 4,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300005,
+   "ordinal": 5,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300006,
+   "ordinal": 6,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300007,
+   "ordinal": 7,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300008,
+   "ordinal": 8,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300009,
+   "ordinal": 9,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300010,
+   "ordinal": 10,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300011,
+   "ordinal": 11,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300012,
+   "ordinal": 12,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300013,
+   "ordinal": 13,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300014,
+   "ordinal": 14,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300015,
+   "ordinal": 15,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300016,
+   "ordinal": 16,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300017,
+   "ordinal": 17,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300018,
+   "ordinal": 18,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300019,
+   "ordinal": 19,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300020,
+   "ordinal": 20,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300021,
+   "ordinal": 21,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300022,
+   "ordinal": 22,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300023,
+   "ordinal": 23,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300024,
+   "ordinal": 24,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300025,
+   "ordinal": 25,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300026,
+   "ordinal": 26,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300027,
+   "ordinal": 27,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300028,
+   "ordinal": 28,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300029,
+   "ordinal": 29,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300030,
+   "ordinal": 30,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300031,
+   "ordinal": 31,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300032,
+   "ordinal": 32,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300033,
+   "ordinal": 33,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300034,
+   "ordinal": 34,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300035,
+   "ordinal": 35,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300036,
+   "ordinal": 36,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300037,
+   "ordinal": 37,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300038,
+   "ordinal": 38,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300039,
+   "ordinal": 39,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300040,
+   "ordinal": 40,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300041,
+   "ordinal": 41,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300042,
+   "ordinal": 42,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300043,
+   "ordinal": 43,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300044,
+   "ordinal": 44,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300045,
+   "ordinal": 45,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300046,
+   "ordinal": 46,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300047,
+   "ordinal": 47,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300048,
+   "ordinal": 48,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  },
+  {
+   "task": "press_button",
+   "seed": 4300049,
+   "ordinal": 49,
+   "instruction": "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  }
+ ],
+ "complete": true,
+ "note": "11-15: the first 50 scenes of the 5090 official bank scenes_seed42_n100_press_button, from the run records of press_arprop e10/e20 (keys task, seed, ordinal, instruction); used by official_scenes.py check-prefix on the A100's own plan"
+}

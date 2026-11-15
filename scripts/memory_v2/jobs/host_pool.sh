@@ -10,6 +10,8 @@
 #   bash /root/mwam_reports/host_pool.sh update              git pull in the container + refresh this script
 #   bash /root/mwam_reports/host_pool.sh start [--lanes L] [--gpus G]   take over from the queue5 lanes, start dispatcher
 #   bash /root/mwam_reports/host_pool.sh allow 0,1,2,3       GPUs the pool may use (container indices)
+#   bash /root/mwam_reports/host_pool.sh share 13000 [28000] also use a GPU another user holds with <= 13000 MiB if >= 28000
+#                                                            MiB stay free (their process untouched); share 0 = off
 #   bash /root/mwam_reports/host_pool.sh reset A B ...       finished tasks back to pending, attempts reset (after a fix)
 #   bash /root/mwam_reports/host_pool.sh pause <gpu>         lend a GPU: stop our task on it (kept for a re-run)
 #   bash /root/mwam_reports/host_pool.sh curve D2-pilot-train  in-training eval curve of a running train task
@@ -44,6 +46,7 @@ case "$cmd" in
               && docker cp "$C:$R/scripts/memory_v2/jobs/host_pool.sh" "$OUT/host_pool.sh" && echo "host_pool.sh refreshed" ;;
   start)    pool start "$@" ;;
   allow)    pool allow --gpus "$1" ;;
+  share)    pool share --mib "${1:-0}" --free "${2:-28000}" ;;
   reset)    for n in "$@"; do
               docker exec "$C" bash -lc "cd $R && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/queue5.py reset --id $n"
             done ;;
