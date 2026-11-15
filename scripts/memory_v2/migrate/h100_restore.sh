@@ -61,9 +61,17 @@ code() {
 
 system() {
   step "system packages + /opt/hf-tools"
-  apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
-    git curl ca-certificates zstd python3-venv build-essential gcc-12 g++-12 cmake ninja-build \
-    libvulkan1 vulkan-tools libgl1 libglib2.0-0 libegl1 libx11-6 libxext6 libsm6 ffmpeg >/dev/null
+  # 11-15 (NTU boxes): the containers set TMPDIR=/mnt/tmp (a volume); apt's signature check failed there
+  # ("Couldn't execute /usr/bin/apt-key ... not signed"), and a failed `apt-get update` inside `&&` did not stop the
+  # step under set -e. Now: apt with the image's own /tmp and without the _apt sandbox, and any failure stops the step.
+  local APT="env TMPDIR=/tmp apt-get -o APT::Sandbox::User=root"
+  if ! $APT update -qq; then echo "[restore] apt-get update FAILED (lines above)"; exit 1; fi
+  if ! DEBIAN_FRONTEND=noninteractive $APT install -y -qq --no-install-recommends \
+      git curl ca-certificates zstd python3-venv build-essential gcc-12 g++-12 cmake ninja-build \
+      libvulkan1 vulkan-tools libgl1 libglib2.0-0 libegl1 libx11-6 libxext6 libsm6 ffmpeg >/dev/null; then
+    echo "[restore] apt-get install FAILED"; exit 1
+  fi
+  step "system packages installed: gcc-12 $(command -v gcc-12 >/dev/null && echo ok || echo MISSING), vulkaninfo $(command -v vulkaninfo >/dev/null && echo ok || echo MISSING)"
   hftools
   $HFPY -c "import huggingface_hub; print('huggingface_hub', huggingface_hub.__version__)"
 }
