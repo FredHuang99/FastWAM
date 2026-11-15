@@ -36,7 +36,7 @@ PRUNE = re.compile(r"^(seed_.*|checkpoints?|ckpt.*|exports|caches?|replay|dumpfi
                    r"dense.*|text|collect|hf_cache|wandb)$")
 FOLDERS = ["closed_loop/g1", "closed_loop/textab", "closed_loop/al3", "closed_loop/al3b", "closed_loop/al3b_first",
            "closed_loop/execlen", "closed_loop/x7c12", "closed_loop/s1pre", "closed_loop/al5", "closed_loop/rep",
-           "closed_loop/w1"]
+           "closed_loop/w1", "closed_loop/abl"]
 PAIRS = [("ar2_prop_e10", "ar_2task_e10_fx"), ("ar2_prop_e10", "ar_2task_e10"), ("ar2_prop_e20", "ar_2task_e20"),
          ("ar2_prop_e30", "ar_2task_e30")]          # 11-14: ledger arm vs AR control on the same machine (progress)
 PY = sys.executable
