@@ -14,12 +14,24 @@ set -euo pipefail
 KIT=/workspace/FastWAM-memory2/outputs/migration_5090_v1/simkit
 ENV=/opt/rmbench-env
 LINK=/opt/rmbench-fused-env
-OUT=/workspace/FastWAM/outputs/fused_environment_5090_sm120
 CONDA=/opt/miniforge/bin/conda
-CUDA_LABEL=nvidia/label/cuda-12.8.1
-TORCH=(torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1)
+# 11-15: SIM_PROFILE=a40 (GPU18, 8 x A40, sm_86) = the A100's env exactly: torch 2.6.0+cu126 and conda CUDA 12.6.3 as
+# on the A100, CuRobo / PyTorch3D rebuilt from the A100's own sources for sm_80 like the A100's wheels (sm_80 code
+# runs on sm_86), so the A40 differs from the A100 only in the GPU. Default (unset) = the 5090 profile below.
+SIM_PROFILE=${SIM_PROFILE:-5090}
+if [ "$SIM_PROFILE" = a40 ]; then
+  OUT=/workspace/FastWAM/outputs/fused_environment_a40_sm86
+  CUDA_LABEL=nvidia/label/cuda-12.6.3; CUDA_VER=12.6; ARCH=8.0; CAP=8.6; ARCH_TAG=sm_86
+  TORCH_INDEX=https://download.pytorch.org/whl/cu126
+  TORCH=($(grep -E '^(torch|torchvision|torchaudio)==' "$KIT/freeze.txt" 2>/dev/null | sed 's/+cu[0-9]*$//' || true))
+else
+  OUT=/workspace/FastWAM/outputs/fused_environment_5090_sm120
+  CUDA_LABEL=nvidia/label/cuda-12.8.1; CUDA_VER=12.8; ARCH=12.0; CAP=12.0; ARCH_TAG=sm_120
+  TORCH_INDEX=https://download.pytorch.org/whl/cu128
+  TORCH=(torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1)
+fi
 mkdir -p "$OUT"
-exec > >(tee -a "$OUT/SIM5090.log") 2>&1
+exec > >(tee -a "$OUT/SIM_${SIM_PROFILE}.log") 2>&1
 STEP=${1:?conda|env|pip|build|check|gate|all}
 trap 'rc=$?; echo "[sim5090] $(date "+%F %T") step $STEP finished, exit code $rc"' EXIT
 step() { echo "[sim5090] $(date '+%F %T') $*"; }
@@ -29,7 +41,7 @@ export PIP_CONFIG_FILE=/dev/null PYTHONUNBUFFERED=1 CONDA_SUBDIR=linux-64
 
 build_env() {   # compiler / CUDA variables for every build or JIT step
   export CUDA_HOME=$ENV CC=/usr/bin/gcc-12 CXX=/usr/bin/g++-12 CUDAHOSTCXX=/usr/bin/g++-12
-  export TORCH_CUDA_ARCH_LIST=12.0 FORCE_CUDA=1 OMP_NUM_THREADS=4
+  export TORCH_CUDA_ARCH_LIST=$ARCH FORCE_CUDA=1 OMP_NUM_THREADS=4
   export PATH="$ENV/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
   export LD_LIBRARY_PATH="$ENV/lib:$ENV/targets/x86_64-linux/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64"
   export CPATH="$ENV/include:$ENV/targets/x86_64-linux/include"
@@ -55,10 +67,10 @@ env_() {
     step "conda env $ENV: python 3.10 (the A100: $(grep -E '^python ' "$KIT/conda_cuda.txt" | awk '{print $2}'))"
     $CONDA create -y -p "$ENV" --override-channels -c conda-forge python=3.10 pip
   fi
-  if ! "$ENV/bin/nvcc" --version 2>/dev/null | grep -q 'release 12.8'; then
-    step "CUDA 12.8.1 development packages ($CUDA_LABEL; the A100 has the same set at 12.6.3)"
+  if ! "$ENV/bin/nvcc" --version 2>/dev/null | grep -q "release $CUDA_VER"; then
+    step "CUDA development packages ($CUDA_LABEL; the A100 has the same set at 12.6.3)"
     $CONDA install -y -p "$ENV" --override-channels --strict-channel-priority -c "$CUDA_LABEL" -c conda-forge \
-      cuda-version=12.8 cuda-minimal-build cuda-cudart-dev cuda-cccl cuda-cupti cuda-nvrtc-dev cuda-nvtx \
+      cuda-version=$CUDA_VER cuda-minimal-build cuda-cudart-dev cuda-cccl cuda-cupti cuda-nvrtc-dev cuda-nvtx \
       cuda-profiler-api libcublas-dev libcufft-dev libcurand-dev libcusolver-dev libcusparse-dev libnvjitlink
   fi
   "$ENV/bin/nvcc" --version | tail -n 2
@@ -68,8 +80,9 @@ env_() {
 
 pip_() {
   local PY=$ENV/bin/python
-  step "torch stack for sm_120: ${TORCH[*]} (cu128)"
-  $PY -m pip install --disable-pip-version-check --no-input "${TORCH[@]}" --index-url https://download.pytorch.org/whl/cu128
+  step "torch stack for $ARCH_TAG: ${TORCH[*]} ($TORCH_INDEX)"
+  [ ${#TORCH[@]} = 3 ] || { echo "torch / torchvision / torchaudio pins not found in $KIT/freeze.txt"; exit 1; }
+  $PY -m pip install --disable-pip-version-check --no-input "${TORCH[@]}" --index-url "$TORCH_INDEX"
   # Everything else exactly as the A100 env (no dependency resolution: the freeze is already a resolved set).
   # Left out: the torch stack and its CUDA wheels (installed above), local wheels (CuRobo / PyTorch3D, built below),
   # conda-provided pip / packaging (file:// lines).
@@ -113,7 +126,7 @@ build() {
 check() {
   build_env
   step "import probe (the same probe as online preflight)"
-  (cd /workspace/FastWAM/resources/RMBench && "$LINK/bin/python" - <<'PY'
+  (cd /workspace/FastWAM/resources/RMBench && "$LINK/bin/python" - "$CAP" "$ARCH_TAG" <<'PY'
 import json, sys
 r = {"python": sys.version.split()[0]}
 import torch
@@ -134,7 +147,7 @@ for name in ("curobo.curobolib.lbfgs_step_cu", "curobo.curobolib.line_search_cu"
         r[name] = "ERROR " + repr(e)[:200]
 print(json.dumps(r, indent=1))
 bad = [k for k, v in r.items() if isinstance(v, str) and v.startswith("ERROR")]
-sys.exit(1 if bad or r["capability"] != "12.0" or "sm_120" not in r["arch_list"] else 0)
+sys.exit(1 if bad or r["capability"] != sys.argv[1] or sys.argv[2] not in r["arch_list"] else 0)
 PY
   )
   step "package versions vs the A100 env (expected differences: torch stack, its CUDA wheels, CuRobo / PyTorch3D builds, pip / packaging)"
