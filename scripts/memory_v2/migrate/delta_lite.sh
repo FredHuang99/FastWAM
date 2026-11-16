@@ -43,11 +43,8 @@ json.dump(m2, open(dst, "w"), indent=1)
 open(paths, "w").write("\n".join(f["stage_path"] for f in sel) + "\n")
 print(f"  -> {len(sel)} files, {m2['total_bytes'] / 2**30:.2f} GiB")
 PY
-$HFPY - "$D" "$HF" /mnt/tmp/delta_lite_paths.txt <<'PY'
-import sys
-from huggingface_hub import snapshot_download
-pats = [p for p in open(sys.argv[3]).read().split("\n") if p]
-print(snapshot_download(repo_id=sys.argv[1], repo_type="model", local_dir=sys.argv[2], allow_patterns=pats, max_workers=16))
-PY
+# 11-16: through the stall watchdog (dl_watch.sh: a download that stops growing is killed and resumed)
+RESTORE_LOG=/mnt/tmp/restore_delta_lite_dl.log HF_REPO="$D" DEST="$HF" ALLOW=/mnt/tmp/delta_lite_paths.txt \
+  bash /workspace/FastWAM-memory2/scripts/memory_v2/migrate/dl_watch.sh
 echo "[restore] $(date '+%F %T') verify the selected files (size + sha256)"
 $HFPY /workspace/FastWAM-memory2/scripts/memory_v2/migrate/manifest.py verify --manifest "$HF/MANIFEST_5090_DELTA_LITE.json" --root "$HF"
