@@ -50,13 +50,18 @@ def main():
              if hasattr(x, "size")]
     if not names:
         raise SystemExit(f"[relay] nothing under {args.repo}/{prefix}")
+    import os
     import time
+    # 11-16: download into <out>/.relay_tmp (same disk as <out>) and move the file into place, instead of the HF cache
+    # + a copy: every 12 GB export used to stay a second time in ~/.cache/huggingface (A100 root disk at 97 %).
+    # A partial file stays in .relay_tmp, so a retry or a later get resumes it.
+    tmp = out / ".relay_tmp"
     for name in names:
         # 11-16: a dropped connection (5090, press_ar e10: 570 MB of 12 GB, "peer closed connection") used to end the
         # whole get; now up to 5 attempts, 60 s apart (hf_hub_download resumes the partial file)
         for attempt in range(1, 6):
             try:
-                local = hf_hub_download(args.repo, name, repo_type="model")
+                local = hf_hub_download(args.repo, name, repo_type="model", local_dir=str(tmp))
                 break
             except Exception as error:                      # noqa: BLE001
                 if attempt == 5:
@@ -64,8 +69,12 @@ def main():
                 print(f"[relay] get {name}: attempt {attempt} failed ({type(error).__name__}); retry in 60 s", flush=True)
                 time.sleep(60)
         dst = out / Path(name).name
-        shutil.copyfile(local, dst)
+        if Path(local).is_symlink():                        # old huggingface_hub: local_dir links into the cache
+            shutil.copyfile(os.path.realpath(local), dst)
+        else:
+            os.replace(local, dst)
         print(f"[relay] get {args.repo}/{name} -> {dst} ({dst.stat().st_size} bytes)", flush=True)
+    shutil.rmtree(tmp, ignore_errors=True)
 
 
 if __name__ == "__main__":
