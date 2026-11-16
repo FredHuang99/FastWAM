@@ -36,7 +36,8 @@ PRUNE = re.compile(r"^(seed_.*|checkpoints?|ckpt.*|exports|caches?|replay|dumpfi
                    r"dense.*|text|collect|hf_cache|wandb)$")
 FOLDERS = ["closed_loop/g1", "closed_loop/textab", "closed_loop/al3", "closed_loop/al3b", "closed_loop/al3b_first",
            "closed_loop/execlen", "closed_loop/x7c12", "closed_loop/s1pre", "closed_loop/al5", "closed_loop/rep",
-           "closed_loop/w1", "closed_loop/abl", "closed_loop/sel", "closed_loop/lat"]
+           "closed_loop/w1", "closed_loop/abl", "closed_loop/sel", "closed_loop/lat",
+           "closed_loop/latsel", "closed_loop/latrep"]
 PAIRS = [("ar2_prop_e10", "ar_2task_e10_fx"), ("ar2_prop_e10", "ar_2task_e10"), ("ar2_prop_e20", "ar_2task_e20"),
          ("ar2_prop_e30", "ar_2task_e30")]          # 11-14: ledger arm vs AR control on the same machine (progress)
 PY = sys.executable
@@ -151,7 +152,7 @@ def zip_dir(src, dest, prefix):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--machine", required=True, choices=("a100", "h200", "5090"))
+    ap.add_argument("--machine", required=True, choices=("a100", "h200", "5090", "a40", "h100"))
     ap.add_argument("--since", default="2026-11-12 16:00", help="Beijing time")
     ap.add_argument("--relay", default="")
     ap.add_argument("--combine", default="")

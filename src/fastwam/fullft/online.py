@@ -85,6 +85,25 @@ def count_counterfactual(entries: List[dict], mode: str) -> List[dict]:
     return out
 
 
+def press_counterfactual(entries: List[dict], mode: str) -> List[dict]:
+    """11-16 night: test-time counterfactuals on the number of presses (a press = a 'bottom' followed by a 'top' of the
+    same arm, the detector's turning points of one stroke). addpress: the first completed press is entered twice ->
+    one press more counted from the moment its 'top' is written; droppress: it is removed -> one press fewer. Applied to
+    the full list of written entries, before the event_max cut; before the first press completes nothing changes."""
+    b = next((i for i, e in enumerate(entries) if e["kind"] == "bottom"), None)
+    if b is None:
+        return entries
+    arm = int(entries[b]["arm"])
+    t = next((i for i in range(b + 1, len(entries)) if entries[i]["kind"] == "top" and int(entries[i]["arm"]) == arm), None)
+    if t is None:
+        return entries
+    if mode == "droppress":
+        return [e for i, e in enumerate(entries) if i not in (b, t)]
+    out = list(entries)
+    out[t + 1:t + 1] = [dict(entries[b]), dict(entries[t])]
+    return out
+
+
 def freeze_counterfactual(entries: List[dict], k: int) -> List[dict]:
     """11-15 test-time counterfactual 'freezeK': the ledger stops being written once K moves are complete (a move = a
     close followed by an open of the same arm): everything after the open that completes move K is withheld, so a
@@ -373,12 +392,16 @@ class FullSession:
                         entries = entries[:-1]           # the most recent event withheld: one event fewer counted
                     elif mode in ("dropfirst", "addmove"):
                         entries = count_counterfactual(entries, mode)[-int(p.rule.event_max):]
+                    elif mode in ("addpress", "droppress"):      # 11-16: one press more / fewer (press_counterfactual)
+                        import dataclasses
+                        full = ledger_entries(dataclasses.replace(self.rule, event_max=10 ** 6), current, self.events)
+                        entries = press_counterfactual(full, mode)[-int(p.rule.event_max):]
                     elif mode.startswith("freeze") and mode[6:].isdigit():   # 11-15: freezeK (ledger stops at move K)
                         import dataclasses
                         full = ledger_entries(dataclasses.replace(self.rule, event_max=10 ** 6), current, self.events)
                         entries = freeze_counterfactual(full, int(mode[6:]))[-int(p.rule.event_max):]
                     elif mode:
-                        raise ValueError(f"unknown MWAM_LEDGER mode {mode!r} (off | drop1 | dropfirst | addmove | freezeK)")
+                        raise ValueError(f"unknown MWAM_LEDGER mode {mode!r} (off | drop1 | dropfirst | addmove | freezeK | addpress | droppress)")
                     ledger = ledger_tensor(p.rule, entries, self._proprio)
             ids, _ = select(p.rule, current, known)
             self._encode(sorted(set(ids) | {current} | (set(known) if p.rule.variant == "prop" else set())))

@@ -6238,3 +6238,152 @@ tasks:
   online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
   output: closed_loop/g1
   env: {MWAM_TEXT_SOURCE: "cache"}
+
+# 11-16 21:20 (Opus): the A100's GPU3 is free after component D (~11-17 14:00). The memoryless control ar2_none e30
+# (H200, ~11-17 16:00) on the judging machine, swap and put scenes 1-20: a spot check of the A40 numbers, and a head
+# start on the main-table 'none' row if A40-EQ does not say EQUIVALENT. Descriptive.
+
+- id: FT-fetch-none30
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 60
+  hypothesis: "fetch the memoryless control export ar2_none_e30 (H200) from the relay when it appears (sha256 checked)"
+  command: "RUN=ar2_none TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A100-none30-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-none30]
+  requires_pass: [FT-fetch-none30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "memoryless control ar2_none e30 on the judging machine, swap scenes 1-20, shard 0 of 4 (spot check of the A40; descriptive)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "20", "--shard", "0/4"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-none30-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-none30]
+  requires_pass: [FT-fetch-none30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "memoryless control ar2_none e30 on the judging machine, swap scenes 1-20, shard 1 of 4 (spot check of the A40; descriptive)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "20", "--shard", "1/4"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-none30-swap-s2
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-none30]
+  requires_pass: [FT-fetch-none30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "memoryless control ar2_none e30 on the judging machine, swap scenes 1-20, shard 2 of 4 (spot check of the A40; descriptive)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "20", "--shard", "2/4"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-none30-swap-s3
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-none30]
+  requires_pass: [FT-fetch-none30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "memoryless control ar2_none e30 on the judging machine, swap scenes 1-20, shard 3 of 4 (spot check of the A40; descriptive)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "20", "--shard", "3/4"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-none30-put-s0
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-none30]
+  requires_pass: [FT-fetch-none30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "memoryless control ar2_none e30 on the judging machine, put scenes 1-20, shard 0 of 4 (spot check of the A40; descriptive)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "20", "--shard", "0/4"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-none30-put-s1
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-none30]
+  requires_pass: [FT-fetch-none30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "memoryless control ar2_none e30 on the judging machine, put scenes 1-20, shard 1 of 4 (spot check of the A40; descriptive)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "20", "--shard", "1/4"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-none30-put-s2
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-none30]
+  requires_pass: [FT-fetch-none30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "memoryless control ar2_none e30 on the judging machine, put scenes 1-20, shard 2 of 4 (spot check of the A40; descriptive)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "20", "--shard", "2/4"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-none30-put-s3
+  lane: loop
+  kind: closed_loop
+  after: [FT-fetch-none30]
+  requires_pass: [FT-fetch-none30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "memoryless control ar2_none e30 on the judging machine, put scenes 1-20, shard 3 of 4 (spot check of the A40; descriptive)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "20", "--shard", "3/4"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: "cache"}

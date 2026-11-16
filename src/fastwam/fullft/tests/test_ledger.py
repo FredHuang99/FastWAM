@@ -325,3 +325,19 @@ def test_config_event_rule_from_copies_numbers(tmp_path):
     assert cfg.rule.lag == 0 and json.loads(json.dumps(cfg.to_dict()))["history"]["event_delta"] == 0.008
     plain = load(None, ["history.variant=arprop", "history.lag=4"])
     assert plain.rule.event_delta == 0.015 and plain.rule.event_min_path == 0.03
+
+
+def test_press_counterfactual():
+    """11-16: addpress enters the first completed press (bottom + its top) twice; droppress removes it; nothing changes
+    before that press is complete; other arms and later presses are untouched."""
+    from fastwam.fullft.online import press_counterfactual
+    e = lambda f, a, k: {"frame": f, "arm": a, "kind": k, "confirmed": f + 3}          # noqa: E731
+    only_bottom = [e(10, 0, "bottom")]
+    assert press_counterfactual(only_bottom, "addpress") == only_bottom
+    led = [e(5, 1, "close"), e(10, 0, "bottom"), e(12, 1, "top"), e(18, 0, "top"), e(30, 0, "bottom"), e(38, 0, "top")]
+    add = press_counterfactual(led, "addpress")
+    assert [x["kind"] for x in add].count("bottom") == 3 and len(add) == len(led) + 2
+    assert add[4:6] == [led[1], led[3]] and add[4] is not led[1]                     # copies, right after its top
+    drop = press_counterfactual(led, "droppress")
+    assert drop == [led[0], led[2], led[4], led[5]]
+    assert press_counterfactual([], "droppress") == []
