@@ -50,8 +50,19 @@ def main():
              if hasattr(x, "size")]
     if not names:
         raise SystemExit(f"[relay] nothing under {args.repo}/{prefix}")
+    import time
     for name in names:
-        local = hf_hub_download(args.repo, name, repo_type="model")
+        # 11-16: a dropped connection (5090, press_ar e10: 570 MB of 12 GB, "peer closed connection") used to end the
+        # whole get; now up to 5 attempts, 60 s apart (hf_hub_download resumes the partial file)
+        for attempt in range(1, 6):
+            try:
+                local = hf_hub_download(args.repo, name, repo_type="model")
+                break
+            except Exception as error:                      # noqa: BLE001
+                if attempt == 5:
+                    raise
+                print(f"[relay] get {name}: attempt {attempt} failed ({type(error).__name__}); retry in 60 s", flush=True)
+                time.sleep(60)
         dst = out / Path(name).name
         shutil.copyfile(local, dst)
         print(f"[relay] get {args.repo}/{name} -> {dst} ({dst.stat().st_size} bytes)", flush=True)

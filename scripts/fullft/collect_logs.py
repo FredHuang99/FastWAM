@@ -36,7 +36,7 @@ PRUNE = re.compile(r"^(seed_.*|checkpoints?|ckpt.*|exports|caches?|replay|dumpfi
                    r"dense.*|text|collect|hf_cache|wandb)$")
 FOLDERS = ["closed_loop/g1", "closed_loop/textab", "closed_loop/al3", "closed_loop/al3b", "closed_loop/al3b_first",
            "closed_loop/execlen", "closed_loop/x7c12", "closed_loop/s1pre", "closed_loop/al5", "closed_loop/rep",
-           "closed_loop/w1", "closed_loop/abl"]
+           "closed_loop/w1", "closed_loop/abl", "closed_loop/sel"]
 PAIRS = [("ar2_prop_e10", "ar_2task_e10_fx"), ("ar2_prop_e10", "ar_2task_e10"), ("ar2_prop_e20", "ar_2task_e20"),
          ("ar2_prop_e30", "ar_2task_e30")]          # 11-14: ledger arm vs AR control on the same machine (progress)
 PY = sys.executable
@@ -120,6 +120,7 @@ def analyses(machine, since, bundle, manifest):
             jobs.append(("press_gap", f"{PY} scripts/fullft/press_gap.py --folder {folder} --label {label}"))
         if label.startswith("press_"):           # 11-15: press_button count errors (first / second count, by number shown)
             jobs.append(("press_err", f"{PY} scripts/fullft/press_errors.py --folder {folder} {label}"))
+            jobs.append(("press_ledger", f"{PY} scripts/fullft/press_ledger_audit.py {folder.split('/')[-1]}:{label}"))
         for kind, cmd in jobs:
             start = time.monotonic()
             rc, out = sh(cmd, env={"FIRST_OUT": str(a / "first")})

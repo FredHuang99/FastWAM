@@ -8,6 +8,8 @@ the first N press_button scenes every compared model finished). The A100 re-chec
   floor: at least one of the three models >= 30% success, else NO VERDICT (all on the floor; go to the failure funnel)
   (c) choice of the ledger: PROP and EV within 5 points -> PROP (cheaper), else the higher one
   With only PROP finished: PROP passing (a) is final (the better one is at least PROP); PROP failing -> WAIT FOR AREV.
+  11-16 fix: the floor counts all three models, so with AREV missing and PROP / AR both < 30% -> WAIT FOR AREV
+  (the 11-15 code printed NO VERDICT there; no press_ar e30 result existed when this was fixed).
 
   PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/press_verdict.py --folder closed_loop/g1 \
       --prop press_arprop_e30 --control press_ar_e30 [--ev press_arev_e30] [--n 50]
@@ -82,7 +84,11 @@ def main():
             choice = "PROP" if abs(rows["PROP"]["success"] - rows["EV"]["success"]) <= 0.05 * n else best
         else:
             choice = None
-        if not floor:
+        if not floor and "EV" not in rows:
+            # 11-16 fix (deviation 34, before any press_ar e30 result): the registered floor is "at least one of the
+            # THREE models >= 30%"; with AREV not finished it is not settled yet, so the verdict waits for AREV
+            verdict = "WAIT FOR AREV (floor not met by PROP / AR so far; AREV can still meet it)"
+        elif not floor:
             verdict = "NO VERDICT (floor: no model >= 30%; go to the failure funnel)"
         elif rows[best]["passes_a"]:
             verdict = f"LEDGER USEFUL ON PRESS (better design {best})"

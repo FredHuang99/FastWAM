@@ -3394,6 +3394,285 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/loop_peek.py --folder closed_loop/abl --label ar2_prop_e30_off --out /dev/null && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/press_gap.py --folder closed_loop/abl --label ar2_prop_e30_off"
   pass_if: "m['rc'] == 0"
 
+# 11-16 (A100 GPU3 empty since 05:08): components C and D, the two ledger counterfactuals of the mechanism figure on
+# the judging machine; ~1 h shards, no prerequisite but the e30 export on disk (any free GPU takes the next shard)
+
+- id: FRZx-a100-e30-swap-s0
+  lane: loop
+  kind: closed_loop
+  requires_pass: [FT-fetch-ar2p-e30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "C: ar2_prop e30 with the ledger frozen after the 2nd completed move (MWAM_LEDGER=freeze2), swap_blocks scenes 1-50 on the judging machine, shard 0 of 8; expected (written 11-16 14:30 BJ before any A100 run; 5090 gave 3/50 and kept moving 47/50 on these scenes): success <= 10/50 and kept moving >= 35/50 over the 8 shards"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_freeze2
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/8"]
+  output: closed_loop/abl
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "freeze2"}
+
+- id: FRZx-a100-e30-swap-s1
+  lane: loop
+  kind: closed_loop
+  requires_pass: [FT-fetch-ar2p-e30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "C: ar2_prop e30 with the ledger frozen after the 2nd completed move (MWAM_LEDGER=freeze2), swap_blocks scenes 1-50 on the judging machine, shard 1 of 8; expected (written 11-16 14:30 BJ before any A100 run; 5090 gave 3/50 and kept moving 47/50 on these scenes): success <= 10/50 and kept moving >= 35/50 over the 8 shards"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_freeze2
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/8"]
+  output: closed_loop/abl
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "freeze2"}
+
+- id: FRZx-a100-e30-swap-s2
+  lane: loop
+  kind: closed_loop
+  requires_pass: [FT-fetch-ar2p-e30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "C: ar2_prop e30 with the ledger frozen after the 2nd completed move (MWAM_LEDGER=freeze2), swap_blocks scenes 1-50 on the judging machine, shard 2 of 8; expected (written 11-16 14:30 BJ before any A100 run; 5090 gave 3/50 and kept moving 47/50 on these scenes): success <= 10/50 and kept moving >= 35/50 over the 8 shards"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_freeze2
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/8"]
+  output: closed_loop/abl
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "freeze2"}
+
+- id: FRZx-a100-e30-swap-s3
+  lane: loop
+  kind: closed_loop
+  requires_pass: [FT-fetch-ar2p-e30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "C: ar2_prop e30 with the ledger frozen after the 2nd completed move (MWAM_LEDGER=freeze2), swap_blocks scenes 1-50 on the judging machine, shard 3 of 8; expected (written 11-16 14:30 BJ before any A100 run; 5090 gave 3/50 and kept moving 47/50 on these scenes): success <= 10/50 and kept moving >= 35/50 over the 8 shards"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_freeze2
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/8"]
+  output: closed_loop/abl
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "freeze2"}
+
+- id: FRZx-a100-e30-swap-s4
+  lane: loop
+  kind: closed_loop
+  requires_pass: [FT-fetch-ar2p-e30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "C: ar2_prop e30 with the ledger frozen after the 2nd completed move (MWAM_LEDGER=freeze2), swap_blocks scenes 1-50 on the judging machine, shard 4 of 8; expected (written 11-16 14:30 BJ before any A100 run; 5090 gave 3/50 and kept moving 47/50 on these scenes): success <= 10/50 and kept moving >= 35/50 over the 8 shards"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_freeze2
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/8"]
+  output: closed_loop/abl
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "freeze2"}
+
+- id: FRZx-a100-e30-swap-s5
+  lane: loop
+  kind: closed_loop
+  requires_pass: [FT-fetch-ar2p-e30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "C: ar2_prop e30 with the ledger frozen after the 2nd completed move (MWAM_LEDGER=freeze2), swap_blocks scenes 1-50 on the judging machine, shard 5 of 8; expected (written 11-16 14:30 BJ before any A100 run; 5090 gave 3/50 and kept moving 47/50 on these scenes): success <= 10/50 and kept moving >= 35/50 over the 8 shards"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_freeze2
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "5/8"]
+  output: closed_loop/abl
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "freeze2"}
+
+- id: FRZx-a100-e30-swap-s6
+  lane: loop
+  kind: closed_loop
+  requires_pass: [FT-fetch-ar2p-e30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "C: ar2_prop e30 with the ledger frozen after the 2nd completed move (MWAM_LEDGER=freeze2), swap_blocks scenes 1-50 on the judging machine, shard 6 of 8; expected (written 11-16 14:30 BJ before any A100 run; 5090 gave 3/50 and kept moving 47/50 on these scenes): success <= 10/50 and kept moving >= 35/50 over the 8 shards"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_freeze2
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "6/8"]
+  output: closed_loop/abl
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "freeze2"}
+
+- id: FRZx-a100-e30-swap-s7
+  lane: loop
+  kind: closed_loop
+  requires_pass: [FT-fetch-ar2p-e30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "C: ar2_prop e30 with the ledger frozen after the 2nd completed move (MWAM_LEDGER=freeze2), swap_blocks scenes 1-50 on the judging machine, shard 7 of 8; expected (written 11-16 14:30 BJ before any A100 run; 5090 gave 3/50 and kept moving 47/50 on these scenes): success <= 10/50 and kept moving >= 35/50 over the 8 shards"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_freeze2
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "7/8"]
+  output: closed_loop/abl
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "freeze2"}
+
+- id: FRZx-a100-e30-summary
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  after: [FRZx-a100-e30-swap-s0, FRZx-a100-e30-swap-s1, FRZx-a100-e30-swap-s2, FRZx-a100-e30-swap-s3, FRZx-a100-e30-swap-s4, FRZx-a100-e30-swap-s5, FRZx-a100-e30-swap-s6, FRZx-a100-e30-swap-s7]
+  timeout_h: 2
+  hypothesis: "FRZ summary (freeze2, scenes 1-50, judging machine): stage table and press / kept-moving split"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/loop_peek.py --folder closed_loop/abl --label ar2_prop_e30_freeze2 --out /dev/null && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/press_gap.py --folder closed_loop/abl --label ar2_prop_e30_freeze2"
+  pass_if: "m['rc'] == 0"
+
+- id: ADDx-a100-e30-swap-s0
+  lane: loop
+  kind: closed_loop
+  requires_pass: [FT-fetch-ar2p-e30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "D: ar2_prop e30 with the first completed move written twice (MWAM_LEDGER=addmove), swap_blocks scenes 1-50 on the judging machine, shard 0 of 8; descriptive (5090: 39/50, pressed before the third move 11/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_addmove
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/8"]
+  output: closed_loop/abl
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "addmove"}
+
+- id: ADDx-a100-e30-swap-s1
+  lane: loop
+  kind: closed_loop
+  requires_pass: [FT-fetch-ar2p-e30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "D: ar2_prop e30 with the first completed move written twice (MWAM_LEDGER=addmove), swap_blocks scenes 1-50 on the judging machine, shard 1 of 8; descriptive (5090: 39/50, pressed before the third move 11/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_addmove
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/8"]
+  output: closed_loop/abl
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "addmove"}
+
+- id: ADDx-a100-e30-swap-s2
+  lane: loop
+  kind: closed_loop
+  requires_pass: [FT-fetch-ar2p-e30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "D: ar2_prop e30 with the first completed move written twice (MWAM_LEDGER=addmove), swap_blocks scenes 1-50 on the judging machine, shard 2 of 8; descriptive (5090: 39/50, pressed before the third move 11/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_addmove
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/8"]
+  output: closed_loop/abl
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "addmove"}
+
+- id: ADDx-a100-e30-swap-s3
+  lane: loop
+  kind: closed_loop
+  requires_pass: [FT-fetch-ar2p-e30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "D: ar2_prop e30 with the first completed move written twice (MWAM_LEDGER=addmove), swap_blocks scenes 1-50 on the judging machine, shard 3 of 8; descriptive (5090: 39/50, pressed before the third move 11/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_addmove
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/8"]
+  output: closed_loop/abl
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "addmove"}
+
+- id: ADDx-a100-e30-swap-s4
+  lane: loop
+  kind: closed_loop
+  requires_pass: [FT-fetch-ar2p-e30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "D: ar2_prop e30 with the first completed move written twice (MWAM_LEDGER=addmove), swap_blocks scenes 1-50 on the judging machine, shard 4 of 8; descriptive (5090: 39/50, pressed before the third move 11/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_addmove
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/8"]
+  output: closed_loop/abl
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "addmove"}
+
+- id: ADDx-a100-e30-swap-s5
+  lane: loop
+  kind: closed_loop
+  requires_pass: [FT-fetch-ar2p-e30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "D: ar2_prop e30 with the first completed move written twice (MWAM_LEDGER=addmove), swap_blocks scenes 1-50 on the judging machine, shard 5 of 8; descriptive (5090: 39/50, pressed before the third move 11/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_addmove
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "5/8"]
+  output: closed_loop/abl
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "addmove"}
+
+- id: ADDx-a100-e30-swap-s6
+  lane: loop
+  kind: closed_loop
+  requires_pass: [FT-fetch-ar2p-e30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "D: ar2_prop e30 with the first completed move written twice (MWAM_LEDGER=addmove), swap_blocks scenes 1-50 on the judging machine, shard 6 of 8; descriptive (5090: 39/50, pressed before the third move 11/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_addmove
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "6/8"]
+  output: closed_loop/abl
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "addmove"}
+
+- id: ADDx-a100-e30-swap-s7
+  lane: loop
+  kind: closed_loop
+  requires_pass: [FT-fetch-ar2p-e30]
+  need_mib: 30000
+  timeout_h: 6
+  hypothesis: "D: ar2_prop e30 with the first completed move written twice (MWAM_LEDGER=addmove), swap_blocks scenes 1-50 on the judging machine, shard 7 of 8; descriptive (5090: 39/50, pressed before the third move 11/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_addmove
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "7/8"]
+  output: closed_loop/abl
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "addmove"}
+
+- id: ADDx-a100-e30-summary
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  after: [ADDx-a100-e30-swap-s0, ADDx-a100-e30-swap-s1, ADDx-a100-e30-swap-s2, ADDx-a100-e30-swap-s3, ADDx-a100-e30-swap-s4, ADDx-a100-e30-swap-s5, ADDx-a100-e30-swap-s6, ADDx-a100-e30-swap-s7]
+  timeout_h: 2
+  hypothesis: "ADD summary (addmove, scenes 1-50, judging machine): stage table and press / kept-moving split"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/loop_peek.py --folder closed_loop/abl --label ar2_prop_e30_addmove --out /dev/null && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/press_gap.py --folder closed_loop/abl --label ar2_prop_e30_addmove"
+  pass_if: "m['rc'] == 0"
+
 - id: FT-fetch-ar2p-e20
   lane: cpu
   kind: shell
