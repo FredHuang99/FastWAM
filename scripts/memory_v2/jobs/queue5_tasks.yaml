@@ -4228,11 +4228,47 @@ tasks:
   output: closed_loop/g1
   env: {MWAM_TEXT_SOURCE: "cache"}
 
+# 11-16 21:10: 16 ar2_prop_e30 episodes on the A40 came from the migration payload (A100 results; the runner skips a
+# seed that has a result.json). a40_quarantine.sh moves them aside; these two cards run the missing seeds on the A40.
+
+- id: A40-lp30-fill
+  lane: a40
+  kind: closed_loop
+  after: [A40-lp30-s0, A40-lp30-s1, A40-lp30-s2, A40-lp30-s3, A40-lp30-s4, A40-lp30-s5, A40-lp30-s6, A40-lp30-s7, A40-lp30-s8, A40-lp30-s9]
+  requires_pass: [A40-fetch-lp30]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "A40-EQ fill: ledger e30 swap, scenes 1-100, only the seeds without an A40 result (the quarantined A100 copies)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lp30p-fill
+  lane: a40
+  kind: closed_loop
+  after: [A40-lp30p-s0, A40-lp30p-s1, A40-lp30p-s2, A40-lp30p-s3, A40-lp30p-s4, A40-lp30p-s5, A40-lp30p-s6, A40-lp30p-s7, A40-lp30p-s8, A40-lp30p-s9]
+  requires_pass: [A40-fetch-lp30]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "A40-EQ fill: ledger e30 put, scenes 1-100, only the seeds without an A40 result (the quarantined A100 copies)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: "cache"}
 - id: A40-EQ-verdict
   lane: a40cpu
   kind: shell
   need_mib: 0
-  after: [A40-fetch-ref, A40-ar30-s0, A40-ar30-s1, A40-ar30-s2, A40-ar30-s3, A40-ar30-s4, A40-ar30-s5, A40-ar30-s6, A40-ar30-s7, A40-ar30-s8, A40-ar30-s9, A40-lp30-s0, A40-lp30-s1, A40-lp30-s2, A40-lp30-s3, A40-lp30-s4, A40-lp30-s5, A40-lp30-s6, A40-lp30-s7, A40-lp30-s8, A40-lp30-s9, A40-lp30p-s0, A40-lp30p-s1, A40-lp30p-s2, A40-lp30p-s3, A40-lp30p-s4, A40-lp30p-s5, A40-lp30p-s6, A40-lp30p-s7, A40-lp30p-s8, A40-lp30p-s9]
+  after: [A40-fetch-ref, A40-ar30-s0, A40-ar30-s1, A40-ar30-s2, A40-ar30-s3, A40-ar30-s4, A40-ar30-s5, A40-ar30-s6, A40-ar30-s7, A40-ar30-s8, A40-ar30-s9, A40-lp30-s0, A40-lp30-s1, A40-lp30-s2, A40-lp30-s3, A40-lp30-s4, A40-lp30-s5, A40-lp30-s6, A40-lp30-s7, A40-lp30-s8, A40-lp30-s9, A40-lp30p-s0, A40-lp30p-s1, A40-lp30p-s2, A40-lp30p-s3, A40-lp30p-s4, A40-lp30p-s5, A40-lp30p-s6, A40-lp30p-s7, A40-lp30p-s8, A40-lp30p-s9, A40-lp30-fill, A40-lp30p-fill]
   requires_pass: [A40-fetch-ref]
   timeout_h: 2
   hypothesis: "A40-EQ verdict (registered 11-16 before any A40 run): rule al4 on AR e30 swap, ledger e30 swap, ledger e30 put (A40 vs A100, scenes 1-100); EQUIVALENT only if all three pass"
