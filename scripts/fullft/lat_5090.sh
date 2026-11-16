@@ -34,7 +34,8 @@ SWEEP=$R/outputs/fullft/PRESS_SWEEP_$(date +%Y%m%d_%H%M).txt
 $PY scripts/fullft/press_event_sweep.py g1:press_arprop_e20 g1:press_arprop_e30 rep:press_arprop_e20_r1 \
   rep:press_arprop_e30_r1 sel:press_arprop_e20 > $SWEEP 2>&1 &
 SW=$!
-empty() { [ "$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i $1 | tr -d ' ')" -lt 2000 ]; }
+empty() { local u; u=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i $1 2>/dev/null | tr -d ' '); [[ "$u" =~ ^[0-9]+$ ]] && [ "$u" -lt 2000 ]; }
+gpu_ok() { nvidia-smi -i $1 --query-gpu=index --format=csv,noheader >/dev/null 2>&1; }   # 11-16: GPU0 fell off the bus at 19:43
 claim() { until empty $1 && sleep 90 && empty $1; do sleep 120; done; echo "[lat] $(date '+%F %T') GPU $1 claimed"; }
 n_done() { ls $O/closed_loop/$1/$2/on/press_button/seed_*/result.json 2>/dev/null | grep -cE 'seed_[0-9]+/result.json'; }
 fetch() {      # fetch + sha256 check of exports/<L>/export_<tag>.pt
@@ -45,16 +46,22 @@ fetch() {      # fetch + sha256 check of exports/<L>/export_<tag>.pt
     | grep -v "Processing\|Download\|%|"
   (cd $E && sha256sum -c export_$tag.pt.sha256)
 }
-run() {        # GPU, checkpoint, label, folder, extra args...
-  local g=$1 ck=$2 l=$3 out=$4; shift 4
+run() {        # GPU, shard (of 2), checkpoint, label, folder, extra args...
+  local g=$1 sh=$2 ck=$3 l=$4 out=$5; shift 5
   claim $g
   for pass in 1 2; do
     CUDA_VISIBLE_DEVICES=$g $PY -m fastwam.memory_v2.online run --checkpoint $ck --label $l --scenes $BANK \
-      --tasks press_button --execute 8 --output $O/closed_loop/$out "$@" --shard $g/2 >> $O/closed_loop/${out}_$l.log 2>&1
-    echo "[lat] $(date '+%F %T') $l ${*} shard $g/2 pass $pass exit code $?; finished $(n_done $out $l)"
+      --tasks press_button --execute 8 --output $O/closed_loop/$out "$@" --shard $sh/2 >> $O/closed_loop/${out}_$l.log 2>&1
+    echo "[lat] $(date '+%F %T') $l ${*} shard $sh/2 on GPU $g pass $pass exit code $?; finished $(n_done $out $l)"
   done
 }
-both() { local p0 p1; run 0 "$@" & p0=$!; run 1 "$@" & p1=$!; wait $p0 $p1; }
+both() {       # the two shards on GPUs 0 and 1; if one GPU is missing, both shards on the other, one after the other
+  local p0 p1 g
+  if gpu_ok 0 && gpu_ok 1; then run 0 0 "$@" & p0=$!; run 1 1 "$@" & p1=$!; wait $p0 $p1; return; fi
+  if gpu_ok 0; then g=0; elif gpu_ok 1; then g=1; else echo "[lat] $(date '+%F %T') no GPU answers: stopping"; exit 1; fi
+  echo "[lat] $(date '+%F %T') only GPU $g answers: both shards on it"
+  run $g 0 "$@"; run $g 1 "$@"
+}
 fetch press_arprop_e20 e20 || { echo "[lat] e20 export missing"; exit 1; }
 fetch press_arprop_e30 e30 || { echo "[lat] e30 export missing"; exit 1; }
 LABELS=""; ARMS=""

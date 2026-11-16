@@ -8,7 +8,9 @@
 #         scenes 51-100 (closed_loop/latsel), against sel:press_arprop_e20 (8/50, first count right 26): descriptive
 #   R     the same setting on scenes 1-50 with the noise salt r1 (closed_loop/latrep), against rep:press_arprop_e20_r1
 #         (9/50, 27): is the LAT-T reading robust to the diffusion noise; descriptive
-# Waits (at most 6 h) until lat_5090.sh and press_fast_5090.sh have ended. Then press_errors / audit / press_pair.
+# Waits (at most 6 h) until lat_5090.sh and press_fast_5090.sh have ended; first completes P-SEL's press_ar e30 on
+# 51-100 if the 19:43 GPU loss cut it short. Then press_errors / audit / press_pair. One GPU missing -> both shards on
+# the other.
 #   docker exec -d mwam5090 bash /workspace/FastWAM-memory2/scripts/fullft/lat2_5090.sh
 set -u
 R=/workspace/FastWAM-memory2
@@ -29,19 +31,34 @@ while pgrep -f "[l]at_5090.sh|[p]ress_fast_5090.sh|[d]ay6_5090.sh" >/dev/null &&
   [ $i = 0 ] && echo "[lat2] $(date '+%F %T') LAT-T still running: waiting (at most 6 h)"; sleep 300; i=$((i + 1)); done
 pgrep -f "[l]at_5090.sh|[p]ress_fast_5090.sh" >/dev/null && { echo "[lat2] LAT-T still running after 6 h: stopping"; exit 1; }
 [ -f $CK ] || { echo "[lat2] $CK missing"; exit 1; }
-empty() { [ "$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i $1 | tr -d ' ')" -lt 2000 ]; }
+empty() { local u; u=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i $1 2>/dev/null | tr -d ' '); [[ "$u" =~ ^[0-9]+$ ]] && [ "$u" -lt 2000 ]; }
+gpu_ok() { nvidia-smi -i $1 --query-gpu=index --format=csv,noheader >/dev/null 2>&1; }   # 11-16: GPU0 fell off the bus at 19:43
 claim() { until empty $1 && sleep 90 && empty $1; do sleep 120; done; echo "[lat2] $(date '+%F %T') GPU $1 claimed"; }
 n_done() { ls $O/closed_loop/$1/$2/on/press_button/seed_*/result.json 2>/dev/null | grep -cE 'seed_[0-9]+/result.json'; }
-run() {        # GPU, label, folder, extra args...
-  local g=$1 l=$2 out=$3; shift 3
+run() {        # GPU, shard (of 2), label, folder, extra args...
+  local g=$1 sh=$2 l=$3 out=$4; shift 4
   claim $g
   for pass in 1 2; do
     CUDA_VISIBLE_DEVICES=$g $PY -m fastwam.memory_v2.online run --checkpoint $CK --label $l --scenes $BANK \
-      --tasks press_button --execute 8 --output $O/closed_loop/$out "$@" --shard $g/2 >> $O/closed_loop/${out}_$l.log 2>&1
-    echo "[lat2] $(date '+%F %T') $l ${*} shard $g/2 pass $pass exit code $?; finished $(n_done $out $l)"
+      --tasks press_button --execute 8 --output $O/closed_loop/$out "$@" --shard $sh/2 >> $O/closed_loop/${out}_$l.log 2>&1
+    echo "[lat2] $(date '+%F %T') $l ${*} shard $sh/2 on GPU $g pass $pass exit code $?; finished $(n_done $out $l)"
   done
 }
-both() { local p0 p1; run 0 "$@" & p0=$!; run 1 "$@" & p1=$!; wait $p0 $p1; }
+both() {       # the two shards on GPUs 0 and 1; if one GPU is missing, both shards on the other, one after the other
+  local p0 p1 g
+  if gpu_ok 0 && gpu_ok 1; then run 0 0 "$@" & p0=$!; run 1 1 "$@" & p1=$!; wait $p0 $p1; return; fi
+  if gpu_ok 0; then g=0; elif gpu_ok 1; then g=1; else echo "[lat2] $(date '+%F %T') no GPU answers: stopping"; exit 1; fi
+  echo "[lat2] $(date '+%F %T') only GPU $g answers: both shards on it"
+  run $g 0 "$@"; run $g 1 "$@"
+}
+A=$(n_done sel press_ar_e30)
+if [ "$A" -lt 50 ] && [ -f $EX/press_ar_e30/export_e30.pt ]; then    # 11-16: GPU0 fell off the bus at 19:43 during P-SEL
+  echo "[lat2] $(date '+%F %T') ===== P-SEL completion: press_ar_e30 on scenes 51-100 has $A/50"
+  CK0=$CK; CK=$EX/press_ar_e30/export_e30.pt
+  both press_ar_e30 sel --from-scene 51 --limit 50
+  CK=$CK0
+  $PY scripts/fullft/press_select.py --pair press_arprop_e20 press_ar_e30
+fi
 echo "[lat2] $(date '+%F %T') ===== CF-A addpress"
 export MWAM_LEDGER=addpress; both press_arprop_e20_addpress abl --limit 50
 echo "[lat2] $(date '+%F %T') ===== CF-D droppress"
