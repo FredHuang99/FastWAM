@@ -49,6 +49,22 @@ def load_export(path: str, device="cuda:0") -> tuple:
     return model, cfg, state
 
 
+def effective_rule(rule):
+    """11-16 test-time ledger timing (descriptive ablations only; the model's own rule otherwise):
+      MWAM_LEDGER_LAG=k          entries become visible k frames after confirmation instead of the trained lag
+      MWAM_EVENT_DELTA=d         the detector's reversal threshold (metres; trained: rule.event_delta)
+      MWAM_EVENT_MIN_PATH=m      the detector's debounce path (metres; trained: rule.event_min_path)
+    Unset -> the trained value. Every decision logs the values used ("event_rule": [delta, min_path, lag])."""
+    import dataclasses
+    changes = {}
+    for env, key, cast in (("MWAM_LEDGER_LAG", "lag", int), ("MWAM_EVENT_DELTA", "event_delta", float),
+                           ("MWAM_EVENT_MIN_PATH", "event_min_path", float)):
+        value = os.environ.get(env, "").strip()
+        if value:
+            changes[key] = cast(value)
+    return dataclasses.replace(rule, **changes) if changes else rule
+
+
 def count_counterfactual(entries: List[dict], mode: str) -> List[dict]:
     """11-14 test-time ledger counterfactuals on the number of completed moves (a move = a close followed by an open of
     the same arm). dropfirst: the first completed move is removed (close + its open) -> one move fewer counted from the
@@ -274,8 +290,9 @@ class FullSession:
         self.reset()
 
     def reset(self):
-        from .events import EventDetector
-        self.detector = EventDetector()
+        from .events import EventDetector, rule_for
+        self.rule = effective_rule(self.p.rule)
+        self.detector = EventDetector(rule_for(self.rule))
         self.events: List[dict] = []                  # detected online, each with "confirmed" (= the frame it was seen)
         self.detected_upto = -1
         self.raw: Dict[int, dict] = {}
@@ -344,11 +361,11 @@ class FullSession:
                 from .events import event_frames
                 from .history import ledger_entries
                 self._detect(current)
-                known = event_frames(self.events, before=current, known_by=current - int(p.rule.lag))
+                known = event_frames(self.events, before=current, known_by=current - int(self.rule.lag))
                 if p.rule.variant == "arprop":
                     if self.decisions == 0:
                         check_ledger_slots(self.text[0], p.rule.event_max, "(online instruction)")
-                    entries = ledger_entries(p.rule, current, self.events)
+                    entries = ledger_entries(self.rule, current, self.events)
                     mode = os.environ.get("MWAM_LEDGER", "").strip().lower()      # 11-14: test-time ablations
                     if mode == "off":
                         entries = []                     # no entry = what the model sees before the first event
@@ -358,7 +375,7 @@ class FullSession:
                         entries = count_counterfactual(entries, mode)[-int(p.rule.event_max):]
                     elif mode.startswith("freeze") and mode[6:].isdigit():   # 11-15: freezeK (ledger stops at move K)
                         import dataclasses
-                        full = ledger_entries(dataclasses.replace(p.rule, event_max=10 ** 6), current, self.events)
+                        full = ledger_entries(dataclasses.replace(self.rule, event_max=10 ** 6), current, self.events)
                         entries = freeze_counterfactual(full, int(mode[6:]))[-int(p.rule.event_max):]
                     elif mode:
                         raise ValueError(f"unknown MWAM_LEDGER mode {mode!r} (off | drop1 | dropfirst | addmove | freezeK)")
@@ -385,7 +402,8 @@ class FullSession:
             "history_positions": out["positions"], "noise_seed": seed, "seconds": seconds,
             "normalized_actions": out["normalised"].float().cpu().tolist(), "actions_after_gripper_clip": actions.tolist(),
             "cached_frames": len(self.cache.kv), "events_known": known,
-            "ledger": [[int(e["frame"]), int(e["arm"]), e["kind"], int(e["confirmed"])] for e in entries]})
+            "ledger": [[int(e["frame"]), int(e["arm"]), e["kind"], int(e["confirmed"])] for e in entries],
+            "event_rule": [float(self.rule.event_delta), float(self.rule.event_min_path), int(self.rule.lag)]})
         if self.decisions % 4 == 0:
             print(f"[decide] {now()} {self.tag} frame={current}/{self.limit} hist={len(out['ids'])} "
                   f"policy={seconds:.1f}s elapsed={time.monotonic() - self.started:.0f}s", flush=True)

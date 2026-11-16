@@ -41,10 +41,17 @@ class HistoryRule:
     drop_event_p: float = 0.0                 # training-only augmentation (missed / spurious detections)
     spurious_event_p: float = 0.0
     lag: int = 0                              # frames between an event's confirmation and its use (arprop / arev)
+    # 11-16 (Opus): the event rule's two distance thresholds travel with the model (events.EventRule; the defaults are
+    # rule A as frozen in plan v11 N2, so every earlier export keeps exactly its rule). The online session builds its
+    # detector from these; the trainer checks that the events file was written with the same values.
+    event_delta: float = 0.015
+    event_min_path: float = 0.03
 
     def __post_init__(self):
         if self.variant not in VARIANTS:
             raise ValueError(f"history variant must be one of {VARIANTS}, got {self.variant!r}")
+        if not (0.0 < float(self.event_delta) <= 0.1 and 0.0 <= float(self.event_min_path) <= 0.2):
+            raise ValueError(f"event thresholds out of range: delta {self.event_delta}, min_path {self.event_min_path}")
         if self.index not in ("rank", "time"):
             raise ValueError(f"history index must be rank | time, got {self.index!r}")
 

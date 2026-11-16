@@ -121,6 +121,24 @@ def detect(gripper: np.ndarray, positions: np.ndarray, rule: Optional[EventRule]
     return events
 
 
+def rule_for(history_rule) -> EventRule:
+    """The EventRule a model was trained with (history.HistoryRule.event_delta / event_min_path; rule A otherwise)."""
+    return EventRule(delta=float(getattr(history_rule, "event_delta", EventRule.delta)),
+                     min_path=float(getattr(history_rule, "event_min_path", EventRule.min_path)))
+
+
+def parse_rule(text: str) -> Dict[str, float]:
+    """delta / min_path of an events file's "rule" field (str(EventRule(...)), written by events_stats.py and
+    press_event_sweep.py). Missing field -> rule A's values (files written before 11-11 had no field)."""
+    import re
+    out = {"delta": EventRule.delta, "min_path": EventRule.min_path}
+    for key in out:
+        m = re.search(rf"\b{key}=([0-9.eE+-]+)", text or "")
+        if m:
+            out[key] = float(m.group(1))
+    return out
+
+
 def event_frames(events: Sequence[dict], before: int, known_by: Optional[int] = None) -> List[int]:
     """Distinct event frames < before (and confirmed <= known_by, default before - 1), ascending."""
     known_by = before - 1 if known_by is None else known_by

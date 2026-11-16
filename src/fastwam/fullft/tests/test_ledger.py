@@ -261,3 +261,53 @@ def test_session_decide_end_to_end(tmp_path, variant):
         assert rows[1]["frame_id"] == 8 and rows[1]["ledger"] == []                  # close at 12 not seen yet
         assert rows[2]["frame_id"] == 16 and rows[2]["ledger"] == [[12, 0, "close", 12]]   # written at 12 + 4 = 16
         assert rows[2]["events_known"] == [12]
+
+
+def test_event_rule_travels_with_the_model(tmp_path, monkeypatch):
+    """11-16: HistoryRule carries the detector thresholds (defaults = frozen rule A, so earlier exports are unchanged);
+    the online session builds its detector from them; test-time env overrides change only the session's copy;
+    the trainer refuses an events file written with other thresholds."""
+    import json
+    from fastwam.fullft.data import load_events
+    from fastwam.fullft.events import EventRule, parse_rule, rule_for
+    from fastwam.fullft.online import FullSession, effective_rule
+    base = HistoryRule("arprop", event_max=8, lag=4)
+    assert rule_for(base) == EventRule()                                      # rule A
+    fast = HistoryRule("arprop", event_max=8, lag=0, event_delta=0.008, event_min_path=0.015)
+    assert rule_for(fast).delta == 0.008 and rule_for(fast).min_path == 0.015
+    with pytest.raises(ValueError):
+        HistoryRule("arprop", event_delta=0.0)
+    for k in ("MWAM_LEDGER_LAG", "MWAM_EVENT_DELTA", "MWAM_EVENT_MIN_PATH"):
+        monkeypatch.delenv(k, raising=False)
+    assert effective_rule(base) is base
+    monkeypatch.setenv("MWAM_LEDGER_LAG", "0")
+    monkeypatch.setenv("MWAM_EVENT_DELTA", "0.006")
+    eff = effective_rule(base)
+    assert (eff.lag, eff.event_delta, eff.event_min_path, eff.event_max) == (0, 0.006, 0.03, 8) and base.lag == 4
+    session = FullSession(types.SimpleNamespace(rule=base), tmp_path, "on", 3, 1.0, False)
+    assert session.detector.rule.delta == 0.006 and session.rule.lag == 0
+    monkeypatch.delenv("MWAM_LEDGER_LAG"); monkeypatch.delenv("MWAM_EVENT_DELTA")
+    session.reset()
+    assert session.detector.rule == EventRule() and session.rule.lag == 4
+    # a smaller delta confirms a press bottom earlier (less rise needed) -> the entry is usable sooner
+    n = 60
+    pos = np.zeros((n, 2, 3)); pos[:, :, 2] = 0.3
+    pos[:, 0, 2] = 0.3 - 0.04 * np.clip(1 - np.abs(np.arange(n) - 20) / 10, 0, 1)   # one 4 cm press, bottom at 20
+    grip = np.ones((n, 2))
+    slow = [e for e in detect(grip, pos) if e["kind"] == "bottom"]
+    quick = [e for e in detect(grip, pos, EventRule(delta=0.008, min_path=0.015)) if e["kind"] == "bottom"]
+    assert slow[0]["frame"] == quick[0]["frame"] == 20 and quick[0]["confirmed"] < slow[0]["confirmed"]
+    # events files: rule field parsed; mismatch refused; files without the field count as rule A
+    assert parse_rule(str(EventRule(delta=0.008, min_path=0.015))) == {"delta": 0.008, "min_path": 0.015}
+    assert parse_rule("") == {"delta": 0.015, "min_path": 0.03}
+    a = tmp_path / "events_a.json"; a.write_text(json.dumps({"rule": str(EventRule()), "episodes": {"x": []}}))
+    b = tmp_path / "events_b.json"; b.write_text(json.dumps({"rule": str(EventRule(delta=0.008, min_path=0.015)),
+                                                            "episodes": {"y": []}}))
+    c = tmp_path / "events_c.json"; c.write_text(json.dumps({"z": []}))
+    assert set(load_events([str(a), str(c)], base)) == {"x", "z"}
+    assert set(load_events([str(b)], fast)) == {"y"}
+    with pytest.raises(ValueError):
+        load_events([str(b)], base)
+    with pytest.raises(ValueError):
+        load_events([str(a)], fast)
+    assert set(load_events([str(a), str(b)])) == {"x", "y"}                  # no rule given: no check (old callers)

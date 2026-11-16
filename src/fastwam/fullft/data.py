@@ -142,10 +142,18 @@ def match_events(episode_ids: Sequence[str], events: Dict[str, List[dict]]) -> D
     return out
 
 
-def load_events(paths: Sequence[str]) -> Dict[str, List[dict]]:
+def load_events(paths: Sequence[str], rule: Optional[HistoryRule] = None) -> Dict[str, List[dict]]:
+    """Merge events_<task>.json files. With `rule` (11-16): every file must have been written with the model's event
+    thresholds (rule.event_delta / event_min_path; a file without a "rule" field counts as rule A)."""
+    from .events import parse_rule
     out: Dict[str, List[dict]] = {}
     for p in paths:
         value = json.loads(Path(p).read_text(encoding="utf-8"))
+        if rule is not None:
+            got = parse_rule(value.get("rule", "") if isinstance(value, dict) else "")
+            want = {"delta": float(rule.event_delta), "min_path": float(rule.event_min_path)}
+            if any(abs(got[k] - want[k]) > 1e-9 for k in want):
+                raise ValueError(f"events file {p} was written with {got}, the model's history rule says {want}")
         out.update(value["episodes"] if "episodes" in value else value)
     return out
 

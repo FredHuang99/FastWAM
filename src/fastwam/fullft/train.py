@@ -73,7 +73,7 @@ def build(cfg: RunConfig, device: str, log, limit_episodes: int = 0):
         vitems = items[:: max(1, len(items) // 64)][:64]                 # smoke: measure on the SAME anchors
     else:
         items, vitems = train_items(episodes), val_items(episodes, cfg.data.val_anchors_per_task)
-    events = load_events(cfg.data.events) if cfg.data.events else {}
+    events = load_events(cfg.data.events, rule) if cfg.data.events else {}    # 11-16: rule thresholds checked
     polarity = video_polarity(episodes)
     train = Samples(episodes, items, rule, events, polarity, augment=True, seed=cfg.seed)
     val = Samples(episodes, vitems, rule, events, polarity, augment=False, seed=cfg.seed)
