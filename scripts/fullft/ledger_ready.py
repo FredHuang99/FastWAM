@@ -43,7 +43,10 @@ def main():
     ap.add_argument("--tasks", nargs="+", required=True)
     ap.add_argument("--event-max", type=int, default=32)
     ap.add_argument("--skip-tests", action="store_true")
+    ap.add_argument("--events", default="", help="11-16: events file to check instead of outputs/fullft/events/events_<task>.json (one task only; e.g. events_press_button_fast.json for press_fast)")
     args = ap.parse_args()
+    if args.events and len(args.tasks) != 1:
+        ap.error("--events goes with exactly one task")
     from fastwam.fullft.data import DenseEpisodes, load_events, match_events, check_ledger_slots
     ok = True
     if not args.skip_tests:
@@ -63,7 +66,7 @@ def main():
         root = ROOTS.get(task, str(R / f"outputs/memory_v2/press/dense_{task}_v1"))
         eps = DenseEpisodes([root], [task])
         ids = [r["episode_id"] for r in eps.records]
-        events = load_events([str(R / f"outputs/fullft/events/events_{task}.json")])
+        events = load_events([args.events or str(R / f"outputs/fullft/events/events_{task}.json")])
         direct = sum(e in events for e in ids)
         matched = match_events(ids, events)
         print(f"[ready] {task}: {len(ids)} dense episodes (root {root}); event lists: {direct} by id, "

@@ -131,6 +131,15 @@ def load(path: Optional[str], overrides: List[str] = ()) -> RunConfig:
             raise ValueError(f"--set expects key=value, got {item!r}")
         k, v = item.split("=", 1)
         set_dotted(tree, k.strip(), v.strip())
+    history = tree.get("history")
+    if isinstance(history, dict) and history.get("event_rule_from"):
+        # 11-16: the event thresholds picked by press_event_sweep.py (PRESS_FAST_RULE.json {"delta", "min_path"}) are
+        # copied in as numbers, so run_config.json and every export carry the values, never the path
+        import json
+        pick = json.loads(Path(str(history.pop("event_rule_from"))).read_text())
+        history["event_delta"], history["event_min_path"] = float(pick["delta"]), float(pick["min_path"])
+    elif isinstance(history, dict):
+        history.pop("event_rule_from", None)
     cfg = _build(RunConfig, tree)
     cfg.rule                                              # validate the history rule early
     if cfg.model.train_video not in ("full", "lora", "frozen"):

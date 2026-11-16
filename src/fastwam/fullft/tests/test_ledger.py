@@ -311,3 +311,17 @@ def test_event_rule_travels_with_the_model(tmp_path, monkeypatch):
     with pytest.raises(ValueError):
         load_events([str(a)], fast)
     assert set(load_events([str(a), str(b)])) == {"x", "y"}                  # no rule given: no check (old callers)
+
+
+def test_config_event_rule_from_copies_numbers(tmp_path):
+    """11-16: history.event_rule_from=<PRESS_FAST_RULE.json> becomes event_delta / event_min_path numbers in the config
+    (run_config.json and exports never hold the path); without it the defaults (rule A) stay."""
+    import json
+    from fastwam.fullft.config import load
+    pick = tmp_path / "PRESS_FAST_RULE.json"
+    pick.write_text(json.dumps({"delta": 0.008, "min_path": 0.015, "why": "test"}))
+    cfg = load(None, ["history.variant=arprop", "history.event_max=32", "history.lag=0", f"history.event_rule_from={pick}"])
+    assert "event_rule_from" not in cfg.history and cfg.rule.event_delta == 0.008 and cfg.rule.event_min_path == 0.015
+    assert cfg.rule.lag == 0 and json.loads(json.dumps(cfg.to_dict()))["history"]["event_delta"] == 0.008
+    plain = load(None, ["history.variant=arprop", "history.lag=4"])
+    assert plain.rule.event_delta == 0.015 and plain.rule.event_min_path == 0.03
