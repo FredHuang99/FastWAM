@@ -12,6 +12,8 @@
 #     added to outputs/fullft/READY_arprop (the tasks already in it stay, battery_try included). The queue lines
 #     rearrange_arprop / swapT_arprop / cover_arprop / ranking_arprop wait for exactly this (ranking also for G2').
 #   docker exec mwam-h100n bash /workspace/FastWAM-memory2/scripts/fullft/h100_restart.sh
+# 11-17 21:11 deviation 44: SUBSET_TASKS="rearrange_blocks cover_blocks" bash h100_restart.sh ready  re-runs step 4 with
+# ledger_ready.py --check3 subset for those tasks (alignment only; the debounce drops some closes there, ready_diag.py)
 set -u
 R=${R:-/workspace/FastWAM-memory2}
 PYM=${PYM:-/opt/mwam/bin/python}
@@ -39,7 +41,8 @@ if [ "${1:-}" = ready ]; then                                   # step 4, detach
     [ -f outputs/memory_v2/press/dense_${task}_v1/.verified ] || { echo "[b1] $task: cache not verified yet, skipped"; continue; }
     [ -s $OUT/events/events_$task.json ] || { echo "[b1] $task: no event file, skipped"; continue; }
     echo "[b1] $(date '+%F %T') ledger_ready $task"
-    $PYM scripts/fullft/ledger_ready.py --variant arprop --tasks $task --marker READY_arprop_$task \
+    c3=""; case " ${SUBSET_TASKS:-} " in *" $task "*) c3="--check3 subset";; esac     # deviation 44 (user 21:11)
+    $PYM scripts/fullft/ledger_ready.py --variant arprop --tasks $task --marker READY_arprop_$task $c3 \
       $([ $first = 1 ] || echo --skip-tests) 2>&1 | grep -v '^\.\+$' | tail -n 8
     first=0
     if [ -f $OUT/READY_arprop_$task ]; then

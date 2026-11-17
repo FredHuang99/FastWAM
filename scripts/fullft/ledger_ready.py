@@ -4,6 +4,10 @@ outputs/fullft/READY_<variant> only if every check passes (the H200 queue starts
   2 per task: every dense episode has its rule-A event list (directly or by episode number, data.match_events)
   3 per task: alignment of the event file with the dense cache: the gripper 'close' frames detected in the demos equal
     the commanded crossings (0.65 -> 0.35) of the cache's proprio (de-normalised) in >= 95 % of episodes
+    --check3 subset (11-17 deviation 44, user 21:11; for tasks whose demos put a grasp < 3 cm of path after a reversal,
+    where the event rule's debounce drops that close: rearrange 11/100, cover 27/100 episode-arms, ready_diag.py):
+    in EVERY episode-arm each event 'close' falls on a crossing (no extra, no shifted close) and each crossing without
+    an event has an earlier event of the same arm (the debounce needs one); the dropped crossings are reported
   4 per task: the last event_max text positions are padding (exact zeros) in every episode
 CPU only (does not touch the GPU).
   PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/ledger_ready.py --variant arprop --tasks put_back_block press_button
@@ -44,6 +48,8 @@ def main():
     ap.add_argument("--event-max", type=int, default=32)
     ap.add_argument("--skip-tests", action="store_true")
     ap.add_argument("--events", default="", help="11-16: events file to check instead of outputs/fullft/events/events_<task>.json (one task only; e.g. events_press_button_fast.json for press_fast)")
+    ap.add_argument("--check3", choices=("equal", "subset"), default="equal",
+                    help="11-17 deviation 44: subset = alignment only (see the docstring); default equal (>= 95 %%)")
     ap.add_argument("--marker", default="", help="11-17: marker file name under outputs/fullft (default READY_<variant>; plan v13 runs use READY_v13)")
     args = ap.parse_args()
     if args.events and len(args.tasks) != 1:
@@ -73,7 +79,7 @@ def main():
         print(f"[ready] {task}: {len(ids)} dense episodes (root {root}); event lists: {direct} by id, "
               f"{len(matched)} after matching by episode number; e.g. dense {ids[:2]} / events {sorted(events)[:2]}")
         ok &= len(matched) == len(ids)
-        agree, total, bad_text = 0, 0, []
+        agree, total, bad_text, dropped, crossings, unexplained = 0, 0, [], 0, 0, []
         for r in eps.records:
             e = eps(r["episode_id"])
             try:
@@ -86,11 +92,31 @@ def main():
             for arm, col in ((0, 6), (1, 13)):
                 total += 1
                 want = sorted({int(x["frame"]) for x in matched[r["episode_id"]] if x["arm"] == arm and x["kind"] == "close"})
-                agree += want == closes(raw[:, col].tolist())
+                got = closes(raw[:, col].tolist())
+                if args.check3 == "equal":
+                    agree += want == got
+                    continue
+                same_arm = [int(x["frame"]) for x in matched[r["episode_id"]] if x["arm"] == arm]
+                extra = [f for f in want if f not in got]
+                missing = [f for f in got if f not in want]
+                no_prior = [m for m in missing if not any(f < m for f in same_arm)]
+                crossings += len(got)
+                dropped += len(missing)
+                if extra or no_prior:
+                    unexplained.append((r["episode_id"], arm, extra, no_prior))
+                else:
+                    agree += 1
         share = agree / max(1, total)
-        print(f"[ready] {task}: close frames equal in {agree}/{total} episode-arms ({share:.3f}, need >= 0.95); "
-              f"text positions not padding in {len(bad_text)} episodes {bad_text[:3]}")
-        ok &= share >= 0.95 and not bad_text
+        if args.check3 == "equal":
+            print(f"[ready] {task}: close frames equal in {agree}/{total} episode-arms ({share:.3f}, need >= 0.95); "
+                  f"text positions not padding in {len(bad_text)} episodes {bad_text[:3]}")
+            ok &= share >= 0.95 and not bad_text
+        else:
+            print(f"[ready] {task}: (check3 subset, deviation 44) event closes on crossings, every missing one after a "
+                  f"same-arm event: {agree}/{total} episode-arms (need all); crossings dropped by the debounce "
+                  f"{dropped}/{crossings}; unexplained {unexplained[:3]}; text positions not padding in "
+                  f"{len(bad_text)} episodes {bad_text[:3]}")
+            ok &= agree == total and not bad_text
     marker = R / f"outputs/fullft/{args.marker or 'READY_' + args.variant}"
     if ok:
         marker.write_text(json.dumps({"tasks": args.tasks}) + "\n")
