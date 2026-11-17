@@ -1,16 +1,21 @@
 #!/usr/bin/env bash
-# gpu24 / mwam-h100n (user 11-17 19:42): the queue takes every free GPU; when another user needs one, free it GRACEFULLY.
-#   h100_yield.sh <gpu> [hours]   our training on that GPU writes its resume checkpoint at the next update and exits
-#                                 (<run>/STOP, the trainer's own stop path); the GPU is then HELD for others for `hours`
-#                                 (default 2; outputs/fullft/H100_HOLD_<gpu>): h100_queue.sh does not take it before
-#                                 that, and after it only by the usual 1-minute rule (so not while someone holds it).
-#                                 The run goes back to the queue (its line, so it is first again) and resumes from its
-#                                 resume.pt on the next free GPU. No GPU of ours there: the hold alone (to reserve it).
-#   h100_yield.sh any [hours]     the same for our training that comes last in h100_queue.txt
-#   h100_yield.sh list            our trainings per GPU (progress), memory in use, holds
-#   h100_yield.sh release <gpu>   end a hold now
-# Steps of a yield: the hold is written first; the run's launcher (it would retry a stopped run at once on the next free
-# GPU) is stopped and the run's QUEUE_GPU points at the trainer itself, so no dispatcher starts the run twice meanwhile;
+# gpu24 / mwam-h100n (user 11-17 19:42 / 19:51): the queue keeps rotating as before (every free GPU, 1-minute rule, we
+# never preempt). Only when someone asks for a GPU:
+#   h100_yield.sh <gpu>           (a) immediate graceful exit of our training on that GPU: it writes its resume checkpoint
+#                                 at the next update and exits (<run>/STOP, the trainer's own stop path); the run goes
+#                                 back to its queue line (so it is first again) and resumes from its resume.pt on the next
+#                                 free GPU. No freeze: if nobody takes the GPU within the queue's 1-minute rule, our queue
+#                                 takes it again.
+#   h100_yield.sh <gpu> <hours>   (a) + (b): the GPU is also FROZEN for `hours` (outputs/fullft/H100_HOLD_<gpu>; written
+#                                 before the stop): h100_queue.sh does not take it before the freeze ends, and after it
+#                                 only by the usual 1-minute rule (still in use by someone -> we just wait).
+#   h100_yield.sh hold <gpu> <hours>   (b) alone: freeze the GPU for `hours`, or EXTEND a running freeze by `hours`
+#                                 (from its current end); no training is touched.
+#   h100_yield.sh any [hours]     (a) [+ (b)] for our training that comes last in h100_queue.txt
+#   h100_yield.sh list            our trainings per GPU (progress), memory in use, freezes
+#   h100_yield.sh release <gpu>   end a freeze now
+# Steps of a yield: [the freeze first;] the run's launcher (it would retry a stopped run at once on the next free GPU)
+# is stopped and the run's QUEUE_GPU points at the trainer itself, so no dispatcher starts the run twice meanwhile;
 # STOP; wait (at most 40 min: one update ~17 s, the checkpoint write a few minutes) until the trainer has exited; STOP and
 # QUEUE_GPU removed; a line in <run>/YIELDS. Works for runs started by any dispatcher version. Nothing is deleted.
 #   docker exec mwam-h100n bash /workspace/FastWAM-memory2/scripts/fullft/h100_yield.sh 2
@@ -26,7 +31,7 @@ progress() { grep -ao 'u [0-9]*/[0-9]*' $OUT/QUEUE_$1.log 2>/dev/null | tail -1;
 used() { nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i $1 2>/dev/null | tr -d ' '; }
 hold_txt() {
   local u; u=$( { tr -dc '0-9' < $OUT/H100_HOLD_$1; } 2>/dev/null )
-  [ -n "$u" ] && [ "$(date +%s)" -lt "$u" ] && echo "held for others until $(date -d @$u '+%m-%d %H:%M')"
+  [ -n "$u" ] && [ "$(date +%s)" -lt "$u" ] && echo "frozen for others until $(date -d @$u '+%m-%d %H:%M')"
 }
 
 case "${1:-}" in
@@ -38,7 +43,13 @@ case "${1:-}" in
     done
     exit 0 ;;
   release)
-    g=${2:?gpu}; rm -f $OUT/H100_HOLD_$g; echo "GPU $g: hold ended"; exit 0 ;;
+    g=${2:?gpu}; rm -f $OUT/H100_HOLD_$g; echo "GPU $g: freeze ended"; exit 0 ;;
+  hold)
+    g=${2:?gpu}; h=${3:?hours}; now=$(date +%s)
+    u=$( { tr -dc '0-9' < $OUT/H100_HOLD_$g; } 2>/dev/null ); [ -n "$u" ] && [ "$u" -gt "$now" ] || u=$now
+    u=$(( u + ${h%.*} * 3600 )); echo $u > $OUT/H100_HOLD_$g
+    echo "GPU $g: frozen for others until $(date -d @$u '+%F %T') (our queue does not take it before; after it only if free)"
+    exit 0 ;;
   any)
     g=""
     while IFS='|' read -r run _; do
@@ -48,17 +59,20 @@ case "${1:-}" in
     done < $QF
     [ -n "$g" ] || { echo "no training of ours is running: nothing to yield"; exit 0; } ;;
   [0-9]*) g=$1 ;;
-  *) sed -n 2,12p "$0"; exit 2 ;;
+  *) sed -n 2,21p "$0"; exit 2 ;;
 esac
-H=${2:-2}
+H=${2:-0}
 LOG=$OUT/H100_YIELD_$(date +%Y%m%d_%H%M%S)_gpu$g.txt
 exec > >(tee -a "$LOG") 2>&1
-until_t=$(( $(date +%s) + ${H%.*} * 3600 ))
-echo $until_t > $OUT/H100_HOLD_$g
-echo "[yield] $(date '+%F %T') GPU $g held for others until $(date -d @$until_t '+%F %T') ($H h; the queue will not take it before)"
+if [ "${H%.*}" -gt 0 ] 2>/dev/null; then
+  bash $R/scripts/fullft/h100_yield.sh hold $g $H | sed 's/^/[yield] /'
+  frz="frozen until $(date -d @$(cat $OUT/H100_HOLD_$g) '+%m-%d %H:%M')"
+else
+  frz="not frozen (our queue takes it again after its 1-minute rule if nobody uses it)"
+fi
 run=$(run_on $g | head -1)
 if [ -z "$run" ]; then
-  echo "[yield] no training of ours on GPU $g ($(used $g) MiB in use): only the hold"; exit 0
+  echo "[yield] no training of ours on GPU $g ($(used $g) MiB in use): nothing to stop; GPU $g $frz"; exit 0
 fi
 f=$OUT/$run/QUEUE_GPU
 sub=$(cut -d' ' -f2 $f)
@@ -87,5 +101,5 @@ rm -f $OUT/$run/STOP $f
 last=$(grep -a 'resume checkpoint saved at update' $OUT/QUEUE_$run.log | tail -1 | grep -o 'update [0-9]*')
 grep -aq 'STOP found' <(tail -n 20 $OUT/QUEUE_$run.log) && ok="saved and exited" || ok="EXITED WITHOUT the STOP line (check the log)"
 echo "$(date '+%F %T') yielded GPU $g: $ok, resume.pt at $last" >> $OUT/$run/YIELDS
-echo "[yield] $(date '+%F %T') $run: $ok; resume.pt at $last. GPU $g now $(used $g) MiB, held until $(date -d @$until_t '+%m-%d %H:%M')."
+echo "[yield] $(date '+%F %T') $run: $ok; resume.pt at $last. GPU $g now $(used $g) MiB, $frz."
 echo "[yield] $run is back in the queue and resumes from that checkpoint on the next free GPU (h100_queue.sh must run)"

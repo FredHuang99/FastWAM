@@ -12,13 +12,13 @@
 #   * per run: export_watch.sh (exports e10 / e20 / e30 go to the relay), the trainer, one resumed retry on a free GPU,
 #     else <run>/QUEUE_FAILED (that run is skipped, the others continue)
 #   * outputs/fullft/QUEUE_STOP_H100: start nothing new (running trainers continue); the file is removed when seen
-#   * 11-17 19:42 (user; replaces the 16:50 "at most 2 GPUs"): the queue keeps taking every free GPU (1-minute rule);
-#     when another user needs a GPU, h100_yield.sh frees it gracefully: the trainer saves resume.pt and exits, the GPU is
-#     HELD for others for some hours (outputs/fullft/H100_HOLD_<gpu> = expiry time; this queue does not take a held GPU),
-#     and the stopped run goes back to the queue (same line, so it is first again) and resumes from its resume.pt on the
-#     next free GPU. Optional cap: outputs/fullft/H100_MAX_RUNS (one number; default MAX_RUNS = the number of GPUs, no
-#     cap), re-read before every start. Other users' share of the GPUs (information only): gpu_share.sh (sampler, every
-#     10 min) + gpu_share_report.py (last 24 h); the heartbeat prints its one-line summary
+#   * 11-17 19:42 / 19:51 (user; the 16:50 "at most 2 GPUs" is revoked): rotation and waiting exactly as before (every
+#     free GPU by the 1-minute rule; we never preempt). Only when someone asks: h100_yield.sh <gpu> stops our training
+#     there gracefully (resume.pt saved; the run goes back to its queue line and resumes on the next free GPU). A FREEZE
+#     of a GPU exists only when set explicitly (h100_yield.sh <gpu> <hours> or h100_yield.sh hold <gpu> <hours>):
+#     outputs/fullft/H100_HOLD_<gpu> = expiry time; this queue does not take a frozen GPU before then, and after it only
+#     by the usual 1-minute rule (still in use by someone -> we wait). Other users' share of the GPUs (information only):
+#     gpu_share.sh (sampler, every 10 min) + gpu_share_report.py (last 24 h); the heartbeat prints its one-line summary
 #   docker exec -d mwam-h100n bash /workspace/FastWAM-memory2/scripts/fullft/h100_queue.sh
 #   DRY=1 ...   print the plan (next line, why the others wait, GPU memory) and exit
 # Own log: outputs/fullft/H100_QUEUE_<time>.txt; trainer stdout: outputs/fullft/QUEUE_<run>.log
@@ -27,7 +27,6 @@ R=${R:-/workspace/FastWAM-memory2}
 OUT=$R/outputs/fullft
 QF=${QF:-$R/scripts/fullft/h100_queue.txt}
 GPUS=${GPUS:-"0 1 2 3"}
-MAX_RUNS=${MAX_RUNS:-$(echo $GPUS | wc -w)}
 mkdir -p $OUT
 LOG=$OUT/H100_QUEUE_$(date +%Y%m%d_%H%M)$([ "${DRY:-0}" = 1 ] && echo _dry).txt
 exec > >(tee -a "$LOG") 2>&1
@@ -41,10 +40,7 @@ used() { nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i $1 
 alive() { [ -f "$1" ] && kill -0 "$(cut -d' ' -f2 "$1")" 2>/dev/null; }
 ours_on() { local f; for f in $OUT/*/QUEUE_GPU; do alive "$f" && [ "$(cut -d' ' -f1 "$f")" = "$1" ] && return 0; done; return 1; }
 running() { local f n=0; for f in $OUT/*/QUEUE_GPU; do alive "$f" && n=$((n + 1)); done; echo $n; }
-max_runs() {      # the cap: outputs/fullft/H100_MAX_RUNS if it holds a number, else MAX_RUNS
-  local v; v=$( { tr -dc '0-9' < $OUT/H100_MAX_RUNS; } 2>/dev/null ); echo "${v:-$MAX_RUNS}"
-}
-held() {          # GPU $1 is held for another user (h100_yield.sh) until the time in H100_HOLD_<gpu>; expired holds go
+held() {          # GPU $1 is frozen for another user (explicit h100_yield.sh hold) until H100_HOLD_<gpu>; expired go
   local f=$OUT/H100_HOLD_$1 u
   [ -f $f ] || return 1
   u=$(tr -dc '0-9' < $f)
@@ -137,10 +133,10 @@ launch() {        # run, sets, gpu: the trainer in the background, one resumed r
 }
 
 if [ "${DRY:-0}" = 1 ]; then
-  for g in $GPUS; do echo "  GPU $g: $(used $g) MiB$(ours_on $g && echo ' (ours)')$(held $g && echo " (held for others until $(date -d @$(cat $OUT/H100_HOLD_$g) '+%m-%d %H:%M'))")"; done
+  for g in $GPUS; do echo "  GPU $g: $(used $g) MiB$(ours_on $g && echo ' (ours)')$(held $g && echo " (frozen for others until $(date -d @$(cat $OUT/H100_HOLD_$g) '+%m-%d %H:%M'))")"; done
   echo "[h100q] picking:"; NEXT=$(pick) && echo "[h100q] next: $NEXT" || echo "[h100q] nothing runnable now"
   echo "[h100q] micro batch: $(cat $OUT/H100_MB 2>/dev/null || echo 'not measured yet (smoke runs first)')"
-  echo "[h100q] our trainers alive: $(running); cap $(max_runs)$([ -s $OUT/H100_MAX_RUNS ] && echo ' (from H100_MAX_RUNS)')"
+  echo "[h100q] our trainers alive: $(running)"
   exit 0
 fi
 echo $$ > $OUT/H100_QUEUE.pid        # h100_restart.sh: one dispatcher at a time (removed when the main loop ends)
@@ -151,15 +147,13 @@ while true; do
   [ -f $OUT/QUEUE_STOP_H100 ] && { echo "[h100q] QUEUE_STOP_H100 found: nothing new starts"; rm -f $OUT/QUEUE_STOP_H100 $OUT/H100_QUEUE.pid; break; }
   if [ $(( $(date +%s) - beat )) -ge 1800 ]; then         # heartbeat every 30 min: GPU memory and our runs
     beat=$(date +%s)
-    echo "[h100q] $(date '+%F %T') GPUs: $(for g in $GPUS; do printf '%s:%sMiB%s ' $g "$(used $g)" "$(ours_on $g && echo '(ours)')"; done)ours alive $(running), cap $(max_runs)"
+    echo "[h100q] $(date '+%F %T') GPUs: $(for g in $GPUS; do printf '%s:%sMiB%s ' $g "$(used $g)" "$(ours_on $g && echo '(ours)')"; done)ours alive $(running)"
     echo "[h100q] $($PY scripts/fullft/gpu_share_report.py --short 2>/dev/null || echo 'GPU share: no samples (start scripts/fullft/gpu_share.sh)')"
   fi
   if ! NEXT=$(pick 2>/dev/null); then sleep 600; continue; fi
-  if [ "$(running)" -ge "$(max_runs)" ]; then sleep 300; continue; fi     # the cap (user 11-17)
   if ! g=$(free_gpu); then sleep 60; continue; fi
   NEXT=$(pick) || continue          # re-pick with reasons in the log (the GPU look took up to a few minutes)
-  [ "$(running)" -ge "$(max_runs)" ] && continue
-  echo "[h100q] $(date '+%F %T') next: ${NEXT%%|*} on GPU $g (ours alive $(running), cap $(max_runs))"
+  echo "[h100q] $(date '+%F %T') next: ${NEXT%%|*} on GPU $g"
   launch "${NEXT%%|*}" "${NEXT#*|}" "$g"
 done
 while pgrep -f "fastwam.fullft.train train" >/dev/null; do sleep 600; done
