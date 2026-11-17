@@ -117,6 +117,15 @@ def main():
     job = read(directory / 'job.json'); case = job['causal_case']
     stress = job.get('stress') or {}
     hold_at = {int(x) for x in stress.get('at', [])} if stress.get('kind') == 'hold' else set()
+    event_stress = stress.get('kind') == 'event'          # 11-17 plan v13 E1: one null-event injection per episode
+    if event_stress:                                       # by file path: this process's `fastwam` may be another checkout
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            'mwam_fullft_inject', Path(__file__).resolve().parents[3] / 'src/fastwam/fullft/inject.py')
+        inj = importlib.util.module_from_spec(spec); sys.modules['mwam_fullft_inject'] = inj; spec.loader.exec_module(inj)
+        Trigger, targets_for, object_displacement = inj.Trigger, inj.targets_for, inj.object_displacement
+        counters_changed, arm_return_error = inj.counters_changed, inj.arm_return_error
+        trigger = Trigger(int(stress['n_open']))
     sys.path.insert(0, str(root / 'scripts/memory_s1'))
     import sim_eval
     import deploy_policy
@@ -173,6 +182,35 @@ def main():
                 'seconds': time.monotonic() - started})
             print(f'[stress] frame={self.frame_id} hold {k} ({arm}) shown={len(frames)}', flush=True)
 
+        def inject(self, environment, observation):
+            """Plan v13 E1: the null event (pause / fidget / airgrasp, fastwam.fullft.inject) right before this decision,
+            budget-neutral like hold(); 'history': its frames go to the policy as req['inserted']; 'hidden': not shown.
+            Validity (object displacement, task counters, the active arm's return) is logged to stress.jsonl."""
+            kind, k, arm_mode, active = stress['inject'], int(stress['k']), stress['arm'], int(trigger.arm)
+            last = getattr(self, 'last_target', None)
+            base = np.asarray(last if last is not None else observation['joint_action']['vector'], dtype=np.float32)
+            before = object_snapshot(environment); before.update(task_state(environment))
+            phys_before = physical_state(environment.robot); count_before = environment.take_action_cnt
+            started = time.monotonic(); frames = []
+            for target in targets_for(kind, k, base, active):
+                environment.take_action(target, action_type='qpos')
+                environment.take_action_cnt = count_before                  # injections do not use the official budget
+                if arm_mode == 'history':
+                    item = self.capture(environment, environment.get_obs())
+                    item['frame_id'] = None; item['inserted'] = True
+                    frames.append(item)
+            self.pending[-1] = self.capture(environment, environment.get_obs())
+            self.inserted = frames
+            after = object_snapshot(environment); after.update(task_state(environment))
+            phys_after = physical_state(environment.robot)
+            append(directory / 'stress.jsonl', {'frame': self.frame_id, 'kind': 'event', 'inject': kind, 'k': k,
+                'arm': arm_mode, 'active_arm': active, 'open_frame': trigger.open_frame, 'shown': len(frames),
+                'displacement_m': object_displacement(before, after), 'counters_changed': counters_changed(before, after),
+                'arm_return_rad': arm_return_error(phys_before, phys_after, active), 'target': base.tolist(),
+                'objects_before': before, 'objects_after': after, 'physical_after': np.asarray(phys_after).tolist(),
+                'seconds': time.monotonic() - started})
+            print(f'[stress] frame={self.frame_id} {kind} {k} ({arm_mode}) arm={active} shown={len(frames)}', flush=True)
+
         def execute(self, environment, observation):
             sim_eval.check_stop(self.config.get('memory_stop_root'))
             if environment.step_lim != case['cap']: raise ValueError('Official task limit differs from frozen protocol')
@@ -181,6 +219,15 @@ def main():
             self.pending.append(self.capture(environment, observation))
             if not self.actions and self.frame_id in hold_at:
                 self.hold(environment, observation)
+            if event_stress and not trigger.fired:
+                pose = ee_poses(environment)
+                vec = np.asarray(observation['joint_action']['vector'], dtype=np.float64)
+                if pose is None:
+                    raise ValueError('event stress needs the end-effector poses')
+                trigger.step(self.frame_id, [vec[6], vec[13]], [pose['left'][:3], pose['right'][:3]])
+                if not self.actions and trigger.due:
+                    self.inject(environment, observation)
+                    trigger.fire()
             if not self.actions:
                 count = execution_count(self.frame_id, case['cap'], int(job.get('execute', EXECUTE)))
                 response = self.request(environment, 'decide')

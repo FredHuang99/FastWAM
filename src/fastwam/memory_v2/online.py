@@ -89,6 +89,11 @@ def parse_stress(value: str) -> Optional[dict]:
     if not value:
         return None
     parts = value.split(":")
+    if parts[0] == "event":            # 11-17 plan v13 E1: event:<pause|fidget|airgrasp>:<k>:<history|hidden>
+        if len(parts) != 4 or parts[1] not in ("pause", "fidget", "airgrasp") or parts[3] not in ("history", "hidden") \
+                or int(parts[2]) < 4:
+            raise ValueError(f"--stress expects event:pause|fidget|airgrasp:K:history|hidden, got {value!r}")
+        return {"kind": "event", "inject": parts[1], "k": int(parts[2]), "arm": parts[3]}
     if len(parts) != 3 or parts[0] != "hold" or parts[2] not in ("history", "hidden") or int(parts[1]) < 1:
         raise ValueError(f"--stress expects hold:K:history|hidden, got {value!r}")
     return {"kind": "hold", "k": int(parts[1]), "arm": parts[2]}
@@ -570,8 +575,13 @@ def run_episode(policy: Policy, scene: dict, mode: str, label: str, out: Path, a
     gpu = gpu_uuid()
     sim_cfg = simulator_config(policy.dense_cfg, root, out, args)
     stress = parse_stress(getattr(args, "stress", ""))
-    if stress:
+    if stress and stress["kind"] == "hold":
         stress["at"] = stress_triggers(int(scene["seed"]), limit, int(args.execute), int(args.stress_n))
+    elif stress:                        # E1: one injection, triggered in the simulator by the robot's own events
+        from fastwam.fullft.inject import N_OPEN
+        if task not in N_OPEN:
+            raise ValueError(f"event stress has a trigger for {sorted(N_OPEN)} only, not {task}")
+        stress["n_open"] = N_OPEN[task]
     stress_state = {"offset": 0}
     write(directory / "job.json", {"id": f"{label}:{mode}:{task}:{scene['seed']}", "attempt": 1, "scene": scene,
                                    "condition": f"memory_v2_{mode}", "run_seed": policy.dense_cfg["seed"],
@@ -1184,7 +1194,8 @@ def main(argv=None):
                     help="kv_replay: re-prefill every history frame at every decision (parity / latency reference)")
     ap.add_argument("--max-targets", type=int, default=0, help="smoke runs: stop after N executed targets (0 = official)")
     ap.add_argument("--record-frames", action="store_true", help="save camera PNGs of every frame")
-    ap.add_argument("--stress", default="", help="tempo stress hold:K:history|hidden (plan v10 D.3); '' = none")
+    ap.add_argument("--stress", default="", help="tempo stress hold:K:history|hidden (plan v10 D.3), or the plan v13 E1 "
+                    "null event event:pause|fidget|airgrasp:K:history|hidden; '' = none")
     ap.add_argument("--stress-n", type=int, default=2, help="pauses per episode (decision frames from the scene seed)")
     ap.add_argument("--dump-first", action="store_true",
                     help="diagnosis: pickle frame 0's decision request (observations, proprio, instruction) to "

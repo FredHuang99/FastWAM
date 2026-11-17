@@ -6432,6 +6432,2092 @@ tasks:
 # vs epoch); no verdict. Fresh output folder closed_loop/lc so no migrated A100 result can be skipped into it.
 # Listed after the none30 shards: when the e30 export lands, freed GPUs go to none30 first.
 
+# ---------------------------------------------------------------- 11-17 plan v13 E1 STRESS (A40, before the learning curve)
+- id: A40-E1-smoke
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "E1 smoke: ar2_prop e30, airgrasp 32 visible, swap scene 1 (one injection, frames shown, validity logged)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "1", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e1smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-smoke-check
+  lane: a40cpu
+  kind: shell
+  after: [A40-E1-smoke]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "E1 smoke check: exactly one injection, all 32 frames shown, validity fields present (e1_smoke_check.py)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e1_smoke_check.py"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-E1-ar_2task-pause-vis-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, pause 64 vis, swap_blocks scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-pause-vis-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, pause 64 vis, swap_blocks scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-pause-vis-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, pause 64 vis, swap_blocks scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-pause-vis-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, pause 64 vis, swap_blocks scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-pause-vis-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, pause 64 vis, swap_blocks scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-pause-hid-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, pause 64 hid, swap_blocks scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-pause-hid-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, pause 64 hid, swap_blocks scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-pause-hid-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, pause 64 hid, swap_blocks scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-pause-hid-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, pause 64 hid, swap_blocks scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-pause-hid-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, pause 64 hid, swap_blocks scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-fidget-vis-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, fidget 64 vis, swap_blocks scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-fidget-vis-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, fidget 64 vis, swap_blocks scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-fidget-vis-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, fidget 64 vis, swap_blocks scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-fidget-vis-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, fidget 64 vis, swap_blocks scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-fidget-vis-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, fidget 64 vis, swap_blocks scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-fidget-hid-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, fidget 64 hid, swap_blocks scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-fidget-hid-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, fidget 64 hid, swap_blocks scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-fidget-hid-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, fidget 64 hid, swap_blocks scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-fidget-hid-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, fidget 64 hid, swap_blocks scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-fidget-hid-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, fidget 64 hid, swap_blocks scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-airgrasp-vis-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, airgrasp 32 vis, swap_blocks scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-airgrasp-vis-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, airgrasp 32 vis, swap_blocks scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-airgrasp-vis-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, airgrasp 32 vis, swap_blocks scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-airgrasp-vis-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, airgrasp 32 vis, swap_blocks scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-airgrasp-vis-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, airgrasp 32 vis, swap_blocks scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-airgrasp-hid-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, airgrasp 32 hid, swap_blocks scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-airgrasp-hid-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, airgrasp 32 hid, swap_blocks scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-airgrasp-hid-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, airgrasp 32 hid, swap_blocks scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-airgrasp-hid-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, airgrasp 32 hid, swap_blocks scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-airgrasp-hid-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, airgrasp 32 hid, swap_blocks scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-pause-vis-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, pause 64 vis, swap_blocks scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-pause-vis-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, pause 64 vis, swap_blocks scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-pause-vis-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, pause 64 vis, swap_blocks scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-pause-vis-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, pause 64 vis, swap_blocks scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-pause-vis-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, pause 64 vis, swap_blocks scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-pause-hid-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, pause 64 hid, swap_blocks scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-pause-hid-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, pause 64 hid, swap_blocks scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-pause-hid-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, pause 64 hid, swap_blocks scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-pause-hid-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, pause 64 hid, swap_blocks scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-pause-hid-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, pause 64 hid, swap_blocks scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-fidget-vis-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, fidget 64 vis, swap_blocks scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-fidget-vis-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, fidget 64 vis, swap_blocks scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-fidget-vis-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, fidget 64 vis, swap_blocks scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-fidget-vis-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, fidget 64 vis, swap_blocks scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-fidget-vis-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, fidget 64 vis, swap_blocks scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-fidget-hid-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, fidget 64 hid, swap_blocks scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-fidget-hid-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, fidget 64 hid, swap_blocks scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-fidget-hid-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, fidget 64 hid, swap_blocks scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-fidget-hid-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, fidget 64 hid, swap_blocks scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-fidget-hid-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, fidget 64 hid, swap_blocks scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-airgrasp-vis-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, airgrasp 32 vis, swap_blocks scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-airgrasp-vis-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, airgrasp 32 vis, swap_blocks scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-airgrasp-vis-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, airgrasp 32 vis, swap_blocks scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-airgrasp-vis-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, airgrasp 32 vis, swap_blocks scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-airgrasp-vis-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, airgrasp 32 vis, swap_blocks scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-airgrasp-hid-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, airgrasp 32 hid, swap_blocks scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-airgrasp-hid-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, airgrasp 32 hid, swap_blocks scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-airgrasp-hid-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, airgrasp 32 hid, swap_blocks scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-airgrasp-hid-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, airgrasp 32 hid, swap_blocks scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-airgrasp-hid-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, airgrasp 32 hid, swap_blocks scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-verdict-swap
+  lane: a40cpu
+  kind: shell
+  after: [A40-E1-ar_2task-pause-vis-swap-s0, A40-E1-ar_2task-pause-vis-swap-s1, A40-E1-ar_2task-pause-vis-swap-s2, A40-E1-ar_2task-pause-vis-swap-s3, A40-E1-ar_2task-pause-vis-swap-s4, A40-E1-ar_2task-pause-hid-swap-s0, A40-E1-ar_2task-pause-hid-swap-s1, A40-E1-ar_2task-pause-hid-swap-s2, A40-E1-ar_2task-pause-hid-swap-s3, A40-E1-ar_2task-pause-hid-swap-s4, A40-E1-ar_2task-fidget-vis-swap-s0, A40-E1-ar_2task-fidget-vis-swap-s1, A40-E1-ar_2task-fidget-vis-swap-s2, A40-E1-ar_2task-fidget-vis-swap-s3, A40-E1-ar_2task-fidget-vis-swap-s4, A40-E1-ar_2task-fidget-hid-swap-s0, A40-E1-ar_2task-fidget-hid-swap-s1, A40-E1-ar_2task-fidget-hid-swap-s2, A40-E1-ar_2task-fidget-hid-swap-s3, A40-E1-ar_2task-fidget-hid-swap-s4, A40-E1-ar_2task-airgrasp-vis-swap-s0, A40-E1-ar_2task-airgrasp-vis-swap-s1, A40-E1-ar_2task-airgrasp-vis-swap-s2, A40-E1-ar_2task-airgrasp-vis-swap-s3, A40-E1-ar_2task-airgrasp-vis-swap-s4, A40-E1-ar_2task-airgrasp-hid-swap-s0, A40-E1-ar_2task-airgrasp-hid-swap-s1, A40-E1-ar_2task-airgrasp-hid-swap-s2, A40-E1-ar_2task-airgrasp-hid-swap-s3, A40-E1-ar_2task-airgrasp-hid-swap-s4, A40-E1-ar2_prop-pause-vis-swap-s0, A40-E1-ar2_prop-pause-vis-swap-s1, A40-E1-ar2_prop-pause-vis-swap-s2, A40-E1-ar2_prop-pause-vis-swap-s3, A40-E1-ar2_prop-pause-vis-swap-s4, A40-E1-ar2_prop-pause-hid-swap-s0, A40-E1-ar2_prop-pause-hid-swap-s1, A40-E1-ar2_prop-pause-hid-swap-s2, A40-E1-ar2_prop-pause-hid-swap-s3, A40-E1-ar2_prop-pause-hid-swap-s4, A40-E1-ar2_prop-fidget-vis-swap-s0, A40-E1-ar2_prop-fidget-vis-swap-s1, A40-E1-ar2_prop-fidget-vis-swap-s2, A40-E1-ar2_prop-fidget-vis-swap-s3, A40-E1-ar2_prop-fidget-vis-swap-s4, A40-E1-ar2_prop-fidget-hid-swap-s0, A40-E1-ar2_prop-fidget-hid-swap-s1, A40-E1-ar2_prop-fidget-hid-swap-s2, A40-E1-ar2_prop-fidget-hid-swap-s3, A40-E1-ar2_prop-fidget-hid-swap-s4, A40-E1-ar2_prop-airgrasp-vis-swap-s0, A40-E1-ar2_prop-airgrasp-vis-swap-s1, A40-E1-ar2_prop-airgrasp-vis-swap-s2, A40-E1-ar2_prop-airgrasp-vis-swap-s3, A40-E1-ar2_prop-airgrasp-vis-swap-s4, A40-E1-ar2_prop-airgrasp-hid-swap-s0, A40-E1-ar2_prop-airgrasp-hid-swap-s1, A40-E1-ar2_prop-airgrasp-hid-swap-s2, A40-E1-ar2_prop-airgrasp-hid-swap-s3, A40-E1-ar2_prop-airgrasp-hid-swap-s4]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "E1 verdict on swap_blocks (registered reading in scripts/fullft/e1_verdict.py)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e1_verdict.py --task swap_blocks"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-E1-ar_2task-pause-vis-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, pause 64 vis, put_back_block scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-pause-vis-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, pause 64 vis, put_back_block scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-pause-vis-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, pause 64 vis, put_back_block scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-pause-vis-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, pause 64 vis, put_back_block scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-pause-vis-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, pause 64 vis, put_back_block scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-pause-hid-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, pause 64 hid, put_back_block scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-pause-hid-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, pause 64 hid, put_back_block scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-pause-hid-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, pause 64 hid, put_back_block scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-pause-hid-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, pause 64 hid, put_back_block scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-pause-hid-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, pause 64 hid, put_back_block scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-fidget-vis-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, fidget 64 vis, put_back_block scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-fidget-vis-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, fidget 64 vis, put_back_block scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-fidget-vis-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, fidget 64 vis, put_back_block scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-fidget-vis-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, fidget 64 vis, put_back_block scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-fidget-vis-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, fidget 64 vis, put_back_block scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-fidget-hid-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, fidget 64 hid, put_back_block scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-fidget-hid-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, fidget 64 hid, put_back_block scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-fidget-hid-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, fidget 64 hid, put_back_block scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-fidget-hid-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, fidget 64 hid, put_back_block scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-fidget-hid-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, fidget 64 hid, put_back_block scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-airgrasp-vis-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, airgrasp 32 vis, put_back_block scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-airgrasp-vis-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, airgrasp 32 vis, put_back_block scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-airgrasp-vis-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, airgrasp 32 vis, put_back_block scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-airgrasp-vis-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, airgrasp 32 vis, put_back_block scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-airgrasp-vis-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, airgrasp 32 vis, put_back_block scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-airgrasp-hid-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, airgrasp 32 hid, put_back_block scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-airgrasp-hid-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, airgrasp 32 hid, put_back_block scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-airgrasp-hid-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, airgrasp 32 hid, put_back_block scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-airgrasp-hid-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, airgrasp 32 hid, put_back_block scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar_2task-airgrasp-hid-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar_2task_e30, airgrasp 32 hid, put_back_block scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-pause-vis-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, pause 64 vis, put_back_block scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-pause-vis-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, pause 64 vis, put_back_block scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-pause-vis-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, pause 64 vis, put_back_block scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-pause-vis-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, pause 64 vis, put_back_block scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-pause-vis-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, pause 64 vis, put_back_block scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-pause-hid-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, pause 64 hid, put_back_block scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-pause-hid-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, pause 64 hid, put_back_block scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-pause-hid-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, pause 64 hid, put_back_block scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-pause-hid-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, pause 64 hid, put_back_block scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-pause-hid-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, pause 64 hid, put_back_block scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-fidget-vis-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, fidget 64 vis, put_back_block scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-fidget-vis-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, fidget 64 vis, put_back_block scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-fidget-vis-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, fidget 64 vis, put_back_block scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-fidget-vis-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, fidget 64 vis, put_back_block scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-fidget-vis-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, fidget 64 vis, put_back_block scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-fidget-hid-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, fidget 64 hid, put_back_block scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-fidget-hid-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, fidget 64 hid, put_back_block scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-fidget-hid-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, fidget 64 hid, put_back_block scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-fidget-hid-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, fidget 64 hid, put_back_block scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-fidget-hid-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, fidget 64 hid, put_back_block scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-airgrasp-vis-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, airgrasp 32 vis, put_back_block scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-airgrasp-vis-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, airgrasp 32 vis, put_back_block scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-airgrasp-vis-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, airgrasp 32 vis, put_back_block scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-airgrasp-vis-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, airgrasp 32 vis, put_back_block scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-airgrasp-vis-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, airgrasp 32 vis, put_back_block scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-airgrasp-hid-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, airgrasp 32 hid, put_back_block scenes 1-50 shard 0/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-airgrasp-hid-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, airgrasp 32 hid, put_back_block scenes 1-50 shard 1/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-airgrasp-hid-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, airgrasp 32 hid, put_back_block scenes 1-50 shard 2/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-airgrasp-hid-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, airgrasp 32 hid, put_back_block scenes 1-50 shard 3/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-ar2_prop-airgrasp-hid-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E1-smoke-check]
+  requires_pass: [A40-E1-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E1 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e1_verdict.py, written before any E1 run): one null event per episode triggered by the robot's own events; Delta = vis - hid successes over valid pairs; ledger pause/fidget both >= -5 IMMUNE, either <= -8 (p < 0.05) WINDOW-FRAGILE; ledger airgrasp <= -8 (p < 0.05) FOOLED, >= -5 NOT FOOLED; AR reported only. This card: ar2_prop_e30, airgrasp 32 hid, put_back_block scenes 1-50 shard 4/5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E1-verdict-put
+  lane: a40cpu
+  kind: shell
+  after: [A40-E1-ar_2task-pause-vis-put-s0, A40-E1-ar_2task-pause-vis-put-s1, A40-E1-ar_2task-pause-vis-put-s2, A40-E1-ar_2task-pause-vis-put-s3, A40-E1-ar_2task-pause-vis-put-s4, A40-E1-ar_2task-pause-hid-put-s0, A40-E1-ar_2task-pause-hid-put-s1, A40-E1-ar_2task-pause-hid-put-s2, A40-E1-ar_2task-pause-hid-put-s3, A40-E1-ar_2task-pause-hid-put-s4, A40-E1-ar_2task-fidget-vis-put-s0, A40-E1-ar_2task-fidget-vis-put-s1, A40-E1-ar_2task-fidget-vis-put-s2, A40-E1-ar_2task-fidget-vis-put-s3, A40-E1-ar_2task-fidget-vis-put-s4, A40-E1-ar_2task-fidget-hid-put-s0, A40-E1-ar_2task-fidget-hid-put-s1, A40-E1-ar_2task-fidget-hid-put-s2, A40-E1-ar_2task-fidget-hid-put-s3, A40-E1-ar_2task-fidget-hid-put-s4, A40-E1-ar_2task-airgrasp-vis-put-s0, A40-E1-ar_2task-airgrasp-vis-put-s1, A40-E1-ar_2task-airgrasp-vis-put-s2, A40-E1-ar_2task-airgrasp-vis-put-s3, A40-E1-ar_2task-airgrasp-vis-put-s4, A40-E1-ar_2task-airgrasp-hid-put-s0, A40-E1-ar_2task-airgrasp-hid-put-s1, A40-E1-ar_2task-airgrasp-hid-put-s2, A40-E1-ar_2task-airgrasp-hid-put-s3, A40-E1-ar_2task-airgrasp-hid-put-s4, A40-E1-ar2_prop-pause-vis-put-s0, A40-E1-ar2_prop-pause-vis-put-s1, A40-E1-ar2_prop-pause-vis-put-s2, A40-E1-ar2_prop-pause-vis-put-s3, A40-E1-ar2_prop-pause-vis-put-s4, A40-E1-ar2_prop-pause-hid-put-s0, A40-E1-ar2_prop-pause-hid-put-s1, A40-E1-ar2_prop-pause-hid-put-s2, A40-E1-ar2_prop-pause-hid-put-s3, A40-E1-ar2_prop-pause-hid-put-s4, A40-E1-ar2_prop-fidget-vis-put-s0, A40-E1-ar2_prop-fidget-vis-put-s1, A40-E1-ar2_prop-fidget-vis-put-s2, A40-E1-ar2_prop-fidget-vis-put-s3, A40-E1-ar2_prop-fidget-vis-put-s4, A40-E1-ar2_prop-fidget-hid-put-s0, A40-E1-ar2_prop-fidget-hid-put-s1, A40-E1-ar2_prop-fidget-hid-put-s2, A40-E1-ar2_prop-fidget-hid-put-s3, A40-E1-ar2_prop-fidget-hid-put-s4, A40-E1-ar2_prop-airgrasp-vis-put-s0, A40-E1-ar2_prop-airgrasp-vis-put-s1, A40-E1-ar2_prop-airgrasp-vis-put-s2, A40-E1-ar2_prop-airgrasp-vis-put-s3, A40-E1-ar2_prop-airgrasp-vis-put-s4, A40-E1-ar2_prop-airgrasp-hid-put-s0, A40-E1-ar2_prop-airgrasp-hid-put-s1, A40-E1-ar2_prop-airgrasp-hid-put-s2, A40-E1-ar2_prop-airgrasp-hid-put-s3, A40-E1-ar2_prop-airgrasp-hid-put-s4]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "E1 verdict on put_back_block (registered reading in scripts/fullft/e1_verdict.py)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e1_verdict.py --task put_back_block"
+  pass_if: "m['rc'] == 0"
+
 - id: A40-fetch-prop10
   lane: a40cpu
   kind: shell
