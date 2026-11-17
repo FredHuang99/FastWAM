@@ -12,6 +12,12 @@
 #   * per run: export_watch.sh (exports e10 / e20 / e30 go to the relay), the trainer, one resumed retry on a free GPU,
 #     else <run>/QUEUE_FAILED (that run is skipped, the others continue)
 #   * outputs/fullft/QUEUE_STOP_H100: start nothing new (running trainers continue); the file is removed when seen
+#   * 11-17 (user 16:50: after the current round at most 2 of our trainings at once on this shared machine): a new run
+#     starts only while fewer than MAX_RUNS of our trainers are alive (default 2; counted from the alive <run>/QUEUE_GPU
+#     files, so runs started by an earlier dispatcher count too). outputs/fullft/H100_MAX_RUNS (one number) overrides it
+#     and is re-read before every start, e.g. `echo 4 > outputs/fullft/H100_MAX_RUNS` restores full use without a
+#     restart. A run's resumed retry is the same run and is not held by the cap. Other users' share of the GPUs:
+#     gpu_share.sh (sampler, every 10 min) + gpu_share_report.py (last 24 h); the heartbeat prints its one-line summary
 #   docker exec -d mwam-h100n bash /workspace/FastWAM-memory2/scripts/fullft/h100_queue.sh
 #   DRY=1 ...   print the plan (next line, why the others wait, GPU memory) and exit
 # Own log: outputs/fullft/H100_QUEUE_<time>.txt; trainer stdout: outputs/fullft/QUEUE_<run>.log
@@ -20,6 +26,7 @@ R=${R:-/workspace/FastWAM-memory2}
 OUT=$R/outputs/fullft
 QF=${QF:-$R/scripts/fullft/h100_queue.txt}
 GPUS=${GPUS:-"0 1 2 3"}
+MAX_RUNS=${MAX_RUNS:-2}
 mkdir -p $OUT
 LOG=$OUT/H100_QUEUE_$(date +%Y%m%d_%H%M)$([ "${DRY:-0}" = 1 ] && echo _dry).txt
 exec > >(tee -a "$LOG") 2>&1
@@ -32,6 +39,10 @@ echo "[h100q] $(date '+%F %T') start; checkout $(git -c safe.directory='*' log -
 used() { nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i $1 | tr -d ' '; }
 alive() { [ -f "$1" ] && kill -0 "$(cut -d' ' -f2 "$1")" 2>/dev/null; }
 ours_on() { local f; for f in $OUT/*/QUEUE_GPU; do alive "$f" && [ "$(cut -d' ' -f1 "$f")" = "$1" ] && return 0; done; return 1; }
+running() { local f n=0; for f in $OUT/*/QUEUE_GPU; do alive "$f" && n=$((n + 1)); done; echo $n; }
+max_runs() {      # the cap: outputs/fullft/H100_MAX_RUNS if it holds a number, else MAX_RUNS
+  local v; v=$( { tr -dc '0-9' < $OUT/H100_MAX_RUNS; } 2>/dev/null ); echo "${v:-$MAX_RUNS}"
+}
 free_gpu() {      # prints the first free GPU (1-minute rule), else returns 1
   local g k
   for g in $GPUS; do
@@ -113,6 +124,7 @@ if [ "${DRY:-0}" = 1 ]; then
   for g in $GPUS; do echo "  GPU $g: $(used $g) MiB$(ours_on $g && echo ' (ours)')"; done
   echo "[h100q] picking:"; NEXT=$(pick) && echo "[h100q] next: $NEXT" || echo "[h100q] nothing runnable now"
   echo "[h100q] micro batch: $(cat $OUT/H100_MB 2>/dev/null || echo 'not measured yet (smoke runs first)')"
+  echo "[h100q] our trainers alive: $(running); cap $(max_runs)$([ -s $OUT/H100_MAX_RUNS ] && echo ' (from H100_MAX_RUNS)')"
   exit 0
 fi
 smoke || exit 1
@@ -122,12 +134,15 @@ while true; do
   [ -f $OUT/QUEUE_STOP_H100 ] && { echo "[h100q] QUEUE_STOP_H100 found: nothing new starts"; rm -f $OUT/QUEUE_STOP_H100; break; }
   if [ $(( $(date +%s) - beat )) -ge 1800 ]; then         # heartbeat every 30 min: GPU memory and our runs
     beat=$(date +%s)
-    echo "[h100q] $(date '+%F %T') GPUs: $(for g in $GPUS; do printf '%s:%sMiB%s ' $g "$(used $g)" "$(ours_on $g && echo '(ours)')"; done)"
+    echo "[h100q] $(date '+%F %T') GPUs: $(for g in $GPUS; do printf '%s:%sMiB%s ' $g "$(used $g)" "$(ours_on $g && echo '(ours)')"; done)ours alive $(running), cap $(max_runs)"
+    echo "[h100q] $($PY scripts/fullft/gpu_share_report.py --short 2>/dev/null || echo 'GPU share: no samples (start scripts/fullft/gpu_share.sh)')"
   fi
   if ! NEXT=$(pick 2>/dev/null); then sleep 600; continue; fi
+  if [ "$(running)" -ge "$(max_runs)" ]; then sleep 300; continue; fi     # the cap (user 11-17)
   if ! g=$(free_gpu); then sleep 60; continue; fi
   NEXT=$(pick) || continue          # re-pick with reasons in the log (the GPU look took up to a few minutes)
-  echo "[h100q] $(date '+%F %T') next: ${NEXT%%|*} on GPU $g"
+  [ "$(running)" -ge "$(max_runs)" ] && continue
+  echo "[h100q] $(date '+%F %T') next: ${NEXT%%|*} on GPU $g (ours alive $(running), cap $(max_runs))"
   launch "${NEXT%%|*}" "${NEXT#*|}" "$g"
 done
 while pgrep -f "fastwam.fullft.train train" >/dev/null; do sleep 600; done
