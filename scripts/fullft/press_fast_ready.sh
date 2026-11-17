@@ -18,7 +18,10 @@ state() { echo "$(date '+%F %T') $*" > $F/PRESS_FAST_READY_STATUS.txt; [ "${DEBU
 [ -f $R/outputs/memory_v2/press/dense_press_button_v1/.verified ] || { state "waits: press cache not verified"; exit 1; }
 mkdir -p $IN
 if [ ! -s $IN/LAT_VERDICT.json ] || [ ! -s $IN/PRESS_FAST_RULE.json ] || [ ! -s $IN/events_press_button_fast.json ]; then
-  /opt/hf-tools/bin/python scripts/memory_v2/migrate/relay.py get --prefix diag/press_fast --out $IN >/dev/null 2>&1
+  # 11-17 17:12: the H200 container has no /opt/hf-tools (deviation 38 again): the relay get failed silently here, the
+  # line kept waiting and the queue started press_arev at 17:03 instead. Fall back to /opt/mwam's python.
+  HFPY=/opt/hf-tools/bin/python; [ -x $HFPY ] || HFPY=/opt/mwam/bin/python
+  $HFPY scripts/memory_v2/migrate/relay.py get --prefix diag/press_fast --out $IN >/dev/null 2>&1
 fi
 for f in LAT_VERDICT.json PRESS_FAST_RULE.json events_press_button_fast.json; do
   [ -s $IN/$f ] || { state "waits: $f not on the relay yet (diag/press_fast)"; exit 1; }

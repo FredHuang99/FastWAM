@@ -30,8 +30,9 @@ echo "[queue] $(date '+%F %T') start; checkout $(git -c safe.directory='*' log -
 pick() {          # prints "run|sets" of the next runnable line; reasons for the others go to stderr
   local run sets cond
   while IFS='|' read -r run sets cond; do
+    case "$run" in [[:space:]]*\#*|\#*) continue;; esac          # comments first (quotes in them upset xargs)
     run=$(echo "$run" | xargs); sets=$(echo "$sets" | xargs); cond=$(echo "${cond:-}" | xargs)
-    [ -z "$run" ] && continue; case "$run" in \#*) continue;; esac
+    [ -z "$run" ] && continue
     if [ -f $OUT/$run/SUMMARY.json ]; then echo "  $run: finished" >&2; continue; fi
     if [ -f $OUT/$run/QUEUE_FAILED ]; then echo "  $run: FAILED earlier (see $OUT/$run/QUEUE_FAILED)" >&2; continue; fi
     if [ -n "$cond" ] && ! bash -c "$cond" >/dev/null 2>&1; then echo "  $run: waits (condition: $cond)" >&2; continue; fi

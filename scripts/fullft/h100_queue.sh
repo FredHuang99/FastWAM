@@ -47,8 +47,9 @@ free_gpu() {      # prints the first free GPU (1-minute rule), else returns 1
 pick() {          # prints "run|sets" of the next runnable line; reasons for the others go to stderr
   local run sets cond
   while IFS='|' read -r run sets cond; do
+    case "$run" in [[:space:]]*\#*|\#*) continue;; esac          # comments first (quotes in them upset xargs)
     run=$(echo "$run" | xargs); sets=$(echo "$sets" | xargs); cond=$(echo "${cond:-}" | xargs)
-    [ -z "$run" ] && continue; case "$run" in \#*) continue;; esac
+    [ -z "$run" ] && continue
     if [ -f $OUT/$run/SUMMARY.json ]; then echo "  $run: finished" >&2; continue; fi
     if [ -f $OUT/$run/QUEUE_FAILED ]; then echo "  $run: FAILED earlier (see $OUT/$run/QUEUE_FAILED)" >&2; continue; fi
     if alive $OUT/$run/QUEUE_GPU; then echo "  $run: training on GPU $(cut -d' ' -f1 $OUT/$run/QUEUE_GPU)" >&2; continue; fi
