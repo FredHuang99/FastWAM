@@ -1,0 +1,128 @@
+#!/bin/bash
+# NTU GaaS H200, 11-17 20:05 (user approved: plan v13 E5 ar2_clock and E7 ar2_long train here; IDENTICAL to the old
+# H200 at 19:32). One job = one run of scripts/gaas/gaas_queue.txt on one GPU (two such jobs = the user's "2 GPUs at a
+# time"). Submitted by fetch_2task.sh when the run's data is here, or by hand:
+#   cd ~/mwam && qsub -v RUN=ar2_clock FastWAM-memory2/scripts/gaas/gaas_run.pbs
+# Steps (stops at the first failure, reason in the log):
+#   1 container exactly as in setup_parity.pbs (the way that passed IDENTICAL): APPTAINER_HOME unset, --cleanenv + env
+#     file, PYTHONNOUSERSITE=1, the SIF unpacked once into node-local /tmp, binds to the old H200's paths; pip freeze
+#     sha256 must be the old H200's; unit tests
+#   2 data checks, once (markers): the two-task cache against the payload MANIFEST with sha256 (.verified); for ar2_long
+#     the resume parts against parts.sha256, joined, the whole file against resume.pt.sha256 (.resume_verified); for
+#     ar2_clock READY_e5 = ledger_ready.py --variant arclk on put / swap (no GPU visible to it)
+#   3 the line's condition, then the trainer (base_2task.yaml + the line's sets, micro 8 x 8 as on the old H200), with
+#     export_watch.sh (exports to the relay for the A40) beside it; one resumed retry in the same job
+#   4 45 min before the walltime: <run>/STOP (the trainer saves resume.pt and exits) and the job resubmits itself (or
+#     says how); the next job resumes from resume.pt
+# After the run: waits (up to 2 h) for the last export to reach the relay, then ends (the GPU goes back to the pool).
+# Logs: ~/mwam/logs/RUN_<run>_<time>.txt ; trainer: outputs/fullft/QUEUE_<run>.log
+#PBS -N mwam_run
+#PBS -P gs_ccds_tianwei.zhang
+#PBS -q gpu_as
+#PBS -l select=1:ncpus=12:ngpus=1:mem=200gb
+#PBS -l walltime=96:00:00
+#PBS -j oe
+set -u
+W=$HOME/mwam
+R=$W/FastWAM-memory2
+HFPY=$W/envs/hf-tools/bin/python
+SIF=$W/sif/pytorch_25.11_417cbf33.sif
+FREEZE_SHA=2707a91e446b2327fb3a9d695d86dc87fe3d8f41d3c29069d87d4270701b4607
+RUN=${RUN:?submit with qsub -v RUN=<run>}
+WALL_H=${WALL_H:-96}
+C=$W/hf/payload/workspace/FastWAM/outputs/s1_dense_joint_h100_v1
+F=$R/outputs/fullft
+mkdir -p $W/logs $F/$RUN
+LOG=$W/logs/RUN_${RUN}_$(date +%Y%m%d_%H%M).txt
+exec > >(tee -a "$LOG") 2>&1
+step() { echo "[run] $(date '+%F %T') $*"; }
+fail() { echo "[run] $(date '+%F %T') FAILED: $*"; { echo "$(date '+%F %T') job ${PBS_JOBID:-none}: $*"; } >> $F/$RUN/GAAS_FAILED; exit 1; }
+step "run $RUN; host $(hostname); job ${PBS_JOBID:-none}; cores $(nproc); CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-unset}"
+nvidia-smi -L
+cd $R
+git pull -q --ff-only origin memory2 || step "git pull skipped (another job pulling?)"
+step "code $(git log --oneline -1 | cut -c1-70)"
+echo "${PBS_JOBID:-none}" > $F/$RUN/GAAS_JOB
+[ -f $F/$RUN/SUMMARY.json ] && { step "$RUN has finished already: nothing to do"; exit 0; }
+LINE=$(grep -v '^[[:space:]]*#' scripts/gaas/gaas_queue.txt | awk -F'|' -v r="$RUN" '{x = $1; gsub(/[[:space:]]/, "", x)} x == r')
+[ -n "$LINE" ] || fail "no line $RUN in scripts/gaas/gaas_queue.txt"
+SETS=$(echo "$LINE" | cut -d'|' -f2 | xargs)
+COND=$(echo "$LINE" | cut -d'|' -f3- | xargs)
+read -r -a SETA <<< "$SETS"                      # no glob expansion of values like [45,60]
+A=(--set "name=$RUN"); for s in "${SETA[@]}"; do A+=(--set "$s"); done
+step "sets: $SETS"
+module purge; module load apptainer/1.4.1
+unset APPTAINER_HOME SINGULARITY_HOME          # the module's APPTAINER_HOME would become the container's HOME
+
+step "1 container, environment, unit tests"
+SBX=/tmp/mwam_sbx_${PBS_JOBID:-$$}
+trap 'rm -rf "$SBX"' EXIT                       # the job's own unpacked image on the node's local disk
+apptainer build --sandbox "$SBX" "$SIF" > /dev/null 2>&1 || fail "sandbox from the SIF"
+B="$R:/workspace/FastWAM-memory2,$W/hf/payload/workspace/FastWAM:/workspace/FastWAM,$W/envs/mwam:/opt/mwam"
+EF=$W/logs/container_env_${PBS_JOBID:-$$}.txt
+printf '%s\n' "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-}" PYTHONNOUSERSITE=1 \
+  PYTHONPATH=/workspace/FastWAM-memory2/src PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True OMP_NUM_THREADS=8 > $EF
+X() { apptainer exec --nv --cleanenv --bind "$B" --pwd /workspace/FastWAM-memory2 --env-file "$EF" "$SBX" "$@"; }
+GOT=$(X /opt/mwam/bin/python -m pip freeze 2>/dev/null | sha256sum | cut -c1-64)
+[ "$GOT" = "$FREEZE_SHA" ] || fail "pip freeze sha256 $GOT is not the old H200's $FREEZE_SHA"
+X /opt/mwam/bin/python -c "import torch; p = torch.cuda.get_device_properties(0); print('[run]', torch.__version__, torch.cuda.get_device_name(0), 'SMs', p.multi_processor_count)"
+X /opt/mwam/bin/python -m pytest -q -p no:cacheprovider src/fastwam/fullft/tests 2>&1 | tail -n 2
+[ ${PIPESTATUS[0]} -eq 0 ] || fail "unit tests"
+
+step "2 data checks"
+if [ ! -f $C/.verified ]; then
+  $HFPY scripts/memory_v2/migrate/manifest.py verify --manifest $W/hf/MANIFEST.json --root $W/hf \
+    --prefix /workspace/FastWAM/outputs/s1_dense_joint_h100_v1/cache /workspace/FastWAM/outputs/s1_dense_joint_h100_v1/RECORDS.json \
+    2>&1 | tail -n 3
+  [ ${PIPESTATUS[0]} -eq 0 ] || fail "two-task cache sha256 against the MANIFEST"
+  touch $C/.verified
+fi
+step "two-task cache verified ($(du -sh $C | cut -f1))"
+if [ "$RUN" = ar2_long ] && [ ! -f $F/ar_2task/.resume_verified ]; then
+  D=$W/dl/ar_2task_e30/ckpt/ar_2task_e30
+  (cd $D && sha256sum -c --quiet parts.sha256) || fail "resume parts sha256"
+  mkdir -p $F/ar_2task
+  cat $(cd $D && awk '{print $2}' parts.sha256 | sort | sed "s#^#$D/#") > $F/ar_2task/resume.pt.tmp || fail "joining the parts"
+  mv $F/ar_2task/resume.pt.tmp $F/ar_2task/resume.pt
+  (cd $F/ar_2task && sha256sum -c --quiet $D/resume.pt.sha256) || fail "the joined resume.pt differs from the old H200's"
+  touch $F/ar_2task/.resume_verified
+  step "ar_2task/resume.pt joined, sha256 = the old H200's: $(cut -c1-16 $D/resume.pt.sha256)..."
+fi
+if [ "$RUN" = ar2_clock ] && [ ! -f $F/READY_e5 ]; then
+  X bash -c "CUDA_VISIBLE_DEVICES= /opt/mwam/bin/python scripts/fullft/ledger_ready.py --variant arclk \
+    --tasks put_back_block swap_blocks --marker READY_e5 --skip-tests" 2>&1 | tail -n 6
+  [ -f $F/READY_e5 ] || fail "READY_e5 (ledger_ready.py above)"
+fi
+
+step "3 condition and training"
+bash -c "$COND" || fail "condition not met: $COND"
+( sleep $(( WALL_H * 3600 - 2700 )); touch $F/$RUN/STOP; echo "[run] $(date '+%F %T') walltime near: STOP written" ) &
+TIMER=$!
+X bash -c "RUN=$RUN bash scripts/fullft/export_watch.sh" > /dev/null 2>&1 &
+WATCH=$!
+rc=1
+for attempt in 1 2; do
+  step "$RUN attempt $attempt"
+  X /opt/mwam/bin/python -m fastwam.fullft.train train --config configs/fullft/base_2task.yaml "${A[@]}" >> $F/QUEUE_$RUN.log 2>&1
+  rc=$?
+  step "trainer exit code $rc; $(grep -a 'u [0-9]*/' $F/QUEUE_$RUN.log | tail -n 1 | cut -c1-160)"
+  [ -f $F/$RUN/SUMMARY.json ] && break
+  [ -f $F/$RUN/STOP ] && break
+  [ $attempt = 1 ] && { step "no SUMMARY.json: one resumed retry in 120 s"; sleep 120; }
+done
+kill $TIMER 2>/dev/null
+if [ -f $F/$RUN/STOP ] && [ ! -f $F/$RUN/SUMMARY.json ]; then
+  rm -f $F/$RUN/STOP
+  step "stopped before the walltime; $(grep -a 'resume checkpoint saved' $F/QUEUE_$RUN.log | tail -n 1 | cut -c1-120)"
+  if command -v qsub > /dev/null && J=$(cd $W && qsub -v RUN=$RUN $R/scripts/gaas/gaas_run.pbs); then
+    echo "$J" > $F/$RUN/GAAS_JOB; step "resubmitted: job $J (resumes from resume.pt)"
+  else
+    step "could not resubmit from here: on the login node run  cd ~/mwam && qsub -v RUN=$RUN FastWAM-memory2/scripts/gaas/gaas_run.pbs"
+  fi
+  exit 0
+fi
+[ -f $F/$RUN/SUMMARY.json ] || fail "trainer failed twice (exit code $rc; see $F/QUEUE_$RUN.log)"
+step "$RUN finished: $(head -c 300 $F/$RUN/SUMMARY.json)"
+for i in $(seq 1 24); do kill -0 $WATCH 2>/dev/null || break; sleep 300; done
+step "export watcher: $(ls $F/$RUN/.relayed_* 2>/dev/null | xargs -n1 basename 2>/dev/null | tr '\n' ' ')"
+step "done"

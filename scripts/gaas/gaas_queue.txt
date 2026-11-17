@@ -1,0 +1,32 @@
+# NTU GaaS H200 (user 16:50: 2 GPUs of the group's 4 at a time; IDENTICAL to the old H200 at 19:32, parity_h200b.py:
+# runs may move between the two H200s and a pair may be split across them, no flag). One line = one PBS job on one GPU
+# (gaas_run.pbs, qsub -v RUN=<run>); same format as h200_queue.txt: run | --set values on top of
+# configs/fullft/base_2task.yaml (micro 8 x 8, as on the old H200) | condition (checked by the job, in ~/mwam/FastWAM-memory2).
+# A run listed here must not also be listed in h200_queue.txt.
+#
+# 11-17 20:05 (user approved): plan v13 E5 and E7 move here from the old H200 queue (they were waiting behind E4 there).
+#
+# plan v13 E5 CLOCK-arm (user approved 15:40): AR + 32 proprio tokens sampled uniformly over the elapsed time,
+# each with a sinusoidal timestamp (history.variant=arclk; same content as ledger entries = joint states, same token
+# path and zero-initialised encoder, same 2-task data / recipe / seed as ar_2task and ar2_prop): only the index differs.
+# Waits for READY_e5 (unit tests + event-file / text-slot checks on this machine; gaas_run.pbs writes it).
+# Registered reading (plan v13 section 3 E5, written before any result; copied from h200_queue.txt):
+#   A40: no stress swap and put 1-100; stress swap 1-50 with a pause, visible vs hidden (E1's injection).
+#   Floor: the clock arm reaches swap >= 70/100 without stress, else no stress verdict (only "natively trained, the
+#   event index beats the time index" is reported).
+#   clock arm Delta (visible - hidden) <= -8/50 with sign p < 0.05 AND the ledger model's E1 Delta >= -5/50
+#     -> INDEX MATTERS; clock Delta >= -5/50 -> NOT REPRODUCED; otherwise PARTIAL.
+#   After INDEX MATTERS only: timestamps x1.5 and x0.5 (MWAM_CLOCK_SCALE), 50 episodes each, report whether the
+#   failure direction flips.
+ar2_clock | history.variant=arclk history.event_max=32 | test -f outputs/fullft/READY_e5
+#
+# plan v13 E7 AR-long (user approved 15:50, deviation 42 option (a)): the two-task AR (ar_2task, N7, trained on the old
+# H200) trained on from its final resume checkpoint (update 20077 = 30 frame-epochs) to 60 frame-epochs. The LR follows a
+# 60-epoch cosine, so it restarts at about 5.5e-5 at the seed point and decays to 1e-5 at e60 (more help than the
+# original recipe). Same data, seed, data order. Exports e45, e60 (relayed for the A40). The seed checkpoint comes from
+# the old H200 through the relay (h200_send_resume.sh -> fetch_2task.sh -> gaas_run.pbs reassembles it and checks the
+# sha256 of the whole file = .resume_verified).
+# Registered reading (plan v13 section 3 E7; copied from h200_queue.txt): A40, swap and put 1-100, e45 and e60.
+#   e60 swap >= 90/100 -> TRAINABLE; <= 70/100 -> STRUCTURAL; otherwise PARTIAL. Floor: put >= 95/100.
+#   TRAINABLE -> contribution 1 is rewritten as in plan v13 1.3 (and Opus asks the user to switch to Fable).
+ar2_long | schedule.frame_epochs=60 schedule.export_at_epochs=[45,60] schedule.resume_from=/workspace/FastWAM-memory2/outputs/fullft/ar_2task/resume.pt | test -f outputs/fullft/ar_2task/.resume_verified && test -f outputs/fullft/ar_2task/resume.pt
