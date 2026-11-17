@@ -56,7 +56,11 @@ def main():
     if not ref.exists():
         ref.parent.mkdir(parents=True, exist_ok=True)
         subprocess.run(["/opt/hf-tools/bin/python", str(R / "scripts/memory_v2/migrate/relay.py"), "get", "--prefix",
-                        "diag/parity_ref", "--out", str(ref.parent)], check=False)
+                        "diag/parity_ref", "--out", str(ref.parent)], check=False, capture_output=True)
+    if not ref.exists():
+        print("PARITY: NO READING - the H200 reference (press_ar metrics.jsonl) is not on the relay under diag/parity_ref;"
+              " put it from the H200 first")
+        raise SystemExit(2)
     tn, en = rows(Path(args.new))
     tr, er = rows(ref)
     w = lambda t, a, b, k: mean([x.get(k) for x in t if a < x["update"] <= b])          # noqa: E731
