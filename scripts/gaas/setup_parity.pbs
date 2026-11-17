@@ -8,7 +8,13 @@
 #     2707a91e... (the old H200's, 16:59 / 17:20), unit tests
 #   5 h200b_parity: the press_ar recipe, stop_after 500 (about 40-50 min); reading registered in parity_h200b.py
 # Downloads run outside the container with ~/mwam/envs/hf-tools (the user's HF login); the GPU is the one PBS gives
-# (CUDA_VISIBLE_DEVICES is left as PBS sets it: a GPU UUID). Live log: ~/mwam/logs/SETUP_PARITY_<time>.txt
+# (CUDA_VISIBLE_DEVICES as PBS sets it, a GPU UUID, passed in explicitly). Live log: ~/mwam/logs/SETUP_PARITY_<time>.txt
+# 11-17 18:45 (first run FAILED on pip freeze: 305 lines vs 262; numpy 2.3.5, NCCL 2.30, tensorrt_llm ... came from
+# /usr/local/apptainer/1.4.1/.local): the cluster's apptainer module sets APPTAINER_HOME=/usr/local/apptainer/1.4.1,
+# which apptainer reads as the container's HOME, and Python puts that HOME's user site-packages (HPCC's MLPerf packages)
+# before the image's. Now: APPTAINER_HOME unset, --cleanenv (only the variables we pass, incl. CUDA_VISIBLE_DEVICES),
+# PYTHONNOUSERSITE=1. Also the SIF is unpacked ONCE per job into a sandbox on the node's local disk (no squashfuse here:
+# every `apptainer exec <sif>` unpacked 8.8 GB again).
 #   cd ~/mwam && qsub FastWAM-memory2/scripts/gaas/setup_parity.pbs
 #PBS -N mwam_setup
 #PBS -P gs_ccds_tianwei.zhang
@@ -31,6 +37,7 @@ step "host $(hostname); job ${PBS_JOBID:-none}; cores $(nproc); CUDA_VISIBLE_DEV
 nvidia-smi -L
 cd $R && git pull -q --ff-only origin memory2 && step "code $(git log --oneline -1 | cut -c1-70)"
 module purge; module load apptainer/1.4.1
+unset APPTAINER_HOME SINGULARITY_HOME          # the module's APPTAINER_HOME would become the container's HOME
 [ -x $HFPY ] || fail "no $HFPY (create it and log in to Hugging Face on the login node first)"
 [ -s $SIF ] || fail "no $SIF (sif_pull.pbs first)"
 
@@ -67,10 +74,16 @@ $HFPY $R/scripts/memory_v2/migrate/relay.py get --prefix diag/parity_ref --out $
 [ -s $R/outputs/fullft/parity_ref/metrics.jsonl ] || fail "no old H200 press_ar metrics (diag/parity_ref)"
 
 step "4 inside the SIF: versions, pip freeze, unit tests"
+SBX=/tmp/mwam_sbx_${PBS_JOBID:-$$}
+trap 'rm -rf "$SBX"' EXIT
+apptainer build --sandbox "$SBX" "$SIF" > /dev/null 2>&1 || fail "sandbox from the SIF"
+du -sh "$SBX"
 B="$R:/workspace/FastWAM-memory2,$W/hf/payload/workspace/FastWAM:/workspace/FastWAM,$W/envs/mwam:/opt/mwam"
-X() { apptainer exec --nv --bind "$B" --pwd /workspace/FastWAM-memory2 \
-        --env PYTHONPATH=/workspace/FastWAM-memory2/src,PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True,OMP_NUM_THREADS=8 \
-        "$SIF" "$@"; }
+EF=$W/logs/container_env_${PBS_JOBID:-$$}.txt            # an env file: a 2-GPU job's UUID list contains commas
+printf '%s\n' "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-}" PYTHONNOUSERSITE=1 \
+  PYTHONPATH=/workspace/FastWAM-memory2/src PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True OMP_NUM_THREADS=8 > $EF
+X() { apptainer exec --nv --cleanenv --bind "$B" --pwd /workspace/FastWAM-memory2 --env-file "$EF" "$SBX" "$@"; }
+X /opt/mwam/bin/python -c "import sys, site; print('user site', site.ENABLE_USER_SITE); print(' '.join(sys.path))"
 X /opt/mwam/bin/python -c "import sys, torch; p = torch.cuda.get_device_properties(0); print(sys.version.split()[0], torch.__version__, torch.version.cuda, torch.backends.cudnn.version(), torch.cuda.nccl.version(), '|', torch.cuda.get_device_name(0), 'SMs', p.multi_processor_count)"
 X /opt/mwam/bin/python -m pip freeze 2>/dev/null > $W/logs/freeze_gaas.txt
 GOT=$(sha256sum < $W/logs/freeze_gaas.txt | cut -c1-64)
