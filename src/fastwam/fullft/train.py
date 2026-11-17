@@ -301,6 +301,13 @@ def train(cfg: RunConfig, args, smoke: bool = False) -> dict:
             if stop:
                 log("STOP found: exiting after saving")
                 return {"status": "stopped", "update": u}
+            if s.stop_after and u >= s.stop_after and not smoke:     # 11-17: H100 vs H200 parity run
+                summary = {"status": "stopped_after", "updates": u, "epochs": epoch_float,
+                           "samples_per_s": seen / (time.monotonic() - t0),
+                           "peak_gib": torch.cuda.max_memory_allocated() / 2 ** 30, "skipped_steps": skipped}
+                write_json(run / "SUMMARY.json", summary)
+                log("stop_after reached:", json.dumps(summary))
+                return summary
             if u >= total:
                 break
         if state["update"] < total:

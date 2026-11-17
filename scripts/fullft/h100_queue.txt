@@ -3,5 +3,9 @@
 # Several lines train at once, one per free GPU. A run listed here must not also be listed in h200_queue.txt.
 # 11-16 (user: the first H100 job is battery_ar, the AR arm of the battery half of G2; moved here from the H200 queue)
 battery_ar | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_battery_try_v1] data.tasks=[battery_try] | test -f outputs/memory_v2/press/dense_battery_try_v1/.verified
+# 11-17 (user: is H100 training aligned with the H200?): parity run = the exact press_ar recipe (data, seed, LR schedule of
+# the full 30-epoch run) on the micro batch of this machine, stopped after 500 updates (eval at 500 included), compared with the
+# the press_ar metrics of the H200 by parity_h100.py (reading registered there). Runs before battery_arprop on the next free GPU
+h100_parity | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_press_button_v1] data.tasks=[press_button] schedule.stop_after=500 | test -f outputs/memory_v2/press/dense_press_button_v1/.verified
 # the ledger arm of the battery half of G2; needs the battery event file and READY_arprop (ledger_ready.py) on this machine
 battery_arprop | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_battery_try_v1] data.tasks=[battery_try] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_battery_try.json] | test -f outputs/memory_v2/press/dense_battery_try_v1/.verified && test -f outputs/fullft/events/events_battery_try.json && grep -q battery_try outputs/fullft/READY_arprop

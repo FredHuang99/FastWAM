@@ -20,7 +20,9 @@ for TAG in $TAGS; do
   F=$OUT/$RUN/export_$TAG.pt; M=$OUT/$RUN/.relayed_$TAG
   [ -f $M ] && { echo "[watch] $TAG: already relayed"; continue; }
   echo "[watch] $(date '+%F %T') waiting for $F"
-  until [ -f $F ]; do sleep $POLL; done
+  until [ -f $F ]; do                     # 11-17: a run that ended without this export (parity runs) ends the watch
+    [ -f $OUT/$RUN/SUMMARY.json ] && [ ! -f $F ] && { echo "[watch] $RUN finished without export_$TAG.pt"; exit 0; }
+    sleep $POLL; done
   echo "[watch] $(date '+%F %T') $TAG appeared ($(du -h $F | cut -f1))"
   for try in 1 2 3; do
     RUN=$RUN TAG=$TAG bash scripts/fullft/export_relay.sh > /dev/null 2>&1
