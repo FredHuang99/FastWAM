@@ -12,6 +12,9 @@
 #      -> ~/mwam/dl/ar_2task_e30 ; sizes checked against the relay listing
 #   -> qsub -v RUN=ar2_long gaas_run.pbs (once)
 # Safe to run again (downloads resume; a run already submitted is not submitted twice: outputs/fullft/<run>/GAAS_JOB).
+# 11-17 20:35: the first cache download stalled at 8.71 GB (no byte for minutes, process alive). Every download now runs
+# under a watchdog: nothing new on disk for 10 min -> the download is killed and started again (it resumes), from the
+# second try with plain HTTPS (HF_HUB_DISABLE_XET=1); up to 5 tries. Our pid: ~/mwam/logs/FETCH_2TASK.pid
 #   cd ~/mwam/FastWAM-memory2 && git pull -q --ff-only origin memory2 && nohup bash scripts/gaas/fetch_2task.sh > /dev/null 2>&1 &
 # Log: ~/mwam/logs/FETCH_2TASK_<time>.txt
 set -u
@@ -22,7 +25,35 @@ mkdir -p $W/logs $W/dl
 LOG=$W/logs/FETCH_2TASK_$(date +%Y%m%d_%H%M).txt
 exec > >(tee -a "$LOG") 2>&1
 say() { echo "[fetch] $(date '+%F %T') $*"; }
+echo $$ > $W/logs/FETCH_2TASK.pid
 cd $R
+export HF_HUB_DOWNLOAD_TIMEOUT=60
+grown() { du -sb $W/hf $W/dl $HOME/.cache/huggingface 2>/dev/null | awk '{s += $1} END {print s + 0}'; }
+download() {    # label python-file args...: run it under the stall watchdog
+  local label=$1 py=$2 try pid last now idle
+  shift 2
+  for try in 1 2 3 4 5; do
+    say "$label: download try $try$([ "${HF_HUB_DISABLE_XET:-0}" = 1 ] && echo ' (plain HTTPS)')"
+    $HFPY $py "$@" &
+    pid=$!
+    last=$(grown); idle=0
+    while kill -0 $pid 2>/dev/null; do
+      sleep 60
+      now=$(grown)
+      if [ "$now" = "$last" ]; then idle=$((idle + 1)); else idle=0; last=$now; fi
+      if [ $idle -ge 10 ]; then
+        say "$label: nothing new on disk for 10 min ($(awk -v b=$now 'BEGIN {printf "%.2f GB", b / 1e9}') in our folders): restart"
+        kill $pid 2>/dev/null; sleep 10; kill -9 $pid 2>/dev/null
+        break
+      fi
+    done
+    if [ $idle -lt 10 ] && wait $pid; then say "$label: download finished"; return 0; fi
+    [ $idle -ge 10 ] || say "$label: download ended with an error"
+    export HF_HUB_DISABLE_XET=1
+    sleep 30
+  done
+  return 1
+}
 C=$W/hf/payload/workspace/FastWAM/outputs/s1_dense_joint_h100_v1
 submit() {      # run: one job per run, once
   local run=$1 j
@@ -34,7 +65,7 @@ submit() {      # run: one job per run, once
 }
 
 say "1 two-task training cache -> $C"
-$HFPY - "$W/hf" <<'PY' || { say "FAILED: cache download"; exit 1; }
+cat > $W/logs/dl_cache2.py <<'PY'
 import sys
 from huggingface_hub import hf_hub_download, snapshot_download
 repo, out = "hhyfred/memwam-h100-migration-v1", sys.argv[1]
@@ -43,6 +74,7 @@ base = "payload/workspace/FastWAM/outputs/s1_dense_joint_h100_v1/"
 snapshot_download(repo, allow_patterns=[base + "RECORDS.json", base + "IDENTITY.json", base + "cache/*"],
                   local_dir=out, max_workers=8)
 PY
+download cache $W/logs/dl_cache2.py "$W/hf" || { say "FAILED: cache download (5 tries)"; exit 1; }
 $HFPY scripts/memory_v2/migrate/manifest.py verify --manifest $W/hf/MANIFEST.json --root $W/hf --no-hash \
   --prefix /workspace/FastWAM/outputs/s1_dense_joint_h100_v1/cache /workspace/FastWAM/outputs/s1_dense_joint_h100_v1/RECORDS.json \
   2>&1 | tail -n 3
@@ -92,11 +124,12 @@ for i in $(seq 1 120); do
 done
 ls_relay | grep -q '^SEND_DONE ' || { say "FAILED: the old H200 never finished sending (SEND_RESUME log there)"; exit 1; }
 ls_relay
-$HFPY - "$D" <<'PY' || { say "FAILED: parts download"; exit 1; }
+cat > $W/logs/dl_parts.py <<'PY'
 import sys
 from huggingface_hub import snapshot_download
 snapshot_download("hhyfred/memwam-fullft", allow_patterns=["ckpt/ar_2task_e30/*"], local_dir=sys.argv[1], max_workers=8)
 PY
+download parts $W/logs/dl_parts.py "$D" || { say "FAILED: parts download (5 tries)"; exit 1; }
 bad=0
 while read -r name size; do
   got=$(stat -c %s $D/ckpt/ar_2task_e30/$name 2>/dev/null || echo 0)
