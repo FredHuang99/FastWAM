@@ -91,7 +91,7 @@ def add_lora(module: nn.Module, rank: int) -> int:
 # ----------------------------------------------------------------------------- the model
 class FullModel(nn.Module):
     def __init__(self, mot, proprio_encoder: nn.Linear, variant: str = "none", event_slots: int = 0,
-                 video_shift: float = 5.0, action_shift: float = 1.0):
+                 video_shift: float = 5.0, action_shift: float = 1.0, ledger_features: int = 0):
         super().__init__()
         self.mot = mot
         self.proprio_encoder = proprio_encoder
@@ -111,7 +111,8 @@ class FullModel(nn.Module):
         self.ledger = None
         if variant == "arprop":
             from .history import ledger_dim
-            self.ledger = nn.Linear(ledger_dim(event_slots), text_dim)
+            # 11-17 E4: ledger_features = HistoryRule.ledger_features (wider with the ordinal code); 0 = as before
+            self.ledger = nn.Linear(int(ledger_features) or ledger_dim(event_slots), text_dim)
             nn.init.zeros_(self.ledger.weight)
             nn.init.zeros_(self.ledger.bias)
         self.video_scheduler = WanContinuousFlowMatchScheduler(shift=video_shift)
@@ -125,7 +126,7 @@ class FullModel(nn.Module):
     # ------------------------------------------------------------------ construction
     @classmethod
     def from_release(cls, architecture: str, base: str, variant: str = "none", event_slots: int = 0,
-                     video_shift: float = 5.0, action_shift: float = 1.0) -> "FullModel":
+                     video_shift: float = 5.0, action_shift: float = 1.0, ledger_features: int = 0) -> "FullModel":
         import yaml
         from fastwam.models.wan22.action_dit import ActionDiT
         from fastwam.models.wan22.mot import MoT
@@ -143,7 +144,7 @@ class FullModel(nn.Module):
         mot.load_state_dict(payload["mot"], strict=True)
         proprio.load_state_dict(payload["proprio_encoder"], strict=True)
         del payload
-        return cls(mot, proprio, variant, event_slots, video_shift, action_shift)
+        return cls(mot, proprio, variant, event_slots, video_shift, action_shift, ledger_features)
 
     @property
     def video(self):

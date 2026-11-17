@@ -20,8 +20,38 @@ ar2_none | history.variant=none | test -f outputs/fullft/GO_ar2_none
 # reading registered in scripts/fullft/noise_floor.py (val_action change >= 8 % explains the H100 gap of 12 %)
 press_noise500 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_press_button_v1] data.tasks=[press_button] schedule.stop_after=500 schedule.noise_seed=18 | test -f outputs/memory_v2/press/dense_press_button_v1/.verified
 press_fast | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_press_button_v1] data.tasks=[press_button] history.variant=arprop history.event_max=32 history.lag=0 history.event_rule_from=/workspace/FastWAM-memory2/outputs/fullft/PRESS_FAST_RULE.json data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_press_button_fast.json] | bash scripts/fullft/press_fast_ready.sh
-press_arev | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_press_button_v1] data.tasks=[press_button] history.variant=arev history.event_max=12 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_press_button.json] | test -f outputs/fullft/READY_arev && test -f outputs/fullft/events/events_press_button.json && test -f outputs/memory_v2/press/dense_press_button_v1/.verified
+# 11-17 15:40 deviation 40 (user approved plan v13 section 7 item 3): press_arev and the three-arm Press comparison
+# (plan v12 W2 / D.4 S-C (a)) are STOPPED (all arms on the floor: ledger best 9/50, AR 0); the AR + event-frames arm is
+# done on put + swap instead (plan v13 E9, a later line). Kept here commented out for the record:
+# press_arev | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_press_button_v1] data.tasks=[press_button] history.variant=arev history.event_max=12 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_press_button.json] | test -f outputs/fullft/READY_arev && test -f outputs/fullft/events/events_press_button.json && test -f outputs/memory_v2/press/dense_press_button_v1/.verified
+#
+# 11-17 plan v13 E4 PRESS-count (user approved 15:40). press_fast's setting (same data, recipe, seed 17, lag 0, the swept
+# thresholds, the fast events file) + ONE change: every ledger entry carries "the how-many-th event of this arm and this
+# kind" as a 16-dim thermometer code (history.ordinal=16; code in history.py / data.py, unit tests in test_ledger.py).
+# Registered reading (plan v13 section 3 E4, copied verbatim in meaning; written before any result):
+#   held-out scenes 51-100, paired with the epoch of press_fast picked by P-SEL:
+#   >= 8/50 more and sign p < 0.05 -> COUNT HELPS; difference within +-4 -> NO EFFECT; otherwise PARTIAL.
+#   Floor: both arms complete >= 48/50.
+#   Test-time counterfactuals (scenes 1-50, on the episodes whose first count is right without the change):
+#   "code + 1" (MWAM_LEDGER=ordplus1: the ordinal of every press entry + 1, number of entries unchanged) and
+#   "one more" (MWAM_LEDGER=duppress: the most recent completed press entered twice, code unchanged).
+#   "code + 1" gives under-by-one in >= 60 % AND "one more" in <= 20 % -> READS THE CODE; the reverse -> READS THE
+#   COUNT OF ENTRIES; otherwise MIXED.
+#   Press line stop rule: until 12-01 at most 3 more trainings after E4, one change each, expectation written first;
+#   held-out still < 20/50 on 12-01 -> Press stays "analysis" and "countable" leaves the method.
+press_count | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_press_button_v1] data.tasks=[press_button] history.variant=arprop history.event_max=32 history.lag=0 history.ordinal=16 history.event_rule_from=/workspace/FastWAM-memory2/outputs/fullft/PRESS_FAST_RULE.json data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_press_button_fast.json] | test -f outputs/fullft/READY_v13 && test -f outputs/fullft/READY_press_fast && test -f outputs/fullft/PRESS_FAST_RULE.json && test -f outputs/fullft/events/events_press_button_fast.json && test -f outputs/memory_v2/press/dense_press_button_v1/.verified
+#
+# 11-17 plan v13 E7 AR-long (user approved 15:50, deviation 42 option (a)): the two-task AR (ar_2task, N7) trained on
+# from its final resume checkpoint (update 20077 = 30 frame-epochs) to 60 frame-epochs. The LR follows a 60-epoch cosine,
+# so it restarts at about 5.5e-5 at the seed point and decays to 1e-5 at e60 (more help than the original recipe).
+# Same data, seed, data order. Exports e45, e60 (relayed for the A40).
+# Registered reading (plan v13 section 3 E7): A40, swap and put 1-100, e45 and e60.
+#   e60 swap >= 90/100 -> TRAINABLE; <= 70/100 -> STRUCTURAL; otherwise PARTIAL. Floor: put >= 95/100.
+#   TRAINABLE -> contribution 1 is rewritten as in plan v13 1.3 (and Opus asks the user to switch to Fable).
+ar2_long | schedule.frame_epochs=60 schedule.export_at_epochs=[45,60] schedule.resume_from=/workspace/FastWAM-memory2/outputs/fullft/ar_2task/resume.pt | test -f outputs/fullft/READY_v13 && test -f outputs/fullft/ar_2task/resume.pt
 # battery_ar: moved to the H100 queue (h100_queue.txt) 11-16, user: the first H100 job
 # put_arprop: put is 100/100 with AR alone; runs only with GO_put_arprop
 put_arprop | data.tasks=[put_back_block] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_put_back_block.json] | test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop
-# battery_<winner>: added after the Press arms (G2 rule (c)); then B1: rearrange / swap_T / cover / ranking AR, put + swap none
+# battery_<winner>: superseded 11-17 (plan v13: G2' replaces G2; the battery pair trains on the H100, deviation 39)
+# plan v13 E5 (clock arm), E8 (body as teacher), E9 (AR + event frames on put + swap) and the G2' harm check are added
+# here as their code passes its tests; Press iterations go before E8 / E9.

@@ -43,6 +43,10 @@ class ScheduleConfig:
     noise_seed: int = 0                                  # 11-17: reseed the training random draws (diffusion noise,
                                                          # timesteps, dropout) after the model is built; data order,
                                                          # augmentation and initialisation still follow seed (0 = off)
+    resume_from: str = ""                                # 11-17 plan v13 E7: a NEW run starts from another run's
+                                                         # resume.pt (weights, optimizer, data position, done exports);
+                                                         # the LR follows THIS run's schedule. Ignored once the run has
+                                                         # its own resume.pt; a missing file is an error ("" = off)
     log_every: int = 10
     eval_every: int = 500
     resume_every: int = 1000                             # overwrite the single resume checkpoint

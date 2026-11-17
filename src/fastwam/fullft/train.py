@@ -80,7 +80,7 @@ def build(cfg: RunConfig, device: str, log, limit_episodes: int = 0):
     log(f"data: {len(items)} train anchors ({len({e for e, _ in items})} episodes), {len(vitems)} val anchors; "
         f"tasks {cfg.data.tasks}; video_valid polarity '{polarity}'; history {rule}")
     model = FullModel.from_release(cfg.model.architecture, cfg.model.base, rule.variant, rule.event_slots,
-                                   cfg.model.video_shift, cfg.model.action_shift)
+                                   cfg.model.video_shift, cfg.model.action_shift, rule.ledger_features)
     model.set_trainable(cfg.model.train_video, cfg.model.lora_rank)
     model.checkpoint_layers = cfg.model.checkpoint_layers
     model.compute_dtype = torch.bfloat16
@@ -112,6 +112,23 @@ def optimizer_for(model: FullModel, cfg: RunConfig):
         return torch.optim.AdamW(groups, lr=o.lr, betas=tuple(o.betas), fused=True)
     except (RuntimeError, TypeError):
         return torch.optim.AdamW(groups, lr=o.lr, betas=tuple(o.betas))
+
+
+def resume_source(run: Path, resume_from: str, smoke: bool = False) -> Optional[Path]:
+    """Checkpoint a training run starts from: its own resume.pt if present; else schedule.resume_from (11-17 plan v13
+    E7, a new run seeded from another run's resume.pt; a missing file is an error, never a silent fresh start); else
+    None. Smoke runs always start fresh."""
+    if smoke:
+        return None
+    own = Path(run) / "resume.pt"
+    if own.is_file():
+        return own
+    if resume_from:
+        seed = Path(resume_from)
+        if not seed.is_file():
+            raise FileNotFoundError(f"schedule.resume_from {seed} does not exist")
+        return seed
+    return None
 
 
 def lr_at(update: int, total: int, cfg: RunConfig) -> float:
@@ -201,13 +218,21 @@ def train(cfg: RunConfig, args, smoke: bool = False) -> dict:
         cfg.optim.warmup_steps = min(cfg.optim.warmup_steps, max(1, total // 10))
     state = {"update": 0, "epoch": 0, "position": 0}
     resume = run / "resume.pt"
-    if resume.is_file() and not smoke:
-        ck = torch.load(resume, map_location="cpu", weights_only=False)
+    source = resume_source(run, s.resume_from, smoke)
+    if source is not None:
+        ck = torch.load(source, map_location="cpu", weights_only=False)
         model.load_state_dict(ck["model"], strict=True)
         opt.load_state_dict(ck["optimizer"])
         state = ck["state"]
-        log(f"resumed from {resume}: update {state['update']}, epoch {state['epoch']}, position {state['position']}")
+        log(f"resumed from {source}: update {state['update']}, epoch {state['epoch']}, position {state['position']}")
         del ck
+        if source != resume:
+            if state["update"] >= total:
+                raise ValueError(f"seed {source} is at update {state['update']} >= this run's {total} updates: "
+                                 "nothing to train (raise schedule.frame_epochs)")
+            log(f"seeded from {source} (plan v13 E7): weights, optimizer, data position and done exports "
+                f"{state.get('exports', [])} of that run; LR from this run's schedule: {lr_at(state['update'], total, cfg):.2e} "
+                f"at update {state['update']} of {total}")
     normaliser = normaliser_for(cfg)
     exports = sorted(float(e) for e in s.export_at_epochs)
     done_exports = {float(x) for x in state.get("exports", [])}
@@ -615,7 +640,8 @@ def main(argv: Optional[List[str]] = None) -> None:
     elif args.command == "nanhunt":
         nanhunt(cfg, args)
     else:
-        model = FullModel.from_release(cfg.model.architecture, cfg.model.base, cfg.rule.variant, cfg.rule.event_slots)
+        model = FullModel.from_release(cfg.model.architecture, cfg.model.base, cfg.rule.variant, cfg.rule.event_slots,
+                                       ledger_features=cfg.rule.ledger_features)
         model.set_trainable(cfg.model.train_video, cfg.model.lora_rank)
         ck = torch.load(args.resume, map_location="cpu", weights_only=False)
         model.load_state_dict(ck["model"], strict=True)

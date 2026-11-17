@@ -44,6 +44,7 @@ def main():
     ap.add_argument("--event-max", type=int, default=32)
     ap.add_argument("--skip-tests", action="store_true")
     ap.add_argument("--events", default="", help="11-16: events file to check instead of outputs/fullft/events/events_<task>.json (one task only; e.g. events_press_button_fast.json for press_fast)")
+    ap.add_argument("--marker", default="", help="11-17: marker file name under outputs/fullft (default READY_<variant>; plan v13 runs use READY_v13)")
     args = ap.parse_args()
     if args.events and len(args.tasks) != 1:
         ap.error("--events goes with exactly one task")
@@ -90,7 +91,7 @@ def main():
         print(f"[ready] {task}: close frames equal in {agree}/{total} episode-arms ({share:.3f}, need >= 0.95); "
               f"text positions not padding in {len(bad_text)} episodes {bad_text[:3]}")
         ok &= share >= 0.95 and not bad_text
-    marker = R / f"outputs/fullft/READY_{args.variant}"
+    marker = R / f"outputs/fullft/{args.marker or 'READY_' + args.variant}"
     if ok:
         marker.write_text(json.dumps({"tasks": args.tasks}) + "\n")
         print(f"[ready] ALL CHECKS PASSED -> {marker}")

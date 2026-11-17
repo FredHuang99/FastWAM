@@ -20,7 +20,7 @@ from fastwam.fullft.model import FullModel, rerotate  # noqa: E402
 LAYERS, HEADS, HEAD_DIM, VIDEO, ACTION, TEXT = 2, 4, 24, 96, 32, 16
 
 
-def _model(variant="ar", event_slots=0, seed=0):
+def _model(variant="ar", event_slots=0, seed=0, ledger_features=0):
     from fastwam.models.wan22.action_dit import ActionDiT
     from fastwam.models.wan22.mot import MoT
     from fastwam.models.wan22.wan_video_dit import WanVideoDiT
@@ -32,7 +32,7 @@ def _model(variant="ar", event_slots=0, seed=0):
     action = ActionDiT(hidden_dim=ACTION, action_dim=14, ffn_dim=64, text_dim=TEXT, freq_dim=32, eps=1e-6,
                        num_heads=HEADS, attn_head_dim=HEAD_DIM, num_layers=LAYERS)
     mot = MoT({"video": video, "action": action}, mot_checkpoint_mixed_attn=False)
-    m = FullModel(mot, nn.Linear(14, TEXT), variant=variant, event_slots=event_slots)
+    m = FullModel(mot, nn.Linear(14, TEXT), variant=variant, event_slots=event_slots, ledger_features=ledger_features)
     with torch.no_grad():                         # lift zero-initialised output layers so every path does something
         for name, p in m.named_parameters():
             if p.abs().sum() == 0 and not name.startswith(("hist_gate", "extra", "ledger")):

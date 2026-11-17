@@ -40,7 +40,7 @@ def load_export(path: str, device="cuda:0") -> tuple:
     cfg = _build(RunConfig, state["config"])
     rule = cfg.rule
     model = FullModel.from_release(cfg.model.architecture, cfg.model.base, rule.variant, rule.event_slots,
-                                   cfg.model.video_shift, cfg.model.action_shift)
+                                   cfg.model.video_shift, cfg.model.action_shift, rule.ledger_features)
     model.set_trainable(cfg.model.train_video, cfg.model.lora_rank)
     model.load_state_dict(state["weights"], strict=True)
     model.requires_grad_(False)
@@ -400,8 +400,14 @@ class FullSession:
                         import dataclasses
                         full = ledger_entries(dataclasses.replace(self.rule, event_max=10 ** 6), current, self.events)
                         entries = freeze_counterfactual(full, int(mode[6:]))[-int(p.rule.event_max):]
+                    elif mode in ("ordplus1", "duppress"):      # 11-17 plan v13 E4: code + 1 / one more press, same code
+                        import dataclasses
+                        from .history import ordinal_counterfactual
+                        full = ledger_entries(dataclasses.replace(self.rule, event_max=10 ** 6), current, self.events)
+                        entries = ordinal_counterfactual(full, mode)[-int(p.rule.event_max):]
                     elif mode:
-                        raise ValueError(f"unknown MWAM_LEDGER mode {mode!r} (off | drop1 | dropfirst | addmove | freezeK | addpress | droppress)")
+                        raise ValueError(f"unknown MWAM_LEDGER mode {mode!r} (off | drop1 | dropfirst | addmove | freezeK | "
+                                         "addpress | droppress | ordplus1 | duppress)")
                     ledger = ledger_tensor(p.rule, entries, self._proprio)
             ids, _ = select(p.rule, current, known)
             self._encode(sorted(set(ids) | {current} | (set(known) if p.rule.variant == "prop" else set())))
@@ -425,7 +431,8 @@ class FullSession:
             "history_positions": out["positions"], "noise_seed": seed, "seconds": seconds,
             "normalized_actions": out["normalised"].float().cpu().tolist(), "actions_after_gripper_clip": actions.tolist(),
             "cached_frames": len(self.cache.kv), "events_known": known,
-            "ledger": [[int(e["frame"]), int(e["arm"]), e["kind"], int(e["confirmed"])] for e in entries],
+            "ledger": [[int(e["frame"]), int(e["arm"]), e["kind"], int(e["confirmed"])] + ([int(e["ordinal"])] if "ordinal" in e else [])
+                       for e in entries],
             "event_rule": [float(self.rule.event_delta), float(self.rule.event_min_path), int(self.rule.lag)]})
         if self.decisions % 4 == 0:
             print(f"[decide] {now()} {self.tag} frame={current}/{self.limit} hist={len(out['ids'])} "

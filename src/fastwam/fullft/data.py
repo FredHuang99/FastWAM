@@ -18,7 +18,7 @@ from typing import Dict, List, Optional, Sequence, Tuple
 import torch
 
 from .events import event_frames
-from .history import LEDGER_KINDS, HistoryRule, event_states, ledger_dim, ledger_entries, select
+from .history import LEDGER_KINDS, HistoryRule, event_states, ledger_dim, ledger_entries, ordinal_code, select
 
 HORIZON = 32
 
@@ -97,15 +97,19 @@ def ledger_tensor(rule: HistoryRule, entries: Sequence[dict], proprio_of) -> Tup
     """(features [event_max, ledger_dim], valid [event_max]) of ledger entries (ascending); proprio_of(frame) ->
     normalised proprio [14]. Slot j holds entry j; rank 0 = the most recent entry."""
     slots = rule.event_max
-    feat = torch.zeros(slots, ledger_dim(slots))
+    dims = int(rule.ordinal)
+    feat = torch.zeros(slots, ledger_dim(slots, dims))
     valid = torch.zeros(slots, dtype=torch.bool)
+    flag = 20 + slots                                   # the valid flag (= the last feature when dims == 0)
     n = len(entries)
     for j, e in enumerate(entries):
         feat[j, :14] = proprio_of(int(e["frame"])).float()
         feat[j, 14 + LEDGER_KINDS.index(e["kind"])] = 1.0
         feat[j, 18 + int(e["arm"])] = 1.0
         feat[j, 20 + (n - 1 - j)] = 1.0
-        feat[j, -1] = 1.0
+        feat[j, flag] = 1.0
+        if dims:                                        # 11-17 E4: KeyError if an entry carries no ordinal
+            feat[j, flag + 1:flag + 1 + dims] = torch.tensor(ordinal_code(int(e["ordinal"]), dims))
         valid[j] = True
     return feat, valid
 

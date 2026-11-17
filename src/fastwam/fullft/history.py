@@ -46,10 +46,19 @@ class HistoryRule:
     # detector from these; the trainer checks that the events file was written with the same values.
     event_delta: float = 0.015
     event_min_path: float = 0.03
+    # 11-17 plan v13 E4 (arprop only): each ledger entry also carries its ORDINAL = 1 + the number of earlier written
+    # entries of the same arm and kind since the episode start (so the 3rd press of the right arm says 3 even when
+    # older entries have left the event_max window), as a thermometer code of this many dims (feature k = 1 if
+    # ordinal >= k). 0 = off: features, ledger_dim and every earlier export are exactly as before.
+    ordinal: int = 0
 
     def __post_init__(self):
         if self.variant not in VARIANTS:
             raise ValueError(f"history variant must be one of {VARIANTS}, got {self.variant!r}")
+        if not 0 <= int(self.ordinal) <= 64:
+            raise ValueError(f"history ordinal (thermometer dims) must be 0..64, got {self.ordinal}")
+        if int(self.ordinal) and self.variant != "arprop":
+            raise ValueError("history ordinal is a ledger feature: only with variant arprop")
         if not (0.0 < float(self.event_delta) <= 0.1 and 0.0 <= float(self.event_min_path) <= 0.2):
             raise ValueError(f"event thresholds out of range: delta {self.event_delta}, min_path {self.event_min_path}")
         if self.index not in ("rank", "time"):
@@ -71,6 +80,11 @@ class HistoryRule:
     @property
     def event_slots(self) -> int:
         return self.event_max if self.variant in ("event", "prop", "arprop") else 0
+
+    @property
+    def ledger_features(self) -> int:
+        """Input width of the ledger encoder (0 when the variant has no ledger)."""
+        return ledger_dim(self.event_max, self.ordinal) if self.variant == "arprop" else 0
 
 
 def select(rule: HistoryRule, t: int, events: Sequence[int] = (), rng: Optional[random.Random] = None
@@ -118,15 +132,65 @@ def event_states(rule: HistoryRule, t: int, events: Sequence[int]) -> List[int]:
     return sorted({int(e) for e in events if 0 < int(e) < t})[-rule.event_max:]
 
 
-def ledger_dim(slots: int) -> int:
-    """Features of one ledger token: proprio (14) + kind one-hot (4) + arm one-hot (2) + rank one-hot (slots) + 1."""
-    return 14 + len(LEDGER_KINDS) + 2 + int(slots) + 1
+def ledger_dim(slots: int, ordinal: int = 0) -> int:
+    """Features of one ledger token: proprio (14) + kind one-hot (4) + arm one-hot (2) + rank one-hot (slots) + 1
+    (valid flag) [+ ordinal thermometer (ordinal dims), 11-17 E4]. Rank 0 = the most recent entry."""
+    return 14 + len(LEDGER_KINDS) + 2 + int(slots) + 1 + int(ordinal)
+
+
+def ordinal_code(n: int, dims: int) -> List[float]:
+    """Thermometer code of an ordinal n >= 1: feature k (k = 1..dims) is 1 if n >= k (saturates at dims)."""
+    return [1.0 if int(n) >= k else 0.0 for k in range(1, int(dims) + 1)]
+
+
+def with_ordinals(entries: Sequence[dict]) -> List[dict]:
+    """Copies of the (ascending) entries, each with 'ordinal' = 1 + the number of earlier entries of the same arm and
+    kind in this list. Called on the full written list since the episode start (before the event_max cut)."""
+    seen: dict = {}
+    out = []
+    for e in entries:
+        key = (int(e["arm"]), e["kind"])
+        seen[key] = seen.get(key, 0) + 1
+        out.append(dict(e, ordinal=seen[key]))
+    return out
 
 
 def ledger_entries(rule: HistoryRule, t: int, events: Sequence[dict]) -> List[dict]:
     """arprop: the ledger at current frame t = events with frame < t whose entry has been written (confirmed + lag
-    <= t), ordered by (frame, arm), the last `event_max` kept. The same function offline and online."""
+    <= t), ordered by (frame, arm), the last `event_max` kept. The same function offline and online.
+    With rule.ordinal the entries are copies carrying their ordinal, counted over ALL written entries."""
     known = [e for e in events
              if int(e["frame"]) < t and int(e.get("confirmed", e["frame"])) + int(rule.lag) <= t]
     known.sort(key=lambda e: (int(e["frame"]), int(e["arm"])))
+    if int(rule.ordinal):
+        known = with_ordinals(known)
     return known[-rule.event_max:]
+
+
+PRESS_KINDS = ("bottom", "top")
+
+
+def ordinal_counterfactual(entries: List[dict], mode: str) -> List[dict]:
+    """11-17 plan v13 E4 test-time counterfactuals for a model trained with history.ordinal, applied to the full list
+    of written entries (ledger_entries with no cap), before the event_max cut:
+      ordplus1  the ordinal of every press entry ('bottom' / 'top') + 1; the NUMBER of entries is unchanged
+      duppress  the most recent completed press (a 'bottom' and the next 'top' of the same arm) is entered twice, the
+                copies keeping their ordinals; one press more by the number of entries, the code unchanged
+    Before the first press completes, duppress changes nothing."""
+    if mode == "ordplus1":
+        if any("ordinal" not in e for e in entries):
+            raise ValueError("ordplus1 needs a model trained with history.ordinal (entries carry no ordinal)")
+        return [dict(e, ordinal=int(e["ordinal"]) + 1) if e["kind"] in PRESS_KINDS else e for e in entries]
+    if mode == "duppress":
+        for t in range(len(entries) - 1, -1, -1):
+            if entries[t]["kind"] != "top":
+                continue
+            arm = int(entries[t]["arm"])
+            b = next((i for i in range(t - 1, -1, -1)
+                      if int(entries[i]["arm"]) == arm and entries[i]["kind"] in PRESS_KINDS), None)
+            if b is not None and entries[b]["kind"] == "bottom":
+                out = list(entries)
+                out[t + 1:t + 1] = [dict(entries[b]), dict(entries[t])]
+                return out
+        return entries
+    raise ValueError(f"unknown ordinal counterfactual {mode!r} (ordplus1 | duppress)")

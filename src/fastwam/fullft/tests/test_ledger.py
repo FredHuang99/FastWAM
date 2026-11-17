@@ -194,7 +194,7 @@ def test_session_streaming_detection_equals_demo_detector(tmp_path):
         session._detect(n)
 
 
-@pytest.mark.parametrize("variant", ["ar", "arprop"])
+@pytest.mark.parametrize("variant", ["ar", "arprop", "arprop_ord"])
 def test_session_decide_end_to_end(tmp_path, variant):
     """FullSession.decide as the closed loop calls it (observation batches, identity checks, detection, ledger,
     selection, eviction, the decision log), with the image / text encoders stubbed: it equals decide_encoded on the
@@ -208,8 +208,10 @@ def test_session_decide_end_to_end(tmp_path, variant):
     from fastwam.fullft.online import FrameCache, FullSession, decide_encoded
     from fastwam.memory_s1.common import seed_for
     from fastwam.memory_s1.sim_bridge import diagnostic_action_noise
-    rule = HistoryRule(variant, event_max=4, lag=4)
-    m = _model(variant, event_slots=rule.event_slots)
+    ordinal = 3 if variant == "arprop_ord" else 0                  # 11-17 plan v13 E4: the ordinal code end to end
+    variant = "arprop" if ordinal else variant
+    rule = HistoryRule(variant, event_max=4, lag=4, ordinal=ordinal)
+    m = _model(variant, event_slots=rule.event_slots, ledger_features=rule.ledger_features)
     with torch.no_grad():
         m.hist_gate.fill_(0.5)
         if m.ledger is not None:
@@ -259,7 +261,7 @@ def test_session_decide_end_to_end(tmp_path, variant):
     assert len(rows) == 5 and rows[0]["ledger"] == []
     if variant == "arprop":
         assert rows[1]["frame_id"] == 8 and rows[1]["ledger"] == []                  # close at 12 not seen yet
-        assert rows[2]["frame_id"] == 16 and rows[2]["ledger"] == [[12, 0, "close", 12]]   # written at 12 + 4 = 16
+        assert rows[2]["frame_id"] == 16 and rows[2]["ledger"] == [[12, 0, "close", 12] + ([1] if ordinal else [])]
         assert rows[2]["events_known"] == [12]
 
 
@@ -341,3 +343,92 @@ def test_press_counterfactual():
     drop = press_counterfactual(led, "droppress")
     assert drop == [led[0], led[2], led[4], led[5]]
     assert press_counterfactual([], "droppress") == []
+
+
+# ----------------------------------------------------------------------------- 11-17 plan v13 E4 / E7
+PRESSES = [{"frame": 10, "arm": 1, "kind": "bottom", "confirmed": 12},
+           {"frame": 16, "arm": 1, "kind": "top", "confirmed": 18},
+           {"frame": 20, "arm": 0, "kind": "close", "confirmed": 20},
+           {"frame": 30, "arm": 1, "kind": "bottom", "confirmed": 32},
+           {"frame": 36, "arm": 1, "kind": "top", "confirmed": 38},
+           {"frame": 50, "arm": 1, "kind": "bottom", "confirmed": 52},
+           {"frame": 56, "arm": 1, "kind": "top", "confirmed": 58},
+           {"frame": 60, "arm": 1, "kind": "bottom", "confirmed": 62}]
+
+
+def test_ordinal_entries_and_features():
+    from fastwam.fullft.history import ordinal_code
+    with pytest.raises(ValueError):
+        HistoryRule("ar", ordinal=4)                                             # ledger feature only
+    base = HistoryRule("arprop", event_max=3, lag=0)
+    assert base.ledger_features == ledger_dim(3) == 3 + 21 and ledger_dim(32) == 53         # unchanged without it
+    assert all("ordinal" not in e for e in ledger_entries(base, 100, PRESSES))
+    rule = HistoryRule("arprop", event_max=3, lag=0, ordinal=4)
+    assert rule.ledger_features == ledger_dim(3, 4) == ledger_dim(3) + 4 and HistoryRule("ar").ledger_features == 0
+    got = ledger_entries(rule, 100, PRESSES)                                    # capped at 3, counted from the start
+    assert [(e["frame"], e["ordinal"]) for e in got] == [(50, 3), (56, 3), (60, 4)]
+    assert "ordinal" not in PRESSES[0]                                           # copies, the event list untouched
+    assert ordinal_code(1, 4) == [1, 0, 0, 0] and ordinal_code(4, 4) == [1, 1, 1, 1] and ordinal_code(9, 4) == [1] * 4
+    proprio = {f: torch.full((14,), float(f)) for f in range(100)}
+    f0, v0 = ledger_tensor(base, ledger_entries(base, 100, PRESSES), lambda f: proprio[f])
+    f1, v1 = ledger_tensor(rule, got, lambda f: proprio[f])
+    assert f1.shape == (3, ledger_dim(3, 4)) and torch.equal(v0, v1)
+    assert torch.equal(f1[:, :ledger_dim(3)], f0)                               # the old features, same places
+    assert f1[0, -4:].tolist() == [1, 1, 1, 0] and f1[2, -4:].tolist() == [1, 1, 1, 1]
+    f2, v2 = ledger_tensor(rule, ledger_entries(rule, 21, PRESSES), lambda f: proprio[f])
+    assert v2.tolist() == [True, True, True] and f2[0, -4:].tolist() == [1, 0, 0, 0]    # 1st bottom, 1st top, 1st close
+    with pytest.raises(KeyError):
+        ledger_tensor(rule, ledger_entries(base, 100, PRESSES), lambda f: proprio[f])     # entries without ordinals
+
+
+def test_ordinal_counterfactuals():
+    from fastwam.fullft.history import ordinal_counterfactual
+    rule = HistoryRule("arprop", event_max=10 ** 6, lag=0, ordinal=16)
+    full = ledger_entries(rule, 100, PRESSES)
+    plus = ordinal_counterfactual(full, "ordplus1")
+    assert len(plus) == len(full)
+    assert [e["ordinal"] for e in plus] == [2, 2, 1, 3, 3, 4, 4, 5]               # the close keeps 1
+    assert [e["ordinal"] for e in full] == [1, 1, 1, 2, 2, 3, 3, 4]               # input untouched
+    dup = ordinal_counterfactual(full, "duppress")                                # last COMPLETED press: 50 / 56
+    assert [(e["frame"], e["ordinal"]) for e in dup] == [(10, 1), (16, 1), (20, 1), (30, 2), (36, 2), (50, 3),
+                                                         (56, 3), (50, 3), (56, 3), (60, 4)]
+    early = ledger_entries(rule, 13, PRESSES)                                     # only the 1st bottom written
+    assert ordinal_counterfactual(early, "duppress") == early
+    with pytest.raises(ValueError):
+        ordinal_counterfactual(ledger_entries(HistoryRule("arprop", event_max=99), 100, PRESSES), "ordplus1")
+    with pytest.raises(ValueError):
+        ordinal_counterfactual(full, "nope")
+
+
+def test_zero_ledger_with_ordinal_is_exactly_ar():
+    rule = HistoryRule("arprop", event_max=4, lag=0, ordinal=16)
+    batch = _ledger_batch()
+    batch["ledger"] = torch.randn(2, 4, rule.ledger_features, generator=torch.Generator().manual_seed(5))
+    noise = _noise(batch)
+    m0, ml = _model("ar"), _model("arprop", event_slots=4, ledger_features=rule.ledger_features)
+    assert ml.ledger.in_features == ledger_dim(4, 16)
+    missing, unexpected = ml.load_state_dict(m0.state_dict(), strict=False)
+    assert not unexpected and sorted(missing) == ["ledger.bias", "ledger.weight"]
+    with torch.no_grad():
+        m0.hist_gate.fill_(0.3)
+        ml.hist_gate.fill_(0.3)
+        v0, a0 = m0.loss(batch, noise)
+        v1, a1 = ml.loss(batch, noise)
+        assert torch.equal(v0, v1) and torch.equal(a0, a1)
+    v, a = ml.loss(batch, noise)
+    (a.mean() + v.mean()).backward()
+    assert float(ml.ledger.weight.grad[:, -16:].abs().sum()) > 0                 # the code columns learn
+
+
+def test_resume_source(tmp_path):
+    from fastwam.fullft.train import resume_source
+    run, other = tmp_path / "run", tmp_path / "other"
+    run.mkdir(); other.mkdir()
+    assert resume_source(run, "") is None
+    with pytest.raises(FileNotFoundError):
+        resume_source(run, str(other / "resume.pt"))                              # never a silent fresh start
+    (other / "resume.pt").write_text("x")
+    assert resume_source(run, str(other / "resume.pt")) == other / "resume.pt"
+    assert resume_source(run, str(other / "resume.pt"), smoke=True) is None
+    (run / "resume.pt").write_text("y")
+    assert resume_source(run, str(other / "resume.pt")) == run / "resume.pt"      # its own checkpoint wins

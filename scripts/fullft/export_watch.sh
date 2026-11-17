@@ -5,16 +5,26 @@
 # A tag counts as relayed only when the relay lists both export_<tag>.pt and its .sha256; up to 3 tries per tag.
 # Resumable (marker outputs/fullft/<run>/.relayed_<tag>). CPU / network only.
 #   docker exec -d mwam2 bash /workspace/FastWAM-memory2/scripts/fullft/export_watch.sh
-# Env: RUN (ar_2task), TAGS ("e10 e20 e30"), POLL seconds (300). Own log: outputs/fullft/EXPORT_WATCH_<time>.txt
+# Env: RUN (ar_2task), TAGS (default: the run's own schedule.export_at_epochs from its run_config.json, waited for up
+# to 1 h; "e10 e20 e30" if it never appears; 11-17: plan v13 E7 exports at e45 / e60), POLL seconds (300).
+# Own log: outputs/fullft/EXPORT_WATCH_<time>.txt
 set -u
 R=/workspace/FastWAM-memory2
 OUT=$R/outputs/fullft
-RUN=${RUN:-ar_2task}; TAGS=${TAGS:-"e10 e20 e30"}; POLL=${POLL:-300}
+RUN=${RUN:-ar_2task}; TAGS=${TAGS:-}; POLL=${POLL:-300}
 LOG=$OUT/EXPORT_WATCH_$(date +%Y%m%d_%H%M).txt
 exec > >(tee -a "$LOG") 2>&1
 trap 'rc=$?; echo "[watch] $(date "+%F %T") finished, exit code $rc; log $LOG"' EXIT
 HFPY=/opt/hf-tools/bin/python; [ -x $HFPY ] || HFPY=/opt/mwam/bin/python
 cd $R
+if [ -z "$TAGS" ]; then
+  i=0; until [ -f $OUT/$RUN/run_config.json ] || [ $i -ge 60 ]; do sleep 60; i=$((i + 1)); done
+  TAGS=$(/opt/mwam/bin/python -c 'import json, sys
+e = json.load(open(sys.argv[1]))["schedule"]["export_at_epochs"]
+print(" ".join("e%d" % float(x) if float(x) == int(float(x)) else "e%s" % x for x in e))' $OUT/$RUN/run_config.json 2>/dev/null)
+  TAGS=${TAGS:-"e10 e20 e30"}
+fi
+echo "[watch] $(date '+%F %T') run $RUN, tags $TAGS"
 listed() { $HFPY scripts/memory_v2/migrate/relay.py ls --prefix exports/${RUN}_$1 --repo hhyfred/memwam-fullft 2>/dev/null; }
 for TAG in $TAGS; do
   F=$OUT/$RUN/export_$TAG.pt; M=$OUT/$RUN/.relayed_$TAG

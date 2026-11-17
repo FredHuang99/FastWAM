@@ -36,7 +36,8 @@ def main():
     out = Path(args.out) if Path(args.out).is_absolute() else R / args.out
     if not out.exists():
         t = time.monotonic()
-        model = FullModel.from_release(cfg.model.architecture, cfg.model.base, cfg.rule.variant, cfg.rule.event_slots)
+        model = FullModel.from_release(cfg.model.architecture, cfg.model.base, cfg.rule.variant, cfg.rule.event_slots,
+                                       ledger_features=cfg.rule.ledger_features)
         model.set_trainable(cfg.model.train_video, cfg.model.lora_rank)
         weights = {k: v.detach().to(torch.bfloat16).cpu() for k, v in model.state_dict().items()}
         out.parent.mkdir(parents=True, exist_ok=True)
