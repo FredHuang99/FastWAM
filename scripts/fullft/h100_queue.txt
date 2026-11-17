@@ -9,3 +9,11 @@ battery_ar | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dens
 h100_parity | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_press_button_v1] data.tasks=[press_button] schedule.stop_after=500 | test -f outputs/memory_v2/press/dense_press_button_v1/.verified
 # the ledger arm of the battery half of G2; needs the battery event file and READY_arprop (ledger_ready.py) on this machine
 battery_arprop | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_battery_try_v1] data.tasks=[battery_try] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_battery_try.json] | test -f outputs/memory_v2/press/dense_battery_try_v1/.verified && test -f outputs/fullft/events/events_battery_try.json && grep -q battery_try outputs/fullft/READY_arprop
+# 11-17 11:30 (L1117: GPU3 of gpu24 free with nothing runnable): plan v12 B1 = the AR column of the main table for the
+# four tasks not trained yet. Every main-table option in the v13 brief keeps the AR column, so these do not wait for v13.
+# Shortest first (v12 H200 estimates 16 / 14 / 41 / 59 h; about 3.6x that here). Caches: cache_fetch.sh with these TASKS.
+# Same recipe as battery_ar (base_2task.yaml, history ar, 30 frame-epochs, exports e10 / e20 / e30 to the relay).
+rearrange_ar | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified
+swapT_ar | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_swap_T_v1] data.tasks=[swap_T] | test -f outputs/memory_v2/press/dense_swap_T_v1/.verified
+cover_ar | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_cover_blocks_v1] data.tasks=[cover_blocks] | test -f outputs/memory_v2/press/dense_cover_blocks_v1/.verified
+ranking_ar | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_blocks_ranking_try_v1] data.tasks=[blocks_ranking_try] | test -f outputs/memory_v2/press/dense_blocks_ranking_try_v1/.verified
