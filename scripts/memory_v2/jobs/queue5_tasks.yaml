@@ -6423,3 +6423,1407 @@ tasks:
   online_args: ["--execute", "8", "--limit", "20", "--shard", "3/4"]
   output: closed_loop/g1
   env: {MWAM_TEXT_SOURCE: "cache"}
+
+# ---------------------------------------------------------------------------------------------------------------
+# 11-17 10:50 BJ (Opus, L1117): A40 learning curve. A40-EQ passed (all three pairs EQUIVALENT, 00:35), so A40 numbers
+# share the judging table. The A40 idles from ~11:30 (ar2_none e20 put done) until ar2_none e30 reaches the relay
+# (~16:45). Fill: the e10 / e20 exports of the ledger model (ar2_prop) and of the AR control (ar_2task) on swap and put
+# scenes 1-100 (the A100 ran them only on swap 1-20 / put 1-50). Descriptive (learning-curve figure: none / AR / ledger
+# vs epoch); no verdict. Fresh output folder closed_loop/lc so no migrated A100 result can be skipped into it.
+# Listed after the none30 shards: when the e30 export lands, freed GPUs go to none30 first.
+
+- id: A40-fetch-prop10
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 6
+  hypothesis: "fetch ar2_prop_e10 from the relay for the A40 learning curve (sha256 checked)"
+  command: "RUN=ar2_prop TAG=e10 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fetch-prop20
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 6
+  hypothesis: "fetch ar2_prop_e20 from the relay for the A40 learning curve (sha256 checked)"
+  command: "RUN=ar2_prop TAG=e20 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fetch-ar10
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 6
+  hypothesis: "fetch ar_2task_e10 from the relay for the A40 learning curve (sha256 checked)"
+  command: "RUN=ar_2task TAG=e10 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fetch-ar20
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 6
+  hypothesis: "fetch ar_2task_e20 from the relay for the A40 learning curve (sha256 checked)"
+  command: "RUN=ar_2task TAG=e20 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-lc-prop10-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop10]
+  requires_pass: [A40-fetch-prop10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e10, swap scenes 1-100, shard 0 of 10 (A100: swap 15/20, put 39/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop10-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop10]
+  requires_pass: [A40-fetch-prop10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e10, swap scenes 1-100, shard 1 of 10 (A100: swap 15/20, put 39/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop10-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop10]
+  requires_pass: [A40-fetch-prop10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e10, swap scenes 1-100, shard 2 of 10 (A100: swap 15/20, put 39/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop10-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop10]
+  requires_pass: [A40-fetch-prop10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e10, swap scenes 1-100, shard 3 of 10 (A100: swap 15/20, put 39/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop10-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop10]
+  requires_pass: [A40-fetch-prop10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e10, swap scenes 1-100, shard 4 of 10 (A100: swap 15/20, put 39/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop10-swap-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop10]
+  requires_pass: [A40-fetch-prop10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e10, swap scenes 1-100, shard 5 of 10 (A100: swap 15/20, put 39/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop10-swap-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop10]
+  requires_pass: [A40-fetch-prop10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e10, swap scenes 1-100, shard 6 of 10 (A100: swap 15/20, put 39/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop10-swap-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop10]
+  requires_pass: [A40-fetch-prop10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e10, swap scenes 1-100, shard 7 of 10 (A100: swap 15/20, put 39/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop10-swap-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop10]
+  requires_pass: [A40-fetch-prop10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e10, swap scenes 1-100, shard 8 of 10 (A100: swap 15/20, put 39/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop10-swap-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop10]
+  requires_pass: [A40-fetch-prop10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e10, swap scenes 1-100, shard 9 of 10 (A100: swap 15/20, put 39/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop10-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop10]
+  requires_pass: [A40-fetch-prop10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e10, put scenes 1-100, shard 0 of 10 (A100: swap 15/20, put 39/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop10-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop10]
+  requires_pass: [A40-fetch-prop10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e10, put scenes 1-100, shard 1 of 10 (A100: swap 15/20, put 39/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop10-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop10]
+  requires_pass: [A40-fetch-prop10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e10, put scenes 1-100, shard 2 of 10 (A100: swap 15/20, put 39/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop10-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop10]
+  requires_pass: [A40-fetch-prop10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e10, put scenes 1-100, shard 3 of 10 (A100: swap 15/20, put 39/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop10-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop10]
+  requires_pass: [A40-fetch-prop10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e10, put scenes 1-100, shard 4 of 10 (A100: swap 15/20, put 39/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop10-put-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop10]
+  requires_pass: [A40-fetch-prop10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e10, put scenes 1-100, shard 5 of 10 (A100: swap 15/20, put 39/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop10-put-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop10]
+  requires_pass: [A40-fetch-prop10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e10, put scenes 1-100, shard 6 of 10 (A100: swap 15/20, put 39/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop10-put-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop10]
+  requires_pass: [A40-fetch-prop10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e10, put scenes 1-100, shard 7 of 10 (A100: swap 15/20, put 39/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop10-put-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop10]
+  requires_pass: [A40-fetch-prop10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e10, put scenes 1-100, shard 8 of 10 (A100: swap 15/20, put 39/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop10-put-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop10]
+  requires_pass: [A40-fetch-prop10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e10, put scenes 1-100, shard 9 of 10 (A100: swap 15/20, put 39/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e10/export_e10.pt
+  label: ar2_prop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar10-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar10]
+  requires_pass: [A40-fetch-ar10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e10, swap scenes 1-100, shard 0 of 10 (A100: swap 0/20, put 34/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar10-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar10]
+  requires_pass: [A40-fetch-ar10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e10, swap scenes 1-100, shard 1 of 10 (A100: swap 0/20, put 34/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar10-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar10]
+  requires_pass: [A40-fetch-ar10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e10, swap scenes 1-100, shard 2 of 10 (A100: swap 0/20, put 34/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar10-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar10]
+  requires_pass: [A40-fetch-ar10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e10, swap scenes 1-100, shard 3 of 10 (A100: swap 0/20, put 34/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar10-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar10]
+  requires_pass: [A40-fetch-ar10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e10, swap scenes 1-100, shard 4 of 10 (A100: swap 0/20, put 34/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar10-swap-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar10]
+  requires_pass: [A40-fetch-ar10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e10, swap scenes 1-100, shard 5 of 10 (A100: swap 0/20, put 34/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar10-swap-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar10]
+  requires_pass: [A40-fetch-ar10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e10, swap scenes 1-100, shard 6 of 10 (A100: swap 0/20, put 34/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar10-swap-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar10]
+  requires_pass: [A40-fetch-ar10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e10, swap scenes 1-100, shard 7 of 10 (A100: swap 0/20, put 34/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar10-swap-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar10]
+  requires_pass: [A40-fetch-ar10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e10, swap scenes 1-100, shard 8 of 10 (A100: swap 0/20, put 34/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar10-swap-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar10]
+  requires_pass: [A40-fetch-ar10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e10, swap scenes 1-100, shard 9 of 10 (A100: swap 0/20, put 34/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar10-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar10]
+  requires_pass: [A40-fetch-ar10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e10, put scenes 1-100, shard 0 of 10 (A100: swap 0/20, put 34/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar10-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar10]
+  requires_pass: [A40-fetch-ar10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e10, put scenes 1-100, shard 1 of 10 (A100: swap 0/20, put 34/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar10-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar10]
+  requires_pass: [A40-fetch-ar10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e10, put scenes 1-100, shard 2 of 10 (A100: swap 0/20, put 34/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar10-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar10]
+  requires_pass: [A40-fetch-ar10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e10, put scenes 1-100, shard 3 of 10 (A100: swap 0/20, put 34/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar10-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar10]
+  requires_pass: [A40-fetch-ar10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e10, put scenes 1-100, shard 4 of 10 (A100: swap 0/20, put 34/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar10-put-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar10]
+  requires_pass: [A40-fetch-ar10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e10, put scenes 1-100, shard 5 of 10 (A100: swap 0/20, put 34/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar10-put-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar10]
+  requires_pass: [A40-fetch-ar10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e10, put scenes 1-100, shard 6 of 10 (A100: swap 0/20, put 34/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar10-put-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar10]
+  requires_pass: [A40-fetch-ar10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e10, put scenes 1-100, shard 7 of 10 (A100: swap 0/20, put 34/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar10-put-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar10]
+  requires_pass: [A40-fetch-ar10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e10, put scenes 1-100, shard 8 of 10 (A100: swap 0/20, put 34/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar10-put-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar10]
+  requires_pass: [A40-fetch-ar10]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e10, put scenes 1-100, shard 9 of 10 (A100: swap 0/20, put 34/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop20-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop20]
+  requires_pass: [A40-fetch-prop20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e20, swap scenes 1-100, shard 0 of 10 (A100: swap 20/20, put 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop20-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop20]
+  requires_pass: [A40-fetch-prop20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e20, swap scenes 1-100, shard 1 of 10 (A100: swap 20/20, put 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop20-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop20]
+  requires_pass: [A40-fetch-prop20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e20, swap scenes 1-100, shard 2 of 10 (A100: swap 20/20, put 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop20-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop20]
+  requires_pass: [A40-fetch-prop20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e20, swap scenes 1-100, shard 3 of 10 (A100: swap 20/20, put 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop20-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop20]
+  requires_pass: [A40-fetch-prop20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e20, swap scenes 1-100, shard 4 of 10 (A100: swap 20/20, put 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop20-swap-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop20]
+  requires_pass: [A40-fetch-prop20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e20, swap scenes 1-100, shard 5 of 10 (A100: swap 20/20, put 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop20-swap-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop20]
+  requires_pass: [A40-fetch-prop20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e20, swap scenes 1-100, shard 6 of 10 (A100: swap 20/20, put 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop20-swap-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop20]
+  requires_pass: [A40-fetch-prop20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e20, swap scenes 1-100, shard 7 of 10 (A100: swap 20/20, put 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop20-swap-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop20]
+  requires_pass: [A40-fetch-prop20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e20, swap scenes 1-100, shard 8 of 10 (A100: swap 20/20, put 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop20-swap-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop20]
+  requires_pass: [A40-fetch-prop20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e20, swap scenes 1-100, shard 9 of 10 (A100: swap 20/20, put 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop20-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop20]
+  requires_pass: [A40-fetch-prop20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e20, put scenes 1-100, shard 0 of 10 (A100: swap 20/20, put 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop20-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop20]
+  requires_pass: [A40-fetch-prop20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e20, put scenes 1-100, shard 1 of 10 (A100: swap 20/20, put 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop20-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop20]
+  requires_pass: [A40-fetch-prop20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e20, put scenes 1-100, shard 2 of 10 (A100: swap 20/20, put 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop20-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop20]
+  requires_pass: [A40-fetch-prop20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e20, put scenes 1-100, shard 3 of 10 (A100: swap 20/20, put 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop20-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop20]
+  requires_pass: [A40-fetch-prop20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e20, put scenes 1-100, shard 4 of 10 (A100: swap 20/20, put 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop20-put-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop20]
+  requires_pass: [A40-fetch-prop20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e20, put scenes 1-100, shard 5 of 10 (A100: swap 20/20, put 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop20-put-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop20]
+  requires_pass: [A40-fetch-prop20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e20, put scenes 1-100, shard 6 of 10 (A100: swap 20/20, put 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop20-put-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop20]
+  requires_pass: [A40-fetch-prop20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e20, put scenes 1-100, shard 7 of 10 (A100: swap 20/20, put 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop20-put-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop20]
+  requires_pass: [A40-fetch-prop20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e20, put scenes 1-100, shard 8 of 10 (A100: swap 20/20, put 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-prop20-put-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-prop20]
+  requires_pass: [A40-fetch-prop20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar2_prop e20, put scenes 1-100, shard 9 of 10 (A100: swap 20/20, put 48/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e20/export_e20.pt
+  label: ar2_prop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar20-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar20]
+  requires_pass: [A40-fetch-ar20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e20, swap scenes 1-100, shard 0 of 10 (A100: swap 7/20, put 50/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar20-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar20]
+  requires_pass: [A40-fetch-ar20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e20, swap scenes 1-100, shard 1 of 10 (A100: swap 7/20, put 50/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar20-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar20]
+  requires_pass: [A40-fetch-ar20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e20, swap scenes 1-100, shard 2 of 10 (A100: swap 7/20, put 50/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar20-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar20]
+  requires_pass: [A40-fetch-ar20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e20, swap scenes 1-100, shard 3 of 10 (A100: swap 7/20, put 50/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar20-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar20]
+  requires_pass: [A40-fetch-ar20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e20, swap scenes 1-100, shard 4 of 10 (A100: swap 7/20, put 50/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar20-swap-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar20]
+  requires_pass: [A40-fetch-ar20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e20, swap scenes 1-100, shard 5 of 10 (A100: swap 7/20, put 50/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar20-swap-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar20]
+  requires_pass: [A40-fetch-ar20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e20, swap scenes 1-100, shard 6 of 10 (A100: swap 7/20, put 50/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar20-swap-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar20]
+  requires_pass: [A40-fetch-ar20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e20, swap scenes 1-100, shard 7 of 10 (A100: swap 7/20, put 50/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar20-swap-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar20]
+  requires_pass: [A40-fetch-ar20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e20, swap scenes 1-100, shard 8 of 10 (A100: swap 7/20, put 50/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar20-swap-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar20]
+  requires_pass: [A40-fetch-ar20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e20, swap scenes 1-100, shard 9 of 10 (A100: swap 7/20, put 50/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar20-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar20]
+  requires_pass: [A40-fetch-ar20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e20, put scenes 1-100, shard 0 of 10 (A100: swap 7/20, put 50/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar20-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar20]
+  requires_pass: [A40-fetch-ar20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e20, put scenes 1-100, shard 1 of 10 (A100: swap 7/20, put 50/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar20-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar20]
+  requires_pass: [A40-fetch-ar20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e20, put scenes 1-100, shard 2 of 10 (A100: swap 7/20, put 50/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar20-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar20]
+  requires_pass: [A40-fetch-ar20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e20, put scenes 1-100, shard 3 of 10 (A100: swap 7/20, put 50/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar20-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar20]
+  requires_pass: [A40-fetch-ar20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e20, put scenes 1-100, shard 4 of 10 (A100: swap 7/20, put 50/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar20-put-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar20]
+  requires_pass: [A40-fetch-ar20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e20, put scenes 1-100, shard 5 of 10 (A100: swap 7/20, put 50/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar20-put-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar20]
+  requires_pass: [A40-fetch-ar20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e20, put scenes 1-100, shard 6 of 10 (A100: swap 7/20, put 50/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar20-put-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar20]
+  requires_pass: [A40-fetch-ar20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e20, put scenes 1-100, shard 7 of 10 (A100: swap 7/20, put 50/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar20-put-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar20]
+  requires_pass: [A40-fetch-ar20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e20, put scenes 1-100, shard 8 of 10 (A100: swap 7/20, put 50/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-lc-ar20-put-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar20]
+  requires_pass: [A40-fetch-ar20]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "learning curve (descriptive, registered 11-17 10:50 BJ before any A40 run of this checkpoint): ar_2task e20, put scenes 1-100, shard 9 of 10 (A100: swap 7/20, put 50/50)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/lc
+  env: {MWAM_TEXT_SOURCE: "cache"}

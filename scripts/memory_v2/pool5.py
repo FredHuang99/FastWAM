@@ -225,6 +225,22 @@ def loop_scenes(task):
     return [(s["task"], int(s["seed"])) for s in scenes[k::n]]
 
 
+def own_errors(task):
+    """Open episode errors (ERROR.json, no result.json) among the scenes and modes THIS card runs (11-17: a shard used
+    to count the errors of every shard sharing its output folder and label, and burned its attempts on a sibling's
+    simulator OOMs - ADDx-a100 s4 / s6 / s7 on the A100). Falls back to the whole label when the scenes are unknown."""
+    eff = q.effective(task)
+    errors = q.error_dirs([eff["output"]], eff["label"], modes=eff.get("modes") or None)
+    try:
+        mine = loop_scenes(task)
+    except Exception:                              # noqa: BLE001
+        mine = None
+    if not mine:
+        return errors
+    mine = set(mine)
+    return [e for e in errors if (e[0], e[2]) in mine]
+
+
 def progress(task, s):
     """(done, total, unit, eta epoch or None, note)."""
     kind = task["kind"]
@@ -250,9 +266,12 @@ def progress(task, s):
         if mode in modes and (not wanted or (tname, seed) in wanted):
             done += 1
             stamps.append(res.stat().st_mtime)
-    for e in out.glob(f"{label}/*/*/seed_*/ERROR.json"):
-        if not (e.parent / "result.json").exists():
-            errors += 1
+    if q.effective(task).get("label"):
+        errors = len(own_errors(task))
+    else:
+        for e in out.glob(f"{label}/*/*/seed_*/ERROR.json"):
+            if not (e.parent / "result.json").exists():
+                errors += 1
     total = len(scenes) * len(modes) if scenes is not None else None
     eta = None
     stamps.sort()
@@ -306,7 +325,7 @@ def cmd_exec(args):
             failure = ("stalled: nothing written for " + str(cfg["stall_minutes"]) + " min" if s.get("stall_killed")
                        else f"rc={rc}: " + classify(log_tail(q.Q / "tasks" / f"{tid}.log", 60)))
         elif task["kind"] == "closed_loop":
-            open_errors = q.error_dirs([q.effective(task)["output"]], q.effective(task)["label"])
+            open_errors = own_errors(task)
             if open_errors:
                 failure = f"{len(open_errors)} episodes ended with ERROR.json (re-run retries only those)"
     if failure:
