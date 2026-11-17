@@ -1,0 +1,52 @@
+# Plan v13 E2 AUDIT -- REGISTERED PREDICTIONS (verbatim output of scripts/fullft/audit_demos.py, commit 3cb02cb's code
+# as pulled at 85f57a5; run on the 5090 (mwam5090, CPU) 11-17 21:19 BJ; JSON outputs/fullft/audit/E2_AUDIT_20261117_2119.json
+# there). Committed by Opus 11-17 ~21:25 BJ, BEFORE any battery closed-loop result exists (battery_ar / battery_arprop are
+# still training on the H100, ETA 11-19 15:00 / 16:00) and before any closed-loop result of rearrange, swap_T, cover,
+# ranking, observe, place. Rules (rule 0 / T / R / C, the measured gains, LAW HOLDS / FAILS) are in the script header;
+# they are not changed after this point. Fits (known results, not predictions): put_back_block, swap_blocks, press_button (cur).
+# Every task: 50 demos read, none unreadable (floor >= 45 met).
+in-place threshold theta = 0.0004 rad (NOT separable (press q90 0.7533 >= swap q10 0.6805): press median)
+task                set  |     demos events_median events_max  G_median     G_q10  L_median       tau         r    s_time    s_last   s_count    s_full s_full_goal
+put_back_block      cur  |    50.000    11.000    11.000    29.000    24.000     8.000     1.000     0.000     0.975     0.830     0.998     0.998     0.998
+swap_blocks         cur  |    50.000    20.000    24.000    28.000    13.000     9.000     0.793     0.000     0.511     0.557     0.773     0.734     0.715
+press_button        cur  |    50.000    20.000    24.000    26.000    11.000     8.000     0.363     0.261     0.841     0.763     0.818     0.890     0.885
+battery_try         cur  |    50.000    24.000    33.000    27.500     3.000     8.000     0.697     0.006     0.664     0.498     0.781     0.730     0.690
+rearrange_blocks    cur  |    50.000    14.000    15.000    27.000    13.000     8.000     0.877     0.000     0.941     0.659     0.954     0.957     0.970
+swap_T              cur  |    50.000    15.000    17.000    16.000     0.000     8.000     0.502     0.000     0.686     0.532     0.810     0.804     0.770
+cover_blocks        cur  |    50.000    30.000    32.000    34.000    23.000     9.000     0.949     0.003     0.753     0.629     0.867     0.846     0.789
+blocks_ranking_try  cur  |    50.000    45.000    73.000    33.000    15.000     8.000     0.857     0.037     0.912     0.588     0.912     0.820     0.815
+observe_and_pickup  cur  |    50.000     2.000     3.000    40.000    25.000     8.000     0.980     0.000     0.675     0.854     0.854     0.854     0.980
+place_block_mat     cur  |    50.000    37.000    40.000    28.000    13.000     9.000     0.732     0.000     0.605     0.536     0.849     0.713     0.610
+put_back_block      fast |    50.000    13.000    13.000    26.000     7.000     4.000     0.887     0.000     0.946     0.854     0.999     0.999     0.999
+swap_blocks         fast |    50.000    25.000    28.000    22.000    10.000     5.000     0.814     0.000     0.439     0.630     0.690     0.602     0.562
+press_button        fast |    50.000    20.000    24.000    26.000    11.000     4.000     0.419     0.261     0.841     0.763     0.818     0.890     0.885
+battery_try         fast |    50.000    31.000    40.000    21.000     2.000     5.000     0.694     0.000     0.615     0.533     0.811     0.750     0.743
+rearrange_blocks    fast |    50.000    17.000    17.000    24.000     5.000     4.000     0.790     0.000     0.939     0.732     0.932     0.957     0.971
+swap_T              fast |    50.000    18.000    20.000    15.000     0.000     4.000     0.639     0.000     0.659     0.514     0.805     0.735     0.734
+cover_blocks        fast |    50.000    38.000    42.000    28.000    13.000     4.000     0.814     0.000     0.722     0.602     0.751     0.725     0.552
+blocks_ranking_try  fast |    50.000    63.000   103.000    23.000    11.000     4.000     0.754     0.027     0.904     0.642     0.928     0.821     0.807
+observe_and_pickup  fast |    50.000     3.000     3.000    18.000     4.900     6.000     0.830     0.000     0.605     0.875     0.875     0.875     0.980
+place_block_mat     fast |    50.000    46.000    47.000    21.000     8.000     5.000     0.882     0.000     0.544     0.645     0.897     0.763     0.709
+
+===== PREDICTIONS (register before any battery closed-loop result is read) =====
+theta 0.0004 rad; fits (known results): put_back_block, swap_blocks, press_button cur
+put_back_block      cur  | ledger GAIN                     | read none                   | clock EARLY UNDER PAUSE
+swap_blocks         cur  | ledger none (0.5 <= tau < 0.9)  | read none                   | clock none
+press_button        cur  | ledger SMALL                    | read none                   | clock EARLY UNDER PAUSE
+battery_try         cur  | ledger none (0.5 <= tau < 0.9)  | read NEEDS COUNTABLE CODE   | clock none
+rearrange_blocks    cur  | ledger none (0.5 <= tau < 0.9)  | read NEEDS COUNTABLE CODE   | clock EARLY UNDER PAUSE
+swap_T              cur  | ledger none (0.5 <= tau < 0.9)  | read NEEDS COUNTABLE CODE   | clock none
+cover_blocks        cur  | ledger GAIN                     | read none                   | clock none
+blocks_ranking_try  cur  | ledger none (0.5 <= tau < 0.9)  | read none                   | clock EARLY UNDER PAUSE
+observe_and_pickup  cur  | ledger GAIN                     | read CURRENT READ SUFFICES  | clock none
+place_block_mat     cur  | ledger none (0.5 <= tau < 0.9)  | read none                   | clock none
+put_back_block      fast | ledger none (0.5 <= tau < 0.9)  | read none                   | clock EARLY UNDER PAUSE
+swap_blocks         fast | ledger NONE                     | read CURRENT READ SUFFICES  | clock none
+press_button        fast | ledger SMALL                    | read none                   | clock EARLY UNDER PAUSE
+battery_try         fast | ledger none (0.5 <= tau < 0.9)  | read none                   | clock none
+rearrange_blocks    fast | ledger none (0.5 <= tau < 0.9)  | read none                   | clock EARLY UNDER PAUSE
+swap_T              fast | ledger none (0.5 <= tau < 0.9)  | read NEEDS COUNTABLE CODE   | clock none
+cover_blocks        fast | ledger none (0.5 <= tau < 0.9)  | read none                   | clock none
+blocks_ranking_try  fast | ledger none (0.5 <= tau < 0.9)  | read none                   | clock EARLY UNDER PAUSE
+observe_and_pickup  fast | ledger none (0.5 <= tau < 0.9)  | read CURRENT READ SUFFICES  | clock none
+place_block_mat     fast | ledger none (0.5 <= tau < 0.9)  | read none                   | clock none
