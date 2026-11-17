@@ -1,0 +1,44 @@
+#!/bin/bash
+# NTU GaaS (H200), 11-17 (Opus): step 1 of the environment = the OLD H200's training image, pulled BY DIGEST into an
+# apptainer SIF, so the H200s are numerically interchangeable (user 16:57). Old H200 (container mwam2, 16:59):
+#   nvcr.io/nvidia/pytorch@sha256:417cbf33f87b5378849df37983552cd1f8bc8b62fe1ceabe004de816a55dff21 (built 2025-11-08)
+#   torch 2.10.0a0+b558c986e8.nv25.11, CUDA 13.0, cuDNN 91500, NCCL (2, 28, 8), python 3.12.3
+# Runs on a datamover node (free queue, CPU only; pulling and squashing an image is not done on the login node).
+# Ends by printing the same version line from inside the SIF: it must equal the line above.
+#   cd ~/mwam && qsub FastWAM-memory2/scripts/gaas/sif_pull.pbs        live log: ~/mwam/logs/SIF_PULL_<time>.txt
+#PBS -N mwam_sif
+#PBS -P gs_ccds_tianwei.zhang
+#PBS -q gpu_datamover
+#PBS -l select=1:ncpus=4
+#PBS -l walltime=06:00:00
+#PBS -j oe
+set -u
+DIGEST=sha256:417cbf33f87b5378849df37983552cd1f8bc8b62fe1ceabe004de816a55dff21
+W=$HOME/mwam
+SIF=$W/sif/pytorch_25.11_417cbf33.sif
+mkdir -p $W/sif $W/logs $W/.apptainer_cache
+LOG=$W/logs/SIF_PULL_$(date +%Y%m%d_%H%M).txt
+exec > >(tee -a "$LOG") 2>&1
+echo "[sif] $(date '+%F %T') host $(hostname); job ${PBS_JOBID:-none}; cores $(nproc)"
+module purge
+module load apptainer/1.4.1
+echo "[sif] $(apptainer --version)"
+printf "[sif] nvcr.io from this node: "; curl -s -o /dev/null -m 15 -w "%{http_code}\n" https://nvcr.io
+df -h /tmp $HOME 2>&1 | sed 's/^/[sif] /'
+# the squashed image needs about 2x its size of scratch: use /tmp only if it has >= 80 GB free, else a folder in $HOME
+FREE=$(df -BG --output=avail /tmp 2>/dev/null | tail -1 | tr -dc '0-9')
+if [ "${FREE:-0}" -ge 80 ]; then export APPTAINER_TMPDIR=/tmp/mwam_$$; else export APPTAINER_TMPDIR=$W/tmp; fi
+mkdir -p "$APPTAINER_TMPDIR"
+export APPTAINER_CACHEDIR=$W/.apptainer_cache
+echo "[sif] scratch $APPTAINER_TMPDIR; cache $APPTAINER_CACHEDIR"
+if [ -s "$SIF" ]; then
+  echo "[sif] $SIF exists: not pulled again"
+else
+  apptainer pull "$SIF" "docker://nvcr.io/nvidia/pytorch@$DIGEST" || { echo "[sif] PULL FAILED"; exit 1; }
+fi
+ls -la "$SIF"
+(cd $W/sif && sha256sum "$(basename $SIF)" > "$(basename $SIF).sha256" && cat "$(basename $SIF).sha256")
+echo "[sif] versions inside the SIF (must equal the old H200 line in this script's header):"
+apptainer exec "$SIF" python -c "import sys, torch; print(sys.version.split()[0], torch.__version__, torch.version.cuda, torch.backends.cudnn.version(), torch.cuda.nccl.version())"
+case "$APPTAINER_TMPDIR" in /tmp/mwam_*) rm -rf "$APPTAINER_TMPDIR";; esac
+echo "[sif] $(date '+%F %T') done; log $LOG"
