@@ -18,7 +18,8 @@ from typing import Dict, List, Optional, Sequence, Tuple
 import torch
 
 from .events import event_frames
-from .history import LEDGER_KINDS, HistoryRule, event_states, ledger_dim, ledger_entries, ordinal_code, select
+from .history import (LEDGER_KINDS, HistoryRule, clock_code, clock_dim, clock_frames, event_states, ledger_dim,
+                      ledger_entries, ordinal_code, select)
 
 HORIZON = 32
 
@@ -110,6 +111,22 @@ def ledger_tensor(rule: HistoryRule, entries: Sequence[dict], proprio_of) -> Tup
         feat[j, flag] = 1.0
         if dims:                                        # 11-17 E4: KeyError if an entry carries no ordinal
             feat[j, flag + 1:flag + 1 + dims] = torch.tensor(ordinal_code(int(e["ordinal"]), dims))
+        valid[j] = True
+    return feat, valid
+
+
+def clock_tensor(rule: HistoryRule, frames: Sequence[int], proprio_of, scale: float = 1.0
+                 ) -> Tuple[torch.Tensor, torch.Tensor]:
+    """arclk (plan v13 E5): (features [event_max, clock_dim], valid [event_max]) of the sampled frames (ascending);
+    proprio_of(frame) -> normalised proprio [14]; scale multiplies the frame index inside the timestamp code only
+    (test-time timestamp scaling, 1.0 = as trained)."""
+    slots = rule.event_max
+    feat = torch.zeros(slots, clock_dim())
+    valid = torch.zeros(slots, dtype=torch.bool)
+    for j, f in enumerate(list(frames)[-slots:]):
+        feat[j, :14] = proprio_of(int(f)).float()
+        feat[j, 14:-1] = torch.tensor(clock_code(float(f) * scale))
+        feat[j, -1] = 1.0
         valid[j] = True
     return feat, valid
 
@@ -220,6 +237,12 @@ class Samples(torch.utils.data.Dataset):
                 states[j] = e["proprio"][f].float()
                 valid[j] = True
             sample.update(event_proprio=states, event_valid=valid)
+        if self.rule.variant == "arclk":
+            if episode_id not in self.checked_text:
+                check_ledger_slots(e["text"], self.rule.event_max, f"in {episode_id}")
+                self.checked_text.add(episode_id)
+            feat, valid = clock_tensor(self.rule, clock_frames(self.rule, a), lambda f: e["proprio"][f])
+            sample.update(ledger=feat, ledger_valid=valid)
         if self.rule.variant == "arprop":
             if episode_id not in self.checked_text:
                 check_ledger_slots(e["text"], self.rule.event_max, f"in {episode_id}")

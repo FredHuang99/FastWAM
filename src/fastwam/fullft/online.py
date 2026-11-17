@@ -409,6 +409,15 @@ class FullSession:
                         raise ValueError(f"unknown MWAM_LEDGER mode {mode!r} (off | drop1 | dropfirst | addmove | freezeK | "
                                          "addpress | droppress | ordplus1 | duppress)")
                     ledger = ledger_tensor(p.rule, entries, self._proprio)
+            if p.rule.variant == "arclk":                       # 11-17 plan v13 E5: clock tokens (time-indexed)
+                from .data import check_ledger_slots, clock_tensor
+                from .history import clock_frames
+                if self.decisions == 0:
+                    check_ledger_slots(self.text[0], p.rule.event_max, "(online instruction)")
+                scale = float(os.environ.get("MWAM_CLOCK_SCALE", "").strip() or 1.0)   # E5 timestamp x1.5 / x0.5
+                frames = clock_frames(p.rule, current)
+                ledger = clock_tensor(p.rule, frames, self._proprio, scale)
+                entries = [{"frame": f, "arm": -1, "kind": "clock", "confirmed": f} for f in frames]
             ids, _ = select(p.rule, current, known)
             self._encode(sorted(set(ids) | {current} | (set(known) if p.rule.variant == "prop" else set())))
             noise_frame = 0 if self.noise_mode == "per_episode" else int(request.get("noise_frame", current))

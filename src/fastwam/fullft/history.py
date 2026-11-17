@@ -13,6 +13,9 @@ Variants (frames strictly before the current frame t; the current frame itself i
          occupy the last `event_max` (zero) padding slots of the text context (model.py), so a zero ledger encoder
          is exactly the ar model
   arev   ar frames + the last `event_max` event FRAMES (known `lag` frames after confirmation)
+  arclk  (11-17, plan v13 E5) ar frames + `event_max` CLOCK tokens: the proprio states of frames sampled uniformly over
+         the elapsed time [0, t), each with a sinusoidal code of its frame index (a timestamp); same content as the
+         ledger (joint states), same token path (text padding slots), only the index differs (time, not events)
 Index:
   rank   position -1 for the most recent shown frame, -2 for the one before, ... (no time inside the model)
   time   position -(t - frame) / time_unit (time_unit = 16 raw frames = one latent step of the clip)
@@ -23,8 +26,9 @@ import random
 from dataclasses import dataclass, field
 from typing import List, Optional, Sequence, Tuple
 
-VARIANTS = ("none", "ar", "event", "tw", "clk", "prop", "arprop", "arev")
-FRAME_VARIANTS = ("ar", "event", "tw", "arprop", "arev")
+VARIANTS = ("none", "ar", "event", "tw", "clk", "prop", "arprop", "arev", "arclk")
+FRAME_VARIANTS = ("ar", "event", "tw", "arprop", "arev", "arclk")
+CLOCK_CODE = 16                                            # arclk: sinusoidal timestamp dims
 LEDGER_KINDS = ("close", "open", "bottom", "top")          # events.py kinds
 
 
@@ -67,7 +71,7 @@ class HistoryRule:
     @property
     def max_frames(self) -> int:
         """Fixed slot count K per variant (padding up to it)."""
-        if self.variant in ("ar", "arprop"):
+        if self.variant in ("ar", "arprop", "arclk"):
             return int(self.anchor) + len(self.recent)
         if self.variant == "arev":
             return int(self.anchor) + len(self.recent) + self.event_max
@@ -79,11 +83,13 @@ class HistoryRule:
 
     @property
     def event_slots(self) -> int:
-        return self.event_max if self.variant in ("event", "prop", "arprop") else 0
+        return self.event_max if self.variant in ("event", "prop", "arprop", "arclk") else 0
 
     @property
     def ledger_features(self) -> int:
         """Input width of the ledger encoder (0 when the variant has no ledger)."""
+        if self.variant == "arclk":
+            return clock_dim()
         return ledger_dim(self.event_max, self.ordinal) if self.variant == "arprop" else 0
 
 
@@ -99,7 +105,7 @@ def select(rule: HistoryRule, t: int, events: Sequence[int] = (), rng: Optional[
     ids = set()
     if rule.anchor:
         ids.add(0)
-    if rule.variant in ("ar", "tw", "arprop", "arev"):
+    if rule.variant in ("ar", "tw", "arprop", "arev", "arclk"):
         ids.update(t - r for r in rule.recent if t - r > 0)
     if rule.variant == "tw":
         grid = [f for f in range(rule.tw_stride, t, rule.tw_stride)]
@@ -136,6 +142,34 @@ def ledger_dim(slots: int, ordinal: int = 0) -> int:
     """Features of one ledger token: proprio (14) + kind one-hot (4) + arm one-hot (2) + rank one-hot (slots) + 1
     (valid flag) [+ ordinal thermometer (ordinal dims), 11-17 E4]. Rank 0 = the most recent entry."""
     return 14 + len(LEDGER_KINDS) + 2 + int(slots) + 1 + int(ordinal)
+
+
+def clock_dim() -> int:
+    """Features of one arclk token: proprio (14) + timestamp code (CLOCK_CODE) + 1 (valid flag)."""
+    return 14 + CLOCK_CODE + 1
+
+
+def clock_frames(rule: HistoryRule, t: int) -> List[int]:
+    """arclk: min(event_max, t) frames spread uniformly over the elapsed time [0, t) (0 and t - 1 included); [] at t <= 0.
+    They move as t grows (the memory is indexed by time), unlike ledger entries."""
+    t = int(t)
+    if t <= 0:
+        return []
+    n = min(int(rule.event_max), t)
+    if n == 1:
+        return [0]
+    return sorted({int(round(i * (t - 1) / (n - 1))) for i in range(n)})
+
+
+def clock_code(frame: float, dims: int = CLOCK_CODE) -> List[float]:
+    """Sinusoidal timestamp of a frame index: [sin(f w_k), cos(f w_k)], w_k = 10000^(-k / (dims / 2))."""
+    import math
+    half = dims // 2
+    out = []
+    for k in range(half):
+        w = 10000.0 ** (-k / half)
+        out += [math.sin(float(frame) * w), math.cos(float(frame) * w)]
+    return out
 
 
 def ordinal_code(n: int, dims: int) -> List[float]:

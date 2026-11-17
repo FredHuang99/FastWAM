@@ -194,7 +194,7 @@ def test_session_streaming_detection_equals_demo_detector(tmp_path):
         session._detect(n)
 
 
-@pytest.mark.parametrize("variant", ["ar", "arprop", "arprop_ord"])
+@pytest.mark.parametrize("variant", ["ar", "arprop", "arprop_ord", "arclk"])
 def test_session_decide_end_to_end(tmp_path, variant):
     """FullSession.decide as the closed loop calls it (observation batches, identity checks, detection, ledger,
     selection, eviction, the decision log), with the image / text encoders stubbed: it equals decide_encoded on the
@@ -250,6 +250,10 @@ def test_session_decide_end_to_end(tmp_path, variant):
         for i in range(current + 1):
             ref_encoded.setdefault(i, (lat[i], torch.tensor(obs[i]["proprio"], dtype=torch.float32)))
         ledger = None
+        if variant == "arclk":                                         # 11-17 plan v13 E5: clock tokens
+            from fastwam.fullft.data import clock_tensor
+            from fastwam.fullft.history import clock_frames
+            ledger = clock_tensor(rule, clock_frames(rule, current), lambda f: ref_encoded[f][1])
         if variant == "arprop":
             evs = detect(np.stack([grip[:current + 1], np.ones(current + 1)], 1), pos[:current + 1])
             ledger = ledger_tensor(rule, ledger_entries(rule, current, evs), lambda f: ref_encoded[f][1])
@@ -432,3 +436,56 @@ def test_resume_source(tmp_path):
     assert resume_source(run, str(other / "resume.pt"), smoke=True) is None
     (run / "resume.pt").write_text("y")
     assert resume_source(run, str(other / "resume.pt")) == run / "resume.pt"      # its own checkpoint wins
+
+
+def test_arclk_zero_encoder_is_exactly_ar_and_dataset_builds_clock_tokens(tmp_path):
+    """11-17 plan v13 E5: time-indexed proprio tokens through the ledger path; zero encoder = exactly AR; the dense
+    dataset builds the same tokens as clock_tensor(clock_frames(t)); the frames move with t (time-indexed)."""
+    import json as _json
+    from fastwam.fullft.data import DenseEpisodes, Samples, clock_tensor, collate, train_items
+    from fastwam.fullft.history import clock_dim, clock_frames
+    rule = HistoryRule("arclk", event_max=4)
+    assert rule.ledger_features == clock_dim() and rule.max_frames == HistoryRule("ar").max_frames
+    assert clock_frames(rule, 40) == [0, 13, 26, 39] and clock_frames(rule, 41) == [0, 13, 27, 40]
+    batch = _ledger_batch()
+    batch["ledger"] = torch.randn(2, 4, clock_dim(), generator=torch.Generator().manual_seed(3))
+    noise = _noise(batch)
+    m0, mc = _model("ar"), _model("arclk", event_slots=4, ledger_features=rule.ledger_features)
+    missing, unexpected = mc.load_state_dict(m0.state_dict(), strict=False)
+    assert not unexpected and sorted(missing) == ["ledger.bias", "ledger.weight"]
+    with torch.no_grad():
+        m0.hist_gate.fill_(0.3)
+        mc.hist_gate.fill_(0.3)
+        v0, a0 = m0.loss(batch, noise)
+        v1, a1 = mc.loss(batch, noise)
+        assert torch.equal(v0, v1) and torch.equal(a0, a1)
+    v, a = mc.loss(batch, noise)
+    (a.mean() + v.mean()).backward()
+    assert float(mc.ledger.weight.grad.abs().sum()) > 0
+    with pytest.raises(ValueError):
+        _model("arclk", event_slots=4)                                 # the width must come from the rule
+    root = tmp_path / "dense"
+    eid = "put_back_block/episode_0000000"
+    folder = root / "cache" / eid.replace("/", "_")
+    folder.mkdir(parents=True)
+    n = 60
+    torch.save({"latent": torch.randn(n, 48, 1, 4, 4), "video_latent": torch.randn(n, 48, 3, 4, 4),
+                "video_valid": torch.ones(n, 9, dtype=torch.bool), "text": torch.cat((torch.randn(3, TEXT), torch.zeros(4, TEXT))),
+                "text_valid": torch.tensor([True] * 3 + [False] * 4),
+                "proprio": torch.arange(n, dtype=torch.float32)[:, None].repeat(1, 14), "actions": torch.randn(n, 14)},
+               folder / "encodings.pt")
+    (folder / "COMPLETE.json").write_text("{}")
+    (root / "RECORDS.json").write_text(_json.dumps([{"episode_id": eid, "task": "put_back_block", "split": "train",
+                                                      "length": n}]))
+    eps = DenseEpisodes([str(root)], ["put_back_block"])
+    items = train_items(eps)
+    ds = Samples(eps, items, rule, {}, "valid")
+    for a in (0, 1, 5, 40, 59):
+        row = ds[items.index((eid, a))]
+        feat, valid = clock_tensor(rule, clock_frames(rule, a), lambda f: torch.full((14,), float(f)))
+        assert torch.equal(row["ledger"], feat) and torch.equal(row["ledger_valid"], valid)
+        assert row["hist_ids"][row["hist_valid"]].tolist() == select(HistoryRule("ar"), a)[0]
+    assert collate([ds[i] for i in (0, 30)])["ledger"].shape == (2, 4, clock_dim())
+    f2, _ = clock_tensor(rule, [10], lambda f: torch.zeros(14), scale=1.5)
+    f1, _ = clock_tensor(rule, [15], lambda f: torch.zeros(14))
+    assert torch.allclose(f1, f2)                                        # timestamp scaling = another frame index

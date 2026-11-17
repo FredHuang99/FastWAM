@@ -109,9 +109,12 @@ class FullModel(nn.Module):
             nn.init.zeros_(self.extra.weight)
             nn.init.zeros_(self.extra.bias)
         self.ledger = None
-        if variant == "arprop":
+        if variant in ("arprop", "arclk"):
             from .history import ledger_dim
-            # 11-17 E4: ledger_features = HistoryRule.ledger_features (wider with the ordinal code); 0 = as before
+            # 11-17 E4: ledger_features = HistoryRule.ledger_features (wider with the ordinal code); 0 = as before.
+            # E5 arclk: the clock tokens use the same zero-initialised encoder and slots (width from the rule).
+            if variant == "arclk" and not int(ledger_features):
+                raise ValueError("arclk needs ledger_features (HistoryRule.ledger_features)")
             self.ledger = nn.Linear(int(ledger_features) or ledger_dim(event_slots), text_dim)
             nn.init.zeros_(self.ledger.weight)
             nn.init.zeros_(self.ledger.bias)
