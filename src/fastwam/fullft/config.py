@@ -40,6 +40,9 @@ class ScheduleConfig:
     max_updates: int = 0                                 # 0 = from frame_epochs
     stop_after: int = 0                                  # 11-17: stop after this many updates (0 = never); the LR
                                                          # schedule keeps the full length (parity runs)
+    noise_seed: int = 0                                  # 11-17: reseed the training random draws (diffusion noise,
+                                                         # timesteps, dropout) after the model is built; data order,
+                                                         # augmentation and initialisation still follow seed (0 = off)
     log_every: int = 10
     eval_every: int = 500
     resume_every: int = 1000                             # overwrite the single resume checkpoint

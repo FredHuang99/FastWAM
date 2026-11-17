@@ -218,6 +218,10 @@ def train(cfg: RunConfig, args, smoke: bool = False) -> dict:
         log("smoke step-0 fixed-noise losses:", json.dumps(base))
     log(f"updates: {total} (micro {s.micro_batch} x accumulation {s.accumulation} = {per_update} samples / update; "
         f"{len(train_set)} anchors per frame-epoch)")
+    if s.noise_seed and not smoke and state["update"] == 0:
+        torch.manual_seed(s.noise_seed)
+        torch.cuda.manual_seed_all(s.noise_seed)
+        log(f"noise_seed {s.noise_seed}: training random draws reseeded (data order, augmentation, init unchanged)")
     model.train()
     torch.cuda.reset_peak_memory_stats()
     t0 = time.monotonic()
