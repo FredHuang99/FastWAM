@@ -1,0 +1,93 @@
+#!/bin/bash
+# NTU GaaS (H200), 11-17 (Opus): step 2 of the environment + the H200 alignment test (user 16:57: the new H200 must be
+# numerically aligned with the old one). One GPU of our gpu_as allocation, about 1.5-2 h. Stops at the first failure.
+#   1 the old H200's /opt/mwam venv (relay diag/env_h200, 148 MB) -> ~/mwam/envs/mwam, sha256 checked
+#   2 the base weights (/workspace/FastWAM/resources/base/*) from the payload repo, checked against its MANIFEST
+#   3 the Press training cache (cache relay, every file's sha256) and the old H200's press_ar metrics (diag/parity_ref)
+#   4 inside the SIF, with the same logical paths as the old H200 (binds): versions line, `pip freeze` sha256 must be
+#     2707a91e... (the old H200's, 16:59 / 17:20), unit tests
+#   5 h200b_parity: the press_ar recipe, stop_after 500 (about 40-50 min); reading registered in parity_h200b.py
+# Downloads run outside the container with ~/mwam/envs/hf-tools (the user's HF login); the GPU is the one PBS gives
+# (CUDA_VISIBLE_DEVICES is left as PBS sets it: a GPU UUID). Live log: ~/mwam/logs/SETUP_PARITY_<time>.txt
+#   cd ~/mwam && qsub FastWAM-memory2/scripts/gaas/setup_parity.pbs
+#PBS -N mwam_setup
+#PBS -P gs_ccds_tianwei.zhang
+#PBS -q gpu_as
+#PBS -l select=1:ncpus=12:ngpus=1:mem=200gb
+#PBS -l walltime=06:00:00
+#PBS -j oe
+set -u
+W=$HOME/mwam
+R=$W/FastWAM-memory2
+HFPY=$W/envs/hf-tools/bin/python
+SIF=$W/sif/pytorch_25.11_417cbf33.sif
+FREEZE_SHA=2707a91e446b2327fb3a9d695d86dc87fe3d8f41d3c29069d87d4270701b4607
+mkdir -p $W/logs $W/dl $W/envs $W/hf
+LOG=$W/logs/SETUP_PARITY_$(date +%Y%m%d_%H%M).txt
+exec > >(tee -a "$LOG") 2>&1
+step() { echo "[setup] $(date '+%F %T') $*"; }
+fail() { echo "[setup] $(date '+%F %T') FAILED: $*"; exit 1; }
+step "host $(hostname); job ${PBS_JOBID:-none}; cores $(nproc); CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-unset}"
+nvidia-smi -L
+cd $R && git pull -q --ff-only origin memory2 && step "code $(git log --oneline -1 | cut -c1-70)"
+module purge; module load apptainer/1.4.1
+[ -x $HFPY ] || fail "no $HFPY (create it and log in to Hugging Face on the login node first)"
+[ -s $SIF ] || fail "no $SIF (sif_pull.pbs first)"
+
+step "1 venv of the old H200"
+if [ ! -x $W/envs/mwam/bin/python ]; then
+  mkdir -p $W/dl/env_h200
+  $HFPY $R/scripts/memory_v2/migrate/relay.py get --prefix diag/env_h200 --out $W/dl/env_h200 2>&1 | tail -n 3
+  (cd $W/dl/env_h200 && sha256sum -c mwam_venv_h200.tgz.sha256) || fail "venv archive sha256"
+  tar -C $W/envs -xzf $W/dl/env_h200/mwam_venv_h200.tgz || fail "venv extract"
+fi
+cat $W/envs/mwam/pyvenv.cfg
+
+step "2 base weights (payload repo, checked against its MANIFEST)"
+$HFPY - "$W/hf" <<'PY' || fail "base weights download"
+import sys
+from huggingface_hub import hf_hub_download, snapshot_download
+repo, out = "hhyfred/memwam-h100-migration-v1", sys.argv[1]
+print(hf_hub_download(repo, "MANIFEST.json", local_dir=out))
+print(snapshot_download(repo, allow_patterns=["payload/workspace/FastWAM/resources/base/*"], local_dir=out, max_workers=8))
+PY
+$HFPY $R/scripts/memory_v2/migrate/manifest.py verify --manifest $W/hf/MANIFEST.json --root $W/hf \
+  --prefix /workspace/FastWAM/resources/base || fail "base weights verify"
+ls -la $W/hf/payload/workspace/FastWAM/resources/base/
+
+step "3 Press training cache + the old H200's press_ar metrics"
+P=$R/outputs/memory_v2/press
+mkdir -p $P $R/outputs/fullft/parity_ref
+if [ ! -f $P/dense_press_button_v1/.verified ]; then
+  $HFPY $R/scripts/fullft/cache_relay.py get --name dense_press_button_v1 --dest $P 2>&1 | tail -n 5
+  [ ${PIPESTATUS[0]} -eq 0 ] && touch $P/dense_press_button_v1/.verified || fail "press cache"
+fi
+du -sh $P/dense_press_button_v1
+$HFPY $R/scripts/memory_v2/migrate/relay.py get --prefix diag/parity_ref --out $R/outputs/fullft/parity_ref 2>&1 | tail -n 2
+[ -s $R/outputs/fullft/parity_ref/metrics.jsonl ] || fail "no old H200 press_ar metrics (diag/parity_ref)"
+
+step "4 inside the SIF: versions, pip freeze, unit tests"
+B="$R:/workspace/FastWAM-memory2,$W/hf/payload/workspace/FastWAM:/workspace/FastWAM,$W/envs/mwam:/opt/mwam"
+X() { apptainer exec --nv --bind "$B" --pwd /workspace/FastWAM-memory2 \
+        --env PYTHONPATH=/workspace/FastWAM-memory2/src,PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True,OMP_NUM_THREADS=8 \
+        "$SIF" "$@"; }
+X /opt/mwam/bin/python -c "import sys, torch; p = torch.cuda.get_device_properties(0); print(sys.version.split()[0], torch.__version__, torch.version.cuda, torch.backends.cudnn.version(), torch.cuda.nccl.version(), '|', torch.cuda.get_device_name(0), 'SMs', p.multi_processor_count)"
+X /opt/mwam/bin/python -m pip freeze 2>/dev/null > $W/logs/freeze_gaas.txt
+GOT=$(sha256sum < $W/logs/freeze_gaas.txt | cut -c1-64)
+echo "[setup] pip freeze sha256 $GOT (old H200 $FREEZE_SHA), $(wc -l < $W/logs/freeze_gaas.txt) lines"
+if [ "$GOT" != "$FREEZE_SHA" ]; then
+  diff $W/dl/env_h200/mwam_freeze_h200.txt $W/logs/freeze_gaas.txt | head -n 40
+  fail "the environment differs from the old H200 (diff above)"
+fi
+X /opt/mwam/bin/python -m pytest -q -p no:cacheprovider src/fastwam/fullft/tests 2>&1 | tail -n 4
+[ ${PIPESTATUS[0]} -eq 0 ] || fail "unit tests"
+
+step "5 h200b_parity (press_ar recipe, stop_after 500)"
+if [ ! -f $R/outputs/fullft/h200b_parity/SUMMARY.json ]; then
+  X /opt/mwam/bin/python -m fastwam.fullft.train train --config configs/fullft/base_2task.yaml --set name=h200b_parity \
+    --set "data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_press_button_v1]" \
+    --set "data.tasks=[press_button]" --set schedule.stop_after=500 > $R/outputs/fullft/QUEUE_h200b_parity.log 2>&1
+  echo "[setup] trainer exit code $?"; tail -n 4 $R/outputs/fullft/QUEUE_h200b_parity.log | cut -c1-200
+fi
+X /opt/mwam/bin/python scripts/fullft/parity_h200b.py
+step "done; log $LOG"
