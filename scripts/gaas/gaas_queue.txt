@@ -30,3 +30,12 @@ ar2_clock | history.variant=arclk history.event_max=32 | test -f outputs/fullft/
 #   e60 swap >= 90/100 -> TRAINABLE; <= 70/100 -> STRUCTURAL; otherwise PARTIAL. Floor: put >= 95/100.
 #   TRAINABLE -> contribution 1 is rewritten as in plan v13 1.3 (and Opus asks the user to switch to Fable).
 ar2_long | schedule.frame_epochs=60 schedule.export_at_epochs=[45,60] schedule.resume_from=/workspace/FastWAM-memory2/outputs/fullft/ar_2task/resume.pt | test -f outputs/fullft/ar_2task/.resume_verified && test -f outputs/fullft/ar_2task/resume.pt
+#
+# 11-18 17:08 (user approved; plan v12 B1 = the AR column of the main table, moved here from the H100 queue because the
+# new H200 trains ~3x faster: cover ~50 h, ranking ~70 h vs ~150 / ~210 h on the H100). Same recipe as every H200 run
+# (base_2task.yaml, history ar, 30 frame-epochs, micro 8 x 8, exports e10 / e20 / e30 to the relay). Their ledger arms
+# (cover_arprop, ranking_arprop) also train on an H200 once G2' fixes the design (deviation 45; plan v13 section 5).
+# Caches: fetch_b1.sh downloads them (login node); gaas_run.pbs checks every file's sha256 (cache_relay.py verify) before
+# the condition. ranking_ar follows E5's job, cover_ar follows E7's job (PBS depend=afterany), so 2 GPUs at a time.
+ranking_ar | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_blocks_ranking_try_v1] data.tasks=[blocks_ranking_try] | test -f outputs/memory_v2/press/dense_blocks_ranking_try_v1/.verified
+cover_ar | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_cover_blocks_v1] data.tasks=[cover_blocks] | test -f outputs/memory_v2/press/dense_cover_blocks_v1/.verified

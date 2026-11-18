@@ -7,7 +7,8 @@
 #   1 container exactly as in setup_parity.pbs (the way that passed IDENTICAL): APPTAINER_HOME unset, --cleanenv + env
 #     file, PYTHONNOUSERSITE=1, the SIF unpacked once into node-local /tmp, binds to the old H200's paths; pip freeze
 #     sha256 must be the old H200's; unit tests
-#   2 data checks, once (markers): the two-task cache against the payload MANIFEST with sha256 (.verified); for ar2_long
+#   2 data checks, once (markers): the two-task cache against the payload MANIFEST with sha256 (.verified); a run's own
+#     task cache from the cache relay (11-18: cover_ar, ranking_ar) against its RELAY_MANIFEST (.verified); for ar2_long
 #     the resume parts against parts.sha256, joined, the whole file against resume.pt.sha256 (.resume_verified); for
 #     ar2_clock READY_e5 = ledger_ready.py --variant arclk on put / swap (no GPU visible to it)
 #   3 the line's condition, then the trainer (base_2task.yaml + the line's sets, micro 8 x 8 as on the old H200), with
@@ -78,6 +79,16 @@ if [ ! -f $C/.verified ]; then
   touch $C/.verified
 fi
 step "two-task cache verified ($(du -sh $C | cut -f1))"
+for root in $(echo "$SETS" | grep -o 'data.roots=\[[^]]*\]' | sed 's/data.roots=\[//; s/\]//' | tr ',' ' '); do
+  case "$root" in /workspace/FastWAM-memory2/outputs/memory_v2/press/dense_*) ;; *) continue;; esac
+  D=$R/${root#/workspace/FastWAM-memory2/}       # 11-18: a task cache from the cache relay (fetch_b1.sh), once
+  [ -f $D/.verified ] && { step "cache $(basename $D) verified before"; continue; }
+  [ -d $D ] || fail "no cache folder $D (fetch_b1.sh on the login node first)"
+  $HFPY scripts/fullft/cache_relay.py verify $D 2>&1 | tail -n 4
+  [ ${PIPESTATUS[0]} -eq 0 ] || fail "cache $(basename $D): sha256 against its RELAY_MANIFEST"
+  touch $D/.verified
+  step "cache $(basename $D) verified ($(du -sh $D | cut -f1))"
+done
 if [ "$RUN" = ar2_long ] && [ ! -f $F/ar_2task/.resume_verified ]; then
   D=$W/dl/ar_2task_e30/ckpt/ar_2task_e30
   (cd $D && sha256sum -c --quiet parts.sha256) || fail "resume parts sha256"
