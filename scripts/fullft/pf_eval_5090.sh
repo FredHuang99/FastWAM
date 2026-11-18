@@ -8,7 +8,9 @@
 #   3. P-SEL rule (press_select.py --run press_fast) picks the epoch; the pick runs on scenes 51-100 (closed_loop/sel)
 #   4. press_fast_verdict.py (rule registered 11-16 19:55): paired with sel:press_arprop_e20; verdict to the relay
 #      (diag/press_fast_verdict); press_errors / press_ledger_audit as description
-# One GPU missing -> both shards on the other. Rerunnable: finished episodes are skipped.
+# One GPU missing -> both shards on the other. Rerunnable: finished episodes are skipped (a seed folder without
+# result.json is renamed *_interrupted_* and run again). PF_GPUS (default "0 1") limits the GPUs (11-18: PF_GPUS=1).
+#   docker exec -d -e PF_GPUS=1 mwam5090 bash /workspace/FastWAM-memory2/scripts/fullft/pf_eval_5090.sh
 #   docker exec -d mwam5090 bash /workspace/FastWAM-memory2/scripts/fullft/pf_eval_5090.sh
 set -u
 R=/workspace/FastWAM-memory2
@@ -41,11 +43,14 @@ run() {        # GPU, shard (of 2), checkpoint, label, folder, extra args...
     echo "[pfe] $(date '+%F %T') $l ${*} shard $sh/2 on GPU $g pass $pass exit code $?; finished $(n_done $out $l)"
   done
 }
+PF_GPUS=${PF_GPUS:-"0 1"}     # 11-18: GPU0 fell off the bus twice (Xid 79); user: GPU1 only until it is repaired (PF_GPUS=1)
 both() {
-  local p0 p1 g
-  if gpu_ok 0 && gpu_ok 1; then run 0 0 "$@" & p0=$!; run 1 1 "$@" & p1=$!; wait $p0 $p1; return; fi
-  if gpu_ok 0; then g=0; elif gpu_ok 1; then g=1; else echo "[pfe] $(date '+%F %T') no GPU answers: stopping"; exit 1; fi
-  echo "[pfe] $(date '+%F %T') only GPU $g answers: both shards on it"
+  local p0 p1 g ok=()
+  for g in $PF_GPUS; do gpu_ok $g && ok+=($g); done
+  if [ ${#ok[@]} -ge 2 ]; then run ${ok[0]} 0 "$@" & p0=$!; run ${ok[1]} 1 "$@" & p1=$!; wait $p0 $p1; return; fi
+  [ ${#ok[@]} = 1 ] || { echo "[pfe] $(date '+%F %T') no allowed GPU answers (PF_GPUS=$PF_GPUS): stopping"; exit 1; }
+  g=${ok[0]}
+  echo "[pfe] $(date '+%F %T') GPU $g only (PF_GPUS=$PF_GPUS): both shards on it, one after the other"
   run $g 0 "$@"; run $g 1 "$@"
 }
 fetch() {      # tag -> the checkout path of the export (waits for the relay, checks sha256, 5 tries)
