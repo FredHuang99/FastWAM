@@ -75,7 +75,8 @@ case "${1:-}" in
       unset TOK; chmod 600 $W/.git/credentials
     fi
     echo "test push to $BR ..."
-    if push_once; then echo "OK: $BR pushed ($(G log --oneline -1 | cut -c1-60))"; say "setup OK"; else echo "push FAILED (see $LOG); fix the token and run setup again (rm $W/.git/credentials first)"; exit 1; fi
+    if push_once; then echo "OK: $BR pushed ($(G log --oneline -1 | cut -c1-60))"; say "setup OK"; else echo "push FAILED (see $LOG); fix the token and run setup again (rm $W/.git/credentials first)"; tail -n 3 $LOG; exit 1; fi
+    bash $R/scripts/fullft/results_push.sh start      # then every 30 min by itself
     ;;
   once) push_once && echo "pushed" || echo "push FAILED (see $LOG)";;
   start)
