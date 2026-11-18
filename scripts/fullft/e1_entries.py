@@ -29,6 +29,7 @@ def main():
     for inj in ("pause", "fidget", "airgrasp"):
         base = Path(args.folder) / f"ar2_prop_e30_e1{inj}_vis" / "on" / args.task
         n_ep, n_with, kinds, offs, conf, examples = 0, 0, Counter(), Counter(), Counter(), []
+        redated, twins = Counter(), Counter()
         for d in sorted(base.glob("seed_*")):
             st = rows(d / "stress.jsonl")
             if not st or not (d / "result.json").exists():
@@ -44,7 +45,16 @@ def main():
             if not seen:
                 continue
             n_with += 1
+            # 11-18 17:55: the same scene's hidden arm (no injected frames on the policy timeline: the frames after the
+            # injection are numbered from lo on). An entry of the same kind and arm within +-10 frames of lo there =
+            # the visible arm's entry is an event that also happens without the injection, only dated inside it.
+            hid = {(int(e[0]), int(e[1]), e[2]) for x in rows(Path(str(d).replace(f"_e1{inj}_vis", f"_e1{inj}_hid")) /
+                                                              "decisions.jsonl") for e in x.get("ledger") or []}
             for (f, arm, kind), c in sorted(seen.items()):
+                twin = sorted(h[0] - lo for h in hid if h[1] == arm and h[2] == kind and abs(h[0] - lo) <= 10)
+                redated[("also in hidden arm" if twin else "only in visible arm", kind)] += 1
+                if twin:
+                    twins[twin[0]] += 1
                 same = "active arm" if arm == int(s.get("active_arm", -9)) else "other arm"
                 kinds[(kind, same)] += 1
                 offs[min(f - lo, 99) if f - lo < 8 else ("8-31" if f - lo < 32 else ">=32")] += 1
@@ -57,6 +67,8 @@ def main():
         print(f"{args.task} {inj}: {n_with}/{n_ep} visible-arm episodes with a ledger entry in the injected frames")
         print(f"  entries by (kind, arm): {dict(kinds)}")
         print(f"  event frame - first injected frame: {dict(offs)}; confirmation frame - first injected frame: {dict(conf)}")
+        print(f"  same scene, hidden arm, same kind and arm within +-10 frames of the injection point: {dict(redated)}; "
+              f"its frame - injection point: {dict(sorted(twins.items()))}")
         print("\n".join(examples))
 
 
