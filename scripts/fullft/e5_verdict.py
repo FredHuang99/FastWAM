@@ -1,5 +1,5 @@
 """Plan v13 E5 CLOCK-arm verdict (registered by Fable 11-17 in plan v13 section 3, approved by the user 15:40; copied
-into scripts/gaas/gaas_queue.txt; this script written 11-18 18:00 BJ, before any ar2_clock result exists). Read-only.
+into scripts/gaas/gaas_queue.txt; this script written 11-18 17:40 BJ, before any ar2_clock result exists). Read-only.
 
 Model: ar2_clock e30 (AR + 32 proprio tokens sampled uniformly over the elapsed time, each with a sinusoidal timestamp;
 same content, token path, data and recipe as the ledger model ar2_prop: only the index differs). A40, closed_loop/e5:

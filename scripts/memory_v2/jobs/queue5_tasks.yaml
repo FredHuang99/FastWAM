@@ -9915,7 +9915,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 # ---------------------------------------------------------------------------------------------------------------
-# 11-18 18:30 BJ (Opus; user 17:27 "按照你的建议来做"): the A40's next work after the learning curve, all written before
+# 11-18 17:40 BJ (Opus; user 17:27 "按照你的建议来做"): the A40's next work after the learning curve, all written before
 # any of these models has a closed-loop result. Every card waits for its model on the relay (export_fetch.sh polls it;
 # a waiting fetch card is CPU-only and blocks nothing; GPU cards whose fetch has not passed are simply not ready).
 # Order = plan v13 section 5, A40 list: battery pair (E6, S-C (b)), rearrange / swap_T AR (E6, numbers only), E5, E7.

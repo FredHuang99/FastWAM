@@ -1,4 +1,4 @@
-"""Plan v13 E6 ROW-1 on the A40 (Fable 11-17, approved 15:40; this script written 11-18 18:00 BJ, before any closed-loop
+"""Plan v13 E6 ROW-1 on the A40 (Fable 11-17, approved 15:40; this script written 11-18 17:40 BJ, before any closed-loop
 result of these models exists). Read-only. A40, closed_loop/e6, official scenes 1-100 (bank order), no stress.
 
 Battery (battery_try): the registered reading is plan v11 D.4 S-C (b), executed by Opus as plan v13 E6 says:

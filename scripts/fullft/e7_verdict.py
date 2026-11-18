@@ -1,5 +1,5 @@
 """Plan v13 E7 AR-long verdict (registered by Fable 11-17 in plan v13 section 3, approved by the user 15:50; copied
-into scripts/gaas/gaas_queue.txt; this script written 11-18 18:00 BJ, before any ar2_long result exists). Read-only.
+into scripts/gaas/gaas_queue.txt; this script written 11-18 17:40 BJ, before any ar2_long result exists). Read-only.
 
 Model: the two-task AR (ar_2task) trained on from its 30-frame-epoch resume checkpoint to 60 frame-epochs on the new
 H200 (GaaS run ar2_long; exports e45, e60). A40, closed_loop/e7: labels ar2_long_e45 / ar2_long_e60, swap_blocks and
