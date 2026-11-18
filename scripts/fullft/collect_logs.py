@@ -1,6 +1,7 @@
 """Collect one machine's logs and summaries since a cut-off into a zip (11-13; read-only for every run and episode).
 
-Per machine (A100 container 6e4b37a15066, H200 mwam2, 5090 mwam5090):
+Per machine (A100 mwam-a100, old H200 mwam2, 5090 mwam5090, A40 mwam-a40, H100 mwam-h100n; 11-18: GaaS H200 login node,
+outside any container: MWAM_R=~/mwam/FastWAM-memory2, --extra ~/mwam/logs, run with ~/mwam/envs/hf-tools/bin/python):
   00_machine.txt      host, time, checkout, nvidia-smi, our processes (token-like words redacted), disk, memory
   01_pool_status.txt  pool5 status and a 30 h report (when this machine runs the pool)
   files/...           every .txt .log .json .jsonl .md .yaml .csv under outputs/ modified since --since (BJ), episode
@@ -26,7 +27,7 @@ import zipfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-R = Path("/workspace/FastWAM-memory2")
+R = Path(os.environ.get("MWAM_R", "/workspace/FastWAM-memory2"))   # 11-18: the GaaS checkout is ~/mwam/FastWAM-memory2
 OUTPUTS = R / "outputs"
 O = OUTPUTS / "memory_v2"
 BJ = timezone(timedelta(hours=8))
@@ -37,7 +38,7 @@ PRUNE = re.compile(r"^(seed_.*|checkpoints?|ckpt.*|exports|caches?|replay|dumpfi
 FOLDERS = ["closed_loop/g1", "closed_loop/textab", "closed_loop/al3", "closed_loop/al3b", "closed_loop/al3b_first",
            "closed_loop/execlen", "closed_loop/x7c12", "closed_loop/s1pre", "closed_loop/al5", "closed_loop/rep",
            "closed_loop/w1", "closed_loop/abl", "closed_loop/sel", "closed_loop/lat",
-           "closed_loop/latsel", "closed_loop/latrep", "closed_loop/lc"]
+           "closed_loop/latsel", "closed_loop/latrep", "closed_loop/lc", "closed_loop/e1smoke", "closed_loop/e1"]
 PAIRS = [("ar2_prop_e10", "ar_2task_e10_fx"), ("ar2_prop_e10", "ar_2task_e10"), ("ar2_prop_e20", "ar_2task_e20"),
          ("ar2_prop_e30", "ar_2task_e30")]          # 11-14: ledger arm vs AR control on the same machine (progress)
 PY = sys.executable
@@ -66,8 +67,9 @@ def machine_text(machine):
     return "\n".join(parts)
 
 
-def sweep(since, bundle, manifest):
-    for root, dirs, files in os.walk(OUTPUTS):
+def sweep(since, bundle, manifest, top=None, under="files"):
+    top = top or OUTPUTS
+    for root, dirs, files in os.walk(top):
         dirs[:] = [d for d in dirs if not PRUNE.match(d)]
         if len(files) > 3000:                     # a cache-like folder: only its newest few log files
             files = sorted(files, key=lambda f: -os.path.getmtime(os.path.join(root, f)))[:50]
@@ -81,18 +83,18 @@ def sweep(since, bundle, manifest):
                 continue
             if st.st_mtime < since:
                 continue
-            rel = p.relative_to(OUTPUTS)
-            dest = bundle / "files" / rel
+            rel = p.relative_to(top)
+            dest = bundle / under / rel
             dest.parent.mkdir(parents=True, exist_ok=True)
             if st.st_size > CAP:
                 with open(p, "rb") as fh:
                     fh.seek(st.st_size - CAP)
                     data = fh.read()
                 dest.write_bytes(f"[collect] truncated: last {CAP} of {st.st_size} bytes\n".encode() + data)
-                manifest.append(f"files/{rel}\t{st.st_size}\tTRUNCATED to last 4 MB")
+                manifest.append(f"{under}/{rel}\t{st.st_size}\tTRUNCATED to last 4 MB")
             else:
                 dest.write_bytes(p.read_bytes())
-                manifest.append(f"files/{rel}\t{st.st_size}")
+                manifest.append(f"{under}/{rel}\t{st.st_size}")
 
 
 def recent_labels(since):
@@ -152,7 +154,8 @@ def zip_dir(src, dest, prefix):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--machine", required=True, choices=("a100", "h200", "5090", "a40", "h100"))
+    ap.add_argument("--machine", required=True, choices=("a100", "h200", "5090", "a40", "h100", "gaas"))
+    ap.add_argument("--extra", nargs="*", default=[], help="11-18: more folders to sweep (e.g. GaaS ~/mwam/logs)")
     ap.add_argument("--since", default="2026-11-12 16:00", help="Beijing time")
     ap.add_argument("--relay", default="")
     ap.add_argument("--combine", default="")
@@ -170,6 +173,10 @@ def main():
         (bundle / "01_pool_status.txt").write_text(f"(status rc {rc1})\n{st}\n\n(report rc {rc2})\n{rep}", encoding="utf-8")
     print(f"[collect] {args.machine}: sweeping outputs/ since {args.since} BJ", flush=True)
     sweep(since, bundle, manifest)
+    for extra in args.extra:
+        if Path(extra).is_dir():
+            print(f"[collect] {args.machine}: sweeping {extra} since {args.since} BJ", flush=True)
+            sweep(since, bundle, manifest, Path(extra), "extra_" + Path(extra).name)
     print(f"[collect] {args.machine}: analyses of the closed-loop labels written since then", flush=True)
     analyses(args.machine, since, bundle, manifest)
     ledger_progress(bundle, manifest)
