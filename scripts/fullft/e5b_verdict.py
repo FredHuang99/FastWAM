@@ -1,5 +1,5 @@
 """Plan v14 E5b CLOCK-put verdict (registered by Fable 11-18 in plan v14 section 3, approved by the user 18:33; this
-script written 11-18 19:00 BJ, before any closed-loop result of the clock model ar2_clock e30 exists). Read-only.
+script written 11-18 18:40 BJ, before any closed-loop result of the clock model ar2_clock e30 exists). Read-only.
 
 Hypothesis (plan v14 1.2 (b)): E2's rule C says time alone predicts progress in the put demonstrations, not in swap.
 So the clock model under a pause errs on put and not on swap. A40, closed_loop/e5: labels ar2_clock_e30_e1pause_vis /

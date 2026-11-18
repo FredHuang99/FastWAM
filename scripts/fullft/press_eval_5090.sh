@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# mwam5090, 11-18 19:30 BJ (Opus, plan v14 5.2 item 3; written before any press_count / press_v3c closed-loop result).
+# mwam5090, 11-18 18:40 BJ (Opus, plan v14 5.2 item 3; written before any press_count / press_v3c closed-loop result).
 # The 5090 is not on the auto-pull (user 18:08), so this one script carries it through the user's absence
 # (11-19 all day -> 11-20 14:00). GPU1 only (PF_GPUS, default 1; GPU0 fell off the bus twice). Steps:
 #   0 relay: the Obs event file (for the old H200's obs_arprop readiness; plan v14 5.2 item 5) -> diag/events_obs

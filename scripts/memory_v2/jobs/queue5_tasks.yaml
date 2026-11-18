@@ -11362,7 +11362,7 @@ tasks:
   output: closed_loop/e5
   env: {MWAM_TEXT_SOURCE: "cache"}
 
-# 11-18 19:00 (Opus, plan v14 E5b, user approved 18:33): the clock model on put under the same pause (before any
+# 11-18 18:40 (Opus, plan v14 E5b, user approved 18:33): the clock model on put under the same pause (before any
 # closed-loop result of ar2_clock); shards right after E5's, verdict after E5's verdict.
 - id: A40-E5b-clock30-pause-vis-put-s0
   lane: a40
@@ -12652,7 +12652,7 @@ tasks:
   pass_if: "m['rc'] == 0"
 
 # ---------------------------------------------------------------------------------------------------------------
-# 11-18 19:40 BJ (Opus, plan v14 E19, user approved 18:33): E1's stress table replicated on the second judging machine
+# 11-18 18:40 BJ (Opus, plan v14 E19, user approved 18:33): E1's stress table replicated on the second judging machine
 # (A100), swap scenes 1-50, the same injections, validity and verdict script as on the A40 (closed_loop/e19). Order:
 # ledger pause, ledger airgrasp, ledger fidget, AR pause (each visible / hidden). Replicated = the same verdict words
 # as the A40's (STRUCTURAL NOT IMMUNE BY CONSTRUCTION, BEHAVIOUR IMMUNE, AIRGRASP NOT FOOLED; Status 1118 section 2.1).

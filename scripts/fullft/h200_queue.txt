@@ -73,7 +73,7 @@ put_arprop | data.tasks=[put_back_block] history.variant=arprop history.event_ma
 # plan v13 E5 (clock arm), E8 (body as teacher), E9 (AR + event frames on put + swap) and the G2' harm check are added
 # here as their code passes its tests; Press iterations go before E8 / E9.
 #
-# 11-18 19:50 (Opus, plan v14 5.2 / 5.3, user approved 18:33). The old H200 after E4 (~11-19 07:10), first runnable wins:
+# 11-18 18:40 (Opus, plan v14 5.2 / 5.3, user approved 18:33). The old H200 after E4 (~11-19 07:10), first runnable wins:
 #   press_v3c   plan v14 E14 (the audit-chosen writer + count code); its line is added on 11-19 (auto-pull) once the
 #               writer is chosen on the demos and the event file is built; P0
 #   obs_arprop  the Obs ledger arm (main table, paired with obs_ar on this machine); condition = obs_ready.sh (event file

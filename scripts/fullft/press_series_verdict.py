@@ -1,4 +1,4 @@
-"""Press-series verdicts on the 5090 for plan v13 E4 (press_count) and plan v14 E14 (press_v3c); written 11-18 19:20 BJ,
+"""Press-series verdicts on the 5090 for plan v13 E4 (press_count) and plan v14 E14 (press_v3c); written 11-18 18:40 BJ,
 before any press_count or press_v3c closed-loop result exists. Read-only. The epoch of each run is chosen with the
 P-SEL rule (press_select.py, scenes 1-50, closed_loop/g1); the chosen export runs on the held-out scenes 51-100
 (closed_loop/sel) and is paired there with the reference run's chosen export (same machine).
