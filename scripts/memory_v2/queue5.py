@@ -356,9 +356,12 @@ def episodes(folders, label, modes=None, tasks=None):
             if (modes and r.get("mode") not in modes) or (tasks and r.get("task") not in tasks):
                 continue
             snaps, counters = cls.read_rows(d / "executed_actions.jsonl")
-            if len(snaps) < 2 or not snaps[0]:
+            staged = r["task"] in ("put_back_block", "swap_blocks", "press_button")
+            if len(snaps) < 2 or (staged and not snaps[0]):
                 continue
-            a = cls.analyse(r["task"], snaps, counters)
+            # 11-18 (A40 plan v13 E6): the other RMBench tasks have no stage analysis; they count by the simulator's
+            # success flag only (the stage analysis raised ValueError and the card was judged ERROR)
+            a = cls.analyse(r["task"], snaps, counters) if staged else {}
             a["success"] = bool(r.get("success"))
             a["dir"] = str(d)
             out[(r["task"], r["mode"], int(r["seed"]))] = a

@@ -9913,3 +9913,2293 @@ tasks:
   online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
   output: closed_loop/lc
   env: {MWAM_TEXT_SOURCE: "cache"}
+
+# ---------------------------------------------------------------------------------------------------------------
+# 11-18 18:30 BJ (Opus; user 17:27 "按照你的建议来做"): the A40's next work after the learning curve, all written before
+# any of these models has a closed-loop result. Every card waits for its model on the relay (export_fetch.sh polls it;
+# a waiting fetch card is CPU-only and blocks nothing; GPU cards whose fetch has not passed are simply not ready).
+# Order = plan v13 section 5, A40 list: battery pair (E6, S-C (b)), rearrange / swap_T AR (E6, numbers only), E5, E7.
+# New tasks (battery_try, rearrange_blocks, swap_T): A40-prep-<task> checks the scene bank (from the 5090 delta) and
+# fetches the instruction text (text_fetch.py, sha256 against the cache relay manifest); a 1-episode smoke per model
+# (closed_loop/e6smoke) gates its 10 shards. Fresh folders e6 / e5 / e7: no migrated result can be skipped into them.
+# queue5.py 11-18: tasks without a stage analysis count by the simulator's success flag (they were judged ERROR).
+
+- id: A40-prep-battery_try
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 3
+  hypothesis: "battery_try: scene bank complete + instruction text from the cache relay (sha256)"
+  command: "bash /workspace/FastWAM-memory2/scripts/fullft/a40_prep_task.sh battery_try"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fetch-batAR30
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 72
+  hypothesis: "fetch battery_ar_e30 from the relay when it appears (sha256 checked): battery AR arm (H100, done ~11-19 15:00)"
+  command: "RUN=battery_ar TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fetch-batLED30
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 72
+  hypothesis: "fetch battery_arprop_e30 from the relay when it appears (sha256 checked): battery ledger arm (H100, done ~11-19 17:00)"
+  command: "RUN=battery_arprop TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-batAR30-smoke
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "smoke: battery_ar_e30, battery_try scene 1, one episode finishes on the A40 (closed_loop/e6smoke)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_smoke
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "1"]
+  output: closed_loop/e6smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+  pass_if: "m.get('episodes', 0) >= 1"
+
+- id: A40-E6-batAR30-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-batAR30-smoke]
+  requires_pass: [A40-batAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6 / plan v11 D.4 S-C (b) (registered 11-11, executed by Opus as plan v13 says; reading in scripts/fullft/e6_report.py, written 11-18 before any battery closed loop): ledger - AR >= 15 points on scenes 1-50 (>= 8/50) with paired sign p < 0.05 -> ledger useful on Battery; floor: one of the two >= 30 % (15/50); 51-100 and 1-100 reported. Both arms trained on the H100 (deviation 39). This card: battery_ar_e30, battery_try scenes 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-batAR30-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-batAR30-smoke]
+  requires_pass: [A40-batAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6 / plan v11 D.4 S-C (b) (registered 11-11, executed by Opus as plan v13 says; reading in scripts/fullft/e6_report.py, written 11-18 before any battery closed loop): ledger - AR >= 15 points on scenes 1-50 (>= 8/50) with paired sign p < 0.05 -> ledger useful on Battery; floor: one of the two >= 30 % (15/50); 51-100 and 1-100 reported. Both arms trained on the H100 (deviation 39). This card: battery_ar_e30, battery_try scenes 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-batAR30-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-batAR30-smoke]
+  requires_pass: [A40-batAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6 / plan v11 D.4 S-C (b) (registered 11-11, executed by Opus as plan v13 says; reading in scripts/fullft/e6_report.py, written 11-18 before any battery closed loop): ledger - AR >= 15 points on scenes 1-50 (>= 8/50) with paired sign p < 0.05 -> ledger useful on Battery; floor: one of the two >= 30 % (15/50); 51-100 and 1-100 reported. Both arms trained on the H100 (deviation 39). This card: battery_ar_e30, battery_try scenes 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-batAR30-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-batAR30-smoke]
+  requires_pass: [A40-batAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6 / plan v11 D.4 S-C (b) (registered 11-11, executed by Opus as plan v13 says; reading in scripts/fullft/e6_report.py, written 11-18 before any battery closed loop): ledger - AR >= 15 points on scenes 1-50 (>= 8/50) with paired sign p < 0.05 -> ledger useful on Battery; floor: one of the two >= 30 % (15/50); 51-100 and 1-100 reported. Both arms trained on the H100 (deviation 39). This card: battery_ar_e30, battery_try scenes 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-batAR30-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-batAR30-smoke]
+  requires_pass: [A40-batAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6 / plan v11 D.4 S-C (b) (registered 11-11, executed by Opus as plan v13 says; reading in scripts/fullft/e6_report.py, written 11-18 before any battery closed loop): ledger - AR >= 15 points on scenes 1-50 (>= 8/50) with paired sign p < 0.05 -> ledger useful on Battery; floor: one of the two >= 30 % (15/50); 51-100 and 1-100 reported. Both arms trained on the H100 (deviation 39). This card: battery_ar_e30, battery_try scenes 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-batAR30-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-batAR30-smoke]
+  requires_pass: [A40-batAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6 / plan v11 D.4 S-C (b) (registered 11-11, executed by Opus as plan v13 says; reading in scripts/fullft/e6_report.py, written 11-18 before any battery closed loop): ledger - AR >= 15 points on scenes 1-50 (>= 8/50) with paired sign p < 0.05 -> ledger useful on Battery; floor: one of the two >= 30 % (15/50); 51-100 and 1-100 reported. Both arms trained on the H100 (deviation 39). This card: battery_ar_e30, battery_try scenes 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-batAR30-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-batAR30-smoke]
+  requires_pass: [A40-batAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6 / plan v11 D.4 S-C (b) (registered 11-11, executed by Opus as plan v13 says; reading in scripts/fullft/e6_report.py, written 11-18 before any battery closed loop): ledger - AR >= 15 points on scenes 1-50 (>= 8/50) with paired sign p < 0.05 -> ledger useful on Battery; floor: one of the two >= 30 % (15/50); 51-100 and 1-100 reported. Both arms trained on the H100 (deviation 39). This card: battery_ar_e30, battery_try scenes 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-batAR30-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-batAR30-smoke]
+  requires_pass: [A40-batAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6 / plan v11 D.4 S-C (b) (registered 11-11, executed by Opus as plan v13 says; reading in scripts/fullft/e6_report.py, written 11-18 before any battery closed loop): ledger - AR >= 15 points on scenes 1-50 (>= 8/50) with paired sign p < 0.05 -> ledger useful on Battery; floor: one of the two >= 30 % (15/50); 51-100 and 1-100 reported. Both arms trained on the H100 (deviation 39). This card: battery_ar_e30, battery_try scenes 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-batAR30-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-batAR30-smoke]
+  requires_pass: [A40-batAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6 / plan v11 D.4 S-C (b) (registered 11-11, executed by Opus as plan v13 says; reading in scripts/fullft/e6_report.py, written 11-18 before any battery closed loop): ledger - AR >= 15 points on scenes 1-50 (>= 8/50) with paired sign p < 0.05 -> ledger useful on Battery; floor: one of the two >= 30 % (15/50); 51-100 and 1-100 reported. Both arms trained on the H100 (deviation 39). This card: battery_ar_e30, battery_try scenes 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-batAR30-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-batAR30-smoke]
+  requires_pass: [A40-batAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6 / plan v11 D.4 S-C (b) (registered 11-11, executed by Opus as plan v13 says; reading in scripts/fullft/e6_report.py, written 11-18 before any battery closed loop): ledger - AR >= 15 points on scenes 1-50 (>= 8/50) with paired sign p < 0.05 -> ledger useful on Battery; floor: one of the two >= 30 % (15/50); 51-100 and 1-100 reported. Both arms trained on the H100 (deviation 39). This card: battery_ar_e30, battery_try scenes 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-batLED30-smoke
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep-battery_try, A40-fetch-batLED30]
+  requires_pass: [A40-prep-battery_try, A40-fetch-batLED30]
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "smoke: battery_arprop_e30, battery_try scene 1, one episode finishes on the A40 (closed_loop/e6smoke)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_arprop_e30/export_e30.pt
+  label: battery_arprop_e30_smoke
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "1"]
+  output: closed_loop/e6smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+  pass_if: "m.get('episodes', 0) >= 1"
+
+- id: A40-E6-batLED30-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-batLED30-smoke]
+  requires_pass: [A40-batLED30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6 / plan v11 D.4 S-C (b) (registered 11-11, executed by Opus as plan v13 says; reading in scripts/fullft/e6_report.py, written 11-18 before any battery closed loop): ledger - AR >= 15 points on scenes 1-50 (>= 8/50) with paired sign p < 0.05 -> ledger useful on Battery; floor: one of the two >= 30 % (15/50); 51-100 and 1-100 reported. Both arms trained on the H100 (deviation 39). This card: battery_arprop_e30, battery_try scenes 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_arprop_e30/export_e30.pt
+  label: battery_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-batLED30-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-batLED30-smoke]
+  requires_pass: [A40-batLED30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6 / plan v11 D.4 S-C (b) (registered 11-11, executed by Opus as plan v13 says; reading in scripts/fullft/e6_report.py, written 11-18 before any battery closed loop): ledger - AR >= 15 points on scenes 1-50 (>= 8/50) with paired sign p < 0.05 -> ledger useful on Battery; floor: one of the two >= 30 % (15/50); 51-100 and 1-100 reported. Both arms trained on the H100 (deviation 39). This card: battery_arprop_e30, battery_try scenes 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_arprop_e30/export_e30.pt
+  label: battery_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-batLED30-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-batLED30-smoke]
+  requires_pass: [A40-batLED30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6 / plan v11 D.4 S-C (b) (registered 11-11, executed by Opus as plan v13 says; reading in scripts/fullft/e6_report.py, written 11-18 before any battery closed loop): ledger - AR >= 15 points on scenes 1-50 (>= 8/50) with paired sign p < 0.05 -> ledger useful on Battery; floor: one of the two >= 30 % (15/50); 51-100 and 1-100 reported. Both arms trained on the H100 (deviation 39). This card: battery_arprop_e30, battery_try scenes 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_arprop_e30/export_e30.pt
+  label: battery_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-batLED30-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-batLED30-smoke]
+  requires_pass: [A40-batLED30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6 / plan v11 D.4 S-C (b) (registered 11-11, executed by Opus as plan v13 says; reading in scripts/fullft/e6_report.py, written 11-18 before any battery closed loop): ledger - AR >= 15 points on scenes 1-50 (>= 8/50) with paired sign p < 0.05 -> ledger useful on Battery; floor: one of the two >= 30 % (15/50); 51-100 and 1-100 reported. Both arms trained on the H100 (deviation 39). This card: battery_arprop_e30, battery_try scenes 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_arprop_e30/export_e30.pt
+  label: battery_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-batLED30-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-batLED30-smoke]
+  requires_pass: [A40-batLED30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6 / plan v11 D.4 S-C (b) (registered 11-11, executed by Opus as plan v13 says; reading in scripts/fullft/e6_report.py, written 11-18 before any battery closed loop): ledger - AR >= 15 points on scenes 1-50 (>= 8/50) with paired sign p < 0.05 -> ledger useful on Battery; floor: one of the two >= 30 % (15/50); 51-100 and 1-100 reported. Both arms trained on the H100 (deviation 39). This card: battery_arprop_e30, battery_try scenes 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_arprop_e30/export_e30.pt
+  label: battery_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-batLED30-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-batLED30-smoke]
+  requires_pass: [A40-batLED30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6 / plan v11 D.4 S-C (b) (registered 11-11, executed by Opus as plan v13 says; reading in scripts/fullft/e6_report.py, written 11-18 before any battery closed loop): ledger - AR >= 15 points on scenes 1-50 (>= 8/50) with paired sign p < 0.05 -> ledger useful on Battery; floor: one of the two >= 30 % (15/50); 51-100 and 1-100 reported. Both arms trained on the H100 (deviation 39). This card: battery_arprop_e30, battery_try scenes 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_arprop_e30/export_e30.pt
+  label: battery_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-batLED30-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-batLED30-smoke]
+  requires_pass: [A40-batLED30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6 / plan v11 D.4 S-C (b) (registered 11-11, executed by Opus as plan v13 says; reading in scripts/fullft/e6_report.py, written 11-18 before any battery closed loop): ledger - AR >= 15 points on scenes 1-50 (>= 8/50) with paired sign p < 0.05 -> ledger useful on Battery; floor: one of the two >= 30 % (15/50); 51-100 and 1-100 reported. Both arms trained on the H100 (deviation 39). This card: battery_arprop_e30, battery_try scenes 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_arprop_e30/export_e30.pt
+  label: battery_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-batLED30-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-batLED30-smoke]
+  requires_pass: [A40-batLED30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6 / plan v11 D.4 S-C (b) (registered 11-11, executed by Opus as plan v13 says; reading in scripts/fullft/e6_report.py, written 11-18 before any battery closed loop): ledger - AR >= 15 points on scenes 1-50 (>= 8/50) with paired sign p < 0.05 -> ledger useful on Battery; floor: one of the two >= 30 % (15/50); 51-100 and 1-100 reported. Both arms trained on the H100 (deviation 39). This card: battery_arprop_e30, battery_try scenes 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_arprop_e30/export_e30.pt
+  label: battery_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-batLED30-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-batLED30-smoke]
+  requires_pass: [A40-batLED30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6 / plan v11 D.4 S-C (b) (registered 11-11, executed by Opus as plan v13 says; reading in scripts/fullft/e6_report.py, written 11-18 before any battery closed loop): ledger - AR >= 15 points on scenes 1-50 (>= 8/50) with paired sign p < 0.05 -> ledger useful on Battery; floor: one of the two >= 30 % (15/50); 51-100 and 1-100 reported. Both arms trained on the H100 (deviation 39). This card: battery_arprop_e30, battery_try scenes 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_arprop_e30/export_e30.pt
+  label: battery_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-batLED30-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-batLED30-smoke]
+  requires_pass: [A40-batLED30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6 / plan v11 D.4 S-C (b) (registered 11-11, executed by Opus as plan v13 says; reading in scripts/fullft/e6_report.py, written 11-18 before any battery closed loop): ledger - AR >= 15 points on scenes 1-50 (>= 8/50) with paired sign p < 0.05 -> ledger useful on Battery; floor: one of the two >= 30 % (15/50); 51-100 and 1-100 reported. Both arms trained on the H100 (deviation 39). This card: battery_arprop_e30, battery_try scenes 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_arprop_e30/export_e30.pt
+  label: battery_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-bat-verdict
+  lane: a40cpu
+  kind: shell
+  after: [A40-E6-batAR30-s0, A40-E6-batAR30-s1, A40-E6-batAR30-s2, A40-E6-batAR30-s3, A40-E6-batAR30-s4, A40-E6-batAR30-s5, A40-E6-batAR30-s6, A40-E6-batAR30-s7, A40-E6-batAR30-s8, A40-E6-batAR30-s9, A40-E6-batLED30-s0, A40-E6-batLED30-s1, A40-E6-batLED30-s2, A40-E6-batLED30-s3, A40-E6-batLED30-s4, A40-E6-batLED30-s5, A40-E6-batLED30-s6, A40-E6-batLED30-s7, A40-E6-batLED30-s8, A40-E6-batLED30-s9]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "S-C (b) battery verdict on scenes 1-50 (+ 51-100, 1-100 descriptive)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e6_report.py"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-prep-rearrange_blocks
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 3
+  hypothesis: "rearrange_blocks: scene bank complete + instruction text from the cache relay (sha256)"
+  command: "bash /workspace/FastWAM-memory2/scripts/fullft/a40_prep_task.sh rearrange_blocks"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fetch-rearrAR30
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 48
+  hypothesis: "fetch rearrange_ar_e30 from the relay when it appears (sha256 checked): rearrange_blocks AR arm (H100, done ~11-19 03:30)"
+  command: "RUN=rearrange_ar TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-rearrAR30-smoke
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep-rearrange_blocks, A40-fetch-rearrAR30]
+  requires_pass: [A40-prep-rearrange_blocks, A40-fetch-rearrAR30]
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "smoke: rearrange_ar_e30, rearrange_blocks scene 1, one episode finishes on the A40 (closed_loop/e6smoke)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_ar_e30/export_e30.pt
+  label: rearrange_ar_e30_smoke
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "1"]
+  output: closed_loop/e6smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+  pass_if: "m.get('episodes', 0) >= 1"
+
+- id: A40-E6-rearrAR30-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-rearrAR30-smoke]
+  requires_pass: [A40-rearrAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6: numbers only (official scenes 1-100 on the A40), compared by Opus line by line with the E2 predictions (scripts/fullft/E2_PREDICTIONS_REGISTERED.txt); the C.3 'comparable' line is a hint, no grading. This card: rearrange_ar_e30, rearrange_blocks scenes 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_ar_e30/export_e30.pt
+  label: rearrange_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-rearrAR30-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-rearrAR30-smoke]
+  requires_pass: [A40-rearrAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6: numbers only (official scenes 1-100 on the A40), compared by Opus line by line with the E2 predictions (scripts/fullft/E2_PREDICTIONS_REGISTERED.txt); the C.3 'comparable' line is a hint, no grading. This card: rearrange_ar_e30, rearrange_blocks scenes 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_ar_e30/export_e30.pt
+  label: rearrange_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-rearrAR30-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-rearrAR30-smoke]
+  requires_pass: [A40-rearrAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6: numbers only (official scenes 1-100 on the A40), compared by Opus line by line with the E2 predictions (scripts/fullft/E2_PREDICTIONS_REGISTERED.txt); the C.3 'comparable' line is a hint, no grading. This card: rearrange_ar_e30, rearrange_blocks scenes 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_ar_e30/export_e30.pt
+  label: rearrange_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-rearrAR30-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-rearrAR30-smoke]
+  requires_pass: [A40-rearrAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6: numbers only (official scenes 1-100 on the A40), compared by Opus line by line with the E2 predictions (scripts/fullft/E2_PREDICTIONS_REGISTERED.txt); the C.3 'comparable' line is a hint, no grading. This card: rearrange_ar_e30, rearrange_blocks scenes 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_ar_e30/export_e30.pt
+  label: rearrange_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-rearrAR30-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-rearrAR30-smoke]
+  requires_pass: [A40-rearrAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6: numbers only (official scenes 1-100 on the A40), compared by Opus line by line with the E2 predictions (scripts/fullft/E2_PREDICTIONS_REGISTERED.txt); the C.3 'comparable' line is a hint, no grading. This card: rearrange_ar_e30, rearrange_blocks scenes 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_ar_e30/export_e30.pt
+  label: rearrange_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-rearrAR30-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-rearrAR30-smoke]
+  requires_pass: [A40-rearrAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6: numbers only (official scenes 1-100 on the A40), compared by Opus line by line with the E2 predictions (scripts/fullft/E2_PREDICTIONS_REGISTERED.txt); the C.3 'comparable' line is a hint, no grading. This card: rearrange_ar_e30, rearrange_blocks scenes 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_ar_e30/export_e30.pt
+  label: rearrange_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-rearrAR30-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-rearrAR30-smoke]
+  requires_pass: [A40-rearrAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6: numbers only (official scenes 1-100 on the A40), compared by Opus line by line with the E2 predictions (scripts/fullft/E2_PREDICTIONS_REGISTERED.txt); the C.3 'comparable' line is a hint, no grading. This card: rearrange_ar_e30, rearrange_blocks scenes 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_ar_e30/export_e30.pt
+  label: rearrange_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-rearrAR30-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-rearrAR30-smoke]
+  requires_pass: [A40-rearrAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6: numbers only (official scenes 1-100 on the A40), compared by Opus line by line with the E2 predictions (scripts/fullft/E2_PREDICTIONS_REGISTERED.txt); the C.3 'comparable' line is a hint, no grading. This card: rearrange_ar_e30, rearrange_blocks scenes 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_ar_e30/export_e30.pt
+  label: rearrange_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-rearrAR30-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-rearrAR30-smoke]
+  requires_pass: [A40-rearrAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6: numbers only (official scenes 1-100 on the A40), compared by Opus line by line with the E2 predictions (scripts/fullft/E2_PREDICTIONS_REGISTERED.txt); the C.3 'comparable' line is a hint, no grading. This card: rearrange_ar_e30, rearrange_blocks scenes 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_ar_e30/export_e30.pt
+  label: rearrange_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-rearrAR30-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-rearrAR30-smoke]
+  requires_pass: [A40-rearrAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6: numbers only (official scenes 1-100 on the A40), compared by Opus line by line with the E2 predictions (scripts/fullft/E2_PREDICTIONS_REGISTERED.txt); the C.3 'comparable' line is a hint, no grading. This card: rearrange_ar_e30, rearrange_blocks scenes 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_ar_e30/export_e30.pt
+  label: rearrange_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-prep-swap_T
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 3
+  hypothesis: "swap_T: scene bank complete + instruction text from the cache relay (sha256)"
+  command: "bash /workspace/FastWAM-memory2/scripts/fullft/a40_prep_task.sh swap_T"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fetch-swapTAR30
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 48
+  hypothesis: "fetch swapT_ar_e30 from the relay when it appears (sha256 checked): swap_T AR arm (H100, done ~11-18 23:00)"
+  command: "RUN=swapT_ar TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-swapTAR30-smoke
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep-swap_T, A40-fetch-swapTAR30]
+  requires_pass: [A40-prep-swap_T, A40-fetch-swapTAR30]
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "smoke: swapT_ar_e30, swap_T scene 1, one episode finishes on the A40 (closed_loop/e6smoke)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_smoke
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "1"]
+  output: closed_loop/e6smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+  pass_if: "m.get('episodes', 0) >= 1"
+
+- id: A40-E6-swapTAR30-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-swapTAR30-smoke]
+  requires_pass: [A40-swapTAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6: numbers only (official scenes 1-100 on the A40), compared by Opus line by line with the E2 predictions (scripts/fullft/E2_PREDICTIONS_REGISTERED.txt); the C.3 'comparable' line is a hint, no grading. This card: swapT_ar_e30, swap_T scenes 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-swapTAR30-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-swapTAR30-smoke]
+  requires_pass: [A40-swapTAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6: numbers only (official scenes 1-100 on the A40), compared by Opus line by line with the E2 predictions (scripts/fullft/E2_PREDICTIONS_REGISTERED.txt); the C.3 'comparable' line is a hint, no grading. This card: swapT_ar_e30, swap_T scenes 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-swapTAR30-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-swapTAR30-smoke]
+  requires_pass: [A40-swapTAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6: numbers only (official scenes 1-100 on the A40), compared by Opus line by line with the E2 predictions (scripts/fullft/E2_PREDICTIONS_REGISTERED.txt); the C.3 'comparable' line is a hint, no grading. This card: swapT_ar_e30, swap_T scenes 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-swapTAR30-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-swapTAR30-smoke]
+  requires_pass: [A40-swapTAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6: numbers only (official scenes 1-100 on the A40), compared by Opus line by line with the E2 predictions (scripts/fullft/E2_PREDICTIONS_REGISTERED.txt); the C.3 'comparable' line is a hint, no grading. This card: swapT_ar_e30, swap_T scenes 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-swapTAR30-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-swapTAR30-smoke]
+  requires_pass: [A40-swapTAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6: numbers only (official scenes 1-100 on the A40), compared by Opus line by line with the E2 predictions (scripts/fullft/E2_PREDICTIONS_REGISTERED.txt); the C.3 'comparable' line is a hint, no grading. This card: swapT_ar_e30, swap_T scenes 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-swapTAR30-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-swapTAR30-smoke]
+  requires_pass: [A40-swapTAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6: numbers only (official scenes 1-100 on the A40), compared by Opus line by line with the E2 predictions (scripts/fullft/E2_PREDICTIONS_REGISTERED.txt); the C.3 'comparable' line is a hint, no grading. This card: swapT_ar_e30, swap_T scenes 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-swapTAR30-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-swapTAR30-smoke]
+  requires_pass: [A40-swapTAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6: numbers only (official scenes 1-100 on the A40), compared by Opus line by line with the E2 predictions (scripts/fullft/E2_PREDICTIONS_REGISTERED.txt); the C.3 'comparable' line is a hint, no grading. This card: swapT_ar_e30, swap_T scenes 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-swapTAR30-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-swapTAR30-smoke]
+  requires_pass: [A40-swapTAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6: numbers only (official scenes 1-100 on the A40), compared by Opus line by line with the E2 predictions (scripts/fullft/E2_PREDICTIONS_REGISTERED.txt); the C.3 'comparable' line is a hint, no grading. This card: swapT_ar_e30, swap_T scenes 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-swapTAR30-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-swapTAR30-smoke]
+  requires_pass: [A40-swapTAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6: numbers only (official scenes 1-100 on the A40), compared by Opus line by line with the E2 predictions (scripts/fullft/E2_PREDICTIONS_REGISTERED.txt); the C.3 'comparable' line is a hint, no grading. This card: swapT_ar_e30, swap_T scenes 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-swapTAR30-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-swapTAR30-smoke]
+  requires_pass: [A40-swapTAR30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v13 E6: numbers only (official scenes 1-100 on the A40), compared by Opus line by line with the E2 predictions (scripts/fullft/E2_PREDICTIONS_REGISTERED.txt); the C.3 'comparable' line is a hint, no grading. This card: swapT_ar_e30, swap_T scenes 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E6-ar-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-E6-rearrAR30-s0, A40-E6-rearrAR30-s1, A40-E6-rearrAR30-s2, A40-E6-rearrAR30-s3, A40-E6-rearrAR30-s4, A40-E6-rearrAR30-s5, A40-E6-rearrAR30-s6, A40-E6-rearrAR30-s7, A40-E6-rearrAR30-s8, A40-E6-rearrAR30-s9, A40-E6-swapTAR30-s0, A40-E6-swapTAR30-s1, A40-E6-swapTAR30-s2, A40-E6-swapTAR30-s3, A40-E6-swapTAR30-s4, A40-E6-swapTAR30-s5, A40-E6-swapTAR30-s6, A40-E6-swapTAR30-s7, A40-E6-swapTAR30-s8, A40-E6-swapTAR30-s9]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "plan v13 E6 numbers: rearrange / swap_T AR e30 (1-50, 51-100, 1-100)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e6_report.py"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fetch-clock30
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 36
+  hypothesis: "fetch ar2_clock_e30 from the relay when it appears (sha256 checked): plan v13 E5 clock arm (new H200, done ~11-19 04:30)"
+  command: "RUN=ar2_clock TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-E5-smoke
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-clock30]
+  requires_pass: [A40-fetch-clock30]
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "E5 smoke: ar2_clock e30, pause 64 visible, swap scene 1 (one injection on the clock model; closed_loop/e5smoke)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "1", "--stress", "event:pause:64:history"]
+  output: closed_loop/e5smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+  pass_if: "m.get('episodes', 0) >= 1"
+
+- id: A40-E5-clock30-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30 no stress, swap_blocks scenes 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30 no stress, swap_blocks scenes 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30 no stress, swap_blocks scenes 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30 no stress, swap_blocks scenes 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30 no stress, swap_blocks scenes 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-swap-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30 no stress, swap_blocks scenes 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-swap-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30 no stress, swap_blocks scenes 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-swap-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30 no stress, swap_blocks scenes 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-swap-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30 no stress, swap_blocks scenes 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-swap-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30 no stress, swap_blocks scenes 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30 no stress, put_back_block scenes 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30 no stress, put_back_block scenes 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30 no stress, put_back_block scenes 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30 no stress, put_back_block scenes 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30 no stress, put_back_block scenes 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-put-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30 no stress, put_back_block scenes 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-put-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30 no stress, put_back_block scenes 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-put-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30 no stress, put_back_block scenes 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-put-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30 no stress, put_back_block scenes 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-put-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30 no stress, put_back_block scenes 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-pause-vis-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30, pause 64 vis, swap_blocks scenes 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-pause-vis-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30, pause 64 vis, swap_blocks scenes 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-pause-vis-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30, pause 64 vis, swap_blocks scenes 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-pause-vis-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30, pause 64 vis, swap_blocks scenes 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-pause-vis-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30, pause 64 vis, swap_blocks scenes 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-pause-hid-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30, pause 64 hid, swap_blocks scenes 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-pause-hid-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30, pause 64 hid, swap_blocks scenes 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-pause-hid-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30, pause 64 hid, swap_blocks scenes 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-pause-hid-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30, pause 64 hid, swap_blocks scenes 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-clock30-pause-hid-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 (registered 11-17 by Fable, approved 15:40; reading in scripts/fullft/e5_verdict.py, written 11-18 before any ar2_clock result): floor clock no-stress swap >= 70/100; clock Delta (pause vis - hid, swap 1-50, E1's injection and validity) <= -8 with p < 0.05 AND ledger E1 Delta >= -5 -> INDEX MATTERS; clock Delta >= -5 -> NOT REPRODUCED; else PARTIAL. This card: ar2_clock_e30, pause 64 hid, swap_blocks scenes 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5-verdict
+  lane: a40cpu
+  kind: shell
+  after: [A40-E5-clock30-swap-s0, A40-E5-clock30-swap-s1, A40-E5-clock30-swap-s2, A40-E5-clock30-swap-s3, A40-E5-clock30-swap-s4, A40-E5-clock30-swap-s5, A40-E5-clock30-swap-s6, A40-E5-clock30-swap-s7, A40-E5-clock30-swap-s8, A40-E5-clock30-swap-s9, A40-E5-clock30-put-s0, A40-E5-clock30-put-s1, A40-E5-clock30-put-s2, A40-E5-clock30-put-s3, A40-E5-clock30-put-s4, A40-E5-clock30-put-s5, A40-E5-clock30-put-s6, A40-E5-clock30-put-s7, A40-E5-clock30-put-s8, A40-E5-clock30-put-s9, A40-E5-clock30-pause-vis-swap-s0, A40-E5-clock30-pause-vis-swap-s1, A40-E5-clock30-pause-vis-swap-s2, A40-E5-clock30-pause-vis-swap-s3, A40-E5-clock30-pause-vis-swap-s4, A40-E5-clock30-pause-hid-swap-s0, A40-E5-clock30-pause-hid-swap-s1, A40-E5-clock30-pause-hid-swap-s2, A40-E5-clock30-pause-hid-swap-s3, A40-E5-clock30-pause-hid-swap-s4]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "E5 verdict (registered reading in scripts/fullft/e5_verdict.py)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e5_verdict.py"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-E5-index-matters
+  lane: a40cpu
+  kind: shell
+  after: [A40-E5-verdict]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "gate (registered in E5): the timestamp-scale runs only after INDEX MATTERS (PASS = the verdict is INDEX MATTERS)"
+  command: "cd /workspace/FastWAM-memory2 && /opt/mwam/bin/python -c \"import json, sys; v = json.load(open('outputs/fullft/E5_VERDICT.json'))['verdict']; print('E5 verdict:', v); sys.exit(0 if v == 'INDEX MATTERS' else 1)\""
+  pass_if: "m['rc'] == 0"
+
+- id: A40-E5-ts15-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-index-matters]
+  requires_pass: [A40-E5-index-matters]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 follow-up after INDEX MATTERS: timestamps x1.5 (MWAM_CLOCK_SCALE), no stress, swap_blocks scenes 1-50; report only whether the failure direction flips (e5_verdict.py --scales); shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_ts1.5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_CLOCK_SCALE: "1.5"}
+
+- id: A40-E5-ts15-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-index-matters]
+  requires_pass: [A40-E5-index-matters]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 follow-up after INDEX MATTERS: timestamps x1.5 (MWAM_CLOCK_SCALE), no stress, swap_blocks scenes 1-50; report only whether the failure direction flips (e5_verdict.py --scales); shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_ts1.5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_CLOCK_SCALE: "1.5"}
+
+- id: A40-E5-ts15-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-index-matters]
+  requires_pass: [A40-E5-index-matters]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 follow-up after INDEX MATTERS: timestamps x1.5 (MWAM_CLOCK_SCALE), no stress, swap_blocks scenes 1-50; report only whether the failure direction flips (e5_verdict.py --scales); shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_ts1.5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_CLOCK_SCALE: "1.5"}
+
+- id: A40-E5-ts15-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-index-matters]
+  requires_pass: [A40-E5-index-matters]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 follow-up after INDEX MATTERS: timestamps x1.5 (MWAM_CLOCK_SCALE), no stress, swap_blocks scenes 1-50; report only whether the failure direction flips (e5_verdict.py --scales); shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_ts1.5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_CLOCK_SCALE: "1.5"}
+
+- id: A40-E5-ts15-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-index-matters]
+  requires_pass: [A40-E5-index-matters]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 follow-up after INDEX MATTERS: timestamps x1.5 (MWAM_CLOCK_SCALE), no stress, swap_blocks scenes 1-50; report only whether the failure direction flips (e5_verdict.py --scales); shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_ts1.5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_CLOCK_SCALE: "1.5"}
+
+- id: A40-E5-ts05-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-index-matters]
+  requires_pass: [A40-E5-index-matters]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 follow-up after INDEX MATTERS: timestamps x0.5 (MWAM_CLOCK_SCALE), no stress, swap_blocks scenes 1-50; report only whether the failure direction flips (e5_verdict.py --scales); shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_ts0.5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_CLOCK_SCALE: "0.5"}
+
+- id: A40-E5-ts05-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-index-matters]
+  requires_pass: [A40-E5-index-matters]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 follow-up after INDEX MATTERS: timestamps x0.5 (MWAM_CLOCK_SCALE), no stress, swap_blocks scenes 1-50; report only whether the failure direction flips (e5_verdict.py --scales); shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_ts0.5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_CLOCK_SCALE: "0.5"}
+
+- id: A40-E5-ts05-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-index-matters]
+  requires_pass: [A40-E5-index-matters]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 follow-up after INDEX MATTERS: timestamps x0.5 (MWAM_CLOCK_SCALE), no stress, swap_blocks scenes 1-50; report only whether the failure direction flips (e5_verdict.py --scales); shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_ts0.5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_CLOCK_SCALE: "0.5"}
+
+- id: A40-E5-ts05-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-index-matters]
+  requires_pass: [A40-E5-index-matters]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 follow-up after INDEX MATTERS: timestamps x0.5 (MWAM_CLOCK_SCALE), no stress, swap_blocks scenes 1-50; report only whether the failure direction flips (e5_verdict.py --scales); shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_ts0.5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_CLOCK_SCALE: "0.5"}
+
+- id: A40-E5-ts05-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-index-matters]
+  requires_pass: [A40-E5-index-matters]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E5 follow-up after INDEX MATTERS: timestamps x0.5 (MWAM_CLOCK_SCALE), no stress, swap_blocks scenes 1-50; report only whether the failure direction flips (e5_verdict.py --scales); shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_ts0.5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_CLOCK_SCALE: "0.5"}
+
+- id: A40-E5-scales
+  lane: a40cpu
+  kind: shell
+  after: [A40-E5-ts15-swap-s0, A40-E5-ts15-swap-s1, A40-E5-ts15-swap-s2, A40-E5-ts15-swap-s3, A40-E5-ts15-swap-s4, A40-E5-ts05-swap-s0, A40-E5-ts05-swap-s1, A40-E5-ts05-swap-s2, A40-E5-ts05-swap-s3, A40-E5-ts05-swap-s4]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "E5 timestamp-scale report (failure direction x1.5 vs x0.5; reported only)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e5_verdict.py --scales"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fetch-long45
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 24
+  hypothesis: "fetch ar2_long_e45 from the relay when it appears (sha256 checked): plan v13 E7 AR-long at 45 frame-epochs (new H200, exported ~11-18 14:40)"
+  command: "RUN=ar2_long TAG=e45 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fetch-long60
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 36
+  hypothesis: "fetch ar2_long_e60 from the relay when it appears (sha256 checked): plan v13 E7 AR-long at 60 frame-epochs (new H200, done ~11-19 06:30)"
+  command: "RUN=ar2_long TAG=e60 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-E7-long45-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long45]
+  requires_pass: [A40-fetch-long45]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e45, swap_blocks scenes 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e45/export_e45.pt
+  label: ar2_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long45-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long45]
+  requires_pass: [A40-fetch-long45]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e45, swap_blocks scenes 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e45/export_e45.pt
+  label: ar2_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long45-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long45]
+  requires_pass: [A40-fetch-long45]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e45, swap_blocks scenes 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e45/export_e45.pt
+  label: ar2_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long45-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long45]
+  requires_pass: [A40-fetch-long45]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e45, swap_blocks scenes 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e45/export_e45.pt
+  label: ar2_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long45-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long45]
+  requires_pass: [A40-fetch-long45]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e45, swap_blocks scenes 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e45/export_e45.pt
+  label: ar2_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long45-swap-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long45]
+  requires_pass: [A40-fetch-long45]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e45, swap_blocks scenes 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e45/export_e45.pt
+  label: ar2_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long45-swap-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long45]
+  requires_pass: [A40-fetch-long45]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e45, swap_blocks scenes 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e45/export_e45.pt
+  label: ar2_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long45-swap-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long45]
+  requires_pass: [A40-fetch-long45]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e45, swap_blocks scenes 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e45/export_e45.pt
+  label: ar2_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long45-swap-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long45]
+  requires_pass: [A40-fetch-long45]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e45, swap_blocks scenes 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e45/export_e45.pt
+  label: ar2_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long45-swap-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long45]
+  requires_pass: [A40-fetch-long45]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e45, swap_blocks scenes 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e45/export_e45.pt
+  label: ar2_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long45-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long45]
+  requires_pass: [A40-fetch-long45]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e45, put_back_block scenes 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e45/export_e45.pt
+  label: ar2_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long45-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long45]
+  requires_pass: [A40-fetch-long45]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e45, put_back_block scenes 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e45/export_e45.pt
+  label: ar2_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long45-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long45]
+  requires_pass: [A40-fetch-long45]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e45, put_back_block scenes 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e45/export_e45.pt
+  label: ar2_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long45-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long45]
+  requires_pass: [A40-fetch-long45]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e45, put_back_block scenes 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e45/export_e45.pt
+  label: ar2_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long45-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long45]
+  requires_pass: [A40-fetch-long45]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e45, put_back_block scenes 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e45/export_e45.pt
+  label: ar2_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long45-put-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long45]
+  requires_pass: [A40-fetch-long45]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e45, put_back_block scenes 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e45/export_e45.pt
+  label: ar2_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long45-put-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long45]
+  requires_pass: [A40-fetch-long45]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e45, put_back_block scenes 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e45/export_e45.pt
+  label: ar2_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long45-put-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long45]
+  requires_pass: [A40-fetch-long45]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e45, put_back_block scenes 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e45/export_e45.pt
+  label: ar2_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long45-put-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long45]
+  requires_pass: [A40-fetch-long45]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e45, put_back_block scenes 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e45/export_e45.pt
+  label: ar2_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long45-put-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long45]
+  requires_pass: [A40-fetch-long45]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e45, put_back_block scenes 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e45/export_e45.pt
+  label: ar2_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long60-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long60]
+  requires_pass: [A40-fetch-long60]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e60, swap_blocks scenes 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e60/export_e60.pt
+  label: ar2_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long60-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long60]
+  requires_pass: [A40-fetch-long60]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e60, swap_blocks scenes 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e60/export_e60.pt
+  label: ar2_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long60-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long60]
+  requires_pass: [A40-fetch-long60]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e60, swap_blocks scenes 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e60/export_e60.pt
+  label: ar2_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long60-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long60]
+  requires_pass: [A40-fetch-long60]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e60, swap_blocks scenes 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e60/export_e60.pt
+  label: ar2_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long60-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long60]
+  requires_pass: [A40-fetch-long60]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e60, swap_blocks scenes 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e60/export_e60.pt
+  label: ar2_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long60-swap-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long60]
+  requires_pass: [A40-fetch-long60]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e60, swap_blocks scenes 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e60/export_e60.pt
+  label: ar2_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long60-swap-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long60]
+  requires_pass: [A40-fetch-long60]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e60, swap_blocks scenes 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e60/export_e60.pt
+  label: ar2_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long60-swap-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long60]
+  requires_pass: [A40-fetch-long60]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e60, swap_blocks scenes 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e60/export_e60.pt
+  label: ar2_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long60-swap-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long60]
+  requires_pass: [A40-fetch-long60]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e60, swap_blocks scenes 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e60/export_e60.pt
+  label: ar2_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long60-swap-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long60]
+  requires_pass: [A40-fetch-long60]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e60, swap_blocks scenes 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e60/export_e60.pt
+  label: ar2_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long60-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long60]
+  requires_pass: [A40-fetch-long60]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e60, put_back_block scenes 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e60/export_e60.pt
+  label: ar2_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long60-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long60]
+  requires_pass: [A40-fetch-long60]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e60, put_back_block scenes 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e60/export_e60.pt
+  label: ar2_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long60-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long60]
+  requires_pass: [A40-fetch-long60]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e60, put_back_block scenes 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e60/export_e60.pt
+  label: ar2_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long60-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long60]
+  requires_pass: [A40-fetch-long60]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e60, put_back_block scenes 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e60/export_e60.pt
+  label: ar2_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long60-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long60]
+  requires_pass: [A40-fetch-long60]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e60, put_back_block scenes 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e60/export_e60.pt
+  label: ar2_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long60-put-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long60]
+  requires_pass: [A40-fetch-long60]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e60, put_back_block scenes 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e60/export_e60.pt
+  label: ar2_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long60-put-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long60]
+  requires_pass: [A40-fetch-long60]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e60, put_back_block scenes 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e60/export_e60.pt
+  label: ar2_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long60-put-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long60]
+  requires_pass: [A40-fetch-long60]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e60, put_back_block scenes 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e60/export_e60.pt
+  label: ar2_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long60-put-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long60]
+  requires_pass: [A40-fetch-long60]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e60, put_back_block scenes 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e60/export_e60.pt
+  label: ar2_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-long60-put-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-long60]
+  requires_pass: [A40-fetch-long60]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v13 E7 (registered 11-17 by Fable, approved 15:50; reading in scripts/fullft/e7_verdict.py, written 11-18 before any ar2_long result): e60 swap >= 90/100 TRAINABLE, <= 70/100 STRUCTURAL, else PARTIAL; floor e60 put >= 95/100; e45 reported. This card: ar2_long_e60, put_back_block scenes 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e60/export_e60.pt
+  label: ar2_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/e7
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E7-verdict
+  lane: a40cpu
+  kind: shell
+  after: [A40-E7-long45-swap-s0, A40-E7-long45-swap-s1, A40-E7-long45-swap-s2, A40-E7-long45-swap-s3, A40-E7-long45-swap-s4, A40-E7-long45-swap-s5, A40-E7-long45-swap-s6, A40-E7-long45-swap-s7, A40-E7-long45-swap-s8, A40-E7-long45-swap-s9, A40-E7-long45-put-s0, A40-E7-long45-put-s1, A40-E7-long45-put-s2, A40-E7-long45-put-s3, A40-E7-long45-put-s4, A40-E7-long45-put-s5, A40-E7-long45-put-s6, A40-E7-long45-put-s7, A40-E7-long45-put-s8, A40-E7-long45-put-s9, A40-E7-long60-swap-s0, A40-E7-long60-swap-s1, A40-E7-long60-swap-s2, A40-E7-long60-swap-s3, A40-E7-long60-swap-s4, A40-E7-long60-swap-s5, A40-E7-long60-swap-s6, A40-E7-long60-swap-s7, A40-E7-long60-swap-s8, A40-E7-long60-swap-s9, A40-E7-long60-put-s0, A40-E7-long60-put-s1, A40-E7-long60-put-s2, A40-E7-long60-put-s3, A40-E7-long60-put-s4, A40-E7-long60-put-s5, A40-E7-long60-put-s6, A40-E7-long60-put-s7, A40-E7-long60-put-s8, A40-E7-long60-put-s9]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "E7 verdict (registered reading in scripts/fullft/e7_verdict.py)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e7_verdict.py"
+  pass_if: "m['rc'] == 0"

@@ -16,6 +16,7 @@ until $HFPY scripts/memory_v2/migrate/relay.py ls --prefix exports/${RUN}_${TAG}
       | grep -q "^export_${TAG}.pt.sha256 "; do
   echo "[fetch] $(date '+%F %T') waiting for exports/${RUN}_${TAG} on the relay"; sleep $POLL
 done
+echo "[fetch] disk before: $(df -h $R/outputs | tail -1)"        # 11-18: the A40 now keeps ~7 more exports
 for attempt in 1 2 3; do
   echo "[fetch] $(date '+%F %T') fetching ${RUN}_${TAG} (attempt $attempt)"
   $HFPY scripts/memory_v2/migrate/relay.py get --prefix exports/${RUN}_${TAG} --repo hhyfred/memwam-fullft --out $E \
