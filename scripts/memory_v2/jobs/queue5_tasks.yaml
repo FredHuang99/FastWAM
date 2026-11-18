@@ -11362,6 +11362,178 @@ tasks:
   output: closed_loop/e5
   env: {MWAM_TEXT_SOURCE: "cache"}
 
+# 11-18 19:00 (Opus, plan v14 E5b, user approved 18:33): the clock model on put under the same pause (before any
+# closed-loop result of ar2_clock); shards right after E5's, verdict after E5's verdict.
+- id: A40-E5b-clock30-pause-vis-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E5b (registered 11-18 by Fable, approved by the user 18:33; reading in scripts/fullft/e5b_verdict.py, written before any ar2_clock result): E2 rule C says time alone suffices on put, not on swap; clock Delta (pause vis - hid, put 1-50, E1's put injection and validity) <= -8 with p < 0.05 -> CLOCK READ ON PUT, >= -5 -> NOT ON PUT; floors >= 45 valid pairs, hidden >= 40/50. This card: ar2_clock_e30, pause 64 vis, put_back_block scenes 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5b-clock30-pause-vis-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E5b (registered 11-18 by Fable, approved by the user 18:33; reading in scripts/fullft/e5b_verdict.py, written before any ar2_clock result): E2 rule C says time alone suffices on put, not on swap; clock Delta (pause vis - hid, put 1-50, E1's put injection and validity) <= -8 with p < 0.05 -> CLOCK READ ON PUT, >= -5 -> NOT ON PUT; floors >= 45 valid pairs, hidden >= 40/50. This card: ar2_clock_e30, pause 64 vis, put_back_block scenes 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5b-clock30-pause-vis-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E5b (registered 11-18 by Fable, approved by the user 18:33; reading in scripts/fullft/e5b_verdict.py, written before any ar2_clock result): E2 rule C says time alone suffices on put, not on swap; clock Delta (pause vis - hid, put 1-50, E1's put injection and validity) <= -8 with p < 0.05 -> CLOCK READ ON PUT, >= -5 -> NOT ON PUT; floors >= 45 valid pairs, hidden >= 40/50. This card: ar2_clock_e30, pause 64 vis, put_back_block scenes 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5b-clock30-pause-vis-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E5b (registered 11-18 by Fable, approved by the user 18:33; reading in scripts/fullft/e5b_verdict.py, written before any ar2_clock result): E2 rule C says time alone suffices on put, not on swap; clock Delta (pause vis - hid, put 1-50, E1's put injection and validity) <= -8 with p < 0.05 -> CLOCK READ ON PUT, >= -5 -> NOT ON PUT; floors >= 45 valid pairs, hidden >= 40/50. This card: ar2_clock_e30, pause 64 vis, put_back_block scenes 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5b-clock30-pause-vis-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E5b (registered 11-18 by Fable, approved by the user 18:33; reading in scripts/fullft/e5b_verdict.py, written before any ar2_clock result): E2 rule C says time alone suffices on put, not on swap; clock Delta (pause vis - hid, put 1-50, E1's put injection and validity) <= -8 with p < 0.05 -> CLOCK READ ON PUT, >= -5 -> NOT ON PUT; floors >= 45 valid pairs, hidden >= 40/50. This card: ar2_clock_e30, pause 64 vis, put_back_block scenes 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5b-clock30-pause-hid-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E5b (registered 11-18 by Fable, approved by the user 18:33; reading in scripts/fullft/e5b_verdict.py, written before any ar2_clock result): E2 rule C says time alone suffices on put, not on swap; clock Delta (pause vis - hid, put 1-50, E1's put injection and validity) <= -8 with p < 0.05 -> CLOCK READ ON PUT, >= -5 -> NOT ON PUT; floors >= 45 valid pairs, hidden >= 40/50. This card: ar2_clock_e30, pause 64 hid, put_back_block scenes 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5b-clock30-pause-hid-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E5b (registered 11-18 by Fable, approved by the user 18:33; reading in scripts/fullft/e5b_verdict.py, written before any ar2_clock result): E2 rule C says time alone suffices on put, not on swap; clock Delta (pause vis - hid, put 1-50, E1's put injection and validity) <= -8 with p < 0.05 -> CLOCK READ ON PUT, >= -5 -> NOT ON PUT; floors >= 45 valid pairs, hidden >= 40/50. This card: ar2_clock_e30, pause 64 hid, put_back_block scenes 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5b-clock30-pause-hid-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E5b (registered 11-18 by Fable, approved by the user 18:33; reading in scripts/fullft/e5b_verdict.py, written before any ar2_clock result): E2 rule C says time alone suffices on put, not on swap; clock Delta (pause vis - hid, put 1-50, E1's put injection and validity) <= -8 with p < 0.05 -> CLOCK READ ON PUT, >= -5 -> NOT ON PUT; floors >= 45 valid pairs, hidden >= 40/50. This card: ar2_clock_e30, pause 64 hid, put_back_block scenes 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5b-clock30-pause-hid-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E5b (registered 11-18 by Fable, approved by the user 18:33; reading in scripts/fullft/e5b_verdict.py, written before any ar2_clock result): E2 rule C says time alone suffices on put, not on swap; clock Delta (pause vis - hid, put 1-50, E1's put injection and validity) <= -8 with p < 0.05 -> CLOCK READ ON PUT, >= -5 -> NOT ON PUT; floors >= 45 valid pairs, hidden >= 40/50. This card: ar2_clock_e30, pause 64 hid, put_back_block scenes 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E5b-clock30-pause-hid-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5-smoke]
+  requires_pass: [A40-E5-smoke]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E5b (registered 11-18 by Fable, approved by the user 18:33; reading in scripts/fullft/e5b_verdict.py, written before any ar2_clock result): E2 rule C says time alone suffices on put, not on swap; clock Delta (pause vis - hid, put 1-50, E1's put injection and validity) <= -8 with p < 0.05 -> CLOCK READ ON PUT, >= -5 -> NOT ON PUT; floors >= 45 valid pairs, hidden >= 40/50. This card: ar2_clock_e30, pause 64 hid, put_back_block scenes 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
 - id: A40-E5-verdict
   lane: a40cpu
   kind: shell
@@ -11560,6 +11732,206 @@ tasks:
   timeout_h: 1
   hypothesis: "E5 timestamp-scale report (failure direction x1.5 vs x0.5; reported only)"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e5_verdict.py --scales"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-E5b-verdict
+  lane: a40cpu
+  kind: shell
+  after: [A40-E5b-clock30-pause-vis-put-s0, A40-E5b-clock30-pause-vis-put-s1, A40-E5b-clock30-pause-vis-put-s2, A40-E5b-clock30-pause-vis-put-s3, A40-E5b-clock30-pause-vis-put-s4, A40-E5b-clock30-pause-hid-put-s0, A40-E5b-clock30-pause-hid-put-s1, A40-E5b-clock30-pause-hid-put-s2, A40-E5b-clock30-pause-hid-put-s3, A40-E5b-clock30-pause-hid-put-s4, A40-E5-verdict]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "E5b verdict (registered reading in scripts/fullft/e5b_verdict.py), read with E5 by the plan v14 E5b table"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e5b_verdict.py"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-E5b-clock-put
+  lane: a40cpu
+  kind: shell
+  after: [A40-E5b-verdict]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "gate (registered in E5b): the put timestamp-scale runs only after CLOCK READ ON PUT (PASS = that verdict)"
+  command: "cd /workspace/FastWAM-memory2 && /opt/mwam/bin/python -c \"import json, sys; v = json.load(open('outputs/fullft/E5B_VERDICT.json'))['verdict']; print('E5b verdict:', v); sys.exit(0 if v == 'CLOCK READ ON PUT' else 1)\""
+  pass_if: "m['rc'] == 0"
+
+- id: A40-E5b-ts15-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5b-clock-put]
+  requires_pass: [A40-E5b-clock-put]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E5b follow-up after CLOCK READ ON PUT: timestamps x1.5 (MWAM_CLOCK_SCALE), no stress, put_back_block scenes 1-50; report only whether the failure direction flips (e5b_verdict.py --scales); shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_ts1.5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_CLOCK_SCALE: "1.5"}
+
+- id: A40-E5b-ts15-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5b-clock-put]
+  requires_pass: [A40-E5b-clock-put]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E5b follow-up after CLOCK READ ON PUT: timestamps x1.5 (MWAM_CLOCK_SCALE), no stress, put_back_block scenes 1-50; report only whether the failure direction flips (e5b_verdict.py --scales); shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_ts1.5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_CLOCK_SCALE: "1.5"}
+
+- id: A40-E5b-ts15-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5b-clock-put]
+  requires_pass: [A40-E5b-clock-put]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E5b follow-up after CLOCK READ ON PUT: timestamps x1.5 (MWAM_CLOCK_SCALE), no stress, put_back_block scenes 1-50; report only whether the failure direction flips (e5b_verdict.py --scales); shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_ts1.5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_CLOCK_SCALE: "1.5"}
+
+- id: A40-E5b-ts15-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5b-clock-put]
+  requires_pass: [A40-E5b-clock-put]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E5b follow-up after CLOCK READ ON PUT: timestamps x1.5 (MWAM_CLOCK_SCALE), no stress, put_back_block scenes 1-50; report only whether the failure direction flips (e5b_verdict.py --scales); shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_ts1.5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_CLOCK_SCALE: "1.5"}
+
+- id: A40-E5b-ts15-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5b-clock-put]
+  requires_pass: [A40-E5b-clock-put]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E5b follow-up after CLOCK READ ON PUT: timestamps x1.5 (MWAM_CLOCK_SCALE), no stress, put_back_block scenes 1-50; report only whether the failure direction flips (e5b_verdict.py --scales); shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_ts1.5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_CLOCK_SCALE: "1.5"}
+
+- id: A40-E5b-ts05-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5b-clock-put]
+  requires_pass: [A40-E5b-clock-put]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E5b follow-up after CLOCK READ ON PUT: timestamps x0.5 (MWAM_CLOCK_SCALE), no stress, put_back_block scenes 1-50; report only whether the failure direction flips (e5b_verdict.py --scales); shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_ts0.5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_CLOCK_SCALE: "0.5"}
+
+- id: A40-E5b-ts05-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5b-clock-put]
+  requires_pass: [A40-E5b-clock-put]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E5b follow-up after CLOCK READ ON PUT: timestamps x0.5 (MWAM_CLOCK_SCALE), no stress, put_back_block scenes 1-50; report only whether the failure direction flips (e5b_verdict.py --scales); shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_ts0.5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_CLOCK_SCALE: "0.5"}
+
+- id: A40-E5b-ts05-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5b-clock-put]
+  requires_pass: [A40-E5b-clock-put]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E5b follow-up after CLOCK READ ON PUT: timestamps x0.5 (MWAM_CLOCK_SCALE), no stress, put_back_block scenes 1-50; report only whether the failure direction flips (e5b_verdict.py --scales); shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_ts0.5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_CLOCK_SCALE: "0.5"}
+
+- id: A40-E5b-ts05-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5b-clock-put]
+  requires_pass: [A40-E5b-clock-put]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E5b follow-up after CLOCK READ ON PUT: timestamps x0.5 (MWAM_CLOCK_SCALE), no stress, put_back_block scenes 1-50; report only whether the failure direction flips (e5b_verdict.py --scales); shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_ts0.5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_CLOCK_SCALE: "0.5"}
+
+- id: A40-E5b-ts05-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E5b-clock-put]
+  requires_pass: [A40-E5b-clock-put]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E5b follow-up after CLOCK READ ON PUT: timestamps x0.5 (MWAM_CLOCK_SCALE), no stress, put_back_block scenes 1-50; report only whether the failure direction flips (e5b_verdict.py --scales); shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_ts0.5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/e5
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_CLOCK_SCALE: "0.5"}
+
+- id: A40-E5b-scales
+  lane: a40cpu
+  kind: shell
+  after: [A40-E5b-ts15-put-s0, A40-E5b-ts15-put-s1, A40-E5b-ts15-put-s2, A40-E5b-ts15-put-s3, A40-E5b-ts15-put-s4, A40-E5b-ts05-put-s0, A40-E5b-ts05-put-s1, A40-E5b-ts05-put-s2, A40-E5b-ts05-put-s3, A40-E5b-ts05-put-s4]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "E5b timestamp-scale report on put (dominant failure class x1.5 vs x0.5; reported only)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e5b_verdict.py --scales"
   pass_if: "m['rc'] == 0"
 
 - id: A40-fetch-long45
@@ -12277,4 +12649,726 @@ tasks:
   timeout_h: 1
   hypothesis: "descriptive, read-only (11-18 Opus): which ledger entries fell inside the injected frames of E1 (swap: 26 % of the ledger model's pause / fidget episodes; put for comparison); kind, arm, frame offsets"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e1_entries.py --task swap_blocks && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e1_entries.py --task put_back_block --examples 3"
+  pass_if: "m['rc'] == 0"
+
+# ---------------------------------------------------------------------------------------------------------------
+# 11-18 19:40 BJ (Opus, plan v14 E19, user approved 18:33): E1's stress table replicated on the second judging machine
+# (A100), swap scenes 1-50, the same injections, validity and verdict script as on the A40 (closed_loop/e19). Order:
+# ledger pause, ledger airgrasp, ledger fidget, AR pause (each visible / hidden). Replicated = the same verdict words
+# as the A40's (STRUCTURAL NOT IMMUNE BY CONSTRUCTION, BEHAVIOUR IMMUNE, AIRGRASP NOT FOOLED; Status 1118 section 2.1).
+# The A100 is shared and ~14 min per episode: 400 episodes run as GPUs free up (plan v14 5.3).
+
+- id: A100-E19-smoke
+  lane: loop
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "E19 smoke on the A100: ledger e30, airgrasp 32 visible, swap scene 1 (one injection, frames shown, validity logged; checked by e1_smoke_check.py as on the A40)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "1", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e1smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-smoke-check
+  lane: cpu
+  kind: shell
+  after: [A100-E19-smoke]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "E19 smoke check on the A100 (e1_smoke_check.py)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e1_smoke_check.py"
+  pass_if: "m['rc'] == 0"
+
+- id: A100-E19-ar2_prop_e30-pause-vis-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, pause 64 vis, swap_blocks scenes 1-50, shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-pause-vis-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, pause 64 vis, swap_blocks scenes 1-50, shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-pause-vis-swap-s2
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, pause 64 vis, swap_blocks scenes 1-50, shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-pause-vis-swap-s3
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, pause 64 vis, swap_blocks scenes 1-50, shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-pause-vis-swap-s4
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, pause 64 vis, swap_blocks scenes 1-50, shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-pause-hid-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, pause 64 hid, swap_blocks scenes 1-50, shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-pause-hid-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, pause 64 hid, swap_blocks scenes 1-50, shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-pause-hid-swap-s2
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, pause 64 hid, swap_blocks scenes 1-50, shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-pause-hid-swap-s3
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, pause 64 hid, swap_blocks scenes 1-50, shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-pause-hid-swap-s4
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, pause 64 hid, swap_blocks scenes 1-50, shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-airgrasp-vis-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, airgrasp 32 vis, swap_blocks scenes 1-50, shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-airgrasp-vis-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, airgrasp 32 vis, swap_blocks scenes 1-50, shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-airgrasp-vis-swap-s2
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, airgrasp 32 vis, swap_blocks scenes 1-50, shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-airgrasp-vis-swap-s3
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, airgrasp 32 vis, swap_blocks scenes 1-50, shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-airgrasp-vis-swap-s4
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, airgrasp 32 vis, swap_blocks scenes 1-50, shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:airgrasp:32:history"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-airgrasp-hid-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, airgrasp 32 hid, swap_blocks scenes 1-50, shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-airgrasp-hid-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, airgrasp 32 hid, swap_blocks scenes 1-50, shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-airgrasp-hid-swap-s2
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, airgrasp 32 hid, swap_blocks scenes 1-50, shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-airgrasp-hid-swap-s3
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, airgrasp 32 hid, swap_blocks scenes 1-50, shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-airgrasp-hid-swap-s4
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, airgrasp 32 hid, swap_blocks scenes 1-50, shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1airgrasp_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:airgrasp:32:hidden"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-fidget-vis-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, fidget 64 vis, swap_blocks scenes 1-50, shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-fidget-vis-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, fidget 64 vis, swap_blocks scenes 1-50, shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-fidget-vis-swap-s2
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, fidget 64 vis, swap_blocks scenes 1-50, shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-fidget-vis-swap-s3
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, fidget 64 vis, swap_blocks scenes 1-50, shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-fidget-vis-swap-s4
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, fidget 64 vis, swap_blocks scenes 1-50, shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:fidget:64:history"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-fidget-hid-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, fidget 64 hid, swap_blocks scenes 1-50, shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-fidget-hid-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, fidget 64 hid, swap_blocks scenes 1-50, shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-fidget-hid-swap-s2
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, fidget 64 hid, swap_blocks scenes 1-50, shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-fidget-hid-swap-s3
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, fidget 64 hid, swap_blocks scenes 1-50, shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar2_prop_e30-fidget-hid-swap-s4
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar2_prop_e30, fidget 64 hid, swap_blocks scenes 1-50, shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_e1fidget_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:fidget:64:hidden"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar_2task_e30-pause-vis-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar_2task_e30, pause 64 vis, swap_blocks scenes 1-50, shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar_2task_e30-pause-vis-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar_2task_e30, pause 64 vis, swap_blocks scenes 1-50, shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar_2task_e30-pause-vis-swap-s2
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar_2task_e30, pause 64 vis, swap_blocks scenes 1-50, shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar_2task_e30-pause-vis-swap-s3
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar_2task_e30, pause 64 vis, swap_blocks scenes 1-50, shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar_2task_e30-pause-vis-swap-s4
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar_2task_e30, pause 64 vis, swap_blocks scenes 1-50, shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:64:history"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar_2task_e30-pause-hid-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar_2task_e30, pause 64 hid, swap_blocks scenes 1-50, shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar_2task_e30-pause-hid-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar_2task_e30, pause 64 hid, swap_blocks scenes 1-50, shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar_2task_e30-pause-hid-swap-s2
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar_2task_e30, pause 64 hid, swap_blocks scenes 1-50, shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar_2task_e30-pause-hid-swap-s3
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar_2task_e30, pause 64 hid, swap_blocks scenes 1-50, shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-ar_2task_e30-pause-hid-swap-s4
+  lane: loop
+  kind: closed_loop
+  after: [A100-E19-smoke-check]
+  requires_pass: [A100-E19-smoke-check]
+  need_mib: 30000
+  timeout_h: 8
+  hypothesis: "plan v14 E19 (registered 11-18 by Fable, approved 18:33): E1 replicated on the A100 with E1's registered reading (scripts/fullft/e1_verdict.py, unchanged); replicated = the same verdict words as the A40. This card: ar_2task_e30, pause 64 hid, swap_blocks scenes 1-50, shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30_e1pause_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:64:hidden"]
+  output: closed_loop/e19
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E19-verdict
+  lane: cpu
+  kind: shell
+  after: [A100-E19-ar2_prop_e30-pause-vis-swap-s0, A100-E19-ar2_prop_e30-pause-vis-swap-s1, A100-E19-ar2_prop_e30-pause-vis-swap-s2, A100-E19-ar2_prop_e30-pause-vis-swap-s3, A100-E19-ar2_prop_e30-pause-vis-swap-s4, A100-E19-ar2_prop_e30-pause-hid-swap-s0, A100-E19-ar2_prop_e30-pause-hid-swap-s1, A100-E19-ar2_prop_e30-pause-hid-swap-s2, A100-E19-ar2_prop_e30-pause-hid-swap-s3, A100-E19-ar2_prop_e30-pause-hid-swap-s4, A100-E19-ar2_prop_e30-airgrasp-vis-swap-s0, A100-E19-ar2_prop_e30-airgrasp-vis-swap-s1, A100-E19-ar2_prop_e30-airgrasp-vis-swap-s2, A100-E19-ar2_prop_e30-airgrasp-vis-swap-s3, A100-E19-ar2_prop_e30-airgrasp-vis-swap-s4, A100-E19-ar2_prop_e30-airgrasp-hid-swap-s0, A100-E19-ar2_prop_e30-airgrasp-hid-swap-s1, A100-E19-ar2_prop_e30-airgrasp-hid-swap-s2, A100-E19-ar2_prop_e30-airgrasp-hid-swap-s3, A100-E19-ar2_prop_e30-airgrasp-hid-swap-s4, A100-E19-ar2_prop_e30-fidget-vis-swap-s0, A100-E19-ar2_prop_e30-fidget-vis-swap-s1, A100-E19-ar2_prop_e30-fidget-vis-swap-s2, A100-E19-ar2_prop_e30-fidget-vis-swap-s3, A100-E19-ar2_prop_e30-fidget-vis-swap-s4, A100-E19-ar2_prop_e30-fidget-hid-swap-s0, A100-E19-ar2_prop_e30-fidget-hid-swap-s1, A100-E19-ar2_prop_e30-fidget-hid-swap-s2, A100-E19-ar2_prop_e30-fidget-hid-swap-s3, A100-E19-ar2_prop_e30-fidget-hid-swap-s4, A100-E19-ar_2task_e30-pause-vis-swap-s0, A100-E19-ar_2task_e30-pause-vis-swap-s1, A100-E19-ar_2task_e30-pause-vis-swap-s2, A100-E19-ar_2task_e30-pause-vis-swap-s3, A100-E19-ar_2task_e30-pause-vis-swap-s4, A100-E19-ar_2task_e30-pause-hid-swap-s0, A100-E19-ar_2task_e30-pause-hid-swap-s1, A100-E19-ar_2task_e30-pause-hid-swap-s2, A100-E19-ar_2task_e30-pause-hid-swap-s3, A100-E19-ar_2task_e30-pause-hid-swap-s4]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "E19 verdict on the A100 (e1_verdict.py on closed_loop/e19) and the comparison with the A40's verdict words"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e1_verdict.py --task swap_blocks --folder /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/e19 --out outputs/fullft/E19_VERDICT_A100_swap_blocks.json && /opt/mwam/bin/python -c \"import json; v = json.load(open('outputs/fullft/E19_VERDICT_A100_swap_blocks.json')); a40 = {'structural': 'NOT IMMUNE BY CONSTRUCTION', 'behaviour': 'IMMUNE', 'airgrasp': 'NOT FOOLED'}; same = {k: v[k] == w for k, w in a40.items()}; print('A100 vs A40:', {k: (v[k], a40[k]) for k in a40}); print('E19:', 'REPLICATED' if all(same.values()) else 'NOT REPLICATED in ' + str([k for k, s in same.items() if not s]))\""
   pass_if: "m['rc'] == 0"

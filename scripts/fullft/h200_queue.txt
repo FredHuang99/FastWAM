@@ -72,3 +72,13 @@ put_arprop | data.tasks=[put_back_block] history.variant=arprop history.event_ma
 # battery_<winner>: superseded 11-17 (plan v13: G2' replaces G2; the battery pair trains on the H100, deviation 39)
 # plan v13 E5 (clock arm), E8 (body as teacher), E9 (AR + event frames on put + swap) and the G2' harm check are added
 # here as their code passes its tests; Press iterations go before E8 / E9.
+#
+# 11-18 19:50 (Opus, plan v14 5.2 / 5.3, user approved 18:33). The old H200 after E4 (~11-19 07:10), first runnable wins:
+#   press_v3c   plan v14 E14 (the audit-chosen writer + count code); its line is added on 11-19 (auto-pull) once the
+#               writer is chosen on the demos and the event file is built; P0
+#   obs_arprop  the Obs ledger arm (main table, paired with obs_ar on this machine); condition = obs_ready.sh (event file
+#               from the relay, ledger_ready.py); ~6 h; a filler before press_v3c
+#   ar2_prop_s18  fallback (plan v14 5.1): the two-task ledger model with training seed 18 (seed 17 = ar2_prop), only after
+#               11-19 20:00 BJ (epoch 1795089600) if nothing above is runnable by then; E9 / E13 lines added on 11-19 go above it
+obs_arprop | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1] data.tasks=[observe_and_pickup] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_observe_and_pickup.json] | bash scripts/fullft/obs_ready.sh
+ar2_prop_s18 | seed=18 history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_put_back_block.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_blocks.json] | test $(date +%s) -ge 1795089600 && grep -q swap_blocks outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/events/events_swap_blocks.json

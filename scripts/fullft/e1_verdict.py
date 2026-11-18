@@ -86,6 +86,7 @@ def main():
     ap.add_argument("--task", default="swap_blocks")
     ap.add_argument("--folder", default=str(O / "e1"))
     ap.add_argument("--n", type=int, default=50)
+    ap.add_argument("--out", default="", help="11-18: verdict JSON path (default outputs/fullft/E1_VERDICT_<task>.json)")
     args = ap.parse_args()
     folder = Path(args.folder)
     seeds = seeds_of(args.task, args.n)
@@ -146,7 +147,7 @@ def main():
     print("AR: reported only (rows above)")
     report = {"task": args.task, "scenes": len(seeds), "cells": {f"{m}|{k}": v for (m, k), v in cells.items()},
               "structural": structural, "behaviour": behaviour, "airgrasp": air}
-    (F / f"E1_VERDICT_{args.task}.json").write_text(json.dumps(report, indent=1) + "\n")
+    (Path(args.out) if args.out else F / f"E1_VERDICT_{args.task}.json").write_text(json.dumps(report, indent=1) + "\n")
 
 
 if __name__ == "__main__":
