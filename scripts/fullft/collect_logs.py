@@ -1,6 +1,6 @@
 """Collect one machine's logs and summaries since a cut-off into a zip (11-13; read-only for every run and episode).
 
-Per machine (A100 container 6e4b37a15066, old H200 mwam2, 5090 mwam5090, A40 mwam-a40, H100 mwam-h100n; 11-18: GaaS H200 login node,
+Per machine (A100 mwam-conti-a100 = 6e4b37a15066, old H200 mwam2, 5090 mwam5090, A40 mwam-a40, H100 mwam-h100n; 11-18: GaaS H200 login node,
 outside any container: MWAM_R=~/mwam/FastWAM-memory2, --extra ~/mwam/logs, run with ~/mwam/envs/hf-tools/bin/python):
   00_machine.txt      host, time, checkout, nvidia-smi, our processes (token-like words redacted), disk, memory
   01_pool_status.txt  pool5 status and a 30 h report (when this machine runs the pool)
