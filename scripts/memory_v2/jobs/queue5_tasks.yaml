@@ -12203,3 +12203,12 @@ tasks:
   hypothesis: "E7 verdict (registered reading in scripts/fullft/e7_verdict.py)"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e7_verdict.py"
   pass_if: "m['rc'] == 0"
+
+- id: A40-E1-entries
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "descriptive, read-only (11-18 Opus): which ledger entries fell inside the injected frames of E1 (swap: 26 % of the ledger model's pause / fidget episodes; put for comparison); kind, arm, frame offsets"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e1_entries.py --task swap_blocks && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e1_entries.py --task put_back_block --examples 3"
+  pass_if: "m['rc'] == 0"
