@@ -8518,6 +8518,66 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e1_verdict.py --task put_back_block"
   pass_if: "m['rc'] == 0"
 
+# ---------------------------------------------------------------------------------------------------------------
+# 11-18 17:50 BJ (Opus): the A40 has only the put / swap scene banks (user 17:43: closed_loop/scenes_seed42_n100_* =
+# put_back_block, swap_blocks and their _from subsets). The battery / rearrange / swap_T banks are planned here with the
+# official rule (the BANK-* cards of 11-11, lane a40), after the same planning-parity gate as the 5090's BANK-check:
+# official-rule planning of put_back from seed 42 on the A40 reproduces the first 20 scenes of the existing put bank
+# (from the A100). Placed before the remaining learning-curve cards (plan v13: the curve is the A40's last item).
+- id: A40-BANK-check
+  lane: a40
+  kind: shell
+  need_mib: 8000
+  timeout_h: 3
+  hypothesis: "planning parity (11-18, as BANK-check 11-11): official-rule planning of put_back from seed 42 on the A40 reproduces the first 20 scenes of closed_loop/scenes_seed42_n100_put_back_block (same seeds, ordinals, instructions). Only then are the other tasks' official banks planned on the A40"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=put_back_block; B=$C/scenes_seed42_n20_${t}_a40; cd /workspace/FastWAM-memory2; for i in $(seq 1 5); do $P $S complete $B $t 20 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 20 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 20 && $P $S check-prefix $C/scenes_seed42_n100_$t $B $t"
+  pass_if: "m['rc'] == 0"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "planning failed or PREFIX CHECK FAILED (read the job log): official banks are not planned on the A40; Opus brings the 5090's banks through the relay instead"
+
+- id: A40-BANK-battery_try
+  lane: a40
+  kind: shell
+  after: [A40-BANK-check]
+  requires_pass: [A40-BANK-check]
+  need_mib: 8000
+  timeout_h: 10
+  hypothesis: "official protocol scene bank (as BANK-battery_try 11-11): the first 100 expert-feasible seeds of battery_try from seed 42 (official eval_policy rule; a seed whose expert demo raises is skipped as the official evaluation does), planned on the A40 after A40-BANK-check; written to closed_loop/scenes_seed42_n100_battery_try"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=battery_try; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 60); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
+  pass_if: "m['rc'] == 0"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "no complete bank: read the job log and closed_loop/scenes_seed42_n100_battery_try/battery_try.error.json - missing task assets in the A40 simulator install, a non-expert exception (left for a human), or the time limit"
+
+- id: A40-BANK-rearrange_blocks
+  lane: a40
+  kind: shell
+  after: [A40-BANK-check]
+  requires_pass: [A40-BANK-check]
+  need_mib: 8000
+  timeout_h: 10
+  hypothesis: "official protocol scene bank (as BANK-rearrange_blocks 11-11): the first 100 expert-feasible seeds of rearrange_blocks from seed 42 (official eval_policy rule; a seed whose expert demo raises is skipped as the official evaluation does), planned on the A40 after A40-BANK-check; written to closed_loop/scenes_seed42_n100_rearrange_blocks"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=rearrange_blocks; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 60); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
+  pass_if: "m['rc'] == 0"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "no complete bank: read the job log and closed_loop/scenes_seed42_n100_rearrange_blocks/rearrange_blocks.error.json - missing task assets in the A40 simulator install, a non-expert exception (left for a human), or the time limit"
+
+- id: A40-BANK-swap_T
+  lane: a40
+  kind: shell
+  after: [A40-BANK-check]
+  requires_pass: [A40-BANK-check]
+  need_mib: 8000
+  timeout_h: 10
+  hypothesis: "official protocol scene bank (as BANK-swap_T 11-11): the first 100 expert-feasible seeds of swap_T from seed 42 (official eval_policy rule; a seed whose expert demo raises is skipped as the official evaluation does), planned on the A40 after A40-BANK-check; written to closed_loop/scenes_seed42_n100_swap_T"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=swap_T; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 60); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
+  pass_if: "m['rc'] == 0"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "no complete bank: read the job log and closed_loop/scenes_seed42_n100_swap_T/swap_T.error.json - missing task assets in the A40 simulator install, a non-expert exception (left for a human), or the time limit"
+
 - id: A40-fetch-prop10
   lane: a40cpu
   kind: shell
@@ -9924,9 +9984,11 @@ tasks:
 # (closed_loop/e6smoke) gates its 10 shards. Fresh folders e6 / e5 / e7: no migrated result can be skipped into them.
 # queue5.py 11-18: tasks without a stage analysis count by the simulator's success flag (they were judged ERROR).
 
-- id: A40-prep-battery_try
+- id: A40-prep2-battery_try
   lane: a40cpu
   kind: shell
+  after: [A40-BANK-battery_try]
+  requires_pass: [A40-BANK-battery_try]
   need_mib: 0
   timeout_h: 3
   hypothesis: "battery_try: scene bank complete + instruction text from the cache relay (sha256)"
@@ -9954,8 +10016,8 @@ tasks:
 - id: A40-batAR30-smoke
   lane: a40
   kind: closed_loop
-  after: [A40-prep-battery_try, A40-fetch-batAR30]
-  requires_pass: [A40-prep-battery_try, A40-fetch-batAR30]
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
   need_mib: 30000
   timeout_h: 3
   hypothesis: "smoke: battery_ar_e30, battery_try scene 1, one episode finishes on the A40 (closed_loop/e6smoke)"
@@ -10142,8 +10204,8 @@ tasks:
 - id: A40-batLED30-smoke
   lane: a40
   kind: closed_loop
-  after: [A40-prep-battery_try, A40-fetch-batLED30]
-  requires_pass: [A40-prep-battery_try, A40-fetch-batLED30]
+  after: [A40-prep2-battery_try, A40-fetch-batLED30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batLED30]
   need_mib: 30000
   timeout_h: 3
   hypothesis: "smoke: battery_arprop_e30, battery_try scene 1, one episode finishes on the A40 (closed_loop/e6smoke)"
@@ -10337,9 +10399,11 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e6_report.py"
   pass_if: "m['rc'] == 0"
 
-- id: A40-prep-rearrange_blocks
+- id: A40-prep2-rearrange_blocks
   lane: a40cpu
   kind: shell
+  after: [A40-BANK-rearrange_blocks]
+  requires_pass: [A40-BANK-rearrange_blocks]
   need_mib: 0
   timeout_h: 3
   hypothesis: "rearrange_blocks: scene bank complete + instruction text from the cache relay (sha256)"
@@ -10358,8 +10422,8 @@ tasks:
 - id: A40-rearrAR30-smoke
   lane: a40
   kind: closed_loop
-  after: [A40-prep-rearrange_blocks, A40-fetch-rearrAR30]
-  requires_pass: [A40-prep-rearrange_blocks, A40-fetch-rearrAR30]
+  after: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
+  requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
   need_mib: 30000
   timeout_h: 3
   hypothesis: "smoke: rearrange_ar_e30, rearrange_blocks scene 1, one episode finishes on the A40 (closed_loop/e6smoke)"
@@ -10543,9 +10607,11 @@ tasks:
   output: closed_loop/e6
   env: {MWAM_TEXT_SOURCE: "cache"}
 
-- id: A40-prep-swap_T
+- id: A40-prep2-swap_T
   lane: a40cpu
   kind: shell
+  after: [A40-BANK-swap_T]
+  requires_pass: [A40-BANK-swap_T]
   need_mib: 0
   timeout_h: 3
   hypothesis: "swap_T: scene bank complete + instruction text from the cache relay (sha256)"
@@ -10564,8 +10630,8 @@ tasks:
 - id: A40-swapTAR30-smoke
   lane: a40
   kind: closed_loop
-  after: [A40-prep-swap_T, A40-fetch-swapTAR30]
-  requires_pass: [A40-prep-swap_T, A40-fetch-swapTAR30]
+  after: [A40-prep2-swap_T, A40-fetch-swapTAR30]
+  requires_pass: [A40-prep2-swap_T, A40-fetch-swapTAR30]
   need_mib: 30000
   timeout_h: 3
   hypothesis: "smoke: swapT_ar_e30, swap_T scene 1, one episode finishes on the A40 (closed_loop/e6smoke)"
