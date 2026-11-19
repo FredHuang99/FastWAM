@@ -80,5 +80,10 @@ put_arprop | data.tasks=[put_back_block] history.variant=arprop history.event_ma
 #               from the relay, ledger_ready.py); ~6 h; a filler before press_v3c
 #   ar2_prop_s18  fallback (plan v14 5.1): the two-task ledger model with training seed 18 (seed 17 = ar2_prop), only after
 #               11-19 20:00 BJ (epoch 1795089600) if nothing above is runnable by then; E9 / E13 lines added on 11-19 go above it
+# 11-19 08:40 (Opus, plan v14 E14, P0): press_v3c = press_count's recipe with the writer chosen on the demos by
+# press_writer_scan.py (A40 card A40-E14-writer-verdict -> relay diag/press_v3c); condition v3c_ready.sh. Goes before
+# obs_arprop. No plug-in writer chosen (NO TIMELY WRITER, or a provisional / gripper writer that needs the online
+# detector first) -> the files never reach the relay and this line never runs.
+press_v3c | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_press_button_v1] data.tasks=[press_button] history.variant=arprop history.event_max=32 history.lag=0 history.ordinal=16 history.event_rule_from=/workspace/FastWAM-memory2/outputs/fullft/PRESS_V3C_RULE.json data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_press_button_v3c.json] | bash scripts/fullft/v3c_ready.sh
 obs_arprop | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1] data.tasks=[observe_and_pickup] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_observe_and_pickup.json] | bash scripts/fullft/obs_ready.sh
 ar2_prop_s18 | seed=18 history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_put_back_block.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_blocks.json] | test $(date +%s) -ge 1795089600 && grep -q swap_blocks outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/events/events_swap_blocks.json
