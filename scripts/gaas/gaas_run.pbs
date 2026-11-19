@@ -26,6 +26,13 @@
 set -u
 W=$HOME/mwam
 R=$W/FastWAM-memory2
+# 11-19 (plan v15): PBS runs the copy of this file made at qsub time; jobs queued days ahead (E24 / E25 behind cover_ar)
+# should run the repository's current version instead: pull once, then hand over to it (MWAM_REEXEC guards the loop).
+if [ "${MWAM_REEXEC:-0}" != 1 ]; then
+  (cd $R && git pull -q --ff-only origin memory2) > /dev/null 2>&1
+  export MWAM_REEXEC=1
+  [ -f $R/scripts/gaas/gaas_run.pbs ] && exec bash $R/scripts/gaas/gaas_run.pbs "$@"
+fi
 HFPY=$W/envs/hf-tools/bin/python
 SIF=$W/sif/pytorch_25.11_417cbf33.sif
 FREEZE_SHA=2707a91e446b2327fb3a9d695d86dc87fe3d8f41d3c29069d87d4270701b4607
@@ -103,6 +110,14 @@ if [ "$RUN" = ar2_clock ] && [ ! -f $F/READY_e5 ]; then
   X bash -c "CUDA_VISIBLE_DEVICES= /opt/mwam/bin/python scripts/fullft/ledger_ready.py --variant arclk \
     --tasks put_back_block swap_blocks --marker READY_e5 --skip-tests" 2>&1 | tail -n 6
   [ -f $F/READY_e5 ] || fail "READY_e5 (ledger_ready.py above)"
+fi
+# 11-19 plan v15 E24: any other clock run (history.variant=arclk) gets READY_<run> on this machine's data: the last
+# event_max text slots are padding in every episode (the clock tokens are written there); no event file needed.
+if [ "$RUN" != ar2_clock ] && echo " $SETS " | grep -q ' history.variant=arclk ' && [ ! -f $F/READY_$RUN ]; then
+  TASKS=$(echo "$SETS" | grep -o 'data.tasks=\[[^]]*\]' | sed 's/data.tasks=\[//; s/\]//' | tr ',' ' ')
+  X bash -c "CUDA_VISIBLE_DEVICES= /opt/mwam/bin/python scripts/fullft/ledger_ready.py --variant arclk \
+    --tasks ${TASKS:-put_back_block swap_blocks} --no-events --marker READY_$RUN --skip-tests" 2>&1 | tail -n 6
+  [ -f $F/READY_$RUN ] || fail "READY_$RUN (ledger_ready.py above)"
 fi
 
 step "3 condition and training"

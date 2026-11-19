@@ -39,3 +39,33 @@ ar2_long | schedule.frame_epochs=60 schedule.export_at_epochs=[45,60] schedule.r
 # the condition. ranking_ar follows E5's job, cover_ar follows E7's job (PBS depend=afterany), so 2 GPUs at a time.
 ranking_ar | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_blocks_ranking_try_v1] data.tasks=[blocks_ranking_try] | test -f outputs/memory_v2/press/dense_blocks_ranking_try_v1/.verified
 cover_ar | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_cover_blocks_v1] data.tasks=[cover_blocks] | test -f outputs/memory_v2/press/dense_cover_blocks_v1/.verified
+#
+# 11-19 13:40 plan v15 (Fable 11-19 noon; user 13:21 "按照 fable 的计划去执行"; v15 section 7 item 2, default = do it):
+# line B after cover_ar (~11-21 08:30): E24 press_clock (~17 h) -> E25 ar2_tw (~35 h). Submitted by fetch_b2.sh on the
+# login node with PBS depend=afterany (cover_ar -> press_clock -> ar2_tw), so still 2 GPUs at a time.
+#
+# plan v15 E24 CLOCK-press: press_button single task, the clock arm's recipe (AR + 32 proprio tokens sampled uniformly
+# over the elapsed time, each with a timestamp; history.variant=arclk, as ar2_clock) on press_arprop's data and recipe.
+# READY_press_clock (gaas_run.pbs step 2): the last 32 text slots are padding in every press episode (no event file).
+# Registered reading (plan v15 section 3 E24, written before any result; A40, the E17 press bank):
+#   epochs chosen on scenes 1-50 by P-SEL; held-out 51-100 paired with press_count's chosen epoch (same machine):
+#   clock >= press_count + 8/50 with sign p < 0.05 -> TIME INDEX COUNTS BETTER; press_count >= clock + 8/50 with
+#   p < 0.05 -> EVENT INDEX COUNTS BETTER; |diff| <= 4 -> SAME; otherwise PARTIAL. Floor: both >= 48/50 finished.
+#   Stress (51-100, pause 64 frames, visible vs hidden, once per episode between two presses with at least one press
+#   still to do; injection point fixed in the A40 card before any clock closed-loop result): clock Delta <= -8/50 with
+#   p < 0.05 -> CLOCK READ ON PRESS; Delta >= -5/50 -> NOT READ AT 64. Floor: valid pairs >= 45, hidden >= 15/50
+#   (else no verdict, only how the over / under press counts move). press_count's Delta reported beside it.
+#   Clock not below every ledger version AND NOT READ -> switch to Fable.
+press_clock | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_press_button_v1] data.tasks=[press_button] history.variant=arclk history.event_max=32 | test -f outputs/memory_v2/press/dense_press_button_v1/.verified && test -f outputs/fullft/READY_press_clock
+#
+# plan v15 E25 TW-twin: two-task, anchor + every 32nd frame (the last 12) + t-16, t-32, positions in real time
+# (history.variant=tw, history.index=time; the 2x2 cell "time index x images", paired with E9 = arev, the last 12 event
+# frames). 15 history frames: micro 4 x accumulation 16 (= 64 samples / update, as micro 8 x 8) so it fits; E9 on the
+# old H200 uses the same micro setting. Note: the grid keeps the last 12 multiples of 32 = the last 384 frames.
+# Registered reading (plan v15 section 3 E25, before any result; A40):
+#   no stress swap >= 95/100 -> LONG VISUAL SUFFICES; <= 75/100 -> NOT ENOUGH; otherwise PARTIAL. Floor put >= 90/100.
+#   Stress swap 1-50, pause 64 and 256 frames, visible vs hidden (floor hidden >= 35/50, valid pairs >= 45): some level
+#   Delta <= -8/50 with p < 0.05 -> CLOCK READ WITH IMAGES; both levels >= -5/50 -> NOT READ.
+#   With E22a (time index, other content): images hurt where the body-state clock is not at the same level ->
+#   CONTENT DECIDES; both hurt at 256 -> the index decides; neither -> no clock reading on swap.
+ar2_tw | history.variant=tw history.index=time schedule.micro_batch=4 schedule.accumulation=16 | true

@@ -51,9 +51,14 @@ def main():
     ap.add_argument("--check3", choices=("equal", "subset"), default="equal",
                     help="11-17 deviation 44: subset = alignment only (see the docstring); default equal (>= 95 %%)")
     ap.add_argument("--marker", default="", help="11-17: marker file name under outputs/fullft (default READY_<variant>; plan v13 runs use READY_v13)")
+    ap.add_argument("--no-events", action="store_true",
+                    help="11-19 plan v15 E24 (arclk on press_button, new H200, no event file there): skip checks 2 and 3 "
+                         "(the event file); only for variants that do not read events (arclk)")
     args = ap.parse_args()
     if args.events and len(args.tasks) != 1:
         ap.error("--events goes with exactly one task")
+    if args.no_events and args.variant != "arclk":
+        ap.error("--no-events only for --variant arclk (the clock tokens do not read the event file)")
     from fastwam.fullft.data import DenseEpisodes, load_events, match_events, check_ledger_slots
     ok = True
     if not args.skip_tests:
@@ -73,6 +78,17 @@ def main():
         root = ROOTS.get(task, str(R / f"outputs/memory_v2/press/dense_{task}_v1"))
         eps = DenseEpisodes([root], [task])
         ids = [r["episode_id"] for r in eps.records]
+        if args.no_events:                       # check 4 only (the clock tokens use the last event_max text slots)
+            bad_text = []
+            for r in eps.records:
+                try:
+                    check_ledger_slots(eps(r["episode_id"])["text"], args.event_max, r["episode_id"])
+                except ValueError:
+                    bad_text.append(r["episode_id"])
+            print(f"[ready] {task}: {len(ids)} dense episodes (root {root}); --no-events: checks 2-3 skipped; text "
+                  f"positions not padding in {len(bad_text)} episodes {bad_text[:3]}")
+            ok &= bool(ids) and not bad_text
+            continue
         events = load_events([args.events or str(R / f"outputs/fullft/events/events_{task}.json")])
         direct = sum(e in events for e in ids)
         matched = match_events(ids, events)
