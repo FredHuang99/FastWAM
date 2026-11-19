@@ -39,3 +39,30 @@ swapT_arprop | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/de
 # hours before G2'. Plan v13 section 5 H100 item 4 said ungated.
 # 11-18 17:08 MOVED to the H200s (user; the new H200 trains ~3x faster than the H100; both arms of a pair stay on H200s, IDENTICAL): scripts/gaas/gaas_queue.txt
 # cover_arprop | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_cover_blocks_v1] data.tasks=[cover_blocks] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_cover_blocks.json] | test -f outputs/memory_v2/press/dense_cover_blocks_v1/.verified && test -f outputs/fullft/events/events_cover_blocks.json && grep -q cover_blocks outputs/fullft/READY_arprop && test -f outputs/fullft/GO_cover_arprop
+#
+# 11-19 14:00 (Opus; plan v14 E15 / E16, user approved 11-18 18:33; plan v15 E16b, user 11-19 13:21 + v15 section 7
+# item 3 default). The two GPUs the battery pair frees today (~15:00 / ~17:00) take E15 and E16; E16b waits for the
+# next free GPU (swapT_arprop / rearrange_arprop end ~11-20 13:40 / 15:00). Same machine as the other arms of each task
+# (deviation 39). Condition: h100_v15_ready.sh (unit tests; clock runs also the text-slot check; marker READY_<run>).
+#
+# plan v14 E15 R-test: battery_arprop's setting + the countable code of E4 (history.ordinal=16); only this changes.
+# Registered reading (plan v14 section 3 E15, before any result; A40, battery_try 1-100, paired with battery_arprop e30;
+# if E2_PREDICTIONS_REGISTERED.txt states rule R's hit rule, that one counts): count >= ledger + 10/100 with sign
+# p < 0.05 -> R HIT; |diff| <= 5/100 -> R MISS; otherwise undecided. Floor: battery_arprop <= 90/100 (not saturated)
+# and at least one of the two >= 30/100.
+battery_count | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_battery_try_v1] data.tasks=[battery_try] history.variant=arprop history.event_max=32 history.lag=4 history.ordinal=16 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_battery_try.json] | test -f outputs/memory_v2/press/dense_battery_try_v1/.verified && test -f outputs/fullft/events/events_battery_try.json && bash scripts/fullft/h100_v15_ready.sh battery_count
+#
+# plan v14 E16 C-test: rearrange single-task clock arm (as E5: AR + 32 proprio tokens uniform over the elapsed time,
+# each with a timestamp; history.variant=arclk). Registered reading (plan v14 section 3 E16, before any result; A40):
+# no stress 1-100; pause 64 frames visible vs hidden 1-50, injected at the first put-down when the end-effector has
+# risen to its apex: Delta <= -8/50 with p < 0.05 -> C HIT; Delta >= -5/50 -> C MISS; otherwise undecided. Floor: no
+# stress >= 70/100; valid pairs >= 45; hidden >= 35/50. Reported only: rearrange AR and ledger under the same injection
+# (50 pairs each); plan v15 adds (descriptive only, not in rule C's count) a 256-frame pause level and the no-stress
+# 1-100 comparison clock vs ledger vs AR.
+rearrange_clock | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arclk history.event_max=32 | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && bash scripts/fullft/h100_v15_ready.sh rearrange_clock
+#
+# plan v15 E16b: swap_T single-task clock arm, as E16. Reading: no stress 1-100 descriptive (clock vs ledger vs AR);
+# pause 64 frames visible vs hidden 1-50 read as E16 (Delta <= -8/50 with p < 0.05 / >= -5/50; same floors), injection
+# point fixed in the A40 card before any swap_T clock result. Rule C has no prediction for swap_T ("clock none"), so it
+# does not count for the audit.
+swapT_clock | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_swap_T_v1] data.tasks=[swap_T] history.variant=arclk history.event_max=32 | test -f outputs/memory_v2/press/dense_swap_T_v1/.verified && bash scripts/fullft/h100_v15_ready.sh swapT_clock
