@@ -35,6 +35,16 @@ except ImportError:          # loaded by file path (the simulator adapter: its `
 
 KINDS = ("pause", "fidget", "airgrasp")
 N_OPEN = {"put_back_block": 1, "swap_blocks": 2}
+# 11-19 19:10 (plan v14 E16, plan v15 E16b / E24; written before any closed-loop result of the models these serve):
+# per task, (event kind counted, n): the injection comes at the first apex ('top') of the same arm after the n-th event
+# of that kind. put / swap are exactly N_OPEN (E1 / E5 / E5b / E22 unchanged). rearrange_blocks: after the first
+# release (plan v14 E16: "the first put-down, the end-effector risen to its apex"). swap_T: after the second release,
+# as swap_blocks (the same three-move swap with T-shaped blocks). press_button: after the first press ('bottom'
+# reversal of the pressing arm), so at least one more press is always left (the card needs >= 1 left press, >= 1
+# middle press and the check press). For 'bottom' the injection comes when that press is CONFIRMED (the arm has risen
+# by the rule's delta, 1.5 cm), not at an apex: between presses the debounce (3 cm of path) hides the apex reversal.
+TRIGGERS = {"put_back_block": ("open", 1), "swap_blocks": ("open", 2), "rearrange_blocks": ("open", 1),
+            "swap_T": ("open", 2), "press_button": ("bottom", 1)}
 WRIST = {0: 5, 1: 12}                     # 14-d joint vector: left arm 0-5, left gripper 6, right arm 7-12, gripper 13
 GRIP = {0: 6, 1: 13}
 ARM = {0: slice(0, 6), 1: slice(7, 13)}
@@ -45,9 +55,12 @@ class Trigger:
     """Streams the trainer's event detector over the executed frames; `step` returns True once the injection is due
     (and keeps returning True until `fire` is called); `arm` is the active arm."""
 
-    def __init__(self, n_open: int, rule: Optional[EventRule] = None):
+    def __init__(self, n_open: int, rule: Optional[EventRule] = None, kind: str = "open"):
+        if kind not in ("open", "close", "bottom"):
+            raise ValueError(f"trigger kind must be open | close | bottom, got {kind!r}")
         self.detector = EventDetector(rule or EventRule())
         self.n_open = int(n_open)
+        self.kind = kind
         self.opens = 0
         self.arm: Optional[int] = None
         self.open_frame: Optional[int] = None
@@ -59,10 +72,12 @@ class Trigger:
                         key=lambda e: (e["frame"], e["arm"])):
             if self.fired or self.due:
                 break
-            if e["kind"] == "open" and self.arm is None:
+            if e["kind"] == self.kind and self.arm is None:
                 self.opens += 1
                 if self.opens == self.n_open:
                     self.arm, self.open_frame = int(e["arm"]), int(e["frame"])
+                    if self.kind == "bottom":     # a press: due as soon as it is confirmed (the arm has risen by the
+                        self.due = True           # rule's delta after the press; the debounce hides the apex 'top')
             elif (e["kind"] == "top" and self.arm is not None and int(e["arm"]) == self.arm
                   and int(e["frame"]) > int(self.open_frame)):
                 self.due = True

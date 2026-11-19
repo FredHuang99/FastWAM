@@ -578,10 +578,10 @@ def run_episode(policy: Policy, scene: dict, mode: str, label: str, out: Path, a
     if stress and stress["kind"] == "hold":
         stress["at"] = stress_triggers(int(scene["seed"]), limit, int(args.execute), int(args.stress_n))
     elif stress:                        # E1: one injection, triggered in the simulator by the robot's own events
-        from fastwam.fullft.inject import N_OPEN
-        if task not in N_OPEN:
-            raise ValueError(f"event stress has a trigger for {sorted(N_OPEN)} only, not {task}")
-        stress["n_open"] = N_OPEN[task]
+        from fastwam.fullft.inject import TRIGGERS
+        if task not in TRIGGERS:
+            raise ValueError(f"event stress has a trigger for {sorted(TRIGGERS)} only, not {task}")
+        stress["trigger_kind"], stress["n_open"] = TRIGGERS[task]       # put / swap: ("open", 1 / 2) as before
     stress_state = {"offset": 0}
     write(directory / "job.json", {"id": f"{label}:{mode}:{task}:{scene['seed']}", "attempt": 1, "scene": scene,
                                    "condition": f"memory_v2_{mode}", "run_seed": policy.dense_cfg["seed"],

@@ -56,3 +56,31 @@ def test_loads_by_file_path():
     sys.modules["mwam_fullft_inject_test"] = mod
     spec.loader.exec_module(mod)
     assert mod.N_OPEN == {"put_back_block": 1, "swap_blocks": 2} and mod.Trigger(2).n_open == 2
+
+
+def test_press_trigger_fires_after_the_first_press_at_the_apex():
+    """11-19 (plan v15 E24): press_button's trigger counts 'bottom' reversals (presses) instead of releases; put / swap
+    keep ('open', 1 / 2) exactly as N_OPEN."""
+    from fastwam.fullft.inject import N_OPEN, TRIGGERS
+    assert {k: v for k, (kind, v) in TRIGGERS.items() if k in N_OPEN} == N_OPEN
+    assert all(TRIGGERS[k][0] == "open" for k in N_OPEN) and TRIGGERS["press_button"] == ("bottom", 1)
+    n = 300
+    grip = np.ones((n, 2)); pos = np.zeros((n, 2, 3)); pos[:, :, 2] = 0.30
+    pos[:, 0, 0] = 0.4; pos[:, 1, 0] = 0.0
+    z = np.full(n, 0.30)
+    for c in (80, 160, 240):                        # three presses: down 3 cm and back up over 40 frames
+        for f in range(c - 20, c + 20):
+            z[f] = 0.30 - 0.03 * (1 - abs(f - c) / 20)
+    pos[:, 1, 2] = z
+    tr, fired = Trigger(1, kind="bottom"), []
+    for t in range(n):
+        if tr.step(t, grip[t], pos[t]):
+            fired.append(t)
+            tr.fire()
+    assert len(fired) == 1 and tr.arm == 1 and 85 <= fired[0] <= 100       # press 1 confirmed, before press 2
+    try:
+        Trigger(1, kind="sideways")
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("an unknown trigger kind must be refused")

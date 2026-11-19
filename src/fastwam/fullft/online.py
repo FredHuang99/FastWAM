@@ -295,7 +295,15 @@ class FullPolicy:
                 "text_fingerprints": dict(self.text_fingerprints), "noise_salt": os.environ.get("MWAM_NOISE_SALT", ""),
                 "ledger_ablation": os.environ.get("MWAM_LEDGER", ""),
                 "clock_ablation": os.environ.get("MWAM_CLOCK", ""), "clock_scale": os.environ.get("MWAM_CLOCK_SCALE", ""),
-                "token_budget": os.environ.get("MWAM_BUDGET", "")}
+                "token_budget": os.environ.get("MWAM_BUDGET", ""), "event_frames": os.environ.get("MWAM_EVFRAMES", "")}
+
+
+def event_frames_off() -> bool:
+    """11-19 plan v15 E9 (test time, arev only): MWAM_EVFRAMES=off shows no event frame (anchor + recent window only)."""
+    raw = os.environ.get("MWAM_EVFRAMES", "").strip().lower()
+    if raw not in ("", "off"):
+        raise ValueError(f"MWAM_EVFRAMES must be unset or 'off', got {raw!r}")
+    return raw == "off"
 
 
 def token_budget() -> int:
@@ -393,6 +401,8 @@ class FullSession:
                 from .history import ledger_entries
                 self._detect(current)
                 known = event_frames(self.events, before=current, known_by=current - int(self.rule.lag))
+                if p.rule.variant == "arev" and event_frames_off():     # 11-19 plan v15 E9: event frames switched off
+                    known = []
                 if p.rule.variant == "arprop":
                     if self.decisions == 0:
                         check_ledger_slots(self.text[0], p.rule.event_max, "(online instruction)")

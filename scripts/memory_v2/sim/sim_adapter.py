@@ -125,7 +125,7 @@ def main():
         inj = importlib.util.module_from_spec(spec); sys.modules['mwam_fullft_inject'] = inj; spec.loader.exec_module(inj)
         Trigger, targets_for, object_displacement = inj.Trigger, inj.targets_for, inj.object_displacement
         counters_changed, arm_return_error = inj.counters_changed, inj.arm_return_error
-        trigger = Trigger(int(stress['n_open']))
+        trigger = Trigger(int(stress['n_open']), kind=stress.get('trigger_kind', 'open'))
     sys.path.insert(0, str(root / 'scripts/memory_s1'))
     import sim_eval
     import deploy_policy

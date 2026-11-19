@@ -535,3 +535,20 @@ def test_token_budget_env(monkeypatch):
     monkeypatch.setenv("MWAM_BUDGET", "-1")
     with pytest.raises(ValueError):
         token_budget()
+
+
+def test_event_frames_switch(monkeypatch):
+    """11-19 plan v15 E9: MWAM_EVFRAMES=off -> no event frame (arev shows anchor + recent only); other values refused."""
+    from fastwam.fullft.online import event_frames_off
+    from fastwam.fullft.history import select
+    monkeypatch.delenv("MWAM_EVFRAMES", raising=False)
+    assert event_frames_off() is False
+    monkeypatch.setenv("MWAM_EVFRAMES", "off")
+    assert event_frames_off() is True
+    rule = HistoryRule("arev", event_max=12)
+    with_ev, _ = select(rule, 200, [50, 90, 130])
+    without, _ = select(rule, 200, [])
+    assert set(with_ev) - set(without) == {50, 90, 130} and set(without) == {0, 168, 184}
+    monkeypatch.setenv("MWAM_EVFRAMES", "on")
+    with pytest.raises(ValueError):
+        event_frames_off()
