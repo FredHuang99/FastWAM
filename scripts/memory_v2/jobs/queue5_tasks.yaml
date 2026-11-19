@@ -17735,3 +17735,193 @@ tasks:
   hypothesis: "E22b verdict (registered reading in e22_verdict.py --part b)"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e22_verdict.py --part b"
   pass_if: "m['rc'] == 0"
+
+# 11-19 15:20 (Opus, plan v15 E23, P2): the clock arm at e10 (exported to the relay by the new H200 on 11-18).
+- id: A40-fetch-ar2_clock-e10
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 24
+  hypothesis: "fetch ar2_clock_e10 from the relay (new H200) for E23 (sha256 checked)"
+  command: "RUN=ar2_clock TAG=e10 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-E23-clock-e10-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_clock-e10]
+  requires_pass: [A40-fetch-ar2_clock-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E23 (registered by Fable 11-19 noon; reading in scripts/fullft/e23_verdict.py, before any clock e10 run): clock e10 vs the ledger e10 (closed_loop/lc) on swap 1-100: ledger >= clock + 15 with p < 0.05 -> EVENT LEARNS FASTER; |diff| <= 8 -> SAME SPEED; else PARTIAL. P2. This card: ar2_clock_e10, swap_blocks scenes 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e10/export_e10.pt
+  label: ar2_clock_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/e23
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E23-clock-e10-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_clock-e10]
+  requires_pass: [A40-fetch-ar2_clock-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E23 (registered by Fable 11-19 noon; reading in scripts/fullft/e23_verdict.py, before any clock e10 run): clock e10 vs the ledger e10 (closed_loop/lc) on swap 1-100: ledger >= clock + 15 with p < 0.05 -> EVENT LEARNS FASTER; |diff| <= 8 -> SAME SPEED; else PARTIAL. P2. This card: ar2_clock_e10, swap_blocks scenes 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e10/export_e10.pt
+  label: ar2_clock_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/e23
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E23-clock-e10-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_clock-e10]
+  requires_pass: [A40-fetch-ar2_clock-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E23 (registered by Fable 11-19 noon; reading in scripts/fullft/e23_verdict.py, before any clock e10 run): clock e10 vs the ledger e10 (closed_loop/lc) on swap 1-100: ledger >= clock + 15 with p < 0.05 -> EVENT LEARNS FASTER; |diff| <= 8 -> SAME SPEED; else PARTIAL. P2. This card: ar2_clock_e10, swap_blocks scenes 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e10/export_e10.pt
+  label: ar2_clock_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/e23
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E23-clock-e10-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_clock-e10]
+  requires_pass: [A40-fetch-ar2_clock-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E23 (registered by Fable 11-19 noon; reading in scripts/fullft/e23_verdict.py, before any clock e10 run): clock e10 vs the ledger e10 (closed_loop/lc) on swap 1-100: ledger >= clock + 15 with p < 0.05 -> EVENT LEARNS FASTER; |diff| <= 8 -> SAME SPEED; else PARTIAL. P2. This card: ar2_clock_e10, swap_blocks scenes 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e10/export_e10.pt
+  label: ar2_clock_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/e23
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E23-clock-e10-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_clock-e10]
+  requires_pass: [A40-fetch-ar2_clock-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E23 (registered by Fable 11-19 noon; reading in scripts/fullft/e23_verdict.py, before any clock e10 run): clock e10 vs the ledger e10 (closed_loop/lc) on swap 1-100: ledger >= clock + 15 with p < 0.05 -> EVENT LEARNS FASTER; |diff| <= 8 -> SAME SPEED; else PARTIAL. P2. This card: ar2_clock_e10, swap_blocks scenes 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e10/export_e10.pt
+  label: ar2_clock_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/e23
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E23-clock-e10-swap-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_clock-e10]
+  requires_pass: [A40-fetch-ar2_clock-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E23 (registered by Fable 11-19 noon; reading in scripts/fullft/e23_verdict.py, before any clock e10 run): clock e10 vs the ledger e10 (closed_loop/lc) on swap 1-100: ledger >= clock + 15 with p < 0.05 -> EVENT LEARNS FASTER; |diff| <= 8 -> SAME SPEED; else PARTIAL. P2. This card: ar2_clock_e10, swap_blocks scenes 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e10/export_e10.pt
+  label: ar2_clock_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/e23
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E23-clock-e10-swap-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_clock-e10]
+  requires_pass: [A40-fetch-ar2_clock-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E23 (registered by Fable 11-19 noon; reading in scripts/fullft/e23_verdict.py, before any clock e10 run): clock e10 vs the ledger e10 (closed_loop/lc) on swap 1-100: ledger >= clock + 15 with p < 0.05 -> EVENT LEARNS FASTER; |diff| <= 8 -> SAME SPEED; else PARTIAL. P2. This card: ar2_clock_e10, swap_blocks scenes 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e10/export_e10.pt
+  label: ar2_clock_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/e23
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E23-clock-e10-swap-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_clock-e10]
+  requires_pass: [A40-fetch-ar2_clock-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E23 (registered by Fable 11-19 noon; reading in scripts/fullft/e23_verdict.py, before any clock e10 run): clock e10 vs the ledger e10 (closed_loop/lc) on swap 1-100: ledger >= clock + 15 with p < 0.05 -> EVENT LEARNS FASTER; |diff| <= 8 -> SAME SPEED; else PARTIAL. P2. This card: ar2_clock_e10, swap_blocks scenes 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e10/export_e10.pt
+  label: ar2_clock_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/e23
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E23-clock-e10-swap-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_clock-e10]
+  requires_pass: [A40-fetch-ar2_clock-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E23 (registered by Fable 11-19 noon; reading in scripts/fullft/e23_verdict.py, before any clock e10 run): clock e10 vs the ledger e10 (closed_loop/lc) on swap 1-100: ledger >= clock + 15 with p < 0.05 -> EVENT LEARNS FASTER; |diff| <= 8 -> SAME SPEED; else PARTIAL. P2. This card: ar2_clock_e10, swap_blocks scenes 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e10/export_e10.pt
+  label: ar2_clock_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/e23
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E23-clock-e10-swap-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_clock-e10]
+  requires_pass: [A40-fetch-ar2_clock-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E23 (registered by Fable 11-19 noon; reading in scripts/fullft/e23_verdict.py, before any clock e10 run): clock e10 vs the ledger e10 (closed_loop/lc) on swap 1-100: ledger >= clock + 15 with p < 0.05 -> EVENT LEARNS FASTER; |diff| <= 8 -> SAME SPEED; else PARTIAL. P2. This card: ar2_clock_e10, swap_blocks scenes 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e10/export_e10.pt
+  label: ar2_clock_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/e23
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E23-verdict
+  lane: a40cpu
+  kind: shell
+  after: [A40-E23-clock-e10-swap-s0, A40-E23-clock-e10-swap-s1, A40-E23-clock-e10-swap-s2, A40-E23-clock-e10-swap-s3, A40-E23-clock-e10-swap-s4, A40-E23-clock-e10-swap-s5, A40-E23-clock-e10-swap-s6, A40-E23-clock-e10-swap-s7, A40-E23-clock-e10-swap-s8, A40-E23-clock-e10-swap-s9]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "E23 verdict (registered reading in scripts/fullft/e23_verdict.py)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e23_verdict.py"
+  pass_if: "m['rc'] == 0"
