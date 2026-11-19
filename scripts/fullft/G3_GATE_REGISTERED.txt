@@ -1,0 +1,18 @@
+# Plan v15 G3 "method positioning" gate (Fable 11-19 noon, plan v15 section 7 item 4; user approved 11-19 13:45 with one
+# added piece of evidence). Written 11-19 13:50 BJ by Opus, before any closed-loop result of E9 (ar2_arev), E25
+# (ar2_tw), E22, E24, E16 or E23 exists. The user decides at the gate (12-01); nothing is triggered automatically.
+#
+# At 12-01: if NONE of the following shows "event-indexed beats time-indexed", the method section is rewritten around
+# "body-state history"; the event record becomes one sampling scheme among others; press_button is written separately.
+#   E22a  INDEX MATTERS AT L on some task                         (e22_verdict.py --part a, registered reading)
+#   E22b  EVENT INDEX CHEAPER                                      (e22_verdict.py --part b; appendix-level evidence)
+#   E24   EVENT INDEX COUNTS BETTER, or CLOCK READ ON PRESS with press_count's Delta >= -5/50   (gaas_queue.txt)
+#   E16   C HIT (rearrange clock hurt by the pause) with the rearrange ledger's Delta >= -5/50 under the same pause
+#   E23   EVENT LEARNS FASTER                                      (e23_verdict.py)
+#   NEW (user 13:45): E9 (event-indexed images) vs E25 (time-indexed images, 12 frames) under long pauses.
+#     swap_blocks scenes 1-50, pause 64 and 256 frames, visible vs hidden paired (E1's injection point and validity).
+#     At one level: E25 Delta <= -8/50 with sign p < 0.05 AND E9 Delta >= -5/50 -> "event index better in the image
+#     column" (counts as evidence for the event index); both Delta >= -5/50 -> does not count; otherwise undecided.
+#     Floors per cell: valid pairs >= 45, hidden arm >= 35/50 (E25's registered floor).
+#     E9's own registered verdict (no stress swap >= 95 INDEX SUFFICES / <= 75 BODY CONTENT MATTERS) is unchanged;
+#     its two pause levels were descriptive and are now used for this comparison.
