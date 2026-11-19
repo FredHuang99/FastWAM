@@ -60,12 +60,13 @@ press_clock | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/den
 #
 # plan v15 E25 TW-twin: two-task, anchor + every 32nd frame (the last 12) + t-16, t-32, positions in real time
 # (history.variant=tw, history.index=time; the 2x2 cell "time index x images", paired with E9 = arev, the last 12 event
-# frames). 15 history frames: micro 4 x accumulation 16 (= 64 samples / update, as micro 8 x 8) so it fits; E9 on the
-# old H200 uses the same micro setting. Note: the grid keeps the last 12 multiples of 32 = the last 384 frames.
+# frames). 15 history frames, the same count as E9; recipe exactly as every H200 run (micro 8 x 8; press_arev, also
+# 15 history frames, trained at micro 8 on the old H200 on 11-16). Note: the grid keeps the last 12 multiples of 32 =
+# the last 384 frames (+ the anchor).
 # Registered reading (plan v15 section 3 E25, before any result; A40):
 #   no stress swap >= 95/100 -> LONG VISUAL SUFFICES; <= 75/100 -> NOT ENOUGH; otherwise PARTIAL. Floor put >= 90/100.
 #   Stress swap 1-50, pause 64 and 256 frames, visible vs hidden (floor hidden >= 35/50, valid pairs >= 45): some level
 #   Delta <= -8/50 with p < 0.05 -> CLOCK READ WITH IMAGES; both levels >= -5/50 -> NOT READ.
 #   With E22a (time index, other content): images hurt where the body-state clock is not at the same level ->
 #   CONTENT DECIDES; both hurt at 256 -> the index decides; neither -> no clock reading on swap.
-ar2_tw | history.variant=tw history.index=time schedule.micro_batch=4 schedule.accumulation=16 | true
+ar2_tw | history.variant=tw history.index=time | true

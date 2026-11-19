@@ -86,4 +86,18 @@ put_arprop | data.tasks=[put_back_block] history.variant=arprop history.event_ma
 # detector first) -> the files never reach the relay and this line never runs.
 press_v3c | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_press_button_v1] data.tasks=[press_button] history.variant=arprop history.event_max=32 history.lag=0 history.ordinal=16 history.event_rule_from=/workspace/FastWAM-memory2/outputs/fullft/PRESS_V3C_RULE.json data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_press_button_v3c.json] | bash scripts/fullft/v3c_ready.sh
 obs_arprop | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1] data.tasks=[observe_and_pickup] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_observe_and_pickup.json] | bash scripts/fullft/obs_ready.sh
+#
+# 11-19 14:20 plan v13 E9 EV-image (user approved 11-17 15:40, deviation 40; plan v14: P1; plan v15 (Fable 11-19 noon,
+# user 13:21): its evaluation is P0, training stays on this machine after press_v3c / obs_arprop). The two-task AR +
+# the last 12 event FRAMES (history.variant=arev, known lag 4 frames after confirmation, as the ledger), same data,
+# recipe, seed as ar_2task / ar2_prop / ar2_clock. ~35 h. press_arev (same variant, 15 history frames) ran at micro 8
+# here on 11-16.
+# Registered reading (plan v13 section 3 E9, before any result; A40, swap and put 1-100):
+#   swap >= 95/100 -> INDEX SUFFICES; <= 75/100 -> BODY CONTENT MATTERS; otherwise PARTIAL. Floor: put >= 90/100.
+# Plan v15 adds (written before any result): with the clock arm (swap 100) and AR (56) known, BODY CONTENT MATTERS ->
+# the 2x2 differs in the content column; INDEX SUFFICES -> history covering the episode suffices, body state is the
+# cheapest content, E25 (ar2_tw, new H200) decides whether the event index matters for images; PARTIAL -> report e10,
+# e20 too. Descriptive only: event frames switched off (swap 1-50); pause 64 / 256 frames visible vs hidden (swap 1-50).
+# Condition: press_v3c finished, or 11-19 20:00 BJ passed (plan v14 5.3: v3c first; not ready by 20:00 -> E9 first).
+ar2_arev | history.variant=arev history.event_max=12 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_put_back_block.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_blocks.json] | test -f outputs/fullft/press_v3c/SUMMARY.json -o $(date +%s) -ge 1795089600 && grep -q swap_blocks outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/events/events_swap_blocks.json
 ar2_prop_s18 | seed=18 history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_put_back_block.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_blocks.json] | test $(date +%s) -ge 1795089600 && grep -q swap_blocks outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/events/events_swap_blocks.json
