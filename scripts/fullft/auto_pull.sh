@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # User 11-18 18:08 (plan v14 5.2 item 1): the A40, A100, H100 and old H200 containers pull the repo on a timer, so
 # task cards, queue lines and the scripts they call that Opus pushes go live without a command from the user
-# (the user is away 11-19 all day -> 11-20 14:00). The 5090 is NOT included (it still needs the user's command).
+# (the user is away 11-19 all day -> 11-20 14:00). User 11-19 09:47: the 5090 is included too.
 # Every <minutes> (default 10): git fetch origin memory2, then a fast-forward-only merge. Never resets, never touches
 # a running process: a running bash script keeps its old file (git replaces files, the open one stays), a running
 # trainer / closed loop keeps its loaded code; only tasks that start later use the new code. A failed fast-forward
