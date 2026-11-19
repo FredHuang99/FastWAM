@@ -115,17 +115,30 @@ def ledger_tensor(rule: HistoryRule, entries: Sequence[dict], proprio_of) -> Tup
     return feat, valid
 
 
-def clock_tensor(rule: HistoryRule, frames: Sequence[int], proprio_of, scale: float = 1.0
-                 ) -> Tuple[torch.Tensor, torch.Tensor]:
+CLOCK_MODES = ("", "off", "freeze", "flat")
+
+
+def clock_tensor(rule: HistoryRule, frames: Sequence[int], proprio_of, scale: float = 1.0, mode: str = "",
+                 current: Optional[int] = None) -> Tuple[torch.Tensor, torch.Tensor]:
     """arclk (plan v13 E5): (features [event_max, clock_dim], valid [event_max]) of the sampled frames (ascending);
     proprio_of(frame) -> normalised proprio [14]; scale multiplies the frame index inside the timestamp code only
-    (test-time timestamp scaling, 1.0 = as trained)."""
+    (test-time timestamp scaling, 1.0 = as trained).
+    mode (11-19 plan v15 E21, test time only; "" = as trained):
+      off     no clock token (all slots invalid, zero features): what the model sees at the episode start
+      freeze  every token's joint state = the CURRENT frame's (`current`); the timestamps stay those of the samples
+      flat    every token's timestamp code = the code of the middle sample; the joint states stay"""
+    if mode not in CLOCK_MODES:
+        raise ValueError(f"clock mode must be one of {CLOCK_MODES}, got {mode!r}")
+    if mode == "freeze" and current is None:
+        raise ValueError("clock mode 'freeze' needs the current frame")
     slots = rule.event_max
     feat = torch.zeros(slots, clock_dim())
     valid = torch.zeros(slots, dtype=torch.bool)
-    for j, f in enumerate(list(frames)[-slots:]):
-        feat[j, :14] = proprio_of(int(f)).float()
-        feat[j, 14:-1] = torch.tensor(clock_code(float(f) * scale))
+    shown = [] if mode == "off" else [int(f) for f in list(frames)[-slots:]]
+    middle = shown[len(shown) // 2] if shown else 0
+    for j, f in enumerate(shown):
+        feat[j, :14] = proprio_of(int(current) if mode == "freeze" else f).float()
+        feat[j, 14:-1] = torch.tensor(clock_code(float(middle if mode == "flat" else f) * scale))
         feat[j, -1] = 1.0
         valid[j] = True
     return feat, valid

@@ -293,7 +293,19 @@ class FullPolicy:
                 "train_video": self.run_cfg.model.train_video, "run": self.run_cfg.name,
                 "export_state": self.export_state, "t5_on_gpu": self.t5_on_gpu, "text_source": self.text_source,
                 "text_fingerprints": dict(self.text_fingerprints), "noise_salt": os.environ.get("MWAM_NOISE_SALT", ""),
-                "ledger_ablation": os.environ.get("MWAM_LEDGER", "")}
+                "ledger_ablation": os.environ.get("MWAM_LEDGER", ""),
+                "clock_ablation": os.environ.get("MWAM_CLOCK", ""), "clock_scale": os.environ.get("MWAM_CLOCK_SCALE", ""),
+                "token_budget": os.environ.get("MWAM_BUDGET", "")}
+
+
+def token_budget() -> int:
+    """11-19 plan v15 E22b (test time): MWAM_BUDGET=K keeps only K memory tokens (ledger: the last K entries; clock:
+    K samples spread uniformly over the elapsed time); unset / 0 = as trained."""
+    raw = os.environ.get("MWAM_BUDGET", "").strip()
+    k = int(raw) if raw else 0
+    if k < 0:
+        raise ValueError(f"MWAM_BUDGET must be >= 0, got {raw!r}")
+    return k
 
 
 class FullSession:
@@ -409,6 +421,9 @@ class FullSession:
                     elif mode:
                         raise ValueError(f"unknown MWAM_LEDGER mode {mode!r} (off | drop1 | dropfirst | addmove | freezeK | "
                                          "addpress | droppress | ordplus1 | duppress)")
+                    budget = token_budget()                      # 11-19 plan v15 E22b: only the last K entries
+                    if budget:
+                        entries = entries[-budget:]
                     ledger = ledger_tensor(p.rule, entries, self._proprio)
             if p.rule.variant == "arclk":                       # 11-17 plan v13 E5: clock tokens (time-indexed)
                 from .data import check_ledger_slots, clock_tensor
@@ -416,8 +431,14 @@ class FullSession:
                 if self.decisions == 0:
                     check_ledger_slots(self.text[0], p.rule.event_max, "(online instruction)")
                 scale = float(os.environ.get("MWAM_CLOCK_SCALE", "").strip() or 1.0)   # E5 timestamp x1.5 / x0.5
-                frames = clock_frames(p.rule, current)
-                ledger = clock_tensor(p.rule, frames, self._proprio, scale)
+                cmode = os.environ.get("MWAM_CLOCK", "").strip().lower()   # 11-19 plan v15 E21: off | freeze | flat
+                budget = token_budget()                          # 11-19 plan v15 E22b: K uniform samples, not 32
+                if budget:
+                    import dataclasses
+                    frames = clock_frames(dataclasses.replace(p.rule, event_max=min(budget, int(p.rule.event_max))), current)
+                else:
+                    frames = clock_frames(p.rule, current)
+                ledger = clock_tensor(p.rule, frames, self._proprio, scale, mode=cmode, current=current)
                 entries = [{"frame": f, "arm": -1, "kind": "clock", "confirmed": f} for f in frames]
             ids, _ = select(p.rule, current, known)
             self._encode(sorted(set(ids) | {current} | (set(known) if p.rule.variant == "prop" else set())))

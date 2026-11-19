@@ -489,3 +489,49 @@ def test_arclk_zero_encoder_is_exactly_ar_and_dataset_builds_clock_tokens(tmp_pa
     f2, _ = clock_tensor(rule, [10], lambda f: torch.zeros(14), scale=1.5)
     f1, _ = clock_tensor(rule, [15], lambda f: torch.zeros(14))
     assert torch.allclose(f1, f2)                                        # timestamp scaling = another frame index
+
+
+def test_clock_test_time_modes():
+    """11-19 plan v15 E21: the test-time clock modes. '' = as trained; off = no valid token; freeze = every token's
+    joint state is the current frame's, timestamps unchanged; flat = every timestamp is the middle sample's, joint
+    states unchanged; an unknown mode or freeze without the current frame is refused."""
+    from fastwam.fullft.data import clock_tensor
+    from fastwam.fullft.history import clock_code, clock_frames
+    rule = HistoryRule("arclk", event_max=4)
+    frames = clock_frames(rule, 40)                                   # [0, 13, 26, 39]
+    state = {f: torch.full((14,), float(f)) for f in range(41)}
+    of = lambda f: state[int(f)]                                      # noqa: E731
+    base, bv = clock_tensor(rule, frames, of)
+    assert bv.all() and torch.equal(base[:, 0], torch.tensor([0.0, 13.0, 26.0, 39.0]))
+    off, ov = clock_tensor(rule, frames, of, mode="off")
+    assert not ov.any() and float(off.abs().sum()) == 0.0
+    frz, fv = clock_tensor(rule, frames, of, mode="freeze", current=40)
+    assert torch.equal(fv, bv) and bool((frz[:, :14] == 40.0).all())
+    assert torch.equal(frz[:, 14:], base[:, 14:])                     # timestamps and valid flag unchanged
+    flat, lv = clock_tensor(rule, frames, of, mode="flat")
+    assert torch.equal(lv, bv) and torch.equal(flat[:, :14], base[:, :14])
+    middle = torch.tensor(clock_code(26.0))                           # frames[len // 2] = 26
+    assert all(torch.allclose(flat[j, 14:-1], middle) for j in range(4))
+    sc, _ = clock_tensor(rule, frames, of, scale=1.5, mode="flat")
+    assert torch.allclose(sc[0, 14:-1], torch.tensor(clock_code(26.0 * 1.5)))
+    with pytest.raises(ValueError):
+        clock_tensor(rule, frames, of, mode="sideways")
+    with pytest.raises(ValueError):
+        clock_tensor(rule, frames, of, mode="freeze")
+
+
+def test_token_budget_env(monkeypatch):
+    """11-19 plan v15 E22b: MWAM_BUDGET parses to K (unset = 0 = as trained); K clock samples still span [0, t)."""
+    import dataclasses
+    from fastwam.fullft.online import token_budget
+    from fastwam.fullft.history import clock_frames
+    monkeypatch.delenv("MWAM_BUDGET", raising=False)
+    assert token_budget() == 0
+    monkeypatch.setenv("MWAM_BUDGET", "8")
+    assert token_budget() == 8
+    rule = HistoryRule("arclk", event_max=32)
+    f8 = clock_frames(dataclasses.replace(rule, event_max=8), 300)
+    assert len(f8) == 8 and f8[0] == 0 and f8[-1] == 299
+    monkeypatch.setenv("MWAM_BUDGET", "-1")
+    with pytest.raises(ValueError):
+        token_budget()
