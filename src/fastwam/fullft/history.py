@@ -50,6 +50,7 @@ class HistoryRule:
     # detector from these; the trainer checks that the events file was written with the same values.
     event_delta: float = 0.015
     event_min_path: float = 0.03
+    event_provisional: float = 0.0            # 11-19 plan v14 E14: provisional write (events.EventRule.provisional)
     # 11-17 plan v13 E4 (arprop only): each ledger entry also carries its ORDINAL = 1 + the number of earlier written
     # entries of the same arm and kind since the episode start (so the 3rd press of the right arm says 3 even when
     # older entries have left the event_max window), as a thermometer code of this many dims (feature k = 1 if
@@ -63,6 +64,8 @@ class HistoryRule:
             raise ValueError(f"history ordinal (thermometer dims) must be 0..64, got {self.ordinal}")
         if int(self.ordinal) and self.variant != "arprop":
             raise ValueError("history ordinal is a ledger feature: only with variant arprop")
+        if not (0.0 <= float(self.event_provisional) < float(self.event_delta)):
+            raise ValueError(f"event_provisional must be in [0, event_delta), got {self.event_provisional}")
         if not (0.0 < float(self.event_delta) <= 0.1 and 0.0 <= float(self.event_min_path) <= 0.2):
             raise ValueError(f"event thresholds out of range: delta {self.event_delta}, min_path {self.event_min_path}")
         if self.index not in ("rank", "time"):

@@ -15239,3 +15239,566 @@ tasks:
   hypothesis: "E17 table (descriptive): per label 1-50 / 51-100, P-SEL picks, sign comparisons with the 5090's E3 / E4"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e17_report.py"
   pass_if: "m['rc'] == 0"
+
+# 11-19 10:05 BJ (Opus, plan v14 E14): the writer scan chose the provisional write P(eps 0.002; delta 0.012, min_path
+# 0.015) (tau 1.000, recall 1.000, spurious 0.000; T(0.004, *) had tau 0.999), which needed the online detector:
+# implemented (events.EventRule.provisional, online pending entries, tests test_events_provisional.py). The files for
+# the old H200 are made from the demos here; E14 is evaluated on the A40 (E17 approved) with e14_verdict_a40.py.
+
+- id: A40-E14-writer-files
+  lane: a40cpu
+  kind: shell
+  after: [A40-E14-writer-verdict]
+  requires_pass: [A40-E14-writer-verdict]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "E14 step 1b: PRESS_V3C_RULE.json + events_press_button_v3c.json for the chosen provisional writer (the detector must reproduce the scan's timing on every demo), to the relay diag/press_v3c"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python -m pytest -q -p no:cacheprovider src/fastwam/fullft/tests/test_events_provisional.py && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/press_v3c_files.py --relay"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fetch-press_v3c-e10
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 60
+  hypothesis: "fetch press_v3c_e10 from the relay (old H200, plan v14 E14) for its A40 evaluation (sha256 checked)"
+  command: "RUN=press_v3c TAG=e10 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-E14-press_v3c-e10-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e10]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e10 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e10/export_e10.pt
+  label: press_v3c_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e10-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e10]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e10 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e10/export_e10.pt
+  label: press_v3c_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e10-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e10]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e10 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e10/export_e10.pt
+  label: press_v3c_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e10-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e10]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e10 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e10/export_e10.pt
+  label: press_v3c_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e10-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e10]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e10 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e10/export_e10.pt
+  label: press_v3c_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e10-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e10]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e10 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e10/export_e10.pt
+  label: press_v3c_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e10-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e10]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e10 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e10/export_e10.pt
+  label: press_v3c_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e10-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e10]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e10 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e10/export_e10.pt
+  label: press_v3c_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e10-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e10]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e10 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e10/export_e10.pt
+  label: press_v3c_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e10-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e10]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e10]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e10 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e10/export_e10.pt
+  label: press_v3c_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fetch-press_v3c-e20
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 60
+  hypothesis: "fetch press_v3c_e20 from the relay (old H200, plan v14 E14) for its A40 evaluation (sha256 checked)"
+  command: "RUN=press_v3c TAG=e20 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-E14-press_v3c-e20-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e20]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e20]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e20 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e20/export_e20.pt
+  label: press_v3c_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e20-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e20]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e20]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e20 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e20/export_e20.pt
+  label: press_v3c_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e20-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e20]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e20]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e20 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e20/export_e20.pt
+  label: press_v3c_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e20-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e20]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e20]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e20 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e20/export_e20.pt
+  label: press_v3c_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e20-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e20]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e20]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e20 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e20/export_e20.pt
+  label: press_v3c_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e20-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e20]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e20]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e20 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e20/export_e20.pt
+  label: press_v3c_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e20-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e20]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e20]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e20 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e20/export_e20.pt
+  label: press_v3c_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e20-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e20]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e20]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e20 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e20/export_e20.pt
+  label: press_v3c_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e20-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e20]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e20]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e20 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e20/export_e20.pt
+  label: press_v3c_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e20-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e20]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e20]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e20 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e20/export_e20.pt
+  label: press_v3c_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fetch-press_v3c-e30
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 60
+  hypothesis: "fetch press_v3c_e30 from the relay (old H200, plan v14 E14) for its A40 evaluation (sha256 checked)"
+  command: "RUN=press_v3c TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-E14-press_v3c-e30-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e30]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e30]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e30 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e30/export_e30.pt
+  label: press_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e30-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e30]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e30]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e30 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e30/export_e30.pt
+  label: press_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e30-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e30]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e30]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e30 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e30/export_e30.pt
+  label: press_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e30-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e30]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e30]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e30 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e30/export_e30.pt
+  label: press_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e30-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e30]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e30]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e30 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e30/export_e30.pt
+  label: press_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e30-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e30]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e30]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e30 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e30/export_e30.pt
+  label: press_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e30-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e30]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e30]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e30 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e30/export_e30.pt
+  label: press_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e30-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e30]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e30]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e30 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e30/export_e30.pt
+  label: press_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e30-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e30]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e30]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e30 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e30/export_e30.pt
+  label: press_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-press_v3c-e30-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-E17-smoke, A40-fetch-press_v3c-e30]
+  requires_pass: [A40-E17-smoke, A40-fetch-press_v3c-e30]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v14 E14 (registered 11-18, approved 18:33; reading in scripts/fullft/e14_verdict_a40.py, written before press_v3c exists): press_v3c_e30 on the A40's press bank, scenes 1-100 (P-SEL on 1-50, held-out 51-100 vs press_count's pick); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_v3c_e30/export_e30.pt
+  label: press_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/e17
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-E14-verdict
+  lane: a40cpu
+  kind: shell
+  after: [A40-E14-press_v3c-e10-s0, A40-E14-press_v3c-e10-s1, A40-E14-press_v3c-e10-s2, A40-E14-press_v3c-e10-s3, A40-E14-press_v3c-e10-s4, A40-E14-press_v3c-e10-s5, A40-E14-press_v3c-e10-s6, A40-E14-press_v3c-e10-s7, A40-E14-press_v3c-e10-s8, A40-E14-press_v3c-e10-s9, A40-E14-press_v3c-e20-s0, A40-E14-press_v3c-e20-s1, A40-E14-press_v3c-e20-s2, A40-E14-press_v3c-e20-s3, A40-E14-press_v3c-e20-s4, A40-E14-press_v3c-e20-s5, A40-E14-press_v3c-e20-s6, A40-E14-press_v3c-e20-s7, A40-E14-press_v3c-e20-s8, A40-E14-press_v3c-e20-s9, A40-E14-press_v3c-e30-s0, A40-E14-press_v3c-e30-s1, A40-E14-press_v3c-e30-s2, A40-E14-press_v3c-e30-s3, A40-E14-press_v3c-e30-s4, A40-E14-press_v3c-e30-s5, A40-E14-press_v3c-e30-s6, A40-E14-press_v3c-e30-s7, A40-E14-press_v3c-e30-s8, A40-E14-press_v3c-e30-s9, A40-E17-press_count-e10-s0, A40-E17-press_count-e10-s1, A40-E17-press_count-e10-s2, A40-E17-press_count-e10-s3, A40-E17-press_count-e10-s4, A40-E17-press_count-e10-s5, A40-E17-press_count-e10-s6, A40-E17-press_count-e10-s7, A40-E17-press_count-e10-s8, A40-E17-press_count-e10-s9, A40-E17-press_count-e20-s0, A40-E17-press_count-e20-s1, A40-E17-press_count-e20-s2, A40-E17-press_count-e20-s3, A40-E17-press_count-e20-s4, A40-E17-press_count-e20-s5, A40-E17-press_count-e20-s6, A40-E17-press_count-e20-s7, A40-E17-press_count-e20-s8, A40-E17-press_count-e20-s9, A40-E17-press_count-e30-s0, A40-E17-press_count-e30-s1, A40-E17-press_count-e30-s2, A40-E17-press_count-e30-s3, A40-E17-press_count-e30-s4, A40-E17-press_count-e30-s5, A40-E17-press_count-e30-s6, A40-E17-press_count-e30-s7, A40-E17-press_count-e30-s8, A40-E17-press_count-e30-s9]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "E14 verdict on the A40 (registered reading in scripts/fullft/e14_verdict_a40.py)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e14_verdict_a40.py"
+  pass_if: "m['rc'] == 0"

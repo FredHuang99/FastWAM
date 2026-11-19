@@ -25,6 +25,6 @@ $HFPY scripts/memory_v2/migrate/relay.py get --prefix diag/press_v3c --out $IN 2
 cp -f $IN/PRESS_V3C_RULE.json $F/PRESS_V3C_RULE.json
 cp -f $IN/events_press_button_v3c.json $F/events/events_press_button_v3c.json
 PYTHONPATH=src CUDA_VISIBLE_DEVICES= $PY scripts/fullft/ledger_ready.py --variant press_v3c --tasks press_button \
-  --events $F/events/events_press_button_v3c.json --skip-tests 2>&1 | grep -v '^\.\+$' | tail -n 8
+  --events $F/events/events_press_button_v3c.json 2>&1 | grep -v '^\.\+$' | tail -n 8
 [ -f $F/READY_press_v3c ] && { echo "[v3c] READY: rule $(cat $F/PRESS_V3C_RULE.json)"; exit 0; }
 echo "[v3c] NOT READY (see above)"; exit 1

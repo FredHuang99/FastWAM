@@ -30,6 +30,12 @@ class EventRule:
     min_path: float = 0.03            # metres of end-effector path between two events of the same arm
     use_gripper: bool = True
     use_reversal: bool = True
+    # 11-19 plan v14 E14 (provisional write, "先暂记、后确认"): > 0 -> a reversal becomes VISIBLE (its "confirmed" frame)
+    # as soon as the height has come back by `provisional` metres from the turning point; whether the event exists is
+    # still decided at `delta` (and by the debounce) exactly as before. Online, a candidate not yet decided is shown by
+    # EventDetector.pending() and disappears if it is not confirmed (the turning point moves or the debounce drops it);
+    # offline (detect) only the events that exist are returned, each with that earlier visible frame. 0 = off.
+    provisional: float = 0.0
 
 
 @dataclass
@@ -41,6 +47,7 @@ class _ArmState:
     anchor_z: Optional[float] = None  # height where the current direction was confirmed
     path_since_event: float = float("inf")
     last_position: Optional[np.ndarray] = None
+    prov_frame: Optional[int] = None  # first frame the current turning point is provisionally visible (provisional > 0)
 
 
 @dataclass
@@ -56,10 +63,25 @@ class EventDetector:
     def reset(self) -> None:
         self.arms = [_ArmState(), _ArmState()]
 
-    def _emit(self, arm: _ArmState, out: list, frame: int, side: int, kind: str) -> None:
+    def _emit(self, arm: _ArmState, out: list, frame: int, side: int, kind: str, visible: Optional[int] = None) -> None:
         if arm.path_since_event >= self.rule.min_path:
-            out.append({"frame": int(frame), "arm": side, "kind": kind})
+            e = {"frame": int(frame), "arm": side, "kind": kind}
+            if visible is not None:
+                e["visible"] = int(visible)
+            out.append(e)
             arm.path_since_event = 0.0
+
+    def pending(self) -> List[dict]:
+        """Provisional write (rule.provisional > 0): the turning points already visible but not yet decided, as ledger
+        events {"frame", "arm", "kind", "confirmed" = the visible frame, "provisional": True}; [] when off."""
+        if not (self.rule.provisional > 0 and self.rule.use_reversal):
+            return []
+        out = []
+        for side, arm in enumerate(self.arms):
+            if arm.prov_frame is not None and arm.direction != 0:
+                out.append({"frame": int(arm.extreme_frame), "arm": side, "kind": "bottom" if arm.direction < 0 else "top",
+                            "confirmed": int(arm.prov_frame), "provisional": True})
+        return out
 
     def step(self, frame: int, gripper: Sequence[float], positions) -> List[dict]:
         r = self.rule
@@ -93,18 +115,25 @@ class EventDetector:
                     elif z >= arm.anchor_z + r.delta:
                         arm.direction, arm.extreme_z, arm.extreme_frame = 1, z, frame
                     continue
+                prov = r.provisional > 0
                 if arm.direction < 0:
                     if z < arm.extreme_z:
-                        arm.extreme_z, arm.extreme_frame = z, frame
+                        arm.extreme_z, arm.extreme_frame, arm.prov_frame = z, frame, None
                     elif z >= arm.extreme_z + r.delta:
-                        self._emit(arm, out, arm.extreme_frame, side, "bottom")
-                        arm.direction, arm.extreme_z, arm.extreme_frame = 1, z, frame
+                        self._emit(arm, out, arm.extreme_frame, side, "bottom",
+                                   (arm.prov_frame if arm.prov_frame is not None else frame) if prov else None)
+                        arm.direction, arm.extreme_z, arm.extreme_frame, arm.prov_frame = 1, z, frame, None
+                    elif prov and arm.prov_frame is None and z >= arm.extreme_z + r.provisional:
+                        arm.prov_frame = frame
                 else:
                     if z > arm.extreme_z:
-                        arm.extreme_z, arm.extreme_frame = z, frame
+                        arm.extreme_z, arm.extreme_frame, arm.prov_frame = z, frame, None
                     elif z <= arm.extreme_z - r.delta:
-                        self._emit(arm, out, arm.extreme_frame, side, "top")
-                        arm.direction, arm.extreme_z, arm.extreme_frame = -1, z, frame
+                        self._emit(arm, out, arm.extreme_frame, side, "top",
+                                   (arm.prov_frame if arm.prov_frame is not None else frame) if prov else None)
+                        arm.direction, arm.extreme_z, arm.extreme_frame, arm.prov_frame = -1, z, frame, None
+                    elif prov and arm.prov_frame is None and z <= arm.extreme_z - r.provisional:
+                        arm.prov_frame = frame
         return out
 
 
@@ -115,7 +144,7 @@ def detect(gripper: np.ndarray, positions: np.ndarray, rule: Optional[EventRule]
     events = []
     for t in range(len(gripper)):
         for e in detector.step(t, gripper[t], positions[t]):
-            e["confirmed"] = t
+            e["confirmed"] = e.pop("visible", t)          # provisional write: the earlier visible frame
             events.append(e)
     events.sort(key=lambda e: (e["frame"], e["arm"]))
     return events
@@ -124,7 +153,8 @@ def detect(gripper: np.ndarray, positions: np.ndarray, rule: Optional[EventRule]
 def rule_for(history_rule) -> EventRule:
     """The EventRule a model was trained with (history.HistoryRule.event_delta / event_min_path; rule A otherwise)."""
     return EventRule(delta=float(getattr(history_rule, "event_delta", EventRule.delta)),
-                     min_path=float(getattr(history_rule, "event_min_path", EventRule.min_path)))
+                     min_path=float(getattr(history_rule, "event_min_path", EventRule.min_path)),
+                     provisional=float(getattr(history_rule, "event_provisional", 0.0) or 0.0))
 
 
 def parse_rule(text: str) -> Dict[str, float]:

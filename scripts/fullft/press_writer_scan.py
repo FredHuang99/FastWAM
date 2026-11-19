@@ -57,12 +57,12 @@ def load(name):
 class GripNoDebounce(EventDetector):
     """press_fast's detector, gripper events never debounced (the path counter still restarts at every event)."""
 
-    def _emit(self, arm, out, frame, side, kind):
+    def _emit(self, arm, out, frame, side, kind, visible=None):
         if kind in ("close", "open"):
             out.append({"frame": int(frame), "arm": side, "kind": kind})
             arm.path_since_event = 0.0
             return
-        super()._emit(arm, out, frame, side, kind)
+        super()._emit(arm, out, frame, side, kind, visible)
 
 
 def detect_with(det_cls, grip, pos, rule):

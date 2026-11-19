@@ -147,6 +147,8 @@ def load(path: Optional[str], overrides: List[str] = ()) -> RunConfig:
         import json
         pick = json.loads(Path(str(history.pop("event_rule_from"))).read_text())
         history["event_delta"], history["event_min_path"] = float(pick["delta"]), float(pick["min_path"])
+        if float(pick.get("provisional", 0.0) or 0.0) > 0:          # 11-19 plan v14 E14 (provisional write)
+            history["event_provisional"] = float(pick["provisional"])
     elif isinstance(history, dict):
         history.pop("event_rule_from", None)
     cfg = _build(RunConfig, tree)
