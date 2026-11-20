@@ -54,11 +54,14 @@ def effective_rule(rule):
       MWAM_LEDGER_LAG=k          entries become visible k frames after confirmation instead of the trained lag
       MWAM_EVENT_DELTA=d         the detector's reversal threshold (metres; trained: rule.event_delta)
       MWAM_EVENT_MIN_PATH=m      the detector's debounce path (metres; trained: rule.event_min_path)
+      MWAM_EVENT_PROVISIONAL=p   11-20 plan v16 T1 (earlier side): provisional write at a p-metre reversal (the v3c writer,
+                                 events.EventRule.provisional; 0 = off; trained: rule.event_provisional)
     Unset -> the trained value. Every decision logs the values used ("event_rule": [delta, min_path, lag])."""
     import dataclasses
     changes = {}
     for env, key, cast in (("MWAM_LEDGER_LAG", "lag", int), ("MWAM_EVENT_DELTA", "event_delta", float),
-                           ("MWAM_EVENT_MIN_PATH", "event_min_path", float)):
+                           ("MWAM_EVENT_MIN_PATH", "event_min_path", float),
+                           ("MWAM_EVENT_PROVISIONAL", "event_provisional", float)):
         value = os.environ.get(env, "").strip()
         if value:
             changes[key] = cast(value)
@@ -474,7 +477,8 @@ class FullSession:
             "cached_frames": len(self.cache.kv), "events_known": known,
             "ledger": [[int(e["frame"]), int(e["arm"]), e["kind"], int(e["confirmed"])] + ([int(e["ordinal"])] if "ordinal" in e else [])
                        for e in entries],
-            "event_rule": [float(self.rule.event_delta), float(self.rule.event_min_path), int(self.rule.lag)]})
+            "event_rule": [float(self.rule.event_delta), float(self.rule.event_min_path), int(self.rule.lag),
+                           float(self.rule.event_provisional)]})
         if self.decisions % 4 == 0:
             print(f"[decide] {now()} {self.tag} frame={current}/{self.limit} hist={len(out['ids'])} "
                   f"policy={seconds:.1f}s elapsed={time.monotonic() - self.started:.0f}s", flush=True)

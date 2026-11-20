@@ -283,7 +283,7 @@ def test_event_rule_travels_with_the_model(tmp_path, monkeypatch):
     assert rule_for(fast).delta == 0.008 and rule_for(fast).min_path == 0.015
     with pytest.raises(ValueError):
         HistoryRule("arprop", event_delta=0.0)
-    for k in ("MWAM_LEDGER_LAG", "MWAM_EVENT_DELTA", "MWAM_EVENT_MIN_PATH"):
+    for k in ("MWAM_LEDGER_LAG", "MWAM_EVENT_DELTA", "MWAM_EVENT_MIN_PATH", "MWAM_EVENT_PROVISIONAL"):
         monkeypatch.delenv(k, raising=False)
     assert effective_rule(base) is base
     monkeypatch.setenv("MWAM_LEDGER_LAG", "0")
@@ -552,3 +552,41 @@ def test_event_frames_switch(monkeypatch):
     monkeypatch.setenv("MWAM_EVFRAMES", "on")
     with pytest.raises(ValueError):
         event_frames_off()
+
+
+def test_provisional_env_makes_press_visible_earlier(monkeypatch, tmp_path):
+    """11-20 plan v16 T1 (earlier side): MWAM_EVENT_PROVISIONAL turns on the v3c provisional write at test time for a
+    model trained without it: the press bottom becomes a (provisional) ledger entry before the confirming rise, and
+    nothing changes when the variable is unset."""
+    import types
+    from fastwam.fullft.events import EventDetector
+    from fastwam.fullft.online import FullSession, effective_rule
+    base = HistoryRule("arprop", event_max=8, lag=0, event_delta=0.012, event_min_path=0.015)
+    monkeypatch.delenv("MWAM_EVENT_PROVISIONAL", raising=False)
+    assert effective_rule(base) is base and FullSession(types.SimpleNamespace(rule=base), tmp_path, "on", 3, 1.0,
+                                                        False).detector.rule.provisional == 0.0
+    monkeypatch.setenv("MWAM_EVENT_PROVISIONAL", "0.002")
+    eff = effective_rule(base)
+    assert eff.event_provisional == 0.002 and base.event_provisional == 0.0 and eff.lag == 0
+    session = FullSession(types.SimpleNamespace(rule=base), tmp_path, "on", 3, 1.0, False)
+    assert session.detector.rule.provisional == 0.002
+    n = 60
+    pos = np.zeros((n, 2, 3)); pos[:, :, 2] = 0.3
+    pos[:, 0, 2] = 0.3 - 0.04 * np.clip(1 - np.abs(np.arange(n) - 20) / 10, 0, 1)   # one 4 cm press, bottom at 20
+    grip = np.ones((n, 2))
+    det, first_seen = EventDetector(session.detector.rule), None
+    for i in range(n):
+        out = det.step(i, grip[i], pos[i])
+        if first_seen is None and any(e["kind"] == "bottom" for e in out + det.pending()):
+            first_seen = i
+    plain, confirmed = EventDetector(rule_for_plain(base)), None
+    for i in range(n):
+        if confirmed is None and any(e["kind"] == "bottom" for e in plain.step(i, grip[i], pos[i])):
+            confirmed = i
+    assert first_seen is not None and confirmed is not None and first_seen < confirmed
+
+
+def rule_for_plain(rule):
+    from fastwam.fullft.events import rule_for
+    return rule_for(rule)
+

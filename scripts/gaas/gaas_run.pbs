@@ -120,6 +120,20 @@ if [ "$RUN" != ar2_clock ] && echo " $SETS " | grep -q ' history.variant=arclk '
   [ -f $F/READY_$RUN ] || fail "READY_$RUN (ledger_ready.py above)"
 fi
 
+# 11-20 plan v16 (user 19:12: line A after ranking_ar trains cover's ledger version): any ledger run (history.variant=arprop)
+# gets READY_arprop_<task> here, CPU only, from the events file fetch_b3.sh put in outputs/fullft/events; cover and
+# rearrange use deviation 44's --check3 subset (rule A's 3 cm debounce drops real grasps there; alignment only).
+if echo " $SETS " | grep -q ' history.variant=arprop '; then
+  for T in $(echo "$SETS" | grep -o 'data.tasks=\[[^]]*\]' | sed 's/data.tasks=\[//; s/\]//' | tr ',' ' '); do
+    [ -f $F/READY_arprop_$T ] && continue
+    [ -s $F/events/events_$T.json ] || fail "no events file outputs/fullft/events/events_$T.json (fetch_b3.sh first)"
+    c3=""; case "$T" in cover_blocks|rearrange_blocks) c3="--check3 subset";; esac
+    X bash -c "CUDA_VISIBLE_DEVICES= /opt/mwam/bin/python scripts/fullft/ledger_ready.py --variant arprop --tasks $T \
+      --marker READY_arprop_$T --skip-tests $c3" 2>&1 | tail -n 6
+    [ -f $F/READY_arprop_$T ] || fail "READY_arprop_$T (ledger_ready.py above)"
+  done
+fi
+
 step "3 condition and training"
 bash -c "$COND" || fail "condition not met: $COND"
 ( sleep $(( WALL_H * 3600 - 2700 )); touch $F/$RUN/STOP; echo "[run] $(date '+%F %T') walltime near: STOP written" ) &

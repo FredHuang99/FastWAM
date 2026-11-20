@@ -70,3 +70,9 @@ press_clock | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/den
 #   With E22a (time index, other content): images hurt where the body-state clock is not at the same level ->
 #   CONTENT DECIDES; both hurt at 256 -> the index decides; neither -> no clock reading on swap.
 ar2_tw | history.variant=tw history.index=time | true
+#
+# 11-20 plan v16 (Opus; user 19:12: "代码来不及就先训原定的 cover 账本版"): line A after ranking_ar (~11-21 06:30). cover's ledger
+# version with the current setting (rule A, lag 4; G2' mechanical pick = v1 the current setting; deviation 45's 18:00
+# gate lifted ~11.5 h early by the user's approval). Pairs with cover_ar (same machine type, IDENTICAL H200s). The
+# readiness (gaas_run.pbs, deviation 44 --check3 subset) and the events file (fetch_b3.sh) are this machine's own.
+cover_arprop | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_cover_blocks_v1] data.tasks=[cover_blocks] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_cover_blocks.json] | test -f outputs/memory_v2/press/dense_cover_blocks_v1/.verified && test -f outputs/fullft/events/events_cover_blocks.json && test -f outputs/fullft/READY_arprop_cover_blocks
