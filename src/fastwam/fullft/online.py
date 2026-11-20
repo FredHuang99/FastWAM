@@ -301,6 +301,14 @@ class FullPolicy:
                 "token_budget": os.environ.get("MWAM_BUDGET", ""), "event_frames": os.environ.get("MWAM_EVFRAMES", "")}
 
 
+def visible_events(events: List[dict], hide_after: Optional[int]) -> List[dict]:
+    """Plan v17 T2b blind arm: the events whose entry was confirmed at or before `hide_after` (the previous decision's
+    frame); None (every other run) returns the list itself, unchanged."""
+    if hide_after is None:
+        return events
+    return [e for e in events if int(e.get("confirmed", e["frame"])) <= int(hide_after)]
+
+
 def event_frames_off() -> bool:
     """11-19 plan v15 E9 (test time, arev only): MWAM_EVFRAMES=off shows no event frame (anchor + recent window only)."""
     raw = os.environ.get("MWAM_EVFRAMES", "").strip().lower()
@@ -343,6 +351,20 @@ class FullSession:
         self.text = self.instruction = self.seed = self.task = None
         self.decisions = 0
         self.started = time.monotonic()
+        self.hide_after: Optional[int] = None         # plan v17 T2b blind arm: set (and cleared) by ReplanDriver only
+
+    def observe(self, request: dict) -> List[dict]:
+        """Plan v17 T2b (memory_v2.online.ReplanDriver): store the observations of a request and stream the event
+        detector up to its frame WITHOUT deciding; returns the events confirmed by this call. decide() afterwards
+        sees the same raw frames and events (its own _detect is then a no-op)."""
+        current = int(request["current_id"])
+        for r in request["observations"]:
+            self.raw[int(r["frame_id"])] = r
+        if sorted(self.raw) != list(range(current + 1)):
+            raise ValueError("Missing contiguous observations")
+        before = len(self.events)
+        self._detect(current)
+        return list(self.events[before:])
 
     def _encode(self, ids):
         import numpy as np
@@ -403,13 +425,15 @@ class FullSession:
                 from .events import event_frames
                 from .history import ledger_entries
                 self._detect(current)
-                known = event_frames(self.events, before=current, known_by=current - int(self.rule.lag))
+                seen = visible_events(self.events, self.hide_after)        # = self.events unless T2b blind
+                known = event_frames(seen, before=current, known_by=current - int(self.rule.lag))
                 if p.rule.variant == "arev" and event_frames_off():     # 11-19 plan v15 E9: event frames switched off
                     known = []
                 if p.rule.variant == "arprop":
                     if self.decisions == 0:
                         check_ledger_slots(self.text[0], p.rule.event_max, "(online instruction)")
-                    evs = self.events + self.detector.pending()   # 11-19: undecided provisional entries (none when off)
+                    evs = seen + visible_events(self.detector.pending(), self.hide_after)   # 11-19: undecided
+                                                                       # provisional entries (none when off)
                     entries = ledger_entries(self.rule, current, evs)
                     mode = os.environ.get("MWAM_LEDGER", "").strip().lower()      # 11-14: test-time ablations
                     if mode == "off":
@@ -478,7 +502,8 @@ class FullSession:
             "ledger": [[int(e["frame"]), int(e["arm"]), e["kind"], int(e["confirmed"])] + ([int(e["ordinal"])] if "ordinal" in e else [])
                        for e in entries],
             "event_rule": [float(self.rule.event_delta), float(self.rule.event_min_path), int(self.rule.lag),
-                           float(self.rule.event_provisional)]})
+                           float(self.rule.event_provisional)],
+            **({"hide_after": int(self.hide_after)} if self.hide_after is not None else {})})
         if self.decisions % 4 == 0:
             print(f"[decide] {now()} {self.tag} frame={current}/{self.limit} hist={len(out['ids'])} "
                   f"policy={seconds:.1f}s elapsed={time.monotonic() - self.started:.0f}s", flush=True)

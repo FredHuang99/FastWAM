@@ -78,6 +78,67 @@ def execution_count(frame: int, limit: int, execute: int = EXECUTE) -> int:
     return min(int(execute), limit - frame)
 
 
+REPLAN_MODES = ("off", "replan", "blind")
+
+
+class ReplanDriver:
+    """Plan v17 T2b (Fable review of plan v16, 2.2; 11-20): event-triggered re-decision, test time only.
+
+    The simulator executes ONE target per RPC (the job's `execute` is 1); this driver keeps the model's 32-step chunk
+    and asks the model again (session.decide) every `period` targets (8, as the baseline) and, in mode 'replan' /
+    'blind', also as soon as the event detector confirms a new press ('bottom') before the period is used up: the
+    unexecuted rest of the chunk is dropped. Between decisions the session only stores the observations and runs the
+    detector (session.observe; no model call).
+      off     decisions every `period` targets only = the baseline schedule (frames 0, 8, 16, ...), for the smoke check
+      replan  the re-decision reads the ledger as usual (the triggering press is in it)
+      blind   the same re-decision, but entries confirmed after the previous decision stay hidden from it (session.
+              hide_after); they become visible at the next regular decision
+    Rows of replan.jsonl: frame, kind (regular / replan), the triggering events, the targets used of the old chunk,
+    and the joint jump (max |new first target - old target at this frame| over the arm joints, radians)."""
+
+    def __init__(self, session, period: int, mode: str, directory: Path):
+        if mode not in REPLAN_MODES:
+            raise ValueError(f"replan mode must be one of {REPLAN_MODES}, got {mode!r}")
+        if not hasattr(session, "observe"):
+            raise ValueError("--replan needs a session with observe() (fullft exports)")
+        self.session, self.period, self.mode, self.directory = session, int(period), mode, Path(directory)
+        self.chunk = None
+        self.used = 0
+        self.last = None
+
+    def reset(self):
+        self.session.reset()
+        self.chunk, self.used, self.last = None, 0, None
+
+    def decide(self, request: dict):
+        import numpy as np
+        frame = int(request["current_id"])
+        new = self.session.observe(request)
+        fresh = [e for e in new if e.get("kind") == "bottom"]
+        trigger = (self.mode != "off" and self.chunk is not None and self.used < self.period and bool(fresh))
+        if self.chunk is None or self.used >= self.period or trigger:
+            old = None if self.chunk is None or self.used >= len(self.chunk) else np.asarray(self.chunk[self.used])
+            self.session.hide_after = self.last if (trigger and self.mode == "blind") else None
+            try:
+                chunk = np.asarray(self.session.decide(request), dtype=np.float32)
+            finally:
+                self.session.hide_after = None
+            if trigger:
+                arms = [i for i in range(chunk.shape[1]) if i not in (6, 13)]
+                jump = None if old is None else float(np.abs(chunk[0, arms] - old[arms]).max())
+                append(self.directory / "replan.jsonl", {
+                    "frame": frame, "kind": "replan", "mode": self.mode, "previous_decision": self.last,
+                    "used_of_previous": self.used, "events": [[int(e["frame"]), int(e["arm"]), e["kind"],
+                                                               int(e.get("confirmed", e["frame"]))] for e in fresh],
+                    "joint_jump_rad": jump})
+            self.chunk, self.used, self.last = chunk, 0, frame
+        out = self.chunk[self.used:]
+        if len(out) < HORIZON:                       # the simulator executes out[0] only; the shape stays [32, 14]
+            out = np.concatenate([out, np.repeat(out[-1:], HORIZON - len(out), axis=0)], axis=0)
+        self.used += 1
+        return out
+
+
 # ----------------------------------------------------------------------------- tempo stress (plan v10 D.3 / N3)
 def parse_stress(value: str) -> Optional[dict]:
     """'' -> None; 'hold:K:history' / 'hold:K:hidden' -> {"kind": "hold", "k": K, "arm": ...}.
@@ -583,19 +644,26 @@ def run_episode(policy: Policy, scene: dict, mode: str, label: str, out: Path, a
             raise ValueError(f"event stress has a trigger for {sorted(TRIGGERS)} only, not {task}")
         stress["trigger_kind"], stress["n_open"] = TRIGGERS[task]       # put / swap: ("open", 1 / 2) as before
     stress_state = {"offset": 0}
+    replan = getattr(args, "replan", "") or ""                   # plan v17 T2b: one target per RPC, see ReplanDriver
+    if replan and stress:
+        raise ValueError("--replan and --stress cannot be combined")
+    rpc_execute = 1 if replan else int(args.execute)
     write(directory / "job.json", {"id": f"{label}:{mode}:{task}:{scene['seed']}", "attempt": 1, "scene": scene,
                                    "condition": f"memory_v2_{mode}", "run_seed": policy.dense_cfg["seed"],
                                    "causal_case": {"task": task, "fork": 0, "capture": [], "cap": limit},
                                    "max_targets": int(args.max_targets), "record_frames": bool(args.record_frames),
-                                   "execute": int(args.execute), "candidates": int(args.candidates),
+                                   "execute": rpc_execute, "candidates": int(args.candidates),
                                    "coherence": args.coherence, "noise": args.noise,
-                                   "policy": policy.describe(), "label": label, "stress": stress})
+                                   "policy": policy.describe(), "label": label, "stress": stress,
+                                   **({"replan": replan, "period": int(args.execute)} if replan else {})})
     target_limit = min(limit, args.max_targets) if args.max_targets else limit
     session_cls = getattr(policy, "session_cls", None) or Session        # fullft exports bring their own session
     session = session_cls(policy, directory, mode, args.steps, args.guidance, args.dependence,
                       tag=f"{label}/{mode} {task} seed={scene['seed']}", limit=target_limit,
                       candidates=args.candidates, coherence=args.coherence, noise=args.noise,
                       replay_cache=not args.no_replay_cache)
+    if replan:
+        session = ReplanDriver(session, int(args.execute), replan, directory)
     key = os.urandom(24)
     env = simulator_environment(sim_cfg, gpu)
     env.update(FW_CAUSAL_SIM_ROOT=str(root), MEMORY_S1_RPC_KEY=key.hex(), MEMORY_S1_ARCHIVE_STRIDE="1",
@@ -658,7 +726,7 @@ def run_episode(policy: Policy, scene: dict, mode: str, label: str, out: Path, a
                                 if req.get("inserted"):
                                     raise ValueError("Inserted frames without a stress setting")
                                 actions = session.decide(req)
-                            n = execution_count(frame, limit, args.execute)
+                            n = execution_count(frame, limit, rpc_execute)
                             commands.extend(actions[:n])
                             c.send({"ok": True, "actions": actions.tolist(), "execute": n})
                             last, next_frame = frame, next_frame + n
@@ -690,6 +758,9 @@ def run_episode(policy: Policy, scene: dict, mode: str, label: str, out: Path, a
                   "dependence_mean": {k: sum(v) / len(v) for k, v in dependence.items()},
                   "steps": args.steps or default_steps(policy), "guidance_scale": args.guidance,
                   "execute": int(args.execute), "candidates": int(args.candidates), "coherence": args.coherence,
+                  **({"replan": replan, "rpc_execute": rpc_execute,
+                      "replans": sum(1 for x in (directory / "replan.jsonl").read_text().splitlines() if x.strip())
+                      if (directory / "replan.jsonl").exists() else 0} if replan else {}),
                   "noise": args.noise, "stress": stress, "stress_frames_shown": stress_state["offset"],
                   "simulator_backend": value.get("simulator_backend"), "simulator_seconds": value.get("simulator_seconds"),
                   "wall_seconds": time.monotonic() - start, **episode_metrics(rows)}
@@ -1183,6 +1254,9 @@ def main(argv=None):
     ap.add_argument("--output", default="outputs/memory_v2/closed_loop")
     ap.add_argument("--steps", type=int, default=0, help="Euler steps (0 = the checkpoint's, 10)")
     ap.add_argument("--execute", type=int, default=EXECUTE, help="targets executed per decision (of 32 predicted)")
+    ap.add_argument("--replan", default="", choices=("",) + REPLAN_MODES,
+                    help="plan v17 T2b: one target per RPC; decide every --execute targets and (replan / blind) also "
+                         "when a press is confirmed (fullft exports only)")
     ap.add_argument("--candidates", type=int, default=1, help="U1: chunks sampled per decision (noise seeds; 1 = plain)")
     ap.add_argument("--coherence", default="none", choices=("none", "overlap"),
                     help="U1: overlap = execute the candidate closest to the previous chunk's unexecuted part (BID-lite)")
