@@ -22310,3 +22310,24 @@ tasks:
   hypothesis: "E23 verdict (registered reading in scripts/fullft/e23_verdict.py)"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e23_verdict.py"
   pass_if: "m['rc'] == 0"
+
+# 11-20 08:10 (Opus): two read-only report cards whose logs reach the results snapshot (names match *report*).
+- id: A40-Z6-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-Z6-occupancy-2]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "plan v15 Z6 (descriptive): print outputs/fullft/Z6_OCCUPANCY.json so the snapshot carries it"
+  command: "cat /workspace/FastWAM-memory2/outputs/fullft/Z6_OCCUPANCY.json"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-v15-press-trigger-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-v15-stress-check-press]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "plan v15 E24 (descriptive): in the press trigger smoke episodes, did the first counted press come before the injection (the card asks for the pause between two presses)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/press_trigger_report.py v15smoke press_count_e30_smoke_p64_vis"
+  pass_if: "m['rc'] == 0"
