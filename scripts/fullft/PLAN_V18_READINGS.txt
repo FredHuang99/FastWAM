@@ -29,3 +29,11 @@ Press entries from the simulator's true counters, readable from the observation 
 against g1 + sel. D = over-press rate difference, paired bootstrap 95 % CI, SESOI = half of the baseline rate:
 >= HALF / PART / DOES NOT EXPLAIN / UNCERTAIN (-> pre-set extension: the same on 1-100 with noise r2, 200 pairs).
 Manipulation check: delay <= 7 frames. Floor 95 pairs.
+
+================================================================================ N1 training-noise replicates (added 01:45)
+User 01:11: use the GaaS group's other two H200s over the weekend if free, with jobs that finish within 48 h.
+press_count_s18 / press_count_s19: press_count's exact line with seed 18 / 19 (gaas_queue.txt; submitted by
+fetch_b4.sh). Evaluation (5090, after Z0 / N0): e30 of each on press scenes 1-100, default noise, paired with
+press_count e30 (g1 + sel). Descriptive only, no verdict: per pair the first-button over-press rate difference with a
+paired-bootstrap 95 % CI, mean e1, mean extra presses, success; the largest |difference| is the training-noise band
+that every later comparison of two trainings (E4, E14 and onward) is read against.
