@@ -13936,6 +13936,141 @@ tasks:
   output: closed_loop/e22
   env: {MWAM_TEXT_SOURCE: "cache"}
 
+# ---------------------------------------------------------------------------------------------------------------
+# 11-20 22:50 BJ (Opus, plan v17; the user took over the Fable review of plan v16 in full at 20:47): the cheapest second
+# task -- record delay on swap (Fable part 2 item 1), evaluation only, A100. Placed after the E22a 256 level and
+# before its 1024 level (file order). Reading in scripts/fullft/swap_lag_verdict.py.
+
+- id: A100-SWL-base-s0
+  lane: loop
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v17 second task (registered 11-20 22:50 BJ in scripts/fullft/swap_lag_verdict.py before any run): the ledger model ar2_prop_e30 on swap_blocks 1-50 with the record delayed by L frames vs as trained; per L: success drop >= 8 with p < 0.05 -> HURT, |drop| <= 4 -> TOLERATED; prediction: 16 and 32 tolerated (swap's next record-dependent branch comes after the arm withdraws); lag16 HURT discounts T1's late side. This card: as trained, shard 0 of 2"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/2"]
+  output: closed_loop/swaplag
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-SWL-base-s1
+  lane: loop
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v17 second task (registered 11-20 22:50 BJ in scripts/fullft/swap_lag_verdict.py before any run): the ledger model ar2_prop_e30 on swap_blocks 1-50 with the record delayed by L frames vs as trained; per L: success drop >= 8 with p < 0.05 -> HURT, |drop| <= 4 -> TOLERATED; prediction: 16 and 32 tolerated (swap's next record-dependent branch comes after the arm withdraws); lag16 HURT discounts T1's late side. This card: as trained, shard 1 of 2"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/2"]
+  output: closed_loop/swaplag
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-SWL-lag16-s0
+  lane: loop
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v17 second task (registered 11-20 22:50 BJ in scripts/fullft/swap_lag_verdict.py before any run): the ledger model ar2_prop_e30 on swap_blocks 1-50 with the record delayed by L frames vs as trained; per L: success drop >= 8 with p < 0.05 -> HURT, |drop| <= 4 -> TOLERATED; prediction: 16 and 32 tolerated (swap's next record-dependent branch comes after the arm withdraws); lag16 HURT discounts T1's late side. This card: MWAM_LEDGER_LAG=16, shard 0 of 2"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_lag16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/2"]
+  output: closed_loop/swaplag
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER_LAG: "16"}
+
+- id: A100-SWL-lag16-s1
+  lane: loop
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v17 second task (registered 11-20 22:50 BJ in scripts/fullft/swap_lag_verdict.py before any run): the ledger model ar2_prop_e30 on swap_blocks 1-50 with the record delayed by L frames vs as trained; per L: success drop >= 8 with p < 0.05 -> HURT, |drop| <= 4 -> TOLERATED; prediction: 16 and 32 tolerated (swap's next record-dependent branch comes after the arm withdraws); lag16 HURT discounts T1's late side. This card: MWAM_LEDGER_LAG=16, shard 1 of 2"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_lag16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/2"]
+  output: closed_loop/swaplag
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER_LAG: "16"}
+
+- id: A100-SWL-lag32-s0
+  lane: loop
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v17 second task (registered 11-20 22:50 BJ in scripts/fullft/swap_lag_verdict.py before any run): the ledger model ar2_prop_e30 on swap_blocks 1-50 with the record delayed by L frames vs as trained; per L: success drop >= 8 with p < 0.05 -> HURT, |drop| <= 4 -> TOLERATED; prediction: 16 and 32 tolerated (swap's next record-dependent branch comes after the arm withdraws); lag16 HURT discounts T1's late side. This card: MWAM_LEDGER_LAG=32, shard 0 of 2"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_lag32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/2"]
+  output: closed_loop/swaplag
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER_LAG: "32"}
+
+- id: A100-SWL-lag32-s1
+  lane: loop
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v17 second task (registered 11-20 22:50 BJ in scripts/fullft/swap_lag_verdict.py before any run): the ledger model ar2_prop_e30 on swap_blocks 1-50 with the record delayed by L frames vs as trained; per L: success drop >= 8 with p < 0.05 -> HURT, |drop| <= 4 -> TOLERATED; prediction: 16 and 32 tolerated (swap's next record-dependent branch comes after the arm withdraws); lag16 HURT discounts T1's late side. This card: MWAM_LEDGER_LAG=32, shard 1 of 2"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_lag32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/2"]
+  output: closed_loop/swaplag
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER_LAG: "32"}
+
+- id: A100-SWL-lag64-s0
+  lane: loop
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v17 second task (registered 11-20 22:50 BJ in scripts/fullft/swap_lag_verdict.py before any run): the ledger model ar2_prop_e30 on swap_blocks 1-50 with the record delayed by L frames vs as trained; per L: success drop >= 8 with p < 0.05 -> HURT, |drop| <= 4 -> TOLERATED; prediction: 16 and 32 tolerated (swap's next record-dependent branch comes after the arm withdraws); lag16 HURT discounts T1's late side. This card: MWAM_LEDGER_LAG=64, shard 0 of 2"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_lag64
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/2"]
+  output: closed_loop/swaplag
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER_LAG: "64"}
+
+- id: A100-SWL-lag64-s1
+  lane: loop
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v17 second task (registered 11-20 22:50 BJ in scripts/fullft/swap_lag_verdict.py before any run): the ledger model ar2_prop_e30 on swap_blocks 1-50 with the record delayed by L frames vs as trained; per L: success drop >= 8 with p < 0.05 -> HURT, |drop| <= 4 -> TOLERATED; prediction: 16 and 32 tolerated (swap's next record-dependent branch comes after the arm withdraws); lag16 HURT discounts T1's late side. This card: MWAM_LEDGER_LAG=64, shard 1 of 2"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_lag64
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/2"]
+  output: closed_loop/swaplag
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER_LAG: "64"}
+
+- id: A100-SWL-verdict
+  lane: cpu
+  kind: shell
+  after: [A100-SWL-base-s0, A100-SWL-base-s1, A100-SWL-lag16-s0, A100-SWL-lag16-s1, A100-SWL-lag32-s0, A100-SWL-lag32-s1, A100-SWL-lag64-s0, A100-SWL-lag64-s1]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v17 swap record-delay verdict (swap_lag_verdict.py, registered before any run) -> relay diag/swap_lag"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/swap_lag_verdict.py && /opt/hf-tools/bin/python scripts/memory_v2/migrate/relay.py put outputs/fullft/SWAP_LAG_VERDICT.json --prefix diag/swap_lag"
+  pass_if: "m['rc'] == 0"
+
 - id: A100-E22-clock-p1024-vis-swap-s0
   lane: loop
   kind: closed_loop
