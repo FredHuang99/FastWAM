@@ -23,6 +23,10 @@ O3 chain (over phases): every press of button k after T before the robot first p
   press x_j (j = 1, 2, ...). At the cutoff x_j - 16 (two decisions before it registered), how many of the presses of
   button k before x_j were in the ledger of the last decision <= cutoff? 'full' if >= card_k, else 'short'.
   A 'full' at j >= 2 means the model pressed again while its ledger already held the required number.
+T2 boundary R (Fable 1(b); computed and committed BEFORE the T2 result is read): for every over-pressing phase of the
+  press_ledger_audit class 'late', s = frames from the confirmation of the deciding press to the turning point ('top'
+  ledger entry of the same arm) that starts the extra press's descent; R = mean of min(1, s / 4). timing_meaning.py
+  reads T2 against R (g1 run, button 1, the T2 metric).
 O2 (descriptive): over rate by E bin (<= 8, 9-12, 13-16, > 16, never).
 O3 (descriptive): first-count error e1 (button 1 presses - card 1) by card number; share of e1 >= +2 among e1 >= +1.
   The 5090 log already printed e1 by card for g1:press_count_e30 before this script existed (+1: 11, +2: 8, +3: 4,
@@ -104,11 +108,13 @@ def episode(directory: Path) -> dict:
                 presses.append({"frame": i + 1, "button": b})
             prev[c] = max(prev[c], v)
     presses.sort(key=lambda p: (p["frame"], p["button"]))
-    bottoms, shown = {}, []
+    bottoms, shown, tops = {}, [], set()
     for d in decisions:
         keys = set()
         for e in d.get("ledger") or []:
             frame, arm, kind, confirmed = int(e[0]), int(e[1]), e[2], int(e[3])
+            if kind == "top":
+                tops.add((frame, arm))
             if kind != "bottom":
                 continue
             keys.add((frame, arm))
@@ -162,6 +168,17 @@ def episode(directory: Path) -> dict:
         last = mine[c - 1]
         row["deciding"] = decomposition(last) if last["bottom"] is not None else None
         if ph["outcome"] == "over":
+            # s (Fable 1(b)): from the confirmation of the deciding press to the turning point ('top' entry of the
+            # same arm) that starts the extra press's descent; None if either was never recorded
+            t_over = ph["T_over"]
+            row["T_over"] = t_over
+            row["audit_class"] = ph["why"]
+            if last["bottom"] is not None:
+                arm = last["bottom"][1]
+                tt = sorted(f for f, a in tops if a == arm and last["t_bot"] < f < t_over)
+                row["s"] = (tt[0] - last["t_conf"]) if tt else None
+            else:
+                row["s"] = None
             leave = next((p["frame"] for p in presses if p["frame"] > T and p["button"] != k), 10 ** 9)
             extra = [p for p in mine[c:] if p["frame"] < leave]
             chain = []
@@ -251,7 +268,15 @@ def describe(eps) -> dict:
             continue
         by_card.setdefault(int(e["card"][1]), []).append(e["e1"])
     over = [x for v in by_card.values() for x in v if x >= 1]
-    return {"episodes": len(eps), "phases": len(phases),
+    late = [ph for ph in phases if ph["outcome"] == "over" and ph.get("audit_class") == "late"]
+    late_b1 = [ph for ph in late if ph["button"] == 1]
+    r_all = [min(1.0, max(0, ph["s"]) / 4) for ph in late if ph.get("s") is not None]
+    r_b1 = [min(1.0, max(0, ph["s"]) / 4) for ph in late_b1 if ph.get("s") is not None]
+    t2_r = {"R_late_all": round(sum(r_all) / len(r_all), 3) if r_all else None, "n_late_all": len(late),
+            "n_with_s_all": len(r_all), "R_late_button1": round(sum(r_b1) / len(r_b1), 3) if r_b1 else None,
+            "n_late_button1": len(late_b1), "n_with_s_button1": len(r_b1),
+            "s_median_late": med([ph["s"] for ph in late if ph.get("s") is not None])}
+    return {"episodes": len(eps), "phases": len(phases), "t2_R": t2_r,
             "outcomes": {o: sum(ph["outcome"] == o for ph in phases) for o in ("over", "moved on")},
             "o1": o1_reading(phases),
             "o1_without_never": o1_reading([ph for ph in phases if not ph["never"]]),
@@ -278,6 +303,7 @@ def show(name, s):
           f"confirmed->decision {a['c']}, total {a['total']}")
     print(f"   O5 deciding presses (n {d['n']}): press->bottom {d['a']}, bottom->confirmed {d['b']}, "
           f"confirmed->decision {d['c']}, total {d['total']}")
+    print(f"   T2 boundary R (Fable 1(b); mean min(1, s/4) over 'late' over-pressing phases): {s['t2_R']}")
     print(f"   mirror rule (press_ledger_audit 'late' on both outcomes; biased, descriptive): late over/moved "
           f"{s['mirror_late']['late']}, not late {s['mirror_late']['not_late']}")
 
@@ -335,6 +361,13 @@ def selftest():
         assert c["o3_chain"]["j2plus"] == 10 and c["o3_chain"]["j2plus_full"] == 10, c["o3_chain"]
         assert c["o3_chain"]["word"] == "CHAIN MISREAD", c["o3_chain"]
         assert c["o3_share_e1_2plus_among_over"] == [10, 10], c["o3_share_e1_2plus_among_over"]
+        # s / R: a 'top' 6 frames after each bottom (confirmed 8 after): deciding press 40 confirmed 44, top 46 -> s 2
+        topped = lambda plan: (lambda f: [[pf, 0, "bottom", pf + 4] for pf, b in plan if b != 3 and pf + 8 <= f]  # noqa
+                               + [[pf + 6, 0, "top", pf + 8] for pf, b in plan if b != 3 and pf + 10 <= f])
+        for s_ in range(4):
+            pla._write_episode(root / "lab" / "T" / "on" / pla.TASK / f"seed_{s_}", (2, 1), over_plan, topped(over_plan))
+        t = describe(run_episodes(f"{root / 'lab'}:T"))
+        assert t["t2_R"]["n_late_all"] == 4 and t["t2_R"]["R_late_all"] == 0.5 and t["t2_R"]["s_median_late"] == 2, t["t2_R"]
         flat = describe(run_episodes(f"{root / 'lab'}:S"))       # one row empty -> no reading
         assert flat["o1"]["word"].startswith("NO READING"), flat["o1"]
         assert abs(fisher_one_sided(5, 5, 5, 5) - 0.6719) < 1e-3

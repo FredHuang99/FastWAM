@@ -1,0 +1,72 @@
+Plan v17 readings registered in the repository 11-20 22:30 BJ (Opus), before any of these runs exists. Source: the Fable
+review of plan v16 (claude/MemWAM_Plan_v16_FableReview_20261120.md, sections 2.3-2.5 and part 1.3), taken over in full by
+the user at 20:47. The scripts that compute them are written before their runs start and quote this file; the words
+below do not change after that. T1 / T2 stay as registered in timing_verdict.py (fc1e8bf); their reading checks are in
+timing_meaning.py; T2b is registered in replan_verdict.py; O1 / O3 chain / R in press_timing_audit.py (eef1dd3 and later).
+
+================================================================================ W1 WAR (write-after-read model; training)
+Readiness checks (offline; ALL must pass before training starts):
+  R1 the map from joints to end-effector height is accepted by EVENTS, not by R^2: on the demos' measured joints the same
+     detector run on the mapped height and on the true height must pair presses one-to-one >= 99 %, confirmation frames
+     within 1 frame. Use forward kinematics when available instead of a fit.
+  R2 lead: the share of presses already readable at the committing decision must be >= 30 percentage points higher with
+     the in-flight entry than with the confirmed entry alone [threshold subjective, Fable]; otherwise no training, change
+     the in-flight rule first.
+  R3 no leak: the in-flight entry at anchor t depends only on actions executed before t; unit test: changing the labels
+     after t leaves it unchanged.
+  R4 consistency: in training the in-flight entry lives exactly as at test time (confirmed -> becomes the normal entry;
+     unconfirmed after 24 frames -> withdrawn), looking back 24 frames, not 8; write times on an 8-frame grid with a random
+     start phase.
+  R5 a small share of training samples with an in-flight entry that is later withdrawn.
+Evaluation: unseen scenes 51-100; two evaluation noises, 50 episodes each = 100 pairs; both sides pick epochs the same way.
+MAIN (first-button over-presses, the T1 / T2 / T2b metric):
+  over(W1) <= over(press_count) - 16/100 with p < 0.05 and under increase <= 8/100 -> WRITE-AFTER-READ HELPS
+  |over difference| <= 8/100                                                      -> NO EFFECT
+  over drop >= 16 and under increase > 8                                          -> FLIPS
+  otherwise                                                                       -> PARTIAL
+ATTRIBUTION (the same W1 model, evaluation only): in-flight entries switched off at test time;
+  over rises >= 8/50 with p < 0.05 -> GAIN IS FROM IN-FLIGHT;  <= 4 -> GAIN NOT FROM IN-FLIGHT.
+Paper wording: "the design works" only with HELPS and GAIN IS FROM IN-FLIGHT; "counting is fixed" additionally needs the
+first button right in more than half of the episodes and successes not below press_count.
+Reported only: successes; withdrawn in-flight entries per episode; e1 distribution. Floor: each cell >= 48/50.
+Precondition (gate G4b): trained only if T2b = REPLAN HELPS; its reference is then T2b (W1 must be better, or more
+stable under inference delay, card A1).
+
+================================================================================ S1 SLOW (slower demonstrations; method B)
+Precondition: T2b = REPLAN HELPS. Method B of plan v16 with D = 12 (the confirmed press frame copied D times in the
+training cache, later frames and event frames shifted); everything else as press_count.
+MAIN: same form and thresholds as W1 MAIN (S1 against press_count) -> SLOW HELPS / NO EFFECT / FLIPS / PARTIAL.
+Manipulation check: in closed loop the median interval between presses must be >= 6 frames longer than the baseline's,
+  else void (the model did not learn to pause).
+ATTRIBUTION (the S1 model, evaluation only): records delayed by D + 8 frames; over rises >= 8/50 with p < 0.05 ->
+  SLOW WORKS THROUGH MEMORY; <= 4 -> SLOW WORKS OTHERWISE (not evidence for the criterion).
+Reported only: episode length; hitting the step limit. Methods C: not done; A: reserve.
+
+================================================================================ A1 ASYNC (inference delay injected; evaluation only)
+Intervention: observation, memory read and computation start at frame t; the new actions take effect from t + d. During
+those d frames the later targets of the previous chunk keep executing (32 predicted, 8 used: there is room); the new chunk
+drops its first d targets and executes the next 8. d = 8 (d = 4 described only).
+Cells (press scenes 1-50, same noise, paired; each against its own d = 0 run): original model, original execution;
+original model + re-decision (the re-decision also takes effect d frames late); W1 model, original execution (its
+in-flight detection counts the old targets executed during the delay).
+Negative control: swap task, ledger model, d = 0 against d = 8.
+Per cell Delta = over(d=8) - over(d=0): Delta >= 8 with p < 0.05 -> DELAY HURTS; <= 4 -> DELAY TOLERATED; else UNDECIDED.
+Together: T2b = REPLAN HELPS and the re-decision cell DELAY TOLERATED -> EXECUTION ONLY; T2b = REPLAN HELPS and the
+re-decision cell DELAY HURTS -> CAPABILITY NEEDED (then the W1 cell DELAY TOLERATED -> the in-flight entry supplies the
+capability; DELAY HURTS -> an action prefix is needed too); T2b = REPLAN NO EFFECT -> the either-or does not apply.
+Floor: each cell >= 48/50; the swap control at d = 8 >= 45/50 successes, else the injection itself breaks execution:
+A1 void, first fix the chunk hand-over.
+Expectation (subjective, Fable): original DELAY HURTS; re-decision DELAY HURTS; swap unaffected.
+
+================================================================================ Gates
+G4-0 (11-20 night): press_timing_audit (O1 denominator, O5 decomposition, R); no line stops, priors only.
+G4a (11-21 morning): TIMING NOT CAUSAL stops the W1 / S1 engineering only if timing_meaning.py's three checks hold;
+  T2b runs regardless and decides.
+G4b (T2b): REPLAN NO EFFECT with the manipulation check passed -> W1 not trained, S1 not done, switch to the backup
+  thesis; REPLAN HELPS -> W1 trains (reference T2b).
+G4c (W1): PARTIAL -> no retraining, a second evaluation noise first; Monday evening only the direction is decided; title
+  and three contributions wait for G4d.
+G4d breadth (before the final claim): the thesis goes into the title only with (1) a dose-response within one task;
+  (2) the criterion's prediction verified on at least one other task; (3) the clock control "counts normally, collapses
+  under a pause"; (4) counting right in more than half of unseen scenes. Missing (2) or (4): the paper is positioned as
+  "finding + audit" and the design is one section.
