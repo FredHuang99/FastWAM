@@ -13374,6 +13374,929 @@ tasks:
   pass_if: "m['rc'] == 0"
 
 # ---------------------------------------------------------------------------------------------------------------
+# 11-20 17:40 BJ (Opus; plan v15 5.1 + 5.3; user 11-20 17:04 "可以迁移去a100，目前有3个gpu是空闲的"). The A40's 8 GPUs are
+# held by another user's jobs since ~10:00 BJ; E22a (P0; E21's time-code reading moves its 1024 level up) runs WHOLE on
+# the A100: every visible / hidden pair on the A100, shards interleaved vis / hid so pairs complete together; 256 first,
+# then 1024 (the 1024 cards also need the smoke's wall time <= 25 min, plan v15 E22a). The A40 copies are on hold. The
+# cells go to the A40 by the relay (e22_a100.sh pack / fetch); the registered e22_verdict.py --part a runs there unchanged,
+# next to the 64-frame cells of E5 / E1. Written before any E22a episode exists.
+- id: A100-fetch-ar2_clock-e30
+  lane: cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 12
+  hypothesis: "fetch the clock arm export ar2_clock_e30 (new H200, E5) from the relay for E22a on the A100 (sha256 checked)"
+  command: "RUN=ar2_clock TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A100-E22-smoke
+  lane: loop
+  kind: closed_loop
+  after: [A100-fetch-ar2_clock-e30]
+  requires_pass: [A100-fetch-ar2_clock-e30]
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "E22a smoke on the A100: clock e30, pause 1024 visible, swap scene 1 (one injection, all 1024 frames shown, validity logged; the wall time decides whether the 1024 level runs)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p1024_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "1", "--stress", "event:pause:1024:history"]
+  output: closed_loop/e22smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-smoke-check
+  lane: cpu
+  kind: shell
+  after: [A100-E22-smoke]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "E22a smoke check on the A100 (stress_smoke_check.py: one injection, 1024 frames shown, validity fields)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/stress_smoke_check.py e22smoke ar2_clock_e30_p1024_vis swap_blocks 1024"
+  pass_if: "m['rc'] == 0"
+
+- id: A100-E22-time1024
+  lane: cpu
+  kind: shell
+  after: [A100-E22-smoke-check]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "plan v15 E22a cost rule: the 1024-frame smoke episode must take <= 25 min wall (else the 1024 cards are skipped and a 768 level is written instead)"
+  command: "bash /workspace/FastWAM-memory2/scripts/fullft/e22_a100.sh time1024"
+  pass_if: "m['rc'] == 0"
+
+- id: A100-E22-clock-p256-vis-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 256 vis, swap_blocks scenes 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p256-hid-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 256 hid, swap_blocks scenes 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p256-vis-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 256 vis, swap_blocks scenes 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p256-hid-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 256 hid, swap_blocks scenes 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p256-vis-swap-s2
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 256 vis, swap_blocks scenes 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p256-hid-swap-s2
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 256 hid, swap_blocks scenes 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p256-vis-swap-s3
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 256 vis, swap_blocks scenes 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p256-hid-swap-s3
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 256 hid, swap_blocks scenes 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p256-vis-swap-s4
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 256 vis, swap_blocks scenes 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p256-hid-swap-s4
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 256 hid, swap_blocks scenes 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p256-vis-put-s0
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 256 vis, put_back_block scenes 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p256-hid-put-s0
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 256 hid, put_back_block scenes 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p256-vis-put-s1
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 256 vis, put_back_block scenes 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p256-hid-put-s1
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 256 hid, put_back_block scenes 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p256-vis-put-s2
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 256 vis, put_back_block scenes 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p256-hid-put-s2
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 256 hid, put_back_block scenes 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p256-vis-put-s3
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 256 vis, put_back_block scenes 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p256-hid-put-s3
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 256 hid, put_back_block scenes 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p256-vis-put-s4
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 256 vis, put_back_block scenes 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p256-hid-put-s4
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 256 hid, put_back_block scenes 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-ledger-p256-vis-put-s0
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_prop_e30, pause 256 vis, put_back_block scenes 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p256_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-ledger-p256-hid-put-s0
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_prop_e30, pause 256 hid, put_back_block scenes 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p256_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-ledger-p256-vis-put-s1
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_prop_e30, pause 256 vis, put_back_block scenes 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p256_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-ledger-p256-hid-put-s1
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_prop_e30, pause 256 hid, put_back_block scenes 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p256_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-ledger-p256-vis-put-s2
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_prop_e30, pause 256 vis, put_back_block scenes 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p256_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-ledger-p256-hid-put-s2
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_prop_e30, pause 256 hid, put_back_block scenes 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p256_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-ledger-p256-vis-put-s3
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_prop_e30, pause 256 vis, put_back_block scenes 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p256_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-ledger-p256-hid-put-s3
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_prop_e30, pause 256 hid, put_back_block scenes 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p256_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-ledger-p256-vis-put-s4
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_prop_e30, pause 256 vis, put_back_block scenes 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p256_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-ledger-p256-hid-put-s4
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check]
+  requires_pass: [A100-E22-smoke-check]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_prop_e30, pause 256 hid, put_back_block scenes 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p256_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:256:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p1024-vis-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check, A100-E22-time1024]
+  requires_pass: [A100-E22-smoke-check, A100-E22-time1024]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 1024 vis, swap_blocks scenes 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p1024_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:1024:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p1024-hid-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check, A100-E22-time1024]
+  requires_pass: [A100-E22-smoke-check, A100-E22-time1024]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 1024 hid, swap_blocks scenes 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p1024_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:1024:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p1024-vis-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check, A100-E22-time1024]
+  requires_pass: [A100-E22-smoke-check, A100-E22-time1024]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 1024 vis, swap_blocks scenes 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p1024_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:1024:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p1024-hid-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check, A100-E22-time1024]
+  requires_pass: [A100-E22-smoke-check, A100-E22-time1024]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 1024 hid, swap_blocks scenes 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p1024_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:1024:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p1024-vis-swap-s2
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check, A100-E22-time1024]
+  requires_pass: [A100-E22-smoke-check, A100-E22-time1024]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 1024 vis, swap_blocks scenes 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p1024_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:1024:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p1024-hid-swap-s2
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check, A100-E22-time1024]
+  requires_pass: [A100-E22-smoke-check, A100-E22-time1024]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 1024 hid, swap_blocks scenes 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p1024_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:1024:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p1024-vis-swap-s3
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check, A100-E22-time1024]
+  requires_pass: [A100-E22-smoke-check, A100-E22-time1024]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 1024 vis, swap_blocks scenes 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p1024_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:1024:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p1024-hid-swap-s3
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check, A100-E22-time1024]
+  requires_pass: [A100-E22-smoke-check, A100-E22-time1024]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 1024 hid, swap_blocks scenes 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p1024_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:1024:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p1024-vis-swap-s4
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check, A100-E22-time1024]
+  requires_pass: [A100-E22-smoke-check, A100-E22-time1024]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 1024 vis, swap_blocks scenes 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p1024_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:1024:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-clock-p1024-hid-swap-s4
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check, A100-E22-time1024]
+  requires_pass: [A100-E22-smoke-check, A100-E22-time1024]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_clock_e30, pause 1024 hid, swap_blocks scenes 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p1024_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:1024:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-ledger-p1024-vis-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check, A100-E22-time1024]
+  requires_pass: [A100-E22-smoke-check, A100-E22-time1024]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_prop_e30, pause 1024 vis, swap_blocks scenes 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p1024_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:1024:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-ledger-p1024-hid-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check, A100-E22-time1024]
+  requires_pass: [A100-E22-smoke-check, A100-E22-time1024]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_prop_e30, pause 1024 hid, swap_blocks scenes 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p1024_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:1024:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-ledger-p1024-vis-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check, A100-E22-time1024]
+  requires_pass: [A100-E22-smoke-check, A100-E22-time1024]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_prop_e30, pause 1024 vis, swap_blocks scenes 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p1024_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:1024:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-ledger-p1024-hid-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check, A100-E22-time1024]
+  requires_pass: [A100-E22-smoke-check, A100-E22-time1024]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_prop_e30, pause 1024 hid, swap_blocks scenes 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p1024_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:1024:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-ledger-p1024-vis-swap-s2
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check, A100-E22-time1024]
+  requires_pass: [A100-E22-smoke-check, A100-E22-time1024]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_prop_e30, pause 1024 vis, swap_blocks scenes 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p1024_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:1024:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-ledger-p1024-hid-swap-s2
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check, A100-E22-time1024]
+  requires_pass: [A100-E22-smoke-check, A100-E22-time1024]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_prop_e30, pause 1024 hid, swap_blocks scenes 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p1024_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:1024:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-ledger-p1024-vis-swap-s3
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check, A100-E22-time1024]
+  requires_pass: [A100-E22-smoke-check, A100-E22-time1024]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_prop_e30, pause 1024 vis, swap_blocks scenes 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p1024_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:1024:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-ledger-p1024-hid-swap-s3
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check, A100-E22-time1024]
+  requires_pass: [A100-E22-smoke-check, A100-E22-time1024]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_prop_e30, pause 1024 hid, swap_blocks scenes 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p1024_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:1024:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-ledger-p1024-vis-swap-s4
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check, A100-E22-time1024]
+  requires_pass: [A100-E22-smoke-check, A100-E22-time1024]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_prop_e30, pause 1024 vis, swap_blocks scenes 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p1024_vis
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:1024:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-ledger-p1024-hid-swap-s4
+  lane: loop
+  kind: closed_loop
+  after: [A100-E22-smoke-check, A100-E22-time1024]
+  requires_pass: [A100-E22-smoke-check, A100-E22-time1024]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "plan v15 E22a (registered by Fable 11-19 noon; reading in scripts/fullft/e22_verdict.py --part a, written before any E22 run): E1's injection point and validity, vis vs hid paired; per task: clock Delta <= -8/50 with p < 0.05 and the ledger's Delta at its largest level >= -5 -> INDEX MATTERS AT L; clock >= -5 at every level -> NO DOSE EFFECT; ledger <= -8 with p < 0.05 -> LEDGER ALSO HURT; else PARTIAL; floors valid pairs >= 45, hidden >= 45/50. MOVED WHOLE to the A100 (plan v15 5.1; user 11-20 17:04: the A40 is full with another user's jobs); the verdict stays on the A40 (cells arrive by e22_a100.sh). This card: ar2_prop_e30, pause 1024 hid, swap_blocks scenes 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p1024_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:1024:history"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22-pack-256
+  lane: cpu
+  kind: shell
+  after: [A100-E22-clock-p256-vis-swap-s0, A100-E22-clock-p256-hid-swap-s0, A100-E22-clock-p256-vis-swap-s1, A100-E22-clock-p256-hid-swap-s1, A100-E22-clock-p256-vis-swap-s2, A100-E22-clock-p256-hid-swap-s2, A100-E22-clock-p256-vis-swap-s3, A100-E22-clock-p256-hid-swap-s3, A100-E22-clock-p256-vis-swap-s4, A100-E22-clock-p256-hid-swap-s4, A100-E22-clock-p256-vis-put-s0, A100-E22-clock-p256-hid-put-s0, A100-E22-clock-p256-vis-put-s1, A100-E22-clock-p256-hid-put-s1, A100-E22-clock-p256-vis-put-s2, A100-E22-clock-p256-hid-put-s2, A100-E22-clock-p256-vis-put-s3, A100-E22-clock-p256-hid-put-s3, A100-E22-clock-p256-vis-put-s4, A100-E22-clock-p256-hid-put-s4, A100-E22-ledger-p256-vis-put-s0, A100-E22-ledger-p256-hid-put-s0, A100-E22-ledger-p256-vis-put-s1, A100-E22-ledger-p256-hid-put-s1, A100-E22-ledger-p256-vis-put-s2, A100-E22-ledger-p256-hid-put-s2, A100-E22-ledger-p256-vis-put-s3, A100-E22-ledger-p256-hid-put-s3, A100-E22-ledger-p256-vis-put-s4, A100-E22-ledger-p256-hid-put-s4]
+  need_mib: 0
+  timeout_h: 3
+  hypothesis: "E22a 256-frame cells of the A100 -> relay diag/e22_a100 (e22_a100.sh pack 256) for the A40's verdict card"
+  command: "bash /workspace/FastWAM-memory2/scripts/fullft/e22_a100.sh pack 256"
+  pass_if: "m['rc'] == 0"
+
+- id: A100-E22-pack-all
+  lane: cpu
+  kind: shell
+  after: [A100-E22-clock-p256-vis-swap-s0, A100-E22-clock-p256-hid-swap-s0, A100-E22-clock-p256-vis-swap-s1, A100-E22-clock-p256-hid-swap-s1, A100-E22-clock-p256-vis-swap-s2, A100-E22-clock-p256-hid-swap-s2, A100-E22-clock-p256-vis-swap-s3, A100-E22-clock-p256-hid-swap-s3, A100-E22-clock-p256-vis-swap-s4, A100-E22-clock-p256-hid-swap-s4, A100-E22-clock-p256-vis-put-s0, A100-E22-clock-p256-hid-put-s0, A100-E22-clock-p256-vis-put-s1, A100-E22-clock-p256-hid-put-s1, A100-E22-clock-p256-vis-put-s2, A100-E22-clock-p256-hid-put-s2, A100-E22-clock-p256-vis-put-s3, A100-E22-clock-p256-hid-put-s3, A100-E22-clock-p256-vis-put-s4, A100-E22-clock-p256-hid-put-s4, A100-E22-ledger-p256-vis-put-s0, A100-E22-ledger-p256-hid-put-s0, A100-E22-ledger-p256-vis-put-s1, A100-E22-ledger-p256-hid-put-s1, A100-E22-ledger-p256-vis-put-s2, A100-E22-ledger-p256-hid-put-s2, A100-E22-ledger-p256-vis-put-s3, A100-E22-ledger-p256-hid-put-s3, A100-E22-ledger-p256-vis-put-s4, A100-E22-ledger-p256-hid-put-s4, A100-E22-clock-p1024-vis-swap-s0, A100-E22-clock-p1024-hid-swap-s0, A100-E22-clock-p1024-vis-swap-s1, A100-E22-clock-p1024-hid-swap-s1, A100-E22-clock-p1024-vis-swap-s2, A100-E22-clock-p1024-hid-swap-s2, A100-E22-clock-p1024-vis-swap-s3, A100-E22-clock-p1024-hid-swap-s3, A100-E22-clock-p1024-vis-swap-s4, A100-E22-clock-p1024-hid-swap-s4, A100-E22-ledger-p1024-vis-swap-s0, A100-E22-ledger-p1024-hid-swap-s0, A100-E22-ledger-p1024-vis-swap-s1, A100-E22-ledger-p1024-hid-swap-s1, A100-E22-ledger-p1024-vis-swap-s2, A100-E22-ledger-p1024-hid-swap-s2, A100-E22-ledger-p1024-vis-swap-s3, A100-E22-ledger-p1024-hid-swap-s3, A100-E22-ledger-p1024-vis-swap-s4, A100-E22-ledger-p1024-hid-swap-s4]
+  need_mib: 0
+  timeout_h: 3
+  hypothesis: "all E22a cells of the A100 -> relay diag/e22_a100 (e22_a100.sh pack all) for the A40's verdict card"
+  command: "bash /workspace/FastWAM-memory2/scripts/fullft/e22_a100.sh pack all"
+  pass_if: "m['rc'] == 0"
+
+# ---------------------------------------------------------------------------------------------------------------
 # 11-19 08:50 BJ (Opus, plan v14 E14 step 1 + E17; user approved 18:33; written before any press model ran on the A40 and
 # before the writer scan ran on any data). (a) E14's writer is chosen from the press demos on the A40 (CPU): the demos are
 # downloaded first (press/fetch.py, pinned revision); press_writer_scan.py puts the chosen plug-in writer on the relay
@@ -18166,6 +19089,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache", MWAM_CLOCK: "off"}
 
 - id: A40-E22-clock-p256-vis-swap-s0
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18183,6 +19107,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p256-vis-swap-s1
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18200,6 +19125,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p256-vis-swap-s2
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18217,6 +19143,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p256-vis-swap-s3
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18234,6 +19161,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p256-vis-swap-s4
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18251,6 +19179,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p256-hid-swap-s0
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18268,6 +19197,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p256-hid-swap-s1
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18285,6 +19215,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p256-hid-swap-s2
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18302,6 +19233,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p256-hid-swap-s3
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18319,6 +19251,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p256-hid-swap-s4
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18336,6 +19269,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p256-vis-put-s0
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18353,6 +19287,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p256-vis-put-s1
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18370,6 +19305,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p256-vis-put-s2
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18387,6 +19323,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p256-vis-put-s3
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18404,6 +19341,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p256-vis-put-s4
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18421,6 +19359,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p256-hid-put-s0
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18438,6 +19377,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p256-hid-put-s1
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18455,6 +19395,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p256-hid-put-s2
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18472,6 +19413,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p256-hid-put-s3
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18489,6 +19431,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p256-hid-put-s4
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18506,6 +19449,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-ledger-p256-vis-put-s0
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18523,6 +19467,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-ledger-p256-vis-put-s1
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18540,6 +19485,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-ledger-p256-vis-put-s2
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18557,6 +19503,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-ledger-p256-vis-put-s3
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18574,6 +19521,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-ledger-p256-vis-put-s4
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18591,6 +19539,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-ledger-p256-hid-put-s0
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18608,6 +19557,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-ledger-p256-hid-put-s1
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18625,6 +19575,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-ledger-p256-hid-put-s2
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18642,6 +19593,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-ledger-p256-hid-put-s3
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -18659,6 +19611,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-ledger-p256-hid-put-s4
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -19760,6 +20713,7 @@ tasks:
 
 # 11-19 15:00 (Opus, plan v15): E22a at 1024 frames (P1), E22b (P1), then the verdict cards of E21 / E22.
 - id: A40-E22-clock-p1024-vis-swap-s0
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -19777,6 +20731,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p1024-vis-swap-s1
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -19794,6 +20749,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p1024-vis-swap-s2
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -19811,6 +20767,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p1024-vis-swap-s3
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -19828,6 +20785,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p1024-vis-swap-s4
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -19845,6 +20803,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p1024-hid-swap-s0
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -19862,6 +20821,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p1024-hid-swap-s1
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -19879,6 +20839,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p1024-hid-swap-s2
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -19896,6 +20857,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p1024-hid-swap-s3
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -19913,6 +20875,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-clock-p1024-hid-swap-s4
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -19930,6 +20893,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-ledger-p1024-vis-swap-s0
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -19947,6 +20911,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-ledger-p1024-vis-swap-s1
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -19964,6 +20929,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-ledger-p1024-vis-swap-s2
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -19981,6 +20947,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-ledger-p1024-vis-swap-s3
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -19998,6 +20965,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-ledger-p1024-vis-swap-s4
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -20015,6 +20983,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-ledger-p1024-hid-swap-s0
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -20032,6 +21001,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-ledger-p1024-hid-swap-s1
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -20049,6 +21019,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-ledger-p1024-hid-swap-s2
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -20066,6 +21037,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-ledger-p1024-hid-swap-s3
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -20083,6 +21055,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-E22-ledger-p1024-hid-swap-s4
+  hold: true
   lane: a40
   kind: closed_loop
   after: []
@@ -20619,10 +21592,28 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e21_verdict.py"
   pass_if: "m['rc'] == 0"
 
+- id: A40-E22a-fetch-256
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 96
+  hypothesis: "E22a 256-frame cells from the A100 (moved whole, plan v15 5.1, user 11-20 17:04): e22_a100.sh fetch 256 (sha256; same first 50 seeds on both machines, else nothing unpacked)"
+  command: "bash /workspace/FastWAM-memory2/scripts/fullft/e22_a100.sh fetch 256"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-E22a-fetch-all
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 120
+  hypothesis: "all E22a cells from the A100 (moved whole, plan v15 5.1, user 11-20 17:04): e22_a100.sh fetch all"
+  command: "bash /workspace/FastWAM-memory2/scripts/fullft/e22_a100.sh fetch all"
+  pass_if: "m['rc'] == 0"
+
 - id: A40-E22a-verdict-256
   lane: a40cpu
   kind: shell
-  after: [A40-E22-clock-p256-vis-swap-s0, A40-E22-clock-p256-vis-swap-s1, A40-E22-clock-p256-vis-swap-s2, A40-E22-clock-p256-vis-swap-s3, A40-E22-clock-p256-vis-swap-s4, A40-E22-clock-p256-hid-swap-s0, A40-E22-clock-p256-hid-swap-s1, A40-E22-clock-p256-hid-swap-s2, A40-E22-clock-p256-hid-swap-s3, A40-E22-clock-p256-hid-swap-s4, A40-E22-clock-p256-vis-put-s0, A40-E22-clock-p256-vis-put-s1, A40-E22-clock-p256-vis-put-s2, A40-E22-clock-p256-vis-put-s3, A40-E22-clock-p256-vis-put-s4, A40-E22-clock-p256-hid-put-s0, A40-E22-clock-p256-hid-put-s1, A40-E22-clock-p256-hid-put-s2, A40-E22-clock-p256-hid-put-s3, A40-E22-clock-p256-hid-put-s4, A40-E22-ledger-p256-vis-put-s0, A40-E22-ledger-p256-vis-put-s1, A40-E22-ledger-p256-vis-put-s2, A40-E22-ledger-p256-vis-put-s3, A40-E22-ledger-p256-vis-put-s4, A40-E22-ledger-p256-hid-put-s0, A40-E22-ledger-p256-hid-put-s1, A40-E22-ledger-p256-hid-put-s2, A40-E22-ledger-p256-hid-put-s3, A40-E22-ledger-p256-hid-put-s4]
+  after: [A40-E22a-fetch-256]
   need_mib: 0
   timeout_h: 1
   hypothesis: "E22a verdict with the 256-frame cells (the 1024 cells may still be WAIT; registered reading in e22_verdict.py --part a)"
@@ -20632,7 +21623,7 @@ tasks:
 - id: A40-E22a-verdict
   lane: a40cpu
   kind: shell
-  after: [A40-E22-clock-p256-vis-swap-s0, A40-E22-clock-p256-vis-swap-s1, A40-E22-clock-p256-vis-swap-s2, A40-E22-clock-p256-vis-swap-s3, A40-E22-clock-p256-vis-swap-s4, A40-E22-clock-p256-hid-swap-s0, A40-E22-clock-p256-hid-swap-s1, A40-E22-clock-p256-hid-swap-s2, A40-E22-clock-p256-hid-swap-s3, A40-E22-clock-p256-hid-swap-s4, A40-E22-clock-p256-vis-put-s0, A40-E22-clock-p256-vis-put-s1, A40-E22-clock-p256-vis-put-s2, A40-E22-clock-p256-vis-put-s3, A40-E22-clock-p256-vis-put-s4, A40-E22-clock-p256-hid-put-s0, A40-E22-clock-p256-hid-put-s1, A40-E22-clock-p256-hid-put-s2, A40-E22-clock-p256-hid-put-s3, A40-E22-clock-p256-hid-put-s4, A40-E22-ledger-p256-vis-put-s0, A40-E22-ledger-p256-vis-put-s1, A40-E22-ledger-p256-vis-put-s2, A40-E22-ledger-p256-vis-put-s3, A40-E22-ledger-p256-vis-put-s4, A40-E22-ledger-p256-hid-put-s0, A40-E22-ledger-p256-hid-put-s1, A40-E22-ledger-p256-hid-put-s2, A40-E22-ledger-p256-hid-put-s3, A40-E22-ledger-p256-hid-put-s4, A40-E22-clock-p1024-vis-swap-s0, A40-E22-clock-p1024-vis-swap-s1, A40-E22-clock-p1024-vis-swap-s2, A40-E22-clock-p1024-vis-swap-s3, A40-E22-clock-p1024-vis-swap-s4, A40-E22-clock-p1024-hid-swap-s0, A40-E22-clock-p1024-hid-swap-s1, A40-E22-clock-p1024-hid-swap-s2, A40-E22-clock-p1024-hid-swap-s3, A40-E22-clock-p1024-hid-swap-s4, A40-E22-ledger-p1024-vis-swap-s0, A40-E22-ledger-p1024-vis-swap-s1, A40-E22-ledger-p1024-vis-swap-s2, A40-E22-ledger-p1024-vis-swap-s3, A40-E22-ledger-p1024-vis-swap-s4, A40-E22-ledger-p1024-hid-swap-s0, A40-E22-ledger-p1024-hid-swap-s1, A40-E22-ledger-p1024-hid-swap-s2, A40-E22-ledger-p1024-hid-swap-s3, A40-E22-ledger-p1024-hid-swap-s4]
+  after: [A40-E22a-fetch-all]
   need_mib: 0
   timeout_h: 1
   hypothesis: "E22a verdict, all levels (registered reading in e22_verdict.py --part a)"

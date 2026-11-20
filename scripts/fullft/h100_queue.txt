@@ -50,7 +50,10 @@ swapT_arprop | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/de
 # if E2_PREDICTIONS_REGISTERED.txt states rule R's hit rule, that one counts): count >= ledger + 10/100 with sign
 # p < 0.05 -> R HIT; |diff| <= 5/100 -> R MISS; otherwise undecided. Floor: battery_arprop <= 90/100 (not saturated)
 # and at least one of the two >= 30/100.
-battery_count | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_battery_try_v1] data.tasks=[battery_try] history.variant=arprop history.event_max=32 history.lag=4 history.ordinal=16 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_battery_try.json] | test -f outputs/memory_v2/press/dense_battery_try_v1/.verified && test -f outputs/fullft/events/events_battery_try.json && bash scripts/fullft/h100_v15_ready.sh battery_count
+# 11-20 17:04 user: E15 STOPPED (its floor can no longer be met: battery AR and ledger are both 91/100). h100_v15b.sh
+# yields it gracefully (resume.pt kept); this line now also waits for outputs/fullft/GO_battery_count (touch it to
+# resume). Its GPU goes to rearrange_arprop / swapT_arprop, re-queued after the 11-19 double-launch losses.
+battery_count | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_battery_try_v1] data.tasks=[battery_try] history.variant=arprop history.event_max=32 history.lag=4 history.ordinal=16 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_battery_try.json] | test -f outputs/fullft/GO_battery_count && test -f outputs/memory_v2/press/dense_battery_try_v1/.verified && test -f outputs/fullft/events/events_battery_try.json && bash scripts/fullft/h100_v15_ready.sh battery_count
 #
 # plan v14 E16 C-test: rearrange single-task clock arm (as E5: AR + 32 proprio tokens uniform over the elapsed time,
 # each with a timestamp; history.variant=arclk). Registered reading (plan v14 section 3 E16, before any result; A40):

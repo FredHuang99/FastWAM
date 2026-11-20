@@ -54,15 +54,27 @@ watching() {      # an export_watch.sh for run $1 is alive (also one started by 
   done
   return 1
 }
-free_gpu() {      # prints the first free GPU (1-minute rule), else returns 1
+claimed() {       # GPU $1 was claimed by a pick in the last 10 min (a stale claim is removed)
+  local c=$OUT/H100_CLAIM_$1
+  [ -d $c ] || return 1
+  [ $(( $(date +%s) - $(stat -c %Y $c) )) -lt 600 ] && return 0
+  rmdir $c 2>/dev/null; return 1
+}
+free_gpu() {      # prints the first free GPU (1-minute rule) and CLAIMS it, else returns 1
+  # 11-20 fix: the main loop and a launcher's resumed retry both look for a free GPU; on 11-19 both picked the same
+  # GPU three times within a minute and both trainers ran out of memory (rearrange_arprop, swapT_arprop lost). The
+  # claim is an atomic mkdir after the looks: the second picker fails the mkdir and goes on to the next GPU. It lapses
+  # after 10 min (the trainer holds > 1000 MiB long before that, and QUEUE_GPU marks it ours).
   local g k
   for g in $GPUS; do
     ours_on $g && continue
     held $g && continue
+    claimed $g && continue
     for k in 1 2 3; do
       [ "$(used $g)" -lt 1000 ] || continue 2
       [ $k -lt 3 ] && sleep 30
     done
+    mkdir $OUT/H100_CLAIM_$g 2>/dev/null || continue
     echo $g; return 0
   done
   return 1
