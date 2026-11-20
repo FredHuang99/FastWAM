@@ -37,7 +37,8 @@ PY=${PY:-/opt/mwam/bin/python}
 echo "[h100q] $(date '+%F %T') start; checkout $(git -c safe.directory='*' log --oneline -1 | cut -c1-60); queue $QF; GPUs $GPUS"
 
 used() { nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i $1 | tr -d ' '; }
-alive() { [ -f "$1" ] && kill -0 "$(cut -d' ' -f2 "$1")" 2>/dev/null; }
+live() { kill -0 "$1" 2>/dev/null && [ "$(awk '{print $3}' /proc/$1/stat 2>/dev/null)" != Z ]; }   # a zombie (exited, not reaped: 11-20 yield) is not alive
+alive() { [ -f "$1" ] && live "$(cut -d' ' -f2 "$1")"; }
 ours_on() { local f; for f in $OUT/*/QUEUE_GPU; do alive "$f" && [ "$(cut -d' ' -f1 "$f")" = "$1" ] && return 0; done; return 1; }
 running() { local f n=0; for f in $OUT/*/QUEUE_GPU; do alive "$f" && n=$((n + 1)); done; echo $n; }
 held() {          # GPU $1 is frozen for another user (explicit h100_yield.sh hold) until H100_HOLD_<gpu>; expired go

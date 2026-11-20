@@ -25,7 +25,8 @@ OUT=$R/outputs/fullft
 QF=${QF:-$R/scripts/fullft/h100_queue.txt}
 GPUS=${GPUS:-"0 1 2 3"}
 WAIT_MIN=${WAIT_MIN:-40}
-alive() { [ -f "$1" ] && kill -0 "$(cut -d' ' -f2 "$1")" 2>/dev/null; }
+live() { kill -0 "$1" 2>/dev/null && [ "$(awk '{print $3}' /proc/$1/stat 2>/dev/null)" != Z ]; }   # a zombie (exited, not reaped: 11-20 yield) is not alive
+alive() { [ -f "$1" ] && live "$(cut -d' ' -f2 "$1")"; }
 run_on() { local f; for f in $OUT/*/QUEUE_GPU; do alive "$f" && [ "$(cut -d' ' -f1 "$f")" = "$1" ] && basename "$(dirname "$f")"; done; }
 progress() { grep -ao 'u [0-9]*/[0-9]*' $OUT/QUEUE_$1.log 2>/dev/null | tail -1; }
 used() { nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i $1 2>/dev/null | tr -d ' '; }
@@ -88,11 +89,11 @@ kill $sub 2>/dev/null                       # its launcher would retry the stopp
 touch $OUT/$run/STOP
 echo "[yield] $(date '+%F %T') STOP written; waiting for the checkpoint and the exit (at most $WAIT_MIN min)"
 for i in $(seq 1 $(( WAIT_MIN * 6 ))); do
-  kill -0 $tr 2>/dev/null || break
+  live $tr || break
   [ $(( i % 12 )) = 0 ] && echo "[yield] $(date '+%T') still saving / running: $(tail -n 1 $OUT/QUEUE_$run.log | cut -c1-150)"
   sleep 10
 done
-if kill -0 $tr 2>/dev/null; then
+if live $tr; then
   echo "[yield] the trainer has not exited after $WAIT_MIN min; it keeps GPU $g. STOP stays (it will stop at its next"
   echo "        update); look at $OUT/QUEUE_$run.log, then run this again"
   exit 1
