@@ -301,6 +301,34 @@ class FullPolicy:
                 "token_budget": os.environ.get("MWAM_BUDGET", ""), "event_frames": os.environ.get("MWAM_EVFRAMES", "")}
 
 
+def oracle_presses(raw: Dict[int, dict], current: int) -> List[dict]:
+    """Plan v18 Z0 (11-21): the press entries an oracle writer would give, from the simulator's own counters
+    (observation['task_counts'], sent only when the job has oracle_counts; MWAM_LEDGER=oracle sets it). A press of
+    button 1 / 2 that the counter shows first at observation f becomes a 'bottom' entry with frame f - 1 (the step
+    that pressed it) and confirmed f, so the first decision at or after f reads it (zero writing delay). The pressing
+    arm is the one whose end effector is nearest the button in x, y at f (as press_ledger_audit). The confirm button
+    is left out (the trained ledger never holds it). Detector 'bottom' entries are replaced by these; other kinds stay."""
+    import math
+    out, prev = [], None
+    for f in range(current + 1):
+        r = raw.get(f) or {}
+        counts = r.get("task_counts")
+        if counts is None:
+            raise ValueError("MWAM_LEDGER=oracle needs observations with task_counts (the job's oracle_counts)")
+        if prev is not None:
+            for k, name in ((1, "press_cnt_1"), (2, "press_cnt_2")):
+                for _ in range(max(0, int(counts.get(name, 0)) - int(prev.get(name, 0)))):
+                    button = (r.get("task_buttons") or {}).get(f"button{k}")
+                    pose = r.get("endpose") or {}
+                    arm = 0
+                    if button and pose.get("left") and pose.get("right"):
+                        d = [math.dist(pose[s][:2], button[:2]) for s in ("left", "right")]
+                        arm = 0 if d[0] <= d[1] else 1
+                    out.append({"frame": f - 1, "arm": arm, "kind": "bottom", "confirmed": f, "oracle": k})
+        prev = counts
+    return out
+
+
 def visible_events(events: List[dict], hide_after: Optional[int]) -> List[dict]:
     """Plan v17 T2b blind arm: the events whose entry was confirmed at or before `hide_after` (the previous decision's
     frame); None (every other run) returns the list itself, unchanged."""
@@ -436,7 +464,10 @@ class FullSession:
                                                                        # provisional entries (none when off)
                     entries = ledger_entries(self.rule, current, evs)
                     mode = os.environ.get("MWAM_LEDGER", "").strip().lower()      # 11-14: test-time ablations
-                    if mode == "off":
+                    if mode == "oracle":                 # 11-21 plan v18 Z0: zero-delay write of the TRUE presses
+                        evs_o = [e for e in evs if e.get("kind") != "bottom"] + oracle_presses(self.raw, current)
+                        entries = ledger_entries(self.rule, current, evs_o)
+                    elif mode == "off":
                         entries = []                     # no entry = what the model sees before the first event
                     elif mode == "drop1":
                         entries = entries[:-1]           # the most recent event withheld: one event fewer counted
@@ -457,7 +488,7 @@ class FullSession:
                         entries = ordinal_counterfactual(full, mode)[-int(p.rule.event_max):]
                     elif mode:
                         raise ValueError(f"unknown MWAM_LEDGER mode {mode!r} (off | drop1 | dropfirst | addmove | freezeK | "
-                                         "addpress | droppress | ordplus1 | duppress)")
+                                         "addpress | droppress | ordplus1 | duppress | oracle)")
                     budget = token_budget()                      # 11-19 plan v15 E22b: only the last K entries
                     if budget:
                         entries = entries[-budget:]

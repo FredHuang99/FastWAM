@@ -655,7 +655,9 @@ def run_episode(policy: Policy, scene: dict, mode: str, label: str, out: Path, a
                                    "execute": rpc_execute, "candidates": int(args.candidates),
                                    "coherence": args.coherence, "noise": args.noise,
                                    "policy": policy.describe(), "label": label, "stress": stress,
-                                   **({"replan": replan, "period": int(args.execute)} if replan else {})})
+                                   **({"replan": replan, "period": int(args.execute)} if replan else {}),
+                                   **({"oracle_counts": True} if os.environ.get("MWAM_LEDGER", "").strip().lower()
+                                      == "oracle" else {})})
     target_limit = min(limit, args.max_targets) if args.max_targets else limit
     session_cls = getattr(policy, "session_cls", None) or Session        # fullft exports bring their own session
     session = session_cls(policy, directory, mode, args.steps, args.guidance, args.dependence,

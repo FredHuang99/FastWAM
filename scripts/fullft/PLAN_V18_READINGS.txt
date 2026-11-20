@@ -1,0 +1,31 @@
+Plan v18 readings, registered 11-21 01:35 BJ (Opus; the user approved at 00:58), before any Z0 / N0 episode exists.
+
+================================================================================ Reading method from plan v18 on
+(the user asked at 00:53 why registered readings keep coming back unsatisfying; Opus' answer, approved at 00:58)
+1 Competing explanations first (at least two, plus "nothing"); for every experiment write what each predicts; run only
+  experiments whose predictions differ. (T1's late side did not discriminate: every explanation predicted LATE HURTS.)
+2 Measure the noise first: the same scenes again with other diffusion noise give the zero-effect band of each metric.
+3 Effect size with a 95 % confidence interval against the smallest effect that matters (SESOI, set from what the paper
+  needs), three outcomes only: clearly yes (the interval beyond the SESOI), clearly no (the interval inside it),
+  uncertain (the interval crosses it) -> a pre-set extension (how many more episodes), written before the run.
+4 Metrics close to the mechanism (extra presses, presses made with the full count in the ledger); success and other
+  binary episode outcomes are descriptive.
+5 Dose-response over a single cut-off where possible.
+6 Zero-compute checks before an experiment is run: does the intervention move the quantity it is meant to move? (The
+  delay decomposition showed T2b could shorten the record delay by about one frame only.)
+Readings registered before 11-21 keep their words (T1, T2, O1, O3, swap lag, W1 / S1 / A1 texts); they are read with
+this method's eyes in the reports, never re-judged.
+
+================================================================================ Changes approved 00:58
+- T2b (replan_verdict.py, replan_eval_5090.sh) is WITHDRAWN before any T2b episode ran: by O5 it could shorten the delay
+  by about one frame (median), so it cannot discriminate. The code stays in the repository, unused.
+- W1 is PAUSED (no code): the earlier write (prov, 12 -> 8 frames) changed nothing; an in-flight entry would be earlier
+  still but by the same logic is not expected to help before Z0 says otherwise. S1 stays paused (its precondition was T2b).
+- Z0 ORACLE replaces T2b; N0 noise calibration added. Readings: scripts/fullft/oracle_verdict.py (Z0, in full) and
+  scripts/fullft/noise_band.py (N0, descriptive). Chain: scripts/fullft/oracle_eval_5090.sh.
+
+================================================================================ Z0 ORACLE (summary; the header of oracle_verdict.py is the text)
+Press entries from the simulator's true counters, readable from the observation that shows the press. Scenes 1-100
+against g1 + sel. D = over-press rate difference, paired bootstrap 95 % CI, SESOI = half of the baseline rate:
+>= HALF / PART / DOES NOT EXPLAIN / UNCERTAIN (-> pre-set extension: the same on 1-100 with noise r2, 200 pairs).
+Manipulation check: delay <= 7 frames. Floor 95 pairs.

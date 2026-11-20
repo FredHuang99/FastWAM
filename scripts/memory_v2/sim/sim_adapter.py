@@ -139,6 +139,12 @@ def main():
             pose = ee_poses(environment)
             if pose is not None:
                 item['endpose'] = pose
+            if job.get('oracle_counts'):                   # 11-21 plan v18 Z0: the true press counters (oracle ledger)
+                state = task_state(environment)
+                item['task_counts'] = {k: state[k] for k in ('press_cnt_1', 'press_cnt_2', 'press_cnt_check_button')
+                                       if k in state}
+                item['task_buttons'] = {b: state[b]['p'] for b in ('button1', 'button2')
+                                        if isinstance(state.get(b), dict) and 'p' in state[b]}
             return item
 
         def request(self, environment, command):
