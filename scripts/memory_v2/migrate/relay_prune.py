@@ -7,9 +7,10 @@ Deleted:
   repos hhyfred/memwam-h100-migration-v1, hhyfred/memwam-5090-delta-v1 (one-time transfers)       -> delete_repo
   hhyfred/memwam-fullft: every file under exports/ and ckpt/ that is in the 5090 mirror manifest  -> removed from the
       current revision AND its LFS objects permanently deleted (else they keep counting against storage)
-Guard (per file, before anything is deleted): its entry in /mnt/hf/relay_mirror/MIRROR_MANIFEST.json must be checked:
-  copied by relay_mirror.py with sha256 = HF's, or held on the 5090 already: then its sha256 is computed here
-  (always, ~500 GB, minutes) and must equal HF's; files without an LFS sha256 (small text) by size. Files
+Guard (per file, before anything is deleted): its entry in /mnt/hf/relay_mirror/MIRROR_MANIFEST.json must be
+  finalized (relay_mirror.py --finalize: its own file under the mirror folder, sha256 = HF's), the file must still be
+  there with HF's size, and its sha256 is computed again here and must equal HF's current one (files without an LFS
+  sha256, i.e. small text, by size). Files
   uploaded after the mirror ran (e.g. the backlog exports) are not in the manifest and are never touched.
 One unchecked or different file -> nothing at all is deleted (exit 2).
 The token is read by huggingface_hub from the container's login, never printed.
@@ -54,9 +55,19 @@ def main():
     print(f"[prune] {'DELETING' if args.yes else 'dry run'}; mirror manifest {MANIFEST} ({len(man)} entries)", flush=True)
     plan = {}                                                        # repo -> [(path, size, sha)]
     kept_sha = set()                                                 # LFS objects still used by kept fullft files
+    gone = set()
     for rid in DELETE_REPOS + (FULLFT,):
         rows = []
-        for f in api.list_repo_tree(rid, recursive=True):
+        try:
+            tree = list(api.list_repo_tree(rid, recursive=True))
+        except Exception as e:                                      # noqa: BLE001
+            if rid in DELETE_REPOS and ("404" in str(e) or "NotFound" in type(e).__name__):
+                print(f"[prune] {rid}: does not exist (deleted before)", flush=True)
+                gone.add(rid)
+                plan[rid] = []
+                continue
+            raise
+        for f in tree:
             size = getattr(f, "size", None)
             if size is None:
                 continue
@@ -69,19 +80,29 @@ def main():
             rows = [r for r in rows if r not in keep]
         plan[rid] = rows
     bad, to_hash = [], []
-    for rid, rows in plan.items():
+    for rid in DELETE_REPOS:                 # a whole repo goes: today's listing must hold every file the mirror saw
+        if rid in gone:
+            continue
+        seen = {k.split(":", 1)[1] for k in man if k.startswith(rid + ":")}
+        now = {r[0] for r in plan[rid]}
+        if not seen or seen - now:
+            bad.append(f"{rid}: the mirror saw {len(seen)} files, today's listing lacks {len(seen - now)} of them")
+    for rid, rows in plan.items():                                   # every file: its own finalized copy on the 5090
         for path, size, sha in rows:
             e = man.get(f"{rid}:{path}")
-            if not e or not e.get("verified") or int(e.get("size", -1)) != size:
-                bad.append(f"{rid}:{path} (manifest {e and e.get('verified')})")
-            elif sha and not e.get("copy"):                          # held before the mirror: hash it now
-                to_hash.append((rid, path, sha, e["where"]))
+            w = Path(e["where"]) if e and e.get("where") else None
+            if not e or not e.get("verified") or not e.get("finalized") or e.get("copy") not in ("link", "copy", True):
+                bad.append(f"{rid}:{path} (no finalized copy: {e and (e.get('verified'), e.get('copy'))})")
+            elif int(e.get("size", -1)) != size or not w.is_file() or w.stat().st_size != size:
+                bad.append(f"{rid}:{path} (copy missing or of another size: {w})")
+            elif sha:
+                to_hash.append((rid, path, sha, str(w)))             # hashed again here, independently of the mirror
     if to_hash:
-        print(f"[prune] hashing {len(to_hash)} files the 5090 held before the mirror "
-              f"({sum(Path(w).stat().st_size for *_, w in to_hash if Path(w).exists()) / 1e9:.0f} GB)", flush=True)
-        with ThreadPoolExecutor(4) as ex:
-            got = list(ex.map(lambda t: sha256(t[3]) if Path(t[3]).is_file() else None, to_hash))
-        bad += [f"{r}:{p} (sha256 differs or file gone: {w})" for (r, p, s, w), h in zip(to_hash, got) if h != s]
+        print(f"[prune] re-hashing {len(to_hash)} copies on the 5090 "
+              f"({sum(Path(w).stat().st_size for *_, w in to_hash) / 1e9:.0f} GB)", flush=True)
+        with ThreadPoolExecutor(6) as ex:
+            got = list(ex.map(lambda t: sha256(t[3]), to_hash))
+        bad += [f"{r}:{p} (sha256 of the copy differs from HF: {w})" for (r, p, s, w), h in zip(to_hash, got) if h != s]
     for rid, rows in plan.items():
         print(f"[prune] {rid}: delete {len(rows)} files, {gb(sum(r[1] for r in rows))}", flush=True)
     for rid in KEEP_REPOS:
@@ -96,6 +117,8 @@ def main():
     if not args.yes:
         return 0
     for rid in DELETE_REPOS:
+        if rid in gone:
+            continue
         api.delete_repo(rid, repo_type="model")
         print(f"[prune] repo {rid}: DELETED", flush=True)
     rows = plan[FULLFT]

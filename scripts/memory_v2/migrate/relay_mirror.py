@@ -17,6 +17,7 @@ import json
 import os
 import shutil
 import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 REPOS = ("hhyfred/memwam-fullft", "hhyfred/memwam-caches", "hhyfred/memwam-h100-migration-v1",
@@ -34,10 +35,87 @@ def sha256(p: Path) -> str:
     return h.hexdigest()
 
 
+ALIASES = tuple(tuple(x.split("=", 1)) for x in os.environ.get(
+    "MWAM_MIRROR_ALIASES", "/workspace/FastWAM-memory2=/mnt/hf/payload/workspace/FastWAM-memory2,"
+                           "/workspace/FastWAM=/mnt/hf/payload/workspace/FastWAM").split(","))
+
+
+def own_copy(src: Path, out: Path) -> str:
+    """A copy of src at out that survives deleting src: a hard link through the path of src on the same mount as
+    out (the 5090 mounts /database/mwam/hf at /mnt/hf and its payload/workspace/... again at /workspace/...), else a
+    full copy. Returns 'link' or 'copy'."""
+    out.parent.mkdir(parents=True, exist_ok=True)
+    if out.exists():
+        if src.exists() and os.path.samefile(src, out):
+            return "link"
+        out.unlink()
+    for a, b in ALIASES:
+        if str(src).startswith(a + "/"):
+            alias = Path(b + str(src)[len(a):])
+            if alias.exists() and os.path.samefile(alias, src):
+                try:
+                    os.link(alias, out)
+                    return "link"
+                except OSError:
+                    break
+    tmp = out.with_name(out.name + ".part")
+    shutil.copyfile(src, tmp)
+    tmp.rename(out)
+    return "copy"
+
+
+def finalize(todo, dest: Path, man_p: Path, man: dict) -> int:
+    """Download completeness: every file listed on HF now must have its own file under DEST with HF's sha256 (LFS)
+    or size (small files). Files the 5090 held before get a hard link (or copy) under DEST first."""
+    t0 = time.time()
+    missing, linked, copied = [], 0, 0
+    jobs = []
+    for rid, path, size, sha in todo:
+        key = f"{rid}:{path}"
+        e = man.get(key)
+        out = dest / rid.split("/")[1] / path
+        if not e:
+            missing.append(f"{key} (not in the manifest)")
+            continue
+        if not e.get("copy"):
+            src = Path(e["where"])
+            if not src.is_file():
+                missing.append(f"{key} (held file gone: {src})")
+                continue
+            how = own_copy(src, out)
+            linked += how == "link"; copied += how == "copy"
+            e.update(src=str(src), where=str(out), copy=how)
+        if not out.is_file() or out.stat().st_size != size:
+            missing.append(f"{key} (no file of the right size at {out})")
+            e["verified"] = False
+            continue
+        jobs.append((key, out, sha))
+    with ThreadPoolExecutor(6) as ex:
+        got = list(ex.map(lambda j: sha256(j[1]) if j[2] else None, jobs))
+    bad = []
+    for (key, out, sha), h in zip(jobs, got):
+        ok = (h == sha) if sha else True
+        man[key]["verified"] = ("sha" if sha else "size") if ok else False
+        man[key]["finalized"] = time.strftime("%F %T")
+        if not ok:
+            bad.append(f"{key} (sha256 differs)")
+    man_p.write_text(json.dumps(man, indent=0) + "\n")
+    hashed = sum(1 for j in jobs if j[2])
+    print(f"[mirror] {time.strftime('%F %T')} finalize: {len(todo)} files on HF; own copies under {dest}: "
+          f"{len(jobs)} ({linked} hard links and {copied} copies of files the 5090 already held); sha256 checked "
+          f"{hashed}; missing {len(missing)}; sha256 different {len(bad)}; {time.time() - t0:.0f} s", flush=True)
+    for x in (missing + bad)[:20]:
+        print(f"    {x}", flush=True)
+    return 0 if not missing and not bad else 2
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dest", required=True)
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--finalize", action="store_true",
+                    help="after the download: every HF file gets its own copy under DEST (files the 5090 held are "
+                         "hard-linked, else copied), and every copy is sha256-checked against HF; exit 0 only if all")
     args = ap.parse_args()
     from huggingface_hub import HfApi, hf_hub_download
     api = HfApi()
@@ -64,6 +142,8 @@ def main():
             print(f"[mirror] {rid}: cannot list ({type(e).__name__}: {str(e)[:120]})", flush=True)
             return 1
     todo.sort(key=lambda x: (not x[1].startswith("exports/"), x[0], x[1]))
+    if args.finalize:
+        return finalize(todo, dest, man_p, man)
     total = sum(x[2] for x in todo)
     already = sum(x[2] for x in todo if (INV_KEY.get(x[0]), x[1]) in held)
     print(f"[mirror] {len(todo)} files, {total / 1e9:.1f} GB on HF; on the 5090 already {already / 1e9:.1f} GB; "
@@ -76,6 +156,8 @@ def main():
         key = f"{rid}:{path}"
         h = held.get((INV_KEY.get(rid), path))
         if h:
+            if man.get(key, {}).get("copy") in ("link", "copy") and man[key].get("verified"):
+                continue                                             # finalized before: own copy under DEST
             man[key] = {"size": size, "sha256": sha, "where": h[0], "verified": h[1], "copy": False}
             continue
         out = dest / rid.split("/")[1] / path
