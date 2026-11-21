@@ -63,9 +63,20 @@ module purge; module load apptainer/1.4.1
 unset APPTAINER_HOME SINGULARITY_HOME          # the module's APPTAINER_HOME would become the container's HOME
 
 step "1 container, environment, unit tests"
-SBX=/tmp/mwam_sbx_${PBS_JOBID:-$$}
-trap 'rm -rf "$SBX"' EXIT                       # the job's own unpacked image on the node's local disk
-apptainer build --sandbox "$SBX" "$SIF" > /dev/null 2>&1 || fail "sandbox from the SIF"
+SBXDIR=/tmp/mwam_sbx_${PBS_JOBID:-$$}
+SBX=$SBXDIR
+trap 'rm -rf "$SBXDIR"' EXIT                    # the job's own unpacked image on the node's local disk (never the SIF)
+# 11-21 (plan v18): every job started after 11-21 01:49 failed here with the error thrown away. Now: the node's free
+# space and the build's own error go to the log; if the sandbox cannot be built, run the SIF directly (no unpack).
+step "node $(hostname): /tmp $(df -h /tmp 2>/dev/null | tail -n 1 | awk '{print $4}') free; home $(df -h $HOME 2>/dev/null | tail -n 1 | awk '{print $4}') free"
+SBXLOG=$W/logs/sbx_${PBS_JOBID:-$$}.txt
+if ! apptainer build --sandbox "$SBXDIR" "$SIF" > $SBXLOG 2>&1; then
+  step "sandbox build failed: $(grep -iE 'error|fatal|no space|quota|denied' $SBXLOG | tail -n 3 | tr '\n' ' ' | cut -c1-400)"
+  rm -rf "$SBXDIR"
+  SBX=$SIF
+  apptainer exec "$SIF" true >> $SBXLOG 2>&1 || fail "sandbox from the SIF, and the SIF itself does not run ($SBXLOG)"
+  step "running the SIF directly (no sandbox)"
+fi
 B="$R:/workspace/FastWAM-memory2,$W/hf/payload/workspace/FastWAM:/workspace/FastWAM,$W/envs/mwam:/opt/mwam"
 EF=$W/logs/container_env_${PBS_JOBID:-$$}.txt
 printf '%s\n' "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-}" PYTHONNOUSERSITE=1 \
