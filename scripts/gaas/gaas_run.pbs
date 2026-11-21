@@ -184,6 +184,13 @@ bash -c "$COND" || fail "condition not met: $COND"
 TIMER=$!
 X bash -c "RUN=$RUN bash scripts/fullft/export_watch.sh" > /dev/null 2>&1 &
 WATCH=$!
+if [ -s scripts/gaas/relay_backlog.txt ]; then       # 11-21: exports that missed the relay while HF was full
+  find $F -maxdepth 1 -name .relay_backlog_lock -mmin +1500 -exec rmdir {} \; 2>/dev/null
+  if mkdir $F/.relay_backlog_lock 2>/dev/null; then
+    X bash -c "bash scripts/fullft/relay_backlog.sh" > /dev/null 2>&1 &
+    step "relay backlog started in this job (scripts/gaas/relay_backlog.txt)"
+  fi
+fi
 rc=1
 for attempt in 1 2; do
   step "$RUN attempt $attempt"
