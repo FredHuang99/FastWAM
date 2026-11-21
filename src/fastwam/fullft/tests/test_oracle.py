@@ -65,3 +65,50 @@ def test_session_oracle_mode_logs_true_presses(tmp_path, monkeypatch):
         last = cur
     rows_d = [json.loads(x) for x in (tmp_path / "d" / "decisions.jsonl").read_text().splitlines()]
     assert any(e[2] == "bottom" and e[0] != 11 for e in rows_d[-1]["ledger"])
+
+
+def test_replan_driver_oracle_trigger(tmp_path):
+    """Z1: with trigger='oracle' the driver re-decides at the observation whose counters first show a press (button 1 /
+    2 only), not at detector bottoms; blind hides with the previous decision's frame as the cap."""
+    from fastwam.fullft.tests.test_replan import FakeSession
+    from fastwam.memory_v2.online import ReplanDriver
+    for mode in ("replan", "blind"):
+        s = FakeSession(presses=[5])                        # a detector bottom at 5: ignored under the oracle trigger
+        (tmp_path / mode).mkdir()
+        d = ReplanDriver(s, 8, mode, tmp_path / mode, trigger="oracle")
+        cnt = {1: 0, 2: 0, 3: 0}
+        for f in range(30):
+            if f == 11:
+                cnt[1] += 1
+            if f == 21:
+                cnt[3] += 1                                 # the confirm button: no re-decision
+            obs = {"frame_id": f, "task_counts": {"press_cnt_1": cnt[1], "press_cnt_2": cnt[2],
+                                                  "press_cnt_check_button": cnt[3]}}
+            d.decide({"current_id": f, "observations": [obs]})
+        assert [c[0] for c in s.calls] == [0, 8, 11, 19, 27], (mode, s.calls)
+        assert dict(s.calls)[11] == (8 if mode == "blind" else None)
+        rows = [json.loads(x) for x in (tmp_path / mode / "replan.jsonl").read_text().splitlines()]
+        assert [r["frame"] for r in rows] == [11] and rows[0]["events"] == [[10, -1, "bottom", 11]]
+    import pytest as _pytest
+    with _pytest.raises(ValueError):
+        ReplanDriver(FakeSession([]), 8, "replan", tmp_path, trigger="sometimes")
+
+
+def test_session_oracle_blind_hides_the_press(tmp_path, monkeypatch):
+    from fastwam.fullft.tests.test_replan import _observations, _session
+    obs = _observations()
+    for f, r in enumerate(obs):
+        r["task_counts"] = {"press_cnt_1": int(f >= 12), "press_cnt_2": 0, "press_cnt_check_button": 0}
+        r["task_buttons"] = {"button1": [0.01 * f, 0.0, 0.1], "button2": [-1.0, 0.0, 0.1]}
+    monkeypatch.setenv("MWAM_LEDGER", "oracle")
+    s = _session(tmp_path, "b")
+    for f in range(13):
+        s.observe({"current_id": f, "instruction": "x", "episode_seed": 5, "task": "press_button", "observations": [obs[f]]})
+    req = {"current_id": 12, "instruction": "x", "episode_seed": 5, "task": "press_button", "observations": []}
+    s.hide_after = 8
+    s.decide(req)
+    s.hide_after = None
+    s.decide(req)
+    rows = [json.loads(x) for x in (tmp_path / "b" / "decisions.jsonl").read_text().splitlines()]
+    assert not any(e[2] == "bottom" for e in rows[0]["ledger"]) and rows[0]["hide_after"] == 8
+    assert [[e[0], e[2], e[3]] for e in rows[1]["ledger"] if e[2] == "bottom"] == [[11, "bottom", 12]]

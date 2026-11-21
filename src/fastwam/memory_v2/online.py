@@ -96,25 +96,46 @@ class ReplanDriver:
     Rows of replan.jsonl: frame, kind (regular / replan), the triggering events, the targets used of the old chunk,
     and the joint jump (max |new first target - old target at this frame| over the arm joints, radians)."""
 
-    def __init__(self, session, period: int, mode: str, directory: Path):
+    def __init__(self, session, period: int, mode: str, directory: Path, trigger: str = "detector"):
         if mode not in REPLAN_MODES:
             raise ValueError(f"replan mode must be one of {REPLAN_MODES}, got {mode!r}")
+        if trigger not in ("detector", "oracle"):
+            raise ValueError(f"replan trigger must be detector or oracle, got {trigger!r}")
         if not hasattr(session, "observe"):
             raise ValueError("--replan needs a session with observe() (fullft exports)")
         self.session, self.period, self.mode, self.directory = session, int(period), mode, Path(directory)
+        self.trigger = trigger                        # 11-21 plan v18 Z1: 'oracle' = the simulator's press counters
         self.chunk = None
         self.used = 0
         self.last = None
+        self.counts = None
 
     def reset(self):
         self.session.reset()
-        self.chunk, self.used, self.last = None, 0, None
+        self.chunk, self.used, self.last, self.counts = None, 0, None, None
+
+    def _oracle_fresh(self, request: dict) -> list:
+        """Z1: presses of button 1 / 2 that the simulator's counters show first in this request's observations
+        (the same increments oracle_presses() turns into ledger entries); [] without counters."""
+        out = []
+        for r in request.get("observations") or []:
+            c = r.get("task_counts")
+            if c is None:
+                continue
+            if self.counts is not None:
+                for k, name in ((1, "press_cnt_1"), (2, "press_cnt_2")):
+                    for _ in range(max(0, int(c.get(name, 0)) - int(self.counts.get(name, 0)))):
+                        f = int(r["frame_id"])
+                        out.append({"frame": f - 1, "arm": -1, "kind": "bottom", "confirmed": f, "oracle": k})
+            self.counts = c
+        return out
 
     def decide(self, request: dict):
         import numpy as np
         frame = int(request["current_id"])
         new = self.session.observe(request)
-        fresh = [e for e in new if e.get("kind") == "bottom"]
+        fresh = (self._oracle_fresh(request) if self.trigger == "oracle"
+                 else [e for e in new if e.get("kind") == "bottom"])
         trigger = (self.mode != "off" and self.chunk is not None and self.used < self.period and bool(fresh))
         if self.chunk is None or self.used >= self.period or trigger:
             old = None if self.chunk is None or self.used >= len(self.chunk) else np.asarray(self.chunk[self.used])
@@ -664,8 +685,10 @@ def run_episode(policy: Policy, scene: dict, mode: str, label: str, out: Path, a
                       tag=f"{label}/{mode} {task} seed={scene['seed']}", limit=target_limit,
                       candidates=args.candidates, coherence=args.coherence, noise=args.noise,
                       replay_cache=not args.no_replay_cache)
-    if replan:
-        session = ReplanDriver(session, int(args.execute), replan, directory)
+    if replan:                                   # Z1 (11-21): under MWAM_LEDGER=oracle the trigger is the true counter
+        session = ReplanDriver(session, int(args.execute), replan, directory,
+                               trigger="oracle" if os.environ.get("MWAM_LEDGER", "").strip().lower() == "oracle"
+                               else "detector")
     key = os.urandom(24)
     env = simulator_environment(sim_cfg, gpu)
     env.update(FW_CAUSAL_SIM_ROOT=str(root), MEMORY_S1_RPC_KEY=key.hex(), MEMORY_S1_ARCHIVE_STRIDE="1",

@@ -465,7 +465,8 @@ class FullSession:
                     entries = ledger_entries(self.rule, current, evs)
                     mode = os.environ.get("MWAM_LEDGER", "").strip().lower()      # 11-14: test-time ablations
                     if mode == "oracle":                 # 11-21 plan v18 Z0: zero-delay write of the TRUE presses
-                        evs_o = [e for e in evs if e.get("kind") != "bottom"] + oracle_presses(self.raw, current)
+                        evs_o = [e for e in evs if e.get("kind") != "bottom"] + visible_events(
+                            oracle_presses(self.raw, current), self.hide_after)        # Z1b blind: hidden as well
                         entries = ledger_entries(self.rule, current, evs_o)
                     elif mode == "off":
                         entries = []                     # no entry = what the model sees before the first event
