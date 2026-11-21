@@ -62,7 +62,20 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--machine", required=True)
     ap.add_argument("--hash", action="store_true")
+    ap.add_argument("--show-absent", action="store_true",
+                    help="no HF call: read this machine's last report and print the groups with files NOT held here")
     args = ap.parse_args()
+    if args.show_absent:
+        d = json.loads((OUT / "fullft" / f"RELAY_INVENTORY_{args.machine}.json").read_text())
+        miss = defaultdict(lambda: [0, 0, None])
+        for f in d["files"]:
+            if f["state"] not in ("sha", "size"):
+                m = miss[f["group"]]
+                m[0] += f["size"]; m[1] += 1; m[2] = m[2] or f["path"]
+        print(f"[inv] {args.machine} ({d['time']}): {sum(m[0] for m in miss.values()) / 1e9:.1f} GB of HF files not held here")
+        for g, (b, n, ex) in sorted(miss.items(), key=lambda x: -x[1][0]):
+            print(f"  {b / 1e9:7.2f} GB {n:5d} files  {g}   e.g. {ex}")
+        return
     from huggingface_hub import HfApi, hf_hub_download
     api = HfApi()
     t0 = time.time()
