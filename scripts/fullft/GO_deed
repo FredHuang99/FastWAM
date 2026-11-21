@@ -1,0 +1,4 @@
+11-22 03:40 Opus: plan v19 3.2 acceptance passed (deed_smoke_5090.sh, 5090, log DEED_SMOKE_5090_20261121_1913.txt):
+repeat theta 0.6193 (all 348 press pairs of the 50 demos right); bit parity with every new part off (596 hashes equal to
+5dcb216); smoke exports of the D2 and D1 (b) configurations each ran a closed-loop scene (20 decisions; the D2 ledger
+entries carry their counts). Unit tests 62/62. D1 (d1_w, d1_wn) and D2 (d2_press) may train.

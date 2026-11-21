@@ -120,3 +120,24 @@ press_none | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dens
 # parts off, closed-loop smoke of the D1 (b) and D2 configurations).
 d1_w | model.decision_weight=3 data.tasks=[put_back_block,swap_blocks] data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_put_back_block.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_blocks.json] | test -f scripts/fullft/GO_deed && test -s outputs/fullft/events/events_put_back_block.json && test -s outputs/fullft/events/events_swap_blocks.json
 d1_wn | model.decision_weight=3 model.next_event_loss=0.1 data.tasks=[put_back_block,swap_blocks] data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_put_back_block.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_blocks.json] | test -f scripts/fullft/GO_deed && test -s outputs/fullft/events/events_put_back_block.json && test -s outputs/fullft/events/events_swap_blocks.json
+# 11-22 plan v19 D2 (Fable 3.1 / 3.2; executed by Opus): the press merged experiment = press_v3c's recipe (arprop, 32
+# entries, lag 0, ordinal 16, the provisional writer: delta 0.012, min_path 0.015, provisional 0.002 as numbers; the
+# v3c events file; seed 17) + (3) the in-place repeat count, theta 0.6193 (repeat_theta.py on the 5090, 11-22 03:05: all
+# 348 press pairs of the 50 demos right; same-button max 0.0047, change-button min 1.2340) + (1) decision weighting 3 +
+# (2) the next-event head 0.1 + (4) record augmentation (drop old 0.3 keeping 4; over-count 0.3, +1..2).
+# Registered reading (11-22 03:40, before any D2 run). Changed from the Status 11-22 draft BEFORE registration, for two
+# reasons from D0 (11-22 02:00 / 02:23): the over-presses sit mostly on the SECOND button (press_count e30: first 49 %,
+# second 60 %; with the first count right, the second is right in 17/77), so the main measure counts either button; and
+# the control is press_v3c e30, which differs from D2 only by the four new parts (press_count e30 is described).
+#   Episode over-press = button-1 presses > card_1 or button-2 presses > card_2 at the first confirm press (at the episode
+#   end when no confirm press happens); under-press likewise with <.
+#   MAIN A40, press_button 1-100, the same scenes and noise: D = over-press rate(d2_press e30) - over-press rate(press_v3c
+#   e30), paired by scene, paired bootstrap 95 % CI (10,000, seed 0); SESOI = -0.5 x the control's over-press rate.
+#   In this order: CI upper < 0 and D <= SESOI -> OVER-PRESS HALVED; CI upper < 0 -> PART; CI lower > SESOI -> NOT
+#   HALVED; otherwise UNCERTAIN (pre-set extension: both again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule).
+#   Guard: the under-press rate may rise by at most +0.10 (D_under CI lower > +0.10 -> OVERCORRECTED, reported with the
+#   main outcome). Plan 6.2: CI containing 0 or D >= 0 -> back to Fable.
+#   Described: each button's over / right / under, presses in a row, the first over-press once the record already
+#   holds the card's count, success; the same against press_count e30. The 5090 gives a first look (same-machine only).
+# Gate: scripts/fullft/GO_deed (deed_smoke_5090.sh passed 11-22 03:16 container time 19:16) + the v3c events file.
+d2_press | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_press_button_v1] data.tasks=[press_button] data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_press_button_v3c.json] history.variant=arprop history.event_max=32 history.lag=0 history.ordinal=16 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 history.repeat_theta=0.6193 history.ledger_drop_p=0.3 history.ledger_over_p=0.3 model.decision_weight=3 model.next_event_loss=0.1 | test -f scripts/fullft/GO_deed && test -s outputs/fullft/events/events_press_button_v3c.json && test -f outputs/memory_v2/press/dense_press_button_v1/.verified
