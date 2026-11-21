@@ -1,0 +1,16 @@
+{
+ "rows": {
+  "ar2_clock_e30": {
+   "success": 49,
+   "skipped -> returned": 1
+  },
+  "ar2_clock_e30_ts1.5": {},
+  "ar2_clock_e30_ts0.5": {}
+ },
+ "dominant": {
+  "ar2_clock_e30": "skipped -> returned",
+  "ar2_clock_e30_ts1.5": "none",
+  "ar2_clock_e30_ts0.5": "none"
+ },
+ "flips": false
+}

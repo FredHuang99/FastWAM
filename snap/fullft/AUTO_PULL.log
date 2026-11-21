@@ -1,0 +1,98 @@
+[pull] 2026-11-18 18:46:07 start on GPU18: every 10 min; checkout 7a492bf results_push.sh setup starts the 30-min loop after a successfu
+[pull] 2026-11-18 19:46:11 alive; at 7a492bf results_push.sh setup starts the 30-min loop after a successfu
+[pull] 2026-11-18 20:46:14 alive; at 7a492bf results_push.sh setup starts the 30-min loop after a successfu
+[pull] 2026-11-18 21:46:17 alive; at 7a492bf results_push.sh setup starts the 30-min loop after a successfu
+[pull] 2026-11-18 22:46:21 alive; at 7a492bf results_push.sh setup starts the 30-min loop after a successfu
+[pull] 2026-11-18 23:46:24 alive; at 7a492bf results_push.sh setup starts the 30-min loop after a successfu
+[pull] 2026-11-19 00:46:27 alive; at 7a492bf results_push.sh setup starts the 30-min loop after a successfu
+[pull] 2026-11-19 01:46:31 alive; at 7a492bf results_push.sh setup starts the 30-min loop after a successfu
+[pull] 2026-11-19 02:46:34 alive; at 7a492bf results_push.sh setup starts the 30-min loop after a successfu
+[pull] 2026-11-19 03:46:38 alive; at 7a492bf results_push.sh setup starts the 30-min loop after a successfu
+[pull] 2026-11-19 04:46:42 alive; at 7a492bf results_push.sh setup starts the 30-min loop after a successfu
+[pull] 2026-11-19 05:46:45 alive; at 7a492bf results_push.sh setup starts the 30-min loop after a successfu
+[pull] 2026-11-19 06:46:49 alive; at 7a492bf results_push.sh setup starts the 30-min loop after a successfu
+[pull] 2026-11-19 07:46:52 alive; at 7a492bf results_push.sh setup starts the 30-min loop after a successfu
+[pull] 2026-11-19 08:06:53 pulled 1 commit(s) -> 6b546c3 plan v14 E14 step 1 (writer scan on the A40's press demos -> r; files: scripts/fullft/e17_report.py scripts/fullft/h200_queue.txt scripts/fullft/press_writer_scan.py scripts/fullft/v3c_ready.sh scripts/memory_v2/jobs/queue5_tasks.yaml 
+[pull] 2026-11-19 08:46:55 alive; at 6b546c3 plan v14 E14 step 1 (writer scan on the A40's press demos -> r
+[pull] 2026-11-19 09:46:59 pulled 1 commit(s) -> d95fcd0 plan v14 E14: the writer scan chose the provisional write P(ep; files: scripts/fullft/e14_verdict_a40.py scripts/fullft/press_v3c_files.py scripts/fullft/press_writer_scan.py scripts/fullft/v3c_ready.sh scripts/memory_v2/jobs/queue5_tasks.yaml src/fastwam/fullft/config.py src/fastwam/fullft/events.py src/fastwam/fullft/history.py src/fastwam/fullft/online.py src/fastwam/fullft/tests/test_events_provisional.py 
+[pull] 2026-11-19 09:46:59 alive; at d95fcd0 plan v14 E14: the writer scan chose the provisional write P(ep
+[pull] 2026-11-19 09:57:00 pulled 1 commit(s) -> 7d4b00f auto_pull.sh: the 5090 joins the timed pull (user 11-19 09:47); files: scripts/fullft/auto_pull.sh 
+[pull] 2026-11-19 10:47:03 alive; at 7d4b00f auto_pull.sh: the 5090 joins the timed pull (user 11-19 09:47)
+[pull] 2026-11-19 11:47:06 alive; at 7d4b00f auto_pull.sh: the 5090 joins the timed pull (user 11-19 09:47)
+[pull] 2026-11-19 12:47:13 alive; at 7d4b00f auto_pull.sh: the 5090 joins the timed pull (user 11-19 09:47)
+[pull] 2026-11-19 13:27:15 pulled 1 commit(s) -> 0feb8d5 plan v15 (Fable 11-19): new H200 line B after cover_ar -> E24 ; files: scripts/fullft/ledger_ready.py scripts/gaas/fetch_b2.sh scripts/gaas/gaas_queue.txt scripts/gaas/gaas_run.pbs 
+[pull] 2026-11-19 13:37:16 pulled 4 commit(s) -> aff7cff plan v15 E23: the clock arm at e10 on swap 1-100 vs the ledger; files: scripts/fullft/e21_verdict.py scripts/fullft/e22_verdict.py scripts/fullft/e23_verdict.py scripts/fullft/h100_queue.txt scripts/fullft/h100_v15_ready.sh scripts/fullft/h200_queue.txt scripts/gaas/gaas_queue.txt scripts/memory_v2/jobs/queue5_tasks.yaml src/fastwam/fullft/data.py src/fastwam/fullft/online.py src/fastwam/fullft/tests/test_ledger.py 
+[pull] 2026-11-19 13:47:17 pulled 1 commit(s) -> acd7908 G3 gate of plan v15 registered (user 13:45), incl. E9 vs E25 u; files: scripts/fullft/G3_GATE_REGISTERED.txt 
+[pull] 2026-11-19 13:47:17 alive; at acd7908 G3 gate of plan v15 registered (user 13:45), incl. E9 vs E25 u
+[pull] 2026-11-19 14:47:20 alive; at acd7908 G3 gate of plan v15 registered (user 13:45), incl. E9 vs E25 u
+[pull] 2026-11-19 15:47:23 alive; at acd7908 G3 gate of plan v15 registered (user 13:45), incl. E9 vs E25 u
+[pull] 2026-11-19 16:47:27 alive; at acd7908 G3 gate of plan v15 registered (user 13:45), incl. E9 vs E25 u
+[pull] 2026-11-19 17:47:30 alive; at acd7908 G3 gate of plan v15 registered (user 13:45), incl. E9 vs E25 u
+[pull] 2026-11-19 18:47:33 alive; at acd7908 G3 gate of plan v15 registered (user 13:45), incl. E9 vs E25 u
+[pull] 2026-11-19 19:17:35 pulled 1 commit(s) -> 380638e plan v15 Friday part early: stress triggers for rearrange / sw; files: scripts/fullft/e15_verdict.py scripts/fullft/e16_verdict.py scripts/fullft/e24_verdict.py scripts/fullft/e9e25_verdict.py scripts/fullft/stress_smoke_check.py scripts/fullft/v15_common.py scripts/memory_v2/jobs/queue5_tasks.yaml scripts/memory_v2/sim/sim_adapter.py src/fastwam/fullft/inject.py src/fastwam/fullft/online.py src/fastwam/fullft/tests/test_inject.py src/fastwam/fullft/tests/test_ledger
+[pull] 2026-11-19 19:47:37 alive; at 380638e plan v15 Friday part early: stress triggers for rearrange / sw
+[pull] 2026-11-19 20:47:40 alive; at 380638e plan v15 Friday part early: stress triggers for rearrange / sw
+[pull] 2026-11-19 21:47:44 alive; at 380638e plan v15 Friday part early: stress triggers for rearrange / sw
+[pull] 2026-11-19 22:47:47 alive; at 380638e plan v15 Friday part early: stress triggers for rearrange / sw
+[pull] 2026-11-19 23:47:51 alive; at 380638e plan v15 Friday part early: stress triggers for rearrange / sw
+[pull] 2026-11-20 00:47:54 alive; at 380638e plan v15 Friday part early: stress triggers for rearrange / sw
+[pull] 2026-11-20 01:47:58 alive; at 380638e plan v15 Friday part early: stress triggers for rearrange / sw
+[pull] 2026-11-20 02:48:01 alive; at 380638e plan v15 Friday part early: stress triggers for rearrange / sw
+[pull] 2026-11-20 03:48:05 alive; at 380638e plan v15 Friday part early: stress triggers for rearrange / sw
+[pull] 2026-11-20 04:48:09 alive; at 380638e plan v15 Friday part early: stress triggers for rearrange / sw
+[pull] 2026-11-20 05:48:12 alive; at 380638e plan v15 Friday part early: stress triggers for rearrange / sw
+[pull] 2026-11-20 06:48:15 alive; at 380638e plan v15 Friday part early: stress triggers for rearrange / sw
+[pull] 2026-11-20 07:48:18 alive; at 380638e plan v15 Friday part early: stress triggers for rearrange / sw
+[pull] 2026-11-20 08:08:20 pulled 1 commit(s) -> b700ff0 A40: Z6 and press-trigger report cards (read-only, logs reach ; files: scripts/fullft/press_trigger_report.py scripts/memory_v2/jobs/queue5_tasks.yaml 
+[pull] 2026-11-20 08:48:22 alive; at b700ff0 A40: Z6 and press-trigger report cards (read-only, logs reach 
+[pull] 2026-11-20 09:48:25 alive; at b700ff0 A40: Z6 and press-trigger report cards (read-only, logs reach 
+[pull] 2026-11-20 10:48:29 alive; at b700ff0 A40: Z6 and press-trigger report cards (read-only, logs reach 
+[pull] 2026-11-20 11:48:32 alive; at b700ff0 A40: Z6 and press-trigger report cards (read-only, logs reach 
+[pull] 2026-11-20 12:48:35 alive; at b700ff0 A40: Z6 and press-trigger report cards (read-only, logs reach 
+[pull] 2026-11-20 13:48:38 alive; at b700ff0 A40: Z6 and press-trigger report cards (read-only, logs reach 
+[pull] 2026-11-20 14:48:42 alive; at b700ff0 A40: Z6 and press-trigger report cards (read-only, logs reach 
+[pull] 2026-11-20 15:48:45 alive; at b700ff0 A40: Z6 and press-trigger report cards (read-only, logs reach 
+[pull] 2026-11-20 16:48:48 alive; at b700ff0 A40: Z6 and press-trigger report cards (read-only, logs reach 
+[pull] 2026-11-20 17:18:51 pulled 1 commit(s) -> 123639d 11-20 L1120 follow-up (user 17:04): E22a moved whole to the A1; files: scripts/fullft/e22_a100.sh scripts/fullft/h100_queue.sh scripts/fullft/h100_queue.txt scripts/fullft/h100_v15b.sh scripts/memory_v2/jobs/queue5_tasks.yaml 
+[pull] 2026-11-20 17:48:52 alive; at 123639d 11-20 L1120 follow-up (user 17:04): E22a moved whole to the A1
+[pull] 2026-11-20 17:58:53 pulled 1 commit(s) -> 8b98290 H100: a zombie trainer (exited, parent killed by a yield, not ; files: scripts/fullft/h100_queue.sh scripts/fullft/h100_yield.sh 
+[pull] 2026-11-20 18:48:56 alive; at 8b98290 H100: a zombie trainer (exited, parent killed by a yield, not 
+[pull] 2026-11-20 19:28:58 pulled 1 commit(s) -> fc1e8bf plan v16 T1 / T2 on the 5090 (timing of the press record: late; files: scripts/fullft/timing_eval_5090.sh scripts/fullft/timing_verdict.py scripts/gaas/fetch_b3.sh scripts/gaas/gaas_queue.txt scripts/gaas/gaas_run.pbs src/fastwam/fullft/online.py src/fastwam/fullft/tests/test_ledger.py 
+[pull] 2026-11-20 19:48:59 alive; at fc1e8bf plan v16 T1 / T2 on the 5090 (timing of the press record: late
+[pull] 2026-11-20 20:49:03 alive; at fc1e8bf plan v16 T1 / T2 on the 5090 (timing of the press record: late
+[pull] 2026-11-20 21:09:05 pulled 3 commit(s) -> b481edd plan v17 second task on the A100: record delay on swap (ar2_pr; files: scripts/fullft/PLAN_V17_READINGS.txt scripts/fullft/press_timing_audit.py scripts/fullft/replan_eval_5090.sh scripts/fullft/replan_verdict.py scripts/fullft/swap_lag_verdict.py scripts/fullft/timing_meaning.py scripts/memory_v2/jobs/queue5_tasks.yaml src/fastwam/fullft/online.py src/fastwam/fullft/tests/test_replan.py src/fastwam/memory_v2/online.py 
+[pull] 2026-11-20 21:49:07 alive; at b481edd plan v17 second task on the A100: record delay on swap (ar2_pr
+[pull] 2026-11-20 22:49:10 alive; at b481edd plan v17 second task on the A100: record delay on swap (ar2_pr
+[pull] 2026-11-20 23:49:13 alive; at b481edd plan v17 second task on the A100: record delay on swap (ar2_pr
+[pull] 2026-11-21 00:49:17 alive; at b481edd plan v17 second task on the A100: record delay on swap (ar2_pr
+[pull] 2026-11-21 01:09:18 pulled 1 commit(s) -> 8bdac9c plan v18 (user 00:58): Z0 oracle-ledger test replaces T2b, N0 ; files: scripts/fullft/PLAN_V18_READINGS.txt scripts/fullft/noise_band.py scripts/fullft/oracle_eval_5090.sh scripts/fullft/oracle_verdict.py scripts/memory_v2/sim/sim_adapter.py src/fastwam/fullft/online.py src/fastwam/fullft/tests/test_oracle.py src/fastwam/memory_v2/online.py 
+[pull] 2026-11-21 01:19:19 pulled 1 commit(s) -> 604d65a plan v18 N1: two training-seed replicates of press_count for t; files: scripts/fullft/PLAN_V18_READINGS.txt scripts/gaas/fetch_b4.sh scripts/gaas/gaas_queue.txt scripts/gaas/gaas_run.pbs 
+[pull] 2026-11-21 01:49:21 alive; at 604d65a plan v18 N1: two training-seed replicates of press_count for t
+[pull] 2026-11-21 02:49:24 alive; at 604d65a plan v18 N1: two training-seed replicates of press_count for t
+[pull] 2026-11-21 03:49:27 alive; at 604d65a plan v18 N1: two training-seed replicates of press_count for t
+[pull] 2026-11-21 04:49:31 alive; at 604d65a plan v18 N1: two training-seed replicates of press_count for t
+[pull] 2026-11-21 05:49:34 alive; at 604d65a plan v18 N1: two training-seed replicates of press_count for t
+[pull] 2026-11-21 06:49:38 alive; at 604d65a plan v18 N1: two training-seed replicates of press_count for t
+[pull] 2026-11-21 07:49:41 alive; at 604d65a plan v18 N1: two training-seed replicates of press_count for t
+[pull] 2026-11-21 08:49:44 alive; at 604d65a plan v18 N1: two training-seed replicates of press_count for t
+[pull] 2026-11-21 09:49:47 alive; at 604d65a plan v18 N1: two training-seed replicates of press_count for t
+[pull] 2026-11-21 10:49:50 alive; at 604d65a plan v18 N1: two training-seed replicates of press_count for t
+[pull] 2026-11-21 11:49:54 alive; at 604d65a plan v18 N1: two training-seed replicates of press_count for t
+[pull] 2026-11-21 12:49:57 alive; at 604d65a plan v18 N1: two training-seed replicates of press_count for t
+[pull] 2026-11-21 13:50:00 alive; at 604d65a plan v18 N1: two training-seed replicates of press_count for t
+[pull] 2026-11-21 14:20:02 pulled 1 commit(s) -> 3875ace GaaS: every job since 11-21 01:49 failed at the sandbox build ; files: scripts/gaas/gaas_run.pbs scripts/gaas/resubmit_b5.sh 
+[pull] 2026-11-21 14:30:03 pulled 2 commit(s) -> 0aa702c plan v18 readings: Z1 summary (registered before any Z1 episod; files: scripts/fullft/PLAN_V18_READINGS.txt scripts/fullft/z1_eval_5090.sh scripts/fullft/z1_verdict.py src/fastwam/fullft/online.py src/fastwam/fullft/tests/test_oracle.py src/fastwam/memory_v2/online.py 
+[pull] 2026-11-21 14:40:04 pulled 1 commit(s) -> 1735c4d Z1 headers: the times written were wrong (15:10 / 15:20); the ; files: scripts/fullft/PLAN_V18_READINGS.txt scripts/fullft/z1_eval_5090.sh scripts/fullft/z1_verdict.py 
+[pull] 2026-11-21 14:50:04 alive; at 1735c4d Z1 headers: the times written were wrong (15:10 / 15:20); the 
+[pull] 2026-11-21 15:10:06 pulled 2 commit(s) -> 513b378 GaaS: MODULEPATH lost /usr/local/modulefiles (the apptainer/1.; files: scripts/gaas/gaas_run.pbs scripts/memory_v2/migrate/relay_usage.py 
+[pull] 2026-11-21 15:20:07 pulled 2 commit(s) -> d0bbc38 relay_inventory.py (user 15:15): which big HF relay files each; files: scripts/fullft/relay_backlog.sh scripts/gaas/gaas_run.pbs scripts/gaas/relay_backlog.txt scripts/memory_v2/migrate/relay_inventory.py scripts/memory_v2/migrate/relay_prune.py 
+[pull] 2026-11-21 15:40:08 pulled 1 commit(s) -> c420a37 relay_inventory.py --show-absent: the HF files a machine does ; files: scripts/memory_v2/migrate/relay_inventory.py 
+[pull] 2026-11-21 15:50:09 pulled 1 commit(s) -> cf708f2 relay_mirror.py (user 15:46): mirror every HF relay file onto ; files: scripts/memory_v2/migrate/relay_mirror.py 
+[pull] 2026-11-21 15:50:09 alive; at cf708f2 relay_mirror.py (user 15:46): mirror every HF relay file onto 
+[pull] 2026-11-21 16:00:10 pulled 1 commit(s) -> 6c35d43 relay_prune.py rewritten (user 15:46 "HF keeps only what is ne; files: scripts/memory_v2/migrate/relay_prune.py 
+[pull] 2026-11-21 16:10:11 pulled 1 commit(s) -> 4d03261 relay automation on the 5090 (user 16:01: automate; deletion a; files: scripts/memory_v2/migrate/relay_auto_5090.sh scripts/memory_v2/migrate/relay_mirror.py scripts/memory_v2/migrate/relay_prune.py 
+[pull] 2026-11-21 16:30:12 pulled 1 commit(s) -> 48b365c relay_backlog.sh: LIST overridable (H100: rearrange_clock / sw; files: scripts/fullft/relay_backlog.sh scripts/fullft/relay_backlog_h100.txt 
+[pull] 2026-11-21 16:50:13 alive; at 48b365c relay_backlog.sh: LIST overridable (H100: rearrange_clock / sw
+[pull] 2026-11-21 17:50:16 alive; at 48b365c relay_backlog.sh: LIST overridable (H100: rearrange_clock / sw
+[pull] 2026-11-21 18:50:19 alive; at 48b365c relay_backlog.sh: LIST overridable (H100: rearrange_clock / sw
+[pull] 2026-11-21 19:50:22 alive; at 48b365c relay_backlog.sh: LIST overridable (H100: rearrange_clock / sw

@@ -1,0 +1,183 @@
+{
+ "swap_blocks": {
+  "verdict": "WAIT",
+  "clock": [
+   {
+    "model": "ar2_clock_e30",
+    "task": "swap_blocks",
+    "level": 64,
+    "finished_vis": 50,
+    "finished_hid": 50,
+    "valid_pairs": 50,
+    "vis_only": 0,
+    "hid_only": 3,
+    "delta": -3,
+    "p": 0.25,
+    "hidden_success": 50,
+    "share_mean": 0.165625,
+    "classes_vis": {
+     "pressed before s3": 3
+    },
+    "classes_hid": {},
+    "state": "NOT HURT"
+   },
+   {
+    "model": "ar2_clock_e30",
+    "task": "swap_blocks",
+    "level": 256,
+    "finished_vis": 50,
+    "finished_hid": 50,
+    "valid_pairs": 50,
+    "vis_only": 0,
+    "hid_only": 0,
+    "delta": 0,
+    "p": 1.0,
+    "hidden_success": 7,
+    "share_mean": 0.4225,
+    "classes_vis": {
+     "pressed before s3": 43
+    },
+    "classes_hid": {
+     "pressed before s3": 43
+    },
+    "state": "FLOOR NOT MET"
+   },
+   {
+    "model": "ar2_clock_e30",
+    "task": "swap_blocks",
+    "level": 1024,
+    "finished_vis": 0,
+    "finished_hid": 0,
+    "valid_pairs": 0,
+    "vis_only": 0,
+    "hid_only": 0,
+    "delta": 0,
+    "p": 1.0,
+    "hidden_success": 0,
+    "share_mean": null,
+    "classes_vis": {},
+    "classes_hid": {},
+    "state": "WAIT"
+   }
+  ],
+  "ledger": [
+   {
+    "model": "ar2_prop_e30",
+    "task": "swap_blocks",
+    "level": 64,
+    "finished_vis": 50,
+    "finished_hid": 50,
+    "valid_pairs": 50,
+    "vis_only": 0,
+    "hid_only": 0,
+    "delta": 0,
+    "p": 1.0,
+    "hidden_success": 50,
+    "share_mean": 0.0,
+    "classes_vis": {},
+    "classes_hid": {},
+    "state": "NOT HURT"
+   },
+   {
+    "model": "ar2_prop_e30",
+    "task": "swap_blocks",
+    "level": 1024,
+    "finished_vis": 0,
+    "finished_hid": 0,
+    "valid_pairs": 0,
+    "vis_only": 0,
+    "hid_only": 0,
+    "delta": 0,
+    "p": 1.0,
+    "hidden_success": 0,
+    "share_mean": null,
+    "classes_vis": {},
+    "classes_hid": {},
+    "state": "WAIT"
+   }
+  ]
+ },
+ "put_back_block": {
+  "verdict": "NO DOSE EFFECT",
+  "clock": [
+   {
+    "model": "ar2_clock_e30",
+    "task": "put_back_block",
+    "level": 64,
+    "finished_vis": 50,
+    "finished_hid": 50,
+    "valid_pairs": 50,
+    "vis_only": 0,
+    "hid_only": 0,
+    "delta": 0,
+    "p": 1.0,
+    "hidden_success": 49,
+    "share_mean": 0.17125,
+    "classes_vis": {
+     "skipped -> returned": 1
+    },
+    "classes_hid": {
+     "skipped -> returned": 1
+    },
+    "state": "NOT HURT"
+   },
+   {
+    "model": "ar2_clock_e30",
+    "task": "put_back_block",
+    "level": 256,
+    "finished_vis": 50,
+    "finished_hid": 50,
+    "valid_pairs": 50,
+    "vis_only": 0,
+    "hid_only": 0,
+    "delta": 0,
+    "p": 1.0,
+    "hidden_success": 49,
+    "share_mean": 0.4375,
+    "classes_vis": {
+     "skipped -> returned": 1
+    },
+    "classes_hid": {
+     "skipped -> returned": 1
+    },
+    "state": "NOT HURT"
+   }
+  ],
+  "ledger": [
+   {
+    "model": "ar2_prop_e30",
+    "task": "put_back_block",
+    "level": 64,
+    "finished_vis": 50,
+    "finished_hid": 50,
+    "valid_pairs": 50,
+    "vis_only": 0,
+    "hid_only": 0,
+    "delta": 0,
+    "p": 1.0,
+    "hidden_success": 50,
+    "share_mean": 0.0,
+    "classes_vis": {},
+    "classes_hid": {},
+    "state": "NOT HURT"
+   },
+   {
+    "model": "ar2_prop_e30",
+    "task": "put_back_block",
+    "level": 256,
+    "finished_vis": 50,
+    "finished_hid": 50,
+    "valid_pairs": 50,
+    "vis_only": 0,
+    "hid_only": 0,
+    "delta": 0,
+    "p": 1.0,
+    "hidden_success": 50,
+    "share_mean": 0.0,
+    "classes_vis": {},
+    "classes_hid": {},
+    "state": "NOT HURT"
+   }
+  ]
+ }
+}

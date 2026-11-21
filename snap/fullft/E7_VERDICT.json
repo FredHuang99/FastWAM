@@ -1,0 +1,66 @@
+{
+ "verdict": "PARTIAL",
+ "floor": true,
+ "rows": {
+  "e45|swap_blocks": {
+   "finished": 100,
+   "of": 100,
+   "success": 51,
+   "failures": {
+    "kept moving": 36,
+    "pressed before s3": 8,
+    "pressed after s3": 5
+   },
+   "vs_ar_e30": {
+    "scenes": 100,
+    "only_long": 8,
+    "only_e30": 13,
+    "p": 0.38331031799316406,
+    "e30_success": 56
+   }
+  },
+  "e45|put_back_block": {
+   "finished": 100,
+   "of": 100,
+   "success": 100,
+   "failures": {},
+   "vs_ar_e30": {
+    "scenes": 0,
+    "only_long": 0,
+    "only_e30": 0,
+    "p": 1.0,
+    "e30_success": 0
+   }
+  },
+  "e60|swap_blocks": {
+   "finished": 100,
+   "of": 100,
+   "success": 72,
+   "failures": {
+    "kept moving": 23,
+    "pressed before s3": 4,
+    "pressed after s3": 1
+   },
+   "vs_ar_e30": {
+    "scenes": 100,
+    "only_long": 20,
+    "only_e30": 4,
+    "p": 0.001543879508972168,
+    "e30_success": 56
+   }
+  },
+  "e60|put_back_block": {
+   "finished": 100,
+   "of": 100,
+   "success": 100,
+   "failures": {},
+   "vs_ar_e30": {
+    "scenes": 0,
+    "only_long": 0,
+    "only_e30": 0,
+    "p": 1.0,
+    "e30_success": 0
+   }
+  }
+ }
+}

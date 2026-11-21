@@ -1,0 +1,145 @@
+
+[queue5] 2026-11-18 17:45:55 $ bash -c C=/workspace/FastWAM-memory2/outputs/memory_v2/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=put_back_block; B=$C/scenes_seed42_n20_${t}_a40; cd /workspace/FastWAM-memory2; for i in $(seq 1 5); do $P $S complete $B $t 20 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES=0 $P -m fastwam.memory_v2.online plan --seed 42 --episodes 20 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 20 && $P $S check-prefix $C/scenes_seed42_n100_$t $B $t
+put_back_block: /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/scenes_seed42_n20_put_back_block_a40/put_back_block.json NOT complete (0 scenes, next seed None)
+[closed-loop] WARNING dense config was recorded for sm9.0; this GPU is sm8.6: TORCH_EXTENSIONS_DIR -> /workspace/FastWAM/outputs/fused_environment_memory_v2_sm86/torch_extensions (give --extensions-dir to reuse built kernels)
+[plan] 2026-11-18 09:45:57 put_back_block: 20 expert-feasible scenes, seed 42 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/scenes_seed42_n20_put_back_block_a40/put_back_block.json
+[backend] pid=920154 fused_graph_v1; native guards retained; launch_blocking unset
+[simulator_import] running 
+============= Config =============
+
+[95mMessy Table:[0m False
+[95mRandom Background:[0m False
+[95mRandom Light:[0m False
+[95mRandom Table Height:[0m 0
+[95mRandom Head Camera Distance:[0m 0
+[94mHead Camera Config:[0m LargeView, True
+[94mWrist Camera Config:[0m LargeView, True
+[94mEmbodiment Config:[0m aloha-agilex
+
+==================================
+[scene_setup] running task=put_back_block seed=4300000
+[backend] pid=920224 fused_graph_v1; native guards retained; launch_blocking unset
+[backend] pid=920223 fused_graph_v1; native guards retained; launch_blocking unset
+Warp DeprecationWarning: The symbol `warp.torch.device_from_torch` will soon be removed from the public API. Use `warp.device_from_torch` instead.
+[planner_warmup] waiting batch=1
+[planner_warmup] running batch=1 wait_seconds=7.56625086069107e-05
+Warp DeprecationWarning: The symbol `warp.torch.device_from_torch` will soon be removed from the public API. Use `warp.device_from_torch` instead.
+[planner_warmup] waiting batch=1
+[planner_warmup] complete batch=1 seconds=4.987643109634519
+[planner_warmup] running batch=1 wait_seconds=3.78067921474576
+[fused verified] pid=920224 optimizers=5 captures=10 replays=284
+[planner_warmup] waiting batch=10
+[planner_warmup] complete batch=1 seconds=5.026238884776831
+[planner_warmup] running batch=10 wait_seconds=5.357837591320276
+[fused verified] pid=920223 optimizers=5 captures=10 replays=284
+[planner_warmup] waiting batch=10
+[planner_warmup] complete batch=10 seconds=4.007293827831745
+[planner_warmup] running batch=10 wait_seconds=3.822804314084351
+[fused verified] pid=920224 optimizers=10 captures=20 replays=599
+[planner_warmup] complete batch=10 seconds=4.010266587138176
+[fused verified] pid=920223 optimizers=10 captures=20 replays=599
+[expert_filter] running task=put_back_block seed=4300000
+[freeze_instruction] running task=put_back_block seed=4300000
+[candidate] complete task=put_back_block seed=4300000 accepted=True seconds=41.55457132123411
+[scene-plan] put_back_block accepted=1/20 candidate=4300000 feasible=True seconds=41.9
+[scene_setup] running task=put_back_block seed=4300001
+[expert_filter] running task=put_back_block seed=4300001
+[freeze_instruction] running task=put_back_block seed=4300001
+[candidate] complete task=put_back_block seed=4300001 accepted=True seconds=5.059082180261612
+[scene-plan] put_back_block accepted=2/20 candidate=4300001 feasible=True seconds=5.1
+[scene_setup] running task=put_back_block seed=4300002
+[expert_filter] running task=put_back_block seed=4300002
+[freeze_instruction] running task=put_back_block seed=4300002
+[candidate] complete task=put_back_block seed=4300002 accepted=True seconds=5.441401655785739
+[scene-plan] put_back_block accepted=3/20 candidate=4300002 feasible=True seconds=5.5
+[scene_setup] running task=put_back_block seed=4300003
+[expert_filter] running task=put_back_block seed=4300003
+[freeze_instruction] running task=put_back_block seed=4300003
+[candidate] complete task=put_back_block seed=4300003 accepted=True seconds=6.858519594185054
+[scene-plan] put_back_block accepted=4/20 candidate=4300003 feasible=True seconds=6.9
+[scene_setup] running task=put_back_block seed=4300004
+[expert_filter] running task=put_back_block seed=4300004
+[freeze_instruction] running task=put_back_block seed=4300004
+[candidate] complete task=put_back_block seed=4300004 accepted=True seconds=7.061277313157916
+[scene-plan] put_back_block accepted=5/20 candidate=4300004 feasible=True seconds=7.1
+[scene_setup] running task=put_back_block seed=4300005
+[expert_filter] running task=put_back_block seed=4300005
+[freeze_instruction] running task=put_back_block seed=4300005
+[candidate] complete task=put_back_block seed=4300005 accepted=True seconds=5.43862986844033
+[scene-plan] put_back_block accepted=6/20 candidate=4300005 feasible=True seconds=5.5
+[scene_setup] running task=put_back_block seed=4300006
+[expert_filter] running task=put_back_block seed=4300006
+[freeze_instruction] running task=put_back_block seed=4300006
+[candidate] complete task=put_back_block seed=4300006 accepted=True seconds=6.90451093390584
+[scene-plan] put_back_block accepted=7/20 candidate=4300006 feasible=True seconds=6.9
+[scene_setup] running task=put_back_block seed=4300007
+[expert_filter] running task=put_back_block seed=4300007
+[freeze_instruction] running task=put_back_block seed=4300007
+[candidate] complete task=put_back_block seed=4300007 accepted=True seconds=6.236770113930106
+[scene-plan] put_back_block accepted=8/20 candidate=4300007 feasible=True seconds=6.3
+[scene_setup] running task=put_back_block seed=4300008
+[expert_filter] running task=put_back_block seed=4300008
+[freeze_instruction] running task=put_back_block seed=4300008
+[candidate] complete task=put_back_block seed=4300008 accepted=True seconds=6.936662305146456
+[scene-plan] put_back_block accepted=9/20 candidate=4300008 feasible=True seconds=7.0
+[scene_setup] running task=put_back_block seed=4300009
+[expert_filter] running task=put_back_block seed=4300009
+[freeze_instruction] running task=put_back_block seed=4300009
+[candidate] complete task=put_back_block seed=4300009 accepted=True seconds=6.593630299903452
+[scene-plan] put_back_block accepted=10/20 candidate=4300009 feasible=True seconds=6.6
+[scene_setup] running task=put_back_block seed=4300010
+[expert_filter] running task=put_back_block seed=4300010
+[freeze_instruction] running task=put_back_block seed=4300010
+[candidate] complete task=put_back_block seed=4300010 accepted=True seconds=6.3234476409852505
+[scene-plan] put_back_block accepted=11/20 candidate=4300010 feasible=True seconds=6.4
+[scene_setup] running task=put_back_block seed=4300011
+[expert_filter] running task=put_back_block seed=4300011
+[freeze_instruction] running task=put_back_block seed=4300011
+[candidate] complete task=put_back_block seed=4300011 accepted=True seconds=6.459260984323919
+[scene-plan] put_back_block accepted=12/20 candidate=4300011 feasible=True seconds=6.5
+[scene_setup] running task=put_back_block seed=4300012
+[expert_filter] running task=put_back_block seed=4300012
+[freeze_instruction] running task=put_back_block seed=4300012
+[candidate] complete task=put_back_block seed=4300012 accepted=True seconds=7.109935991466045
+[scene-plan] put_back_block accepted=13/20 candidate=4300012 feasible=True seconds=7.2
+[scene_setup] running task=put_back_block seed=4300013
+[expert_filter] running task=put_back_block seed=4300013
+[freeze_instruction] running task=put_back_block seed=4300013
+[candidate] complete task=put_back_block seed=4300013 accepted=True seconds=5.158446453511715
+[scene-plan] put_back_block accepted=14/20 candidate=4300013 feasible=True seconds=5.2
+[scene_setup] running task=put_back_block seed=4300014
+[expert_filter] running task=put_back_block seed=4300014
+[freeze_instruction] running task=put_back_block seed=4300014
+[candidate] complete task=put_back_block seed=4300014 accepted=True seconds=6.819741968996823
+[scene-plan] put_back_block accepted=15/20 candidate=4300014 feasible=True seconds=6.8
+[scene_setup] running task=put_back_block seed=4300015
+[expert_filter] running task=put_back_block seed=4300015
+[freeze_instruction] running task=put_back_block seed=4300015
+[candidate] complete task=put_back_block seed=4300015 accepted=True seconds=4.360249468125403
+[scene-plan] put_back_block accepted=16/20 candidate=4300015 feasible=True seconds=4.4
+[scene_setup] running task=put_back_block seed=4300016
+[expert_filter] running task=put_back_block seed=4300016
+[freeze_instruction] running task=put_back_block seed=4300016
+[candidate] complete task=put_back_block seed=4300016 accepted=True seconds=5.3874300653114915
+[scene-plan] put_back_block accepted=17/20 candidate=4300016 feasible=True seconds=5.4
+[scene_setup] running task=put_back_block seed=4300017
+[expert_filter] running task=put_back_block seed=4300017
+[freeze_instruction] running task=put_back_block seed=4300017
+[candidate] complete task=put_back_block seed=4300017 accepted=True seconds=7.216914418153465
+[scene-plan] put_back_block accepted=18/20 candidate=4300017 feasible=True seconds=7.3
+[scene_setup] running task=put_back_block seed=4300018
+[expert_filter] running task=put_back_block seed=4300018
+[freeze_instruction] running task=put_back_block seed=4300018
+[candidate] complete task=put_back_block seed=4300018 accepted=True seconds=4.83017245773226
+[scene-plan] put_back_block accepted=19/20 candidate=4300018 feasible=True seconds=4.9
+[scene_setup] running task=put_back_block seed=4300019
+[expert_filter] running task=put_back_block seed=4300019
+[freeze_instruction] running task=put_back_block seed=4300019
+[candidate] complete task=put_back_block seed=4300019 accepted=True seconds=6.975693103857338
+[scene-plan] put_back_block accepted=20/20 candidate=4300019 feasible=True seconds=7.0
+Data has been saved to eval_result/put_back_block/deploy_policy/demo_clean/memory_s1_scene_plan/2026-11-18 09:46:06/_result.txt
+[plan] 2026-11-18 09:48:47 put_back_block: complete=True scenes=20
+put_back_block: /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/scenes_seed42_n20_put_back_block_a40/put_back_block.json complete (20 scenes, next seed 4300020)
+put_back_block: /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/scenes_seed42_n20_put_back_block_a40/put_back_block.json complete (20 scenes, next seed 4300020)
+put_back_block: full 100 scenes, prefix 20; first seeds full [4300000, 4300001, 4300002, 4300003, 4300004] prefix [4300000, 4300001, 4300002, 4300003, 4300004]
+PREFIX CHECK OK: the first 20 scenes are identical

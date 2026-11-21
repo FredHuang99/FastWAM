@@ -1,0 +1,94 @@
+{
+ "rows": {
+  "untreated": {
+   "finished": 50,
+   "success": 50,
+   "failures": {},
+   "vs_untreated": {
+    "n": 50,
+    "only_this": 0,
+    "only_untreated": 0
+   }
+  },
+  "a": {
+   "finished": 50,
+   "success": 0,
+   "failures": {
+    "pressed before s3": 50
+   },
+   "vs_untreated": {
+    "n": 50,
+    "only_this": 0,
+    "only_untreated": 50
+   }
+  },
+  "b": {
+   "finished": 50,
+   "success": 0,
+   "failures": {
+    "pressed after s3": 31,
+    "kept moving": 19
+   },
+   "vs_untreated": {
+    "n": 50,
+    "only_this": 0,
+    "only_untreated": 50
+   }
+  },
+  "c": {
+   "finished": 50,
+   "success": 0,
+   "failures": {
+    "kept moving": 50
+   },
+   "vs_untreated": {
+    "n": 50,
+    "only_this": 0,
+    "only_untreated": 50
+   }
+  },
+  "d": {
+   "finished": 50,
+   "success": 50,
+   "failures": {},
+   "vs_untreated": {
+    "n": 50,
+    "only_this": 0,
+    "only_untreated": 0
+   }
+  },
+  "e": {
+   "finished": 50,
+   "success": 0,
+   "failures": {
+    "pressed after s3": 50
+   },
+   "vs_untreated": {
+    "n": 50,
+    "only_this": 0,
+    "only_untreated": 50
+   }
+  },
+  "c_put": {
+   "finished": 50,
+   "success": 41,
+   "failures": {
+    "unclassified": 9
+   },
+   "vs_untreated": {
+    "n": 27,
+    "only_this": 0,
+    "only_untreated": 4
+   }
+  }
+ },
+ "floor": true,
+ "time_code": "TIME CODE READ",
+ "dependence": "DEPENDS",
+ "content": "DOES NOT READ CONTENT",
+ "directions": {
+  "a": "early",
+  "b": "late"
+ },
+ "put_clock_off": "41/50 (reported only; expectation >= 45/50)"
+}

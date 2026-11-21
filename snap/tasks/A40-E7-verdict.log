@@ -1,0 +1,8 @@
+
+[queue5] 2026-11-19 12:31:18 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e7_verdict.py
+ar2_long e45 swap_blocks: 51/100 finished of 100; failures {'kept moving': 36, 'pressed before s3': 8, 'pressed after s3': 5}; vs AR e30 on 100 common scenes: 56 -> 51, only-long 8, only-e30 13, sign p 0.3833
+ar2_long e45 put_back_block: 100/100 finished of 100; vs AR e30 on 0 common scenes: 0 -> 0, only-long 0, only-e30 0, sign p 1.0000
+ar2_long e60 swap_blocks: 72/100 finished of 100; failures {'kept moving': 23, 'pressed before s3': 4, 'pressed after s3': 1}; vs AR e30 on 100 common scenes: 56 -> 72, only-long 20, only-e30 4, sign p 0.0015
+ar2_long e60 put_back_block: 100/100 finished of 100; vs AR e30 on 0 common scenes: 0 -> 0, only-long 0, only-e30 0, sign p 1.0000
+FLOOR (e60 put >= 95/100): True
+E7 VERDICT (e60 swap): PARTIAL

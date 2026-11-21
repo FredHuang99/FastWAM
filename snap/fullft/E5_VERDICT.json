@@ -1,0 +1,30 @@
+{
+ "verdict": "NOT REPRODUCED",
+ "floor": true,
+ "no_stress": {
+  "swap_blocks": {
+   "finished": 100,
+   "success": 100
+  },
+  "put_back_block": {
+   "finished": 100,
+   "success": 97
+  }
+ },
+ "native_vs_ledger": {
+  "scenes": 100,
+  "ledger": 100,
+  "clock": 100,
+  "ledger_only": 0,
+  "clock_only": 0,
+  "p": 1.0
+ },
+ "stress": {
+  "valid_pairs": 50,
+  "vis_only": 0,
+  "hid_only": 3,
+  "delta": -3,
+  "p": 0.25
+ },
+ "ledger_e1_delta": 0
+}

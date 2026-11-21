@@ -1,0 +1,211 @@
+{
+ "verdict": "CHOSEN",
+ "candidate": "P(eps 0.002; delta 0.012, min_path 0.015)",
+ "kind": "P",
+ "delta": 0.012,
+ "min_path": 0.015,
+ "eps": 0.002,
+ "needs_engineering": true,
+ "tau": 1.0,
+ "recall": 1.0,
+ "spurious_per_press": 0.0,
+ "rows": [
+  {
+   "candidate": "T(0.012, 0.015)",
+   "recall": 1.0,
+   "spurious_per_press": 0.0,
+   "tau": 0.4186046511627907,
+   "presses": 398,
+   "eligible": true
+  },
+  {
+   "candidate": "T(0.012, 0.01)",
+   "recall": 1.0,
+   "spurious_per_press": 0.0,
+   "tau": 0.4186046511627907,
+   "presses": 398,
+   "eligible": true
+  },
+  {
+   "candidate": "T(0.012, 0.005)",
+   "recall": 1.0,
+   "spurious_per_press": 0.0,
+   "tau": 0.4186046511627907,
+   "presses": 398,
+   "eligible": true
+  },
+  {
+   "candidate": "T(0.01, 0.015)",
+   "recall": 1.0,
+   "spurious_per_press": 0.0,
+   "tau": 0.4503171247357294,
+   "presses": 398,
+   "eligible": true
+  },
+  {
+   "candidate": "T(0.01, 0.01)",
+   "recall": 1.0,
+   "spurious_per_press": 0.0,
+   "tau": 0.4503171247357294,
+   "presses": 398,
+   "eligible": true
+  },
+  {
+   "candidate": "T(0.01, 0.005)",
+   "recall": 1.0,
+   "spurious_per_press": 0.0,
+   "tau": 0.4503171247357294,
+   "presses": 398,
+   "eligible": true
+  },
+  {
+   "candidate": "T(0.008, 0.015)",
+   "recall": 1.0,
+   "spurious_per_press": 0.0,
+   "tau": 0.919661733615222,
+   "presses": 398,
+   "eligible": true
+  },
+  {
+   "candidate": "T(0.008, 0.01)",
+   "recall": 1.0,
+   "spurious_per_press": 0.0,
+   "tau": 0.919661733615222,
+   "presses": 398,
+   "eligible": true
+  },
+  {
+   "candidate": "T(0.008, 0.005)",
+   "recall": 1.0,
+   "spurious_per_press": 0.0,
+   "tau": 0.919661733615222,
+   "presses": 398,
+   "eligible": true
+  },
+  {
+   "candidate": "T(0.006, 0.015)",
+   "recall": 1.0,
+   "spurious_per_press": 0.0,
+   "tau": 0.919661733615222,
+   "presses": 398,
+   "eligible": true
+  },
+  {
+   "candidate": "T(0.006, 0.01)",
+   "recall": 1.0,
+   "spurious_per_press": 0.0,
+   "tau": 0.919661733615222,
+   "presses": 398,
+   "eligible": true
+  },
+  {
+   "candidate": "T(0.006, 0.005)",
+   "recall": 1.0,
+   "spurious_per_press": 0.0,
+   "tau": 0.919661733615222,
+   "presses": 398,
+   "eligible": true
+  },
+  {
+   "candidate": "T(0.005, 0.015)",
+   "recall": 1.0,
+   "spurious_per_press": 0.0,
+   "tau": 0.919661733615222,
+   "presses": 398,
+   "eligible": true
+  },
+  {
+   "candidate": "T(0.005, 0.01)",
+   "recall": 1.0,
+   "spurious_per_press": 0.0,
+   "tau": 0.919661733615222,
+   "presses": 398,
+   "eligible": true
+  },
+  {
+   "candidate": "T(0.005, 0.005)",
+   "recall": 1.0,
+   "spurious_per_press": 0.0,
+   "tau": 0.919661733615222,
+   "presses": 398,
+   "eligible": true
+  },
+  {
+   "candidate": "T(0.004, 0.015)",
+   "recall": 1.0,
+   "spurious_per_press": 0.0,
+   "tau": 0.9989429175475687,
+   "presses": 398,
+   "eligible": true
+  },
+  {
+   "candidate": "T(0.004, 0.01)",
+   "recall": 1.0,
+   "spurious_per_press": 0.0,
+   "tau": 0.9989429175475687,
+   "presses": 398,
+   "eligible": true
+  },
+  {
+   "candidate": "T(0.004, 0.005)",
+   "recall": 1.0,
+   "spurious_per_press": 0.0,
+   "tau": 0.9989429175475687,
+   "presses": 398,
+   "eligible": true
+  },
+  {
+   "candidate": "G(0.012, 0.015)",
+   "recall": 1.0,
+   "spurious_per_press": 0.0,
+   "tau": 0.4186046511627907,
+   "presses": 398,
+   "eligible": true
+  },
+  {
+   "candidate": "P(eps 0.002; delta 0.012, min_path 0.015)",
+   "recall": 1.0,
+   "spurious_per_press": 0.0,
+   "tau": 1.0,
+   "presses": 398,
+   "eligible": true
+  },
+  {
+   "candidate": "P(eps 0.003; delta 0.012, min_path 0.015)",
+   "recall": 1.0,
+   "spurious_per_press": 0.0,
+   "tau": 1.0,
+   "presses": 398,
+   "eligible": true
+  },
+  {
+   "candidate": "P(eps 0.005; delta 0.012, min_path 0.015)",
+   "recall": 1.0,
+   "spurious_per_press": 0.0,
+   "tau": 0.919661733615222,
+   "presses": 398,
+   "eligible": true
+  }
+ ],
+ "margins": [
+  {
+   "candidate": "P(eps 0.002; delta 0.012, min_path 0.015)",
+   "x0.8": {
+    "candidate": "P(eps 0.0016; delta 0.0096, min_path 0.012)",
+    "recall": 1.0,
+    "spurious_per_press": 0.0,
+    "tau": 1.0,
+    "presses": 398
+   },
+   "x1.2": {
+    "candidate": "P(eps 0.0024; delta 0.0144, min_path 0.018)",
+    "recall": 1.0,
+    "spurious_per_press": 0.0,
+    "tau": 1.0,
+    "presses": 398
+   },
+   "ok": true
+  }
+ ],
+ "seconds": 10
+}

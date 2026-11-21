@@ -1,0 +1,9 @@
+
+[queue5] 2026-11-19 09:10:46 $ bash -c cd /workspace/FastWAM-memory2 && /opt/mwam/bin/python -c "import json, sys; v = json.load(open('outputs/fullft/E5_VERDICT.json'))['verdict']; print('E5 verdict:', v); sys.exit(0 if v == 'INDEX MATTERS' else 1)"
+E5 verdict: NOT REPRODUCED
+
+[queue5] 2026-11-19 09:21:17 $ bash -c cd /workspace/FastWAM-memory2 && /opt/mwam/bin/python -c "import json, sys; v = json.load(open('outputs/fullft/E5_VERDICT.json'))['verdict']; print('E5 verdict:', v); sys.exit(0 if v == 'INDEX MATTERS' else 1)"
+E5 verdict: NOT REPRODUCED
+
+[queue5] 2026-11-19 09:31:48 $ bash -c cd /workspace/FastWAM-memory2 && /opt/mwam/bin/python -c "import json, sys; v = json.load(open('outputs/fullft/E5_VERDICT.json'))['verdict']; print('E5 verdict:', v); sys.exit(0 if v == 'INDEX MATTERS' else 1)"
+E5 verdict: NOT REPRODUCED

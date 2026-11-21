@@ -1,0 +1,12 @@
+{
+ "new": "press_v3c_e30",
+ "ref": "press_count_e30",
+ "n": 50,
+ "success": 8,
+ "reference": 5,
+ "only_new": 7,
+ "only_ref": 4,
+ "sign_p": 0.548828125,
+ "workable_range": false,
+ "reading": "NO EFFECT"
+}

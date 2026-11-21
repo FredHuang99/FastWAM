@@ -1,0 +1,23 @@
+{
+ "verdict": "NOT ON PUT",
+ "audit": "rule C on put: MISS",
+ "e5": "NOT REPRODUCED",
+ "row": "the clock model does not read the clock: if its no-stress swap is also >= 95/100 the weight moves to content (E9) and counting -> SWITCH TO FABLE (row 4)",
+ "valid_pairs": 50,
+ "vis_only": 0,
+ "hid_only": 0,
+ "delta": 0,
+ "p": 1.0,
+ "hidden_success": 49,
+ "classes": {
+  "vis": {
+   "success": 49,
+   "skipped -> returned": 1
+  },
+  "hid": {
+   "success": 49,
+   "skipped -> returned": 1
+  }
+ },
+ "clock_share_mean": 0.17125
+}

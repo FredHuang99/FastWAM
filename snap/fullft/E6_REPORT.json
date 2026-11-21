@@ -1,0 +1,89 @@
+{
+ "rows": {
+  "battery_try:battery_ar_e30": {
+   "1-50": [
+    45,
+    50
+   ],
+   "51-100": [
+    46,
+    50
+   ],
+   "1-100": [
+    91,
+    100
+   ]
+  },
+  "battery_try:battery_arprop_e30": {
+   "1-50": [
+    45,
+    50
+   ],
+   "51-100": [
+    46,
+    50
+   ],
+   "1-100": [
+    91,
+    100
+   ]
+  },
+  "rearrange_blocks:rearrange_ar_e30": {
+   "1-50": [
+    15,
+    50
+   ],
+   "51-100": [
+    14,
+    50
+   ],
+   "1-100": [
+    29,
+    100
+   ]
+  },
+  "swap_T:swapT_ar_e30": {
+   "1-50": [
+    27,
+    50
+   ],
+   "51-100": [
+    24,
+    50
+   ],
+   "1-100": [
+    51,
+    100
+   ]
+  }
+ },
+ "battery_sc_b": {
+  "verdict": "NOT SHOWN (S-C (b) not met)",
+  "scenes_1_50": {
+   "scenes": 50,
+   "ar": 45,
+   "ledger": 45,
+   "ledger_only": 1,
+   "ar_only": 1,
+   "p": 1.0
+  },
+  "descriptive": {
+   "51-100": {
+    "scenes": 50,
+    "ar": 46,
+    "ledger": 46,
+    "ledger_only": 2,
+    "ar_only": 2,
+    "p": 1.0
+   },
+   "1-100": {
+    "scenes": 100,
+    "ar": 91,
+    "ledger": 91,
+    "ledger_only": 3,
+    "ar_only": 3,
+    "p": 1.0
+   }
+  }
+ }
+}

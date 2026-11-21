@@ -1,0 +1,14 @@
+
+[queue5] 2026-11-18 04:55:57 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e1_verdict.py --task swap_blocks
+E1 swap_blocks: 50 scenes; folder /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/e1
+model   inject    | valid | vis succ | hid succ | Delta | vis-only hid-only | p      | entries in injected frames (vis)
+AR      pause     |    48 |       32 |       33 |    -1 |        0        1 | 1.0000 | zero-entry share 1.00, mean 0.0
+AR      fidget    |    48 |       32 |       35 |    -3 |        0        3 | 0.2500 | zero-entry share 1.00, mean 0.0
+AR      airgrasp  |    48 |       32 |       32 |    +0 |        1        1 | 1.0000 | zero-entry share 1.00, mean 0.0
+ledger  pause     |    50 |       50 |       50 |    +0 |        0        0 | 1.0000 | zero-entry share 0.74, mean 0.26
+ledger  fidget    |    50 |       50 |       50 |    +0 |        0        0 | 1.0000 | zero-entry share 0.74, mean 0.26
+ledger  airgrasp  |    50 |       50 |       50 |    +0 |        0        0 | 1.0000 | zero-entry share 0.46, mean 0.54
+STRUCTURAL (ledger, pause + fidget, vis): NOT IMMUNE BY CONSTRUCTION
+BEHAVIOUR (ledger, pause + fidget): IMMUNE
+AIRGRASP (ledger): NOT FOOLED
+AR: reported only (rows above)

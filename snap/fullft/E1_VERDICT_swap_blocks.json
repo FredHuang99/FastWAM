@@ -1,0 +1,99 @@
+{
+ "task": "swap_blocks",
+ "scenes": 50,
+ "cells": {
+  "AR|pause": {
+   "valid_pairs": 48,
+   "vis_success": 32,
+   "hid_success_all": 33,
+   "delta": -1,
+   "vis_only": 0,
+   "hid_only": 1,
+   "p": 1.0,
+   "zero_entry_share": 1.0,
+   "mean_entries": 0.0,
+   "finished": [
+    50,
+    50
+   ]
+  },
+  "AR|fidget": {
+   "valid_pairs": 48,
+   "vis_success": 32,
+   "hid_success_all": 35,
+   "delta": -3,
+   "vis_only": 0,
+   "hid_only": 3,
+   "p": 0.25,
+   "zero_entry_share": 1.0,
+   "mean_entries": 0.0,
+   "finished": [
+    50,
+    50
+   ]
+  },
+  "AR|airgrasp": {
+   "valid_pairs": 48,
+   "vis_success": 32,
+   "hid_success_all": 32,
+   "delta": 0,
+   "vis_only": 1,
+   "hid_only": 1,
+   "p": 1.0,
+   "zero_entry_share": 1.0,
+   "mean_entries": 0.0,
+   "finished": [
+    50,
+    50
+   ]
+  },
+  "ledger|pause": {
+   "valid_pairs": 50,
+   "vis_success": 50,
+   "hid_success_all": 50,
+   "delta": 0,
+   "vis_only": 0,
+   "hid_only": 0,
+   "p": 1.0,
+   "zero_entry_share": 0.74,
+   "mean_entries": 0.26,
+   "finished": [
+    50,
+    50
+   ]
+  },
+  "ledger|fidget": {
+   "valid_pairs": 50,
+   "vis_success": 50,
+   "hid_success_all": 50,
+   "delta": 0,
+   "vis_only": 0,
+   "hid_only": 0,
+   "p": 1.0,
+   "zero_entry_share": 0.74,
+   "mean_entries": 0.26,
+   "finished": [
+    50,
+    50
+   ]
+  },
+  "ledger|airgrasp": {
+   "valid_pairs": 50,
+   "vis_success": 50,
+   "hid_success_all": 50,
+   "delta": 0,
+   "vis_only": 0,
+   "hid_only": 0,
+   "p": 1.0,
+   "zero_entry_share": 0.46,
+   "mean_entries": 0.54,
+   "finished": [
+    50,
+    50
+   ]
+  }
+ },
+ "structural": "NOT IMMUNE BY CONSTRUCTION",
+ "behaviour": "IMMUNE",
+ "airgrasp": "NOT FOOLED"
+}

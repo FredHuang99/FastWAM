@@ -1,0 +1,25 @@
+{
+ "rows": {
+  "ar2_clock_e30": {
+   "finished": 50,
+   "success": 50,
+   "failures": {}
+  },
+  "ar2_clock_e30_ts1.5": {
+   "finished": 0,
+   "success": 0,
+   "failures": {}
+  },
+  "ar2_clock_e30_ts0.5": {
+   "finished": 0,
+   "success": 0,
+   "failures": {}
+  }
+ },
+ "direction": {
+  "ar2_clock_e30": "none",
+  "ar2_clock_e30_ts1.5": "none",
+  "ar2_clock_e30_ts0.5": "none"
+ },
+ "flips": false
+}

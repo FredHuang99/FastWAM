@@ -1,0 +1,64 @@
+
+[queue5] 2026-11-19 22:20:59 $ /opt/mwam/bin/python -m fastwam.memory_v2.online run --checkpoint /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_ar_e30/export_e30.pt --label rearrange_ar_e30_smoke_p64_vis --modes on --scenes /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/scenes_seed42_n100_rearrange_blocks --output /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/v15smoke --tasks rearrange_blocks --execute 8 --limit 2 --stress event:pause:64:history
+[dense] WARNING runtime packages differ from the dense preparation receipt (cache is read, not re-encoded): {"python": {"recorded": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]", "actual": "3.12.3 (main, Nov  6 2024, 18:32:19) [GCC 13.2.0]"}, "packages.Pillow": {"recorded": "12.0.0", "actual": "11.0.0"}, "packages.numpy": {"recorded": "2.1.0", "actual": "1.26.4"}, "packages.torch": {"recorded": "2.10.0a0+b558c986e8.nv25.11", "actual": "2.6.0a0+df5bbc09d1.nv24.12"}, "packages.torchvision": {"recorded": "0.25.0a0+7a13ad0f", "actual": "0.20.0a0"}}
+[closed-loop] 2026-11-19 14:22:12 2 scenes x modes ['on'] -> labels {'on': 'rearrange_ar_e30_smoke_p64_vis'}; checkpoint /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_ar_e30/export_e30.pt; T5 on CPU; max_targets=official
+[closed-loop] WARNING dense config was recorded for sm9.0; this GPU is sm8.6: TORCH_EXTENSIONS_DIR -> /workspace/FastWAM/outputs/fused_environment_memory_v2_sm86/torch_extensions (give --extensions-dir to reuse built kernels)
+[closed-loop] 2026-11-19 14:22:12 start rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 target_limit=700 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/v15smoke/rearrange_ar_e30_smoke_p64_vis/on/rearrange_blocks/seed_4300000
+[fullft] text from the training cache (rearrange_blocks/episode_0000000, 50 episodes share it; fingerprint 73739a6aa417)
+/restore-tmp/dense_joint_v1/data_path.py:16: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /opt/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:206.)
+  return torch.stack([TF.resize(torch.from_numpy(np.ascontiguousarray(a)).permute(2,0,1).float()/255.,
+[decide] 2026-11-19 14:22:58 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 frame=0/700 hist=0 policy=0.6s elapsed=8s
+[decide] 2026-11-19 14:23:12 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 frame=32/700 hist=2 policy=0.6s elapsed=23s
+[decide] 2026-11-19 14:23:22 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 frame=64/700 hist=3 policy=0.6s elapsed=32s
+[decide] 2026-11-19 14:23:32 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 frame=96/700 hist=3 policy=0.6s elapsed=42s
+[decide] 2026-11-19 14:23:41 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 frame=128/700 hist=3 policy=0.6s elapsed=51s
+[decide] 2026-11-19 14:24:05 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 frame=224/700 hist=3 policy=0.6s elapsed=75s
+[decide] 2026-11-19 14:24:14 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 frame=256/700 hist=3 policy=0.6s elapsed=85s
+[decide] 2026-11-19 14:24:24 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 frame=288/700 hist=3 policy=0.6s elapsed=94s
+[decide] 2026-11-19 14:24:34 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 frame=320/700 hist=3 policy=0.6s elapsed=104s
+[decide] 2026-11-19 14:24:43 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 frame=352/700 hist=3 policy=0.6s elapsed=114s
+[decide] 2026-11-19 14:24:53 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 frame=384/700 hist=3 policy=0.6s elapsed=124s
+[decide] 2026-11-19 14:25:03 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 frame=416/700 hist=3 policy=0.6s elapsed=133s
+[decide] 2026-11-19 14:25:13 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 frame=448/700 hist=3 policy=0.6s elapsed=143s
+[decide] 2026-11-19 14:25:22 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 frame=480/700 hist=3 policy=0.6s elapsed=153s
+[decide] 2026-11-19 14:25:32 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 frame=512/700 hist=3 policy=0.6s elapsed=162s
+[decide] 2026-11-19 14:25:42 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 frame=544/700 hist=3 policy=0.6s elapsed=172s
+[decide] 2026-11-19 14:25:59 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 frame=576/700 hist=3 policy=0.6s elapsed=189s
+[decide] 2026-11-19 14:26:15 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 frame=608/700 hist=3 policy=0.6s elapsed=205s
+[decide] 2026-11-19 14:26:24 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 frame=640/700 hist=3 policy=0.6s elapsed=214s
+[decide] 2026-11-19 14:26:36 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 frame=672/700 hist=3 policy=0.6s elapsed=226s
+[decide] 2026-11-19 14:26:50 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 frame=704/700 hist=3 policy=0.6s elapsed=241s
+[decide] 2026-11-19 14:27:00 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 frame=736/700 hist=3 policy=0.6s elapsed=250s
+[closed-loop] 2026-11-19 14:27:11 done  rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300000 success=False targets=700/700 reward=0.0 lift=0.12080901861190796  299s
+[closed-loop] 2026-11-19 14:27:11 start rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 target_limit=700 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/v15smoke/rearrange_ar_e30_smoke_p64_vis/on/rearrange_blocks/seed_4300001
+[decide] 2026-11-19 14:28:01 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 frame=0/700 hist=0 policy=0.5s elapsed=5s
+[decide] 2026-11-19 14:28:11 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 frame=32/700 hist=2 policy=0.5s elapsed=15s
+[decide] 2026-11-19 14:28:20 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 frame=64/700 hist=3 policy=0.6s elapsed=25s
+[decide] 2026-11-19 14:28:30 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 frame=96/700 hist=3 policy=0.6s elapsed=34s
+[decide] 2026-11-19 14:28:40 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 frame=128/700 hist=3 policy=0.6s elapsed=44s
+[decide] 2026-11-19 14:29:03 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 frame=224/700 hist=3 policy=0.6s elapsed=68s
+[decide] 2026-11-19 14:29:13 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 frame=256/700 hist=3 policy=0.6s elapsed=77s
+[decide] 2026-11-19 14:29:22 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 frame=288/700 hist=3 policy=0.6s elapsed=87s
+[decide] 2026-11-19 14:29:32 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 frame=320/700 hist=3 policy=0.6s elapsed=96s
+[decide] 2026-11-19 14:29:41 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 frame=352/700 hist=3 policy=0.6s elapsed=105s
+[decide] 2026-11-19 14:29:51 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 frame=384/700 hist=3 policy=0.6s elapsed=115s
+[decide] 2026-11-19 14:30:00 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 frame=416/700 hist=3 policy=0.6s elapsed=125s
+[decide] 2026-11-19 14:30:10 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 frame=448/700 hist=3 policy=0.6s elapsed=134s
+[decide] 2026-11-19 14:30:19 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 frame=480/700 hist=3 policy=0.6s elapsed=144s
+[decide] 2026-11-19 14:30:29 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 frame=512/700 hist=3 policy=0.6s elapsed=153s
+[decide] 2026-11-19 14:30:39 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 frame=544/700 hist=3 policy=0.6s elapsed=163s
+[decide] 2026-11-19 14:30:51 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 frame=576/700 hist=3 policy=0.6s elapsed=175s
+[decide] 2026-11-19 14:31:04 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 frame=608/700 hist=3 policy=0.6s elapsed=188s
+[decide] 2026-11-19 14:31:14 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 frame=640/700 hist=3 policy=0.6s elapsed=198s
+[decide] 2026-11-19 14:31:23 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 frame=672/700 hist=3 policy=0.6s elapsed=208s
+[decide] 2026-11-19 14:31:33 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 frame=704/700 hist=3 policy=0.6s elapsed=217s
+[decide] 2026-11-19 14:31:43 rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 frame=736/700 hist=3 policy=0.6s elapsed=227s
+[closed-loop] 2026-11-19 14:31:54 done  rearrange_ar_e30_smoke_p64_vis/on rearrange_blocks seed=4300001 success=False targets=700/700 reward=0.0 lift=0.12351638078689575  283s
+
+label/mode              task               n  success  95% CI        lift5cm  reward  targets dep_null  dep_off   dep_on  pol_s
+rearrange_ar_e30_smoke_p64_vis/onrearrange_blocks   2     0.00  [0.00,0.66]      1.00    0.00      700        -        -        -    0.6
+swapT_ar_e30_smoke_p64_vis/onswap_T             1     0.00  [0.00,0.79]         -    0.00      600        -        -        -    0.6
+
+paired on common scenes (A vs B):                         n  both  only A  only B  neither  McNemar p
+
+[summary] 3 episodes, 0 open errors -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/v15smoke/SUMMARY.json

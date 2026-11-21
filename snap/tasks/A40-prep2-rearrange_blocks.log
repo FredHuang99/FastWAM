@@ -1,0 +1,8 @@
+
+[queue5] 2026-11-18 17:59:25 $ bash -c bash /workspace/FastWAM-memory2/scripts/fullft/a40_prep_task.sh rearrange_blocks
+[prep] 2026-11-18 09:59:26 rearrange_blocks; disk: /dev/sdb         19T  9.3T  8.0T  54% /workspace/FastWAM-memory2
+rearrange_blocks: outputs/memory_v2/closed_loop/scenes_seed42_n100_rearrange_blocks/rearrange_blocks.json complete (100 scenes, next seed 4300100)
+[text] rearrange_blocks: 'Move the block between the two mats onto the empty mat, press the button, then move the other block (the one that started on a mat) to the space between the two mats.' -> cache/rearrange_blocks_episode_0000000/encodings.pt (72 MiB; 50 training episodes share the instruction)
+[text] rearrange_blocks: 2 files checked against dense_rearrange_blocks_v1/RELAY_MANIFEST.json (sha256); marker .text_only
+[text] rearrange_blocks: 'Move the block between the two mats onto the empty mat, press the button, then move the other block (the one that started on a mat) to the space between the two mats.' -> cache/rearrange_blocks_episode_0000000/encodings.pt (50 training episodes share it); fingerprint 73739a6aa417
+[prep] 2026-11-18 09:59:35 rearrange_blocks ready

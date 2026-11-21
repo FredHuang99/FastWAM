@@ -1,0 +1,6 @@
+
+[queue5] 2026-11-17 19:49:39 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e1_smoke_check.py
+SMOKE seed 4300000: finished True, success True, injections 1
+{"frame": 352, "inject": "airgrasp", "k": 32, "arm": "history", "active_arm": 1, "open_frame": 316, "shown": 32, "displacement_m": 0.0, "counters_changed": [], "arm_return_rad": 0.004965871572494507}
+ledger entries from the injected frames: 0
+SMOKE: PASS
