@@ -5,7 +5,7 @@
 # (3 tries each, as for a fresh export); stops when every listed tag is marked. Started in the background by
 # gaas_run.pbs, one job at a time (lock outputs/fullft/.relay_backlog_lock, removed on exit, stale after 25 h).
 set -u
-R=/workspace/FastWAM-memory2; OUT=$R/outputs/fullft; LIST=$R/scripts/gaas/relay_backlog.txt
+R=/workspace/FastWAM-memory2; OUT=$R/outputs/fullft; LIST=${LIST:-$R/scripts/gaas/relay_backlog.txt}   # H100: LIST=..._h100.txt
 LOG=$OUT/RELAY_BACKLOG_$(date +%Y%m%d_%H%M).txt
 exec > >(tee -a "$LOG") 2>&1
 trap 'echo "[backlog] $(date "+%F %T") finished; log $LOG"; rmdir $OUT/.relay_backlog_lock 2>/dev/null' EXIT
@@ -14,7 +14,8 @@ for round in $(seq 1 48); do
   left=0
   while read -r run tags; do
     case "$run" in ""|\#*) continue;; esac
-    todo=""; for t in $tags; do [ -f $OUT/$run/.relayed_$t ] || todo="$todo $t"; done
+    todo=""; for t in $tags; do                 # only exports this machine has (export_watch would wait for others)
+      [ -f $OUT/$run/.relayed_$t ] || { [ -f $OUT/$run/export_$t.pt ] && todo="$todo $t"; }; done
     [ -z "$todo" ] && continue
     left=1
     echo "[backlog] $(date '+%F %T') round $round: $run$todo"
