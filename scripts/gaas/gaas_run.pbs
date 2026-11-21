@@ -59,7 +59,22 @@ COND=$(echo "$LINE" | cut -d'|' -f3- | xargs)
 read -r -a SETA <<< "$SETS"                      # no glob expansion of values like [45,60]
 A=(--set "name=$RUN"); for s in "${SETA[@]}"; do A+=(--set "$s"); done
 step "sets: $SETS"
-module purge; module load apptainer/1.4.1
+# 11-21 15:10: the cluster no longer has the module apptainer/1.4.1 ("Unable to locate a modulefile", login node and
+# g13 / g14; apptainer not on PATH). Try, in order: that module, any apptainer / singularity module (newest), the
+# install the old module pointed to (/usr/local/apptainer/<version>/bin), then a plain PATH. Stop with the module list.
+module purge
+APPT_HOW=""
+for m in apptainer/1.4.1 $(module -t avail 2>&1 | grep -iE '^(apptainer|singularity)' | sort -rV); do
+  module load "$m" > /dev/null 2>&1 && command -v apptainer > /dev/null && { APPT_HOW="module $m"; break; }
+done
+if [ -z "$APPT_HOW" ]; then
+  for b in $(ls -d /usr/local/apptainer/*/bin /opt/apptainer*/bin /usr/local/singularity/*/bin 2>/dev/null | sort -rV); do
+    [ -x $b/apptainer ] && { export PATH=$b:$PATH; APPT_HOW="path $b"; break; }
+  done
+fi
+[ -z "$APPT_HOW" ] && command -v apptainer > /dev/null && APPT_HOW="on PATH $(command -v apptainer)"
+[ -n "$APPT_HOW" ] || fail "no apptainer on $(hostname): modules [$(module -t avail 2>&1 | tr '\n' ' ' | cut -c1-300)]; /usr/local: [$(ls /usr/local 2>/dev/null | tr '\n' ' ')]"
+step "apptainer: $APPT_HOW ($(apptainer --version 2>&1 | head -n 1))"
 unset APPTAINER_HOME SINGULARITY_HOME          # the module's APPTAINER_HOME would become the container's HOME
 
 step "1 container, environment, unit tests"
