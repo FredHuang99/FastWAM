@@ -116,7 +116,7 @@ def main():
     with tempfile.TemporaryDirectory() as d:
         old = Path(d) / "old"
         old.mkdir()
-        arc = subprocess.run(["git", "-C", str(REPO), "archive", args.old, "src"], capture_output=True, check=True).stdout
+        arc = subprocess.run(["git", "-c", "safe.directory=*", "-C", str(REPO), "archive", args.old, "src"], capture_output=True, check=True).stdout
         subprocess.run(["tar", "-x", "-C", str(old)], input=arc, check=True)
         a, b = run(old), run(REPO)
     bad = []

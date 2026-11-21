@@ -194,7 +194,7 @@ def test_session_streaming_detection_equals_demo_detector(tmp_path):
         session._detect(n)
 
 
-@pytest.mark.parametrize("variant", ["ar", "arprop", "arprop_ord", "arclk"])
+@pytest.mark.parametrize("variant", ["ar", "arprop", "arprop_ord", "arprop_rep", "arclk"])
 def test_session_decide_end_to_end(tmp_path, variant):
     """FullSession.decide as the closed loop calls it (observation batches, identity checks, detection, ledger,
     selection, eviction, the decision log), with the image / text encoders stubbed: it equals decide_encoded on the
@@ -208,9 +208,10 @@ def test_session_decide_end_to_end(tmp_path, variant):
     from fastwam.fullft.online import FrameCache, FullSession, decide_encoded
     from fastwam.memory_s1.common import seed_for
     from fastwam.memory_s1.sim_bridge import diagnostic_action_noise
-    ordinal = 3 if variant == "arprop_ord" else 0                  # 11-17 plan v13 E4: the ordinal code end to end
+    ordinal = 3 if variant in ("arprop_ord", "arprop_rep") else 0  # 11-17 plan v13 E4: the ordinal code end to end
+    theta = 0.5 if variant == "arprop_rep" else 0.0                # 11-22 plan v19 3.2 (3): in-place repeat count online
     variant = "arprop" if ordinal else variant
-    rule = HistoryRule(variant, event_max=4, lag=4, ordinal=ordinal)
+    rule = HistoryRule(variant, event_max=4, lag=4, ordinal=ordinal, repeat_theta=theta)
     m = _model(variant, event_slots=rule.event_slots, ledger_features=rule.ledger_features)
     with torch.no_grad():
         m.hist_gate.fill_(0.5)
@@ -256,7 +257,8 @@ def test_session_decide_end_to_end(tmp_path, variant):
             ledger = clock_tensor(rule, clock_frames(rule, current), lambda f: ref_encoded[f][1])
         if variant == "arprop":
             evs = detect(np.stack([grip[:current + 1], np.ones(current + 1)], 1), pos[:current + 1])
-            ledger = ledger_tensor(rule, ledger_entries(rule, current, evs), lambda f: ref_encoded[f][1])
+            ledger = ledger_tensor(rule, ledger_entries(rule, current, evs, lambda f: ref_encoded[f][1]),
+                                   lambda f: ref_encoded[f][1])
         ref = decide_encoded(m, rule, ref_cache, ref_encoded, current, text, noise, 3, [], ledger)
         want = ref["normalised"].clone()
         want[:, [6, 13]] = want[:, [6, 13]].clamp(0, 1)            # the session clips the grippers after denormalising

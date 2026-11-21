@@ -103,3 +103,20 @@ ar2_prop_novid | model.video_loss=0 data.tasks=[put_back_block,swap_blocks] hist
 # D = success(ar) - success(none) on 1-100, SESOI 0.10, both CI ends inside +-0.10 -> HISTORY NOT USED (descriptive).
 obs_none | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1] data.tasks=[observe_and_pickup] history.variant=none | test -f outputs/memory_v2/press/dense_observe_and_pickup_v1/.verified
 press_none | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_press_button_v1] data.tasks=[press_button] history.variant=none | test -f outputs/memory_v2/press/dense_press_button_v1/.verified
+# 11-22 plan v19 D1 (Fable 3.1 / 3.2; executed by Opus): the three-frame two-task model (ar_2task's exact recipe: ar,
+# seed 17, base_2task.yaml) with decision-point training. Two arms, same seed / data order as ar_2task:
+#   d1_w   (a) decision-point weighting only: model.decision_weight=3 (window 16 frames from the confirmation of a
+#          gripper-open or press-bottom event; video and action losses multiplied)
+#   d1_wn  (b) the same + the next-event head (model.next_event_loss=0.1)
+# Question: does the three-frame model lack the information, or was it not taught enough at the decision moments?
+# Registered reading (11-22, before any D1 run; Status 11-22 section 2; A40, official seed-42 banks):
+#   MAIN per arm, swap_blocks 1-100, e30: D = success(d1 arm e30) - success(ar_2task e30), paired by scene, paired
+#   bootstrap 95 % CI (10,000, seed 0); SESOI +0.15:
+#     CI lower > +0.15 -> DECISION TRAINING HELPS; CI upper < +0.15 -> NO HELP; otherwise UNCERTAIN (pre-set
+#     extension: both e30 again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule).
+#   The difference between the two arms is described only, unless a MAIN is HELPS: then D = (b) - (a), SESOI 0.10, the
+#   same three outcomes. put_back_block is described only. Plan 6.2: an arm at >= 95 or NO HELP -> back to Fable.
+# Gate: scripts/fullft/GO_deed (committed by Opus after deed_smoke_5090.sh passes: repeat theta, bit parity with the
+# parts off, closed-loop smoke of the D1 (b) and D2 configurations).
+d1_w | model.decision_weight=3 data.tasks=[put_back_block,swap_blocks] data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_put_back_block.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_blocks.json] | test -f scripts/fullft/GO_deed && test -s outputs/fullft/events/events_put_back_block.json && test -s outputs/fullft/events/events_swap_blocks.json
+d1_wn | model.decision_weight=3 model.next_event_loss=0.1 data.tasks=[put_back_block,swap_blocks] data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_put_back_block.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_blocks.json] | test -f scripts/fullft/GO_deed && test -s outputs/fullft/events/events_put_back_block.json && test -s outputs/fullft/events/events_swap_blocks.json
