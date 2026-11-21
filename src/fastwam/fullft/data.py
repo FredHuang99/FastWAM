@@ -18,8 +18,8 @@ from typing import Dict, List, Optional, Sequence, Tuple
 import torch
 
 from .events import event_frames
-from .history import (LEDGER_KINDS, HistoryRule, clock_code, clock_dim, clock_frames, event_states, ledger_dim,
-                      ledger_entries, ordinal_code, select)
+from .history import (LEDGER_KINDS, HistoryRule, augment_ledger, clock_code, clock_dim, clock_frames, event_states,
+                      ledger_dim, ledger_entries, ordinal_code, select)
 
 HORIZON = 32
 
@@ -299,7 +299,10 @@ class Samples(torch.utils.data.Dataset):
             if episode_id not in self.checked_text:
                 check_ledger_slots(e["text"], self.rule.event_max, f"in {episode_id}")
                 self.checked_text.add(episode_id)
-            entries = ledger_entries(self.rule, a, self.events.get(episode_id, []))
+            entries = ledger_entries(self.rule, a, self.events.get(episode_id, []), lambda f: e["proprio"][f])
+            if rng is not None and (float(self.rule.ledger_drop_p) > 0 or float(self.rule.ledger_over_p) > 0):
+                entries = augment_ledger(self.rule, a, self.events.get(episode_id, []), entries,
+                                         lambda f: e["proprio"][f], rng)          # plan v19 3.2 (4), training only
             feat, valid = ledger_tensor(self.rule, entries, lambda f: e["proprio"][f])
             sample.update(ledger=feat, ledger_valid=valid)
         return sample

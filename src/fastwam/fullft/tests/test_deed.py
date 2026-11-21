@@ -51,10 +51,10 @@ def _dense(tmp_path, n=60, episodes=2):
         eid = f"swap_blocks/episode_{k:07d}"
         folder = root / "cache" / eid.replace("/", "_")
         folder.mkdir(parents=True)
-        text = torch.cat((torch.randn(3, TEXT), torch.zeros(4, TEXT)))
+        text = torch.cat((torch.randn(3, TEXT), torch.zeros(12, TEXT)))
         torch.save({"latent": torch.randn(n, 48, 1, 4, 4), "video_latent": torch.randn(n, 48, 3, 4, 4),
                     "video_valid": torch.ones(n, 9, dtype=torch.bool), "text": text,
-                    "text_valid": torch.tensor([True] * 3 + [False] * 4), "proprio": torch.randn(n, 14),
+                    "text_valid": torch.tensor([True] * 3 + [False] * 12), "proprio": torch.randn(n, 14),
                     "actions": torch.randn(n, 14)}, folder / "encodings.pt")
         (folder / "COMPLETE.json").write_text("{}")
         records.append({"episode_id": eid, "task": "swap_blocks", "split": "train", "length": n})
@@ -202,3 +202,116 @@ def test_export_with_head_loads_strict(tmp_path):
         m0.load_state_dict(m1.state_dict(), strict=True)
     m1b, _ = _model(next_event=True, seed=5)
     m1b.load_state_dict(m1.state_dict(), strict=True)
+
+
+# ----------------------------------------------------------------------------- (3) in-place repeat count, (4) augmentation
+PLACE = {"A": [0.0] * 6, "B": [1.0] * 6}
+FRAMES = {10: "A", 12: "A", 20: "A", 22: "A", 30: "A", 32: "A", 40: "B", 42: "B", 50: "B", 52: "B", 45: "A"}
+PRESSES = sorted([{"frame": f, "arm": 0, "kind": "bottom", "confirmed": f + 1} for f in (10, 20, 30, 40, 50)]
+                 + [{"frame": f, "arm": 0, "kind": "top", "confirmed": f + 1} for f in (12, 22, 32, 42, 52)]
+                 + [{"frame": 45, "arm": 1, "kind": "bottom", "confirmed": 46}], key=lambda e: e["frame"])
+
+
+def _proprio(f):
+    p = torch.zeros(14)
+    place = PLACE[FRAMES.get(int(f), "A")]
+    p[0:6] = torch.tensor(place)
+    p[7:13] = torch.tensor(place) + 5.0        # the right arm's joints never matter for the left arm's count
+    p[6] = p[13] = 0.3
+    return p
+
+
+def test_repeat_count_resets_at_a_new_place():
+    from fastwam.fullft.history import ledger_entries, with_ordinals, with_repeats
+    got = with_repeats(PRESSES, _proprio, 0.5)
+    by = {(e["frame"], e["kind"], e["arm"]): e["ordinal"] for e in got}
+    assert [by[(f, "bottom", 0)] for f in (10, 20, 30, 40, 50)] == [1, 2, 3, 1, 2]
+    assert [by[(f, "top", 0)] for f in (12, 22, 32, 42, 52)] == [1, 2, 3, 1, 2]
+    assert by[(45, "bottom", 1)] == 1
+    assert [e["ordinal"] for e in with_ordinals(PRESSES) if e["kind"] == "bottom" and e["arm"] == 0] == [1, 2, 3, 4, 5]
+    rule = HistoryRule("arprop", event_max=3, ordinal=16, repeat_theta=0.5)
+    capped = ledger_entries(rule, 100, PRESSES, _proprio)          # counted over everything, then capped
+    assert [(e["frame"], e["ordinal"]) for e in capped] == [(45, 1), (50, 2), (52, 2)]
+    with pytest.raises(ValueError):
+        ledger_entries(rule, 100, PRESSES)                         # needs proprio_of
+    off = HistoryRule("arprop", event_max=3, ordinal=16)
+    assert ledger_entries(off, 100, PRESSES, _proprio) == ledger_entries(off, 100, PRESSES)   # proprio ignored when off
+    for bad in (dict(repeat_theta=-1.0, ordinal=16), dict(repeat_theta=0.5)):
+        with pytest.raises(ValueError):
+            HistoryRule("arprop", **bad)
+
+
+def test_repeat_count_in_samples_and_features(tmp_path):
+    from fastwam.fullft.data import ledger_tensor
+    from fastwam.fullft.history import ledger_entries, ordinal_code
+    eps, _ = _dense(tmp_path)
+    items = train_items(eps)
+    events = {r["episode_id"]: PRESSES for r in eps.records}
+    rule = HistoryRule("arprop", event_max=8, ordinal=16, repeat_theta=0.5)
+    ds = Samples(eps, items, rule, events, "valid")
+    e = eps(items[0][0])
+    row = ds[items.index((items[0][0], 55))]
+    want = ledger_entries(rule, 55, PRESSES, lambda f: e["proprio"][f])
+    feat, valid = ledger_tensor(rule, want, lambda f: e["proprio"][f])
+    assert torch.equal(row["ledger"], feat) and torch.equal(row["ledger_valid"], valid)
+    flag = 20 + 8
+    last = feat[int(valid.sum()) - 1]
+    assert last[flag + 1:].tolist() == ordinal_code(want[-1]["ordinal"], 16)
+
+
+def test_ledger_augmentation():
+    import random
+    from fastwam.fullft.history import augment_ledger, last_cycle, ledger_entries, run_ended
+    rule = HistoryRule("arprop", event_max=32, ordinal=16, repeat_theta=0.5, ledger_over_p=1.0, ledger_over_max=2)
+    full = ledger_entries(rule, 34, PRESSES, _proprio)             # ... b30 (3), t32 (3): the run at A ends (next top at B)
+    assert full[-1]["frame"] == 32 and run_ended(full[-1], PRESSES, _proprio, 0.5)
+    assert [(e["frame"], e["kind"]) for e in last_cycle(full)] == [(30, "bottom"), (32, "top")]
+    seen_k = set()
+    for seed in range(20):
+        out = augment_ledger(rule, 34, PRESSES, full, _proprio, random.Random(seed))
+        assert out[:len(full)] == full                            # the real entries are untouched
+        extra = out[len(full):]
+        k = len(extra) // 2
+        seen_k.add(k)
+        assert [(e["frame"], e["kind"], e["ordinal"]) for e in extra] == [
+            x for j in range(1, k + 1) for x in ((30, "bottom", 3 + j), (32, "top", 3 + j))]
+    assert seen_k == {1, 2}
+    mid = ledger_entries(rule, 24, PRESSES, _proprio)              # latest t22 (2): the next top (32) is in place
+    assert not run_ended(mid[-1], PRESSES, _proprio, 0.5)
+    assert augment_ledger(rule, 24, PRESSES, mid, _proprio, random.Random(0)) == mid
+    small = HistoryRule("arprop", event_max=5, ordinal=16, repeat_theta=0.5, ledger_over_p=1.0)
+    capped = augment_ledger(small, 34, PRESSES, ledger_entries(small, 34, PRESSES, _proprio), _proprio, random.Random(1))
+    assert len(capped) == 5 and capped[-1]["frame"] == 32 and capped[-1]["ordinal"] > 3
+    drop = HistoryRule("arprop", event_max=32, ordinal=16, repeat_theta=0.5, ledger_drop_p=1.0, ledger_keep=4)
+    base = ledger_entries(drop, 100, PRESSES, _proprio)
+    lengths = set()
+    for seed in range(30):
+        out = augment_ledger(drop, 100, PRESSES, base, _proprio, random.Random(seed))
+        assert out == base[-len(out):] and 4 <= len(out) < len(base)   # oldest dropped, last 4 kept, counts kept
+        lengths.add(len(out))
+    assert len(lengths) > 3
+    tiny = ledger_entries(drop, 24, PRESSES, _proprio)[-4:]
+    assert augment_ledger(drop, 24, PRESSES, tiny, _proprio, random.Random(0)) == tiny   # nothing older than the last 4
+    with pytest.raises(ValueError):
+        HistoryRule("arprop", ordinal=16, ledger_over_p=0.3)       # over-count needs the repeat count
+    with pytest.raises(ValueError):
+        HistoryRule("ar", ledger_drop_p=0.3)
+
+
+def test_augmentation_in_samples_only_touches_the_ledger(tmp_path):
+    eps, _ = _dense(tmp_path)
+    items = train_items(eps)
+    events = {r["episode_id"]: PRESSES for r in eps.records}
+    plain = HistoryRule("arprop", event_max=8, ordinal=16, repeat_theta=0.5)
+    aug = HistoryRule("arprop", event_max=8, ordinal=16, repeat_theta=0.5, ledger_drop_p=0.5, ledger_over_p=0.5)
+    d0 = Samples(eps, items, plain, events, "valid", augment=True, seed=3)
+    d1 = Samples(eps, items, aug, events, "valid", augment=True, seed=3)
+    dv = Samples(eps, items, aug, events, "valid", augment=False, seed=3)      # validation: never augmented
+    changed = 0
+    for i in range(0, len(items), 3):
+        r0, r1, rv = d0[i], d1[i], dv[i]
+        assert all(torch.equal(r0[k], r1[k]) for k in r0 if not k.startswith("ledger"))
+        assert all(torch.equal(r0[k], rv[k]) for k in r0)
+        changed += not torch.equal(r0["ledger"], r1["ledger"])
+        assert torch.equal(r1["ledger"], d1[i]["ledger"])                       # deterministic per (seed, epoch, item)
+    assert changed > 0

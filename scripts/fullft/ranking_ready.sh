@@ -7,7 +7,8 @@
 #     more than 32 body events)
 #   1 the ranking event file from the relay (diag/events_b1, put there by the 5090 on 11-17; the H100 and the new H200
 #     used files of the same batch) into outputs/fullft/events/ (an existing file is never overwritten)
-#   2 ledger_ready.py --variant arprop --tasks blocks_ranking_try (event file / text-slot checks; CPU only)
+#   2 ledger_ready.py --variant arprop --tasks blocks_ranking_try --event-max 80 (event file / 80 text slots; CPU only;
+#     user 11-22 02:23: record size 80 for ranking)
 #     -> marker READY_arprop_blocks_ranking_try
 # This machine has no /opt/hf-tools: /opt/mwam/bin/python only. Log: outputs/fullft/RANKING_READY.log
 set -u
@@ -32,6 +33,6 @@ if [ ! -s $E ]; then
   cp $F/relay_in/events_b1/events_blocks_ranking_try.json $E && echo "[ranking] event file copied"
 fi
 PYTHONPATH=src CUDA_VISIBLE_DEVICES= $PY scripts/fullft/ledger_ready.py --variant arprop --tasks blocks_ranking_try \
-  --marker READY_arprop_blocks_ranking_try --skip-tests 2>&1 | grep -v '^\.\+$' | tail -n 8
+  --event-max 80 --marker READY_arprop_blocks_ranking_try --skip-tests 2>&1 | grep -v '^\.\+$' | tail -n 8
 [ -f $F/READY_arprop_blocks_ranking_try ] && { echo "[ranking] READY"; exit 0; }
 echo "[ranking] NOT READY (see above)"; exit 1

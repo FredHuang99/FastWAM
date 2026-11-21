@@ -463,12 +463,12 @@ class FullSession:
                         check_ledger_slots(self.text[0], p.rule.event_max, "(online instruction)")
                     evs = seen + visible_events(self.detector.pending(), self.hide_after)   # 11-19: undecided
                                                                        # provisional entries (none when off)
-                    entries = ledger_entries(self.rule, current, evs)
+                    entries = ledger_entries(self.rule, current, evs, self._proprio)
                     mode = os.environ.get("MWAM_LEDGER", "").strip().lower()      # 11-14: test-time ablations
                     if mode == "oracle":                 # 11-21 plan v18 Z0: zero-delay write of the TRUE presses
                         evs_o = [e for e in evs if e.get("kind") != "bottom"] + visible_events(
                             oracle_presses(self.raw, current), self.hide_after)        # Z1b blind: hidden as well
-                        entries = ledger_entries(self.rule, current, evs_o)
+                        entries = ledger_entries(self.rule, current, evs_o, self._proprio)
                     elif mode == "off":
                         entries = []                     # no entry = what the model sees before the first event
                     elif mode == "drop1":
@@ -477,16 +477,16 @@ class FullSession:
                         entries = count_counterfactual(entries, mode)[-int(p.rule.event_max):]
                     elif mode in ("addpress", "droppress"):      # 11-16: one press more / fewer (press_counterfactual)
                         import dataclasses
-                        full = ledger_entries(dataclasses.replace(self.rule, event_max=10 ** 6), current, evs)
+                        full = ledger_entries(dataclasses.replace(self.rule, event_max=10 ** 6), current, evs, self._proprio)
                         entries = press_counterfactual(full, mode)[-int(p.rule.event_max):]
                     elif mode.startswith("freeze") and mode[6:].isdigit():   # 11-15: freezeK (ledger stops at move K)
                         import dataclasses
-                        full = ledger_entries(dataclasses.replace(self.rule, event_max=10 ** 6), current, evs)
+                        full = ledger_entries(dataclasses.replace(self.rule, event_max=10 ** 6), current, evs, self._proprio)
                         entries = freeze_counterfactual(full, int(mode[6:]))[-int(p.rule.event_max):]
                     elif mode in ("ordplus1", "duppress"):      # 11-17 plan v13 E4: code + 1 / one more press, same code
                         import dataclasses
                         from .history import ordinal_counterfactual
-                        full = ledger_entries(dataclasses.replace(self.rule, event_max=10 ** 6), current, evs)
+                        full = ledger_entries(dataclasses.replace(self.rule, event_max=10 ** 6), current, evs, self._proprio)
                         entries = ordinal_counterfactual(full, mode)[-int(p.rule.event_max):]
                     elif mode:
                         raise ValueError(f"unknown MWAM_LEDGER mode {mode!r} (off | drop1 | dropfirst | addmove | freezeK | "

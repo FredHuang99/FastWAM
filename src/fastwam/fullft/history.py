@@ -22,8 +22,9 @@ Index:
 """
 from __future__ import annotations
 
+import math
 import random
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import List, Optional, Sequence, Tuple
 
 VARIANTS = ("none", "ar", "event", "tw", "clk", "prop", "arprop", "arev", "arclk")
@@ -56,6 +57,23 @@ class HistoryRule:
     # older entries have left the event_max window), as a thermometer code of this many dims (feature k = 1 if
     # ordinal >= k). 0 = off: features, ledger_dim and every earlier export are exactly as before.
     ordinal: int = 0
+    # 11-22 plan v19 3.2 (3) (arprop with ordinal only): the ordinal becomes the IN-PLACE REPEAT COUNT: an entry counts
+    # previous + 1 when the arm's joints at its frame are closer than repeat_theta (L2 over that arm's six normalised
+    # joints, ARM_JOINTS) to those at the previous entry of the same arm and kind, else 1 (a new place). Same
+    # thermometer code, same features otherwise. 0 = off (the ordinal from the episode start, as before).
+    repeat_theta: float = 0.0
+    # 11-22 plan v19 3.2 (4) record augmentation, TRAINING ONLY (data.Samples with augment; never online; only the
+    # ledger changes, never the frames or the target actions). 0 = off (no random number drawn).
+    #   ledger_drop_p  per sample, with this probability drop the oldest k entries (k uniform in 1..all but the last
+    #                  ledger_keep); the kept entries keep their counts
+    #   ledger_over_p  per sample whose latest entry ENDS its in-place run in the demo (the next demo event of the same
+    #                  arm and kind is at another place, or there is none), with this probability add 1..ledger_over_max
+    #                  more copies of the latest in-place cycle (the arm's entries since its previous entry of the same
+    #                  kind), each copy's count + j: "one or two more presses recorded"; needs repeat_theta
+    ledger_drop_p: float = 0.0
+    ledger_keep: int = 4
+    ledger_over_p: float = 0.0
+    ledger_over_max: int = 2
 
     def __post_init__(self):
         if self.variant not in VARIANTS:
@@ -64,6 +82,20 @@ class HistoryRule:
             raise ValueError(f"history ordinal (thermometer dims) must be 0..64, got {self.ordinal}")
         if int(self.ordinal) and self.variant != "arprop":
             raise ValueError("history ordinal is a ledger feature: only with variant arprop")
+        if float(self.repeat_theta) < 0.0:
+            raise ValueError(f"history repeat_theta must be >= 0, got {self.repeat_theta}")
+        if float(self.repeat_theta) > 0.0 and not int(self.ordinal):
+            raise ValueError("history repeat_theta replaces the ordinal's count: it needs history.ordinal > 0")
+        if not (0.0 <= float(self.ledger_drop_p) <= 1.0 and 0.0 <= float(self.ledger_over_p) <= 1.0):
+            raise ValueError(f"ledger_drop_p / ledger_over_p must be in [0, 1], got {self.ledger_drop_p}, "
+                             f"{self.ledger_over_p}")
+        if int(self.ledger_keep) < 0 or int(self.ledger_over_max) < 1:
+            raise ValueError(f"ledger_keep must be >= 0 and ledger_over_max >= 1, got {self.ledger_keep}, "
+                             f"{self.ledger_over_max}")
+        if (float(self.ledger_drop_p) > 0.0 or float(self.ledger_over_p) > 0.0) and self.variant != "arprop":
+            raise ValueError("ledger augmentation needs variant arprop")
+        if float(self.ledger_over_p) > 0.0 and not float(self.repeat_theta) > 0.0:
+            raise ValueError("ledger_over_p marks the end of an in-place run: it needs history.repeat_theta > 0")
         if not (0.0 <= float(self.event_provisional) < float(self.event_delta)):
             raise ValueError(f"event_provisional must be in [0, event_delta), got {self.event_provisional}")
         if not (0.0 < float(self.event_delta) <= 0.1 and 0.0 <= float(self.event_min_path) <= 0.2):
@@ -192,16 +224,92 @@ def with_ordinals(entries: Sequence[dict]) -> List[dict]:
     return out
 
 
-def ledger_entries(rule: HistoryRule, t: int, events: Sequence[dict]) -> List[dict]:
+ARM_JOINTS = ((0, 1, 2, 3, 4, 5), (7, 8, 9, 10, 11, 12))   # the six joints of each arm in the 14-d proprio (6, 13 = grippers)
+
+
+def arm_joints(proprio, arm: int) -> List[float]:
+    return [float(proprio[i]) for i in ARM_JOINTS[int(arm)]]
+
+
+def joint_distance(a: Sequence[float], b: Sequence[float]) -> float:
+    return math.sqrt(sum((float(x) - float(y)) ** 2 for x, y in zip(a, b)))
+
+
+def with_repeats(entries: Sequence[dict], proprio_of, theta: float) -> List[dict]:
+    """Plan v19 3.2 (3): copies of the (ascending) entries, each with 'ordinal' = its IN-PLACE REPEAT COUNT: previous
+    count + 1 if the arm's joints at its frame (proprio_of(frame), normalised) are within theta of those at the
+    previous entry of the same arm and kind, else 1. Called on the full written list (before the event_max cut)."""
+    last: dict = {}
+    out = []
+    for e in entries:
+        key = (int(e["arm"]), e["kind"])
+        q = arm_joints(proprio_of(int(e["frame"])), int(e["arm"]))
+        prev = last.get(key)
+        n = prev[1] + 1 if prev is not None and joint_distance(q, prev[0]) < float(theta) else 1
+        last[key] = (q, n)
+        out.append(dict(e, ordinal=n))
+    return out
+
+
+def ledger_entries(rule: HistoryRule, t: int, events: Sequence[dict], proprio_of=None) -> List[dict]:
     """arprop: the ledger at current frame t = events with frame < t whose entry has been written (confirmed + lag
     <= t), ordered by (frame, arm), the last `event_max` kept. The same function offline and online.
-    With rule.ordinal the entries are copies carrying their ordinal, counted over ALL written entries."""
+    With rule.ordinal the entries are copies carrying their ordinal, counted over ALL written entries: from the
+    episode start, or (rule.repeat_theta > 0, plan v19 3.2 (3)) the in-place repeat count, which needs proprio_of
+    (frame -> normalised 14-d proprio; ignored otherwise)."""
     known = [e for e in events
              if int(e["frame"]) < t and int(e.get("confirmed", e["frame"])) + int(rule.lag) <= t]
     known.sort(key=lambda e: (int(e["frame"]), int(e["arm"])))
     if int(rule.ordinal):
-        known = with_ordinals(known)
+        if float(rule.repeat_theta) > 0.0:
+            if proprio_of is None:
+                raise ValueError("history repeat_theta: ledger_entries needs proprio_of")
+            known = with_repeats(known, proprio_of, rule.repeat_theta)
+        else:
+            known = with_ordinals(known)
     return known[-rule.event_max:]
+
+
+def run_ended(latest: dict, events: Sequence[dict], proprio_of, theta: float) -> bool:
+    """Plan v19 3.2 (4b): does the entry end its in-place run in the demo? True if the demo's next event of the same
+    arm and kind after it is at another place (joints >= theta apart) or there is none. `events` = all the demo's
+    events (future ones included: a mechanical mark from the demo, training only)."""
+    arm, kind, frame = int(latest["arm"]), latest["kind"], int(latest["frame"])
+    later = [e for e in events if int(e["arm"]) == arm and e["kind"] == kind and int(e["frame"]) > frame]
+    if not later:
+        return True
+    nxt = min(later, key=lambda e: int(e["frame"]))
+    return joint_distance(arm_joints(proprio_of(frame), arm), arm_joints(proprio_of(int(nxt["frame"])), arm)) >= float(theta)
+
+
+def last_cycle(full: Sequence[dict]) -> List[dict]:
+    """The latest entry's in-place cycle: the entries of its arm after the arm's previous entry of the same kind
+    (all of the arm's entries when there is none), ending with it. Press: [bottom, top] of the last press."""
+    latest = full[-1]
+    arm, kind = int(latest["arm"]), latest["kind"]
+    mine = [e for e in full[:-1] if int(e["arm"]) == arm]
+    prev = max((j for j, e in enumerate(mine) if e["kind"] == kind), default=-1)
+    return mine[prev + 1:] + [latest]
+
+
+def augment_ledger(rule: HistoryRule, t: int, events: Sequence[dict], entries: List[dict], proprio_of,
+                   rng: random.Random) -> List[dict]:
+    """Plan v19 3.2 (4), training only: the ledger `entries` (= ledger_entries(rule, t, events, proprio_of)) after
+    (b) over-count then (a) drop-old; a random number is drawn only for a part whose probability is > 0."""
+    out = list(entries)
+    if float(rule.ledger_over_p) > 0.0 and out:
+        if rng.random() < float(rule.ledger_over_p):
+            full = ledger_entries(replace(rule, event_max=10 ** 6), t, events, proprio_of)
+            k = rng.randint(1, int(rule.ledger_over_max))
+            if run_ended(full[-1], events, proprio_of, rule.repeat_theta):
+                cycle = last_cycle(full)
+                extra = [dict(e, ordinal=int(e["ordinal"]) + j, augmented=True) for j in range(1, k + 1) for e in cycle]
+                out = (full + extra)[-int(rule.event_max):]
+    if float(rule.ledger_drop_p) > 0.0 and len(out) > int(rule.ledger_keep):
+        if rng.random() < float(rule.ledger_drop_p):
+            k = rng.randint(1, len(out) - int(rule.ledger_keep))
+            out = out[k:]
+    return out
 
 
 PRESS_KINDS = ("bottom", "top")
