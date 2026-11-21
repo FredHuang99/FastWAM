@@ -63,6 +63,9 @@ step "sets: $SETS"
 # g13 / g14; apptainer not on PATH). Try, in order: that module, any apptainer / singularity module (newest), the
 # install the old module pointed to (/usr/local/apptainer/<version>/bin), then a plain PATH. Stop with the module list.
 module purge
+# 11-21 15:04 (login node): /usr/local/apptainer/1.4.1 and /usr/local/modulefiles still exist; MODULEPATH no longer
+# lists /usr/local/modulefiles (now: /etc/scl/modulefiles:/usr/share/Modules/modulefiles:/etc/modulefiles:...).
+[ -d /usr/local/modulefiles ] && module use /usr/local/modulefiles
 APPT_HOW=""
 for m in apptainer/1.4.1 $(module -t avail 2>&1 | grep -iE '^(apptainer|singularity)' | sort -rV); do
   module load "$m" > /dev/null 2>&1 && command -v apptainer > /dev/null && { APPT_HOW="module $m"; break; }
