@@ -1,4 +1,4 @@
-"""Plan v18 Z1 verdict on the 5090 (registered 11-21 15:10 BJ by Opus; the user approved Z1 at 14:21; written before any
+"""Plan v18 Z1 verdict on the 5090 (registered 11-21 14:25 BJ by Opus (commit fb6570f); the user approved Z1 at 14:21; written before any
 Z1 episode exists). Read-only. Reading method of plan v18 (effect size with a paired-bootstrap 95 % CI against the
 smallest effect that matters; three outcomes plus a pre-set extension).
 

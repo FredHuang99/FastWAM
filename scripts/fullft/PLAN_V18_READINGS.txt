@@ -38,7 +38,7 @@ press_count e30 (g1 + sel). Descriptive only, no verdict: per pair the first-but
 paired-bootstrap 95 % CI, mean e1, mean extra presses, success; the largest |difference| is the training-noise band
 that every later comparison of two trainings (E4, E14 and onward) is read against.
 
-================================================================================ Z1 PRESS RE-DECISION (added 15:10, user approved 14:21; summary, the header of z1_verdict.py is the text)
+================================================================================ Z1 PRESS RE-DECISION (added 14:28, user approved 14:21; summary, the header of z1_verdict.py is the text)
 After Z0 = TIMING EXPLAINS PART, two explanations remain for the rest: commitment (the chunk being executed already
 carries the next descent) or reading (the policy reads the full, timely record and presses anyway). All arms use the
 oracle ledger. Z1 (--replan replan): also re-decide at the observation whose true counter first shows a press.

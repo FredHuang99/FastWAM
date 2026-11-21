@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# mwam5090, 11-21 15:20 BJ (Opus, plan v18 Z1; the user approved at 14:21). GPU1 only (PF_GPUS, default 1). Test time.
+# mwam5090, 11-21 14:25 BJ (Opus, plan v18 Z1; the user approved at 14:21). GPU1 only (PF_GPUS, default 1). Test time.
 # All arms use the oracle ledger (MWAM_LEDGER=oracle: true press counters, zero writing delay), press scenes 1-100:
 #   1 smoke (scene 1, 200 targets): every registered press of button 1 / 2 must have a decision at the very frame the
 #     counter shows it, with that press in the decision's ledger; any failure: stop (nothing else runs)
