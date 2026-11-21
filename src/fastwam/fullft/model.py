@@ -88,10 +88,26 @@ def add_lora(module: nn.Module, rank: int) -> int:
     return count
 
 
+# ----------------------------------------------------------------------------- plan v19 3.2 (2)
+class NextEventHead(nn.Module):
+    """Linear classifier of the next body event from the mean of the action branch's last-layer tokens. Zero
+    initialised WITHOUT drawing random numbers, so adding the head changes neither the start nor any random draw of
+    the run (and at step 0 it sends no gradient into the trunk)."""
+
+    def __init__(self, dim: int, classes: int):
+        super().__init__()
+        self.weight = nn.Parameter(torch.zeros(classes, dim))
+        self.bias = nn.Parameter(torch.zeros(classes))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return F.linear(x, self.weight.to(x.dtype), self.bias.to(x.dtype))
+
+
 # ----------------------------------------------------------------------------- the model
 class FullModel(nn.Module):
     def __init__(self, mot, proprio_encoder: nn.Linear, variant: str = "none", event_slots: int = 0,
-                 video_shift: float = 5.0, action_shift: float = 1.0, ledger_features: int = 0):
+                 video_shift: float = 5.0, action_shift: float = 1.0, ledger_features: int = 0,
+                 next_event: bool = False):
         super().__init__()
         self.mot = mot
         self.proprio_encoder = proprio_encoder
@@ -118,6 +134,10 @@ class FullModel(nn.Module):
             self.ledger = nn.Linear(int(ledger_features) or ledger_dim(event_slots), text_dim)
             nn.init.zeros_(self.ledger.weight)
             nn.init.zeros_(self.ledger.bias)
+        self.next_event_head = None                   # plan v19 3.2 (2); None = every earlier model exactly
+        if next_event:
+            from .data import NEXT_EVENT_CLASSES
+            self.next_event_head = NextEventHead(int(mot.mixtures["action"].hidden_dim), NEXT_EVENT_CLASSES)
         self.video_scheduler = WanContinuousFlowMatchScheduler(shift=video_shift)
         self.action_scheduler = WanContinuousFlowMatchScheduler(shift=action_shift)
         self.checkpoint_layers = False
@@ -129,7 +149,8 @@ class FullModel(nn.Module):
     # ------------------------------------------------------------------ construction
     @classmethod
     def from_release(cls, architecture: str, base: str, variant: str = "none", event_slots: int = 0,
-                     video_shift: float = 5.0, action_shift: float = 1.0, ledger_features: int = 0) -> "FullModel":
+                     video_shift: float = 5.0, action_shift: float = 1.0, ledger_features: int = 0,
+                     next_event: bool = False) -> "FullModel":
         import yaml
         from fastwam.models.wan22.action_dit import ActionDiT
         from fastwam.models.wan22.mot import MoT
@@ -147,7 +168,7 @@ class FullModel(nn.Module):
         mot.load_state_dict(payload["mot"], strict=True)
         proprio.load_state_dict(payload["proprio_encoder"], strict=True)
         del payload
-        return cls(mot, proprio, variant, event_slots, video_shift, action_shift, ledger_features)
+        return cls(mot, proprio, variant, event_slots, video_shift, action_shift, ledger_features, next_event)
 
     @property
     def video(self):
@@ -306,9 +327,12 @@ class FullModel(nn.Module):
         return xv, xa
 
     # ------------------------------------------------------------------ training
-    def loss(self, batch: dict, noise: Optional[dict] = None, history: Optional[History] = "auto"):
+    def loss(self, batch: dict, noise: Optional[dict] = None, history: Optional[History] = "auto",
+             aux: Optional[dict] = None):
         """The released FastWAM.training_loss on a cached clip. noise (validation): {"video", "action",
-        "t_video", "t_action"} to fix the draws. Returns (total, {"video", "action"} per-sample tensors)."""
+        "t_video", "t_action"} to fix the draws. Returns (video, action) per-sample tensors.
+        aux (plan v19 3.2 (2)): a dict; with the next-event head and batch["next_event"] it receives per-sample
+        "next_event" (cross entropy) and "next_event_correct" (0 / 1). The returned losses do not depend on it."""
         dtype = self._dtype()
         clean = batch["video_latent"].to(dtype)
         b = clean.shape[0]
@@ -339,6 +363,11 @@ class FullModel(nn.Module):
                 xv, xa = torch.utils.checkpoint.checkpoint(self._joint_layer, *args, use_reentrant=False)
             else:
                 xv, xa = self._joint_layer(*args)
+        if aux is not None and self.next_event_head is not None and "next_event" in batch:
+            logits = self.next_event_head(xa.float().mean(1)).float()
+            label = batch["next_event"].to(logits.device)
+            aux["next_event"] = F.cross_entropy(logits, label, reduction="none")
+            aux["next_event_correct"] = (logits.detach().argmax(-1) == label).float()
         pred_video = self.video.post(xv, t_v, f, hh, ww)[:, :, 1:]
         pred_action = self.action.post(xa)
         per_frame = F.mse_loss(pred_video.float(), target_video[:, :, 1:].float(), reduction="none").mean(dim=(1, 3, 4))

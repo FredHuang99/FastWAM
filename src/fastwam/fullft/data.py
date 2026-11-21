@@ -115,6 +115,33 @@ def ledger_tensor(rule: HistoryRule, entries: Sequence[dict], proprio_of) -> Tup
     return feat, valid
 
 
+NEXT_EVENT_CLASSES = 2 * len(LEDGER_KINDS) + 1          # plan v19 3.2 (2): 4 kinds x 2 arms + "no event left"
+
+
+def decision_weight(events: Sequence[dict], anchor: int, weight: float, window: int,
+                    kinds: Sequence[str] = ("open", "bottom")) -> float:
+    """Plan v19 3.2 (1): `weight` if the anchor lies within `window` frames from the confirmation of a completion
+    event (kind in `kinds`; confirmed <= anchor < confirmed + window), else 1.0. An event without 'confirmed' counts
+    as confirmed at its frame (gripper events)."""
+    a = int(anchor)
+    for e in events:
+        if e.get("kind") in kinds:
+            c = int(e.get("confirmed", e["frame"]))
+            if c <= a < c + int(window):
+                return float(weight)
+    return 1.0
+
+
+def next_event_label(events: Sequence[dict], anchor: int) -> int:
+    """Plan v19 3.2 (2): class of the demo's first body event at or after the anchor (frame >= anchor; same frame:
+    arm 0 first) = kind index (history.LEDGER_KINDS) * 2 + arm, or NEXT_EVENT_CLASSES - 1 when no event is left."""
+    later = [e for e in events if int(e["frame"]) >= int(anchor)]
+    if not later:
+        return NEXT_EVENT_CLASSES - 1
+    e = min(later, key=lambda x: (int(x["frame"]), int(x["arm"])))
+    return LEDGER_KINDS.index(e["kind"]) * 2 + int(e["arm"])
+
+
 CLOCK_MODES = ("", "off", "freeze", "flat")
 
 
@@ -196,16 +223,22 @@ class Samples(torch.utils.data.Dataset):
     """Item i -> one training sample (episode, anchor) of the given list; history per the rule."""
 
     def __init__(self, episodes: DenseEpisodes, items: Sequence[Tuple[str, int]], rule: HistoryRule,
-                 events: Dict[str, List[dict]], polarity: str, augment: bool = False, seed: int = 0):
+                 events: Dict[str, List[dict]], polarity: str, augment: bool = False, seed: int = 0,
+                 decision: Optional[Tuple[float, int, Sequence[str]]] = None, next_event: bool = False):
+        """decision = (weight, window, kinds) adds 'loss_weight' to every sample (plan v19 3.2 (1)); next_event adds
+        the 'next_event' class (3.2 (2)). Both off (default): the samples are exactly as before."""
         self.episodes, self.items, self.rule = episodes, list(items), rule
         self.events, self.polarity, self.augment, self.seed = events, polarity, augment, seed
+        self.decision, self.next_event = decision, bool(next_event)
         self.epoch = 0
         self.checked_text: set = set()
-        if rule.variant in ("event", "prop", "arprop", "arev"):
+        if rule.variant in ("event", "prop", "arprop", "arev") or decision is not None or self.next_event:
             self.events = events = match_events(sorted({e for e, _ in self.items}), events)
             absent = sorted({e for e, _ in self.items if e not in events})
             if absent:
-                raise ValueError(f"history '{rule.variant}' needs events for {len(absent)} episodes, e.g. {absent[:3]}")
+                what = (f"history '{rule.variant}'" if rule.variant in ("event", "prop", "arprop", "arev")
+                        else "decision weighting / the next-event head")
+                raise ValueError(f"{what} needs events for {len(absent)} episodes, e.g. {absent[:3]}")
 
     def __len__(self) -> int:
         return len(self.items)
@@ -227,6 +260,12 @@ class Samples(torch.utils.data.Dataset):
             "action_valid": action_valid,
             "anchor": torch.tensor(a, dtype=torch.long),
         }
+        if self.decision is not None:
+            w, window, kinds = self.decision
+            sample["loss_weight"] = torch.tensor(
+                decision_weight(self.events.get(episode_id, []), a, w, window, kinds), dtype=torch.float32)
+        if self.next_event:
+            sample["next_event"] = torch.tensor(next_event_label(self.events.get(episode_id, []), a), dtype=torch.long)
         if k:
             lat = e["latent"]
             hist_latent = torch.zeros((k,) + tuple(lat.shape[1:]), dtype=lat.dtype)

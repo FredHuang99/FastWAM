@@ -66,6 +66,19 @@ class ModelConfig:
     video_shift: float = 5.0
     action_shift: float = 1.0
     sample_steps: int = 10
+    # 11-22 plan v19 3.2 (Deed Memory training parts). Defaults = off: every earlier run and export is exactly as
+    # before (no new sample field, no new parameter, the same loss expression).
+    # (1) decision-point weighting: the video and action losses of a training sample are multiplied by decision_weight
+    #     when its anchor lies within decision_window frames from the confirmation of a completion event of the demo
+    #     (confirmed <= anchor < confirmed + window; kinds decision_kinds: gripper opened = put down, press bottom =
+    #     pressed). 1.0 = off. Validation losses stay unweighted.
+    decision_weight: float = 1.0
+    decision_window: int = 16
+    decision_kinds: List[str] = field(default_factory=lambda: ["open", "bottom"])
+    # (2) next-event head: the mean of the action branch's last-layer tokens -> 9 classes (4 event kinds x 2 arms +
+    #     "no event left"); label = the demo's first body event at or after the anchor (events file, no annotation);
+    #     cross entropy times next_event_loss added to the training loss. Not used at inference. 0 = no head.
+    next_event_loss: float = 0.0
 
 
 @dataclass
@@ -88,6 +101,17 @@ class RunConfig:
         if h.get("variant") == "tw" and "index" not in h:
             h["index"] = "time"
         return HistoryRule(**h)
+
+    @property
+    def decision(self) -> Optional[Tuple[float, int, Tuple[str, ...]]]:
+        """(weight, window, kinds) of the decision-point weighting, None when off (plan v19 3.2 (1))."""
+        m = self.model
+        return None if float(m.decision_weight) == 1.0 else (float(m.decision_weight), int(m.decision_window),
+                                                             tuple(m.decision_kinds))
+
+    @property
+    def next_event_head(self) -> bool:
+        return float(self.model.next_event_loss) > 0.0
 
     @property
     def run_dir(self) -> Path:
@@ -155,4 +179,21 @@ def load(path: Optional[str], overrides: List[str] = ()) -> RunConfig:
     cfg.rule                                              # validate the history rule early
     if cfg.model.train_video not in ("full", "lora", "frozen"):
         raise ValueError(f"model.train_video must be full | lora | frozen, got {cfg.model.train_video!r}")
+    check_deed_parts(cfg)
     return cfg
+
+
+def check_deed_parts(cfg: RunConfig) -> None:
+    """Plan v19 3.2 (1) / (2): value ranges; both read the demos' events, so they need data.events."""
+    from .history import LEDGER_KINDS
+    m = cfg.model
+    if not float(m.decision_weight) > 0.0:
+        raise ValueError(f"model.decision_weight must be > 0, got {m.decision_weight}")
+    if int(m.decision_window) < 1:
+        raise ValueError(f"model.decision_window must be >= 1, got {m.decision_window}")
+    if not m.decision_kinds or not set(m.decision_kinds) <= set(LEDGER_KINDS):
+        raise ValueError(f"model.decision_kinds must be a non-empty subset of {LEDGER_KINDS}, got {m.decision_kinds}")
+    if float(m.next_event_loss) < 0.0:
+        raise ValueError(f"model.next_event_loss must be >= 0, got {m.next_event_loss}")
+    if (cfg.decision is not None or cfg.next_event_head) and not cfg.data.events:
+        raise ValueError("decision weighting / the next-event head read the demos' events: set data.events")

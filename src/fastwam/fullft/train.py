@@ -29,7 +29,8 @@ import numpy as np
 import torch
 
 from .config import RunConfig, load
-from .data import DenseEpisodes, Samples, collate, load_events, train_items, val_items, video_polarity
+from .data import (DenseEpisodes, Samples, collate, decision_weight, load_events, train_items, val_items,
+                   video_polarity)
 from .model import FullModel
 
 BJ = timezone(timedelta(hours=8))
@@ -75,12 +76,22 @@ def build(cfg: RunConfig, device: str, log, limit_episodes: int = 0):
         items, vitems = train_items(episodes), val_items(episodes, cfg.data.val_anchors_per_task)
     events = load_events(cfg.data.events, rule) if cfg.data.events else {}    # 11-16: rule thresholds checked
     polarity = video_polarity(episodes)
-    train = Samples(episodes, items, rule, events, polarity, augment=True, seed=cfg.seed)
-    val = Samples(episodes, vitems, rule, events, polarity, augment=False, seed=cfg.seed)
+    train = Samples(episodes, items, rule, events, polarity, augment=True, seed=cfg.seed, decision=cfg.decision,
+                    next_event=cfg.next_event_head)
+    val = Samples(episodes, vitems, rule, events, polarity, augment=False, seed=cfg.seed,
+                  next_event=cfg.next_event_head)                    # validation losses stay unweighted
     log(f"data: {len(items)} train anchors ({len({e for e, _ in items})} episodes), {len(vitems)} val anchors; "
         f"tasks {cfg.data.tasks}; video_valid polarity '{polarity}'; history {rule}")
+    if cfg.decision is not None:                                     # plan v19 3.2 (1)
+        w = [decision_weight(train.events.get(e, []), a, *cfg.decision) for e, a in items]
+        share = sum(x != 1.0 for x in w) / max(1, len(w))
+        log(f"decision-point weighting {cfg.decision}: {share:.1%} of the train anchors weighted "
+            f"(mean weight {sum(w) / max(1, len(w)):.3f})")
+    if cfg.next_event_head:
+        log(f"next-event head: loss weight {cfg.model.next_event_loss}")
     model = FullModel.from_release(cfg.model.architecture, cfg.model.base, rule.variant, rule.event_slots,
-                                   cfg.model.video_shift, cfg.model.action_shift, rule.ledger_features)
+                                   cfg.model.video_shift, cfg.model.action_shift, rule.ledger_features,
+                                   next_event=cfg.next_event_head)
     model.set_trainable(cfg.model.train_video, cfg.model.lora_rank)
     model.checkpoint_layers = cfg.model.checkpoint_layers
     model.compute_dtype = torch.bfloat16
@@ -159,6 +170,7 @@ def evaluate(model: FullModel, val: Samples, device, micro: int, sample_windows:
              normaliser=None) -> Dict[str, float]:
     model.eval()
     vids, acts, arm, arm8 = [], [], [], []
+    nce, nacc = [], []
     for start in range(0, len(val), micro):
         rows = [val[i] for i in range(start, min(len(val), start + micro))]
         batch = to_device(collate(rows), device)
@@ -168,9 +180,13 @@ def evaluate(model: FullModel, val: Samples, device, micro: int, sample_windows:
                  torch.stack([n[k] for n in noises]) for k in noises[0]}
         with torch.autocast("cuda", dtype=torch.bfloat16, enabled=batch["actions"].is_cuda, cache_enabled=False):
             history = model.history(batch)
-            v, a = model.loss(batch, noise, history)
+            aux = {} if model.next_event_head is not None else None
+            v, a = model.loss(batch, noise, history, aux=aux)
             vids += v.float().tolist()
             acts += a.float().tolist()
+            if aux:
+                nce += aux["next_event"].float().tolist()
+                nacc += aux["next_event_correct"].float().tolist()
             if start < sample_windows:
                 sample_batch = dict(batch, latent=batch["video_latent"][:, :, 0:1])
                 pred = model.sample(sample_batch, noise["sample"], steps, history)
@@ -186,6 +202,8 @@ def evaluate(model: FullModel, val: Samples, device, micro: int, sample_windows:
     out = {"val_video": float(np.mean(vids)), "val_action": float(np.mean(acts))}
     if arm:
         out.update(val_arm_rmse=float(np.mean(arm)), val_arm_rmse_8=float(np.mean(arm8)))
+    if nce:
+        out.update(val_next_event=float(np.mean(nce)), val_next_event_acc=float(np.mean(nacc)))
     return out
 
 
@@ -198,6 +216,20 @@ def normaliser_for(cfg: RunConfig):
 
 
 # ----------------------------------------------------------------------------- training
+def objective(cfg: RunConfig, v: torch.Tensor, a: torch.Tensor, batch: dict, aux: Optional[dict],
+              accumulation: int) -> torch.Tensor:
+    """The micro-batch loss. With every plan v19 3.2 part off (no 'loss_weight' in the batch, no aux) it is exactly
+    the earlier expression (the off branch is that expression, verbatim)."""
+    if "loss_weight" in batch:                             # (1) decision-point weighting: both losses multiplied
+        w = batch["loss_weight"].to(v.dtype)
+        loss = (cfg.model.video_loss * (w * v).mean() + cfg.model.action_loss * (w * a).mean()) / accumulation
+    else:
+        loss = (cfg.model.video_loss * v.mean() + cfg.model.action_loss * a.mean()) / accumulation
+    if aux:                                                # (2) next-event head (cross entropy, not weighted)
+        loss = loss + cfg.model.next_event_loss * aux["next_event"].mean() / accumulation
+    return loss
+
+
 def train(cfg: RunConfig, args, smoke: bool = False) -> dict:
     device = "cuda"
     run = cfg.run_dir
@@ -252,6 +284,7 @@ def train(cfg: RunConfig, args, smoke: bool = False) -> dict:
     t0 = time.monotonic()
     seen = 0
     running = []
+    running_aux = []                                   # plan v19 3.2 (2): (cross entropy, accuracy) per micro-batch
     grad_parts: Dict[str, float] = {}
     bad_steps = skipped = 0
     while state["update"] < total:
@@ -265,10 +298,13 @@ def train(cfg: RunConfig, args, smoke: bool = False) -> dict:
         for batch in loader:
             batch = to_device(batch, device)
             with torch.autocast("cuda", dtype=torch.bfloat16, cache_enabled=False):
-                v, a = model.loss(batch)
-                loss = (cfg.model.video_loss * v.mean() + cfg.model.action_loss * a.mean()) / s.accumulation
+                aux = {} if model.next_event_head is not None else None
+                v, a = model.loss(batch, aux=aux)
+                loss = objective(cfg, v, a, batch, aux, s.accumulation)
             loss.backward()
             running.append((float(v.detach().mean()), float(a.detach().mean())))
+            if aux:
+                running_aux.append((float(aux["next_event"].detach().mean()), float(aux["next_event_correct"].mean())))
             micro += 1
             state["position"] += s.micro_batch
             seen += s.micro_batch
@@ -305,12 +341,18 @@ def train(cfg: RunConfig, args, smoke: bool = False) -> dict:
                        "grad_norm": float(norm), "samples_per_s": seen / el,
                        "peak_gib": torch.cuda.max_memory_allocated() / 2 ** 30,
                        "gate_abs_mean": float(model.hist_gate.detach().abs().mean())}
+                extra = ""
+                if running_aux:
+                    row["loss_next_event"] = float(np.mean([r[0] for r in running_aux]))
+                    row["next_event_acc"] = float(np.mean([r[1] for r in running_aux]))
+                    extra = f" next {row['loss_next_event']:.3f} acc {row['next_event_acc']:.2f}"
+                    running_aux = []
                 with metrics_path.open("a") as f:
                     f.write(json.dumps(row) + "\n")
                 eta = (total - u) * per_update / max(1e-9, seen / el) / 3600
                 log(f"u {u}/{total} ep {epoch_float:.3f} lr {lr:.2e} video {vm:.4f} action {am:.4f} gn {float(norm):.2f} "
                     f"{seen / el:.1f} samples/s peak {row['peak_gib']:.1f} GiB gate {row['gate_abs_mean']:.4f} "
-                    f"ETA {eta:.1f} h")
+                    f"ETA {eta:.1f} h{extra}")
                 running = []
             if (u % s.eval_every == 0 and not smoke) or u == total:
                 ev = evaluate(model, val_set, device, s.micro_batch, 32, cfg.model.sample_steps, normaliser)
@@ -641,7 +683,7 @@ def main(argv: Optional[List[str]] = None) -> None:
         nanhunt(cfg, args)
     else:
         model = FullModel.from_release(cfg.model.architecture, cfg.model.base, cfg.rule.variant, cfg.rule.event_slots,
-                                       ledger_features=cfg.rule.ledger_features)
+                                       ledger_features=cfg.rule.ledger_features, next_event=cfg.next_event_head)
         model.set_trainable(cfg.model.train_video, cfg.model.lora_rank)
         ck = torch.load(args.resume, map_location="cpu", weights_only=False)
         model.load_state_dict(ck["model"], strict=True)
