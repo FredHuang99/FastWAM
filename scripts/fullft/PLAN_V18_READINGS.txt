@@ -37,3 +37,14 @@ fetch_b4.sh). Evaluation (5090, after Z0 / N0): e30 of each on press scenes 1-10
 press_count e30 (g1 + sel). Descriptive only, no verdict: per pair the first-button over-press rate difference with a
 paired-bootstrap 95 % CI, mean e1, mean extra presses, success; the largest |difference| is the training-noise band
 that every later comparison of two trainings (E4, E14 and onward) is read against.
+
+================================================================================ Z1 PRESS RE-DECISION (added 15:10, user approved 14:21; summary, the header of z1_verdict.py is the text)
+After Z0 = TIMING EXPLAINS PART, two explanations remain for the rest: commitment (the chunk being executed already
+carries the next descent) or reading (the policy reads the full, timely record and presses anyway). All arms use the
+oracle ledger. Z1 (--replan replan): also re-decide at the observation whose true counter first shows a press.
+Z1b (--replan blind): the same re-decision with that press hidden. Press scenes 1-100, paired by scene.
+MAIN Z1 vs Z0, SESOI half of Z0's rate: PRESS RE-DECISION >= HALF / PART / < HALF / UNCERTAIN (-> pre-set extension:
+Z0 and Z1 again with noise r2, 200 pairs). ATTRIBUTION Z1 vs Z1b, read only after >= HALF or PART, SESOI half of D1:
+THE RECORD CARRIES IT / RE-DECIDING CARRIES IT / UNCERTAIN. Manipulation check: >= 90 % of presses decided at their
+frame, else VOID. Floor 95 pairs. Expectation before any run: < HALF 0.45, PART 0.4, >= HALF 0.15.
+Chain: scripts/fullft/z1_eval_5090.sh (smoke first; any smoke failure stops everything).
