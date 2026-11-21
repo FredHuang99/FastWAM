@@ -9459,6 +9459,351 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e6_report.py --labels battery_try:battery_ar_e30 battery_try:battery_arprop_e30 rearrange_blocks:rearrange_ar_e30 swap_T:swapT_ar_e30 blocks_ranking_try:ranking_ar_e30 cover_blocks:cover_ar_e30 observe_and_pickup:obs_ar_e30 observe_and_pickup:obs_arprop_e30 --pairs observe_and_pickup:obs_arprop_e30:obs_ar_e30"
   pass_if: "m['rc'] == 0"
 
+# ---------------------------------------------------------------------------------------------------------------
+# 11-22 plan v19 A1 (Opus): why is the three-frame battery model at 91? Re-evaluate it with longer execution. Reading in
+# each card's hypothesis (registered before any A1 episode). Placed right after the main-table rows (plan v19 order:
+# B1 -> D4 -> A1 -> observe -> B2 -> second passes -> C2).
+
+- id: A40-A1-batAR30-x16-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 A1 (registered 11-22 by Opus before any A1 episode; Status 11-22 section 2): battery_ar e30 executing 16 / 32 of the 32 predicted steps instead of 8, battery_try 1-100, paired with closed_loop/e6 battery_ar_e30 (execute 8). D = success(execute 16) - success(execute 8), paired-bootstrap 95 % CI (10,000, seed 0); SESOI -0.20: CI upper < 0 and D <= -0.20 -> EXECUTION LENGTH MATTERS; CI lower > -0.20 -> NOT EXECUTION LENGTH; otherwise UNCERTAIN (pre-set extension: both with MWAM_NOISE_SALT=r2). execute 32 descriptive (dose). This card: execute 16, shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "16", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/a1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-A1-batAR30-x16-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 A1 (registered 11-22 by Opus before any A1 episode; Status 11-22 section 2): battery_ar e30 executing 16 / 32 of the 32 predicted steps instead of 8, battery_try 1-100, paired with closed_loop/e6 battery_ar_e30 (execute 8). D = success(execute 16) - success(execute 8), paired-bootstrap 95 % CI (10,000, seed 0); SESOI -0.20: CI upper < 0 and D <= -0.20 -> EXECUTION LENGTH MATTERS; CI lower > -0.20 -> NOT EXECUTION LENGTH; otherwise UNCERTAIN (pre-set extension: both with MWAM_NOISE_SALT=r2). execute 32 descriptive (dose). This card: execute 16, shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "16", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/a1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-A1-batAR30-x16-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 A1 (registered 11-22 by Opus before any A1 episode; Status 11-22 section 2): battery_ar e30 executing 16 / 32 of the 32 predicted steps instead of 8, battery_try 1-100, paired with closed_loop/e6 battery_ar_e30 (execute 8). D = success(execute 16) - success(execute 8), paired-bootstrap 95 % CI (10,000, seed 0); SESOI -0.20: CI upper < 0 and D <= -0.20 -> EXECUTION LENGTH MATTERS; CI lower > -0.20 -> NOT EXECUTION LENGTH; otherwise UNCERTAIN (pre-set extension: both with MWAM_NOISE_SALT=r2). execute 32 descriptive (dose). This card: execute 16, shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "16", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/a1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-A1-batAR30-x16-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 A1 (registered 11-22 by Opus before any A1 episode; Status 11-22 section 2): battery_ar e30 executing 16 / 32 of the 32 predicted steps instead of 8, battery_try 1-100, paired with closed_loop/e6 battery_ar_e30 (execute 8). D = success(execute 16) - success(execute 8), paired-bootstrap 95 % CI (10,000, seed 0); SESOI -0.20: CI upper < 0 and D <= -0.20 -> EXECUTION LENGTH MATTERS; CI lower > -0.20 -> NOT EXECUTION LENGTH; otherwise UNCERTAIN (pre-set extension: both with MWAM_NOISE_SALT=r2). execute 32 descriptive (dose). This card: execute 16, shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "16", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/a1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-A1-batAR30-x16-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 A1 (registered 11-22 by Opus before any A1 episode; Status 11-22 section 2): battery_ar e30 executing 16 / 32 of the 32 predicted steps instead of 8, battery_try 1-100, paired with closed_loop/e6 battery_ar_e30 (execute 8). D = success(execute 16) - success(execute 8), paired-bootstrap 95 % CI (10,000, seed 0); SESOI -0.20: CI upper < 0 and D <= -0.20 -> EXECUTION LENGTH MATTERS; CI lower > -0.20 -> NOT EXECUTION LENGTH; otherwise UNCERTAIN (pre-set extension: both with MWAM_NOISE_SALT=r2). execute 32 descriptive (dose). This card: execute 16, shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "16", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/a1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-A1-batAR30-x16-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 A1 (registered 11-22 by Opus before any A1 episode; Status 11-22 section 2): battery_ar e30 executing 16 / 32 of the 32 predicted steps instead of 8, battery_try 1-100, paired with closed_loop/e6 battery_ar_e30 (execute 8). D = success(execute 16) - success(execute 8), paired-bootstrap 95 % CI (10,000, seed 0); SESOI -0.20: CI upper < 0 and D <= -0.20 -> EXECUTION LENGTH MATTERS; CI lower > -0.20 -> NOT EXECUTION LENGTH; otherwise UNCERTAIN (pre-set extension: both with MWAM_NOISE_SALT=r2). execute 32 descriptive (dose). This card: execute 16, shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "16", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/a1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-A1-batAR30-x16-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 A1 (registered 11-22 by Opus before any A1 episode; Status 11-22 section 2): battery_ar e30 executing 16 / 32 of the 32 predicted steps instead of 8, battery_try 1-100, paired with closed_loop/e6 battery_ar_e30 (execute 8). D = success(execute 16) - success(execute 8), paired-bootstrap 95 % CI (10,000, seed 0); SESOI -0.20: CI upper < 0 and D <= -0.20 -> EXECUTION LENGTH MATTERS; CI lower > -0.20 -> NOT EXECUTION LENGTH; otherwise UNCERTAIN (pre-set extension: both with MWAM_NOISE_SALT=r2). execute 32 descriptive (dose). This card: execute 16, shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "16", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/a1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-A1-batAR30-x16-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 A1 (registered 11-22 by Opus before any A1 episode; Status 11-22 section 2): battery_ar e30 executing 16 / 32 of the 32 predicted steps instead of 8, battery_try 1-100, paired with closed_loop/e6 battery_ar_e30 (execute 8). D = success(execute 16) - success(execute 8), paired-bootstrap 95 % CI (10,000, seed 0); SESOI -0.20: CI upper < 0 and D <= -0.20 -> EXECUTION LENGTH MATTERS; CI lower > -0.20 -> NOT EXECUTION LENGTH; otherwise UNCERTAIN (pre-set extension: both with MWAM_NOISE_SALT=r2). execute 32 descriptive (dose). This card: execute 16, shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "16", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/a1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-A1-batAR30-x16-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 A1 (registered 11-22 by Opus before any A1 episode; Status 11-22 section 2): battery_ar e30 executing 16 / 32 of the 32 predicted steps instead of 8, battery_try 1-100, paired with closed_loop/e6 battery_ar_e30 (execute 8). D = success(execute 16) - success(execute 8), paired-bootstrap 95 % CI (10,000, seed 0); SESOI -0.20: CI upper < 0 and D <= -0.20 -> EXECUTION LENGTH MATTERS; CI lower > -0.20 -> NOT EXECUTION LENGTH; otherwise UNCERTAIN (pre-set extension: both with MWAM_NOISE_SALT=r2). execute 32 descriptive (dose). This card: execute 16, shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "16", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/a1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-A1-batAR30-x16-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 A1 (registered 11-22 by Opus before any A1 episode; Status 11-22 section 2): battery_ar e30 executing 16 / 32 of the 32 predicted steps instead of 8, battery_try 1-100, paired with closed_loop/e6 battery_ar_e30 (execute 8). D = success(execute 16) - success(execute 8), paired-bootstrap 95 % CI (10,000, seed 0); SESOI -0.20: CI upper < 0 and D <= -0.20 -> EXECUTION LENGTH MATTERS; CI lower > -0.20 -> NOT EXECUTION LENGTH; otherwise UNCERTAIN (pre-set extension: both with MWAM_NOISE_SALT=r2). execute 32 descriptive (dose). This card: execute 16, shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "16", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/a1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-A1-batAR30-x32-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 A1 (registered 11-22 by Opus before any A1 episode; Status 11-22 section 2): battery_ar e30 executing 16 / 32 of the 32 predicted steps instead of 8, battery_try 1-100, paired with closed_loop/e6 battery_ar_e30 (execute 8). D = success(execute 16) - success(execute 8), paired-bootstrap 95 % CI (10,000, seed 0); SESOI -0.20: CI upper < 0 and D <= -0.20 -> EXECUTION LENGTH MATTERS; CI lower > -0.20 -> NOT EXECUTION LENGTH; otherwise UNCERTAIN (pre-set extension: both with MWAM_NOISE_SALT=r2). execute 32 descriptive (dose). This card: execute 32, shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "32", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/a1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-A1-batAR30-x32-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 A1 (registered 11-22 by Opus before any A1 episode; Status 11-22 section 2): battery_ar e30 executing 16 / 32 of the 32 predicted steps instead of 8, battery_try 1-100, paired with closed_loop/e6 battery_ar_e30 (execute 8). D = success(execute 16) - success(execute 8), paired-bootstrap 95 % CI (10,000, seed 0); SESOI -0.20: CI upper < 0 and D <= -0.20 -> EXECUTION LENGTH MATTERS; CI lower > -0.20 -> NOT EXECUTION LENGTH; otherwise UNCERTAIN (pre-set extension: both with MWAM_NOISE_SALT=r2). execute 32 descriptive (dose). This card: execute 32, shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "32", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/a1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-A1-batAR30-x32-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 A1 (registered 11-22 by Opus before any A1 episode; Status 11-22 section 2): battery_ar e30 executing 16 / 32 of the 32 predicted steps instead of 8, battery_try 1-100, paired with closed_loop/e6 battery_ar_e30 (execute 8). D = success(execute 16) - success(execute 8), paired-bootstrap 95 % CI (10,000, seed 0); SESOI -0.20: CI upper < 0 and D <= -0.20 -> EXECUTION LENGTH MATTERS; CI lower > -0.20 -> NOT EXECUTION LENGTH; otherwise UNCERTAIN (pre-set extension: both with MWAM_NOISE_SALT=r2). execute 32 descriptive (dose). This card: execute 32, shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "32", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/a1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-A1-batAR30-x32-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 A1 (registered 11-22 by Opus before any A1 episode; Status 11-22 section 2): battery_ar e30 executing 16 / 32 of the 32 predicted steps instead of 8, battery_try 1-100, paired with closed_loop/e6 battery_ar_e30 (execute 8). D = success(execute 16) - success(execute 8), paired-bootstrap 95 % CI (10,000, seed 0); SESOI -0.20: CI upper < 0 and D <= -0.20 -> EXECUTION LENGTH MATTERS; CI lower > -0.20 -> NOT EXECUTION LENGTH; otherwise UNCERTAIN (pre-set extension: both with MWAM_NOISE_SALT=r2). execute 32 descriptive (dose). This card: execute 32, shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "32", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/a1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-A1-batAR30-x32-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 A1 (registered 11-22 by Opus before any A1 episode; Status 11-22 section 2): battery_ar e30 executing 16 / 32 of the 32 predicted steps instead of 8, battery_try 1-100, paired with closed_loop/e6 battery_ar_e30 (execute 8). D = success(execute 16) - success(execute 8), paired-bootstrap 95 % CI (10,000, seed 0); SESOI -0.20: CI upper < 0 and D <= -0.20 -> EXECUTION LENGTH MATTERS; CI lower > -0.20 -> NOT EXECUTION LENGTH; otherwise UNCERTAIN (pre-set extension: both with MWAM_NOISE_SALT=r2). execute 32 descriptive (dose). This card: execute 32, shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "32", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/a1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-A1-batAR30-x32-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 A1 (registered 11-22 by Opus before any A1 episode; Status 11-22 section 2): battery_ar e30 executing 16 / 32 of the 32 predicted steps instead of 8, battery_try 1-100, paired with closed_loop/e6 battery_ar_e30 (execute 8). D = success(execute 16) - success(execute 8), paired-bootstrap 95 % CI (10,000, seed 0); SESOI -0.20: CI upper < 0 and D <= -0.20 -> EXECUTION LENGTH MATTERS; CI lower > -0.20 -> NOT EXECUTION LENGTH; otherwise UNCERTAIN (pre-set extension: both with MWAM_NOISE_SALT=r2). execute 32 descriptive (dose). This card: execute 32, shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "32", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/a1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-A1-batAR30-x32-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 A1 (registered 11-22 by Opus before any A1 episode; Status 11-22 section 2): battery_ar e30 executing 16 / 32 of the 32 predicted steps instead of 8, battery_try 1-100, paired with closed_loop/e6 battery_ar_e30 (execute 8). D = success(execute 16) - success(execute 8), paired-bootstrap 95 % CI (10,000, seed 0); SESOI -0.20: CI upper < 0 and D <= -0.20 -> EXECUTION LENGTH MATTERS; CI lower > -0.20 -> NOT EXECUTION LENGTH; otherwise UNCERTAIN (pre-set extension: both with MWAM_NOISE_SALT=r2). execute 32 descriptive (dose). This card: execute 32, shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "32", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/a1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-A1-batAR30-x32-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 A1 (registered 11-22 by Opus before any A1 episode; Status 11-22 section 2): battery_ar e30 executing 16 / 32 of the 32 predicted steps instead of 8, battery_try 1-100, paired with closed_loop/e6 battery_ar_e30 (execute 8). D = success(execute 16) - success(execute 8), paired-bootstrap 95 % CI (10,000, seed 0); SESOI -0.20: CI upper < 0 and D <= -0.20 -> EXECUTION LENGTH MATTERS; CI lower > -0.20 -> NOT EXECUTION LENGTH; otherwise UNCERTAIN (pre-set extension: both with MWAM_NOISE_SALT=r2). execute 32 descriptive (dose). This card: execute 32, shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "32", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/a1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-A1-batAR30-x32-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 A1 (registered 11-22 by Opus before any A1 episode; Status 11-22 section 2): battery_ar e30 executing 16 / 32 of the 32 predicted steps instead of 8, battery_try 1-100, paired with closed_loop/e6 battery_ar_e30 (execute 8). D = success(execute 16) - success(execute 8), paired-bootstrap 95 % CI (10,000, seed 0); SESOI -0.20: CI upper < 0 and D <= -0.20 -> EXECUTION LENGTH MATTERS; CI lower > -0.20 -> NOT EXECUTION LENGTH; otherwise UNCERTAIN (pre-set extension: both with MWAM_NOISE_SALT=r2). execute 32 descriptive (dose). This card: execute 32, shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "32", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/a1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-A1-batAR30-x32-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 A1 (registered 11-22 by Opus before any A1 episode; Status 11-22 section 2): battery_ar e30 executing 16 / 32 of the 32 predicted steps instead of 8, battery_try 1-100, paired with closed_loop/e6 battery_ar_e30 (execute 8). D = success(execute 16) - success(execute 8), paired-bootstrap 95 % CI (10,000, seed 0); SESOI -0.20: CI upper < 0 and D <= -0.20 -> EXECUTION LENGTH MATTERS; CI lower > -0.20 -> NOT EXECUTION LENGTH; otherwise UNCERTAIN (pre-set extension: both with MWAM_NOISE_SALT=r2). execute 32 descriptive (dose). This card: execute 32, shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "32", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/a1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
 - id: A40-fetch-prop10
   lane: a40cpu
   kind: shell
@@ -24338,3 +24683,2391 @@ tasks:
   hypothesis: "plan v15 E24 (descriptive): in the press trigger smoke episodes, did the first counted press come before the injection (the card asks for the pause between two presses)"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/press_trigger_report.py v15smoke press_count_e30_smoke_p64_vis"
   pass_if: "m['rc'] == 0"
+
+# ---------------------------------------------------------------------------------------------------------------
+# 11-22 plan v19 R3 (user 01:22 / 01:39): every main-table cell is evaluated twice (two diffusion-noise draws); report
+# the mean and the range, never the higher pass. These cards are the second pass (MWAM_NOISE_SALT=r2, closed_loop/r2)
+# of the cells whose first pass exists on the A40 (g1 / e5 / e6), plus the missing first pass of the three-frame
+# two-task model on put_back_block. Descriptive. Then C2: the T-block clock arm under a 256-frame pause (descriptive;
+# the 64-frame level is E16b, registered). Lowest priority on the A40.
+
+- id: A40-MAIN1-ar_2task30-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, first pass (default noise): ar_2task_e30 on put_back_block 1-100 (closed_loop/g1, as the swap first pass); descriptive; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN1-ar_2task30-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, first pass (default noise): ar_2task_e30 on put_back_block 1-100 (closed_loop/g1, as the swap first pass); descriptive; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN1-ar_2task30-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, first pass (default noise): ar_2task_e30 on put_back_block 1-100 (closed_loop/g1, as the swap first pass); descriptive; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN1-ar_2task30-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, first pass (default noise): ar_2task_e30 on put_back_block 1-100 (closed_loop/g1, as the swap first pass); descriptive; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN1-ar_2task30-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, first pass (default noise): ar_2task_e30 on put_back_block 1-100 (closed_loop/g1, as the swap first pass); descriptive; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN1-ar_2task30-put-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, first pass (default noise): ar_2task_e30 on put_back_block 1-100 (closed_loop/g1, as the swap first pass); descriptive; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN1-ar_2task30-put-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, first pass (default noise): ar_2task_e30 on put_back_block 1-100 (closed_loop/g1, as the swap first pass); descriptive; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN1-ar_2task30-put-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, first pass (default noise): ar_2task_e30 on put_back_block 1-100 (closed_loop/g1, as the swap first pass); descriptive; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN1-ar_2task30-put-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, first pass (default noise): ar_2task_e30 on put_back_block 1-100 (closed_loop/g1, as the swap first pass); descriptive; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN1-ar_2task30-put-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, first pass (default noise): ar_2task_e30 on put_back_block 1-100 (closed_loop/g1, as the swap first pass); descriptive; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/g1
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN2-ar2_prop-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-lp30]
+  requires_pass: [A40-fetch-lp30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_prop_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_prop-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-lp30]
+  requires_pass: [A40-fetch-lp30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_prop_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_prop-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-lp30]
+  requires_pass: [A40-fetch-lp30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_prop_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_prop-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-lp30]
+  requires_pass: [A40-fetch-lp30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_prop_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_prop-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-lp30]
+  requires_pass: [A40-fetch-lp30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_prop_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_prop-put-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-lp30]
+  requires_pass: [A40-fetch-lp30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_prop_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_prop-put-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-lp30]
+  requires_pass: [A40-fetch-lp30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_prop_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_prop-put-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-lp30]
+  requires_pass: [A40-fetch-lp30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_prop_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_prop-put-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-lp30]
+  requires_pass: [A40-fetch-lp30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_prop_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_prop-put-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-lp30]
+  requires_pass: [A40-fetch-lp30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_prop_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_prop-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-lp30]
+  requires_pass: [A40-fetch-lp30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_prop_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_prop-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-lp30]
+  requires_pass: [A40-fetch-lp30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_prop_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_prop-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-lp30]
+  requires_pass: [A40-fetch-lp30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_prop_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_prop-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-lp30]
+  requires_pass: [A40-fetch-lp30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_prop_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_prop-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-lp30]
+  requires_pass: [A40-fetch-lp30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_prop_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_prop-swap-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-lp30]
+  requires_pass: [A40-fetch-lp30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_prop_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_prop-swap-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-lp30]
+  requires_pass: [A40-fetch-lp30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_prop_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_prop-swap-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-lp30]
+  requires_pass: [A40-fetch-lp30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_prop_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_prop-swap-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-lp30]
+  requires_pass: [A40-fetch-lp30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_prop_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_prop-swap-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-lp30]
+  requires_pass: [A40-fetch-lp30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_prop_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar_2task-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar_2task_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar_2task-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar_2task_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar_2task-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar_2task_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar_2task-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar_2task_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar_2task-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar_2task_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar_2task-put-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar_2task_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar_2task-put-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar_2task_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar_2task-put-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar_2task_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar_2task-put-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar_2task_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar_2task-put-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar_2task_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar_2task-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar_2task_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar_2task-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar_2task_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar_2task-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar_2task_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar_2task-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar_2task_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar_2task-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar_2task_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar_2task-swap-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar_2task_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar_2task-swap-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar_2task_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar_2task-swap-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar_2task_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar_2task-swap-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar_2task_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar_2task-swap-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar30]
+  requires_pass: [A40-fetch-ar30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar_2task_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e30/export_e30.pt
+  label: ar_2task_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_none-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-none30]
+  requires_pass: [A40-fetch-none30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_none_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_none-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-none30]
+  requires_pass: [A40-fetch-none30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_none_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_none-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-none30]
+  requires_pass: [A40-fetch-none30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_none_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_none-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-none30]
+  requires_pass: [A40-fetch-none30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_none_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_none-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-none30]
+  requires_pass: [A40-fetch-none30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_none_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_none-put-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-none30]
+  requires_pass: [A40-fetch-none30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_none_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_none-put-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-none30]
+  requires_pass: [A40-fetch-none30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_none_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_none-put-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-none30]
+  requires_pass: [A40-fetch-none30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_none_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_none-put-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-none30]
+  requires_pass: [A40-fetch-none30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_none_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_none-put-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-none30]
+  requires_pass: [A40-fetch-none30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_none_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_none-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-none30]
+  requires_pass: [A40-fetch-none30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_none_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_none-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-none30]
+  requires_pass: [A40-fetch-none30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_none_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_none-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-none30]
+  requires_pass: [A40-fetch-none30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_none_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_none-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-none30]
+  requires_pass: [A40-fetch-none30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_none_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_none-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-none30]
+  requires_pass: [A40-fetch-none30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_none_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_none-swap-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-none30]
+  requires_pass: [A40-fetch-none30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_none_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_none-swap-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-none30]
+  requires_pass: [A40-fetch-none30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_none_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_none-swap-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-none30]
+  requires_pass: [A40-fetch-none30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_none_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_none-swap-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-none30]
+  requires_pass: [A40-fetch-none30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_none_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_none-swap-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-none30]
+  requires_pass: [A40-fetch-none30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_none_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e30/export_e30.pt
+  label: ar2_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_clock-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-clock30]
+  requires_pass: [A40-fetch-clock30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_clock_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_clock-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-clock30]
+  requires_pass: [A40-fetch-clock30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_clock_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_clock-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-clock30]
+  requires_pass: [A40-fetch-clock30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_clock_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_clock-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-clock30]
+  requires_pass: [A40-fetch-clock30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_clock_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_clock-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-clock30]
+  requires_pass: [A40-fetch-clock30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_clock_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_clock-put-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-clock30]
+  requires_pass: [A40-fetch-clock30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_clock_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_clock-put-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-clock30]
+  requires_pass: [A40-fetch-clock30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_clock_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_clock-put-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-clock30]
+  requires_pass: [A40-fetch-clock30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_clock_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_clock-put-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-clock30]
+  requires_pass: [A40-fetch-clock30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_clock_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_clock-put-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-clock30]
+  requires_pass: [A40-fetch-clock30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_clock_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_clock-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-clock30]
+  requires_pass: [A40-fetch-clock30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_clock_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_clock-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-clock30]
+  requires_pass: [A40-fetch-clock30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_clock_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_clock-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-clock30]
+  requires_pass: [A40-fetch-clock30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_clock_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_clock-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-clock30]
+  requires_pass: [A40-fetch-clock30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_clock_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_clock-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-clock30]
+  requires_pass: [A40-fetch-clock30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_clock_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_clock-swap-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-clock30]
+  requires_pass: [A40-fetch-clock30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_clock_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_clock-swap-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-clock30]
+  requires_pass: [A40-fetch-clock30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_clock_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_clock-swap-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-clock30]
+  requires_pass: [A40-fetch-clock30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_clock_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_clock-swap-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-clock30]
+  requires_pass: [A40-fetch-clock30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_clock_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-ar2_clock-swap-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-clock30]
+  requires_pass: [A40-fetch-clock30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: ar2_clock_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-battery_ar-bat-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: battery_ar_e30 on battery_try 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-battery_ar-bat-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: battery_ar_e30 on battery_try 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-battery_ar-bat-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: battery_ar_e30 on battery_try 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-battery_ar-bat-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: battery_ar_e30 on battery_try 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-battery_ar-bat-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: battery_ar_e30 on battery_try 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-battery_ar-bat-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: battery_ar_e30 on battery_try 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-battery_ar-bat-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: battery_ar_e30 on battery_try 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-battery_ar-bat-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: battery_ar_e30 on battery_try 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-battery_ar-bat-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: battery_ar_e30 on battery_try 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-battery_ar-bat-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batAR30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: battery_ar_e30 on battery_try 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-battery_arprop-bat-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batLED30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batLED30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: battery_arprop_e30 on battery_try 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_arprop_e30/export_e30.pt
+  label: battery_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-battery_arprop-bat-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batLED30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batLED30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: battery_arprop_e30 on battery_try 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_arprop_e30/export_e30.pt
+  label: battery_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-battery_arprop-bat-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batLED30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batLED30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: battery_arprop_e30 on battery_try 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_arprop_e30/export_e30.pt
+  label: battery_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-battery_arprop-bat-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batLED30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batLED30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: battery_arprop_e30 on battery_try 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_arprop_e30/export_e30.pt
+  label: battery_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-battery_arprop-bat-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batLED30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batLED30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: battery_arprop_e30 on battery_try 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_arprop_e30/export_e30.pt
+  label: battery_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-battery_arprop-bat-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batLED30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batLED30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: battery_arprop_e30 on battery_try 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_arprop_e30/export_e30.pt
+  label: battery_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-battery_arprop-bat-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batLED30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batLED30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: battery_arprop_e30 on battery_try 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_arprop_e30/export_e30.pt
+  label: battery_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-battery_arprop-bat-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batLED30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batLED30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: battery_arprop_e30 on battery_try 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_arprop_e30/export_e30.pt
+  label: battery_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-battery_arprop-bat-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batLED30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batLED30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: battery_arprop_e30 on battery_try 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_arprop_e30/export_e30.pt
+  label: battery_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-battery_arprop-bat-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-battery_try, A40-fetch-batLED30]
+  requires_pass: [A40-prep2-battery_try, A40-fetch-batLED30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: battery_arprop_e30 on battery_try 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_arprop_e30/export_e30.pt
+  label: battery_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-rearrange_ar-rearr-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
+  requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: rearrange_ar_e30 on rearrange_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_ar_e30/export_e30.pt
+  label: rearrange_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-rearrange_ar-rearr-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
+  requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: rearrange_ar_e30 on rearrange_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_ar_e30/export_e30.pt
+  label: rearrange_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-rearrange_ar-rearr-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
+  requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: rearrange_ar_e30 on rearrange_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_ar_e30/export_e30.pt
+  label: rearrange_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-rearrange_ar-rearr-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
+  requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: rearrange_ar_e30 on rearrange_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_ar_e30/export_e30.pt
+  label: rearrange_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-rearrange_ar-rearr-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
+  requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: rearrange_ar_e30 on rearrange_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_ar_e30/export_e30.pt
+  label: rearrange_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-rearrange_ar-rearr-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
+  requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: rearrange_ar_e30 on rearrange_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_ar_e30/export_e30.pt
+  label: rearrange_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-rearrange_ar-rearr-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
+  requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: rearrange_ar_e30 on rearrange_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_ar_e30/export_e30.pt
+  label: rearrange_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-rearrange_ar-rearr-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
+  requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: rearrange_ar_e30 on rearrange_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_ar_e30/export_e30.pt
+  label: rearrange_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-rearrange_ar-rearr-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
+  requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: rearrange_ar_e30 on rearrange_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_ar_e30/export_e30.pt
+  label: rearrange_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-rearrange_ar-rearr-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
+  requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: rearrange_ar_e30 on rearrange_blocks 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_ar_e30/export_e30.pt
+  label: rearrange_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-swapT_ar-swapT-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-swap_T, A40-fetch-swapTAR30]
+  requires_pass: [A40-prep2-swap_T, A40-fetch-swapTAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: swapT_ar_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-swapT_ar-swapT-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-swap_T, A40-fetch-swapTAR30]
+  requires_pass: [A40-prep2-swap_T, A40-fetch-swapTAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: swapT_ar_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-swapT_ar-swapT-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-swap_T, A40-fetch-swapTAR30]
+  requires_pass: [A40-prep2-swap_T, A40-fetch-swapTAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: swapT_ar_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-swapT_ar-swapT-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-swap_T, A40-fetch-swapTAR30]
+  requires_pass: [A40-prep2-swap_T, A40-fetch-swapTAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: swapT_ar_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-swapT_ar-swapT-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-swap_T, A40-fetch-swapTAR30]
+  requires_pass: [A40-prep2-swap_T, A40-fetch-swapTAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: swapT_ar_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-swapT_ar-swapT-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-swap_T, A40-fetch-swapTAR30]
+  requires_pass: [A40-prep2-swap_T, A40-fetch-swapTAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: swapT_ar_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-swapT_ar-swapT-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-swap_T, A40-fetch-swapTAR30]
+  requires_pass: [A40-prep2-swap_T, A40-fetch-swapTAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: swapT_ar_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-swapT_ar-swapT-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-swap_T, A40-fetch-swapTAR30]
+  requires_pass: [A40-prep2-swap_T, A40-fetch-swapTAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: swapT_ar_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-swapT_ar-swapT-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-swap_T, A40-fetch-swapTAR30]
+  requires_pass: [A40-prep2-swap_T, A40-fetch-swapTAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: swapT_ar_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-MAIN2-swapT_ar-swapT-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-swap_T, A40-fetch-swapTAR30]
+  requires_pass: [A40-prep2-swap_T, A40-fetch-swapTAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 R3 main table, second pass: swapT_ar_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2 (closed_loop/r2); descriptive (mean and range with the first pass); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-C2-swapT-clock-p256-his-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-swapT_clock-smoke, A40-v15-stress-check-swapT]
+  requires_pass: [A40-swapT_clock-smoke, A40-v15-stress-check-swapT]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 C2 (descriptive; the 64-frame level is E16b, registered): swapT_clock_e30, 1-50, pause 256 history; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_clock_e30/export_e30.pt
+  label: swapT_clock_e30_p256_his
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "50", "--stress", "event:pause:256:history", "--shard", "0/5"]
+  output: closed_loop/e16
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-C2-swapT-clock-p256-his-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-swapT_clock-smoke, A40-v15-stress-check-swapT]
+  requires_pass: [A40-swapT_clock-smoke, A40-v15-stress-check-swapT]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 C2 (descriptive; the 64-frame level is E16b, registered): swapT_clock_e30, 1-50, pause 256 history; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_clock_e30/export_e30.pt
+  label: swapT_clock_e30_p256_his
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "50", "--stress", "event:pause:256:history", "--shard", "1/5"]
+  output: closed_loop/e16
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-C2-swapT-clock-p256-his-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-swapT_clock-smoke, A40-v15-stress-check-swapT]
+  requires_pass: [A40-swapT_clock-smoke, A40-v15-stress-check-swapT]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 C2 (descriptive; the 64-frame level is E16b, registered): swapT_clock_e30, 1-50, pause 256 history; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_clock_e30/export_e30.pt
+  label: swapT_clock_e30_p256_his
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "50", "--stress", "event:pause:256:history", "--shard", "2/5"]
+  output: closed_loop/e16
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-C2-swapT-clock-p256-his-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-swapT_clock-smoke, A40-v15-stress-check-swapT]
+  requires_pass: [A40-swapT_clock-smoke, A40-v15-stress-check-swapT]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 C2 (descriptive; the 64-frame level is E16b, registered): swapT_clock_e30, 1-50, pause 256 history; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_clock_e30/export_e30.pt
+  label: swapT_clock_e30_p256_his
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "50", "--stress", "event:pause:256:history", "--shard", "3/5"]
+  output: closed_loop/e16
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-C2-swapT-clock-p256-his-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-swapT_clock-smoke, A40-v15-stress-check-swapT]
+  requires_pass: [A40-swapT_clock-smoke, A40-v15-stress-check-swapT]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 C2 (descriptive; the 64-frame level is E16b, registered): swapT_clock_e30, 1-50, pause 256 history; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_clock_e30/export_e30.pt
+  label: swapT_clock_e30_p256_his
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "50", "--stress", "event:pause:256:history", "--shard", "4/5"]
+  output: closed_loop/e16
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-C2-swapT-clock-p256-hid-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-swapT_clock-smoke, A40-v15-stress-check-swapT]
+  requires_pass: [A40-swapT_clock-smoke, A40-v15-stress-check-swapT]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 C2 (descriptive; the 64-frame level is E16b, registered): swapT_clock_e30, 1-50, pause 256 hidden; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_clock_e30/export_e30.pt
+  label: swapT_clock_e30_p256_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "50", "--stress", "event:pause:256:hidden", "--shard", "0/5"]
+  output: closed_loop/e16
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-C2-swapT-clock-p256-hid-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-swapT_clock-smoke, A40-v15-stress-check-swapT]
+  requires_pass: [A40-swapT_clock-smoke, A40-v15-stress-check-swapT]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 C2 (descriptive; the 64-frame level is E16b, registered): swapT_clock_e30, 1-50, pause 256 hidden; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_clock_e30/export_e30.pt
+  label: swapT_clock_e30_p256_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "50", "--stress", "event:pause:256:hidden", "--shard", "1/5"]
+  output: closed_loop/e16
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-C2-swapT-clock-p256-hid-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-swapT_clock-smoke, A40-v15-stress-check-swapT]
+  requires_pass: [A40-swapT_clock-smoke, A40-v15-stress-check-swapT]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 C2 (descriptive; the 64-frame level is E16b, registered): swapT_clock_e30, 1-50, pause 256 hidden; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_clock_e30/export_e30.pt
+  label: swapT_clock_e30_p256_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "50", "--stress", "event:pause:256:hidden", "--shard", "2/5"]
+  output: closed_loop/e16
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-C2-swapT-clock-p256-hid-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-swapT_clock-smoke, A40-v15-stress-check-swapT]
+  requires_pass: [A40-swapT_clock-smoke, A40-v15-stress-check-swapT]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 C2 (descriptive; the 64-frame level is E16b, registered): swapT_clock_e30, 1-50, pause 256 hidden; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_clock_e30/export_e30.pt
+  label: swapT_clock_e30_p256_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "50", "--stress", "event:pause:256:hidden", "--shard", "3/5"]
+  output: closed_loop/e16
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-C2-swapT-clock-p256-hid-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-swapT_clock-smoke, A40-v15-stress-check-swapT]
+  requires_pass: [A40-swapT_clock-smoke, A40-v15-stress-check-swapT]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 C2 (descriptive; the 64-frame level is E16b, registered): swapT_clock_e30, 1-50, pause 256 hidden; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_clock_e30/export_e30.pt
+  label: swapT_clock_e30_p256_hid
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "50", "--stress", "event:pause:256:hidden", "--shard", "4/5"]
+  output: closed_loop/e16
+  env: {MWAM_TEXT_SOURCE: "cache"}
+

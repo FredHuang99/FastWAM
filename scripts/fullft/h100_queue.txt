@@ -69,3 +69,14 @@ rearrange_clock | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press
 # point fixed in the A40 card before any swap_T clock result. Rule C has no prediction for swap_T ("clock none"), so it
 # does not count for the audit.
 swapT_clock | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_swap_T_v1] data.tasks=[swap_T] history.variant=arclk history.event_max=32 | test -f outputs/memory_v2/press/dense_swap_T_v1/.verified && bash scripts/fullft/h100_v15_ready.sh swapT_clock
+#
+# 11-22 plan v19 (Fable; user decisions 01:22). No-history rows of the main table, on this machine because the AR and
+# ledger arms of these three tasks were trained here (H100 and H200 are not numerically aligned; deviation 39).
+# A2 battery_none first (~70-80 h here), then rearrange_none (~45 h) and swapT_none (~40 h) [estimates].
+# A2 registered reading (11-22, before any battery_none result; Status 11-22 section 2; A40, battery_try 1-100, paired
+# with battery_ar e30, default noise): D = success(none) - success(ar); paired-bootstrap 95 % CI (10,000, seed 0);
+# SESOI -0.15: CI lower > -0.15 -> NO MEMORY NEEDED; CI upper < -0.15 -> SHORT MEMORY NEEDED; otherwise UNCERTAIN
+# (pre-set extension: both again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule). rearrange / swapT none: descriptive.
+battery_none | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_battery_try_v1] data.tasks=[battery_try] history.variant=none | test -f outputs/memory_v2/press/dense_battery_try_v1/.verified
+rearrange_none | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=none | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified
+swapT_none | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_swap_T_v1] data.tasks=[swap_T] history.variant=none | test -f outputs/memory_v2/press/dense_swap_T_v1/.verified

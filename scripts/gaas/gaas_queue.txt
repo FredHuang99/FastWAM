@@ -86,3 +86,20 @@ cover_arprop | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/de
 # Submitted by fetch_b4.sh (login node; files from the relay diag/press_fast), walltime 48 h, no dependency.
 press_count_s18 | seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_press_button_v1] data.tasks=[press_button] history.variant=arprop history.event_max=32 history.lag=0 history.ordinal=16 history.event_rule_from=/workspace/FastWAM-memory2/outputs/fullft/PRESS_FAST_RULE.json data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_press_button_fast.json] | test -f outputs/fullft/PRESS_FAST_RULE.json && test -f outputs/fullft/events/events_press_button_fast.json && test -f outputs/fullft/READY_arprop_events_press_button_fast && test -f outputs/memory_v2/press/dense_press_button_v1/.verified
 press_count_s19 | seed=19 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_press_button_v1] data.tasks=[press_button] history.variant=arprop history.event_max=32 history.lag=0 history.ordinal=16 history.event_rule_from=/workspace/FastWAM-memory2/outputs/fullft/PRESS_FAST_RULE.json data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_press_button_fast.json] | test -f outputs/fullft/PRESS_FAST_RULE.json && test -f outputs/fullft/events/events_press_button_fast.json && test -f outputs/fullft/READY_arprop_events_press_button_fast && test -f outputs/memory_v2/press/dense_press_button_v1/.verified
+#
+# 11-22 plan v19 (Fable, user decisions 01:22 / 01:39; executed by Opus). Submitted by scripts/gaas/submit_b6.sh.
+# B4: the two-task body-record model (ar2_prop's exact line: arprop, 32 entries, lag 4, rule A events, seed 17) with the
+# video-prediction loss switched off (model.video_loss=0; the video branch still trains through the action loss).
+# Question: is predicting the future images the free teacher that makes the model learn to use the record?
+# Registered reading (11-22, before any B4 result; Status 11-22 section 2; A40, official seed-42 banks):
+#   MAIN swap_blocks 1-100, e10 (learning speed): D = success(ar2_prop_novid e10) - success(ar2_prop e10), paired by
+#   scene, paired-bootstrap 95 % CI (10,000, seed 0); SESOI -0.15:
+#     CI upper < -0.15 -> VIDEO LOSS HELPS LEARNING; CI lower > -0.15 -> NO HELP; otherwise UNCERTAIN (pre-set
+#     extension: both e10 again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule).
+#   e30 and put_back_block are described only. Same machine class as ar2_prop (H200; the two H200s are IDENTICAL).
+ar2_prop_novid | model.video_loss=0 data.tasks=[put_back_block,swap_blocks] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_put_back_block.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_blocks.json] | test -s outputs/fullft/events/events_put_back_block.json && test -s outputs/fullft/events/events_swap_blocks.json
+# No-history rows of the main table (descriptive), same recipe as obs_ar / press_ar (old H200, H200 class) with
+# history.variant=none. obs_none is also the control of the observe-and-pickup zoom test (A3): with obs_ar,
+# D = success(ar) - success(none) on 1-100, SESOI 0.10, both CI ends inside +-0.10 -> HISTORY NOT USED (descriptive).
+obs_none | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1] data.tasks=[observe_and_pickup] history.variant=none | test -f outputs/memory_v2/press/dense_observe_and_pickup_v1/.verified
+press_none | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_press_button_v1] data.tasks=[press_button] history.variant=none | test -f outputs/memory_v2/press/dense_press_button_v1/.verified
