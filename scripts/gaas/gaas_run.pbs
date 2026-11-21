@@ -52,8 +52,12 @@ git pull -q --ff-only origin memory2 || step "git pull skipped (another job pull
 step "code $(git log --oneline -1 | cut -c1-70)"
 echo "${PBS_JOBID:-none}" > $F/$RUN/GAAS_JOB
 [ -f $F/$RUN/SUMMARY.json ] && { step "$RUN has finished already: nothing to do"; exit 0; }
+if [ "$RUN" = relay_backlog ]; then              # 11-21: upload-only job (no training), see below
+  LINE="relay_backlog | | true"
+else
 LINE=$(grep -v '^[[:space:]]*#' scripts/gaas/gaas_queue.txt | awk -F'|' -v r="$RUN" '{x = $1; gsub(/[[:space:]]/, "", x)} x == r')
 [ -n "$LINE" ] || fail "no line $RUN in scripts/gaas/gaas_queue.txt"
+fi
 SETS=$(echo "$LINE" | cut -d'|' -f2 | xargs)
 COND=$(echo "$LINE" | cut -d'|' -f3- | xargs)
 read -r -a SETA <<< "$SETS"                      # no glob expansion of values like [45,60]
@@ -100,6 +104,17 @@ EF=$W/logs/container_env_${PBS_JOBID:-$$}.txt
 printf '%s\n' "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-}" PYTHONNOUSERSITE=1 \
   PYTHONPATH=/workspace/FastWAM-memory2/src PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True OMP_NUM_THREADS=8 > $EF
 X() { apptainer exec --nv --cleanenv --bind "$B" --pwd /workspace/FastWAM-memory2 --env-file "$EF" "$SBX" "$@"; }
+if [ "$RUN" = relay_backlog ]; then
+  # 11-21 23:45 (user: do not restart a training job): exports that missed the HF relay while it was full
+  # (scripts/gaas/relay_backlog.txt: press_clock e10-e30, ranking_ar e30) go up from this short job once a GPU slot of
+  # the group is free. Submit: qsub -l select=1:ncpus=4:ngpus=1:mem=32gb -l walltime=03:00:00 -v RUN=relay_backlog ...
+  step "relay backlog only (no training): $(grep -v '^#' scripts/gaas/relay_backlog.txt | tr '\n' ';')"
+  X bash -c "bash scripts/fullft/relay_backlog.sh"
+  step "relay backlog: $(tail -n 2 $(ls -t $F/RELAY_BACKLOG_*.txt | head -1) | tr '\n' ' ')"
+  for r in press_clock ranking_ar; do step "$r relayed: $(ls $F/$r/.relayed_* 2>/dev/null | xargs -n1 basename | tr '\n' ' ')"; done
+  step "done"
+  exit 0
+fi
 GOT=$(X /opt/mwam/bin/python -m pip freeze 2>/dev/null | sha256sum | cut -c1-64)
 [ "$GOT" = "$FREEZE_SHA" ] || fail "pip freeze sha256 $GOT is not the old H200's $FREEZE_SHA"
 X /opt/mwam/bin/python -c "import torch; p = torch.cuda.get_device_properties(0); print('[run]', torch.__version__, torch.cuda.get_device_name(0), 'SMs', p.multi_processor_count)"
