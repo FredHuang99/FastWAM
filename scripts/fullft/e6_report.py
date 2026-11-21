@@ -85,6 +85,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--folder", default=str(O / "e6"))
     ap.add_argument("--labels", nargs="*", default=DEFAULT, help="task:label pairs to report (1-50, 51-100, 1-100)")
+    ap.add_argument("--pairs", nargs="*", default=[],
+                    help="11-22: task:labelA:labelB, descriptive paired counts on 1-100 (A-only, B-only, sign p); no word")
     args = ap.parse_args()
     folder = Path(args.folder)
     rows = {}
@@ -98,8 +100,18 @@ def main():
         rows[item] = line
         print(f"{task:18s} {label:22s} " + "  ".join(f"{k}: {v[0]}/{v[1]}" for k, v in line.items())
               + ("" if seeds else "  (no scene bank)"))
+    pairs = {}
+    for item in args.pairs:
+        task, la, lb = item.split(":")
+        seeds = e1.seeds_of(task, 100) or []
+        x, y = results(folder, la, task, seeds), results(folder, lb, task, seeds)
+        c = sorted(set(x) & set(y))
+        aa, bb = sum(x[s] and not y[s] for s in c), sum(y[s] and not x[s] for s in c)
+        pairs[item] = {"scenes": len(c), la: sum(x[s] for s in c), lb: sum(y[s] for s in c), "a_only": aa, "b_only": bb,
+                       "p": e1.sign_p(aa, bb) if c else None}
+        print(f"pair {item} (descriptive, 1-100): {pairs[item]}")
     bat = battery(folder)
-    (F / "E6_REPORT.json").write_text(json.dumps({"rows": rows, "battery_sc_b": bat}, indent=1) + "\n")
+    (F / "E6_REPORT.json").write_text(json.dumps({"rows": rows, "pairs": pairs, "battery_sc_b": bat}, indent=1) + "\n")
 
 
 if __name__ == "__main__":

@@ -8578,6 +8578,887 @@ tasks:
     - if: "m['rc'] != 0"
       then: "no complete bank: read the job log and closed_loop/scenes_seed42_n100_swap_T/swap_T.error.json - missing task assets in the A40 simulator install, a non-expert exception (left for a human), or the time limit"
 
+# ---------------------------------------------------------------------------------------------------------------
+# 11-22 00:30 BJ (Opus; user 00:08: start the A40 evaluation of these models at once). Main-table rows that exist
+# as trained models but were never evaluated: ranking_ar e30 (new H200, 11-21), cover_ar e30 (new H200, 11-20),
+# obs_ar e30 and obs_arprop e30 (old H200, 11-19). The exports come back to the HF relay from the 5090 archive
+# (relay_mirror) and are sha256-checked here. Same protocol as E6: official seed-42 bank, scenes 1-100, execute 8,
+# closed_loop/e6. Descriptive rows only (no verdict word); obs_arprop vs obs_ar paired counts are descriptive too.
+# Placed before the remaining A40 cards so that they run first.
+
+- id: A40-BANK-blocks_ranking_try
+  lane: a40
+  kind: shell
+  after: [A40-BANK-check]
+  requires_pass: [A40-BANK-check]
+  need_mib: 8000
+  timeout_h: 10
+  hypothesis: "official protocol scene bank (as A40-BANK-battery_try): the first 100 expert-feasible seeds of blocks_ranking_try from seed 42; if the bank came with the 5090 delta and is complete, nothing is planned; written to closed_loop/scenes_seed42_n100_blocks_ranking_try"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=blocks_ranking_try; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 60); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
+  pass_if: "m['rc'] == 0"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "no complete bank: read the job log and closed_loop/scenes_seed42_n100_blocks_ranking_try/blocks_ranking_try.error.json - missing task assets in the A40 simulator install, a non-expert exception (left for a human), or the time limit"
+
+- id: A40-prep2-blocks_ranking_try
+  lane: a40cpu
+  kind: shell
+  after: [A40-BANK-blocks_ranking_try]
+  requires_pass: [A40-BANK-blocks_ranking_try]
+  need_mib: 0
+  timeout_h: 3
+  hypothesis: "blocks_ranking_try: scene bank complete + instruction text from the cache relay (sha256)"
+  command: "bash /workspace/FastWAM-memory2/scripts/fullft/a40_prep_task.sh blocks_ranking_try"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fetch-ranking_ar-e30
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 48
+  hypothesis: "fetch ranking_ar_e30 from the relay (re-uploaded from the 5090 archive 11-22; sha256 checked)"
+  command: "RUN=ranking_ar TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-ranking_ar30-smoke
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-blocks_ranking_try, A40-fetch-ranking_ar-e30]
+  requires_pass: [A40-prep2-blocks_ranking_try, A40-fetch-ranking_ar-e30]
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "smoke: ranking_ar_e30, blocks_ranking_try scene 1, one episode finishes on the A40 (closed_loop/e6smoke)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_ar_e30/export_e30.pt
+  label: ranking_ar_e30_smoke
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "1"]
+  output: closed_loop/e6smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+  pass_if: "m.get('episodes', 0) >= 1"
+
+- id: A40-MAIN-ranking_ar30-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-ranking_ar30-smoke]
+  requires_pass: [A40-ranking_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): ranking_ar_e30 on blocks_ranking_try, official scenes 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_ar_e30/export_e30.pt
+  label: ranking_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-ranking_ar30-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-ranking_ar30-smoke]
+  requires_pass: [A40-ranking_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): ranking_ar_e30 on blocks_ranking_try, official scenes 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_ar_e30/export_e30.pt
+  label: ranking_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-ranking_ar30-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-ranking_ar30-smoke]
+  requires_pass: [A40-ranking_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): ranking_ar_e30 on blocks_ranking_try, official scenes 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_ar_e30/export_e30.pt
+  label: ranking_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-ranking_ar30-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-ranking_ar30-smoke]
+  requires_pass: [A40-ranking_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): ranking_ar_e30 on blocks_ranking_try, official scenes 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_ar_e30/export_e30.pt
+  label: ranking_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-ranking_ar30-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-ranking_ar30-smoke]
+  requires_pass: [A40-ranking_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): ranking_ar_e30 on blocks_ranking_try, official scenes 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_ar_e30/export_e30.pt
+  label: ranking_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-ranking_ar30-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-ranking_ar30-smoke]
+  requires_pass: [A40-ranking_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): ranking_ar_e30 on blocks_ranking_try, official scenes 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_ar_e30/export_e30.pt
+  label: ranking_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-ranking_ar30-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-ranking_ar30-smoke]
+  requires_pass: [A40-ranking_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): ranking_ar_e30 on blocks_ranking_try, official scenes 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_ar_e30/export_e30.pt
+  label: ranking_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-ranking_ar30-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-ranking_ar30-smoke]
+  requires_pass: [A40-ranking_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): ranking_ar_e30 on blocks_ranking_try, official scenes 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_ar_e30/export_e30.pt
+  label: ranking_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-ranking_ar30-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-ranking_ar30-smoke]
+  requires_pass: [A40-ranking_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): ranking_ar_e30 on blocks_ranking_try, official scenes 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_ar_e30/export_e30.pt
+  label: ranking_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-ranking_ar30-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-ranking_ar30-smoke]
+  requires_pass: [A40-ranking_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): ranking_ar_e30 on blocks_ranking_try, official scenes 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_ar_e30/export_e30.pt
+  label: ranking_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-BANK-cover_blocks
+  lane: a40
+  kind: shell
+  after: [A40-BANK-check]
+  requires_pass: [A40-BANK-check]
+  need_mib: 8000
+  timeout_h: 10
+  hypothesis: "official protocol scene bank (as A40-BANK-battery_try): the first 100 expert-feasible seeds of cover_blocks from seed 42; if the bank came with the 5090 delta and is complete, nothing is planned; written to closed_loop/scenes_seed42_n100_cover_blocks"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=cover_blocks; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 60); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
+  pass_if: "m['rc'] == 0"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "no complete bank: read the job log and closed_loop/scenes_seed42_n100_cover_blocks/cover_blocks.error.json - missing task assets in the A40 simulator install, a non-expert exception (left for a human), or the time limit"
+
+- id: A40-prep2-cover_blocks
+  lane: a40cpu
+  kind: shell
+  after: [A40-BANK-cover_blocks]
+  requires_pass: [A40-BANK-cover_blocks]
+  need_mib: 0
+  timeout_h: 3
+  hypothesis: "cover_blocks: scene bank complete + instruction text from the cache relay (sha256)"
+  command: "bash /workspace/FastWAM-memory2/scripts/fullft/a40_prep_task.sh cover_blocks"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fetch-cover_ar-e30
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 48
+  hypothesis: "fetch cover_ar_e30 from the relay (re-uploaded from the 5090 archive 11-22; sha256 checked)"
+  command: "RUN=cover_ar TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-cover_ar30-smoke
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks, A40-fetch-cover_ar-e30]
+  requires_pass: [A40-prep2-cover_blocks, A40-fetch-cover_ar-e30]
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "smoke: cover_ar_e30, cover_blocks scene 1, one episode finishes on the A40 (closed_loop/e6smoke)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_ar_e30/export_e30.pt
+  label: cover_ar_e30_smoke
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "1"]
+  output: closed_loop/e6smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+  pass_if: "m.get('episodes', 0) >= 1"
+
+- id: A40-MAIN-cover_ar30-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-cover_ar30-smoke]
+  requires_pass: [A40-cover_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): cover_ar_e30 on cover_blocks, official scenes 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_ar_e30/export_e30.pt
+  label: cover_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-cover_ar30-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-cover_ar30-smoke]
+  requires_pass: [A40-cover_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): cover_ar_e30 on cover_blocks, official scenes 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_ar_e30/export_e30.pt
+  label: cover_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-cover_ar30-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-cover_ar30-smoke]
+  requires_pass: [A40-cover_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): cover_ar_e30 on cover_blocks, official scenes 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_ar_e30/export_e30.pt
+  label: cover_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-cover_ar30-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-cover_ar30-smoke]
+  requires_pass: [A40-cover_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): cover_ar_e30 on cover_blocks, official scenes 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_ar_e30/export_e30.pt
+  label: cover_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-cover_ar30-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-cover_ar30-smoke]
+  requires_pass: [A40-cover_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): cover_ar_e30 on cover_blocks, official scenes 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_ar_e30/export_e30.pt
+  label: cover_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-cover_ar30-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-cover_ar30-smoke]
+  requires_pass: [A40-cover_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): cover_ar_e30 on cover_blocks, official scenes 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_ar_e30/export_e30.pt
+  label: cover_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-cover_ar30-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-cover_ar30-smoke]
+  requires_pass: [A40-cover_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): cover_ar_e30 on cover_blocks, official scenes 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_ar_e30/export_e30.pt
+  label: cover_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-cover_ar30-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-cover_ar30-smoke]
+  requires_pass: [A40-cover_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): cover_ar_e30 on cover_blocks, official scenes 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_ar_e30/export_e30.pt
+  label: cover_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-cover_ar30-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-cover_ar30-smoke]
+  requires_pass: [A40-cover_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): cover_ar_e30 on cover_blocks, official scenes 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_ar_e30/export_e30.pt
+  label: cover_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-cover_ar30-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-cover_ar30-smoke]
+  requires_pass: [A40-cover_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): cover_ar_e30 on cover_blocks, official scenes 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_ar_e30/export_e30.pt
+  label: cover_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-BANK-observe_and_pickup
+  lane: a40
+  kind: shell
+  after: [A40-BANK-check]
+  requires_pass: [A40-BANK-check]
+  need_mib: 8000
+  timeout_h: 10
+  hypothesis: "official protocol scene bank (as A40-BANK-battery_try): the first 100 expert-feasible seeds of observe_and_pickup from seed 42; if the bank came with the 5090 delta and is complete, nothing is planned; written to closed_loop/scenes_seed42_n100_observe_and_pickup"
+  command: "C={O}/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=observe_and_pickup; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 60); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES={GPU} $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100"
+  pass_if: "m['rc'] == 0"
+  failure_explanations:
+    - if: "m['rc'] != 0"
+      then: "no complete bank: read the job log and closed_loop/scenes_seed42_n100_observe_and_pickup/observe_and_pickup.error.json - missing task assets in the A40 simulator install, a non-expert exception (left for a human), or the time limit"
+
+- id: A40-prep2-observe_and_pickup
+  lane: a40cpu
+  kind: shell
+  after: [A40-BANK-observe_and_pickup]
+  requires_pass: [A40-BANK-observe_and_pickup]
+  need_mib: 0
+  timeout_h: 3
+  hypothesis: "observe_and_pickup: scene bank complete + instruction text from the cache relay (sha256)"
+  command: "bash /workspace/FastWAM-memory2/scripts/fullft/a40_prep_task.sh observe_and_pickup"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fetch-obs_ar-e30
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 48
+  hypothesis: "fetch obs_ar_e30 from the relay (re-uploaded from the 5090 archive 11-22; sha256 checked)"
+  command: "RUN=obs_ar TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-obs_ar30-smoke
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-observe_and_pickup, A40-fetch-obs_ar-e30]
+  requires_pass: [A40-prep2-observe_and_pickup, A40-fetch-obs_ar-e30]
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "smoke: obs_ar_e30, observe_and_pickup scene 1, one episode finishes on the A40 (closed_loop/e6smoke)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_ar_e30/export_e30.pt
+  label: obs_ar_e30_smoke
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "1"]
+  output: closed_loop/e6smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+  pass_if: "m.get('episodes', 0) >= 1"
+
+- id: A40-MAIN-obs_ar30-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-obs_ar30-smoke]
+  requires_pass: [A40-obs_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): obs_ar_e30 on observe_and_pickup, official scenes 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_ar_e30/export_e30.pt
+  label: obs_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-obs_ar30-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-obs_ar30-smoke]
+  requires_pass: [A40-obs_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): obs_ar_e30 on observe_and_pickup, official scenes 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_ar_e30/export_e30.pt
+  label: obs_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-obs_ar30-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-obs_ar30-smoke]
+  requires_pass: [A40-obs_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): obs_ar_e30 on observe_and_pickup, official scenes 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_ar_e30/export_e30.pt
+  label: obs_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-obs_ar30-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-obs_ar30-smoke]
+  requires_pass: [A40-obs_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): obs_ar_e30 on observe_and_pickup, official scenes 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_ar_e30/export_e30.pt
+  label: obs_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-obs_ar30-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-obs_ar30-smoke]
+  requires_pass: [A40-obs_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): obs_ar_e30 on observe_and_pickup, official scenes 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_ar_e30/export_e30.pt
+  label: obs_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-obs_ar30-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-obs_ar30-smoke]
+  requires_pass: [A40-obs_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): obs_ar_e30 on observe_and_pickup, official scenes 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_ar_e30/export_e30.pt
+  label: obs_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-obs_ar30-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-obs_ar30-smoke]
+  requires_pass: [A40-obs_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): obs_ar_e30 on observe_and_pickup, official scenes 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_ar_e30/export_e30.pt
+  label: obs_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-obs_ar30-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-obs_ar30-smoke]
+  requires_pass: [A40-obs_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): obs_ar_e30 on observe_and_pickup, official scenes 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_ar_e30/export_e30.pt
+  label: obs_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-obs_ar30-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-obs_ar30-smoke]
+  requires_pass: [A40-obs_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): obs_ar_e30 on observe_and_pickup, official scenes 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_ar_e30/export_e30.pt
+  label: obs_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-obs_ar30-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-obs_ar30-smoke]
+  requires_pass: [A40-obs_ar30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): obs_ar_e30 on observe_and_pickup, official scenes 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_ar_e30/export_e30.pt
+  label: obs_ar_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fetch-obs_arprop-e30
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 48
+  hypothesis: "fetch obs_arprop_e30 from the relay (re-uploaded from the 5090 archive 11-22; sha256 checked)"
+  command: "RUN=obs_arprop TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-obs_arprop30-smoke
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-observe_and_pickup, A40-fetch-obs_arprop-e30]
+  requires_pass: [A40-prep2-observe_and_pickup, A40-fetch-obs_arprop-e30]
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "smoke: obs_arprop_e30, observe_and_pickup scene 1, one episode finishes on the A40 (closed_loop/e6smoke)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_arprop_e30/export_e30.pt
+  label: obs_arprop_e30_smoke
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "1"]
+  output: closed_loop/e6smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+  pass_if: "m.get('episodes', 0) >= 1"
+
+- id: A40-MAIN-obs_arprop30-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-obs_arprop30-smoke]
+  requires_pass: [A40-obs_arprop30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): obs_arprop_e30 on observe_and_pickup, official scenes 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_arprop_e30/export_e30.pt
+  label: obs_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-obs_arprop30-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-obs_arprop30-smoke]
+  requires_pass: [A40-obs_arprop30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): obs_arprop_e30 on observe_and_pickup, official scenes 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_arprop_e30/export_e30.pt
+  label: obs_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-obs_arprop30-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-obs_arprop30-smoke]
+  requires_pass: [A40-obs_arprop30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): obs_arprop_e30 on observe_and_pickup, official scenes 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_arprop_e30/export_e30.pt
+  label: obs_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-obs_arprop30-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-obs_arprop30-smoke]
+  requires_pass: [A40-obs_arprop30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): obs_arprop_e30 on observe_and_pickup, official scenes 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_arprop_e30/export_e30.pt
+  label: obs_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-obs_arprop30-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-obs_arprop30-smoke]
+  requires_pass: [A40-obs_arprop30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): obs_arprop_e30 on observe_and_pickup, official scenes 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_arprop_e30/export_e30.pt
+  label: obs_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-obs_arprop30-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-obs_arprop30-smoke]
+  requires_pass: [A40-obs_arprop30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): obs_arprop_e30 on observe_and_pickup, official scenes 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_arprop_e30/export_e30.pt
+  label: obs_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-obs_arprop30-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-obs_arprop30-smoke]
+  requires_pass: [A40-obs_arprop30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): obs_arprop_e30 on observe_and_pickup, official scenes 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_arprop_e30/export_e30.pt
+  label: obs_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-obs_arprop30-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-obs_arprop30-smoke]
+  requires_pass: [A40-obs_arprop30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): obs_arprop_e30 on observe_and_pickup, official scenes 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_arprop_e30/export_e30.pt
+  label: obs_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-obs_arprop30-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-obs_arprop30-smoke]
+  requires_pass: [A40-obs_arprop30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): obs_arprop_e30 on observe_and_pickup, official scenes 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_arprop_e30/export_e30.pt
+  label: obs_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-obs_arprop30-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-obs_arprop30-smoke]
+  requires_pass: [A40-obs_arprop30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table row (11-22, descriptive, no verdict): obs_arprop_e30 on observe_and_pickup, official scenes 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_arprop_e30/export_e30.pt
+  label: obs_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-MAIN-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-MAIN-ranking_ar30-s0, A40-MAIN-ranking_ar30-s1, A40-MAIN-ranking_ar30-s2, A40-MAIN-ranking_ar30-s3, A40-MAIN-ranking_ar30-s4, A40-MAIN-ranking_ar30-s5, A40-MAIN-ranking_ar30-s6, A40-MAIN-ranking_ar30-s7, A40-MAIN-ranking_ar30-s8, A40-MAIN-ranking_ar30-s9, A40-MAIN-cover_ar30-s0, A40-MAIN-cover_ar30-s1, A40-MAIN-cover_ar30-s2, A40-MAIN-cover_ar30-s3, A40-MAIN-cover_ar30-s4, A40-MAIN-cover_ar30-s5, A40-MAIN-cover_ar30-s6, A40-MAIN-cover_ar30-s7, A40-MAIN-cover_ar30-s8, A40-MAIN-cover_ar30-s9, A40-MAIN-obs_ar30-s0, A40-MAIN-obs_ar30-s1, A40-MAIN-obs_ar30-s2, A40-MAIN-obs_ar30-s3, A40-MAIN-obs_ar30-s4, A40-MAIN-obs_ar30-s5, A40-MAIN-obs_ar30-s6, A40-MAIN-obs_ar30-s7, A40-MAIN-obs_ar30-s8, A40-MAIN-obs_ar30-s9, A40-MAIN-obs_arprop30-s0, A40-MAIN-obs_arprop30-s1, A40-MAIN-obs_arprop30-s2, A40-MAIN-obs_arprop30-s3, A40-MAIN-obs_arprop30-s4, A40-MAIN-obs_arprop30-s5, A40-MAIN-obs_arprop30-s6, A40-MAIN-obs_arprop30-s7, A40-MAIN-obs_arprop30-s8, A40-MAIN-obs_arprop30-s9]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "main-table rows (11-22, descriptive): success on scenes 1-50 / 51-100 / 1-100 for every E6 row, plus obs_arprop vs obs_ar paired counts; E6_REPORT.json (pushed with the results snapshot)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e6_report.py --labels battery_try:battery_ar_e30 battery_try:battery_arprop_e30 rearrange_blocks:rearrange_ar_e30 swap_T:swapT_ar_e30 blocks_ranking_try:ranking_ar_e30 cover_blocks:cover_ar_e30 observe_and_pickup:obs_ar_e30 observe_and_pickup:obs_arprop_e30 --pairs observe_and_pickup:obs_arprop_e30:obs_ar_e30"
+  pass_if: "m['rc'] == 0"
+
 - id: A40-fetch-prop10
   lane: a40cpu
   kind: shell
