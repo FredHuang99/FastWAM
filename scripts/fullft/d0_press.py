@@ -11,8 +11,11 @@ Tables:
   2 second count against the first: right / over / under cross table (also e2 among episodes with e1 = 0)
   3 which arm pressed button 1 and button 2 (majority over that button's presses); e2 by same arm vs different arms
     (with one arm for both, the record's countable code keeps counting across the two buttons: code fact, history.py)
-  4 e2 among same-arm episodes split by whether the arm's code at the start of button 2 already exceeds card_2
-Also printed: the distinct instructions in the training cache (does the text carry the counts?).
+  4 e2 among same-arm episodes split by whether the arm's count of registered presses before its first button-2 press
+    (what the per-(arm, kind) code holds there, all buttons) is already >= card_2 (added 11-22 02:20: the first run
+    printed tables 1-3 only)
+  5 e2 by card_1 + card_2 (the count the code must reach at the end of button 2) and by card_1 among e1-right episodes
+Per-episode rows go to the JSON ("rows"). Also printed: the distinct instructions in the training cache (does the text carry the counts?).
   PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/d0_press.py [FOLDER:LABEL ...]
 """
 from __future__ import annotations
@@ -63,13 +66,18 @@ def main():
         rows = []
         for v, d in eps:
             arm = {1: None, 2: None}
+            before2 = None
             if (d / "executed_actions.jsonl").exists():
                 presses = presses_with_arm(d)
                 for b in (1, 2):
                     c = Counter(p["arm"] for p in presses if p["button"] == b and p["arm"])
                     arm[b] = c.most_common(1)[0][0] if c else None
+                first2 = next((i for i, p in enumerate(presses) if p["button"] == 2), None)
+                if first2 is not None and arm[2]:
+                    before2 = sum(1 for p in presses[:first2] if p["arm"] == arm[2])
             rows.append({"seed": v["seed"], "folder": v["folder"], "card1": v.get("card_1"), "card2": v.get("card_2"),
-                         "e1": v.get("n1_error"), "e2": v.get("n2_error"), "arm1": arm[1], "arm2": arm[2]})
+                         "e1": v.get("n1_error"), "e2": v.get("n2_error"), "arm1": arm[1], "arm2": arm[2],
+                         "presses_before_b2_same_arm": before2})
         res = {"episodes": len(rows)}
         t1 = {}
         for k, ck, ek in ((1, "card1", "e1"), (2, "card2", "e2")):
@@ -89,10 +97,26 @@ def main():
         res["e2_different_arms"] = dict(Counter(cls(r["e2"]) for r in diff))
         res["e1_same_arm"] = dict(Counter(cls(r["e1"]) for r in same))
         res["e1_different_arms"] = dict(Counter(cls(r["e1"]) for r in diff))
+        t4 = defaultdict(Counter)
+        for r in same:
+            b, c2 = r["presses_before_b2_same_arm"], r["card2"]
+            if b is not None and c2 is not None and cls(r["e2"]):
+                t4["code_at_b2>=card2" if b >= int(c2) else "code_at_b2<card2"][cls(r["e2"])] += 1
+        res["e2_by_code_at_b2"] = {k: dict(v) for k, v in sorted(t4.items())}
+        t5, t6 = defaultdict(list), defaultdict(list)
+        for r in rows:
+            if isinstance(r["e2"], int) and r["card1"] is not None and r["card2"] is not None:
+                t5[int(r["card1"]) + int(r["card2"])].append(r["e2"] >= 1)
+                if r["e1"] == 0:
+                    t6[int(r["card1"])].append(r["e2"] >= 1)
+        res["e2_over_by_card_sum"] = {k: [sum(x), len(x)] for k, x in sorted(t5.items())}
+        res["e2_over_by_card1_given_e1_right"] = {k: [sum(x), len(x)] for k, x in sorted(t6.items())}
+        res["rows"] = rows
         out[label] = res
         print(f"\n== {label}: {len(rows)} episodes")
         for key in ("over_by_card", "cross_e1_e2", "e2_given_e1_right", "arms", "e1_same_arm", "e2_same_arm",
-                    "e1_different_arms", "e2_different_arms"):
+                    "e1_different_arms", "e2_different_arms", "e2_by_code_at_b2", "e2_over_by_card_sum",
+                    "e2_over_by_card1_given_e1_right"):
             print(f"  {key}: {res[key]}")
     rec = R / "outputs/memory_v2/press/dense_press_button_v1/RECORDS.json"
     if rec.exists():
