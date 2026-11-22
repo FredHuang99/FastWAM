@@ -3,8 +3,9 @@
 # The container mwam2 lost its GPU management library again (nvidia-smi: "Failed to initialize NVML"); the training
 # keeps running, but the queue's next pick waits on nvidia-smi forever. This does the 11-20 17:13 procedure by itself,
 # once, after E9 (ar2_arev) is done:
-#   1 every 10 min: E9 has SUMMARY.json, and its exports are relayed (.relayed_e10 / e20 / e30; at most 3 h after
-#     SUMMARY.json, then it goes on and logs which tags are missing), and no fullft trainer runs in the container
+#   1 every 10 min: E9 has SUMMARY.json, and its e30 export is relayed (.relayed_e30: the only one the A40 cards fetch;
+#     11-22 13:10 change: e10 never got its marker (the relay was full on 11-21), so waiting for all three would idle the
+#     GPU 3 h; at most 3 h for e30, then it goes on), and no fullft trainer runs in the container
 #   2 on the host: GPU0 has < 2000 MiB in use (GPU0 is ours; nothing else is touched)
 #   3 docker restart mwam2; inside: nvidia-smi must see GPU0 (else stop and log)
 #   4 inside: the timer pull (auto_pull.sh start) and the training queue (h200_queue.sh) -> the queue's next line
@@ -24,7 +25,8 @@ while :; do
   if inside "test -f $R/outputs/fullft/$RUN/SUMMARY.json"; then
     [ -n "$seen" ] || { seen=$(date +%s); say "$RUN SUMMARY.json found"; }
     missing=""
-    for tag in e10 e20 e30; do inside "test -f $R/outputs/fullft/$RUN/.relayed_$tag" || missing="$missing $tag"; done
+    for tag in e30; do inside "test -f $R/outputs/fullft/$RUN/.relayed_$tag" || missing="$missing $tag"; done
+    for tag in e10 e20; do inside "test -f $R/outputs/fullft/$RUN/.relayed_$tag" || say "(note: $tag not relayed; not waited for)"; done
     if [ -n "$missing" ] && [ $(( $(date +%s) - seen )) -lt 10800 ]; then
       say "exports not relayed yet:$missing; waiting"; sleep 600; continue
     fi
