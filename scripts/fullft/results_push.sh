@@ -25,7 +25,7 @@ running() { [ -f $PIDF ] && kill -0 "$(cat $PIDF)" 2>/dev/null && grep -q result
 snapshot() {
   local S=$W/snap Q=$R/outputs/memory_v2/queue5
   rm -rf $S; mkdir -p $S/fullft $S/tasks $S/report
-  cp -p $OUT/E*_VERDICT*.json $OUT/E*_SCALES.json $OUT/E6_REPORT.json $OUT/PRESS_*_VERDICT.json $OUT/AUTO_PULL.log $S/fullft/ 2>/dev/null
+  cp -p $OUT/*_VERDICT*.json $OUT/E*_SCALES.json $OUT/E6_REPORT.json $OUT/AUTO_PULL.log $S/fullft/ 2>/dev/null
   for f in $Q/tasks/*verdict*.log $Q/tasks/*report*.log $Q/tasks/*scales*.log $Q/tasks/*smoke*.log $Q/tasks/*check*.log \
            $Q/tasks/*entries*.log $Q/tasks/*prep*.log $Q/tasks/*BANK*.log $Q/tasks/*index-matters*.log $Q/tasks/*clock-put*.log; do
     [ -f "$f" ] && tail -c 200000 "$f" > $S/tasks/$(basename "$f")

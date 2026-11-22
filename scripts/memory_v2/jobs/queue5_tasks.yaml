@@ -9804,6 +9804,16 @@ tasks:
   output: closed_loop/a1
   env: {MWAM_TEXT_SOURCE: "cache"}
 
+- id: A40-A1-verdict
+  lane: a40cpu
+  kind: shell
+  after: [A40-A1-batAR30-x16-s0, A40-A1-batAR30-x16-s1, A40-A1-batAR30-x16-s2, A40-A1-batAR30-x16-s3, A40-A1-batAR30-x16-s4, A40-A1-batAR30-x16-s5, A40-A1-batAR30-x16-s6, A40-A1-batAR30-x16-s7, A40-A1-batAR30-x16-s8, A40-A1-batAR30-x16-s9, A40-A1-batAR30-x32-s0, A40-A1-batAR30-x32-s1, A40-A1-batAR30-x32-s2, A40-A1-batAR30-x32-s3, A40-A1-batAR30-x32-s4, A40-A1-batAR30-x32-s5, A40-A1-batAR30-x32-s6, A40-A1-batAR30-x32-s7, A40-A1-batAR30-x32-s8, A40-A1-batAR30-x32-s9]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "plan v19 A1 verdict (script 11-22 by Opus after the shards finished, before reading any A1 result; it applies the reading registered in the A1 cards unchanged): D = success(execute 16) - success(execute 8) on battery_try 1-100 paired with closed_loop/e6 battery_ar_e30, paired-bootstrap 95 % CI (10,000, seed 0), SESOI -0.20 -> EXECUTION LENGTH MATTERS / NOT EXECUTION LENGTH / UNCERTAIN; execute 32 descriptive. Fewer than 100 paired scenes -> WAIT. A1_VERDICT.json; this log is pushed with the results snapshot"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/a1_verdict.py"
+  pass_if: "m['rc'] == 0"
+
 - id: A40-fetch-prop10
   lane: a40cpu
   kind: shell
