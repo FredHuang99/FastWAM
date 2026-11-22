@@ -140,6 +140,26 @@ for root in $(echo "$SETS" | grep -o 'data.roots=\[[^]]*\]' | sed 's/data.roots=
   touch $D/.verified
   step "cache $(basename $D) verified ($(du -sh $D | cut -f1))"
 done
+# 11-22 plan v19 A3: zoom latents (data.zoom_root) come from the cache relay (zoom_build_5090.sh), fetched here once
+ZR=$(echo "$SETS" | grep -o 'data.zoom_root=[^ ]*' | sed 's/data.zoom_root=//')
+if [ -n "$ZR" ]; then
+  ZD=$R/${ZR#/workspace/FastWAM-memory2/}
+  if [ ! -f $ZD/ZOOM.json ]; then
+    HF_HUB_DOWNLOAD_TIMEOUT=60 $HFPY scripts/fullft/cache_relay.py get --name $(basename $ZD) --dest $(dirname $ZD) 2>&1 | tail -n 3
+    [ -f $ZD/ZOOM.json ] || fail "zoom latents $(basename $ZD) not on the cache relay (run zoom_build_5090.sh on the 5090)"
+  fi
+  step "zoom latents $(basename $ZD) here ($(du -sh $ZD | cut -f1))"
+fi
+# 11-22: all ten jobs died at 05:21 when the home disk filled (two new runs wrote their first resume.pt, about 72 GB
+# each, next to the four older ones) [inferred]. A run needs room for one more resume.pt while it saves (.partial,
+# then the old one is replaced): wait until the home has >= 160 GB free (up to 6 h). Nothing is deleted here.
+for i in $(seq 1 36); do
+  free=$(df -BG --output=avail $HOME | tail -n 1 | tr -dc '0-9')
+  [ "${free:-0}" -ge 160 ] && break
+  [ $i = 36 ] && fail "home has ${free} GB free after 6 h (< 160 GB needed for a resume checkpoint)"
+  step "home has ${free} GB free (< 160 GB); waiting 10 min"; sleep 600
+done
+step "home ${free} GB free"
 if [ "$RUN" = ar2_long ] && [ ! -f $F/ar_2task/.resume_verified ]; then
   D=$W/dl/ar_2task_e30/ckpt/ar_2task_e30
   (cd $D && sha256sum -c --quiet parts.sha256) || fail "resume parts sha256"
@@ -220,7 +240,9 @@ kill $TIMER 2>/dev/null
 if [ -f $F/$RUN/STOP ] && [ ! -f $F/$RUN/SUMMARY.json ]; then
   rm -f $F/$RUN/STOP
   step "stopped before the walltime; $(grep -a 'resume checkpoint saved' $F/QUEUE_$RUN.log | tail -n 1 | cut -c1-120)"
-  if command -v qsub > /dev/null && J=$(cd $W && qsub -v RUN=$RUN $R/scripts/gaas/gaas_run.pbs); then
+  if [ "${NO_RESUBMIT:-0}" = 1 ]; then         # 11-22: chained jobs (submit_chains.sh) never add a job of their own
+    step "chained job (NO_RESUBMIT): not resubmitted; the chain's next job starts now; resume $RUN later from resume.pt"
+  elif command -v qsub > /dev/null && J=$(cd $W && qsub -v RUN=$RUN $R/scripts/gaas/gaas_run.pbs); then
     echo "$J" > $F/$RUN/GAAS_JOB; step "resubmitted: job $J (resumes from resume.pt)"
   else
     step "could not resubmit from here: on the login node run  cd ~/mwam && qsub -v RUN=$RUN FastWAM-memory2/scripts/gaas/gaas_run.pbs"
@@ -231,4 +253,14 @@ fi
 step "$RUN finished: $(head -c 300 $F/$RUN/SUMMARY.json)"
 for i in $(seq 1 24); do kill -0 $WATCH 2>/dev/null || break; sleep 300; done
 step "export watcher: $(ls $F/$RUN/.relayed_* 2>/dev/null | xargs -n1 basename 2>/dev/null | tr '\n' ' ')"
+# 11-22: AUTO_CLEAN=1 (only when the user approved it for the submission): a finished run's resume.pt (about 72 GB,
+# needed only to continue an unfinished run) is removed once SUMMARY.json exists AND its last export is on the relay
+# (.relayed_e30, or .relayed_final); otherwise it stays and this says why.
+if [ "${AUTO_CLEAN:-0}" = 1 ] && [ -f $F/$RUN/resume.pt ]; then
+  if [ -f $F/$RUN/.relayed_e30 ] || [ -f $F/$RUN/.relayed_final ]; then
+    sz=$(du -sh $F/$RUN/resume.pt | cut -f1); rm -f $F/$RUN/resume.pt && step "AUTO_CLEAN: removed $RUN/resume.pt ($sz)"
+  else
+    step "AUTO_CLEAN: resume.pt kept (the last export is not on the relay yet)"
+  fi
+fi
 step "done"

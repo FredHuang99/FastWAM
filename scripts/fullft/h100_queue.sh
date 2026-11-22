@@ -131,6 +131,8 @@ launch() {        # run, sets, gpu: the trainer in the background, one resumed r
       [ -f $OUT/$run/SUMMARY.json ] && break
       if [ $attempt = 1 ]; then
         echo "[h100q] $run: no SUMMARY.json; one resumed retry on the next free GPU"; sleep 120
+        rm -f $OUT/$run/QUEUE_GPU          # 11-22 fix: our own marker made free_gpu skip the GPU we just left, so the
+                                           # retry waited for another run to finish (rearrange_none, 11-22 12:12 BJ)
         until g=$(free_gpu); do sleep 60; done
       fi
     done
