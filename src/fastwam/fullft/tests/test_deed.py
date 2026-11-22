@@ -315,3 +315,154 @@ def test_augmentation_in_samples_only_touches_the_ledger(tmp_path):
         changed += not torch.equal(r0["ledger"], r1["ledger"])
         assert torch.equal(r1["ledger"], d1[i]["ledger"])                       # deterministic per (seed, epoch, item)
     assert changed > 0
+
+
+# ----------------------------------------------------------------------------- plan v19 3.3: zoom frames (A3)
+def test_zoom_crop_and_rule():
+    import numpy as np
+    from PIL import Image
+    from fastwam.fullft.zoom import ZOOM_REF, box_tag, crop_resize, cur_key, pixel_box, zoom_images
+    rng = np.random.default_rng(0)
+    head = rng.integers(0, 255, (240, 320, 3), dtype=np.uint8)
+    wrists = [rng.integers(0, 255, (120, 160, 3), dtype=np.uint8) for _ in range(2)]
+    box = (0.5, 0.0, 1.0, 0.5)
+    got = crop_resize(head, box)
+    want = np.asarray(Image.fromarray(np.ascontiguousarray(head[0:120, 160:320])).resize((320, 240),
+                                                                                           Image.Resampling.BILINEAR))
+    assert got.shape == head.shape and got.dtype == np.uint8 and np.array_equal(got, want)
+    assert np.array_equal(crop_resize(head, (0.0, 0.0, 1.0, 1.0)), head)          # the full box is the image
+    out = zoom_images([head] + wrists, box, 0)
+    assert np.array_equal(out[0], got) and out[1] is wrists[0] and out[2] is wrists[1]
+    assert pixel_box((0.0, 0.0, 0.001, 0.001), 320, 240) == (0, 0, 1, 1)           # at least one pixel
+    with pytest.raises(ValueError):
+        crop_resize(head.astype(np.float32), box)
+    assert ZOOM_REF == -1 and cur_key(0) == -2 and cur_key(40) == -42
+    on = HistoryRule("ar", zoom=True, zoom_ref_box=(0.1, 0.1, 0.5, 0.5), zoom_cur_box=(0.2, 0.4, 0.9, 1.0))
+    assert on.max_frames == HistoryRule("ar").max_frames + 2
+    assert box_tag(on) != box_tag(HistoryRule("ar", zoom=True)) and len(box_tag(on)) == 8
+    for bad in (dict(zoom_ref_box=(0.5, 0.0, 0.4, 1.0)), dict(zoom_cur_box=(0.0, 0.0, 1.0)), dict(zoom_camera=3)):
+        with pytest.raises(ValueError):
+            HistoryRule("ar", zoom=True, **bad)
+    with pytest.raises(ValueError):
+        HistoryRule("prop", zoom=True)                         # no history frames to add to
+    from fastwam.fullft.history import zoom_positions
+    assert zoom_positions(HistoryRule("ar"), 40, 3) == (-4.0, 0.0)
+    assert zoom_positions(HistoryRule("tw", index="time"), 48, 5) == (-3.0, 0.0)
+
+
+def _zoom_root(tmp_path, eps, rule, n=60):
+    from fastwam.fullft.zoom import box_tag
+    root = tmp_path / "zoom"
+    root.mkdir()
+    g = torch.Generator().manual_seed(9)
+    for r in eps.records:
+        torch.save({"ref": torch.randn(48, 1, 4, 4, generator=g), "cur": torch.randn(n, 48, 1, 4, 4, generator=g),
+                    "tag": box_tag(rule), "episode_id": r["episode_id"], "length": n},
+                   root / (r["episode_id"].replace("/", "_") + ".pt"))
+    return root
+
+
+def test_zoom_in_samples(tmp_path):
+    from fastwam.fullft.history import select, zoom_positions
+    eps, events = _dense(tmp_path)
+    items = train_items(eps)
+    rule = HistoryRule("ar", zoom=True, zoom_ref_box=(0.1, 0.1, 0.5, 0.5), zoom_cur_box=(0.2, 0.4, 0.9, 1.0))
+    root = _zoom_root(tmp_path, eps, rule)
+    ds = Samples(eps, items, rule, events, "valid", zoom_root=str(root))
+    plain = Samples(eps, items, HistoryRule("ar"), events, "valid")
+    eid = items[0][0]
+    z = torch.load(root / (eid.replace("/", "_") + ".pt"), weights_only=True)
+    e = eps(eid)
+    for a in (0, 10, 40, 59):
+        row, base = ds[items.index((eid, a))], plain[items.index((eid, a))]
+        ids, pos = select(HistoryRule("ar"), a)
+        n = len(ids)
+        assert row["hist_valid"].tolist() == [True] * (n + 2) + [False] * (rule.max_frames - n - 2)
+        k0 = HistoryRule("ar").max_frames
+        assert torch.equal(row["hist_latent"][:k0][:n], base["hist_latent"][:n])
+        assert torch.equal(row["hist_latent"][n], z["ref"]) and torch.equal(row["hist_latent"][n + 1], z["cur"][a])
+        assert torch.equal(row["hist_proprio"][n], e["proprio"][0]) and torch.equal(row["hist_proprio"][n + 1], e["proprio"][a])
+        assert row["hist_pos"][n:n + 2].tolist() == list(zoom_positions(rule, a, n))
+        assert row["hist_ids"][n:n + 2].tolist() == [-1, -1]
+        assert all(torch.equal(row[k], base[k]) for k in ("video_latent", "actions", "proprio", "text"))
+    with pytest.raises(ValueError):
+        Samples(eps, items, rule, events, "valid")                        # zoom needs its cache folder
+    other = HistoryRule("ar", zoom=True, zoom_ref_box=(0.0, 0.0, 0.5, 0.5))
+    with pytest.raises(ValueError):
+        Samples(eps, items, other, events, "valid", zoom_root=str(root))[0]   # boxes differ from the cache's
+
+
+def test_zoom_online_decision_equals_offline_sampling():
+    """decide_encoded with the zoom frames (session-encoded under ZOOM_REF / cur_key) gives exactly the chunk of
+    FullModel.sample on the training-style batch (ordinary frames, then the reference and the current crop)."""
+    from fastwam.fullft.history import select, zoom_positions
+    from fastwam.fullft.online import FrameCache, decide_encoded
+    from fastwam.fullft.zoom import ZOOM_REF, cur_key
+    m, _ = _model()
+    with torch.no_grad():
+        m.hist_gate.fill_(0.5)
+    g = torch.Generator().manual_seed(5)
+    encoded = {i: (torch.randn(48, 1, 8, 6, generator=g), torch.randn(14, generator=g)) for i in range(60)}
+    encoded[ZOOM_REF] = (torch.randn(48, 1, 8, 6, generator=g), encoded[0][1])
+    text = torch.randn(1, 5, TEXT, generator=g)
+    rule = HistoryRule("ar", zoom=True, zoom_ref_box=(0.1, 0.1, 0.5, 0.5), zoom_cur_box=(0.2, 0.4, 0.9, 1.0))
+    cache = FrameCache()
+    for current in (0, 40, 48):
+        encoded[cur_key(current)] = (torch.randn(48, 1, 8, 6, generator=g), encoded[current][1])
+        noise = torch.randn(1, 32, 14, generator=g)
+        out = decide_encoded(m, rule, cache, encoded, current, text, noise, steps=3)
+        ids, pos = select(HistoryRule("ar"), current)
+        zr, zc = zoom_positions(rule, current, len(ids))
+        keys, pos = ids + [ZOOM_REF, cur_key(current)], pos + [zr, zc]
+        batch = {"latent": encoded[current][0][None], "text": text, "proprio": encoded[current][1][None],
+                 "anchor": torch.tensor([current]),
+                 "hist_latent": torch.stack([encoded[i][0] for i in keys])[None],
+                 "hist_proprio": torch.stack([encoded[i][1] for i in keys])[None],
+                 "hist_valid": torch.ones(1, len(keys), dtype=torch.bool), "hist_pos": torch.tensor([pos])}
+        ref = m.sample(batch, noise, steps=3)
+        assert out["ids"] == keys and torch.allclose(out["normalised"], ref[0], atol=1e-6)
+        assert ZOOM_REF in cache.kv and cur_key(current) not in cache.kv        # the current crop leaves with the decision
+
+
+def test_object_record_helpers(monkeypatch):
+    """scripts/memory_v2/sim/sim_adapter.py object record (A3): passive reads on duck-typed entities; off by default."""
+    import importlib.util
+    import json as _json
+    from pathlib import Path
+    from types import SimpleNamespace
+    path = Path(__file__).resolve().parents[4] / "scripts/memory_v2/sim/sim_adapter.py"
+    monkeypatch.delenv("MWAM_OBJECT_LOG", raising=False)
+    spec = importlib.util.spec_from_file_location("mwam_sim_adapter_test", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    assert mod.OBJECT_LOG is False                                   # off unless MWAM_OBJECT_LOG=1
+
+    class Ent:
+        def __init__(self, name, p):
+            self._n, self.p = name, p
+
+        def get_name(self):
+            return self._n
+
+        def get_pose(self):
+            return SimpleNamespace(p=self.p)
+
+    class Broken:
+        def get_pose(self):
+            raise RuntimeError("no pose")
+
+    a, b, c = Ent("cup", [0.1, 0.2, 0.75]), Ent("cup", [0.3, 0.2, 0.75]), Ent("", [0.0, 0.0, 0.0])
+    scene = SimpleNamespace(get_all_actors=lambda: [a, b, c, Broken()])
+    env = SimpleNamespace(scene=scene, target_idx=1, name_of_task="observe", target_obj=b, candidates=[a, b],
+                          robot=object(), big=list(range(100)))
+    pos = mod.actor_positions(env)
+    assert pos == {"cup": [0.1, 0.2, 0.75], "cup#2": [0.3, 0.2, 0.75], "unnamed": [0.0, 0.0, 0.0]}
+    meta = mod.object_meta(env)
+    assert meta["scalars"] == {"name_of_task": "observe", "target_idx": 1}
+    assert meta["actors"]["target_obj"] == {"entity": "cup", "p": [0.3, 0.2, 0.75]}
+    assert [x["p"] for x in meta["actors"]["candidates"]] == [[0.1, 0.2, 0.75], [0.3, 0.2, 0.75]]
+    _json.dumps(meta)                                                # serialisable
+    assert mod.actor_positions(SimpleNamespace(scene=None)) == {}    # nothing readable -> empty, no error
+    monkeypatch.setenv("MWAM_OBJECT_LOG", "1")
+    spec.loader.exec_module(mod)
+    assert mod.OBJECT_LOG is True

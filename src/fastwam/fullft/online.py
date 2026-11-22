@@ -171,6 +171,9 @@ def keep_set(rule: HistoryRule, current: int, events: List[int]) -> set:
         keep |= set(range(rule.tw_stride, current + 1, rule.tw_stride))
     if rule.variant in ("event", "prop", "arev"):
         keep |= set(int(e) for e in events)
+    if rule.zoom:                                     # plan v19 3.3: the reference crop stays all episode
+        from .zoom import ZOOM_REF
+        keep.add(ZOOM_REF)
     return keep
 
 
@@ -181,6 +184,11 @@ def decide_encoded(model: FullModel, rule: HistoryRule, cache: FrameCache, encod
     """One decision from per-frame encodings: encoded[i] = (latent [48, 1, 24, 20], normalised proprio [14]).
     events: the KNOWN event frames (lag applied); ledger (arprop): (features [S, F], valid [S]) of data.ledger_tensor."""
     ids, positions = select(rule, current, events)
+    if rule.zoom:                                     # plan v19 3.3: + the two zoom frames (encoded by the session)
+        from .history import zoom_positions
+        from .zoom import ZOOM_REF, cur_key
+        ref_pos, cur_pos = zoom_positions(rule, current, len(ids))
+        ids, positions = list(ids) + [ZOOM_REF, cur_key(current)], list(positions) + [ref_pos, cur_pos]
     cache.ensure(model, ids, encoded, text)
     history = cache.history(model, ids, positions)
     device = text.device
@@ -409,6 +417,23 @@ class FullSession:
             proprio = p.normaliser.normalize(torch.tensor(r["proprio"], dtype=torch.float32)[None], "state")[0]
             self.encoded[i] = (latent, proprio.to(p.device))
 
+    def _encode_zoom(self, current: int) -> None:
+        """Plan v19 3.3: the reference crop of frame 0 (once) and the current crop of this decision, through
+        zoom.zoom_images -> the policy's mosaic -> the single-frame VAE, as build_zoom.py does for the training cache."""
+        import numpy as np
+        from fastwam.memory_s1.model import encode_latent
+        from .zoom import ZOOM_REF, cur_key, zoom_images
+        p, rule = self.p, self.p.rule
+        for key, frame, box in ((ZOOM_REF, 0, rule.zoom_ref_box), (cur_key(current), current, rule.zoom_cur_box)):
+            if key in self.encoded:
+                continue
+            r = self.raw[frame]
+            arrays = [np.frombuffer(b, dtype=np.uint8).reshape(s) for b, s in zip(r["images"], r["shapes"])]
+            image = p.mosaic(zoom_images(arrays, box, rule.zoom_camera))[None].to(p.device, torch.bfloat16)
+            latent = encode_latent(p.vae, image)[0]
+            proprio = p.normaliser.normalize(torch.tensor(r["proprio"], dtype=torch.float32)[None], "state")[0]
+            self.encoded[key] = (latent, proprio.to(p.device))
+
     def _proprio(self, frame: int) -> torch.Tensor:
         """Normalised proprio of an observed frame (as the training caches store it)."""
         r = self.raw[frame]
@@ -512,6 +537,8 @@ class FullSession:
                 entries = [{"frame": f, "arm": -1, "kind": "clock", "confirmed": f} for f in frames]
             ids, _ = select(p.rule, current, known)
             self._encode(sorted(set(ids) | {current} | (set(known) if p.rule.variant == "prop" else set())))
+            if p.rule.zoom:
+                self._encode_zoom(current)
             noise_frame = 0 if self.noise_mode == "per_episode" else int(request.get("noise_frame", current))
             salt = os.environ.get("MWAM_NOISE_SALT", "").strip()   # 11-13: replicate runs (same scenes, other noise)
             seed = seed_for(p.dense_cfg["seed"], self.seed, noise_frame, "closed-loop-noise" + (f"-{salt}" if salt else ""))

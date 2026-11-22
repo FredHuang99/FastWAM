@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 from pathlib import Path
 import sys
 import time
@@ -95,6 +96,85 @@ def ee_poses(environment):
                 for side in ('left', 'right')}
     except Exception:                                        # noqa: BLE001 (the policy side reports a missing pose)
         return None
+
+
+# 11-22 (plan v19 3.3, A3): OBJECT RECORD, off unless MWAM_OBJECT_LOG=1 (read once, in the simulator process, which
+# inherits the closed loop's environment). Passive reads only (names and poses; no simulation step, no success query),
+# every read wrapped: with the flag on, each executed target's objects_after gets '_actors' = {entity name: [x, y, z]}
+# for every entity of the scene, and the first target writes OBJECTS_META.json next to executed_actions.jsonl: the
+# environment's scalar attributes and which scene entity each of its actor attributes is (to find the reference / the
+# correct object of observe_and_pickup). Used to split failures into "picked the wrong object" and "picked nothing".
+# With the flag off nothing below runs: the logs are exactly as before.
+OBJECT_LOG = os.environ.get('MWAM_OBJECT_LOG', '').strip() == '1'
+
+
+def _entity_name(entity):
+    try:
+        value = entity.get_name() if hasattr(entity, 'get_name') else getattr(entity, 'name', '')
+        return str(value or '')
+    except Exception:                                        # noqa: BLE001 (diagnostics only)
+        return ''
+
+
+def _entity_position(entity):
+    try:
+        pose = entity.get_pose() if hasattr(entity, 'get_pose') else getattr(entity, 'pose', None)
+        p = [float(x) for x in list(pose.p)[:3]]
+        return [round(x, 4) for x in p] if all(math.isfinite(x) for x in p) else None
+    except Exception:                                        # noqa: BLE001
+        return None
+
+
+def scene_entities(environment):
+    scene = getattr(environment, 'scene', None)
+    for getter in ('get_all_actors', 'get_entities'):
+        try:
+            if hasattr(scene, getter):
+                return list(getattr(scene, getter)())
+        except Exception:                                    # noqa: BLE001
+            pass
+    try:
+        return list(getattr(scene, 'entities', []) or [])
+    except Exception:                                        # noqa: BLE001
+        return []
+
+
+def actor_positions(environment):
+    """{entity name: [x, y, z]} of every scene entity (repeated names get #2, #3, ...); {} when unreadable."""
+    out = {}
+    for entity in scene_entities(environment):
+        p = _entity_position(entity)
+        if p is None:
+            continue
+        name = _entity_name(entity) or 'unnamed'
+        key, k = name, 1
+        while key in out:
+            k += 1
+            key = f'{name}#{k}'
+        out[key] = p
+    return out
+
+
+def object_meta(environment):
+    """The environment's scalar attributes and, for each attribute holding a posed object (or a list of them), the
+    scene entity name(s): what the task calls the reference / the correct object."""
+    scalars, actors = {}, {}
+    for name, value in sorted(vars(environment).items() if hasattr(environment, '__dict__') else []):
+        if name.startswith('__'):
+            continue
+        number = _number(value)
+        if number is not None:
+            scalars[name] = number
+        elif isinstance(value, str) and len(value) < 200:
+            scalars[name] = value
+        elif hasattr(value, 'get_pose') or hasattr(getattr(value, 'actor', None), 'get_pose'):
+            ent = value if hasattr(value, 'get_pose') else value.actor
+            actors[name] = {'entity': _entity_name(ent), 'p': _entity_position(ent)}
+        elif isinstance(value, (list, tuple)) and value and len(value) <= 32 and all(
+                hasattr(v, 'get_pose') or hasattr(getattr(v, 'actor', None), 'get_pose') for v in value):
+            actors[name] = [{'entity': _entity_name(v if hasattr(v, 'get_pose') else v.actor),
+                             'p': _entity_position(v if hasattr(v, 'get_pose') else v.actor)} for v in value]
+    return {'scalars': scalars, 'actors': actors, 'entities_at_start': actor_positions(environment)}
 
 
 def execution_count(frame, limit, execute=EXECUTE):
@@ -252,6 +332,14 @@ def main():
             after = physical_state(environment.robot); contacts = contact_pairs(environment.scene)
             objects_after = object_snapshot(environment)
             objects_after.update(task_state(environment))
+            if OBJECT_LOG:                                   # 11-22 A3 object record (off by default)
+                try:
+                    if not (directory / 'OBJECTS_META.json').exists():
+                        (directory / 'OBJECTS_META.json').write_text(json.dumps(object_meta(environment), indent=1,
+                                                                                default=str), encoding='utf-8')
+                    objects_after['_actors'] = actor_positions(environment)
+                except Exception as error:                   # noqa: BLE001 (diagnostics must never stop an episode)
+                    objects_after['_actors_error'] = repr(error)[:300]
             append(directory / 'executed_actions.jsonl', {
                 'completed_target_id': self.frame_id + 1, 'target': target.tolist(),
                 'physical_before': before.tolist(), 'physical_after': after.tolist(),

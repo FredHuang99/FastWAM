@@ -19,6 +19,8 @@ class DataConfig:
     val_anchors_per_task: int = 96                       # fixed validation anchors from the val episodes
     num_workers: int = 6
     episode_cache: int = 16                              # episodes kept open per worker
+    zoom_root: str = ""                                  # 11-22 plan v19 3.3: folder of the zoom latents
+                                                         # (scripts/fullft/build_zoom.py); needed with history.zoom
 
 
 @dataclass
@@ -95,7 +97,7 @@ class RunConfig:
     @property
     def rule(self) -> HistoryRule:
         h = dict(self.history)
-        for key in ("recent",):
+        for key in ("recent", "zoom_ref_box", "zoom_cur_box"):
             if key in h:
                 h[key] = tuple(h[key])
         if h.get("variant") == "tw" and "index" not in h:

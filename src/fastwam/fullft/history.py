@@ -74,6 +74,16 @@ class HistoryRule:
     ledger_keep: int = 4
     ledger_over_p: float = 0.0
     ledger_over_max: int = 2
+    # 11-22 plan v19 3.3 (A3, observe_and_pickup): two ZOOM history frames on top of the variant's frames: the head
+    # camera of frame 0 cropped to zoom_ref_box (where the reference object is shown) and the head camera of the current
+    # frame cropped to zoom_cur_box (the table's candidates), each resized back to the camera's size and encoded like
+    # any frame (fullft/zoom.py; the same function offline and online). Boxes are fixed, normalised (x0, y0, x1, y1).
+    # Positions (zoom_positions): the reference crop one step older than the oldest shown frame, the current crop at
+    # 0. False = off: max_frames, selection and every earlier export are exactly as before.
+    zoom: bool = False
+    zoom_ref_box: Tuple[float, ...] = (0.0, 0.0, 1.0, 1.0)
+    zoom_cur_box: Tuple[float, ...] = (0.0, 0.0, 1.0, 1.0)
+    zoom_camera: int = 0
 
     def __post_init__(self):
         if self.variant not in VARIANTS:
@@ -96,6 +106,15 @@ class HistoryRule:
             raise ValueError("ledger augmentation needs variant arprop")
         if float(self.ledger_over_p) > 0.0 and not float(self.repeat_theta) > 0.0:
             raise ValueError("ledger_over_p marks the end of an in-place run: it needs history.repeat_theta > 0")
+        if self.zoom:
+            if self.variant not in FRAME_VARIANTS:
+                raise ValueError(f"history zoom adds history frames: only with {FRAME_VARIANTS}, got {self.variant!r}")
+            for box in (self.zoom_ref_box, self.zoom_cur_box):
+                b = [float(x) for x in box]
+                if len(b) != 4 or not (0.0 <= b[0] < b[2] <= 1.0 and 0.0 <= b[1] < b[3] <= 1.0):
+                    raise ValueError(f"zoom box must be (x0, y0, x1, y1) with 0 <= x0 < x1 <= 1, 0 <= y0 < y1 <= 1: {box}")
+            if int(self.zoom_camera) not in (0, 1, 2):
+                raise ValueError(f"zoom_camera must be 0 (head), 1 or 2, got {self.zoom_camera}")
         if not (0.0 <= float(self.event_provisional) < float(self.event_delta)):
             raise ValueError(f"event_provisional must be in [0, event_delta), got {self.event_provisional}")
         if not (0.0 < float(self.event_delta) <= 0.1 and 0.0 <= float(self.event_min_path) <= 0.2):
@@ -105,7 +124,10 @@ class HistoryRule:
 
     @property
     def max_frames(self) -> int:
-        """Fixed slot count K per variant (padding up to it)."""
+        """Fixed slot count K per variant (padding up to it); + 2 zoom frames when zoom is on."""
+        return self._frames() + (2 if self.zoom else 0)
+
+    def _frames(self) -> int:
         if self.variant in ("ar", "arprop", "arclk"):
             return int(self.anchor) + len(self.recent)
         if self.variant == "arev":
@@ -166,6 +188,15 @@ def positions(rule: HistoryRule, t: int, ids: Sequence[int]) -> List[float]:
         return [-(t - i) / rule.time_unit for i in ids]
     n = len(ids)
     return [-(n - j) * 1.0 for j in range(n)]            # ascending ids -> most recent gets -1
+
+
+def zoom_positions(rule: HistoryRule, t: int, n_shown: int) -> Tuple[float, float]:
+    """Plan v19 3.3: temporal positions of the two zoom frames when n_shown ordinary frames are shown at frame t.
+    rank: the reference crop (of frame 0) one step older than the oldest shown frame, -(n + 1); time: frame 0's own
+    position, -t / time_unit. The current crop: 0 (the current frame's temporal index) in both."""
+    if rule.index == "time":
+        return -float(t) / rule.time_unit, 0.0
+    return -float(n_shown + 1), 0.0
 
 
 def event_states(rule: HistoryRule, t: int, events: Sequence[int]) -> List[int]:

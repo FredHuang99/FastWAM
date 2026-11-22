@@ -19,7 +19,7 @@ import torch
 
 from .events import event_frames
 from .history import (LEDGER_KINDS, HistoryRule, augment_ledger, clock_code, clock_dim, clock_frames, event_states,
-                      ledger_dim, ledger_entries, ordinal_code, select)
+                      ledger_dim, ledger_entries, ordinal_code, select, zoom_positions)
 
 HORIZON = 32
 
@@ -224,12 +224,17 @@ class Samples(torch.utils.data.Dataset):
 
     def __init__(self, episodes: DenseEpisodes, items: Sequence[Tuple[str, int]], rule: HistoryRule,
                  events: Dict[str, List[dict]], polarity: str, augment: bool = False, seed: int = 0,
-                 decision: Optional[Tuple[float, int, Sequence[str]]] = None, next_event: bool = False):
+                 decision: Optional[Tuple[float, int, Sequence[str]]] = None, next_event: bool = False,
+                 zoom_root: str = ""):
         """decision = (weight, window, kinds) adds 'loss_weight' to every sample (plan v19 3.2 (1)); next_event adds
         the 'next_event' class (3.2 (2)). Both off (default): the samples are exactly as before."""
         self.episodes, self.items, self.rule = episodes, list(items), rule
         self.events, self.polarity, self.augment, self.seed = events, polarity, augment, seed
         self.decision, self.next_event = decision, bool(next_event)
+        self.zoom_root = str(zoom_root or "")
+        self._zoom: "OrderedDict[str, dict]" = OrderedDict()
+        if rule.zoom and not self.zoom_root:
+            raise ValueError("history zoom needs data.zoom_root (the folder written by scripts/fullft/build_zoom.py)")
         self.epoch = 0
         self.checked_text: set = set()
         if rule.variant in ("event", "prop", "arprop", "arev") or decision is not None or self.next_event:
@@ -279,6 +284,17 @@ class Samples(torch.utils.data.Dataset):
                 hist_valid[j] = True
                 hist_pos[j] = p
                 hist_ids[j] = f
+            if self.rule.zoom:                         # plan v19 3.3: the two zoom frames after the ordinary ones
+                z = self.zoom_of(episode_id, int(e["proprio"].shape[0]))
+                n = len(ids[-k:])
+                ref_pos, cur_pos = zoom_positions(self.rule, a, n)
+                for j, (zl, pr, zp) in enumerate(((z["ref"], e["proprio"][0], ref_pos),
+                                                  (z["cur"][a], e["proprio"][a], cur_pos))):
+                    hist_latent[n + j] = zl
+                    hist_proprio[n + j] = pr.float()
+                    hist_valid[n + j] = True
+                    hist_pos[n + j] = zp
+                    hist_ids[n + j] = -1                 # not a frame id (zoom)
             sample.update(hist_latent=hist_latent, hist_proprio=hist_proprio, hist_valid=hist_valid,
                           hist_pos=hist_pos, hist_ids=hist_ids)
         if self.rule.variant == "prop":
@@ -306,6 +322,26 @@ class Samples(torch.utils.data.Dataset):
             feat, valid = ledger_tensor(self.rule, entries, lambda f: e["proprio"][f])
             sample.update(ledger=feat, ledger_valid=valid)
         return sample
+
+
+def _zoom_of(self, episode_id: str, length: int) -> dict:
+    """Plan v19 3.3: the zoom latents of an episode (data.zoom_root), checked against the rule's boxes and the length."""
+    from .zoom import box_tag
+    if episode_id not in self._zoom:
+        path = Path(self.zoom_root) / (episode_id.replace("/", "_") + ".pt")
+        value = torch.load(path, map_location="cpu", weights_only=True, mmap=True)
+        if value.get("tag") != box_tag(self.rule):
+            raise ValueError(f"{path}: zoom boxes {value.get('tag')} differ from the model's {box_tag(self.rule)}")
+        if int(value["cur"].shape[0]) != int(length):
+            raise ValueError(f"{path}: {value['cur'].shape[0]} zoom frames for an episode of {length}")
+        self._zoom[episode_id] = value
+        while len(self._zoom) > 16:
+            self._zoom.popitem(last=False)
+    self._zoom.move_to_end(episode_id)
+    return self._zoom[episode_id]
+
+
+Samples.zoom_of = _zoom_of
 
 
 def train_items(episodes: DenseEpisodes) -> List[Tuple[str, int]]:
