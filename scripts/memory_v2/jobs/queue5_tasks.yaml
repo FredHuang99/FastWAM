@@ -23,6 +23,17 @@ put8: &put8_ref                     # A2C e3 at execute 8 (X1-exec8 / X1-put-nul
 put_scenes: &put_scenes [closed_loop/scenes_seed17_n10, closed_loop/scenes_seed18_n8_put_back_block, closed_loop/scenes_seed19_n8_put_back_block, closed_loop/scenes_seed20_n8_put_back_block]
 
 tasks:
+# 11-22 18:50 (Opus; user 18:23: why does rearrange do badly?): zero-GPU failure split of the rearrange episodes already
+# here (three-frame e6 + r2, body record e6, clock e16). Descriptive; log pushed (id contains "report").
+- id: A40-rearr-split-report
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "rearrange failure split (descriptive): scripts/fullft/rearr_split.py over e6:rearrange_ar_e30, e6:rearrange_arprop_e30, e16:rearrange_clock_e30, r2:rearrange_ar_e30 -> REARR_SPLIT.json"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_split.py"
+  pass_if: "m['rc'] == 0"
+
 # ---------------------------------------------------------------------------------------------------------------
 # 11-22 plan v19 A3 / D2 / D1 evaluations (Opus). Plan v19 5.1: "D1, D2, A3 evaluations go to the front of the A40 queue
 # as soon as they arrive", so these cards sit at the top of the list (the dispatcher hands a free GPU to the first ready
