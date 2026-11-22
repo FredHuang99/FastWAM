@@ -10,6 +10,10 @@
 #   3 docker restart mwam2; inside, nvidia-smi must see GPU0
 #   4 inside: the timer pull and the training queue (h200_queue.sh) -> its next line, the ranking body record (80 entries)
 #   5 after 3 min: the queue log
+# 11-22 23:53 (user 23:53: at 23:47 the host GPU0 held 34897 MiB, so step 2 stopped; the waiters are already stopped):
+#   WAIT=1 -> while GPU0 is in use, print who holds it (pid, user, run time, command; read only) and check again every
+#   10 min, up to 48 h; then go on. Nobody else's process is touched.
+#   docker exec mwam2 bash -c 'cd /workspace/FastWAM-memory2 && git -c safe.directory="*" pull -q --ff-only origin memory2' && nohup env WAIT=1 bash -c "$(docker exec mwam2 cat /workspace/FastWAM-memory2/scripts/fullft/h200_restart_now.sh)" > ~/h200_restart_now.log 2>&1 & sleep 5; cat ~/h200_restart_now.log
 #   docker exec mwam2 bash -c 'cd /workspace/FastWAM-memory2 && git -c safe.directory="*" pull -q --ff-only origin memory2' && bash -c "$(docker exec mwam2 cat /workspace/FastWAM-memory2/scripts/fullft/h200_restart_now.sh)" 2>&1 | tee ~/h200_restart_now.log
 set -u
 C=mwam2
@@ -26,8 +30,23 @@ inside "test -f $R/outputs/fullft/ar2_arev/SUMMARY.json" || { say "no ar2_arev/S
 inside "test -f $R/outputs/fullft/ar2_arev/.relayed_e30" || { say "ar2_arev e30 not relayed: stop"; exit 1; }
 procs=$(inside "ps -eo pid,etime,cmd | grep -a '[f]astwam.fullft.train' | cut -c1-160")
 if [ -n "$procs" ]; then say "trainer processes in $C (nothing restarted):"; echo "$procs"; exit 1; fi
-used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i 0 | tr -d ' ')
-{ [[ "$used" =~ ^[0-9]+$ ]] && [ "$used" -lt 2000 ]; } || { say "host GPU0 '$used' MiB: stop"; exit 1; }
+holders() {           # read only: the compute processes on GPU0 and their owners
+  local u; u=$(nvidia-smi --query-gpu=uuid --format=csv,noheader -i 0 | tr -d ' ')
+  nvidia-smi --query-compute-apps=gpu_uuid,pid,used_memory --format=csv,noheader 2>/dev/null | tr -d ' ' \
+    | awk -F, -v u="$u" '$1 == u {print $2, $3}' | while read -r pid mem; do
+      echo "    pid $pid ($mem): $(ps -o user=,etime=,cmd= -p $pid 2>/dev/null | cut -c1-160)"; done
+}
+t0=$(date +%s)
+while :; do
+  used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i 0 | tr -d ' ')
+  { [[ "$used" =~ ^[0-9]+$ ]] && [ "$used" -lt 2000 ]; } && break
+  say "host GPU0 '$used' MiB in use by:"; holders
+  [ "${WAIT:-0}" = 1 ] || { say "stop (WAIT=1 waits for it)"; exit 1; }
+  [ $(( $(date +%s) - t0 )) -gt $(( 48 * 3600 )) ] && { say "48 h without a free GPU0: stop (nothing restarted)"; exit 1; }
+  sleep 600
+  procs=$(inside "ps -eo pid,etime,cmd | grep -a '[f]astwam.fullft.train' | cut -c1-160")
+  if [ -n "$procs" ]; then say "trainer processes in $C now (nothing restarted):"; echo "$procs"; exit 1; fi
+done
 say "E9 finished and relayed; no trainer in $C; host GPU0 $used MiB"
 say "3 docker restart $C"
 docker restart $C > /dev/null || { say "docker restart FAILED"; exit 1; }

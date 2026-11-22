@@ -4,8 +4,9 @@
 # goes back on (it was paused at 14:34 for the group):
 #   ar2_tw (B2, the long-picture version) resumes now from its resume.pt (update 5475 of 20077, ~35 h left), then
 #   press_none (job 116648, held at 14:34; its dependency is moved onto the new ar2_tw job, then it is released).
-# Spare GPU = the group's project (qselect -P, every user) holds fewer than 4 GPUs in running or queued jobs (held
-# jobs wait on a dependency and hold no GPU), and the home disk has >= 160 GB free (gaas_run.pbs waits for that anyway).
+# Spare GPU = OUR jobs hold fewer than 4 GPUs in running or queued jobs (user 11-22 23:53: we pay for 4 H200s and use at
+# most 4; other users' jobs in the project do not count; they are listed for information); held jobs wait on a
+# dependency and hold no GPU. Home disk >= 160 GB free is noted (gaas_run.pbs waits for that anyway).
 # Nothing of another user is touched; nothing is deleted.
 #   cd ~/mwam/FastWAM-memory2 && git pull -q --ff-only origin memory2 && bash scripts/gaas/use_spare_gpu.sh [--yes]
 # Log: ~/mwam/logs/SPARE_GPU_<time>.txt
@@ -36,7 +37,7 @@ for st in R Q H; do
     name=$(echo "$info" | awk -F' = ' '/Job_Name/{print $2}')
     g=$(echo "$info" | awk -F' = ' '/Resource_List.ngpus/{print $2}')
     printf '  %-14s %s  %-10s %-12s gpus %s\n' "${j%%.*}" "$st" "$own" "$name" "${g:-?}"
-    [ "$st" != H ] && used=$(( used + ${g:-1} ))
+    [ "$st" != H ] && [ "$own" = "$(id -un)" ] && used=$(( used + ${g:-1} ))   # user 23:53: only ours count
   done
 done
 echo "== the queue gpu_as"
@@ -52,7 +53,7 @@ done
 
 free=$(df -BG $HOME | tail -n 1 | awk '{gsub("G", "", $4); print $4}')
 spare=$(( LIMIT - used ))
-say "the project holds $used GPU(s) in running / queued jobs (limit $LIMIT): spare $spare; home $free GB free"
+say "our running / queued jobs hold $used GPU(s) (limit $LIMIT for us): spare $spare; home $free GB free"
 if [ "$spare" -lt 1 ]; then say "NO SPARE GPU: nothing submitted"; exit 0; fi
 [ "$free" -lt 160 ] && say "note: < 160 GB free; the job will wait for room before it trains (gaas_run.pbs)"
 if [ $YES != 1 ]; then say "SPARE GPU: run again with --yes to resume chain D (ar2_tw now, press_none after it)"; exit 0; fi
