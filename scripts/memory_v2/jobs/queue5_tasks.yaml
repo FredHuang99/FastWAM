@@ -35,6 +35,16 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py b1"
   pass_if: "m['rc'] == 0"
 
+# 11-22 23:45 (Opus): rearrange body record, was the first press in the record when the arm pressed again? (zero GPU)
+- id: A40-rearr-ledger-report
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "rearrange body record (descriptive): scripts/fullft/rearr_ledger.py over e6:rearrange_arprop_e30 -> use vs write/read failure of the press entry"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_ledger.py e6:rearrange_arprop_e30"
+  pass_if: "m['rc'] == 0"
+
 - id: A40-rearr-split-report
   lane: a40cpu
   kind: shell
