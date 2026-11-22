@@ -8,7 +8,7 @@ set -u
 R=/workspace/FastWAM-memory2; OUT=$R/outputs/fullft; LIST=${LIST:-$R/scripts/gaas/relay_backlog.txt}   # H100: LIST=..._h100.txt
 LOG=$OUT/RELAY_BACKLOG_$(date +%Y%m%d_%H%M).txt
 exec > >(tee -a "$LOG") 2>&1
-trap 'echo "[backlog] $(date "+%F %T") finished; log $LOG"; rmdir $OUT/.relay_backlog_lock 2>/dev/null' EXIT
+trap 'echo "[backlog] $(date "+%F %T") finished; log $LOG"; rm -rf $OUT/.relay_backlog_lock 2>/dev/null' EXIT
 cd $R
 for round in $(seq 1 48); do
   left=0
@@ -19,9 +19,13 @@ for round in $(seq 1 48); do
     [ -z "$todo" ] && continue
     left=1
     echo "[backlog] $(date '+%F %T') round $round: $run$todo"
-    RUN=$run TAGS="${todo# }" POLL=60 bash scripts/fullft/export_watch.sh > /dev/null 2>&1 < /dev/null
+    ac=0; [ -f $OUT/$run/.auto_clean ] && ac=1            # 11-22: the job that trained it had AUTO_CLEAN=1 (user 13:16 / 13:19)
+    RUN=$run TAGS="${todo# }" POLL=60 AUTO_CLEAN=$ac bash scripts/fullft/export_watch.sh > /dev/null 2>&1 < /dev/null
     echo "[backlog] $(date '+%F %T') $run relayed now: $(ls $OUT/$run/.relayed_* 2>/dev/null | xargs -n1 basename 2>/dev/null | tr '\n' ' ')"
-  done < $LIST
+    if [ $ac = 1 ] && [ -f $OUT/$run/SUMMARY.json ] && [ -f $OUT/$run/resume.pt ] && { [ -f $OUT/$run/.relayed_e30 ] || [ -f $OUT/$run/.relayed_final ]; }; then
+      rm -f $OUT/$run/resume.pt && echo "[backlog] $(date '+%F %T') AUTO_CLEAN: removed $run/resume.pt (finished, last export on the relay)"
+    fi
+  done < <(cat "$LIST" "$OUT/RELAY_PENDING.txt" 2>/dev/null)   # 11-22: + the exports jobs handed over (gaas_run.pbs)
   [ $left = 0 ] && { echo "[backlog] $(date '+%F %T') every listed export is on the relay"; exit 0; }
   sleep 1800
 done

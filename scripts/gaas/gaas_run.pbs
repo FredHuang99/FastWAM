@@ -214,14 +214,20 @@ if echo " $SETS " | grep -q ' history.variant=arprop ' && [ "${SKIP_DEFAULT_EVEN
 fi
 
 step "3 condition and training"
+[ "${AUTO_CLEAN:-0}" = 1 ] && touch $F/$RUN/.auto_clean   # 11-22: lets the relay backlog clean up after a later upload
 bash -c "$COND" || fail "condition not met: $COND"
 ( sleep $(( WALL_H * 3600 - 2700 )); touch $F/$RUN/STOP; echo "[run] $(date '+%F %T') walltime near: STOP written" ) &
 TIMER=$!
 X bash -c "RUN=$RUN AUTO_CLEAN=${AUTO_CLEAN:-0} bash scripts/fullft/export_watch.sh" > /dev/null 2>&1 &
 WATCH=$!
-if [ -s scripts/gaas/relay_backlog.txt ]; then       # 11-21: exports that missed the relay while HF was full
-  find $F -maxdepth 1 -name .relay_backlog_lock -mmin +1500 -exec rmdir {} \; 2>/dev/null
+if [ -s scripts/gaas/relay_backlog.txt ] || [ -s $F/RELAY_PENDING.txt ]; then   # 11-21 / 11-22: exports not yet on the relay
+  find $F -maxdepth 1 -name .relay_backlog_lock -mmin +1500 -exec rm -rf {} \; 2>/dev/null
+  if [ -d $F/.relay_backlog_lock ] && command -v qstat > /dev/null; then   # 11-22: a lock whose job no longer runs is stale (the job's end can
+    lj=$(cat $F/.relay_backlog_lock/job 2>/dev/null)   # kill the backlog before its exit trap removes the lock)
+    if [ -z "$lj" ] || ! qstat "$lj" 2>/dev/null | grep -q " R "; then rm -rf $F/.relay_backlog_lock; fi
+  fi
   if mkdir $F/.relay_backlog_lock 2>/dev/null; then
+    echo "${PBS_JOBID:-none}" > $F/.relay_backlog_lock/job
     X bash -c "bash scripts/fullft/relay_backlog.sh" > /dev/null 2>&1 &
     step "relay backlog started in this job (scripts/gaas/relay_backlog.txt)"
   fi
@@ -251,7 +257,16 @@ if [ -f $F/$RUN/STOP ] && [ ! -f $F/$RUN/SUMMARY.json ]; then
 fi
 [ -f $F/$RUN/SUMMARY.json ] || fail "trainer failed twice (exit code $rc; see $F/QUEUE_$RUN.log)"
 step "$RUN finished: $(head -c 300 $F/$RUN/SUMMARY.json)"
-for i in $(seq 1 24); do kill -0 $WATCH 2>/dev/null || break; sleep 300; done
+# 11-22 (user 18:23: do not waste compute): wait at most 30 min (was 2 h) for the last export to reach the relay, so
+# the GPU goes to the chain's next job; what is not on the relay by then goes to outputs/fullft/RELAY_PENDING.txt and
+# a later job's relay backlog uploads it (and, with .auto_clean, then removes resume.pt and the relayed exports).
+for i in $(seq 1 6); do kill -0 $WATCH 2>/dev/null || break; sleep 300; done
+pend=""; for f in $F/$RUN/export_e*.pt; do [ -f "$f" ] || continue; g=$(basename $f .pt); g=${g#export_}
+  [ -f $F/$RUN/.relayed_$g ] || pend="$pend $g"; done
+if [ -n "$pend" ]; then
+  grep -qx "$RUN$pend" $F/RELAY_PENDING.txt 2>/dev/null || echo "$RUN$pend" >> $F/RELAY_PENDING.txt
+  step "not on the relay after 30 min:$pend -> RELAY_PENDING.txt (a later job uploads them)"
+fi
 step "export watcher: $(ls $F/$RUN/.relayed_* 2>/dev/null | xargs -n1 basename 2>/dev/null | tr '\n' ' ')"
 # 11-22: AUTO_CLEAN=1 (only when the user approved it for the submission): a finished run's resume.pt (about 72 GB,
 # needed only to continue an unfinished run) is removed once SUMMARY.json exists AND its last export is on the relay
