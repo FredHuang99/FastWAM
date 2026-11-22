@@ -2,14 +2,23 @@
 records and the delivery's image pipeline (dense_joint_v1 data_path.Raw / mosaic, the functions the caches and the closed
 loop use); nothing under the dense cache is written.
 
+  boxes   (CPU, read-only) SUGGESTED boxes from the scene geometry (11-22 12:50, after reading RMBench
+          envs/observe_and_pickup.py): the reference stands on the shelf at (0, 0.15, 0.88) until the wall at y 0.05
+          hides it (after 20 physics steps, i.e. during the first action: frame 0 shows it); the five candidates lie on
+          the table at x in [-0.35, 0.35] (|x| >= 0.07), y in [-0.25, -0.10], z 0.741. The 3-D boxes below (with room
+          for the objects' size) are projected through the head camera of the robot's config (static_camera_list,
+          position / forward / left, SAPIEN's x-forward camera) and the head camera type of demo_clean.yml (fovy, w, h);
+          printed with a 0.02 margin and written to outputs/fullft/zoom_boxes/SUGGESTED.json
   frames  (CPU, read-only) the head-camera image of frame 0 and of frames at 1/3, 2/3 and the end of the first N
-          episodes, each with a 0.1 grid in normalised coordinates, as PNGs + one contact sheet
-          -> outputs/fullft/zoom_boxes/  (the user sends them; Opus picks the two fixed boxes from them)
+          episodes, each with a 0.1 grid in normalised coordinates and the suggested boxes (red: reference, green:
+          candidates) when `boxes` could compute them, as PNGs + one contact sheet -> outputs/fullft/zoom_boxes/
+          (the user sends them; Opus fixes the two boxes from them)
   build   (GPU, VAE only) the zoom latents of every episode for the given boxes: "ref" = frame 0 cropped to --ref-box,
           "cur" = every frame cropped to --cur-box (fullft/zoom.py zoom_images -> mosaic -> single-frame VAE, one frame at
           a time, as the closed loop encodes) -> <out>/<episode>.pt, resumable; first a pipeline check: frame 0 with the
           full box (0, 0, 1, 1) must reproduce the cache's own latent[0] (the recipe's VAE tolerance), else stop.
 
+  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/zoom_tools.py boxes
   PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/zoom_tools.py frames [--n 6]
   PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/zoom_tools.py build --ref-box X0 Y0 X1 Y1 --cur-box X0 Y0 X1 Y1
 """
@@ -36,6 +45,69 @@ def delivery():
     return common, data_path
 
 
+RMBENCH = Path("/workspace/FastWAM/resources/RMBench")
+REF_BOX_3D = ((-0.12, 0.12), (0.08, 0.22), (0.79, 1.00))         # the reference on the shelf, with its size
+CUR_BOX_3D = ((-0.42, 0.42), (-0.32, -0.03), (0.74, 0.86))       # the candidates on the table, with their size
+
+
+def head_camera(rmbench: Path):
+    """(position, forward, left, fovy_deg, w, h) of the head camera from the RMBench checkout's configs."""
+    import yaml
+    task = yaml.safe_load((rmbench / "env_cfg/task_config/demo_clean.yml").read_text())
+    ctype = task["camera"]["head_camera_type"]
+    spec = yaml.safe_load((rmbench / "env_cfg/task_config/_camera_config.yml").read_text())[ctype]
+    for cfg in sorted((rmbench / "assets/embodiments").glob("*/config.yml")):
+        value = yaml.safe_load(cfg.read_text()) or {}
+        for cam in value.get("static_camera_list") or []:
+            if cam.get("name") == "head_camera":
+                pos = [float(x) for x in cam["position"]]
+                fwd = [float(x) for x in (cam.get("forward") or [-x for x in pos])]
+                left = [float(x) for x in (cam.get("left") or [-fwd[1], fwd[0], 0.0])]
+                return pos, fwd, left, float(spec["fovy"]), int(spec["w"]), int(spec["h"]), str(cfg), ctype
+    raise FileNotFoundError(f"no head_camera in {rmbench}/assets/embodiments/*/config.yml")
+
+
+def project_box(box3d, cam, margin=0.02):
+    """Normalised (x0, y0, x1, y1) image box covering the 8 corners of a world box (camera looks along forward)."""
+    import itertools
+    import math
+    import numpy as np
+    pos, fwd, left, fovy, w, h = (np.asarray(cam[0]), np.asarray(cam[1]), np.asarray(cam[2]), cam[3], cam[4], cam[5])
+    fwd, left = fwd / np.linalg.norm(fwd), left / np.linalg.norm(left)
+    up = np.cross(fwd, left)
+    f = (h / 2.0) / math.tan(math.radians(fovy) / 2.0)
+    us, vs = [], []
+    for corner in itertools.product(*box3d):
+        d = np.asarray(corner) - pos
+        depth = float(fwd @ d)
+        if depth <= 0:
+            raise ValueError(f"corner {corner} is behind the camera")
+        us.append((w / 2.0 - f * float(left @ d) / depth) / w)
+        vs.append((h / 2.0 - f * float(up @ d) / depth) / h)
+    clip = lambda x: min(1.0, max(0.0, x))
+    return [round(clip(min(us) - margin), 3), round(clip(min(vs) - margin), 3),
+            round(clip(max(us) + margin), 3), round(clip(max(vs) + margin), 3)]
+
+
+def suggested(rmbench: Path):
+    cam = head_camera(rmbench)
+    return {"ref_box": project_box(REF_BOX_3D, cam), "cur_box": project_box(CUR_BOX_3D, cam),
+            "camera": {"position": cam[0], "forward": cam[1], "left": cam[2], "fovy": cam[3], "w": cam[4], "h": cam[5],
+                       "config": cam[6], "type": cam[7]},
+            "ref_box_3d": REF_BOX_3D, "cur_box_3d": CUR_BOX_3D}
+
+
+def cmd_boxes(args):
+    value = suggested(Path(args.rmbench))
+    out = R / "outputs/fullft/zoom_boxes"
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "SUGGESTED.json").write_text(json.dumps(value, indent=1) + "\n")
+    print(json.dumps(value, indent=1))
+    print(f"[zoom] suggested --ref-box {' '.join(map(str, value['ref_box']))} --cur-box "
+          f"{' '.join(map(str, value['cur_box']))}  (wrote {out / 'SUGGESTED.json'})", flush=True)
+    return 0
+
+
 def cmd_frames(args):
     import numpy as np
     from PIL import Image, ImageDraw
@@ -45,6 +117,11 @@ def cmd_frames(args):
     records = common.read(root / "RECORDS.json")[: args.n]
     out = R / "outputs/fullft/zoom_boxes"
     out.mkdir(parents=True, exist_ok=True)
+    try:
+        boxes = suggested(Path(args.rmbench))
+    except Exception as error:                                    # noqa: BLE001 (the grid alone still helps)
+        boxes = None
+        print(f"[zoom] no suggested boxes ({error}); grid only", flush=True)
     tiles = []
     for rec in records:
         raw = data_path.Raw(cfg, rec)
@@ -62,6 +139,10 @@ def cmd_frames(args):
                     d.text((x + 2, 2), f"{k / 10:.1f}", fill=(255, 255, 0))
                     d.text((2, y + 2), f"{k / 10:.1f}", fill=(255, 255, 0))
                 d.text((4, h - 14), f"{rec['episode_id']} frame {f}/{n}", fill=(255, 0, 0))
+                if boxes:
+                    for key, color in (("ref_box", (255, 0, 0)), ("cur_box", (0, 255, 0))):
+                        x0, y0, x1, y1 = boxes[key]
+                        d.rectangle([x0 * w, y0 * h, x1 * w - 1, y1 * h - 1], outline=color, width=2)
                 name = f"{rec['episode_id'].replace('/', '_')}_f{f:04d}.png"
                 img.save(out / name)
                 tiles.append(img)
@@ -159,9 +240,12 @@ def cmd_build(args):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
+    x = sub.add_parser("boxes")
+    x.add_argument("--rmbench", default=str(RMBENCH))
     f = sub.add_parser("frames")
     f.add_argument("--root", default=str(ROOT))
     f.add_argument("--n", type=int, default=6)
+    f.add_argument("--rmbench", default=str(RMBENCH))
     b = sub.add_parser("build")
     b.add_argument("--root", default=str(ROOT))
     b.add_argument("--ref-box", type=float, nargs=4, required=True)
@@ -170,7 +254,7 @@ def main():
     b.add_argument("--out", default="")
     b.add_argument("--limit", type=int, default=0)
     args = ap.parse_args()
-    return cmd_frames(args) if args.cmd == "frames" else cmd_build(args)
+    return {"boxes": cmd_boxes, "frames": cmd_frames, "build": cmd_build}[args.cmd](args)
 
 
 if __name__ == "__main__":

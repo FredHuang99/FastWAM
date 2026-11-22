@@ -451,18 +451,28 @@ def test_object_record_helpers(monkeypatch):
         def get_pose(self):
             raise RuntimeError("no pose")
 
-    a, b, c = Ent("cup", [0.1, 0.2, 0.75]), Ent("cup", [0.3, 0.2, 0.75]), Ent("", [0.0, 0.0, 0.0])
-    scene = SimpleNamespace(get_all_actors=lambda: [a, b, c, Broken()])
-    env = SimpleNamespace(scene=scene, target_idx=1, name_of_task="observe", target_obj=b, candidates=[a, b],
-                          robot=object(), big=list(range(100)))
-    pos = mod.actor_positions(env)
-    assert pos == {"cup": [0.1, 0.2, 0.75], "cup#2": [0.3, 0.2, 0.75], "unnamed": [0.0, 0.0, 0.0]}
+    class Wrapped:                                                   # RMBench's Actor keeps the entity in .actor
+        def __init__(self, ent):
+            self.actor = ent
+
+    # the attribute layout of RMBench envs/observe_and_pickup.py (object list, target_object_idx, target_object, ...)
+    a, b, c = Ent("010_mouse", [0.1, -0.2, 0.741]), Ent("011_stapler", [-0.2, -0.15, 0.741]), Ent("008_shelf", [0, 0.15, 0.781])
+    ref = Ent("011_stapler", [0.0, 0.15, 0.88])
+    scene = SimpleNamespace(get_all_actors=lambda: [a, b, c, ref])
+    env = SimpleNamespace(scene=scene, object=[a, Wrapped(b)], target_object_idx=1, target_object=ref, shelf=c,
+                          object_modelnames=["010_mouse", "011_stapler"], object_ids=[0, 3], fail_flag=False,
+                          get_obs_cnt=7, robot=Ent("robot", [9, 9, 9]), broken=Broken(), big=list(range(100)))
+    assert mod.task_actors(env) == {"object[0]": [0.1, -0.2, 0.741], "object[1]": [-0.2, -0.15, 0.741],
+                                    "shelf": [0.0, 0.15, 0.781], "target_object": [0.0, 0.15, 0.88]}   # robot skipped
+    assert mod.task_flags(env) == {"fail_flag": False, "get_obs_cnt": 7, "target_object_idx": 1}
     meta = mod.object_meta(env)
-    assert meta["scalars"] == {"name_of_task": "observe", "target_idx": 1}
-    assert meta["actors"]["target_obj"] == {"entity": "cup", "p": [0.3, 0.2, 0.75]}
-    assert [x["p"] for x in meta["actors"]["candidates"]] == [[0.1, 0.2, 0.75], [0.3, 0.2, 0.75]]
+    assert meta["scalars"] == {"fail_flag": False, "get_obs_cnt": 7, "target_object_idx": 1}
+    assert meta["lists"] == {"object_modelnames": ["010_mouse", "011_stapler"], "object_ids": [0, 3]}
+    assert meta["actors"]["target_object"] == {"entity": "011_stapler", "p": [0.0, 0.15, 0.88]}
+    assert [x["entity"] for x in meta["actors"]["object"]] == ["010_mouse", "011_stapler"]
+    assert [x["name"] for x in meta["scene_entities"]] == ["010_mouse", "011_stapler", "008_shelf", "011_stapler"]
     _json.dumps(meta)                                                # serialisable
-    assert mod.actor_positions(SimpleNamespace(scene=None)) == {}    # nothing readable -> empty, no error
+    assert mod.task_actors(SimpleNamespace()) == {} and mod.scene_entities(SimpleNamespace(scene=None)) == []
     monkeypatch.setenv("MWAM_OBJECT_LOG", "1")
     spec.loader.exec_module(mod)
     assert mod.OBJECT_LOG is True
