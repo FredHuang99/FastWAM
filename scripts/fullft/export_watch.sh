@@ -43,4 +43,11 @@ for TAG in $TAGS; do
     sleep 600
   done
   [ -f $M ] || echo "[watch] $TAG NOT RELAYED after 3 tries"
+  # 11-22 (user 13:19: exports may go once uploaded; GaaS only, AUTO_CLEAN=1 from submit_chains.sh --auto-clean): the
+  # local export goes when the relay lists it with exactly the local size (its .sha256 stays as the record)
+  if [ "${AUTO_CLEAN:-0}" = 1 ] && [ -f $M ] && [ -f $F ]; then
+    want=$(stat -c %s $F); got=$(listed $TAG | awk -v n="export_$TAG.pt" '$1 == n {print $2}')
+    if [ -n "$got" ] && [ "$got" = "$want" ]; then rm -f $F && echo "[watch] $(date '+%F %T') AUTO_CLEAN: removed $F ($want bytes, on the relay)"
+    else echo "[watch] AUTO_CLEAN: $F kept (relay size '$got' vs local $want)"; fi
+  fi
 done

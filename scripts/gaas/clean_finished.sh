@@ -5,6 +5,8 @@
 #   * ar_2task/resume.pt once ar2_long has SUMMARY.json (on this machine it was only the seed of ar2_long, joined from
 #     the old H200's parts; the original stays on the old H200)
 #   * <run>/resume.pt.partial (an unfinished copy written when the disk filled; never read)
+#   * <run>/export_<tag>.pt with .relayed_<tag> whose size equals the relay's listing (user 13:19: exports may go once
+#     uploaded; the .sha256 stays). An export without the marker or with another size on the relay stays.
 # Everything else stays and is listed with the reason. Refuses while any job of ours is queued or running (a trainer
 # could be writing). Dry run unless --yes.
 #   cd ~/mwam/FastWAM-memory2 && bash scripts/gaas/clean_finished.sh [--yes]
@@ -26,4 +28,14 @@ for f in $F/*/resume.pt; do
   else echo "  keep   $f  (not finished: needed to resume)"; fi
 done
 for f in $F/*/*.partial; do [ -f "$f" ] && gone "$f" "unfinished copy from the full disk"; done
+HFPY=$HOME/mwam/envs/hf-tools/bin/python
+for f in $F/*/export_e*.pt; do
+  [ -f "$f" ] || continue
+  d=$(dirname "$f"); run=$(basename "$d"); tag=$(basename "$f" .pt); tag=${tag#export_}
+  [ -f $d/.relayed_$tag ] || { echo "  keep   $f  (no .relayed_$tag)"; continue; }
+  got=$(cd $R && $HFPY scripts/memory_v2/migrate/relay.py ls --prefix exports/${run}_$tag --repo hhyfred/memwam-fullft 2>/dev/null \
+        | awk -v n="export_$tag.pt" '$1 == n {print $2}')
+  if [ -n "$got" ] && [ "$got" = "$(stat -c %s "$f")" ]; then gone "$f" "on the relay, same size"
+  else echo "  keep   $f  (relay size '${got:-none}' vs local $(stat -c %s "$f"))"; fi
+done
 [ $YES = 1 ] && echo "[clean] home after: $(df -h $HOME | tail -n 1 | awk '{print $3" used, "$4" free"}')"

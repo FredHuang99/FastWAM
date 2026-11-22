@@ -217,7 +217,7 @@ step "3 condition and training"
 bash -c "$COND" || fail "condition not met: $COND"
 ( sleep $(( WALL_H * 3600 - 2700 )); touch $F/$RUN/STOP; echo "[run] $(date '+%F %T') walltime near: STOP written" ) &
 TIMER=$!
-X bash -c "RUN=$RUN bash scripts/fullft/export_watch.sh" > /dev/null 2>&1 &
+X bash -c "RUN=$RUN AUTO_CLEAN=${AUTO_CLEAN:-0} bash scripts/fullft/export_watch.sh" > /dev/null 2>&1 &
 WATCH=$!
 if [ -s scripts/gaas/relay_backlog.txt ]; then       # 11-21: exports that missed the relay while HF was full
   find $F -maxdepth 1 -name .relay_backlog_lock -mmin +1500 -exec rmdir {} \; 2>/dev/null
