@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# mwam5090, 11-22 18:50 (Opus; user 18:23: find out why observe_and_pickup does badly). Diagnosis only, no verdict
+# mwam5090, 11-22 18:30 (Opus; user 18:23: find out why observe_and_pickup does badly). Diagnosis only, no verdict
 # (the 5090 is its own machine group; the A40 numbers stay the table's).
 #   1 the exports obs_ar_e30 and obs_arprop_e30: here, else the relay mirror (/mnt/hf/relay_mirror/memwam-fullft), else
 #     the relay; sha256 checked

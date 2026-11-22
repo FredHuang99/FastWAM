@@ -200,7 +200,7 @@ def b1():
     """Plan v19 B1, the reading registered in Status 11-22 section 2 (5dcb216, 01:51, before any body-record episode on
     rearrange / swap_T): per task D = success(body record e30) - success(three-frame e30), scenes 1-100 paired (both in
     closed_loop/e6); SESOI +0.15: CI lower > +0.15 -> LEDGER HELPS; CI inside +-0.15 -> SAME AS AR; otherwise UNCERTAIN.
-    Both tasks SAME AS AR -> plan 6.2 item 1 (back to Fable). Script written 11-22 18:55, after the counts 62 / 29
+    Both tasks SAME AS AR -> plan 6.2 item 1 (back to Fable). Script written 11-22 18:31, after the counts 62 / 29
     (rearrange) were seen in the E16 log; it applies the registered words unchanged."""
     out = {"run": "B1 body record vs three-frame", "sesoi": 0.15, "tasks": {}}
     for task, new_l, ref_l in (("rearrange_blocks", "rearrange_arprop_e30", "rearrange_ar_e30"),
