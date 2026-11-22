@@ -3,9 +3,11 @@
 # run on 11-22 04:00 and all ten died at 05:21. From now on our runs go as FOUR CHAINS: within a chain each job starts
 # only after the previous one ended (qsub -W depend=afterany), so at most 4 run at once, and nothing runs on the login
 # node. Chained jobs never resubmit themselves (NO_RESUBMIT=1); a job that fails or stops lets the chain go on.
-#   chain A  d2_press (~17 h) -> d1_w (~32 h) -> press_count_s19 (~3 h)
-#   chain B  obs_none (~4 h) -> obs_zoom (~4 h; fetches its zoom latents from the cache relay itself) -> d1_wn (~32 h)
-#            -> press_count_s18 (~5 h)
+#   chain A  press_count_s19 (~3 h, resumes at 9000) -> d2_press (~17 h) -> d1_w (~32 h)
+#   chain B  press_count_s18 (~5 h, resumes at 8000) -> obs_none (~2 h, resumes) -> obs_zoom (~4 h; fetches its zoom
+#            latents from the cache relay itself) -> d1_wn (~32 h)
+#   (11-22 13:20: the two nearly finished seed replicates go first: with --auto-clean they free 2 x 68 GB within ~5 h,
+#   which gives the later runs room for two checkpoint saves at once; D2 starts ~3 h later than first planned)
 #   chain C  cover_arprop (~21 h, resumes) -> ar2_prop_novid (~31 h)
 #   chain D  ar2_tw (~36 h, resumes) -> press_none (~13 h)
 #   [estimates: updates left / the 11-21-22 rates; plan v19 5.1 order D2 -> A3 -> D1 first, the main-table runs next]
@@ -47,8 +49,8 @@ chain() {        # name, runs...
     prev=$j
   done
 }
-chain A d2_press d1_w press_count_s19
-chain B obs_none obs_zoom d1_wn press_count_s18
+chain A press_count_s19 d2_press d1_w
+chain B press_count_s18 obs_none obs_zoom d1_wn
 chain C cover_arprop ar2_prop_novid
 chain D ar2_tw press_none
 qstat -u "$(id -un)" 2>/dev/null | tail -n +4
