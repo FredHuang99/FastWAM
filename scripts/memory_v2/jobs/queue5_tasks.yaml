@@ -35,7 +35,7 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py b1"
   pass_if: "m['rc'] == 0"
 
-# 11-22 23:45 (Opus): rearrange body record, was the first press in the record when the arm pressed again? (zero GPU)
+# 11-22 23:21 (Opus): rearrange body record, was the first press in the record when the arm pressed again? (zero GPU)
 - id: A40-rearr-ledger-report
   lane: a40cpu
   kind: shell

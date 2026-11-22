@@ -1,5 +1,5 @@
 """Rearrange, body-record model: when the arm presses the button a second time, was the first press already in its
-record? (11-22 23:40, Opus; follow-up of rearr_split.py: rearrange_arprop e30 still fails 35 / 100 on the press, 18
+record? (11-22 23:20, Opus; follow-up of rearr_split.py: rearrange_arprop e30 still fails 35 / 100 on the press, 18
 pressed twice and 17 never pressed.) Read-only, CPU, zero GPU: the A40 episodes already there. Descriptive.
 Sources per episode: executed_actions.jsonl (completed_target_id, objects_after.press_cnt = the env's press counter)
 and decisions.jsonl (frame_id, ledger = [frame, arm, kind, confirmed, ...] entries the model saw at that decision).

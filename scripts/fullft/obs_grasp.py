@@ -1,4 +1,4 @@
-"""Where does the gripper close in observe_and_pickup? (11-22 23:30, Opus; follow-up of obs_split.py on the 5090 a3diag
+"""Where does the gripper close in observe_and_pickup? (11-22 23:15, Opus; follow-up of obs_split.py on the 5090 a3diag
 episodes: 29 / 50 of obs_arprop \"lifted nothing\", and the objects it did lift were the target 3 times in 21.) Read-only,
 CPU, zero GPU: the episodes already recorded with MWAM_OBJECT_LOG=1. Descriptive.
 Per executed target: the commanded grippers (target[6] left, target[13] right; our event rule's gripper part, events.py
