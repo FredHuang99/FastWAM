@@ -18,7 +18,7 @@ seed 0, percentile 95 % CI). Official seed-42 banks, scenes 1-100, default noise
       under, success, and the same against press_count e30 (closed_loop/g1 1-50 + sel 51-100).
       Pairs: scenes where both episodes have known cards (n1_error not None); the count of excluded scenes is printed.
 A verdict needs all 100 scenes finished on both sides (else WAIT). Writes outputs/fullft/<A3|D1|D2>_VERDICT.json.
-  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py a3|d1|d2
+  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py a3|d1|d2|b1  (b1: see its function)
 """
 from __future__ import annotations
 
@@ -196,9 +196,35 @@ def d2():
     return out
 
 
+def b1():
+    """Plan v19 B1, the reading registered in Status 11-22 section 2 (5dcb216, 01:51, before any body-record episode on
+    rearrange / swap_T): per task D = success(body record e30) - success(three-frame e30), scenes 1-100 paired (both in
+    closed_loop/e6); SESOI +0.15: CI lower > +0.15 -> LEDGER HELPS; CI inside +-0.15 -> SAME AS AR; otherwise UNCERTAIN.
+    Both tasks SAME AS AR -> plan 6.2 item 1 (back to Fable). Script written 11-22 18:55, after the counts 62 / 29
+    (rearrange) were seen in the E16 log; it applies the registered words unchanged."""
+    out = {"run": "B1 body record vs three-frame", "sesoi": 0.15, "tasks": {}}
+    for task, new_l, ref_l in (("rearrange_blocks", "rearrange_arprop_e30", "rearrange_ar_e30"),
+                               ("swap_T", "swapT_arprop_e30", "swapT_ar_e30")):
+        order, ref = success("e6", ref_l, task)
+        _, new = success("e6", new_l, task)
+        r = {"finished": {new_l: len(new), ref_l: len(ref)}}
+        if len(new) < 100 or len(ref) < 100:
+            r["verdict"] = f"WAIT ({len(new)} / {len(ref)} of 100)"
+        else:
+            c = compare(new, ref, order)
+            lo, hi = c["ci95"]
+            r.update(main=c, verdict="LEDGER HELPS" if lo > 0.15 else
+                     "SAME AS AR" if (lo > -0.15 and hi < 0.15) else "UNCERTAIN")
+        out["tasks"][task] = r
+    vs = [r["verdict"] for r in out["tasks"].values()]
+    out["plan_6_2_item_1"] = all(v == "SAME AS AR" for v in vs)
+    out["verdict"] = "; ".join(f"{k}: {v['verdict']}" for k, v in out["tasks"].items())
+    return out
+
+
 def main():
     which = sys.argv[1] if len(sys.argv) > 1 else ""
-    fn = {"a3": a3, "d1": d1, "d2": d2}.get(which)
+    fn = {"a3": a3, "d1": d1, "d2": d2, "b1": b1}.get(which)
     if fn is None:
         print(__doc__)
         return 2

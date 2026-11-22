@@ -25,6 +25,16 @@ put_scenes: &put_scenes [closed_loop/scenes_seed17_n10, closed_loop/scenes_seed1
 tasks:
 # 11-22 18:50 (Opus; user 18:23: why does rearrange do badly?): zero-GPU failure split of the rearrange episodes already
 # here (three-frame e6 + r2, body record e6, clock e16). Descriptive; log pushed (id contains "report").
+- id: A40-B1-verdict
+  lane: a40cpu
+  kind: shell
+  after: [A40-E6-rearrLED30-s0, A40-E6-rearrLED30-s1, A40-E6-rearrLED30-s2, A40-E6-rearrLED30-s3, A40-E6-rearrLED30-s4, A40-E6-rearrLED30-s5, A40-E6-rearrLED30-s6, A40-E6-rearrLED30-s7, A40-E6-rearrLED30-s8, A40-E6-rearrLED30-s9, A40-E6-swapTLED30-s0, A40-E6-swapTLED30-s1, A40-E6-swapTLED30-s2, A40-E6-swapTLED30-s3, A40-E6-swapTLED30-s4, A40-E6-swapTLED30-s5, A40-E6-swapTLED30-s6, A40-E6-swapTLED30-s7, A40-E6-swapTLED30-s8, A40-E6-swapTLED30-s9]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "plan v19 B1 verdict (reading registered in Status 11-22 section 2 at 5dcb216, before any body-record episode on rearrange / swap_T; script 11-22 18:55): per task D = body record e30 - three-frame e30, 1-100 paired, SESOI +0.15 -> LEDGER HELPS / SAME AS AR / UNCERTAIN; both SAME -> plan 6.2 item 1; log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py b1"
+  pass_if: "m['rc'] == 0"
+
 - id: A40-rearr-split-report
   lane: a40cpu
   kind: shell
