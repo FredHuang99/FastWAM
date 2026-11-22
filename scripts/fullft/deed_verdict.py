@@ -88,6 +88,12 @@ def a3():
         _, x = success("a3", f"obs_zoom_{tag}", task)
         if x:
             out[f"described_{tag}"] = compare(x, ref, order)
+    _, none = success("a3", "obs_none_e30", task)       # gaas_queue.txt (11-22, before obs_none): ar - none, SESOI 0.10,
+    if none:                                            # both CI ends inside +-0.10 -> HISTORY NOT USED (descriptive)
+        c = compare(ref, none, order)
+        c["note"] = ("HISTORY NOT USED" if len(none) == 100 and -0.10 < c["ci95"][0] and c["ci95"][1] < 0.10
+                     else "described")
+        out["described_obs_ar_minus_obs_none"] = c
     return out
 
 
