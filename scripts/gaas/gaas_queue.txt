@@ -141,3 +141,17 @@ d1_wn | model.decision_weight=3 model.next_event_loss=0.1 data.tasks=[put_back_b
 #   holds the card's count, success; the same against press_count e30. The 5090 gives a first look (same-machine only).
 # Gate: scripts/fullft/GO_deed (deed_smoke_5090.sh passed 11-22 03:16 container time 19:16) + the v3c events file.
 d2_press | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_press_button_v1] data.tasks=[press_button] data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_press_button_v3c.json] history.variant=arprop history.event_max=32 history.lag=0 history.ordinal=16 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 history.repeat_theta=0.6193 history.ledger_drop_p=0.3 history.ledger_over_p=0.3 model.decision_weight=3 model.next_event_loss=0.1 | test -f scripts/fullft/GO_deed && test -s outputs/fullft/events/events_press_button_v3c.json && test -f outputs/memory_v2/press/dense_press_button_v1/.verified
+# 11-22 plan v19 A3 (3.3 step 2; executed by Opus): observe_and_pickup three-frame model (obs_ar's exact recipe: ar,
+# seed 17, 30 frame-epochs) + two zoom history frames: frame 0's head camera cropped to x 0.395-0.675, y 0.06-0.34
+# (the reference on the shelf; frame 0 is the only frame that shows it: RMBench envs/observe_and_pickup.py puts a wall in
+# front of it after 20 physics steps) and the current head camera cropped to x 0-1, y 0.42-1.0 (the table); boxes fixed
+# 11-22 13:05 from the 4 x 4 frame sheet (every reference seen lies in x 0.49-0.58, y 0.13-0.27); latents built on the
+# 5090 (zoom_build_5090.sh, tag 02102ba0) and fetched from the cache relay (submit_zoom.sh).
+# Question: is observe_and_pickup a perception problem (the reference too small to tell apart)?
+# Registered reading (11-22 13:10, before any A3 run; Status 11-22 section 2; A40, official seed-42 bank):
+#   MAIN observe_and_pickup 1-100, e30: D = success(obs_zoom e30) - success(obs_ar e30), paired by scene, paired
+#   bootstrap 95 % CI (10,000, seed 0); SESOI +0.10: CI lower > +0.10 -> ZOOM HELPS; CI upper < +0.10 -> NO HELP;
+#   otherwise UNCERTAIN (pre-set extension: both e30 again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule).
+#   Described: e10 / e20; the failure split of obs_split.py on episodes run with MWAM_OBJECT_LOG=1. Plan 3.3: if the
+#   zoom helps here, try it next on press_button; still below 28 after two rounds -> back to Fable.
+obs_zoom | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1] data.tasks=[observe_and_pickup] history.zoom=true history.zoom_ref_box=[0.395,0.06,0.675,0.34] history.zoom_cur_box=[0.0,0.42,1.0,1.0] data.zoom_root=/workspace/FastWAM-memory2/outputs/memory_v2/press/zoom_obs_02102ba0 | test -f outputs/memory_v2/press/zoom_obs_02102ba0/ZOOM.json && test -f outputs/memory_v2/press/dense_observe_and_pickup_v1/.verified
