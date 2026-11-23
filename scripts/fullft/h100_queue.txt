@@ -80,3 +80,18 @@ swapT_clock | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/den
 battery_none | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_battery_try_v1] data.tasks=[battery_try] history.variant=none | test -f outputs/memory_v2/press/dense_battery_try_v1/.verified
 rearrange_none | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=none | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified
 swapT_none | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_swap_T_v1] data.tasks=[swap_T] history.variant=none | test -f outputs/memory_v2/press/dense_swap_T_v1/.verified
+#
+# 11-23 (Opus; user 14:53 approved "及时写入的改进版放入 H100"). Why: the rearrange body record (rearrange_arprop e30, 62/100)
+# still fails 18 / 100 by pressing twice, and in 16 of those 18 the first press was not yet in the record when the arm
+# pressed again; from press to record the median is 18 executed targets (min 9, max 48; rearr_ledger.py, A40 11-22
+# 23:25). rearr_v3c = rearrange_arprop's exact line (seed 17, H100 = the machine class of rearrange_ar / rearrange_arprop)
+# with ONLY the write timing changed to D2's / press_v3c's writer: lag 0, delta 0.012, min_path 0.015, provisional 0.002,
+# and its event file (task_v3c_events.py on the 5090 -> relay diag/rearrange_blocks_v3c -> rearr_v3c_ready.sh).
+# Registered reading (11-23, before any rearr_v3c run; Status 11-23; A40, official seed-42 bank, default noise):
+#   MAIN rearrange_blocks 1-100, e30: D = success(rearr_v3c e30) - success(rearrange_arprop e30), paired by scene,
+#   paired bootstrap 95 % CI (10,000, seed 0); SESOI +0.15: CI lower > +0.15 -> TIMELY WRITING HELPS; CI upper < +0.15
+#   -> NO HELP; otherwise UNCERTAIN (pre-set extension: both e30 again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule).
+#   Described: rearr_split.py classes (pressed twice / never pressed / which block) and rearr_ledger.py's write delay for
+#   both models. Expected if the diagnosis is right: "pressed twice" falls from 18 to a few; "never pressed" (17, the
+#   arm made a press-like motion without registering a press) does not change much.
+rearr_v3c | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks_v3c.json] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && bash scripts/fullft/rearr_v3c_ready.sh

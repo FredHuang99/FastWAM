@@ -18,7 +18,7 @@ seed 0, percentile 95 % CI). Official seed-42 banks, scenes 1-100, default noise
       under, success, and the same against press_count e30 (closed_loop/g1 1-50 + sel 51-100).
       Pairs: scenes where both episodes have known cards (n1_error not None); the count of excluded scenes is printed.
 A verdict needs all 100 scenes finished on both sides (else WAIT). Writes outputs/fullft/<A3|D1|D2>_VERDICT.json.
-  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py a3|d1|d2|b1  (b1: see its function)
+  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py a3|d1|d2|b1|rv3c  (b1, rv3c: see their functions)
 """
 from __future__ import annotations
 
@@ -222,9 +222,26 @@ def b1():
     return out
 
 
+def rv3c():
+    """11-23 rearrange timely writer (reading registered in scripts/fullft/h100_queue.txt above rearr_v3c, before any
+    run): D = success(rearr_v3c e30, closed_loop/rv3c) - success(rearrange_arprop e30, closed_loop/e6), rearrange 1-100;
+    SESOI +0.15: CI lower > +0.15 -> TIMELY WRITING HELPS; CI upper < +0.15 -> NO HELP; otherwise UNCERTAIN."""
+    task = "rearrange_blocks"
+    order, ref = success("e6", "rearrange_arprop_e30", task)
+    _, new = success("rv3c", "rearr_v3c_e30", task)
+    out = {"run": "rearrange timely writer", "sesoi": 0.15, "finished": {"rearr_v3c_e30": len(new),
+                                                                         "rearrange_arprop_e30": len(ref)}}
+    if len(new) < 100 or len(ref) < 100:
+        out["verdict"] = f"WAIT ({len(new)} / {len(ref)} of 100)"
+        return out
+    c = compare(new, ref, order)
+    out.update(main=c, verdict=three(c, 0.15, "TIMELY WRITING HELPS", "NO HELP"))
+    return out
+
+
 def main():
     which = sys.argv[1] if len(sys.argv) > 1 else ""
-    fn = {"a3": a3, "d1": d1, "d2": d2, "b1": b1}.get(which)
+    fn = {"a3": a3, "d1": d1, "d2": d2, "b1": b1, "rv3c": rv3c}.get(which)
     if fn is None:
         print(__doc__)
         return 2
