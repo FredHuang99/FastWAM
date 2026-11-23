@@ -269,6 +269,28 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py rv3c; PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_split.py rv3c:rearr_v3c_e30 e6:rearrange_arprop_e30; PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_ledger.py rv3c:rearr_v3c_e30 e6:rearrange_arprop_e30"
   pass_if: "m['rc'] == 0"
 
+# 11-23 23:10 (Opus): report cards for finished table cells that had none (their logs reach the results snapshot):
+# cover_blocks body record vs three-frame, and the no-history versions of swap_T and rearrange (descriptive, 1-100).
+- id: A40-COVER-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-cover_arprop30-s0, A40-cover_arprop30-s1, A40-cover_arprop30-s2, A40-cover_arprop30-s3, A40-cover_arprop30-s4, A40-cover_arprop30-s5, A40-cover_arprop30-s6, A40-cover_arprop30-s7, A40-cover_arprop30-s8, A40-cover_arprop30-s9]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "main-table cell cover_blocks body record (cover_arprop_e30) next to the three-frame model (cover_ar_e30), closed_loop/e6, descriptive"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e6_report.py --labels cover_blocks:cover_arprop_e30 cover_blocks:cover_ar_e30 --pairs cover_blocks:cover_arprop_e30:cover_ar_e30"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-NOHIST-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-swapT_none30-s0, A40-swapT_none30-s1, A40-swapT_none30-s2, A40-swapT_none30-s3, A40-swapT_none30-s4, A40-swapT_none30-s5, A40-swapT_none30-s6, A40-swapT_none30-s7, A40-swapT_none30-s8, A40-swapT_none30-s9, A40-rearrange_none30-s0, A40-rearrange_none30-s1, A40-rearrange_none30-s2, A40-rearrange_none30-s3, A40-rearrange_none30-s4, A40-rearrange_none30-s5, A40-rearrange_none30-s6, A40-rearrange_none30-s7, A40-rearrange_none30-s8, A40-rearrange_none30-s9]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "main-table cells without history: swapT_none_e30 and rearrange_none_e30 next to their three-frame models, closed_loop/e6, descriptive"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e6_report.py --labels swap_T:swapT_none_e30 swap_T:swapT_ar_e30 rearrange_blocks:rearrange_none_e30 rearrange_blocks:rearrange_ar_e30 --pairs swap_T:swapT_none_e30:swapT_ar_e30 rearrange_blocks:rearrange_none_e30:rearrange_ar_e30"
+  pass_if: "m['rc'] == 0"
+
 # 11-23 find-same fix (new H200 obs_pose: the next-pose head; reading registered in gaas_queue.txt above its line,
 # before it trained). Same conditions as obs_ar e30 in closed_loop/e6 (default noise, seed-42 bank, execute 8). Waits on the relay.
 - id: A40-fetch-obs_pose-e30
