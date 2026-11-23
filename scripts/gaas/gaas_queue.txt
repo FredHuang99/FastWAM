@@ -155,3 +155,27 @@ d2_press | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_
 #   Described: e10 / e20; the failure split of obs_split.py on episodes run with MWAM_OBJECT_LOG=1. Plan 3.3: if the
 #   zoom helps here, try it next on press_button; still below 28 after two rounds -> back to Fable.
 obs_zoom | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1] data.tasks=[observe_and_pickup] history.zoom=true history.zoom_ref_box=[0.395,0.06,0.675,0.34] history.zoom_cur_box=[0.0,0.42,1.0,1.0] data.zoom_root=/workspace/FastWAM-memory2/outputs/memory_v2/press/zoom_obs_02102ba0 | test -f outputs/memory_v2/press/zoom_obs_02102ba0/ZOOM.json && test -f outputs/memory_v2/press/dense_observe_and_pickup_v1/.verified
+# 11-23 find-same fix (Opus; user 14:53 "find the root cause and fix it"; user 15:28 agreed to the slot: after ar2_tw,
+# press_none moved behind d1_wn; scripts/gaas/submit_findsame.sh). obs_ar's exact recipe (ar, seed 17, the same
+# schedule) + the next-pose head (11-23 part (2b), 607af00): from the action tokens' mean, predict the body pose at the
+# next gripper close minus the pose now (normalised proprio; label from the demo's own proprio and the events file
+# events_observe_and_pickup.json, which obs_arprop used; no annotation). Not used at inference.
+# Why (5090 checks, 11-23 15:04-15:35, all measured): the closed loop's frame 0 does show the reference (image F0CHECK.png;
+# reference box of the closed loop's frame 0 vs 4 training demos' frame 0: mean difference 1.9-6.5, vs their last frames
+# 24-65); the arms stay still until frame 71 (5 % of the way to the grasp pose; 50 % at 80) and close at 116-121; at the
+# motion onset [m - 24, m + 8], replacing frame 0 by another demo's changes the action loss by -0.2 % (obs_ar) and -0.1 %
+# (obs_arprop): the trained models do not use frame 0 where the reach starts. The action chunks of frames 0-70 carry
+# nothing about the target (the arms stay still); the next-pose label carries it at every anchor before the close
+# (82.5 % of the training anchors), and before the onset only frame 0 tells which candidate it is.
+# Loss weight, by the rule fixed at 15:45 before these numbers: next_pose_loss = 0.1 / (the label's mean square over the
+# anchors that have one) = 0.1 / 0.57 = 0.18 (0.57 computed from the logged means 0.813 before the onset (71 anchors per
+# demo) and 0.230 from the onset to the close (51 per demo); the start-of-training aux term is then 0.1, as D2's 0.1 x CE).
+# Registered reading (11-23 15:55, before obs_pose trains; A40, official seed-42 bank, closed_loop/fs, conditions of obs_ar
+# e30 in closed_loop/e6; deed_verdict.py fs):
+#   MAIN observe_and_pickup 1-100, e30: D = success(obs_pose e30) - success(obs_ar e30), paired by scene, paired bootstrap
+#   95 % CI (10,000, seed 0); SESOI +0.10: CI lower > +0.10 -> NEXT-POSE HELPS; CI upper < +0.10 -> NO HELP; otherwise
+#   UNCERTAIN. Described: success against the bar 28; obs_pose - obs_none; on the 5090 obs_probe.py --window onset on
+#   obs_pose e30 (frame-0 swap >= 2 % -> frame 0 now used at the onset) and the validation next-pose error against the
+#   zero prediction; val_action against obs_ar's (the head must not cost action quality). Plan 3.3: this is the second
+#   find-same round (the first: zoom, NO HELP); still below 28 -> back to Fable.
+obs_pose | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1] data.tasks=[observe_and_pickup] data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_observe_and_pickup.json] model.next_pose_loss=0.18 | test -f outputs/memory_v2/press/dense_observe_and_pickup_v1/.verified && test -s outputs/fullft/events/events_observe_and_pickup.json
