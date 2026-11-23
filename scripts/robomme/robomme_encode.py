@@ -26,10 +26,12 @@ concatenated horizontally (224 x 448); ResizeSmallestSideAspectPreserving + Cent
 Normalize(0.5, 0.5) -> [-1, 1].
 Pipeline check first (--check-root, a RoboTwin dense cache of the delivery on this machine): its episode 0 is
 re-encoded from the delivery's own images (dense_joint_v1 data_path.Raw / mosaic, unmodified): latent[0]; the clip of
-anchor 0 (no padding); a batch of two clips against two single clips; and, for the record, the clip of the LAST anchor
-under two padding rules (repeat the last frame / zero image). Tolerances: the delivery's recipe.json (vae_atol,
-vae_rtol). The RoboMME encoding starts only when latent[0], clip 0 and the batch match (the VAE calls reproduce the
-caches the RMBench models were trained on); otherwise it stops.
+anchor 0 (no padding); and, for the record, a batch of two clips against two single clips and the clip of the LAST
+anchor under two padding rules (repeat the last frame / zero image). Tolerances: the delivery's recipe.json (vae_atol,
+vae_rtol). The RoboMME encoding starts only when latent[0] and clip 0 match (the VAE calls reproduce the caches the
+RMBench models were trained on) and the image self-test passes; otherwise it stops. 11-23 19:51 (first run on the
+5090): latent[0], clip 0 and the repeat-last padding matched exactly (max |diff| 0), the zero image did not (6.49), a
+batch of 2 clips did NOT match single clips, so the encoding runs one clip / frame at a time (--batch 1).
 Splits: RoboMME's 100 demos per task are all its train split; here every --val-every-th episode (by episode number,
 k % 10 == 9 by default, spreading the counts N) is 'val', the rest 'train'. RECORDS.json can be rewritten without
 re-encoding.
@@ -82,9 +84,11 @@ def libero_image(front: np.ndarray, wrist: np.ndarray) -> torch.Tensor:
 def image_selftest() -> bool:
     """A white front and a black wrist image must come out [1, 3, 224, 448] with +1 on the left, -1 on the right."""
     white = libero_image(np.full((1, 256, 256, 3), 255, np.uint8), np.zeros((1, 256, 256, 3), np.uint8))
-    ok = tuple(white.shape) == (1, 3, 224, 448) and bool((white[..., :224] == 1).all()) and \
-        bool((white[..., 224:] == -1).all())
-    print(f"[check] image pipeline: white front | black wrist -> {tuple(white.shape)}, "
+    left, right = white[..., :224], white[..., 224:]
+    dev = max(float((left - 1).abs().max()), float((right + 1).abs().max()))
+    ok = tuple(white.shape) == (1, 3, 224, 448) and dev < 1e-4      # 11-23 19:51: float rounding, not exact
+    print(f"[check] image pipeline: white front | black wrist -> {tuple(white.shape)}, left {float(left.min()):.7f}.."
+          f"{float(left.max()):.7f}, right {float(right.min()):.7f}..{float(right.max()):.7f} (max deviation {dev:.2g}): "
           f"{'+1 | -1 as expected' if ok else 'NOT +1 | -1'}", flush=True)
     return ok
 
@@ -155,19 +159,20 @@ def pipeline_check(enc: Encoders, root: Path, report: dict) -> bool:
             rules[rule] = close(enc.clips(clip(last, rule)[None])[0], cached["video_latent"][last], num)
         c1 = clip(min(8, n - 1), "repeat")
         pair = enc.clips(torch.stack([c0, c1]))
-        okb = close(pair[0], enc.clips(c0[None])[0], num)[0] and close(pair[1], enc.clips(c1[None])[0], num)[0]
+        b0, b1 = close(pair[0], enc.clips(c0[None])[0], num), close(pair[1], enc.clips(c1[None])[0], num)
+        okb, db = b0[0] and b1[0], max(b0[1], b1[1])
         vv = cached["video_valid"][last].bool().tolist() if "video_valid" in cached else None
     finally:
         raw.close()
-    report.update(latent0=[ok0, d0], clip0=[okc, dc], last_anchor=last, last_clip=rules, batch_equals_single=okb,
+    report.update(latent0=[ok0, d0], clip0=[okc, dc], last_anchor=last, last_clip=rules, batch_equals_single=[okb, db],
                   cached_video_valid_last=vv, tolerance=num)
     print(f"[check] latent[0] {'OK' if ok0 else 'DIFFERENT'} (max |diff| {d0:.3g}); clip of anchor 0 "
           f"{'OK' if okc else 'DIFFERENT'} ({dc:.3g}); last anchor {last}: repeat-last "
           f"{'OK' if rules['repeat'][0] else 'DIFFERENT'} ({rules['repeat'][1]:.3g}), zero image "
           f"{'OK' if rules['zero'][0] else 'DIFFERENT'} ({rules['zero'][1]:.3g}); batch of 2 = single "
-          f"{'OK' if okb else 'DIFFERENT'}; cached video_valid of the last anchor {vv} "
+          f"{'OK' if okb else 'DIFFERENT'} ({db:.3g}; the encoding runs one at a time); cached video_valid of the last anchor {vv} "
           f"(tolerance atol {num['vae_atol']}, rtol {num['vae_rtol']})", flush=True)
-    return bool(ok0 and okc and okb)
+    return bool(ok0 and okc)                 # batches are not used (--batch 1), so they need not match
 
 
 def encode_episode(enc, convert: Path, rec: dict, rule: str, batch: int, text_cache: dict) -> dict:
@@ -210,7 +215,8 @@ def main(argv=None):
     ap.add_argument("--base", default="/workspace/FastWAM/resources/base/libero_optional_idm_2cam224.pt")
     ap.add_argument("--tasks", nargs="+", default=["PickXtimes", "BinFill"])
     ap.add_argument("--limit", type=int, default=0, help="first N episodes per task (0 = all)")
-    ap.add_argument("--batch", type=int, default=8)
+    ap.add_argument("--batch", type=int, default=1, help="1 = one clip / frame at a time, as the delivery (19:51: a "
+                                                       "batch of 2 clips did not reproduce single clips)")
     ap.add_argument("--val-every", type=int, default=10)
     args = ap.parse_args(argv)
     convert, out, root = Path(args.convert), Path(args.out), Path(args.check_root)
