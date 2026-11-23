@@ -119,15 +119,22 @@ NEXT_EVENT_CLASSES = 2 * len(LEDGER_KINDS) + 1          # plan v19 3.2 (2): 4 ki
 
 
 def decision_weight(events: Sequence[dict], anchor: int, weight: float, window: int,
-                    kinds: Sequence[str] = ("open", "bottom")) -> float:
+                    kinds: Sequence[str] = ("open", "bottom"), pre: int = 0,
+                    pre_kinds: Sequence[str] = ("close",)) -> float:
     """Plan v19 3.2 (1): `weight` if the anchor lies within `window` frames from the confirmation of a completion
     event (kind in `kinds`; confirmed <= anchor < confirmed + window), else 1.0. An event without 'confirmed' counts
-    as confirmed at its frame (gripper events)."""
+    as confirmed at its frame (gripper events).
+    11-23 (1b): with pre > 0 also `weight` when the anchor lies in the `pre` frames before an event of `pre_kinds`
+    (frame - pre <= anchor < frame; the reach to the object the gripper then closes on)."""
     a = int(anchor)
     for e in events:
         if e.get("kind") in kinds:
             c = int(e.get("confirmed", e["frame"]))
             if c <= a < c + int(window):
+                return float(weight)
+        if int(pre) > 0 and e.get("kind") in pre_kinds:
+            f = int(e["frame"])
+            if f - int(pre) <= a < f:
                 return float(weight)
     return 1.0
 
@@ -140,6 +147,20 @@ def next_event_label(events: Sequence[dict], anchor: int) -> int:
         return NEXT_EVENT_CLASSES - 1
     e = min(later, key=lambda x: (int(x["frame"]), int(x["arm"])))
     return LEDGER_KINDS.index(e["kind"]) * 2 + int(e["arm"])
+
+
+def next_pose_target(events: Sequence[dict], anchor: int, proprio: torch.Tensor,
+                     kinds: Sequence[str] = ("close",)) -> Tuple[torch.Tensor, bool]:
+    """11-23 (2b): (target [14], valid). The demo's first event of `kinds` at or after the anchor (frame >= anchor;
+    same frame: arm 0 first); target = proprio[that frame] - proprio[anchor] (normalised proprio, both arms). No such
+    event left: zeros, False."""
+    a = int(anchor)
+    later = [e for e in events if e.get("kind") in kinds and int(e["frame"]) >= a]
+    if not later:
+        return torch.zeros(int(proprio.shape[-1])), False
+    e = min(later, key=lambda x: (int(x["frame"]), int(x["arm"])))
+    f = min(int(e["frame"]), int(proprio.shape[0]) - 1)
+    return (proprio[f].float() - proprio[a].float()), True
 
 
 CLOCK_MODES = ("", "off", "freeze", "flat")
@@ -224,25 +245,29 @@ class Samples(torch.utils.data.Dataset):
 
     def __init__(self, episodes: DenseEpisodes, items: Sequence[Tuple[str, int]], rule: HistoryRule,
                  events: Dict[str, List[dict]], polarity: str, augment: bool = False, seed: int = 0,
-                 decision: Optional[Tuple[float, int, Sequence[str]]] = None, next_event: bool = False,
-                 zoom_root: str = ""):
-        """decision = (weight, window, kinds) adds 'loss_weight' to every sample (plan v19 3.2 (1)); next_event adds
-        the 'next_event' class (3.2 (2)). Both off (default): the samples are exactly as before."""
+                 decision: Optional[tuple] = None, next_event: bool = False,
+                 zoom_root: str = "", next_pose: Optional[Sequence[str]] = None):
+        """decision = (weight, window, kinds[, pre, pre_kinds]) adds 'loss_weight' to every sample (plan v19 3.2 (1);
+        the pre-event window 11-23 (1b)); next_event adds the 'next_event' class (3.2 (2)); next_pose = event kinds
+        adds 'next_pose' [14] and 'next_pose_valid' (11-23 (2b)). All off (default): the samples are exactly as
+        before."""
         self.episodes, self.items, self.rule = episodes, list(items), rule
         self.events, self.polarity, self.augment, self.seed = events, polarity, augment, seed
         self.decision, self.next_event = decision, bool(next_event)
+        self.next_pose = tuple(next_pose) if next_pose else None
         self.zoom_root = str(zoom_root or "")
         self._zoom: "OrderedDict[str, dict]" = OrderedDict()
         if rule.zoom and not self.zoom_root:
             raise ValueError("history zoom needs data.zoom_root (the folder written by scripts/fullft/build_zoom.py)")
         self.epoch = 0
         self.checked_text: set = set()
-        if rule.variant in ("event", "prop", "arprop", "arev") or decision is not None or self.next_event:
+        if (rule.variant in ("event", "prop", "arprop", "arev") or decision is not None or self.next_event
+                or self.next_pose is not None):
             self.events = events = match_events(sorted({e for e, _ in self.items}), events)
             absent = sorted({e for e, _ in self.items if e not in events})
             if absent:
                 what = (f"history '{rule.variant}'" if rule.variant in ("event", "prop", "arprop", "arev")
-                        else "decision weighting / the next-event head")
+                        else "decision weighting / the next-event or next-pose head")
                 raise ValueError(f"{what} needs events for {len(absent)} episodes, e.g. {absent[:3]}")
 
     def __len__(self) -> int:
@@ -266,11 +291,13 @@ class Samples(torch.utils.data.Dataset):
             "anchor": torch.tensor(a, dtype=torch.long),
         }
         if self.decision is not None:
-            w, window, kinds = self.decision
             sample["loss_weight"] = torch.tensor(
-                decision_weight(self.events.get(episode_id, []), a, w, window, kinds), dtype=torch.float32)
+                decision_weight(self.events.get(episode_id, []), a, *self.decision), dtype=torch.float32)
         if self.next_event:
             sample["next_event"] = torch.tensor(next_event_label(self.events.get(episode_id, []), a), dtype=torch.long)
+        if self.next_pose is not None:
+            target, ok = next_pose_target(self.events.get(episode_id, []), a, e["proprio"], self.next_pose)
+            sample.update(next_pose=target, next_pose_valid=torch.tensor(ok))
         if k:
             lat = e["latent"]
             hist_latent = torch.zeros((k,) + tuple(lat.shape[1:]), dtype=lat.dtype)

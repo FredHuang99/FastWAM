@@ -23,7 +23,7 @@ EVENTS = [{"frame": 10, "arm": 0, "kind": "close", "confirmed": 10},
           {"frame": 30, "arm": 0, "kind": "top", "confirmed": 33}]
 
 
-def _model(next_event=False, seed=0, variant="ar"):
+def _model(next_event=False, seed=0, variant="ar", next_pose=False):
     from fastwam.models.wan22.action_dit import ActionDiT
     from fastwam.models.wan22.mot import MoT
     from fastwam.models.wan22.wan_video_dit import WanVideoDiT
@@ -35,11 +35,12 @@ def _model(next_event=False, seed=0, variant="ar"):
     action = ActionDiT(hidden_dim=ACTION, action_dim=14, ffn_dim=64, text_dim=TEXT, freq_dim=32, eps=1e-6,
                        num_heads=HEADS, attn_head_dim=HEAD_DIM, num_layers=LAYERS)
     mot = MoT({"video": video, "action": action}, mot_checkpoint_mixed_attn=False)
-    m = FullModel(mot, nn.Linear(14, TEXT), variant=variant, next_event=next_event)
+    m = FullModel(mot, nn.Linear(14, TEXT), variant=variant, next_event=next_event, next_pose=next_pose)
     rng_after_build = torch.get_rng_state()
     with torch.no_grad():                         # lift zero-initialised output layers (not the new head)
         for name, p in m.named_parameters():
-            if p.abs().sum() == 0 and not name.startswith(("hist_gate", "extra", "ledger", "next_event_head")):
+            if p.abs().sum() == 0 and not name.startswith(("hist_gate", "extra", "ledger", "next_event_head",
+                                                                       "next_pose_head")):
                 p.normal_(0, 0.02)
     return m.float(), rng_after_build
 

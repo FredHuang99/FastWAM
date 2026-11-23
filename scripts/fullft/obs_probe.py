@@ -9,6 +9,11 @@ Conditions (action loss per anchor, mean over --noises fixed draws):
   true    the history as trained (frame 0 = this demo's frame 0)
   swap    frame 0 replaced by ANOTHER demo's frame 0 (other reference, other table) — everything else unchanged
   none    no history frames at all
+  --window onset (11-23 15:40): instead of the choice window, anchors evenly in [m - 24, m + 8], m = the arm's motion
+          onset (the first frame whose arm joints have moved 5 % of the way from frame 0 to the pose at g). The 32-step
+          action chunk of these anchors holds the start of the reach while the recent frames do not show its direction
+          yet: if the model picks the object anywhere, it is here ([g - 48, g - 1] is the final approach, where the
+          recent frames already show the direction).
 Reading: in the choice window, (swap - true) / true < 2 % -> "frame 0 is not used at the choice"; >= 2 % -> it is used.
 The same for the late window as a contrast, and (none - true) / true for reference. Also: the share of training anchors
 that fall in a 48-frame choice window (how much of the training signal is about the choice).
@@ -38,6 +43,22 @@ def first_close(proprio: torch.Tensor):
     return None
 
 
+ARM_JOINTS = [0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12]
+
+
+def motion_onset(proprio: torch.Tensor, g: int, frac: float = 0.05):
+    """The first frame whose arm joints have moved `frac` of the way (Euclidean, normalised proprio) from frame 0 to
+    the pose at frame g; None if the pose at g equals frame 0's."""
+    p = proprio[:, ARM_JOINTS].float()
+    total = float((p[g] - p[0]).norm())
+    if total == 0.0:
+        return None
+    for t in range(g + 1):
+        if float((p[t] - p[0]).norm()) >= frac * total:
+            return t
+    return g
+
+
 def evenly(lo: int, hi: int, n: int):
     if hi < lo:
         return []
@@ -53,6 +74,7 @@ def main():
     ap.add_argument("--noises", type=int, default=2)
     ap.add_argument("--choice", type=int, default=6)
     ap.add_argument("--late", type=int, default=3)
+    ap.add_argument("--window", choices=("choice", "onset"), default="choice")
     ap.add_argument("--out", default="")
     args = ap.parse_args()
     from fastwam.fullft.data import DenseEpisodes, Samples, collate, load_events, video_polarity
@@ -63,7 +85,7 @@ def main():
     episodes = DenseEpisodes(cfg.data.roots, cfg.data.tasks, capacity=cfg.data.episode_cache)
     recs = [r for r in episodes.records if r["task"] == "observe_and_pickup"]
     ids = [r["episode_id"] for r in recs]
-    items, window, gs, lens = [], {}, [], []
+    items, window, gs, lens, ms = [], {}, [], [], []
     for r in recs:
         e = episodes(r["episode_id"])
         n = int(r["length"])
@@ -72,13 +94,24 @@ def main():
             continue
         gs.append(g)
         lens.append(n)
-        for a in evenly(max(1, g - 48), g - 1, args.choice):
-            items.append((r["episode_id"], a)); window[len(items) - 1] = "choice"
+        if args.window == "onset":
+            m = motion_onset(e["proprio"], g)
+            if m is None:
+                continue
+            ms.append(m)
+            lo, hi = max(1, m - 24), min(g - 1, m + 8)
+        else:
+            lo, hi = max(1, g - 48), g - 1
+        for a in evenly(lo, hi, args.choice):
+            items.append((r["episode_id"], a)); window[len(items) - 1] = args.window
         for a in evenly(min(g + 16, n - 1), n - 1, args.late):
             items.append((r["episode_id"], a)); window[len(items) - 1] = "late"
     print(f"[probe] {cfg.name} ({cfg.rule}); {len(gs)} demos with a grasp; first close at frame median "
           f"{statistics.median(gs)} (min {min(gs)}, max {max(gs)}) of length median {statistics.median(lens)}; "
           f"a 48-frame choice window = {100 * 48 * len(gs) / sum(lens):.1f} % of the training anchors")
+    if ms:
+        print(f"[probe] motion onset (5 % of the way to the grasp pose) at frame median {statistics.median(ms)} "
+              f"(min {min(ms)}, max {max(ms)}); window [m - 24, m + 8]")
     events = load_events(cfg.data.events) if cfg.data.events else {}      # the body-record model needs its record
     samples = Samples(episodes, items, cfg.rule, events, video_polarity(episodes), augment=False, seed=cfg.seed)
     donor = {eid: ids[(k + 1) % len(ids)] for k, eid in enumerate(ids)}
@@ -118,7 +151,7 @@ def main():
             if start % 40 == 0:
                 print(f"  {start}/{len(samples)}", flush=True)
     report = {"export": args.export, "run": cfg.name, "rule": str(cfg.rule), "windows": {}}
-    for w in ("choice", "late"):
+    for w in (args.window, "late"):
         sel = [i for i in loss if window[i] == w]
         m = {c: statistics.mean(statistics.mean(loss[i][c]) for i in sel) for c in ("true", "swap", "none")}
         up = sum(statistics.mean(loss[i]["swap"]) > statistics.mean(loss[i]["true"]) for i in sel)
@@ -127,11 +160,13 @@ def main():
                                 "swap_vs_true": rel_swap, "none_vs_true": rel_none, "swap_higher_at": up}
         print(f"{w:6s}: {len(sel)} anchors; action loss true {m['true']:.5f}, frame-0 swapped {m['swap']:.5f} "
               f"({100 * rel_swap:+.1f} %, higher at {up}/{len(sel)}), no history {m['none']:.5f} ({100 * rel_none:+.1f} %)")
-    c = report["windows"]["choice"]["swap_vs_true"]
-    verdict = "frame 0 is NOT used at the choice (< 2 %)" if c < 0.02 else "frame 0 IS used at the choice (>= 2 %)"
+    c = report["windows"][args.window]["swap_vs_true"]
+    where = "at the choice" if args.window == "choice" else "at the motion onset"
+    verdict = f"frame 0 is NOT used {where} (< 2 %)" if c < 0.02 else f"frame 0 IS used {where} (>= 2 %)"
     report["reading"] = verdict
     print(f"OBS PROBE {cfg.name}: {verdict}")
-    out = Path(args.out or f"/workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_{cfg.name}.json")
+    tail = "" if args.window == "choice" else "_onset"
+    out = Path(args.out or f"/workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_{cfg.name}{tail}.json")
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, indent=1) + "\n")
     print(f"-> {out}")

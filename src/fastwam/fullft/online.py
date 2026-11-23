@@ -41,7 +41,8 @@ def load_export(path: str, device="cuda:0") -> tuple:
     rule = cfg.rule
     model = FullModel.from_release(cfg.model.architecture, cfg.model.base, rule.variant, rule.event_slots,
                                    cfg.model.video_shift, cfg.model.action_shift, rule.ledger_features,
-                                   next_event=cfg.next_event_head)          # plan v19 3.2 (2): loaded, never used
+                                   next_event=cfg.next_event_head,
+                                   next_pose=cfg.next_pose is not None)   # plan v19 3.2 (2), 11-23 (2b): loaded, never used
     model.set_trainable(cfg.model.train_video, cfg.model.lora_rank)
     model.load_state_dict(state["weights"], strict=True)
     model.requires_grad_(False)

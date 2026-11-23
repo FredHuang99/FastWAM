@@ -81,6 +81,20 @@ class ModelConfig:
     #     "no event left"); label = the demo's first body event at or after the anchor (events file, no annotation);
     #     cross entropy times next_event_loss added to the training loss. Not used at inference. 0 = no head.
     next_event_loss: float = 0.0
+    # 11-23 find-same root cause (obs_probe: frame 0 is not used at the choice; user 14:53 "find the root cause and fix
+    # it"). Two more parts, default off, for Fable to choose from (11-24):
+    # (1b) pre-event window of the decision weighting: with decision_weight != 1 and decision_pre_window > 0, an anchor
+    #     also gets decision_weight when it lies in the decision_pre_window frames BEFORE an event of kinds
+    #     decision_pre_kinds (frame - pre <= anchor < frame; 'close' = the gripper closes on the chosen object).
+    #     decision_window may then be 0 (no window after the confirmations). 0 = off.
+    decision_pre_window: int = 0
+    decision_pre_kinds: List[str] = field(default_factory=lambda: ["close"])
+    # (2b) next-pose head: the same token mean -> 14 numbers = the body pose (normalised proprio) at the demo's first
+    #     event of kinds next_pose_kinds at or after the anchor, minus the pose at the anchor (where the arm will be
+    #     when it next closes the gripper = where the chosen object is; no annotation). Masked squared error times
+    #     next_pose_loss added to the training loss (no such event left: no loss). Not used at inference. 0 = no head.
+    next_pose_loss: float = 0.0
+    next_pose_kinds: List[str] = field(default_factory=lambda: ["close"])
 
 
 @dataclass
@@ -108,12 +122,21 @@ class RunConfig:
     def decision(self) -> Optional[Tuple[float, int, Tuple[str, ...]]]:
         """(weight, window, kinds) of the decision-point weighting, None when off (plan v19 3.2 (1))."""
         m = self.model
-        return None if float(m.decision_weight) == 1.0 else (float(m.decision_weight), int(m.decision_window),
-                                                             tuple(m.decision_kinds))
+        if float(m.decision_weight) == 1.0:
+            return None
+        base = (float(m.decision_weight), int(m.decision_window), tuple(m.decision_kinds))
+        if int(m.decision_pre_window) > 0:               # 11-23 (1b): (weight, window, kinds, pre, pre_kinds)
+            return base + (int(m.decision_pre_window), tuple(m.decision_pre_kinds))
+        return base
 
     @property
     def next_event_head(self) -> bool:
         return float(self.model.next_event_loss) > 0.0
+
+    @property
+    def next_pose(self) -> Optional[Tuple[str, ...]]:
+        """The event kinds of the next-pose head (11-23 (2b)), None when off."""
+        return tuple(self.model.next_pose_kinds) if float(self.model.next_pose_loss) > 0.0 else None
 
     @property
     def run_dir(self) -> Path:
@@ -186,16 +209,29 @@ def load(path: Optional[str], overrides: List[str] = ()) -> RunConfig:
 
 
 def check_deed_parts(cfg: RunConfig) -> None:
-    """Plan v19 3.2 (1) / (2): value ranges; both read the demos' events, so they need data.events."""
+    """Plan v19 3.2 (1) / (2) and the 11-23 parts (1b) / (2b): value ranges; all read the demos' events, so they need
+    data.events."""
     from .history import LEDGER_KINDS
     m = cfg.model
     if not float(m.decision_weight) > 0.0:
         raise ValueError(f"model.decision_weight must be > 0, got {m.decision_weight}")
-    if int(m.decision_window) < 1:
-        raise ValueError(f"model.decision_window must be >= 1, got {m.decision_window}")
+    if int(m.decision_pre_window) < 0:
+        raise ValueError(f"model.decision_pre_window must be >= 0, got {m.decision_pre_window}")
+    if int(m.decision_window) < (0 if int(m.decision_pre_window) > 0 else 1):
+        raise ValueError(f"model.decision_window must be >= 1 (>= 0 with a pre-event window), got {m.decision_window}")
+    if not m.decision_pre_kinds or not set(m.decision_pre_kinds) <= set(LEDGER_KINDS):
+        raise ValueError(f"model.decision_pre_kinds must be a non-empty subset of {LEDGER_KINDS}, "
+                         f"got {m.decision_pre_kinds}")
+    if int(m.decision_pre_window) > 0 and float(m.decision_weight) == 1.0:
+        raise ValueError("model.decision_pre_window needs model.decision_weight != 1 (the weight it applies)")
+    if float(m.next_pose_loss) < 0.0:
+        raise ValueError(f"model.next_pose_loss must be >= 0, got {m.next_pose_loss}")
+    if not m.next_pose_kinds or not set(m.next_pose_kinds) <= set(LEDGER_KINDS):
+        raise ValueError(f"model.next_pose_kinds must be a non-empty subset of {LEDGER_KINDS}, got {m.next_pose_kinds}")
     if not m.decision_kinds or not set(m.decision_kinds) <= set(LEDGER_KINDS):
         raise ValueError(f"model.decision_kinds must be a non-empty subset of {LEDGER_KINDS}, got {m.decision_kinds}")
     if float(m.next_event_loss) < 0.0:
         raise ValueError(f"model.next_event_loss must be >= 0, got {m.next_event_loss}")
-    if (cfg.decision is not None or cfg.next_event_head) and not cfg.data.events:
-        raise ValueError("decision weighting / the next-event head read the demos' events: set data.events")
+    if (cfg.decision is not None or cfg.next_event_head or cfg.next_pose is not None) and not cfg.data.events:
+        raise ValueError("decision weighting / the next-event and next-pose heads read the demos' events: "
+                         "set data.events")

@@ -107,7 +107,7 @@ class NextEventHead(nn.Module):
 class FullModel(nn.Module):
     def __init__(self, mot, proprio_encoder: nn.Linear, variant: str = "none", event_slots: int = 0,
                  video_shift: float = 5.0, action_shift: float = 1.0, ledger_features: int = 0,
-                 next_event: bool = False):
+                 next_event: bool = False, next_pose: bool = False):
         super().__init__()
         self.mot = mot
         self.proprio_encoder = proprio_encoder
@@ -138,6 +138,9 @@ class FullModel(nn.Module):
         if next_event:
             from .data import NEXT_EVENT_CLASSES
             self.next_event_head = NextEventHead(int(mot.mixtures["action"].hidden_dim), NEXT_EVENT_CLASSES)
+        self.next_pose_head = None                    # 11-23 (2b); None = every earlier model exactly
+        if next_pose:                                 # the same zero-initialised linear map, 14 outputs (a pose delta)
+            self.next_pose_head = NextEventHead(int(mot.mixtures["action"].hidden_dim), 14)
         self.video_scheduler = WanContinuousFlowMatchScheduler(shift=video_shift)
         self.action_scheduler = WanContinuousFlowMatchScheduler(shift=action_shift)
         self.checkpoint_layers = False
@@ -150,7 +153,7 @@ class FullModel(nn.Module):
     @classmethod
     def from_release(cls, architecture: str, base: str, variant: str = "none", event_slots: int = 0,
                      video_shift: float = 5.0, action_shift: float = 1.0, ledger_features: int = 0,
-                     next_event: bool = False) -> "FullModel":
+                     next_event: bool = False, next_pose: bool = False) -> "FullModel":
         import yaml
         from fastwam.models.wan22.action_dit import ActionDiT
         from fastwam.models.wan22.mot import MoT
@@ -168,7 +171,13 @@ class FullModel(nn.Module):
         mot.load_state_dict(payload["mot"], strict=True)
         proprio.load_state_dict(payload["proprio_encoder"], strict=True)
         del payload
-        return cls(mot, proprio, variant, event_slots, video_shift, action_shift, ledger_features, next_event)
+        return cls(mot, proprio, variant, event_slots, video_shift, action_shift, ledger_features, next_event,
+                   next_pose)
+
+    @property
+    def aux_heads(self) -> bool:
+        """Any training-only head (next event, next pose): the trainer then passes an aux dict to loss()."""
+        return self.next_event_head is not None or self.next_pose_head is not None
 
     @property
     def video(self):
@@ -332,7 +341,10 @@ class FullModel(nn.Module):
         """The released FastWAM.training_loss on a cached clip. noise (validation): {"video", "action",
         "t_video", "t_action"} to fix the draws. Returns (video, action) per-sample tensors.
         aux (plan v19 3.2 (2)): a dict; with the next-event head and batch["next_event"] it receives per-sample
-        "next_event" (cross entropy) and "next_event_correct" (0 / 1). The returned losses do not depend on it."""
+        "next_event" (cross entropy) and "next_event_correct" (0 / 1); with the next-pose head and batch["next_pose"]
+        (11-23 (2b)) per-sample "next_pose" (squared error, mean over the 14 numbers, 0 where no event is left),
+        "next_pose_zero" (the same for a prediction of 0 = "no further motion") and "next_pose_valid". The returned
+        losses do not depend on it."""
         dtype = self._dtype()
         clean = batch["video_latent"].to(dtype)
         b = clean.shape[0]
@@ -368,6 +380,13 @@ class FullModel(nn.Module):
             label = batch["next_event"].to(logits.device)
             aux["next_event"] = F.cross_entropy(logits, label, reduction="none")
             aux["next_event_correct"] = (logits.detach().argmax(-1) == label).float()
+        if aux is not None and self.next_pose_head is not None and "next_pose" in batch:
+            pred = self.next_pose_head(xa.float().mean(1)).float()
+            target = batch["next_pose"].to(pred.device).float()
+            ok = batch["next_pose_valid"].to(pred.device).float()
+            aux["next_pose"] = (pred - target).square().mean(-1) * ok
+            aux["next_pose_zero"] = target.square().mean(-1) * ok
+            aux["next_pose_valid"] = ok
         pred_video = self.video.post(xv, t_v, f, hh, ww)[:, :, 1:]
         pred_action = self.action.post(xa)
         per_frame = F.mse_loss(pred_video.float(), target_video[:, :, 1:].float(), reduction="none").mean(dim=(1, 3, 4))
