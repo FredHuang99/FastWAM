@@ -18,7 +18,7 @@ seed 0, percentile 95 % CI). Official seed-42 banks, scenes 1-100, default noise
       under, success, and the same against press_count e30 (closed_loop/g1 1-50 + sel 51-100).
       Pairs: scenes where both episodes have known cards (n1_error not None); the count of excluded scenes is printed.
 A verdict needs all 100 scenes finished on both sides (else WAIT). Writes outputs/fullft/<A3|D1|D2>_VERDICT.json.
-  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py a3|d1|d2|b1|rv3c  (b1, rv3c: see their functions)
+  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py a3|d1|d2|b1|rv3c|a2|b4  (b1, rv3c, a2, b4: see their functions)
 """
 from __future__ import annotations
 
@@ -239,9 +239,48 @@ def rv3c():
     return out
 
 
+def a2():
+    """Plan v19 A2 (reading registered 11-22 in scripts/fullft/h100_queue.txt above battery_none, before any result):
+    D = success(battery_none e30) - success(battery_ar e30), battery_try 1-100 paired (both closed_loop/e6); SESOI -0.15:
+    CI lower > -0.15 -> NO MEMORY NEEDED; CI upper < -0.15 -> SHORT MEMORY NEEDED; otherwise UNCERTAIN."""
+    task = "battery_try"
+    order, ref = success("e6", "battery_ar_e30", task)
+    _, new = success("e6", "battery_none_e30", task)
+    out = {"run": "A2 battery without history", "sesoi": -0.15, "finished": {"battery_none_e30": len(new), "battery_ar_e30": len(ref)}}
+    if len(new) < 100 or len(ref) < 100:
+        out["verdict"] = f"WAIT ({len(new)} / {len(ref)} of 100)"
+        return out
+    c = compare(new, ref, order)
+    lo, hi = c["ci95"]
+    out.update(main=c, verdict="NO MEMORY NEEDED" if lo > -0.15 else "SHORT MEMORY NEEDED" if hi < -0.15 else "UNCERTAIN")
+    return out
+
+
+def b4():
+    """Plan v19 B4 (reading registered 11-22 in scripts/gaas/gaas_queue.txt above ar2_prop_novid): MAIN swap_blocks
+    1-100, e10: D = success(ar2_prop_novid e10, closed_loop/b4) - success(ar2_prop e10, closed_loop/lc); SESOI -0.15:
+    CI upper < -0.15 -> VIDEO LOSS HELPS LEARNING; CI lower > -0.15 -> NO HELP; otherwise UNCERTAIN. e30 and put_back
+    described."""
+    order, ref = success("lc", "ar2_prop_e10", "swap_blocks")
+    _, new = success("b4", "ar2_prop_novid_e10", "swap_blocks")
+    out = {"run": "B4 body record without the video loss", "sesoi": -0.15,
+           "finished": {"ar2_prop_novid_e10": len(new), "ar2_prop_e10": len(ref)}}
+    if len(new) < 100 or len(ref) < 100:
+        out["verdict"] = f"WAIT ({len(new)} / {len(ref)} of 100)"
+    else:
+        c = compare(new, ref, order)
+        lo, hi = c["ci95"]
+        out.update(main=c, verdict="VIDEO LOSS HELPS LEARNING" if hi < -0.15 else "NO HELP" if lo > -0.15 else "UNCERTAIN")
+    for task in ("swap_blocks", "put_back_block"):
+        _, x = success("b4", "ar2_prop_novid_e30", task)
+        if x:
+            out[f"described_e30_{task}"] = {"finished": len(x), "success": sum(x.values())}
+    return out
+
+
 def main():
     which = sys.argv[1] if len(sys.argv) > 1 else ""
-    fn = {"a3": a3, "d1": d1, "d2": d2, "b1": b1, "rv3c": rv3c}.get(which)
+    fn = {"a3": a3, "d1": d1, "d2": d2, "b1": b1, "rv3c": rv3c, "a2": a2, "b4": b4}.get(which)
     if fn is None:
         print(__doc__)
         return 2
