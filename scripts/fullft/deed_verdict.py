@@ -18,7 +18,7 @@ seed 0, percentile 95 % CI). Official seed-42 banks, scenes 1-100, default noise
       under, success, and the same against press_count e30 (closed_loop/g1 1-50 + sel 51-100).
       Pairs: scenes where both episodes have known cards (n1_error not None); the count of excluded scenes is printed.
 A verdict needs all 100 scenes finished on both sides (else WAIT). Writes outputs/fullft/<A3|D1|D2>_VERDICT.json.
-  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py a3|d1|d2|b1|rv3c|a2|b4  (b1, rv3c, a2, b4: see their functions)
+  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py a3|d1|d2|b1|rv3c|a2|b4|fs  (b1, rv3c, a2, b4, fs: see their functions)
 """
 from __future__ import annotations
 
@@ -278,9 +278,33 @@ def b4():
     return out
 
 
+def fs():
+    """11-23 find-same fix (reading registered in scripts/gaas/gaas_queue.txt above obs_pose, before it trained):
+    D = success(obs_pose e30, closed_loop/fs) - success(obs_ar e30, closed_loop/e6), observe_and_pickup 1-100, paired;
+    SESOI +0.10: CI lower > +0.10 -> NEXT-POSE HELPS; CI upper < +0.10 -> NO HELP; otherwise UNCERTAIN. Described:
+    e10 / e20 when there; success against the bar 28; obs_pose - obs_none."""
+    task = "observe_and_pickup"
+    order, ref = success("e6", "obs_ar_e30", task)
+    _, new = success("fs", "obs_pose_e30", task)
+    out = {"run": "find-same next-pose head", "sesoi": 0.10, "finished": {"obs_pose_e30": len(new), "obs_ar_e30": len(ref)}}
+    if len(new) < 100 or len(ref) < 100:
+        out["verdict"] = f"WAIT (obs_pose {len(new)}, obs_ar {len(ref)} of 100)"
+    else:
+        c = compare(new, ref, order)
+        out.update(main=c, verdict=three(c, 0.10, "NEXT-POSE HELPS", "NO HELP"), success_vs_bar28=f"{c['new']} vs 28")
+    for tag in ("e10", "e20"):
+        _, x = success("fs", f"obs_pose_{tag}", task)
+        if x:
+            out[f"described_{tag}"] = compare(x, ref, order)
+    _, none = success("a3", "obs_none_e30", task)
+    if none and new:
+        out["described_obs_pose_minus_obs_none"] = compare(new, none, order)
+    return out
+
+
 def main():
     which = sys.argv[1] if len(sys.argv) > 1 else ""
-    fn = {"a3": a3, "d1": d1, "d2": d2, "b1": b1, "rv3c": rv3c, "a2": a2, "b4": b4}.get(which)
+    fn = {"a3": a3, "d1": d1, "d2": d2, "b1": b1, "rv3c": rv3c, "a2": a2, "b4": b4, "fs": fs}.get(which)
     if fn is None:
         print(__doc__)
         return 2
