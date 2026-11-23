@@ -105,5 +105,8 @@ ar2_arev | history.variant=arev history.event_max=12 history.lag=4 data.events=[
 # counts are recorded in Status 11-22) + ranking_ready.sh (event file + ledger_ready). Same recipe as cover_arprop
 # except the record size: 27/50 ranking demos have more than 32 body events (median 45, longest 73; events_count.py on
 # the 5090, 11-22 02:00), so the user chose 80 entries (11-22 02:23); ranking_ready.sh checks the text slots for 80.
-ranking_arprop | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_blocks_ranking_try_v1] data.tasks=[blocks_ranking_try] history.variant=arprop history.event_max=80 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_blocks_ranking_try.json] | bash scripts/fullft/ranking_ready.sh
+# 11-23 15:04 (user): 80 does not fit — the ranking instruction leaves 69 empty text positions (text length 128;
+# text_slots.py on this machine) — "use the largest that fits": 69 entries; 13 / 50 demos have more events (max 73)
+# and keep their most recent 69 during training.
+ranking_arprop | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_blocks_ranking_try_v1] data.tasks=[blocks_ranking_try] history.variant=arprop history.event_max=69 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_blocks_ranking_try.json] | bash scripts/fullft/ranking_ready.sh
 ar2_prop_s18 | seed=18 history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_put_back_block.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_blocks.json] | test $(date +%s) -ge 1795089600 && grep -q swap_blocks outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/events/events_swap_blocks.json
