@@ -14,6 +14,9 @@
 # GEN_GATE=background (11-24 19:30; ONLY after the user agrees): the render check compares the head camera outside the
 #   shelf and table boxes (gen_check.py --gate background), and before each cache is built and uploaded the overall
 #   statistics must pass (gen_stats.py). Default GEN_GATE=pixel = the original check.
+# GEN_HOLD=1 (11-24 20:05): generate only -- the render check and the statistics are run and printed but block nothing,
+#   and NO cache is built, NOTHING is uploaded (a training slot can only pick an uploaded cache). Generation is resumable:
+#   the later run without GEN_HOLD (after the user agrees) skips what exists and goes on to the checks, cache, upload.
 # Own log: outputs/fullft/GEN_OBS_5090_<time>.txt ; generator logs outputs/fullft/gen_obs/*.log
 set -u
 R=/workspace/FastWAM-memory2
@@ -31,6 +34,7 @@ HFPY=/opt/hf-tools/bin/python
 T=observe_and_pickup
 GPU=${GEN_GPU:-0}
 GATE=${GEN_GATE:-pixel}
+HOLD=${GEN_HOLD:-0}
 say() { echo "[genobs] $(date '+%F %T') $*"; }
 say "checkout $(git -c safe.directory='*' log --oneline -1 | cut -c1-60); GPU $GPU ($(nvidia-smi -i $GPU --query-gpu=name,memory.used --format=csv,noheader 2>&1))"
 OFF=""
@@ -50,15 +54,23 @@ if [ ! -f $G/GEN_CHECK.json ] || ! grep -q '"pass": true' $G/GEN_CHECK.json || !
   if [ ! -f $C/demo_clean/$T/aloha_agilex/data/episode_0000002.hdf5 ]; then
     mkdir -p $C; gen $C --gen-seeds $SEEDS; say "gen exit code $? ($(tail -n 1 $C.log | cut -c1-160))"
   fi
-  $PY scripts/fullft/gen_check.py --gen $C/demo_clean/$T/aloha_agilex/data --official $OFF/data --n 3 --gate $GATE || { say "RENDER CHECK FAILED: stop; nothing generated goes into training (report to Opus)"; exit 1; }
+  if ! $PY scripts/fullft/gen_check.py --gen $C/demo_clean/$T/aloha_agilex/data --official $OFF/data --n 3 --gate $GATE; then
+    [ "$HOLD" = 1 ] || { say "RENDER CHECK FAILED: stop; nothing generated goes into training (report to Opus)"; exit 1; }
+    say "render check ($GATE) FAILED -- HOLD mode: generating anyway; nothing is built or uploaded"
+  else
+    say "render check ($GATE) passed"
+  fi
+else
+  say "render check ($GATE) passed earlier"
 fi
-say "render check ($GATE) passed"
 build() {   # name, source dir (demo_clean/<task>/aloha_agilex), offset
   local name=$1 src=$2 L=$G/links_$1
   [ -f $P/$name/CACHE.json ] && { say "$name cached already"; return 0; }
-  if [ "$GATE" = background ]; then
+  if [ "$GATE" = background ] || [ "$HOLD" = 1 ]; then
     $PY scripts/fullft/gen_stats.py --gen $src --official $OFF 2>&1 | grep -v "Warning\|warn("
-    [ ${PIPESTATUS[0]} = 0 ] || { say "$name: OVERALL STATISTICS FAILED: no cache, no upload (report to Opus)"; return 1; }
+    st=${PIPESTATUS[0]}
+    [ "$HOLD" = 1 ] && { say "$name: HOLD -- statistics printed (exit $st); no cache, no upload until the user agrees"; return 0; }
+    [ $st = 0 ] || { say "$name: OVERALL STATISTICS FAILED: no cache, no upload (report to Opus)"; return 1; }
   fi
   rm -rf $L; mkdir -p $L/data $L/instruction
   for f in $src/data/episode_*.hdf5; do
