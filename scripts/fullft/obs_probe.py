@@ -80,6 +80,8 @@ def main():
     ap.add_argument("--choice", type=int, default=6)
     ap.add_argument("--late", type=int, default=3)
     ap.add_argument("--window", choices=("choice", "onset", "wait"), default="choice")
+    ap.add_argument("--split", choices=("all", "train", "val"), default="all",
+                    help="11-24: demos of one split only (the dense records' split; the model trained on 'train')")
     ap.add_argument("--out", default="")
     args = ap.parse_args()
     from fastwam.fullft.data import DenseEpisodes, Samples, collate, load_events, video_polarity
@@ -88,7 +90,8 @@ def main():
     device = "cuda"
     model, cfg, _ = load_export(args.export, device)
     episodes = DenseEpisodes(cfg.data.roots, cfg.data.tasks, capacity=cfg.data.episode_cache)
-    recs = [r for r in episodes.records if r["task"] == "observe_and_pickup"]
+    recs = [r for r in episodes.records if r["task"] == "observe_and_pickup"
+            and (args.split == "all" or r.get("split") == args.split)]
     ids = [r["episode_id"] for r in recs]
     items, window, gs, lens, ms = [], {}, [], [], []
     for r in recs:
@@ -111,7 +114,7 @@ def main():
             items.append((r["episode_id"], a)); window[len(items) - 1] = args.window
         for a in evenly(min(g + 16, n - 1), n - 1, args.late):
             items.append((r["episode_id"], a)); window[len(items) - 1] = "late"
-    print(f"[probe] {cfg.name} ({cfg.rule}); {len(gs)} demos with a grasp; first close at frame median "
+    print(f"[probe] {cfg.name} split {args.split}; {len(gs)} demos with a grasp; first close at frame median "
           f"{statistics.median(gs)} (min {min(gs)}, max {max(gs)}) of length median {statistics.median(lens)}; "
           f"a 48-frame choice window = {100 * 48 * len(gs) / sum(lens):.1f} % of the training anchors")
     if ms:
@@ -184,7 +187,7 @@ def main():
     verdict = f"frame 0 is NOT used {where} (< 2 %)" if c < 0.02 else f"frame 0 IS used {where} (>= 2 %)"
     report["reading"] = verdict
     print(f"OBS PROBE {cfg.name}: {verdict}")
-    tail = "" if args.window == "choice" else f"_{args.window}"
+    tail = ("" if args.window == "choice" else f"_{args.window}") + ("" if args.split == "all" else f"_{args.split}")
     out = Path(args.out or f"/workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_{cfg.name}{tail}.json")
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, indent=1) + "\n")
