@@ -893,6 +893,33 @@ def cmd_plan(args):
         print(f"[plan] {now()} {task}: complete={value.get('complete')} scenes={len(value.get('scenes', []))}", flush=True)
 
 
+def cmd_gen(args):
+    """11-24 plan v20 card 8: new demonstrations by the benchmark's own expert (scripts/memory_v2/sim/gen_demos.py, which
+    runs RMBench's collect_data.py unmodified with its seed loop moved), in the SAME simulator environment as plan / run
+    (backend, GPU, Vulkan ICD, denoiser fix). --start-seed + --episodes, or --gen-seeds (the render check)."""
+    from fastwam.memory_s1.eval_parallel import simulator_environment
+    from . import dense
+    cfg, _ = policy_config(args.config, None, args.set)
+    spec = dense.DenseSpec.from_dict(cfg.dense)
+    out = Path(args.output)
+    out.mkdir(parents=True, exist_ok=True)
+    sim_cfg = simulator_config(dense_config_light(spec), Path(spec.root), out, args)
+    env = simulator_environment(sim_cfg, gpu_uuid())
+    if args.vk_icd and not env.get("VK_ICD_FILENAMES"):
+        env["VK_ICD_FILENAMES"] = args.vk_icd
+    elif not env.get("VK_ICD_FILENAMES") and os.path.exists(DRIVER_ICD):
+        env["VK_ICD_FILENAMES"] = DRIVER_ICD
+    apply_denoiser_fix(env)
+    driver = Path(__file__).resolve().parents[3] / "scripts/memory_v2/sim/gen_demos.py"
+    for task in args.tasks:
+        cmd = [sim_cfg["closed_loop"]["simulator_python"], "-B", "-u", str(driver), "--task", task, "--out", str(out)]
+        cmd += (["--seeds"] + [str(s) for s in args.gen_seeds]) if args.gen_seeds else \
+               ["--start-seed", str(args.start_seed), "--episodes", str(args.episodes)]
+        root = Path(spec.root) / sim_cfg["closed_loop"]["simulator_root"]
+        print(f"[gen] {now()} {task}: {' '.join(cmd[3:])} (cwd {root}; simulator {cmd[0]})", flush=True)
+        subprocess.run(cmd, cwd=root, env=env, check=True)
+
+
 def cmd_run(args):
     import torch
     torch.set_num_threads(int(os.environ.get("OMP_NUM_THREADS", "8")))
@@ -1264,7 +1291,9 @@ def cmd_preflight(args):
 # ============================================================================ CLI
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("command", choices=("preflight", "parity", "plan", "run", "summary"))
+    ap.add_argument("command", choices=("preflight", "parity", "plan", "run", "summary", "gen"))
+    ap.add_argument("--start-seed", type=int, default=10_000_000, help="gen: first seed tried (11-24 card 8)")
+    ap.add_argument("--gen-seeds", type=int, nargs="*", default=[], help="gen: exactly these seeds (render check)")
     ap.add_argument("--config", type=Path, default=Path("configs/memory_v2/train_v2_A.yaml"), help="only for --checkpoint init")
     ap.add_argument("--set", action="append", default=[], help="config override on top of the checkpoint's config")
     ap.add_argument("--checkpoint", default="init", help="memory_v2 checkpoint (.pt) or 'init'")
@@ -1317,7 +1346,7 @@ def main(argv=None):
     args = ap.parse_args(argv)
     if args.modes is None:
         args.modes = ["on", "off"] if args.command == "parity" else ["on"]
-    {"preflight": cmd_preflight, "parity": cmd_parity, "plan": cmd_plan, "run": cmd_run, "summary": cmd_summary}[args.command](args)
+    {"preflight": cmd_preflight, "parity": cmd_parity, "plan": cmd_plan, "run": cmd_run, "summary": cmd_summary, "gen": cmd_gen}[args.command](args)
 
 
 if __name__ == "__main__":

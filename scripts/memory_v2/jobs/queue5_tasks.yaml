@@ -1758,6 +1758,214 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py presstold"
   pass_if: "m['rc'] == 0"
 
+# card 8 obs_s200 (new H200; registered 11-24 in gaas_queue.txt above obs_s200); MAIN e30 against obs_ar e30 (closed_loop/e6); dagger entry
+- id: A40-fetch-obs_s200-e30
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 240
+  hypothesis: "fetch obs_s200_e30 from the relay (plan v20 card 8, new H200; sha256 checked; waits until it is there)"
+  command: "RUN=obs_s200 TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-v20obss-smoke
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s200-e30, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s200-e30, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "smoke: obs_s200_e30, observe_and_pickup scene 1, one episode finishes on the A40 (closed_loop/v20smoke)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e30/export_e30.pt
+  label: obs_s200_e30_smoke
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "1"]
+  output: closed_loop/v20smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+  pass_if: "m.get('episodes', 0) >= 1"
+
+- id: A40-v20obss-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20obss-smoke]
+  requires_pass: [A40-v20obss-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 MAIN (registered 11-24 in gaas_queue.txt above obs_s200): obs_s200_e30 on observe_and_pickup 1-100, paired with obs_ar_e30 (closed_loop/e6); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e30/export_e30.pt
+  label: obs_s200_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20obss-smoke]
+  requires_pass: [A40-v20obss-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 MAIN (registered 11-24 in gaas_queue.txt above obs_s200): obs_s200_e30 on observe_and_pickup 1-100, paired with obs_ar_e30 (closed_loop/e6); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e30/export_e30.pt
+  label: obs_s200_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20obss-smoke]
+  requires_pass: [A40-v20obss-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 MAIN (registered 11-24 in gaas_queue.txt above obs_s200): obs_s200_e30 on observe_and_pickup 1-100, paired with obs_ar_e30 (closed_loop/e6); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e30/export_e30.pt
+  label: obs_s200_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20obss-smoke]
+  requires_pass: [A40-v20obss-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 MAIN (registered 11-24 in gaas_queue.txt above obs_s200): obs_s200_e30 on observe_and_pickup 1-100, paired with obs_ar_e30 (closed_loop/e6); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e30/export_e30.pt
+  label: obs_s200_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20obss-smoke]
+  requires_pass: [A40-v20obss-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 MAIN (registered 11-24 in gaas_queue.txt above obs_s200): obs_s200_e30 on observe_and_pickup 1-100, paired with obs_ar_e30 (closed_loop/e6); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e30/export_e30.pt
+  label: obs_s200_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20obss-smoke]
+  requires_pass: [A40-v20obss-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 MAIN (registered 11-24 in gaas_queue.txt above obs_s200): obs_s200_e30 on observe_and_pickup 1-100, paired with obs_ar_e30 (closed_loop/e6); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e30/export_e30.pt
+  label: obs_s200_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20obss-smoke]
+  requires_pass: [A40-v20obss-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 MAIN (registered 11-24 in gaas_queue.txt above obs_s200): obs_s200_e30 on observe_and_pickup 1-100, paired with obs_ar_e30 (closed_loop/e6); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e30/export_e30.pt
+  label: obs_s200_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20obss-smoke]
+  requires_pass: [A40-v20obss-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 MAIN (registered 11-24 in gaas_queue.txt above obs_s200): obs_s200_e30 on observe_and_pickup 1-100, paired with obs_ar_e30 (closed_loop/e6); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e30/export_e30.pt
+  label: obs_s200_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20obss-smoke]
+  requires_pass: [A40-v20obss-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 MAIN (registered 11-24 in gaas_queue.txt above obs_s200): obs_s200_e30 on observe_and_pickup 1-100, paired with obs_ar_e30 (closed_loop/e6); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e30/export_e30.pt
+  label: obs_s200_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20obss-smoke]
+  requires_pass: [A40-v20obss-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 MAIN (registered 11-24 in gaas_queue.txt above obs_s200): obs_s200_e30 on observe_and_pickup 1-100, paired with obs_ar_e30 (closed_loop/e6); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e30/export_e30.pt
+  label: obs_s200_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-obss-verdict
+  lane: a40cpu
+  kind: shell
+  after: [A40-v20obss-s0, A40-v20obss-s1, A40-v20obss-s2, A40-v20obss-s3, A40-v20obss-s4, A40-v20obss-s5, A40-v20obss-s6, A40-v20obss-s7, A40-v20obss-s8, A40-v20obss-s9]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v20 card 8 verdict: v20_verdict.py obss (SESOI +0.15 -> SCENE-LIMITED / NOT SCENE-LIMITED AT 200 / UNCERTAIN); log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py obss"
+  pass_if: "m['rc'] == 0"
+
 
 # 11-24 15:20 (Opus, before the switch to Fable): the registered verdicts whose MAIN data is complete while their
 # full card still waits on described parts. B4's MAIN is e10 (done); the e30 parts are described only. D1 is judged per
@@ -6681,6 +6889,544 @@ tasks:
   online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
   output: closed_loop/v20
   env: {MWAM_TEXT_SOURCE: "cache", MWAM_TOLD_COUNTS: "1"}
+
+# card 8 described: obs_s200 e10 / e20, obs_s800 e10 (after every MAIN evaluation)
+- id: A40-fetch-obs_s200-e10
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 240
+  hypothesis: "fetch obs_s200_e10 from the relay (plan v20 card 8 described obs_s200 e10; sha256 checked; waits until it is there)"
+  command: "RUN=obs_s200 TAG=e10 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-v20obss20010-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s200-e10]
+  requires_pass: [A40-fetch-obs_s200-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s200_e10 on observe_and_pickup 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e10/export_e10.pt
+  label: obs_s200_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss20010-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s200-e10]
+  requires_pass: [A40-fetch-obs_s200-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s200_e10 on observe_and_pickup 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e10/export_e10.pt
+  label: obs_s200_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss20010-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s200-e10]
+  requires_pass: [A40-fetch-obs_s200-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s200_e10 on observe_and_pickup 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e10/export_e10.pt
+  label: obs_s200_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss20010-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s200-e10]
+  requires_pass: [A40-fetch-obs_s200-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s200_e10 on observe_and_pickup 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e10/export_e10.pt
+  label: obs_s200_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss20010-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s200-e10]
+  requires_pass: [A40-fetch-obs_s200-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s200_e10 on observe_and_pickup 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e10/export_e10.pt
+  label: obs_s200_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss20010-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s200-e10]
+  requires_pass: [A40-fetch-obs_s200-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s200_e10 on observe_and_pickup 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e10/export_e10.pt
+  label: obs_s200_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss20010-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s200-e10]
+  requires_pass: [A40-fetch-obs_s200-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s200_e10 on observe_and_pickup 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e10/export_e10.pt
+  label: obs_s200_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss20010-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s200-e10]
+  requires_pass: [A40-fetch-obs_s200-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s200_e10 on observe_and_pickup 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e10/export_e10.pt
+  label: obs_s200_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss20010-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s200-e10]
+  requires_pass: [A40-fetch-obs_s200-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s200_e10 on observe_and_pickup 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e10/export_e10.pt
+  label: obs_s200_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss20010-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s200-e10]
+  requires_pass: [A40-fetch-obs_s200-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s200_e10 on observe_and_pickup 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e10/export_e10.pt
+  label: obs_s200_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fetch-obs_s200-e20
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 240
+  hypothesis: "fetch obs_s200_e20 from the relay (plan v20 card 8 described obs_s200 e20; sha256 checked; waits until it is there)"
+  command: "RUN=obs_s200 TAG=e20 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-v20obss20020-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s200-e20]
+  requires_pass: [A40-fetch-obs_s200-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s200_e20 on observe_and_pickup 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e20/export_e20.pt
+  label: obs_s200_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss20020-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s200-e20]
+  requires_pass: [A40-fetch-obs_s200-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s200_e20 on observe_and_pickup 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e20/export_e20.pt
+  label: obs_s200_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss20020-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s200-e20]
+  requires_pass: [A40-fetch-obs_s200-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s200_e20 on observe_and_pickup 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e20/export_e20.pt
+  label: obs_s200_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss20020-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s200-e20]
+  requires_pass: [A40-fetch-obs_s200-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s200_e20 on observe_and_pickup 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e20/export_e20.pt
+  label: obs_s200_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss20020-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s200-e20]
+  requires_pass: [A40-fetch-obs_s200-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s200_e20 on observe_and_pickup 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e20/export_e20.pt
+  label: obs_s200_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss20020-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s200-e20]
+  requires_pass: [A40-fetch-obs_s200-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s200_e20 on observe_and_pickup 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e20/export_e20.pt
+  label: obs_s200_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss20020-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s200-e20]
+  requires_pass: [A40-fetch-obs_s200-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s200_e20 on observe_and_pickup 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e20/export_e20.pt
+  label: obs_s200_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss20020-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s200-e20]
+  requires_pass: [A40-fetch-obs_s200-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s200_e20 on observe_and_pickup 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e20/export_e20.pt
+  label: obs_s200_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss20020-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s200-e20]
+  requires_pass: [A40-fetch-obs_s200-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s200_e20 on observe_and_pickup 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e20/export_e20.pt
+  label: obs_s200_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss20020-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s200-e20]
+  requires_pass: [A40-fetch-obs_s200-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s200_e20 on observe_and_pickup 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e20/export_e20.pt
+  label: obs_s200_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fetch-obs_s800-e10
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 240
+  hypothesis: "fetch obs_s800_e10 from the relay (plan v20 card 8 described obs_s800 e10; sha256 checked; waits until it is there)"
+  command: "RUN=obs_s800 TAG=e10 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-v20obss80010-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800-e10]
+  requires_pass: [A40-fetch-obs_s800-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s800_e10 on observe_and_pickup 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e10/export_e10.pt
+  label: obs_s800_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss80010-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800-e10]
+  requires_pass: [A40-fetch-obs_s800-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s800_e10 on observe_and_pickup 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e10/export_e10.pt
+  label: obs_s800_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss80010-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800-e10]
+  requires_pass: [A40-fetch-obs_s800-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s800_e10 on observe_and_pickup 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e10/export_e10.pt
+  label: obs_s800_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss80010-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800-e10]
+  requires_pass: [A40-fetch-obs_s800-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s800_e10 on observe_and_pickup 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e10/export_e10.pt
+  label: obs_s800_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss80010-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800-e10]
+  requires_pass: [A40-fetch-obs_s800-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s800_e10 on observe_and_pickup 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e10/export_e10.pt
+  label: obs_s800_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss80010-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800-e10]
+  requires_pass: [A40-fetch-obs_s800-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s800_e10 on observe_and_pickup 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e10/export_e10.pt
+  label: obs_s800_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss80010-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800-e10]
+  requires_pass: [A40-fetch-obs_s800-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s800_e10 on observe_and_pickup 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e10/export_e10.pt
+  label: obs_s800_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss80010-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800-e10]
+  requires_pass: [A40-fetch-obs_s800-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s800_e10 on observe_and_pickup 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e10/export_e10.pt
+  label: obs_s800_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss80010-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800-e10]
+  requires_pass: [A40-fetch-obs_s800-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s800_e10 on observe_and_pickup 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e10/export_e10.pt
+  label: obs_s800_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20obss80010-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800-e10]
+  requires_pass: [A40-fetch-obs_s800-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 8 described: obs_s800_e10 on observe_and_pickup 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e10/export_e10.pt
+  label: obs_s800_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
 
 # cover without history (new H200 filler, plan v20 section 5; main-table cell, described)
 - id: A40-fetch-cover_none-e30
