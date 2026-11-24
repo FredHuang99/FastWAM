@@ -31,6 +31,8 @@ def box_tag(rule) -> str:
     """8 hex chars naming the zoom boxes and camera (cache files carry it; a mismatch is an error)."""
     spec = {"ref": [round(float(x), 6) for x in rule.zoom_ref_box], "cur": [round(float(x), 6) for x in rule.zoom_cur_box],
             "camera": int(rule.zoom_camera)}
+    if getattr(rule, "zoom_match", False):            # 11-24 card 7: a match-frame cache never passes for a plain one
+        spec["match"] = "dinov2-crop-v2"
     return hashlib.sha256(json.dumps(spec, sort_keys=True).encode()).hexdigest()[:8]
 
 

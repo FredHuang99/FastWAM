@@ -84,6 +84,9 @@ class HistoryRule:
     zoom_ref_box: Tuple[float, ...] = (0.0, 0.0, 1.0, 1.0)
     zoom_cur_box: Tuple[float, ...] = (0.0, 0.0, 1.0, 1.0)
     zoom_camera: int = 0
+    zoom_match: bool = False                  # 11-24 plan v20 card 7: the reference zoom frame = the MATCH frame
+                                              # (fullft/match.py: frame 0's table crop, candidates brightened by their
+                                              # similarity to the reference); needs zoom; its own zoom cache
 
     def __post_init__(self):
         if self.variant not in VARIANTS:
@@ -115,6 +118,8 @@ class HistoryRule:
                     raise ValueError(f"zoom box must be (x0, y0, x1, y1) with 0 <= x0 < x1 <= 1, 0 <= y0 < y1 <= 1: {box}")
             if int(self.zoom_camera) not in (0, 1, 2):
                 raise ValueError(f"zoom_camera must be 0 (head), 1 or 2, got {self.zoom_camera}")
+        if self.zoom_match and not self.zoom:
+            raise ValueError("history.zoom_match replaces the reference zoom frame: it needs history.zoom=true")
         if not (0.0 <= float(self.event_provisional) < float(self.event_delta)):
             raise ValueError(f"event_provisional must be in [0, event_delta), got {self.event_provisional}")
         if not (0.0 < float(self.event_delta) <= 0.1 and 0.0 <= float(self.event_min_path) <= 0.2):

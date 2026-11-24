@@ -78,6 +78,17 @@ prepare_data() {
     [ -s $IN/$stem.json ] || { echo "[prep] $run: $stem.json is not on the relay"; return 1; }
     cp $IN/$stem.json $E && echo "[prep] $run: $stem.json fetched ($(stat -c %s $E) bytes, sha256 $(sha256sum $E | cut -c1-16))"
   done
+  # 11-24 plan v20 card 7: data.zoom_root (match_build_5090.sh -> the cache relay), fetched here so a missing cache
+  # makes the run not ready (the slot passes to its next candidate) instead of failing the job
+  ev=$(echo "$sets" | grep -o 'data.zoom_root=[^ ]*' | sed 's/data.zoom_root=//')
+  if [ -n "$ev" ]; then
+    E=$R/${ev#/workspace/FastWAM-memory2/}
+    if [ ! -f $E/ZOOM.json ]; then
+      (cd $R && HF_HUB_DOWNLOAD_TIMEOUT=60 $HFPY scripts/fullft/cache_relay.py get --name $(basename $E) --dest $(dirname $E) 2>&1 | tail -n 3)
+      [ -f $E/ZOOM.json ] || { echo "[prep] $run: zoom cache $(basename $E) is not on the cache relay"; return 1; }
+      echo "[prep] $run: zoom cache $(basename $E) fetched ($(du -sh $E | cut -f1))"
+    fi
+  fi
   # 11-24 plan v20 card 5: data.text_table (press_told_text.py on the 5090 -> relay diag/press_told)
   ev=$(echo "$sets" | grep -o 'data.text_table=[^ ]*' | sed 's/data.text_table=//')
   if [ -n "$ev" ]; then

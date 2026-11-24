@@ -192,3 +192,35 @@ def test_text_table_v20(tmp_path):
     spec.loader.exec_module(told)
     assert told.told_sentence(3, 4) == " Press the left button three times and the middle button four times."
     assert len(told.combos()) == 45 and (9, 1) in told.combos() and (1, 9) in told.combos()
+
+
+def test_match_frame_v20():
+    """11-24 plan v20 card 7: match.py's candidates equal match_probe.py v2's (copied settings); the overlay keeps the
+    plain current-zoom pixels times the brightness map; the zoom tag changes only with zoom_match."""
+    import importlib.util
+    from pathlib import Path
+    import numpy as np
+    from fastwam.fullft import match
+    from fastwam.fullft.zoom import box_tag, crop_resize
+    pytest.importorskip("scipy")
+    spec = importlib.util.spec_from_file_location("mp", Path(__file__).resolve().parents[4] / "scripts/fullft/match_probe.py")
+    mp = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mp)
+    rng = np.random.default_rng(0)
+    img = np.full((240, 320, 3), 150, np.uint8)
+    for (x, y, a, b) in [(40, 140, 14, 10), (55, 142, 4, 6), (110, 170, 12, 12), (190, 160, 16, 9), (250, 185, 10, 14),
+                         (290, 205, 9, 9), (150, 215, 3, 3)]:
+        img[y:y + b, x:x + a] = rng.integers(0, 60, 3)
+    cur = (0.0, 0.42, 1.0, 1.0)
+    mine = match.candidates(img, cur, None)
+    ref, _ = mp.candidates(img, match.FG, match.MIN_AREA, None)
+    ref = sorted(mp.merge_close(ref, match.MERGE_PX), key=lambda c: -c["area"])[:match.KEEP]
+    assert sorted(c["bbox"] for c in mine) == sorted(c["bbox"] for c in ref) and len(mine) == 5
+    out = match.overlay(img, cur, mine, [0.1, 0.9, 0.5, 0.3, 0.2])
+    plain = crop_resize(img, cur).astype(np.float32)
+    assert out.shape == img.shape and out.dtype == np.uint8
+    assert np.all(out.astype(np.float32) <= plain + 1)
+    assert abs(float(out[0, 0, 0]) - round(plain[0, 0, 0] * match.LOW)) <= 1
+    from fastwam.fullft.history import HistoryRule
+    b = dict(variant="ar", zoom=True, zoom_ref_box=(0.395, 0.06, 0.675, 0.34), zoom_cur_box=cur, zoom_camera=0)
+    assert box_tag(HistoryRule(**b)) == "02102ba0" and box_tag(HistoryRule(**b, zoom_match=True)) != "02102ba0"

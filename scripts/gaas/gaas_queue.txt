@@ -311,3 +311,28 @@ press_told | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dens
 #   approved on 11-24 that such an entry may enter the main table, shown beside the 50-demo entry.
 obs_s200 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen155_v1] data.tasks=[observe_and_pickup] | test -f outputs/memory_v2/press/dense_observe_and_pickup_v1/.verified && test -f outputs/memory_v2/press/dense_observe_and_pickup_gen155_v1/.verified
 obs_s800 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen155_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen600_v1] data.tasks=[observe_and_pickup] schedule.frame_epochs=10 schedule.export_at_epochs=[5,10] | test -f outputs/memory_v2/press/dense_observe_and_pickup_v1/.verified && test -f outputs/memory_v2/press/dense_observe_and_pickup_gen155_v1/.verified && test -f outputs/memory_v2/press/dense_observe_and_pickup_gen600_v1/.verified
+#
+# Card 7 (plan v20 3.2, P0), opened by card 13a's gate (11-24 18:52, match_probe v2: dinov2 crop 40/50 >= 35; colour 38,
+# dinov2 map 34; with the lifted-object target 37 / 35 / 31; Status 11-24 2.5). Matcher M = dinov2 crop, settings of the
+# probe v2 (fullft/match.py: colour regions of frame 0's table box, merged within 6 px, the 5 largest; CLS cosine to the
+# reference box; facebook/dinov2-base @ f9e44c81, file sha256 d73036b5..., checked on every load). The match frame =
+# frame 0's table crop (zoom_cur_box) with each candidate brightened 0.25 + 0.75 x its score scaled to [0, 1] (the rest
+# x 0.25); it replaces the reference zoom frame (history.zoom_match; zoom tag a476d745; cache match_build_5090.sh ->
+# the cache relay zoom_obs_match_a476d745, fetched in the job). Closed loop: the same function on the scene's frame 0.
+# obs_match = obs_zoom's exact line with the reference-zoom frame replaced by the match frame: frame 0's table crop
+# (zoom_cur_box) with the similarity map to frame 0's reference crop (zoom_ref_box) overlaid. Matcher M and its settings
+# are fixed by the probe FS-P1 (card 13a) before any training: template / colour histogram, or a frozen public
+# self-supervised image encoder (approved by the user on 11-24; named in the table); no parameter trained on our data,
+# no annotation, no language model.
+# Why: the trained models never use frame 0 (5090 probes, 11-23 / 11-24) and on held-out demos obs_pose's next-pose
+# error is half-way to "no motion" while it is 0.0001 on trained demos (FINDSAME_SPLIT, 11-24): 45 scenes do not teach
+# the comparison. Here the comparison is supplied as a picture; the policy only has to reach the bright spot.
+# Registered reading (before any obs_match episode; A40, observe_and_pickup 1-100, default noise; control obs_ar e30):
+#   MAIN: D = success(obs_match e30) - success(obs_ar e30), paired by scene, paired bootstrap 95 % CI (10,000, seed 0);
+#   SESOI +0.15: CI lower > +0.15 -> MATCH CUE HELPS; CI upper < +0.15 -> NO HELP; otherwise UNCERTAIN (pre-set
+#   extension: both e30 again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule).
+#   Described: success against 28 (pure-WAM best, self-reported) and against 20 (five candidates, blind pick); on the
+#   5090 with MWAM_OBJECT_LOG=1 the first-close-on-target rate (6/29 for obs_ar on 11-22); obs_probe with the match frame
+#   swapped for another demo's (>= 2 % at the onset = the cue is read); closed loop on the 5090, 20 scenes, with the
+#   match frame of another scene: does the first close follow the swapped cue (counterfactual, cf. arXiv 2611.26745).
+obs_match | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1] data.tasks=[observe_and_pickup] history.zoom=true history.zoom_ref_box=[0.395,0.06,0.675,0.34] history.zoom_cur_box=[0.0,0.42,1.0,1.0] history.zoom_match=true data.zoom_root=/workspace/FastWAM-memory2/outputs/memory_v2/press/zoom_obs_match_a476d745 | test -f outputs/memory_v2/press/zoom_obs_match_a476d745/ZOOM.json && test -f outputs/memory_v2/press/dense_observe_and_pickup_v1/.verified

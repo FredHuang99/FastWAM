@@ -460,7 +460,14 @@ class FullSession:
                 continue
             r = self.raw[frame]
             arrays = [np.frombuffer(b, dtype=np.uint8).reshape(s) for b, s in zip(r["images"], r["shapes"])]
-            image = p.mosaic(zoom_images(arrays, box, rule.zoom_camera))[None].to(p.device, torch.bfloat16)
+            if key == ZOOM_REF and getattr(rule, "zoom_match", False):        # 11-24 card 7: the match frame
+                from .match import match_image
+                views = list(arrays)
+                views[int(rule.zoom_camera)], self.match_meta = match_image(np.ascontiguousarray(arrays[int(rule.zoom_camera)]),
+                                                                            rule.zoom_ref_box, rule.zoom_cur_box)
+                image = p.mosaic(views)[None].to(p.device, torch.bfloat16)
+            else:
+                image = p.mosaic(zoom_images(arrays, box, rule.zoom_camera))[None].to(p.device, torch.bfloat16)
             latent = encode_latent(p.vae, image)[0]
             proprio = p.normaliser.normalize(torch.tensor(r["proprio"], dtype=torch.float32)[None], "state")[0]
             self.encoded[key] = (latent, proprio.to(p.device))
