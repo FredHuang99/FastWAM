@@ -66,6 +66,19 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     root = Path(args.root)
     records = json.loads((root / "RECORDS.json").read_text())
+    if not Path(args.events).exists():          # 11-24 19:00: not on the 5090 -> the control's file from the relay
+        hf = "/opt/hf-tools/bin/python" if Path("/opt/hf-tools/bin/python").exists() else sys.executable
+        inbox = R / "outputs/fullft/relay_in/press_v3c"
+        inbox.mkdir(parents=True, exist_ok=True)
+        subprocess.run([hf, str(REPO / "scripts/memory_v2/migrate/relay.py"), "get", "--prefix", "diag/press_v3c",
+                        "--out", str(inbox)])
+        got = inbox / Path(args.events).name
+        if not got.exists() or "provisional=0.002" not in got.read_text()[:400]:
+            print(f"[told] STOP: {args.events} missing here and not on the relay (diag/press_v3c)")
+            return 1
+        Path(args.events).parent.mkdir(parents=True, exist_ok=True)
+        Path(args.events).write_bytes(got.read_bytes())
+        print(f"[told] events file from the relay diag/press_v3c (sha256 {sha(args.events)[:16]}), the one press_v3c / d2_press trained on")
     ev = json.loads(Path(args.events).read_text())
     ev = ev.get("episodes", ev)
     demos = {f"press_button/{p.stem}": p for p in es.demo_files("press_button")}
