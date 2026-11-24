@@ -27,7 +27,44 @@ F = Path("/workspace/FastWAM-memory2/outputs/fullft")
 TASK = "swap_T"
 BLOCKS = ("T_block1", "T_block2")
 LIFT, DOWN, POS_TOL, ANG_TOL = 0.03, 0.77, 0.025, 15.0
-CLASSES = None      # fixed after the first 10 episodes per model (plan v20 card 11); see Status 11-24
+HOME, FAR, RELEASED = 0.03, 0.05, 0.6
+
+
+def classify(m):
+    """Fixed 11-24 20:45 (Opus) from the first 10 episodes of each model (SWAPT_SPLIT_FIRST.json, CARD11_5090 11:19 UTC),
+    BEFORE any of scenes 11-50 was read. What those 20 showed: both blocks are lifted together (left T1, right T2, target
+    ~72); T1 goes down first (~173), T2 second (~280) in every success. 7 / 10 failures: T2 back within 1.2 cm of its OWN
+    start, put down late (517-589), the right gripper still half closed (0.41), and T1 off the table (z 0.83-0.96,
+    6-40 cm from its start); 2: both placed within 2.5 cm but one angle 24.5 / 43.9 deg; 1: both within tolerance, both
+    grippers at 0.41-0.42. The logged gripper value is not the env's: successes end with the right one at 0.68-0.71.
+    Rules in this order (first match). Families for plan v20 2.1 / cards 9, 9b (set now, before the full results):
+      WHERE  = the block went to the wrong place (the other block's start, seen only in frame 0, not used): card 9 family
+      POSE   = right place, position or angle off: card 9 family
+      HANDLE = lifting / releasing / a block left off the table: card 9b family"""
+    if m.get("success"):
+        return "success"
+    b = {k: m[k] for k in BLOCKS}
+    if not all(v["lifted"] for v in b.values()):
+        return "HANDLE: a block never lifted"
+    for k, o in (("T_block1", "T_block2"), ("T_block2", "T_block1")):
+        if b[k]["to_own_start_cm"] < 100 * HOME and b[k]["down"]:
+            return ("WHERE: a block put back at its own start, the other off the table" if not b[o]["down"]
+                    else "WHERE: a block put back at its own start, both on the table")
+    if not all(v["down"] for v in b.values()):
+        return "HANDLE: a block not on the table at the end (held / dropped on something)"
+    if any(v["pos_err_cm"] > 100 * FAR for v in b.values()):
+        return "WHERE: a block put down elsewhere (> 5 cm from its target)"
+    if any(v["pos_err_cm"] >= 100 * POS_TOL for v in b.values()):
+        return "POSE: both near the targets, a position 2.5-5 cm off"
+    if any(not v["ang_ok"] for v in b.values()):
+        return "POSE: both within 2.5 cm, an angle >= 15 deg off"
+    g = m.get("grippers_open_end") or [0, 0]
+    if min(g) < RELEASED:
+        return "HANDLE: both placed within tolerance, a gripper not opened"
+    return "other"
+
+
+CLASSES = classify      # fixed 11-24 20:45 after the first 10 episodes per model (plan v20 card 11); see Status 11-24
 
 
 def angle_deg(q, r):
