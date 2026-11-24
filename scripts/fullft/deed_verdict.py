@@ -111,6 +111,24 @@ def d1():
         else:
             r["main"] = compare(new, ref, order)
             r["verdict"] = three(r["main"], 0.15, "DECISION TRAINING HELPS", "NO HELP")
+            if r["verdict"] == "UNCERTAIN":              # 11-24: the registered pre-set extension (both e30 again with
+                _, nr2 = success("r2", f"{arm}_e30", "swap_blocks")   # MWAM_NOISE_SALT=r2, 200 pairs, the same rule)
+                _, rr2 = success("r2", "ar_2task_e30", "swap_blocks")
+                r["extension"] = {"r2_finished": {f"{arm}_e30": len(nr2), "ar_2task_e30": len(rr2)}}
+                if len(nr2) == 100 and len(rr2) == 100:
+                    a = {("d", x): v for x, v in new.items()}
+                    a.update({("r2", x): v for x, v in nr2.items()})
+                    b = {("d", x): v for x, v in ref.items()}
+                    b.update({("r2", x): v for x, v in rr2.items()})
+                    e = compare(a, b, [("d", x) for x in order] + [("r2", x) for x in order])
+                    ev = three(e, 0.15, "DECISION TRAINING HELPS", "NO HELP")
+                    r["extension"].update(pooled=e, verdict=ev)
+                    r["main_100"], r["main"] = r["main"], e
+                    r["verdict"] = f"UNCERTAIN at 100 pairs -> {ev} at 200 pairs (pre-set extension)"
+                    if ev == "NO HELP" or e["new"] >= 190:
+                        fable.append(f"{arm}: {ev} (200 pairs), {e['new']}/200")
+                else:
+                    r["extension"]["verdict"] = "WAIT (r2 evaluations of the pre-set extension)"
             if r["verdict"] == "NO HELP" or r["main"]["new"] >= 95:
                 fable.append(f"{arm}: {r['verdict']}, {r['main']['new']}/100")
         if put:

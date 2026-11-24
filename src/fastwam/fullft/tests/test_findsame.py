@@ -146,3 +146,15 @@ def test_export_with_pose_head_loads_strict():
         m0.load_state_dict(m1.state_dict(), strict=True)
     m1b, _ = _model(next_pose=True, seed=5)
     m1b.load_state_dict(m1.state_dict(), strict=True)
+
+
+def test_mask_history_v20():
+    """11-24 plan v20 2.4c: MWAM_HIST_MASK swaps the masked slots for the current frame, nothing else."""
+    from fastwam.fullft.online import mask_history
+    assert mask_history([0, 8, 24], 40, "first") == [40, 8, 24]
+    assert mask_history([0, 8, 24], 40, "near") == [0, 40, 40]
+    assert mask_history([0], 5, "near") == [0]
+    assert mask_history([], 0, "first") == []
+    import pytest
+    with pytest.raises(ValueError):
+        mask_history([0], 3, "all")

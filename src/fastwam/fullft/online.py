@@ -178,6 +178,17 @@ def keep_set(rule: HistoryRule, current: int, events: List[int]) -> set:
     return keep
 
 
+def mask_history(ids: List[int], current: int, mode: str) -> List[int]:
+    """11-24 plan v20 2.4c (A2 follow-up; test time only, MWAM_HIST_MASK): the masked history slots show the CURRENT
+    frame (nothing beyond the observation the model already has; at t = 0 every slot is the current frame), positions
+    unchanged. first: the frame-0 slot; near: every slot but frame 0 (the recent frames t - 16, t - 32)."""
+    if mode == "first":
+        return [current if i == 0 else i for i in ids]
+    if mode == "near":
+        return [i if i == 0 else current for i in ids]
+    raise ValueError(f"unknown MWAM_HIST_MASK {mode!r} (first | near)")
+
+
 @torch.no_grad()
 def decide_encoded(model: FullModel, rule: HistoryRule, cache: FrameCache, encoded: Dict[int, tuple], current: int,
                    text: torch.Tensor, noise: torch.Tensor, steps: int = 10, events: List[int] = (),
@@ -185,12 +196,15 @@ def decide_encoded(model: FullModel, rule: HistoryRule, cache: FrameCache, encod
     """One decision from per-frame encodings: encoded[i] = (latent [48, 1, 24, 20], normalised proprio [14]).
     events: the KNOWN event frames (lag applied); ledger (arprop): (features [S, F], valid [S]) of data.ledger_tensor."""
     ids, positions = select(rule, current, events)
+    hmask = os.environ.get("MWAM_HIST_MASK", "").strip().lower()    # 11-24 plan v20 2.4c: test-time frame masks
+    if hmask:
+        ids = mask_history(ids, current, hmask)
     if rule.zoom:                                     # plan v19 3.3: + the two zoom frames (encoded by the session)
         from .history import zoom_positions
         from .zoom import ZOOM_REF, cur_key
         ref_pos, cur_pos = zoom_positions(rule, current, len(ids))
         ids, positions = list(ids) + [ZOOM_REF, cur_key(current)], list(positions) + [ref_pos, cur_pos]
-    cache.ensure(model, ids, encoded, text)
+    cache.ensure(model, list(dict.fromkeys(ids)), encoded, text)    # (ids are unique unless a mask repeats one)
     history = cache.history(model, ids, positions)
     device = text.device
     batch = {"latent": encoded[current][0][None].to(device), "text": text,

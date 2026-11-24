@@ -54,6 +54,414 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_split.py"
   pass_if: "m['rc'] == 0"
 
+# 11-24 plan v20 (Opus): NEW VERSIONS of the five tasks not at target go first (user 11-24: evaluate every new version
+# at once; plan v20 section 5 order 1). Cards written when each run started training; each fetch card waits on the relay.
+# card 3 swapT_arprop_h2 (new H200; registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660). MAIN of card 3 uses its e30 as the control of swapT_long e60.
+- id: A40-fetch-swapT_arprop_h2-e30
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 120
+  hypothesis: "fetch swapT_arprop_h2_e30 from the relay (plan v20 card 3, new H200; sha256 checked; waits until it is there)"
+  command: "RUN=swapT_arprop_h2 TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-v20swTh2-smoke
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_arprop_h2-e30, A40-prep2-swap_T]
+  requires_pass: [A40-fetch-swapT_arprop_h2-e30, A40-prep2-swap_T]
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "smoke: swapT_arprop_h2_e30, swap_T scene 1, one episode finishes on the A40 (closed_loop/v20smoke)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_arprop_h2_e30/export_e30.pt
+  label: swapT_arprop_h2_e30_smoke
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "1"]
+  output: closed_loop/v20smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+  pass_if: "m.get('episodes', 0) >= 1"
+
+- id: A40-v20swTh2-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTh2-smoke]
+  requires_pass: [A40-v20swTh2-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 control (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): swapT_arprop_h2_e30 on swap_T 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_arprop_h2_e30/export_e30.pt
+  label: swapT_arprop_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTh2-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTh2-smoke]
+  requires_pass: [A40-v20swTh2-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 control (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): swapT_arprop_h2_e30 on swap_T 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_arprop_h2_e30/export_e30.pt
+  label: swapT_arprop_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTh2-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTh2-smoke]
+  requires_pass: [A40-v20swTh2-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 control (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): swapT_arprop_h2_e30 on swap_T 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_arprop_h2_e30/export_e30.pt
+  label: swapT_arprop_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTh2-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTh2-smoke]
+  requires_pass: [A40-v20swTh2-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 control (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): swapT_arprop_h2_e30 on swap_T 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_arprop_h2_e30/export_e30.pt
+  label: swapT_arprop_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTh2-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTh2-smoke]
+  requires_pass: [A40-v20swTh2-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 control (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): swapT_arprop_h2_e30 on swap_T 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_arprop_h2_e30/export_e30.pt
+  label: swapT_arprop_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTh2-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTh2-smoke]
+  requires_pass: [A40-v20swTh2-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 control (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): swapT_arprop_h2_e30 on swap_T 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_arprop_h2_e30/export_e30.pt
+  label: swapT_arprop_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTh2-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTh2-smoke]
+  requires_pass: [A40-v20swTh2-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 control (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): swapT_arprop_h2_e30 on swap_T 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_arprop_h2_e30/export_e30.pt
+  label: swapT_arprop_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTh2-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTh2-smoke]
+  requires_pass: [A40-v20swTh2-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 control (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): swapT_arprop_h2_e30 on swap_T 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_arprop_h2_e30/export_e30.pt
+  label: swapT_arprop_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTh2-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTh2-smoke]
+  requires_pass: [A40-v20swTh2-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 control (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): swapT_arprop_h2_e30 on swap_T 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_arprop_h2_e30/export_e30.pt
+  label: swapT_arprop_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTh2-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTh2-smoke]
+  requires_pass: [A40-v20swTh2-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 control (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): swapT_arprop_h2_e30 on swap_T 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_arprop_h2_e30/export_e30.pt
+  label: swapT_arprop_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+# card 1 rearr_v3c_h2 (new H200; registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): described only (the verdict stays with rearr_v3c on the H100)
+- id: A40-fetch-rearr_v3c_h2-e30
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 120
+  hypothesis: "fetch rearr_v3c_h2_e30 from the relay (plan v20 card 1, new H200; sha256 checked; waits until it is there)"
+  command: "RUN=rearr_v3c_h2 TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-v20rv3ch2-smoke
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-rearr_v3c_h2-e30, A40-prep2-rearrange_blocks]
+  requires_pass: [A40-fetch-rearr_v3c_h2-e30, A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "smoke: rearr_v3c_h2_e30, rearrange_blocks scene 1, one episode finishes on the A40 (closed_loop/rv3csmoke)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_v3c_h2_e30/export_e30.pt
+  label: rearr_v3c_h2_e30_smoke
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "1"]
+  output: closed_loop/rv3csmoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+  pass_if: "m.get('episodes', 0) >= 1"
+
+- id: A40-v20rv3ch2-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20rv3ch2-smoke]
+  requires_pass: [A40-v20rv3ch2-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 1 (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): rearr_v3c_h2_e30 on rearrange_blocks 1-100, described against rearr_v3c_e30 (H100) and rearrange_arprop_e30; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_v3c_h2_e30/export_e30.pt
+  label: rearr_v3c_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/rv3c
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20rv3ch2-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20rv3ch2-smoke]
+  requires_pass: [A40-v20rv3ch2-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 1 (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): rearr_v3c_h2_e30 on rearrange_blocks 1-100, described against rearr_v3c_e30 (H100) and rearrange_arprop_e30; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_v3c_h2_e30/export_e30.pt
+  label: rearr_v3c_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/rv3c
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20rv3ch2-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20rv3ch2-smoke]
+  requires_pass: [A40-v20rv3ch2-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 1 (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): rearr_v3c_h2_e30 on rearrange_blocks 1-100, described against rearr_v3c_e30 (H100) and rearrange_arprop_e30; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_v3c_h2_e30/export_e30.pt
+  label: rearr_v3c_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/rv3c
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20rv3ch2-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20rv3ch2-smoke]
+  requires_pass: [A40-v20rv3ch2-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 1 (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): rearr_v3c_h2_e30 on rearrange_blocks 1-100, described against rearr_v3c_e30 (H100) and rearrange_arprop_e30; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_v3c_h2_e30/export_e30.pt
+  label: rearr_v3c_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/rv3c
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20rv3ch2-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20rv3ch2-smoke]
+  requires_pass: [A40-v20rv3ch2-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 1 (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): rearr_v3c_h2_e30 on rearrange_blocks 1-100, described against rearr_v3c_e30 (H100) and rearrange_arprop_e30; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_v3c_h2_e30/export_e30.pt
+  label: rearr_v3c_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/rv3c
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20rv3ch2-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20rv3ch2-smoke]
+  requires_pass: [A40-v20rv3ch2-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 1 (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): rearr_v3c_h2_e30 on rearrange_blocks 1-100, described against rearr_v3c_e30 (H100) and rearrange_arprop_e30; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_v3c_h2_e30/export_e30.pt
+  label: rearr_v3c_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/rv3c
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20rv3ch2-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20rv3ch2-smoke]
+  requires_pass: [A40-v20rv3ch2-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 1 (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): rearr_v3c_h2_e30 on rearrange_blocks 1-100, described against rearr_v3c_e30 (H100) and rearrange_arprop_e30; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_v3c_h2_e30/export_e30.pt
+  label: rearr_v3c_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/rv3c
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20rv3ch2-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20rv3ch2-smoke]
+  requires_pass: [A40-v20rv3ch2-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 1 (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): rearr_v3c_h2_e30 on rearrange_blocks 1-100, described against rearr_v3c_e30 (H100) and rearrange_arprop_e30; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_v3c_h2_e30/export_e30.pt
+  label: rearr_v3c_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/rv3c
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20rv3ch2-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20rv3ch2-smoke]
+  requires_pass: [A40-v20rv3ch2-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 1 (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): rearr_v3c_h2_e30 on rearrange_blocks 1-100, described against rearr_v3c_e30 (H100) and rearrange_arprop_e30; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_v3c_h2_e30/export_e30.pt
+  label: rearr_v3c_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/rv3c
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20rv3ch2-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20rv3ch2-smoke]
+  requires_pass: [A40-v20rv3ch2-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 1 (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): rearr_v3c_h2_e30 on rearrange_blocks 1-100, described against rearr_v3c_e30 (H100) and rearrange_arprop_e30; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_v3c_h2_e30/export_e30.pt
+  label: rearr_v3c_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/rv3c
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-RV3CH2-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-v20rv3ch2-s0, A40-v20rv3ch2-s1, A40-v20rv3ch2-s2, A40-v20rv3ch2-s3, A40-v20rv3ch2-s4, A40-v20rv3ch2-s5, A40-v20rv3ch2-s6, A40-v20rv3ch2-s7, A40-v20rv3ch2-s8, A40-v20rv3ch2-s9]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v20 card 1 described: v20_verdict.py rv3ch2 (paired counts / sign p against rearr_v3c H100); rearr_split.py classes and rearr_ledger.py write delay of rearr_v3c_h2 (and rearr_v3c when there); log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py rv3ch2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_split.py rv3c:rearr_v3c_h2_e30 rv3c:rearr_v3c_e30 e6:rearrange_arprop_e30 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_ledger.py rv3c:rearr_v3c_h2_e30 rv3c:rearr_v3c_e30"
+  pass_if: "m['rc'] == 0"
+
 # ---------------------------------------------------------------------------------------------------------------
 # 11-22 plan v19 A3 / D2 / D1 evaluations (Opus). Plan v19 5.1: "D1, D2, A3 evaluations go to the front of the A40 queue
 # as soon as they arrive", so these cards sit at the top of the list (the dispatcher hands a free GPU to the first ready
@@ -268,6 +676,642 @@ tasks:
   hypothesis: "rearrange timely writer verdict (deed_verdict.py rv3c, SESOI +0.15) and the described failure split / write delay of both models; log pushed"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py rv3c; PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_split.py rv3c:rearr_v3c_e30 e6:rearrange_arprop_e30; PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_ledger.py rv3c:rearr_v3c_e30 e6:rearrange_arprop_e30"
   pass_if: "m['rc'] == 0"
+
+# 11-24 plan v20 (Opus): rearr_v3c (H100) described parts of its 11-23 reading: classes and write delay
+- id: A40-RV3C-split-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-rv3c30-s0, A40-rv3c30-s1, A40-rv3c30-s2, A40-rv3c30-s3, A40-rv3c30-s4, A40-rv3c30-s5, A40-rv3c30-s6, A40-rv3c30-s7, A40-rv3c30-s8, A40-rv3c30-s9]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "rearr_v3c (H100) described (reading 11-23): rearr_split.py classes and rearr_ledger.py write delay against rearrange_arprop_e30; log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_split.py rv3c:rearr_v3c_e30 e6:rearrange_arprop_e30 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_ledger.py rv3c:rearr_v3c_e30 e6:rearrange_arprop_e30"
+  pass_if: "m['rc'] == 0"
+
+# card 3 swapT_long (new H200; registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): MAIN = swapT_long e60 against swapT_arprop_h2 e30
+- id: A40-fetch-swapT_long-e60
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 120
+  hypothesis: "fetch swapT_long_e60 from the relay (plan v20 card 3, new H200; sha256 checked; waits until it is there)"
+  command: "RUN=swapT_long TAG=e60 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-v20swTlong60-smoke
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_long-e60, A40-prep2-swap_T]
+  requires_pass: [A40-fetch-swapT_long-e60, A40-prep2-swap_T]
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "smoke: swapT_long_e60, swap_T scene 1, one episode finishes on the A40 (closed_loop/v20smoke)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_e60/export_e60.pt
+  label: swapT_long_e60_smoke
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "1"]
+  output: closed_loop/v20smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+  pass_if: "m.get('episodes', 0) >= 1"
+
+- id: A40-v20swTlong60-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTlong60-smoke]
+  requires_pass: [A40-v20swTlong60-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): swapT_long_e60 on swap_T 1-100, paired with swapT_arprop_h2_e30 (closed_loop/v20); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_e60/export_e60.pt
+  label: swapT_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlong60-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTlong60-smoke]
+  requires_pass: [A40-v20swTlong60-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): swapT_long_e60 on swap_T 1-100, paired with swapT_arprop_h2_e30 (closed_loop/v20); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_e60/export_e60.pt
+  label: swapT_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlong60-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTlong60-smoke]
+  requires_pass: [A40-v20swTlong60-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): swapT_long_e60 on swap_T 1-100, paired with swapT_arprop_h2_e30 (closed_loop/v20); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_e60/export_e60.pt
+  label: swapT_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlong60-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTlong60-smoke]
+  requires_pass: [A40-v20swTlong60-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): swapT_long_e60 on swap_T 1-100, paired with swapT_arprop_h2_e30 (closed_loop/v20); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_e60/export_e60.pt
+  label: swapT_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlong60-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTlong60-smoke]
+  requires_pass: [A40-v20swTlong60-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): swapT_long_e60 on swap_T 1-100, paired with swapT_arprop_h2_e30 (closed_loop/v20); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_e60/export_e60.pt
+  label: swapT_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlong60-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTlong60-smoke]
+  requires_pass: [A40-v20swTlong60-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): swapT_long_e60 on swap_T 1-100, paired with swapT_arprop_h2_e30 (closed_loop/v20); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_e60/export_e60.pt
+  label: swapT_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlong60-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTlong60-smoke]
+  requires_pass: [A40-v20swTlong60-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): swapT_long_e60 on swap_T 1-100, paired with swapT_arprop_h2_e30 (closed_loop/v20); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_e60/export_e60.pt
+  label: swapT_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlong60-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTlong60-smoke]
+  requires_pass: [A40-v20swTlong60-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): swapT_long_e60 on swap_T 1-100, paired with swapT_arprop_h2_e30 (closed_loop/v20); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_e60/export_e60.pt
+  label: swapT_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlong60-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTlong60-smoke]
+  requires_pass: [A40-v20swTlong60-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): swapT_long_e60 on swap_T 1-100, paired with swapT_arprop_h2_e30 (closed_loop/v20); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_e60/export_e60.pt
+  label: swapT_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlong60-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTlong60-smoke]
+  requires_pass: [A40-v20swTlong60-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): swapT_long_e60 on swap_T 1-100, paired with swapT_arprop_h2_e30 (closed_loop/v20); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_e60/export_e60.pt
+  label: swapT_long_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-swapT-verdict
+  lane: a40cpu
+  kind: shell
+  after: [A40-v20swTlong60-s0, A40-v20swTlong60-s1, A40-v20swTlong60-s2, A40-v20swTlong60-s3, A40-v20swTlong60-s4, A40-v20swTlong60-s5, A40-v20swTlong60-s6, A40-v20swTlong60-s7, A40-v20swTlong60-s8, A40-v20swTlong60-s9, A40-v20swTh2-s0, A40-v20swTh2-s1, A40-v20swTh2-s2, A40-v20swTh2-s3, A40-v20swTh2-s4, A40-v20swTh2-s5, A40-v20swTh2-s6, A40-v20swTh2-s7, A40-v20swTh2-s8, A40-v20swTh2-s9]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v20 card 3 verdict: v20_verdict.py swapt (SESOI +0.15 -> TRAINING-LIMITED / NOT TRAINING-LIMITED / UNCERTAIN; e45 and the H100 comparison described); log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py swapt"
+  pass_if: "m['rc'] == 0"
+
+# ranking body record (old H200, main-table cell; descriptive, plan v19 B5): a new version of a task not at target
+- id: A40-fetch-ranking_arprop-e30
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 120
+  hypothesis: "fetch ranking_arprop_e30 from the relay (old H200 ranking body record; sha256 checked; waits until it is there)"
+  command: "RUN=ranking_arprop TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-rankarp30-smoke
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ranking_arprop-e30, A40-prep2-blocks_ranking_try]
+  requires_pass: [A40-fetch-ranking_arprop-e30, A40-prep2-blocks_ranking_try]
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "smoke: ranking_arprop_e30, blocks_ranking_try scene 1, one episode finishes on the A40 (closed_loop/e6smoke)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_arprop_e30/export_e30.pt
+  label: ranking_arprop_e30_smoke
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "1"]
+  output: closed_loop/e6smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+  pass_if: "m.get('episodes', 0) >= 1"
+
+- id: A40-rankarp30-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-rankarp30-smoke]
+  requires_pass: [A40-rankarp30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table cell ranking body record: ranking_arprop_e30 on blocks_ranking_try 1-100 (closed_loop/e6, as ranking_ar_e30); control of plan v20 card 4; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_arprop_e30/export_e30.pt
+  label: ranking_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-rankarp30-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-rankarp30-smoke]
+  requires_pass: [A40-rankarp30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table cell ranking body record: ranking_arprop_e30 on blocks_ranking_try 1-100 (closed_loop/e6, as ranking_ar_e30); control of plan v20 card 4; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_arprop_e30/export_e30.pt
+  label: ranking_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-rankarp30-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-rankarp30-smoke]
+  requires_pass: [A40-rankarp30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table cell ranking body record: ranking_arprop_e30 on blocks_ranking_try 1-100 (closed_loop/e6, as ranking_ar_e30); control of plan v20 card 4; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_arprop_e30/export_e30.pt
+  label: ranking_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-rankarp30-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-rankarp30-smoke]
+  requires_pass: [A40-rankarp30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table cell ranking body record: ranking_arprop_e30 on blocks_ranking_try 1-100 (closed_loop/e6, as ranking_ar_e30); control of plan v20 card 4; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_arprop_e30/export_e30.pt
+  label: ranking_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-rankarp30-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-rankarp30-smoke]
+  requires_pass: [A40-rankarp30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table cell ranking body record: ranking_arprop_e30 on blocks_ranking_try 1-100 (closed_loop/e6, as ranking_ar_e30); control of plan v20 card 4; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_arprop_e30/export_e30.pt
+  label: ranking_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-rankarp30-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-rankarp30-smoke]
+  requires_pass: [A40-rankarp30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table cell ranking body record: ranking_arprop_e30 on blocks_ranking_try 1-100 (closed_loop/e6, as ranking_ar_e30); control of plan v20 card 4; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_arprop_e30/export_e30.pt
+  label: ranking_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-rankarp30-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-rankarp30-smoke]
+  requires_pass: [A40-rankarp30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table cell ranking body record: ranking_arprop_e30 on blocks_ranking_try 1-100 (closed_loop/e6, as ranking_ar_e30); control of plan v20 card 4; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_arprop_e30/export_e30.pt
+  label: ranking_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-rankarp30-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-rankarp30-smoke]
+  requires_pass: [A40-rankarp30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table cell ranking body record: ranking_arprop_e30 on blocks_ranking_try 1-100 (closed_loop/e6, as ranking_ar_e30); control of plan v20 card 4; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_arprop_e30/export_e30.pt
+  label: ranking_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-rankarp30-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-rankarp30-smoke]
+  requires_pass: [A40-rankarp30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table cell ranking body record: ranking_arprop_e30 on blocks_ranking_try 1-100 (closed_loop/e6, as ranking_ar_e30); control of plan v20 card 4; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_arprop_e30/export_e30.pt
+  label: ranking_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-rankarp30-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-rankarp30-smoke]
+  requires_pass: [A40-rankarp30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table cell ranking body record: ranking_arprop_e30 on blocks_ranking_try 1-100 (closed_loop/e6, as ranking_ar_e30); control of plan v20 card 4; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_arprop_e30/export_e30.pt
+  label: ranking_arprop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-RANKARP-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-rankarp30-s0, A40-rankarp30-s1, A40-rankarp30-s2, A40-rankarp30-s3, A40-rankarp30-s4, A40-rankarp30-s5, A40-rankarp30-s6, A40-rankarp30-s7, A40-rankarp30-s8, A40-rankarp30-s9]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "ranking body record described (v20_verdict.py rankarp: against ranking_ar_e30; plan v20 section 6: below the three-frame model -> back to Fable); log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py rankarp"
+  pass_if: "m['rc'] == 0"
+
+# card 4 ranking_v3c (new H200; registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660)
+- id: A40-fetch-ranking_v3c-e30
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 168
+  hypothesis: "fetch ranking_v3c_e30 from the relay (plan v20 card 4, new H200; sha256 checked; waits until it is there)"
+  command: "RUN=ranking_v3c TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-v20rankv3c-smoke
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ranking_v3c-e30, A40-prep2-blocks_ranking_try]
+  requires_pass: [A40-fetch-ranking_v3c-e30, A40-prep2-blocks_ranking_try]
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "smoke: ranking_v3c_e30, blocks_ranking_try scene 1, one episode finishes on the A40 (closed_loop/v20smoke)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_v3c_e30/export_e30.pt
+  label: ranking_v3c_e30_smoke
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "1"]
+  output: closed_loop/v20smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+  pass_if: "m.get('episodes', 0) >= 1"
+
+- id: A40-v20rankv3c-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20rankv3c-smoke]
+  requires_pass: [A40-v20rankv3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 4 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ranking_v3c_e30 on blocks_ranking_try 1-100, paired with ranking_arprop_e30 (closed_loop/e6); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_v3c_e30/export_e30.pt
+  label: ranking_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20rankv3c-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20rankv3c-smoke]
+  requires_pass: [A40-v20rankv3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 4 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ranking_v3c_e30 on blocks_ranking_try 1-100, paired with ranking_arprop_e30 (closed_loop/e6); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_v3c_e30/export_e30.pt
+  label: ranking_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20rankv3c-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20rankv3c-smoke]
+  requires_pass: [A40-v20rankv3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 4 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ranking_v3c_e30 on blocks_ranking_try 1-100, paired with ranking_arprop_e30 (closed_loop/e6); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_v3c_e30/export_e30.pt
+  label: ranking_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20rankv3c-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20rankv3c-smoke]
+  requires_pass: [A40-v20rankv3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 4 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ranking_v3c_e30 on blocks_ranking_try 1-100, paired with ranking_arprop_e30 (closed_loop/e6); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_v3c_e30/export_e30.pt
+  label: ranking_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20rankv3c-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20rankv3c-smoke]
+  requires_pass: [A40-v20rankv3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 4 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ranking_v3c_e30 on blocks_ranking_try 1-100, paired with ranking_arprop_e30 (closed_loop/e6); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_v3c_e30/export_e30.pt
+  label: ranking_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20rankv3c-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20rankv3c-smoke]
+  requires_pass: [A40-v20rankv3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 4 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ranking_v3c_e30 on blocks_ranking_try 1-100, paired with ranking_arprop_e30 (closed_loop/e6); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_v3c_e30/export_e30.pt
+  label: ranking_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20rankv3c-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20rankv3c-smoke]
+  requires_pass: [A40-v20rankv3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 4 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ranking_v3c_e30 on blocks_ranking_try 1-100, paired with ranking_arprop_e30 (closed_loop/e6); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_v3c_e30/export_e30.pt
+  label: ranking_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20rankv3c-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20rankv3c-smoke]
+  requires_pass: [A40-v20rankv3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 4 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ranking_v3c_e30 on blocks_ranking_try 1-100, paired with ranking_arprop_e30 (closed_loop/e6); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_v3c_e30/export_e30.pt
+  label: ranking_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20rankv3c-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20rankv3c-smoke]
+  requires_pass: [A40-v20rankv3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 4 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ranking_v3c_e30 on blocks_ranking_try 1-100, paired with ranking_arprop_e30 (closed_loop/e6); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_v3c_e30/export_e30.pt
+  label: ranking_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20rankv3c-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20rankv3c-smoke]
+  requires_pass: [A40-v20rankv3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 4 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ranking_v3c_e30 on blocks_ranking_try 1-100, paired with ranking_arprop_e30 (closed_loop/e6); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_v3c_e30/export_e30.pt
+  label: ranking_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-rankv3c-verdict
+  lane: a40cpu
+  kind: shell
+  after: [A40-v20rankv3c-s0, A40-v20rankv3c-s1, A40-v20rankv3c-s2, A40-v20rankv3c-s3, A40-v20rankv3c-s4, A40-v20rankv3c-s5, A40-v20rankv3c-s6, A40-v20rankv3c-s7, A40-v20rankv3c-s8, A40-v20rankv3c-s9, A40-rankarp30-s0, A40-rankarp30-s1, A40-rankarp30-s2, A40-rankarp30-s3, A40-rankarp30-s4, A40-rankarp30-s5, A40-rankarp30-s6, A40-rankarp30-s7, A40-rankarp30-s8, A40-rankarp30-s9]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v20 card 4 verdict: v20_verdict.py rankv3c (SESOI +0.10, ceiling 95 -> non-inferiority -0.05); log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py rankv3c"
+  pass_if: "m['rc'] == 0"
+
 
 # 11-24 15:20 (Opus, before the switch to Fable): the registered verdicts whose MAIN data is complete while their
 # full card still waits on described parts. B4's MAIN is e10 (done); the e30 parts are described only. D1 is judged per
@@ -1880,6 +2924,371 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py d1"
   pass_if: "m['rc'] == 0"
 
+# 11-24 (Opus): D1 arm d1_wn = UNCERTAIN (A40-D1wn-verdict, 11-24 15:44: 61 vs 56, CI [-0.06, 0.15]) -> the pre-set
+# extension registered 11-22 above d1_w: both e30 again with MWAM_NOISE_SALT=r2 (ar_2task_e30 r2 swap is done in
+# closed_loop/r2, A40-MAIN2-ar_2task-swap), 200 pairs, the same rule (deed_verdict.py d1 pools them). d1_w: the same
+# cards are written but held until its own 100-pair reading says UNCERTAIN.
+- id: A40-D1r2-d1_wn30-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-d1_wn-e30]
+  requires_pass: [A40-fetch-d1_wn-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 D1 pre-set extension (registered 11-22): d1_wn_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2, paired with ar_2task_e30 r2; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/d1_wn_e30/export_e30.pt
+  label: d1_wn_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-D1r2-d1_wn30-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-d1_wn-e30]
+  requires_pass: [A40-fetch-d1_wn-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 D1 pre-set extension (registered 11-22): d1_wn_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2, paired with ar_2task_e30 r2; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/d1_wn_e30/export_e30.pt
+  label: d1_wn_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-D1r2-d1_wn30-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-d1_wn-e30]
+  requires_pass: [A40-fetch-d1_wn-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 D1 pre-set extension (registered 11-22): d1_wn_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2, paired with ar_2task_e30 r2; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/d1_wn_e30/export_e30.pt
+  label: d1_wn_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-D1r2-d1_wn30-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-d1_wn-e30]
+  requires_pass: [A40-fetch-d1_wn-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 D1 pre-set extension (registered 11-22): d1_wn_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2, paired with ar_2task_e30 r2; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/d1_wn_e30/export_e30.pt
+  label: d1_wn_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-D1r2-d1_wn30-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-d1_wn-e30]
+  requires_pass: [A40-fetch-d1_wn-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 D1 pre-set extension (registered 11-22): d1_wn_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2, paired with ar_2task_e30 r2; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/d1_wn_e30/export_e30.pt
+  label: d1_wn_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-D1r2-d1_wn30-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-d1_wn-e30]
+  requires_pass: [A40-fetch-d1_wn-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 D1 pre-set extension (registered 11-22): d1_wn_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2, paired with ar_2task_e30 r2; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/d1_wn_e30/export_e30.pt
+  label: d1_wn_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-D1r2-d1_wn30-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-d1_wn-e30]
+  requires_pass: [A40-fetch-d1_wn-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 D1 pre-set extension (registered 11-22): d1_wn_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2, paired with ar_2task_e30 r2; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/d1_wn_e30/export_e30.pt
+  label: d1_wn_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-D1r2-d1_wn30-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-d1_wn-e30]
+  requires_pass: [A40-fetch-d1_wn-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 D1 pre-set extension (registered 11-22): d1_wn_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2, paired with ar_2task_e30 r2; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/d1_wn_e30/export_e30.pt
+  label: d1_wn_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-D1r2-d1_wn30-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-d1_wn-e30]
+  requires_pass: [A40-fetch-d1_wn-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 D1 pre-set extension (registered 11-22): d1_wn_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2, paired with ar_2task_e30 r2; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/d1_wn_e30/export_e30.pt
+  label: d1_wn_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-D1r2-d1_wn30-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-d1_wn-e30]
+  requires_pass: [A40-fetch-d1_wn-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 D1 pre-set extension (registered 11-22): d1_wn_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2, paired with ar_2task_e30 r2; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/d1_wn_e30/export_e30.pt
+  label: d1_wn_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-D1r2-d1_w30-s0
+  lane: a40
+  hold: true        # 11-24: only if d1_w's 100-pair reading is UNCERTAIN
+  kind: closed_loop
+  after: [A40-D1-d1_w30-smoke]
+  requires_pass: [A40-D1-d1_w30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 D1 pre-set extension (registered 11-22): d1_w_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (held until d1_w reads UNCERTAIN); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/d1_w_e30/export_e30.pt
+  label: d1_w_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-D1r2-d1_w30-s1
+  lane: a40
+  hold: true        # 11-24: only if d1_w's 100-pair reading is UNCERTAIN
+  kind: closed_loop
+  after: [A40-D1-d1_w30-smoke]
+  requires_pass: [A40-D1-d1_w30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 D1 pre-set extension (registered 11-22): d1_w_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (held until d1_w reads UNCERTAIN); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/d1_w_e30/export_e30.pt
+  label: d1_w_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-D1r2-d1_w30-s2
+  lane: a40
+  hold: true        # 11-24: only if d1_w's 100-pair reading is UNCERTAIN
+  kind: closed_loop
+  after: [A40-D1-d1_w30-smoke]
+  requires_pass: [A40-D1-d1_w30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 D1 pre-set extension (registered 11-22): d1_w_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (held until d1_w reads UNCERTAIN); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/d1_w_e30/export_e30.pt
+  label: d1_w_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-D1r2-d1_w30-s3
+  lane: a40
+  hold: true        # 11-24: only if d1_w's 100-pair reading is UNCERTAIN
+  kind: closed_loop
+  after: [A40-D1-d1_w30-smoke]
+  requires_pass: [A40-D1-d1_w30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 D1 pre-set extension (registered 11-22): d1_w_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (held until d1_w reads UNCERTAIN); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/d1_w_e30/export_e30.pt
+  label: d1_w_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-D1r2-d1_w30-s4
+  lane: a40
+  hold: true        # 11-24: only if d1_w's 100-pair reading is UNCERTAIN
+  kind: closed_loop
+  after: [A40-D1-d1_w30-smoke]
+  requires_pass: [A40-D1-d1_w30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 D1 pre-set extension (registered 11-22): d1_w_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (held until d1_w reads UNCERTAIN); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/d1_w_e30/export_e30.pt
+  label: d1_w_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-D1r2-d1_w30-s5
+  lane: a40
+  hold: true        # 11-24: only if d1_w's 100-pair reading is UNCERTAIN
+  kind: closed_loop
+  after: [A40-D1-d1_w30-smoke]
+  requires_pass: [A40-D1-d1_w30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 D1 pre-set extension (registered 11-22): d1_w_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (held until d1_w reads UNCERTAIN); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/d1_w_e30/export_e30.pt
+  label: d1_w_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-D1r2-d1_w30-s6
+  lane: a40
+  hold: true        # 11-24: only if d1_w's 100-pair reading is UNCERTAIN
+  kind: closed_loop
+  after: [A40-D1-d1_w30-smoke]
+  requires_pass: [A40-D1-d1_w30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 D1 pre-set extension (registered 11-22): d1_w_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (held until d1_w reads UNCERTAIN); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/d1_w_e30/export_e30.pt
+  label: d1_w_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-D1r2-d1_w30-s7
+  lane: a40
+  hold: true        # 11-24: only if d1_w's 100-pair reading is UNCERTAIN
+  kind: closed_loop
+  after: [A40-D1-d1_w30-smoke]
+  requires_pass: [A40-D1-d1_w30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 D1 pre-set extension (registered 11-22): d1_w_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (held until d1_w reads UNCERTAIN); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/d1_w_e30/export_e30.pt
+  label: d1_w_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-D1r2-d1_w30-s8
+  lane: a40
+  hold: true        # 11-24: only if d1_w's 100-pair reading is UNCERTAIN
+  kind: closed_loop
+  after: [A40-D1-d1_w30-smoke]
+  requires_pass: [A40-D1-d1_w30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 D1 pre-set extension (registered 11-22): d1_w_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (held until d1_w reads UNCERTAIN); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/d1_w_e30/export_e30.pt
+  label: d1_w_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-D1r2-d1_w30-s9
+  lane: a40
+  hold: true        # 11-24: only if d1_w's 100-pair reading is UNCERTAIN
+  kind: closed_loop
+  after: [A40-D1-d1_w30-smoke]
+  requires_pass: [A40-D1-d1_w30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v19 D1 pre-set extension (registered 11-22): d1_w_e30 on swap_blocks 1-100 with MWAM_NOISE_SALT=r2 (held until d1_w reads UNCERTAIN); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/d1_w_e30/export_e30.pt
+  label: d1_w_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-D1ext-verdict
+  lane: a40cpu
+  kind: shell
+  after: [A40-D1r2-d1_wn30-s0, A40-D1r2-d1_wn30-s1, A40-D1r2-d1_wn30-s2, A40-D1r2-d1_wn30-s3, A40-D1r2-d1_wn30-s4, A40-D1r2-d1_wn30-s5, A40-D1r2-d1_wn30-s6, A40-D1r2-d1_wn30-s7, A40-D1r2-d1_wn30-s8, A40-D1r2-d1_wn30-s9, A40-D1-verdict]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v19 D1 verdict with the pre-set extension (deed_verdict.py d1: an UNCERTAIN arm is read again on 200 pairs, default + r2, the same rule); log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py d1"
+  pass_if: "m['rc'] == 0"
+
+
 # 11-23 15:10 (Opus): A40 evaluations of the runs that finished or will finish this week and had no cards: main-table
 # rows (cover body record; battery / rearrange / swap_T / press without history) and the registered A2 and B4 readings.
 - id: A40-fetch-cover_arprop-e30
@@ -2285,6 +3694,190 @@ tasks:
   hypothesis: "plan v19 A2 verdict (deed_verdict.py a2; SESOI -0.15 -> NO MEMORY NEEDED / SHORT MEMORY NEEDED / UNCERTAIN); log pushed"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py a2"
   pass_if: "m['rc'] == 0"
+
+# 11-24 plan v20 2.4c (A2 = SHORT MEMORY NEEDED, A40-A2-verdict 11-24 18:03: battery_none 54 vs battery_ar 91): which
+# history frame the three-frame battery model uses. Test-time masks (MWAM_HIST_MASK, online.py 11-24): the masked
+# slots show the current frame. battery_try 1-50 each, described only (v20_verdict.py battmask).
+- id: A40-A2mask-first-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-batAR30]
+  requires_pass: [A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 2.4c A2 follow-up (described): battery_ar_e30 with MWAM_HIST_MASK=first on battery_try 1-50 against the unmasked closed_loop/e6; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_maskfirst
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/a2m
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_HIST_MASK: "first"}
+
+- id: A40-A2mask-first-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-batAR30]
+  requires_pass: [A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 2.4c A2 follow-up (described): battery_ar_e30 with MWAM_HIST_MASK=first on battery_try 1-50 against the unmasked closed_loop/e6; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_maskfirst
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/a2m
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_HIST_MASK: "first"}
+
+- id: A40-A2mask-first-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-batAR30]
+  requires_pass: [A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 2.4c A2 follow-up (described): battery_ar_e30 with MWAM_HIST_MASK=first on battery_try 1-50 against the unmasked closed_loop/e6; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_maskfirst
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/a2m
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_HIST_MASK: "first"}
+
+- id: A40-A2mask-first-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-batAR30]
+  requires_pass: [A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 2.4c A2 follow-up (described): battery_ar_e30 with MWAM_HIST_MASK=first on battery_try 1-50 against the unmasked closed_loop/e6; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_maskfirst
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/a2m
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_HIST_MASK: "first"}
+
+- id: A40-A2mask-first-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-batAR30]
+  requires_pass: [A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 2.4c A2 follow-up (described): battery_ar_e30 with MWAM_HIST_MASK=first on battery_try 1-50 against the unmasked closed_loop/e6; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_maskfirst
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/a2m
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_HIST_MASK: "first"}
+
+- id: A40-A2mask-near-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-batAR30]
+  requires_pass: [A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 2.4c A2 follow-up (described): battery_ar_e30 with MWAM_HIST_MASK=near on battery_try 1-50 against the unmasked closed_loop/e6; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_masknear
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/a2m
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_HIST_MASK: "near"}
+
+- id: A40-A2mask-near-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-batAR30]
+  requires_pass: [A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 2.4c A2 follow-up (described): battery_ar_e30 with MWAM_HIST_MASK=near on battery_try 1-50 against the unmasked closed_loop/e6; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_masknear
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/a2m
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_HIST_MASK: "near"}
+
+- id: A40-A2mask-near-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-batAR30]
+  requires_pass: [A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 2.4c A2 follow-up (described): battery_ar_e30 with MWAM_HIST_MASK=near on battery_try 1-50 against the unmasked closed_loop/e6; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_masknear
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/a2m
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_HIST_MASK: "near"}
+
+- id: A40-A2mask-near-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-batAR30]
+  requires_pass: [A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 2.4c A2 follow-up (described): battery_ar_e30 with MWAM_HIST_MASK=near on battery_try 1-50 against the unmasked closed_loop/e6; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_masknear
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/a2m
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_HIST_MASK: "near"}
+
+- id: A40-A2mask-near-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-batAR30]
+  requires_pass: [A40-fetch-batAR30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 2.4c A2 follow-up (described): battery_ar_e30 with MWAM_HIST_MASK=near on battery_try 1-50 against the unmasked closed_loop/e6; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_ar_e30/export_e30.pt
+  label: battery_ar_e30_masknear
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/a2m
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_HIST_MASK: "near"}
+
+- id: A40-BATTMASK-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-A2mask-first-s0, A40-A2mask-first-s1, A40-A2mask-first-s2, A40-A2mask-first-s3, A40-A2mask-first-s4, A40-A2mask-near-s0, A40-A2mask-near-s1, A40-A2mask-near-s2, A40-A2mask-near-s3, A40-A2mask-near-s4]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v20 2.4c A2 follow-up described: v20_verdict.py battmask (frame 0 masked / near frames masked, 1-50 against unmasked); log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py battmask"
+  pass_if: "m['rc'] == 0"
+
 
 - id: A40-fetch-rearrange_none-e30
   lane: a40cpu
@@ -3450,6 +5043,952 @@ tasks:
   online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
   output: closed_loop/e17
   env: {MWAM_TEXT_SOURCE: "cache"}
+
+# 11-24 plan v20 order 3: card 2 ar2_v3c (new H200; registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660); non-inferiority on swap and put
+- id: A40-fetch-ar2_v3c-e30
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 168
+  hypothesis: "fetch ar2_v3c_e30 from the relay (plan v20 card 2, new H200; sha256 checked; waits until it is there)"
+  command: "RUN=ar2_v3c TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-v20ar2v3c-smoke
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_v3c-e30]
+  requires_pass: [A40-fetch-ar2_v3c-e30]
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "smoke: ar2_v3c_e30, swap_blocks scene 1, one episode finishes on the A40 (closed_loop/v20smoke)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e30/export_e30.pt
+  label: ar2_v3c_e30_smoke
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "1"]
+  output: closed_loop/v20smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+  pass_if: "m.get('episodes', 0) >= 1"
+
+- id: A40-v20ar2v3c-swap-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20ar2v3c-smoke]
+  requires_pass: [A40-v20ar2v3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ar2_v3c_e30 on swap_blocks 1-100, paired with ar2_prop_e30 (closed_loop/g1); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e30/export_e30.pt
+  label: ar2_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c-swap-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20ar2v3c-smoke]
+  requires_pass: [A40-v20ar2v3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ar2_v3c_e30 on swap_blocks 1-100, paired with ar2_prop_e30 (closed_loop/g1); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e30/export_e30.pt
+  label: ar2_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c-swap-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20ar2v3c-smoke]
+  requires_pass: [A40-v20ar2v3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ar2_v3c_e30 on swap_blocks 1-100, paired with ar2_prop_e30 (closed_loop/g1); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e30/export_e30.pt
+  label: ar2_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c-swap-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20ar2v3c-smoke]
+  requires_pass: [A40-v20ar2v3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ar2_v3c_e30 on swap_blocks 1-100, paired with ar2_prop_e30 (closed_loop/g1); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e30/export_e30.pt
+  label: ar2_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c-swap-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20ar2v3c-smoke]
+  requires_pass: [A40-v20ar2v3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ar2_v3c_e30 on swap_blocks 1-100, paired with ar2_prop_e30 (closed_loop/g1); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e30/export_e30.pt
+  label: ar2_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c-swap-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20ar2v3c-smoke]
+  requires_pass: [A40-v20ar2v3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ar2_v3c_e30 on swap_blocks 1-100, paired with ar2_prop_e30 (closed_loop/g1); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e30/export_e30.pt
+  label: ar2_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c-swap-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20ar2v3c-smoke]
+  requires_pass: [A40-v20ar2v3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ar2_v3c_e30 on swap_blocks 1-100, paired with ar2_prop_e30 (closed_loop/g1); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e30/export_e30.pt
+  label: ar2_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c-swap-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20ar2v3c-smoke]
+  requires_pass: [A40-v20ar2v3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ar2_v3c_e30 on swap_blocks 1-100, paired with ar2_prop_e30 (closed_loop/g1); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e30/export_e30.pt
+  label: ar2_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c-swap-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20ar2v3c-smoke]
+  requires_pass: [A40-v20ar2v3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ar2_v3c_e30 on swap_blocks 1-100, paired with ar2_prop_e30 (closed_loop/g1); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e30/export_e30.pt
+  label: ar2_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c-swap-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20ar2v3c-smoke]
+  requires_pass: [A40-v20ar2v3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 MAIN (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ar2_v3c_e30 on swap_blocks 1-100, paired with ar2_prop_e30 (closed_loop/g1); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e30/export_e30.pt
+  label: ar2_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c-put-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20ar2v3c-smoke]
+  requires_pass: [A40-v20ar2v3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ar2_v3c_e30 on put_back_block 1-100, the same rule beside it; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e30/export_e30.pt
+  label: ar2_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c-put-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20ar2v3c-smoke]
+  requires_pass: [A40-v20ar2v3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ar2_v3c_e30 on put_back_block 1-100, the same rule beside it; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e30/export_e30.pt
+  label: ar2_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c-put-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20ar2v3c-smoke]
+  requires_pass: [A40-v20ar2v3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ar2_v3c_e30 on put_back_block 1-100, the same rule beside it; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e30/export_e30.pt
+  label: ar2_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c-put-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20ar2v3c-smoke]
+  requires_pass: [A40-v20ar2v3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ar2_v3c_e30 on put_back_block 1-100, the same rule beside it; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e30/export_e30.pt
+  label: ar2_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c-put-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20ar2v3c-smoke]
+  requires_pass: [A40-v20ar2v3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ar2_v3c_e30 on put_back_block 1-100, the same rule beside it; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e30/export_e30.pt
+  label: ar2_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c-put-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20ar2v3c-smoke]
+  requires_pass: [A40-v20ar2v3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ar2_v3c_e30 on put_back_block 1-100, the same rule beside it; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e30/export_e30.pt
+  label: ar2_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c-put-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20ar2v3c-smoke]
+  requires_pass: [A40-v20ar2v3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ar2_v3c_e30 on put_back_block 1-100, the same rule beside it; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e30/export_e30.pt
+  label: ar2_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c-put-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20ar2v3c-smoke]
+  requires_pass: [A40-v20ar2v3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ar2_v3c_e30 on put_back_block 1-100, the same rule beside it; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e30/export_e30.pt
+  label: ar2_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c-put-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20ar2v3c-smoke]
+  requires_pass: [A40-v20ar2v3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ar2_v3c_e30 on put_back_block 1-100, the same rule beside it; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e30/export_e30.pt
+  label: ar2_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c-put-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20ar2v3c-smoke]
+  requires_pass: [A40-v20ar2v3c-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 (registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660): ar2_v3c_e30 on put_back_block 1-100, the same rule beside it; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e30/export_e30.pt
+  label: ar2_v3c_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-ar2v3c-verdict
+  lane: a40cpu
+  kind: shell
+  after: [A40-v20ar2v3c-swap-s0, A40-v20ar2v3c-swap-s1, A40-v20ar2v3c-swap-s2, A40-v20ar2v3c-swap-s3, A40-v20ar2v3c-swap-s4, A40-v20ar2v3c-swap-s5, A40-v20ar2v3c-swap-s6, A40-v20ar2v3c-swap-s7, A40-v20ar2v3c-swap-s8, A40-v20ar2v3c-swap-s9, A40-v20ar2v3c-put-s0, A40-v20ar2v3c-put-s1, A40-v20ar2v3c-put-s2, A40-v20ar2v3c-put-s3, A40-v20ar2v3c-put-s4, A40-v20ar2v3c-put-s5, A40-v20ar2v3c-put-s6, A40-v20ar2v3c-put-s7, A40-v20ar2v3c-put-s8, A40-v20ar2v3c-put-s9]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v20 card 2 verdict: v20_verdict.py ar2v3c (non-inferiority margin -0.05 -> NO HARM / HARM / UNCERTAIN, swap and put; e10 described); log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py ar2v3c"
+  pass_if: "m['rc'] == 0"
+
+# described checkpoints after every MAIN evaluation (plan v20 section 5): swapT_long e45, ar2_v3c e10 (swap)
+- id: A40-fetch-swapT_long-e45
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 120
+  hypothesis: "fetch swapT_long_e45 from the relay (plan v20 card 3 described e45; sha256 checked; waits until it is there)"
+  command: "RUN=swapT_long TAG=e45 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-v20swTlong45-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_long-e45]
+  requires_pass: [A40-fetch-swapT_long-e45]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 described: swapT_long_e45 on swap_T 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_e45/export_e45.pt
+  label: swapT_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlong45-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_long-e45]
+  requires_pass: [A40-fetch-swapT_long-e45]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 described: swapT_long_e45 on swap_T 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_e45/export_e45.pt
+  label: swapT_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlong45-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_long-e45]
+  requires_pass: [A40-fetch-swapT_long-e45]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 described: swapT_long_e45 on swap_T 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_e45/export_e45.pt
+  label: swapT_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlong45-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_long-e45]
+  requires_pass: [A40-fetch-swapT_long-e45]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 described: swapT_long_e45 on swap_T 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_e45/export_e45.pt
+  label: swapT_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlong45-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_long-e45]
+  requires_pass: [A40-fetch-swapT_long-e45]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 described: swapT_long_e45 on swap_T 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_e45/export_e45.pt
+  label: swapT_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlong45-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_long-e45]
+  requires_pass: [A40-fetch-swapT_long-e45]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 described: swapT_long_e45 on swap_T 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_e45/export_e45.pt
+  label: swapT_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlong45-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_long-e45]
+  requires_pass: [A40-fetch-swapT_long-e45]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 described: swapT_long_e45 on swap_T 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_e45/export_e45.pt
+  label: swapT_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlong45-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_long-e45]
+  requires_pass: [A40-fetch-swapT_long-e45]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 described: swapT_long_e45 on swap_T 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_e45/export_e45.pt
+  label: swapT_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlong45-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_long-e45]
+  requires_pass: [A40-fetch-swapT_long-e45]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 described: swapT_long_e45 on swap_T 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_e45/export_e45.pt
+  label: swapT_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlong45-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_long-e45]
+  requires_pass: [A40-fetch-swapT_long-e45]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 3 described: swapT_long_e45 on swap_T 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_e45/export_e45.pt
+  label: swapT_long_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fetch-ar2_v3c-e10
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 168
+  hypothesis: "fetch ar2_v3c_e10 from the relay (plan v20 card 2 described e10; sha256 checked; waits until it is there)"
+  command: "RUN=ar2_v3c TAG=e10 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-v20ar2v3c10-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_v3c-e10]
+  requires_pass: [A40-fetch-ar2_v3c-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 described: ar2_v3c_e10 on swap_blocks 1-100 against ar2_prop_e10 (78/100, closed_loop/lc); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e10/export_e10.pt
+  label: ar2_v3c_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c10-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_v3c-e10]
+  requires_pass: [A40-fetch-ar2_v3c-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 described: ar2_v3c_e10 on swap_blocks 1-100 against ar2_prop_e10 (78/100, closed_loop/lc); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e10/export_e10.pt
+  label: ar2_v3c_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c10-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_v3c-e10]
+  requires_pass: [A40-fetch-ar2_v3c-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 described: ar2_v3c_e10 on swap_blocks 1-100 against ar2_prop_e10 (78/100, closed_loop/lc); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e10/export_e10.pt
+  label: ar2_v3c_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c10-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_v3c-e10]
+  requires_pass: [A40-fetch-ar2_v3c-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 described: ar2_v3c_e10 on swap_blocks 1-100 against ar2_prop_e10 (78/100, closed_loop/lc); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e10/export_e10.pt
+  label: ar2_v3c_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c10-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_v3c-e10]
+  requires_pass: [A40-fetch-ar2_v3c-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 described: ar2_v3c_e10 on swap_blocks 1-100 against ar2_prop_e10 (78/100, closed_loop/lc); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e10/export_e10.pt
+  label: ar2_v3c_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c10-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_v3c-e10]
+  requires_pass: [A40-fetch-ar2_v3c-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 described: ar2_v3c_e10 on swap_blocks 1-100 against ar2_prop_e10 (78/100, closed_loop/lc); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e10/export_e10.pt
+  label: ar2_v3c_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c10-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_v3c-e10]
+  requires_pass: [A40-fetch-ar2_v3c-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 described: ar2_v3c_e10 on swap_blocks 1-100 against ar2_prop_e10 (78/100, closed_loop/lc); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e10/export_e10.pt
+  label: ar2_v3c_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c10-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_v3c-e10]
+  requires_pass: [A40-fetch-ar2_v3c-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 described: ar2_v3c_e10 on swap_blocks 1-100 against ar2_prop_e10 (78/100, closed_loop/lc); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e10/export_e10.pt
+  label: ar2_v3c_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c10-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_v3c-e10]
+  requires_pass: [A40-fetch-ar2_v3c-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 described: ar2_v3c_e10 on swap_blocks 1-100 against ar2_prop_e10 (78/100, closed_loop/lc); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e10/export_e10.pt
+  label: ar2_v3c_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20ar2v3c10-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_v3c-e10]
+  requires_pass: [A40-fetch-ar2_v3c-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 2 described: ar2_v3c_e10 on swap_blocks 1-100 against ar2_prop_e10 (78/100, closed_loop/lc); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_v3c_e10/export_e10.pt
+  label: ar2_v3c_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+# cover without history (new H200 filler, plan v20 section 5; main-table cell, described)
+- id: A40-fetch-cover_none-e30
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 240
+  hypothesis: "fetch cover_none_e30 from the relay (new H200 filler; sha256 checked; waits until it is there)"
+  command: "RUN=cover_none TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-covnone30-smoke
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-cover_none-e30, A40-prep2-cover_blocks]
+  requires_pass: [A40-fetch-cover_none-e30, A40-prep2-cover_blocks]
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "smoke: cover_none_e30, cover_blocks scene 1, one episode finishes on the A40 (closed_loop/e6smoke)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_none_e30/export_e30.pt
+  label: cover_none_e30_smoke
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "1"]
+  output: closed_loop/e6smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+  pass_if: "m.get('episodes', 0) >= 1"
+
+- id: A40-covnone30-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-covnone30-smoke]
+  requires_pass: [A40-covnone30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table cell cover without history: cover_none_e30 on cover_blocks 1-100 (closed_loop/e6); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_none_e30/export_e30.pt
+  label: cover_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-covnone30-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-covnone30-smoke]
+  requires_pass: [A40-covnone30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table cell cover without history: cover_none_e30 on cover_blocks 1-100 (closed_loop/e6); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_none_e30/export_e30.pt
+  label: cover_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-covnone30-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-covnone30-smoke]
+  requires_pass: [A40-covnone30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table cell cover without history: cover_none_e30 on cover_blocks 1-100 (closed_loop/e6); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_none_e30/export_e30.pt
+  label: cover_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-covnone30-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-covnone30-smoke]
+  requires_pass: [A40-covnone30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table cell cover without history: cover_none_e30 on cover_blocks 1-100 (closed_loop/e6); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_none_e30/export_e30.pt
+  label: cover_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-covnone30-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-covnone30-smoke]
+  requires_pass: [A40-covnone30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table cell cover without history: cover_none_e30 on cover_blocks 1-100 (closed_loop/e6); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_none_e30/export_e30.pt
+  label: cover_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-covnone30-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-covnone30-smoke]
+  requires_pass: [A40-covnone30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table cell cover without history: cover_none_e30 on cover_blocks 1-100 (closed_loop/e6); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_none_e30/export_e30.pt
+  label: cover_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-covnone30-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-covnone30-smoke]
+  requires_pass: [A40-covnone30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table cell cover without history: cover_none_e30 on cover_blocks 1-100 (closed_loop/e6); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_none_e30/export_e30.pt
+  label: cover_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-covnone30-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-covnone30-smoke]
+  requires_pass: [A40-covnone30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table cell cover without history: cover_none_e30 on cover_blocks 1-100 (closed_loop/e6); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_none_e30/export_e30.pt
+  label: cover_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-covnone30-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-covnone30-smoke]
+  requires_pass: [A40-covnone30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table cell cover without history: cover_none_e30 on cover_blocks 1-100 (closed_loop/e6); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_none_e30/export_e30.pt
+  label: cover_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-covnone30-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-covnone30-smoke]
+  requires_pass: [A40-covnone30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table cell cover without history: cover_none_e30 on cover_blocks 1-100 (closed_loop/e6); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_none_e30/export_e30.pt
+  label: cover_none_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-COVNONE-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-covnone30-s0, A40-covnone30-s1, A40-covnone30-s2, A40-covnone30-s3, A40-covnone30-s4, A40-covnone30-s5, A40-covnone30-s6, A40-covnone30-s7, A40-covnone30-s8, A40-covnone30-s9]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "cover without history described: v20_verdict.py covnone (against cover_ar_e30 / cover_arprop_e30); log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py covnone"
+  pass_if: "m['rc'] == 0"
+
 
 # ------------------------------------------------------------------------------------------------ cpu lane
 - id: X3
@@ -30001,6 +32540,7 @@ tasks:
 
 - id: A40-MAIN2-rearrange_ar-rearr-s0
   lane: a40
+  hold: true        # 11-24 user / plan v20 section 5 order 4: second pass only for the four tasks at target
   kind: closed_loop
   after: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
   requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
@@ -30018,6 +32558,7 @@ tasks:
 
 - id: A40-MAIN2-rearrange_ar-rearr-s1
   lane: a40
+  hold: true        # 11-24 user / plan v20 section 5 order 4: second pass only for the four tasks at target
   kind: closed_loop
   after: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
   requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
@@ -30035,6 +32576,7 @@ tasks:
 
 - id: A40-MAIN2-rearrange_ar-rearr-s2
   lane: a40
+  hold: true        # 11-24 user / plan v20 section 5 order 4: second pass only for the four tasks at target
   kind: closed_loop
   after: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
   requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
@@ -30052,6 +32594,7 @@ tasks:
 
 - id: A40-MAIN2-rearrange_ar-rearr-s3
   lane: a40
+  hold: true        # 11-24 user / plan v20 section 5 order 4: second pass only for the four tasks at target
   kind: closed_loop
   after: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
   requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
@@ -30069,6 +32612,7 @@ tasks:
 
 - id: A40-MAIN2-rearrange_ar-rearr-s4
   lane: a40
+  hold: true        # 11-24 user / plan v20 section 5 order 4: second pass only for the four tasks at target
   kind: closed_loop
   after: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
   requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
@@ -30086,6 +32630,7 @@ tasks:
 
 - id: A40-MAIN2-rearrange_ar-rearr-s5
   lane: a40
+  hold: true        # 11-24 user / plan v20 section 5 order 4: second pass only for the four tasks at target
   kind: closed_loop
   after: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
   requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
@@ -30103,6 +32648,7 @@ tasks:
 
 - id: A40-MAIN2-rearrange_ar-rearr-s6
   lane: a40
+  hold: true        # 11-24 user / plan v20 section 5 order 4: second pass only for the four tasks at target
   kind: closed_loop
   after: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
   requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
@@ -30120,6 +32666,7 @@ tasks:
 
 - id: A40-MAIN2-rearrange_ar-rearr-s7
   lane: a40
+  hold: true        # 11-24 user / plan v20 section 5 order 4: second pass only for the four tasks at target
   kind: closed_loop
   after: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
   requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
@@ -30137,6 +32684,7 @@ tasks:
 
 - id: A40-MAIN2-rearrange_ar-rearr-s8
   lane: a40
+  hold: true        # 11-24 user / plan v20 section 5 order 4: second pass only for the four tasks at target
   kind: closed_loop
   after: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
   requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
@@ -30154,6 +32702,7 @@ tasks:
 
 - id: A40-MAIN2-rearrange_ar-rearr-s9
   lane: a40
+  hold: true        # 11-24 user / plan v20 section 5 order 4: second pass only for the four tasks at target
   kind: closed_loop
   after: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
   requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrAR30]
@@ -30171,6 +32720,7 @@ tasks:
 
 - id: A40-MAIN2-swapT_ar-swapT-s0
   lane: a40
+  hold: true        # 11-24 user / plan v20 section 5 order 4: second pass only for the four tasks at target
   kind: closed_loop
   after: [A40-prep2-swap_T, A40-fetch-swapTAR30]
   requires_pass: [A40-prep2-swap_T, A40-fetch-swapTAR30]
@@ -30188,6 +32738,7 @@ tasks:
 
 - id: A40-MAIN2-swapT_ar-swapT-s1
   lane: a40
+  hold: true        # 11-24 user / plan v20 section 5 order 4: second pass only for the four tasks at target
   kind: closed_loop
   after: [A40-prep2-swap_T, A40-fetch-swapTAR30]
   requires_pass: [A40-prep2-swap_T, A40-fetch-swapTAR30]
@@ -30205,6 +32756,7 @@ tasks:
 
 - id: A40-MAIN2-swapT_ar-swapT-s2
   lane: a40
+  hold: true        # 11-24 user / plan v20 section 5 order 4: second pass only for the four tasks at target
   kind: closed_loop
   after: [A40-prep2-swap_T, A40-fetch-swapTAR30]
   requires_pass: [A40-prep2-swap_T, A40-fetch-swapTAR30]
@@ -30222,6 +32774,7 @@ tasks:
 
 - id: A40-MAIN2-swapT_ar-swapT-s3
   lane: a40
+  hold: true        # 11-24 user / plan v20 section 5 order 4: second pass only for the four tasks at target
   kind: closed_loop
   after: [A40-prep2-swap_T, A40-fetch-swapTAR30]
   requires_pass: [A40-prep2-swap_T, A40-fetch-swapTAR30]
@@ -30239,6 +32792,7 @@ tasks:
 
 - id: A40-MAIN2-swapT_ar-swapT-s4
   lane: a40
+  hold: true        # 11-24 user / plan v20 section 5 order 4: second pass only for the four tasks at target
   kind: closed_loop
   after: [A40-prep2-swap_T, A40-fetch-swapTAR30]
   requires_pass: [A40-prep2-swap_T, A40-fetch-swapTAR30]
@@ -30256,6 +32810,7 @@ tasks:
 
 - id: A40-MAIN2-swapT_ar-swapT-s5
   lane: a40
+  hold: true        # 11-24 user / plan v20 section 5 order 4: second pass only for the four tasks at target
   kind: closed_loop
   after: [A40-prep2-swap_T, A40-fetch-swapTAR30]
   requires_pass: [A40-prep2-swap_T, A40-fetch-swapTAR30]
@@ -30273,6 +32828,7 @@ tasks:
 
 - id: A40-MAIN2-swapT_ar-swapT-s6
   lane: a40
+  hold: true        # 11-24 user / plan v20 section 5 order 4: second pass only for the four tasks at target
   kind: closed_loop
   after: [A40-prep2-swap_T, A40-fetch-swapTAR30]
   requires_pass: [A40-prep2-swap_T, A40-fetch-swapTAR30]
@@ -30290,6 +32846,7 @@ tasks:
 
 - id: A40-MAIN2-swapT_ar-swapT-s7
   lane: a40
+  hold: true        # 11-24 user / plan v20 section 5 order 4: second pass only for the four tasks at target
   kind: closed_loop
   after: [A40-prep2-swap_T, A40-fetch-swapTAR30]
   requires_pass: [A40-prep2-swap_T, A40-fetch-swapTAR30]
@@ -30307,6 +32864,7 @@ tasks:
 
 - id: A40-MAIN2-swapT_ar-swapT-s8
   lane: a40
+  hold: true        # 11-24 user / plan v20 section 5 order 4: second pass only for the four tasks at target
   kind: closed_loop
   after: [A40-prep2-swap_T, A40-fetch-swapTAR30]
   requires_pass: [A40-prep2-swap_T, A40-fetch-swapTAR30]
@@ -30324,6 +32882,7 @@ tasks:
 
 - id: A40-MAIN2-swapT_ar-swapT-s9
   lane: a40
+  hold: true        # 11-24 user / plan v20 section 5 order 4: second pass only for the four tasks at target
   kind: closed_loop
   after: [A40-prep2-swap_T, A40-fetch-swapTAR30]
   requires_pass: [A40-prep2-swap_T, A40-fetch-swapTAR30]
