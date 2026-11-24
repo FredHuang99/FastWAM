@@ -9,7 +9,7 @@ MWAM_NOISE_SALT=r2 pairs (closed_loop/r2) of the same scenes = 200 pairs, the sa
   swapt    card 3: D = success(swapT_long e60) - success(swapT_arprop_h2 e30), swap_T 1-100 (closed_loop/v20); SESOI
            +0.15 -> TRAINING-LIMITED / NOT TRAINING-LIMITED / UNCERTAIN. Described: e45; swapT_arprop_h2 e30 against
            swapT_arprop (H100) e30 (closed_loop/e6).
-  rankv3c  card 4: D = success(ranking_v3c e30, closed_loop/v20) - success(ranking_arprop e30, closed_loop/e6); SESOI
+  rankv3c  card 4: D = success(ranking_v3a e30, closed_loop/v20) - success(ranking_arprop e30, closed_loop/e6); SESOI
            +0.10 -> TIMELY WRITING HELPS / NO HELP / UNCERTAIN; ceiling: ranking_arprop e30 >= 95 -> non-inferiority,
            margin -0.05 -> NO HARM / HARM / UNCERTAIN. Described: success against 100.
   ar2v3c   card 2: non-inferiority, margin -0.05, swap_blocks 1-100 e30 (closed_loop/v20 against ar2_prop e30,
@@ -164,19 +164,19 @@ def batclk():
 def rankv3c():
     task = "blocks_ranking_try"
     order, ref = success("e6", "ranking_arprop_e30", task)
-    _, new = success("v20", "ranking_v3c_e30", task)
-    out = {"run": "card 4 ranking timely writer", "finished": {"ranking_v3c_e30": len(new), "ranking_arprop_e30": len(ref)}}
+    _, new = success("v20", "ranking_v3a_e30", task)
+    out = {"run": "card 4 ranking timely writer (ranking_v3a, user 18:32 option b)", "finished": {"ranking_v3a_e30": len(new), "ranking_arprop_e30": len(ref)}}
     if len(new) < 100 or len(ref) < 100:
         out["verdict"] = f"WAIT ({len(new)} / {len(ref)} of 100)"
         return out
     c = compare(new, ref, order)
     if c["ref"] >= 95:
         out["ceiling"] = f"ranking_arprop e30 {c['ref']}/100 >= 95: no verdict on HELPS; non-inferiority, margin -0.05"
-        with_extension(out, c, non_inferior(c), non_inferior, task, "ranking_v3c_e30", "v20", "ranking_arprop_e30", "e6")
+        with_extension(out, c, non_inferior(c), non_inferior, task, "ranking_v3a_e30", "v20", "ranking_arprop_e30", "e6")
     else:
         out["sesoi"] = 0.10
         rule = lambda x: three(x, 0.10, "TIMELY WRITING HELPS", "NO HELP")              # noqa: E731
-        with_extension(out, c, rule(c), rule, task, "ranking_v3c_e30", "v20", "ranking_arprop_e30", "e6")
+        with_extension(out, c, rule(c), rule, task, "ranking_v3a_e30", "v20", "ranking_arprop_e30", "e6")
     out["success_vs_100"] = f"{c['new']} vs 100 (pure-WAM best, self-reported)"
     return out
 

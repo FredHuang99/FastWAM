@@ -228,7 +228,25 @@ swapT_long | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dens
 #   UNCERTAIN (pre-set extension: both again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule).
 #   Ceiling: ranking_arprop e30 >= 95/100 -> no verdict; then non-inferiority, margin -0.05, the three outcomes of ar2_v3c.
 #   Described: success against 100 (pure-WAM best, self-reported); confirm-press classes if the split exists.
-ranking_v3c | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_blocks_ranking_try_v1] data.tasks=[blocks_ranking_try] history.variant=arprop history.event_max=69 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_blocks_ranking_try_v3c.json] | test -f outputs/memory_v2/press/dense_blocks_ranking_try_v1/.verified && test -f outputs/fullft/READY_arprop_events_blocks_ranking_try_v3c
+# ranking_v3c | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_blocks_ranking_try_v1] data.tasks=[blocks_ranking_try] history.variant=arprop history.event_max=69 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_blocks_ranking_try_v3c.json] | test -f outputs/memory_v2/press/dense_blocks_ranking_try_v1/.verified && test -f outputs/fullft/READY_arprop_events_blocks_ranking_try_v3c
+# 11-24 18:35 WITHDRAWN before any run (go file removed 18:30): with the timely writer's thresholds (delta 0.012,
+# min_path 0.015) 19 of the 50 ranking demos have more than 69 events (median 63, max 103; v20_prep_5090.sh 18:25),
+# against 13 with rule A (task_v3c_events.py --no-write 18:32): the record's oldest entries would be dropped in more
+# demos than in the control, so timing and truncation would be confounded. User 18:32 chose (b): card 4 = ranking_v3a.
+#
+# Card 4, as decided by the user 11-24 18:32 (option b; a deviation from the reading registered at 5c5c660, approved).
+# ranking_v3a = ranking_arprop's exact line (69 entries, seed 17, rule A's thresholds delta 0.015 / min_path 0.03, so the
+# SAME events as the control: 13 of 50 demos above 69 in both) with ONLY the write timing made timely: lag 0 and the
+# provisional write 0.002 (an event visible as soon as the height has come back 0.2 cm from the turning point). Events
+# file events_blocks_ranking_try_v3a.json (task_v3c_events.py --delta 0.015 --min-path 0.03 --tag v3a --relay).
+# Registered reading (11-24 18:40, before any ranking_v3a episode; A40, blocks_ranking_try 1-100, default noise; H200
+# class) = card 4's reading with ranking_v3a in place of ranking_v3c, unchanged otherwise:
+#   MAIN: D = success(ranking_v3a e30) - success(ranking_arprop e30), paired by scene, paired bootstrap 95 % CI
+#   (10,000, seed 0); SESOI +0.10: CI lower > +0.10 -> TIMELY WRITING HELPS; CI upper < +0.10 -> NO HELP; otherwise
+#   UNCERTAIN (pre-set extension: both again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule).
+#   Ceiling: ranking_arprop e30 >= 95/100 -> no verdict; then non-inferiority, margin -0.05, the three outcomes of ar2_v3c.
+#   Described: success against 100 (pure-WAM best, self-reported); confirm-press classes (ranking_split.py).
+ranking_v3a | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_blocks_ranking_try_v1] data.tasks=[blocks_ranking_try] history.variant=arprop history.event_max=69 history.lag=0 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_blocks_ranking_try_v3a.json] | test -f outputs/memory_v2/press/dense_blocks_ranking_try_v1/.verified && test -f outputs/fullft/READY_arprop_events_blocks_ranking_try_v3a
 #
 # Card 2 (plan v20 3.1, P1; after cards 3, 4 and the ready P0 cards).
 # ar2_v3c = ar2_prop's exact line (two-task body record, seed 17) with ONLY the write timing changed to the timely

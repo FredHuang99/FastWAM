@@ -42,7 +42,7 @@ F=$R/outputs/fullft
 # prepare_data: fetch, inside the job, what the line needs and is not here yet (no programs on the login node):
 #   * data.roots dense_<task>_v1 from the cache relay (cache_relay.py get = download + sha256 of every file against its
 #     RELAY_MANIFEST + cache markers); a folder already here but not verified is verified; -> .verified
-#   * data.events files: events_<task>_v3c.json from the relay prefix diag/<task>_v3c (task_v3c_events.py --relay on the
+#   * data.events files: events_<task>_v3c.json / _v3a.json from the relay prefix diag/<task>_<tag> (task_v3c_events.py --relay on the
 #     5090); events_<task>.json of the B1 tasks from diag/events_b1 (as fetch_b3.sh); an existing file is never replaced
 # Returns 1 (with the reason in the log) when something cannot be fetched.
 qline() { grep -v '^[[:space:]]*#' $R/scripts/gaas/gaas_queue.txt | awk -F'|' -v r="$1" '{x = $1; gsub(/[[:space:]]/, "", x)} x == r'; }
@@ -70,7 +70,7 @@ prepare_data() {
     stem=$(basename $E .json); task=${stem#events_}
     mkdir -p $(dirname $E)
     case "$stem" in
-      *_v3c) IN=$F/relay_in/${task}; mkdir -p $IN
+      *_v3[a-z]) IN=$F/relay_in/${task}; mkdir -p $IN
              (cd $R && HF_HUB_DOWNLOAD_TIMEOUT=60 $HFPY scripts/memory_v2/migrate/relay.py get --prefix diag/${task} --out $IN 2>&1 | grep "\[relay\]" | tail -n 2) ;;
       *)     IN=$F/relay_in/events_b1; mkdir -p $IN
              (cd $R && HF_HUB_DOWNLOAD_TIMEOUT=60 $HFPY scripts/memory_v2/migrate/relay.py get --prefix diag/events_b1 --out $IN 2>&1 | grep "\[relay\]" | tail -n 2) ;;
