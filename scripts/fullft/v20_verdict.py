@@ -29,11 +29,17 @@ MWAM_NOISE_SALT=r2 pairs (closed_loop/r2) of the same scenes = 200 pairs, the sa
            e10 / e20, success against 28 and 20; a main-table entry from these carries a dagger
   rankarp  ranking_arprop e30 (main-table cell, closed_loop/e6), described: success; paired counts against ranking_ar e30.
   covnone  cover_none e30 (main-table cell, closed_loop/e6), described: paired counts against cover_ar / cover_arprop e30.
+  rearrpw  card 6 (registered 11-24 above rearr_pw, opened by supplement 1): MAIN = never-pressed rate (rearr_split.py
+           classes 'never pressed: ...'), D = rate(rearr_pw e30, closed_loop/v20) - rate(rearr_v3c_h2 e30,
+           closed_loop/rv3c), paired; SESOI = -0.5 x the control's never-pressed rate; in order: CI upper < 0 and
+           D <= SESOI -> PRESS MISS HALVED; CI upper < 0 -> PART; CI lower > SESOI -> NOT HALVED; otherwise UNCERTAIN
+           (r2 extension, 200 pairs). Floor: control never-pressed >= 8/100, else described only. Guard: pressed-twice
+           D CI lower > +0.08 -> OVERCORRECTED. Described: success against the control and 100, all classes, e10 / e20.
   battmask A2 follow-up (plan v20 2.4c, SHORT MEMORY NEEDED): battery_ar e30, battery_try 1-50, frame 0 masked / the two
            near frames masked (MWAM_HIST_MASK first / near, closed_loop/a2m), against the same 50 scenes unmasked
            (closed_loop/e6). Described only.
 A verdict needs all its MAIN scenes finished on both sides (else WAIT). Writes outputs/fullft/V20_<NAME>.json.
-  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py rv3ch2|swapt|swapth100|rankv3c|ar2v3c|rankarp|covnone|batclk|battmask|presstold|obss|ranknone|obsmatch
+  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py rv3ch2|swapt|swapth100|rankv3c|ar2v3c|rankarp|covnone|batclk|battmask|presstold|obss|ranknone|obsmatch|rearrpw
 """
 from __future__ import annotations
 
@@ -202,6 +208,82 @@ def presstold():
     return out
 
 
+def rearr_classes(folder, label):
+    """{scene: rearr_split class} for the finished episodes of a run (rearr_split.classify, unchanged)."""
+    split = _module("rearr_split", "rearr_split.py")
+    root = dv.O / folder / label / "on" / "rearrange_blocks"
+    out = {}
+    for d in sorted(root.glob("seed_*")):
+        res, act = d / "result.json", d / "executed_actions.jsonl"
+        if not d.name[5:].isdigit() or not res.exists() or not act.exists():
+            continue
+        rows = [json.loads(x) for x in act.read_text().splitlines() if x.strip()]
+        if rows:
+            out[int(d.name[5:])], _ = split.classify(rows, bool(json.loads(res.read_text()).get("success")))
+    return out
+
+
+def rearrpw():
+    task = "rearrange_blocks"
+    order, ref_ok = success("rv3c", "rearr_v3c_h2_e30", task)
+    _, new_ok = success("v20", "rearr_pw_e30", task)
+    out = {"run": "card 6 rearr_pw (pre-event weighting on the press approach)",
+           "finished": {"rearr_pw_e30": len(new_ok), "rearr_v3c_h2_e30": len(ref_ok)}}
+    if len(new_ok) < 100 or len(ref_ok) < 100:
+        out["verdict"] = f"WAIT ({len(new_ok)} / {len(ref_ok)} of 100)"
+        return out
+    cn, cr = rearr_classes("v20", "rearr_pw_e30"), rearr_classes("rv3c", "rearr_v3c_h2_e30")
+    never = lambda c: {x: int(v.startswith("never pressed")) for x, v in c.items()}          # noqa: E731
+    twice = lambda c: {x: int(v.startswith("pressed twice")) for x, v in c.items()}          # noqa: E731
+    from collections import Counter
+    out["classes"] = {"rearr_pw_e30": dict(Counter(cn.values())), "rearr_v3c_h2_e30": dict(Counter(cr.values()))}
+    n_ref = sum(never(cr).values())
+    out["control_never_pressed"] = n_ref
+    c = compare(never(cn), never(cr), order)
+    ct = compare(twice(cn), twice(cr), order)
+    out["described"] = {"success": compare(new_ok, ref_ok, order), "success_against_100": f"{sum(new_ok.values())}/100"}
+    out["guard_pressed_twice"] = dict(ct, overcorrected=ct["ci95"][0] > 0.08)
+
+    def rule(x, ref_rate):
+        sesoi = -0.5 * ref_rate
+        lo, hi = x["ci95"]
+        if hi < 0 and x["D"] <= sesoi:
+            return "PRESS MISS HALVED"
+        if hi < 0:
+            return "PART"
+        if lo > sesoi:
+            return "NOT HALVED"
+        return "UNCERTAIN"
+    if n_ref < 8:
+        out.update(main=c, verdict=f"NO VERDICT (floor: the control's never-pressed count {n_ref} < 8/100; described only)")
+    else:
+        out["sesoi"] = round(-0.5 * n_ref / 100, 4)
+        out.update(main=c, verdict=rule(c, n_ref / 100))
+        if out["verdict"] == "UNCERTAIN":
+            _, nr2 = success("r2", "rearr_pw_e30", task)
+            _, rr2 = success("r2", "rearr_v3c_h2_e30", task)
+            out["extension"] = {"r2_finished": {"rearr_pw_e30": len(nr2), "rearr_v3c_h2_e30": len(rr2)}}
+            if len(nr2) >= 100 and len(rr2) >= 100:
+                a = {("d", x): v for x, v in never(cn).items()}
+                a.update({("r2", x): v for x, v in never(rearr_classes("r2", "rearr_pw_e30")).items()})
+                b = {("d", x): v for x, v in never(cr).items()}
+                b.update({("r2", x): v for x, v in never(rearr_classes("r2", "rearr_v3c_h2_e30")).items()})
+                e = compare(a, b, [("d", x) for x in order] + [("r2", x) for x in order])
+                ref_rate = e["ref"] / max(1, e["scenes"])
+                out["extension"].update(pooled=e, sesoi=round(-0.5 * ref_rate, 4), verdict=rule(e, ref_rate))
+                out["verdict"] = f"UNCERTAIN at 100 pairs -> {rule(e, ref_rate)} at {e['scenes']} pairs (pre-set extension)"
+            else:
+                out["extension"]["verdict"] = "WAIT (r2 evaluations: the pre-set extension)"
+    if out["guard_pressed_twice"]["overcorrected"]:
+        out["verdict"] += " + OVERCORRECTED (pressed twice rose: D CI lower > +0.08)"
+    for tag in ("e10", "e20"):
+        _, x = success("v20", f"rearr_pw_{tag}", task)
+        if x:
+            out[f"described_{tag}"] = {"success": f"{sum(x.values())}/{len(x)}",
+                                       "classes": dict(Counter(rearr_classes("v20", f"rearr_pw_{tag}").values()))}
+    return out
+
+
 def obsmatch():
     task = "observe_and_pickup"
     order, ref = success("e6", "obs_ar_e30", task)
@@ -342,7 +424,7 @@ def battmask():
 def main():
     name = sys.argv[1] if len(sys.argv) > 1 else ""
     fns = {"rv3ch2": rv3ch2, "swapt": swapt, "swapth100": swapth100, "batclk": batclk, "rankv3c": rankv3c, "ar2v3c": ar2v3c, "rankarp": rankarp,
-           "covnone": covnone, "presstold": presstold, "obss": obss, "obsmatch": obsmatch, "ranknone": ranknone, "battmask": battmask}
+           "covnone": covnone, "presstold": presstold, "obss": obss, "obsmatch": obsmatch, "ranknone": ranknone, "battmask": battmask, "rearrpw": rearrpw}
     if name not in fns:
         print(__doc__)
         return 2

@@ -289,6 +289,33 @@ cover_none | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dens
 #   Described: each button's over / right / under (D2's definitions); success by N1 + N2; e10 / e20.
 press_told | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_press_button_v1] data.tasks=[press_button] data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_press_button_v3c.json] history.variant=arprop history.event_max=32 history.lag=0 history.ordinal=16 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.text_table=/workspace/FastWAM-memory2/outputs/fullft/press_told/TOLD_TEXT.pt | test -f outputs/memory_v2/press/dense_press_button_v1/.verified && test -s outputs/fullft/events/events_press_button_v3c.json && test -s outputs/fullft/press_told/TOLD_TEXT.pt
 #
+# Card 6 (plan v20 3.2, P0), opened 11-24 20:30 by supplement 1 (A40-SUP1-press-depth-report, run 18:33, rearr_press_depth.py;
+# the cap's travel is not logged: EE link against the button base only). rearrange_arprop e30, the 17 never-pressed
+# episodes: closest horizontal EE-button distance 0.2-0.9 cm (median 0.7), none ever farther than 4 cm; lowest EE height
+# above the button base while within 4 cm 0.192-0.223 m (median 0.220); every counted press (83 episodes) happened at
+# 0.186-0.191 m (median 0.189). Same picture for rearrange_ar (33) and rearrange_clock (7). The arm reached the button
+# and stopped about 3 cm too high: plan card 6's condition "the hand over the button, pressed too shallow" -> opened.
+# 16 / 17 still hold a left 'bottom' entry at the last decision, written at that height (dz median 0.220).
+# Line: rearr_v3c_h2's line + model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24
+# model.decision_pre_kinds=[bottom] (config.py 11-23 (1b): only the pre-event window, only press-bottom events; the
+# post-confirmation window is off). Starting values of the card (weight 3, P = 24) unchanged.
+# rearr_pw = rearr_v3c_h2's line + pre-event weighting on the press approach: the training anchors in the P frames
+# before a 'bottom' event get loss weight 3 on the video and action losses (model.decision_pre_window, default off since
+# 607af00; P = 24 [starting value]; kind 'bottom' only).
+# Why: 17 / 100 rearrange_arprop episodes end "never pressed"; in 16 of them the record holds a left-arm bottom entry
+# at the last decision (1: close and top only; rearr_ledger.py, A40 11-22): a press-like motion the simulator did not
+# count. A rearrange demo holds one press (about 50 in the training set). Runs only after the button-depth report
+# (rearr_press_depth) shows the arm was at the button.
+# Registered reading (before any rearr_pw episode; A40, rearrange_blocks 1-100, default noise; both arms H200 class):
+#   MAIN: never-pressed rate (rearr_split.py class): D = rate(rearr_pw e30) - rate(rearr_v3c_h2 e30), paired by scene,
+#   paired bootstrap 95 % CI (10,000, seed 0); SESOI = -0.5 x the control's never-pressed rate. In this order:
+#   CI upper < 0 and D <= SESOI -> PRESS MISS HALVED; CI upper < 0 -> PART; CI lower > SESOI -> NOT HALVED; otherwise
+#   UNCERTAIN (pre-set extension: both again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule).
+#   Floor: the control's never-pressed count >= 8/100, else no verdict (described only).
+#   Guard: "pressed twice" may rise by at most +0.08 (D_twice CI lower > +0.08 -> OVERCORRECTED, reported with the outcome).
+#   Described: success 1-100 against rearr_v3c_h2 and against 100 (pure-WAM best, self-reported); all classes; e10 / e20.
+rearr_pw | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks_v3c.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[bottom] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && test -f outputs/fullft/READY_arprop_events_rearrange_blocks_v3c
+#
 # Card 8 (plan v20 3.2, P0; user 11-24 approved running the benchmark's generator and > 50 demos). Scenes: 5090
 # gen_obs_5090.sh (render check against the official demos first; seeds from 10,000,000: disjoint from the official
 # demos', the seed-42 evaluation bank's and the 5090 development banks'); caches dense_observe_and_pickup_gen155_v1 (155
