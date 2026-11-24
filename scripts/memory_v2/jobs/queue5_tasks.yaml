@@ -1966,6 +1966,17 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py obss"
   pass_if: "m['rc'] == 0"
 
+# 11-24 card 7: the A40 can build the match frame online (transformers' Dinov2Model, scipy, the pinned encoder file
+# with its sha256, the RMBench camera config for the candidate area) -- checked now, hours before obs_match exists
+- id: A40-match-precheck-report
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v20 card 7 precheck (CPU): match.candidate_area() from the RMBench config, match.Scorer on the CPU (downloads facebook/dinov2-base at the pinned revision, checks the file sha256); log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python -c \"import scipy, transformers; from fastwam.fullft import match; print('area', match.candidate_area()); s = match.Scorer('cpu'); print('encoder OK', match.MODEL, match.REVISION, match.SHA256[:16], transformers.__version__)\""
+  pass_if: "m['rc'] == 0"
+
 # card 7 obs_match (new H200; registered 11-24 in gaas_queue.txt above obs_match); the closed loop builds the match frame from the scene's frame 0 (match.py)
 - id: A40-fetch-obs_match-e30
   lane: a40cpu
