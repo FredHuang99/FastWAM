@@ -19,13 +19,16 @@ MWAM_NOISE_SALT=r2 pairs (closed_loop/r2) of the same scenes = 200 pairs, the sa
            closed_loop/e6); SESOI +0.15, the same outcomes; reported beside card 3, never pooled with it
   batclk   battery_clock e30 (H100 filler, main-table clock cell, closed_loop/e6), described against battery_ar /
            battery_arprop e30
+  presstold card 5: D = success(press_told e30, closed_loop/v20, MWAM_TOLD_COUNTS=1) - success(press_v3c e30,
+           closed_loop/e17); SESOI +0.30 -> READING THE TARGET IS THE BOTTLENECK / NOT THE MAIN BOTTLENECK / UNCERTAIN.
+           Described: each button's over / right / under (deed_verdict.per_button, D2's definitions); success by N1 + N2
   rankarp  ranking_arprop e30 (main-table cell, closed_loop/e6), described: success; paired counts against ranking_ar e30.
   covnone  cover_none e30 (main-table cell, closed_loop/e6), described: paired counts against cover_ar / cover_arprop e30.
   battmask A2 follow-up (plan v20 2.4c, SHORT MEMORY NEEDED): battery_ar e30, battery_try 1-50, frame 0 masked / the two
            near frames masked (MWAM_HIST_MASK first / near, closed_loop/a2m), against the same 50 scenes unmasked
            (closed_loop/e6). Described only.
 A verdict needs all its MAIN scenes finished on both sides (else WAIT). Writes outputs/fullft/V20_<NAME>.json.
-  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py rv3ch2|swapt|swapth100|rankv3c|ar2v3c|rankarp|covnone|batclk|battmask
+  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py rv3ch2|swapt|swapth100|rankv3c|ar2v3c|rankarp|covnone|batclk|battmask|presstold
 """
 from __future__ import annotations
 
@@ -161,6 +164,39 @@ def batclk():
     return out
 
 
+def presstold():
+    task = "press_button"
+    order, ref = success("e17", "press_v3c_e30", task)
+    _, new = success("v20", "press_told_e30", task)
+    out = {"run": "card 5 press_told (diagnostic; never a main-table entry)", "sesoi": 0.30,
+           "finished": {"press_told_e30": len(new), "press_v3c_e30": len(ref)}}
+    if len(new) < 100 or len(ref) < 100:
+        out["verdict"] = f"WAIT ({len(new)} / {len(ref)} of 100)"
+    else:
+        c = compare(new, ref, order)
+        rule = lambda x: three(x, 0.30, "READING THE TARGET IS THE BOTTLENECK", "NOT THE MAIN BOTTLENECK")   # noqa: E731
+        with_extension(out, c, rule(c), rule, task, "press_told_e30", "v20", "press_v3c_e30", "e17")
+    try:
+        rows_new, rows_ref = dv.press_rows("v20", "press_told_e30"), dv.press_rows("e17", "press_v3c_e30")
+        out["described"] = {"press_told_e30": dv.per_button(rows_new), "press_v3c_e30": dv.per_button(rows_ref)}
+        by = {}
+        for s_, v in rows_new.items():
+            c1, c2 = v.get("card_1"), v.get("card_2")
+            if c1 is not None and c2 is not None:
+                k = int(c1) + int(c2)
+                by.setdefault(k, [0, 0])
+                by[k][0] += int(bool(new.get(s_)))
+                by[k][1] += 1
+        out["described"]["success_by_N1_plus_N2"] = {k: f"{a}/{b}" for k, (a, b) in sorted(by.items())}
+    except Exception as e:                                                     # noqa: BLE001
+        out["described_error"] = f"{type(e).__name__}: {e}"
+    for tag in ("e10", "e20"):
+        _, x = success("v20", f"press_told_{tag}", task)
+        if x:
+            out[f"described_{tag}"] = compare(x, ref, order)
+    return out
+
+
 def rankv3c():
     task = "blocks_ranking_try"
     order, ref = success("e6", "ranking_arprop_e30", task)
@@ -248,7 +284,7 @@ def battmask():
 def main():
     name = sys.argv[1] if len(sys.argv) > 1 else ""
     fns = {"rv3ch2": rv3ch2, "swapt": swapt, "swapth100": swapth100, "batclk": batclk, "rankv3c": rankv3c, "ar2v3c": ar2v3c, "rankarp": rankarp,
-           "covnone": covnone, "battmask": battmask}
+           "covnone": covnone, "presstold": presstold, "battmask": battmask}
     if name not in fns:
         print(__doc__)
         return 2

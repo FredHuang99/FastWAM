@@ -78,6 +78,20 @@ prepare_data() {
     [ -s $IN/$stem.json ] || { echo "[prep] $run: $stem.json is not on the relay"; return 1; }
     cp $IN/$stem.json $E && echo "[prep] $run: $stem.json fetched ($(stat -c %s $E) bytes, sha256 $(sha256sum $E | cut -c1-16))"
   done
+  # 11-24 plan v20 card 5: data.text_table (press_told_text.py on the 5090 -> relay diag/press_told)
+  ev=$(echo "$sets" | grep -o 'data.text_table=[^ ]*' | sed 's/data.text_table=//')
+  if [ -n "$ev" ]; then
+    E=$R/${ev#/workspace/FastWAM-memory2/}
+    if [ ! -s $E ]; then
+      IN=$F/relay_in/press_told; mkdir -p $IN $(dirname $E)
+      (cd $R && HF_HUB_DOWNLOAD_TIMEOUT=60 $HFPY scripts/memory_v2/migrate/relay.py get --prefix diag/press_told --out $IN 2>&1 | grep "\[relay\]" | tail -n 2)
+      [ -s $IN/$(basename $E) ] || { echo "[prep] $run: $(basename $E) is not on the relay"; return 1; }
+      want=$(grep -o '"pt_sha256": "[0-9a-f]*"' $IN/TOLD_TEXT.json 2>/dev/null | cut -d'"' -f4)
+      got=$(sha256sum $IN/$(basename $E) | cut -d' ' -f1)
+      [ -n "$want" ] && [ "$want" = "$got" ] || { echo "[prep] $run: text table sha256 $got != TOLD_TEXT.json's '$want'"; return 1; }
+      cp $IN/$(basename $E) $E && cp $IN/TOLD_TEXT.json $(dirname $E)/ && echo "[prep] $run: text table fetched (sha256 ${got:0:16})"
+    fi
+  fi
   return 0
 }
 # Slot job (RUN=@<slot>, plan v20 2.4a): pick the first ready run of the slot's list (scripts/gaas/slots.txt).

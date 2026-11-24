@@ -113,6 +113,23 @@ def ee_poses(environment):
 # Used to split failures into "picked the wrong object", "picked nothing" and "moved before the wall" (obs_split.py).
 # With the flag off nothing below runs: the logs are exactly as before.
 OBJECT_LOG = os.environ.get('MWAM_OBJECT_LOG', '').strip() == '1'
+# 11-24 plan v20 card 5 (press_told): MWAM_TOLD_COUNTS=1 appends the scene's two card values to the instruction the
+# policy receives (told.py, the same sentence the training text used). Privileged information: a diagnostic arm only,
+# never a main-table entry. Off (default): the instruction is exactly environment.get_instruction().
+TOLD_COUNTS = os.environ.get('MWAM_TOLD_COUNTS', '').strip() == '1'
+
+
+def told(environment):
+    if not TOLD_COUNTS:
+        return ''
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('mwam_told', str(Path(__file__).resolve().parent / 'told.py'))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    n1, n2 = getattr(environment, 'card_id_1', None), getattr(environment, 'card_id_2', None)
+    if n1 is None or n2 is None:
+        raise ValueError('MWAM_TOLD_COUNTS=1 needs a press_button scene (card_id_1 / card_id_2)')
+    return module.told_sentence(int(n1), int(n2))
 WATCH = ('fail_flag', 'get_obs_cnt', 'target_object_idx', 'eval_success')
 SKIP_ATTRS = ('robot', 'scene', 'cameras', 'viewer', 'renderer', 'engine', 'eval_video_ffmpeg')
 
@@ -290,7 +307,7 @@ def main():
             start = time.monotonic()
             payload = {'command': command, 'current_id': self.frame_id,
                 'observations': self.pending, 'task': self.config['task_name'],
-                'episode_seed': environment._memory_seed, 'instruction': environment.get_instruction()}
+                'episode_seed': environment._memory_seed, 'instruction': environment.get_instruction() + told(environment)}
             if getattr(self, 'inserted', None):
                 payload['inserted'] = self.inserted
             response = self.call(payload)

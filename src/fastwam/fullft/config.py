@@ -21,6 +21,10 @@ class DataConfig:
     episode_cache: int = 16                              # episodes kept open per worker
     zoom_root: str = ""                                  # 11-22 plan v19 3.3: folder of the zoom latents
                                                          # (scripts/fullft/build_zoom.py); needed with history.zoom
+    text_table: str = ""                                 # 11-24 plan v20 card 5 (press_told): a .pt file
+                                                         # {"episodes": {episode_id: instruction}, "by_instruction":
+                                                         # {instruction: {"text": [L, D]}}} (scripts/fullft/
+                                                         # press_told_text.py); "" = the cache's own text (unchanged)
 
 
 @dataclass

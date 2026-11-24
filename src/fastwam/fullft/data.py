@@ -32,6 +32,16 @@ def action_window(actions: torch.Tensor, anchor: int) -> Tuple[torch.Tensor, tor
     return actions[index], valid
 
 
+def load_text_table(path: str, episode_ids: Sequence[str]) -> Dict[str, torch.Tensor]:
+    """11-24 plan v20 card 5: {episode_id: text [L, D]} from a text table (scripts/fullft/press_told_text.py). Every
+    episode of `episode_ids` must have an entry (else an error: no silent fall-back to the cache's own text)."""
+    table = torch.load(path, map_location="cpu", weights_only=True)
+    missing = [e for e in episode_ids if e not in table["episodes"]]
+    if missing:
+        raise ValueError(f"text table {path} lacks {len(missing)} episodes, e.g. {missing[:3]}")
+    return {e: table["by_instruction"][table["episodes"][e]]["text"] for e in episode_ids}
+
+
 class DenseEpisodes:
     def __init__(self, roots: Sequence[str], tasks: Sequence[str], capacity: int = 16, check: bool = True):
         self.records: List[dict] = []
@@ -246,7 +256,7 @@ class Samples(torch.utils.data.Dataset):
     def __init__(self, episodes: DenseEpisodes, items: Sequence[Tuple[str, int]], rule: HistoryRule,
                  events: Dict[str, List[dict]], polarity: str, augment: bool = False, seed: int = 0,
                  decision: Optional[tuple] = None, next_event: bool = False,
-                 zoom_root: str = "", next_pose: Optional[Sequence[str]] = None):
+                 zoom_root: str = "", next_pose: Optional[Sequence[str]] = None, text_table: str = ""):
         """decision = (weight, window, kinds[, pre, pre_kinds]) adds 'loss_weight' to every sample (plan v19 3.2 (1);
         the pre-event window 11-23 (1b)); next_event adds the 'next_event' class (3.2 (2)); next_pose = event kinds
         adds 'next_pose' [14] and 'next_pose_valid' (11-23 (2b)). All off (default): the samples are exactly as
@@ -257,6 +267,7 @@ class Samples(torch.utils.data.Dataset):
         self.next_pose = tuple(next_pose) if next_pose else None
         self.zoom_root = str(zoom_root or "")
         self._zoom: "OrderedDict[str, dict]" = OrderedDict()
+        self.text_override = load_text_table(text_table, sorted({e for e, _ in items})) if text_table else {}
         if rule.zoom and not self.zoom_root:
             raise ValueError("history zoom needs data.zoom_root (the folder written by scripts/fullft/build_zoom.py)")
         self.epoch = 0
@@ -281,10 +292,11 @@ class Samples(torch.utils.data.Dataset):
         known = event_frames(self.events.get(episode_id, []), before=a, known_by=a - int(self.rule.lag))
         ids, pos = select(self.rule, a, known, rng)
         k = self.rule.max_frames
+        text = self.text_override.get(episode_id, e["text"])         # 11-24 card 5: per-episode instruction text
         sample = {
             "video_latent": e["video_latent"][a].clone(),
             "video_valid": latent_valid(e["video_valid"][a], self.polarity),
-            "text": e["text"].clone(),
+            "text": text.clone(),
             "proprio": e["proprio"][a].float(),
             "actions": actions.float(),
             "action_valid": action_valid,
@@ -334,13 +346,13 @@ class Samples(torch.utils.data.Dataset):
             sample.update(event_proprio=states, event_valid=valid)
         if self.rule.variant == "arclk":
             if episode_id not in self.checked_text:
-                check_ledger_slots(e["text"], self.rule.event_max, f"in {episode_id}")
+                check_ledger_slots(text, self.rule.event_max, f"in {episode_id}")
                 self.checked_text.add(episode_id)
             feat, valid = clock_tensor(self.rule, clock_frames(self.rule, a), lambda f: e["proprio"][f])
             sample.update(ledger=feat, ledger_valid=valid)
         if self.rule.variant == "arprop":
             if episode_id not in self.checked_text:
-                check_ledger_slots(e["text"], self.rule.event_max, f"in {episode_id}")
+                check_ledger_slots(text, self.rule.event_max, f"in {episode_id}")
                 self.checked_text.add(episode_id)
             entries = ledger_entries(self.rule, a, self.events.get(episode_id, []), lambda f: e["proprio"][f])
             if rng is not None and (float(self.rule.ledger_drop_p) > 0 or float(self.rule.ledger_over_p) > 0):

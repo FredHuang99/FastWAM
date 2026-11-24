@@ -275,6 +275,8 @@ class FullPolicy:
         MWAM_TEXT_SOURCE=cache: the dense training cache's text of an episode with the same instruction instead of
         T5 here (identical on every machine, and what training saw); an instruction the cache lacks is an error."""
         hit = self._text_memo.get(instruction)
+        if hit is None and getattr(self.run_cfg.data, "text_table", ""):       # 11-24 card 5: the run's text table
+            hit = self._table_text(instruction)
         if hit is None:
             if self.text_source == "cache":
                 hit = self._cache_text(instruction)
@@ -285,6 +287,20 @@ class FullPolicy:
                 hit = (features.to(self.device), valid.to(self.device))
             self._text_memo[instruction] = hit
         return hit[0].clone(), hit[1].clone()
+
+    def _table_text(self, instruction: str):
+        """11-24 plan v20 card 5: an instruction of the run's text table (press_told) -> exactly the training text."""
+        import hashlib
+        table = torch.load(self.run_cfg.data.text_table, map_location="cpu", weights_only=True)
+        row = table["by_instruction"].get(instruction)
+        if row is None:
+            return None
+        text = row["text"].to(torch.bfloat16).contiguous()
+        valid = row["text_valid"].bool().contiguous()
+        fp = hashlib.sha256(text.view(torch.int16).cpu().numpy().tobytes() + valid.cpu().numpy().tobytes()).hexdigest()[:12]
+        self.text_fingerprints[instruction] = f"text_table:{fp}"
+        print(f"[fullft] text from the run's text table {self.run_cfg.data.text_table} (fingerprint {fp})", flush=True)
+        return text[None].to(self.device), valid[None].to(self.device)
 
     def _cache_text(self, instruction: str):
         from fastwam.memory_v2 import dense

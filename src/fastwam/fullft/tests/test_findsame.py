@@ -158,3 +158,37 @@ def test_mask_history_v20():
     import pytest
     with pytest.raises(ValueError):
         mask_history([0], 3, "all")
+
+
+def test_text_table_v20(tmp_path):
+    """11-24 plan v20 card 5: data.text_table swaps each episode's text for its row; nothing else changes; off = as before;
+    an episode missing from the table is an error; the told sentence is the one definition in told.py."""
+    import importlib.util
+    from pathlib import Path
+    eps, events = _dense(tmp_path)
+    items = train_items(eps)
+    ids = sorted({e for e, _ in items})
+    text_dim = eps(ids[0])["text"].shape
+    rows = {f"instr {k}": {"text": torch.cat((torch.randn(4, text_dim[1]), torch.zeros(text_dim[0] - 4, text_dim[1]))),
+                           "text_valid": torch.tensor([True] * 4 + [False] * (text_dim[0] - 4))} for k in range(2)}
+    table = {"episodes": {e: f"instr {k}" for k, e in enumerate(ids)}, "by_instruction": rows}
+    torch.save(table, tmp_path / "t.pt")
+    rule = HistoryRule("arprop", event_max=4, lag=4, ordinal=16)
+    base = Samples(eps, items, rule, events, "valid", augment=True, seed=3)
+    off = Samples(eps, items, rule, events, "valid", augment=True, seed=3, text_table="")
+    on = Samples(eps, items, rule, events, "valid", augment=True, seed=3, text_table=str(tmp_path / "t.pt"))
+    for i in range(0, len(items), 5):
+        r0, r1, r2 = base[i], off[i], on[i]
+        assert all(torch.equal(r0[k], r1[k]) for k in r0)
+        assert set(r0) == set(r2) and all(torch.equal(r0[k], r2[k]) for k in r0 if k != "text")
+        assert torch.equal(r2["text"], rows[table["episodes"][items[i][0]]]["text"])
+    del table["episodes"][ids[1]]
+    torch.save(table, tmp_path / "t2.pt")
+    with pytest.raises(ValueError):
+        Samples(eps, items, rule, events, "valid", text_table=str(tmp_path / "t2.pt"))
+    spec = importlib.util.spec_from_file_location(
+        "told", Path(__file__).resolve().parents[4] / "scripts/memory_v2/sim/told.py")
+    told = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(told)
+    assert told.told_sentence(3, 4) == " Press the left button three times and the middle button four times."
+    assert len(told.combos()) == 45 and (9, 1) in told.combos() and (1, 9) in told.combos()

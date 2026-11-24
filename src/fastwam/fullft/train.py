@@ -77,10 +77,11 @@ def build(cfg: RunConfig, device: str, log, limit_episodes: int = 0):
     events = load_events(cfg.data.events, rule) if cfg.data.events else {}    # 11-16: rule thresholds checked
     polarity = video_polarity(episodes)
     train = Samples(episodes, items, rule, events, polarity, augment=True, seed=cfg.seed, decision=cfg.decision,
-                    next_event=cfg.next_event_head, zoom_root=cfg.data.zoom_root, next_pose=cfg.next_pose)
+                    next_event=cfg.next_event_head, zoom_root=cfg.data.zoom_root, next_pose=cfg.next_pose,
+                    text_table=cfg.data.text_table)
     val = Samples(episodes, vitems, rule, events, polarity, augment=False, seed=cfg.seed,
                   next_event=cfg.next_event_head, zoom_root=cfg.data.zoom_root,
-                  next_pose=cfg.next_pose)                  # validation losses stay unweighted
+                  next_pose=cfg.next_pose, text_table=cfg.data.text_table)   # validation losses stay unweighted
     log(f"data: {len(items)} train anchors ({len({e for e, _ in items})} episodes), {len(vitems)} val anchors; "
         f"tasks {cfg.data.tasks}; video_valid polarity '{polarity}'; history {rule}")
     if cfg.decision is not None:                                     # plan v19 3.2 (1)
