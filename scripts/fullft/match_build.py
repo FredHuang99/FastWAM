@@ -26,7 +26,8 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 R = Path("/workspace/FastWAM-memory2")
 ROOT = R / "outputs/memory_v2/press/dense_observe_and_pickup_v1"
-PLAIN = R / "outputs/memory_v2/press/zoom_obs_02102ba0"
+# the plain zoom cache: zoom_build_5090.sh wrote it here (relay name zoom_obs_02102ba0); a relay download lands in the second
+PLAINS = (R / "outputs/memory_v2/press/zoom_dense_observe_and_pickup_v1_02102ba0", R / "outputs/memory_v2/press/zoom_obs_02102ba0")
 REF_BOX = (0.395, 0.06, 0.675, 0.34)
 CUR_BOX = (0.0, 0.42, 1.0, 1.0)
 
@@ -34,7 +35,7 @@ CUR_BOX = (0.0, 0.42, 1.0, 1.0)
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--root", default=str(ROOT))
-    ap.add_argument("--plain", default=str(PLAIN))
+    ap.add_argument("--plain", default="")
     ap.add_argument("--out", default="")
     args = ap.parse_args()
     sys.path.insert(0, str(R / "src"))
@@ -44,7 +45,12 @@ def main():
     from fastwam.memory_s1.model import load_observation_encoders
     from zoom_tools import CODE, delivery
     common, data_path = delivery()
-    root, plain = Path(args.root), Path(args.plain)
+    found = [p for p in PLAINS if (p / "ZOOM.json").exists()]
+    if not args.plain and not found:
+        print(f"[match-build] STOP: no plain zoom cache (ZOOM.json) in {[str(p) for p in PLAINS]}")
+        return 1
+    root, plain = Path(args.root), Path(args.plain) if args.plain else found[0]
+    print(f"[match-build] plain zoom cache {plain}", flush=True)
     cfg = common.read(root / "IDENTITY.json")["config"]
     records = common.read(root / "RECORDS.json")
     base = dict(variant="ar", zoom=True, zoom_ref_box=REF_BOX, zoom_cur_box=CUR_BOX, zoom_camera=0)

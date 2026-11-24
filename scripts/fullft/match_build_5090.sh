@@ -20,6 +20,11 @@ for g in ${MB_GPUS:-0 1}; do
   [[ "$free" =~ ^[0-9]+$ ]] && [ "$free" -ge 6000 ] && { G=$g; break; }
 done
 [ -n "$G" ] || { echo "[mb] no GPU with >= 6 GB free: stop"; exit 1; }
+P=$R/outputs/memory_v2/press
+if [ ! -f $P/zoom_dense_observe_and_pickup_v1_02102ba0/ZOOM.json ] && [ ! -f $P/zoom_obs_02102ba0/ZOOM.json ]; then
+  echo "[mb] the plain zoom cache is not here: fetching zoom_obs_02102ba0 from the cache relay (sha256 checked)"
+  HF_HUB_DOWNLOAD_TIMEOUT=60 $HFPY scripts/fullft/cache_relay.py get --name zoom_obs_02102ba0 --dest $P 2>&1 | tail -n 3
+fi
 echo "[mb] $(date '+%F %T') checkout $(git -c safe.directory='*' log --oneline -1 | cut -c1-60); GPU $G"
 CUDA_VISIBLE_DEVICES=$G /opt/mwam/bin/python scripts/fullft/match_build.py 2>&1 | grep -v "Warning\|warn("
 rc=${PIPESTATUS[0]}

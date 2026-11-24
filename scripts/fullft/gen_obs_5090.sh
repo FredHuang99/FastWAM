@@ -11,6 +11,9 @@
 #     with the official ones) -> the cache relay (cache_relay.py put) as dense_observe_and_pickup_gen155_v1
 #   4 then 600 more (for 800), cached the same way as dense_observe_and_pickup_gen600_v1
 #   docker exec mwam5090 bash -c 'cd /workspace/FastWAM-memory2 && git -c safe.directory="*" pull -q --ff-only origin memory2' && docker exec -d mwam5090 bash /workspace/FastWAM-memory2/scripts/fullft/gen_obs_5090.sh
+# GEN_GATE=background (11-24 19:30; ONLY after the user agrees): the render check compares the head camera outside the
+#   shelf and table boxes (gen_check.py --gate background), and before each cache is built and uploaded the overall
+#   statistics must pass (gen_stats.py). Default GEN_GATE=pixel = the original check.
 # Own log: outputs/fullft/GEN_OBS_5090_<time>.txt ; generator logs outputs/fullft/gen_obs/*.log
 set -u
 R=/workspace/FastWAM-memory2
@@ -27,6 +30,7 @@ PY=/opt/mwam/bin/python
 HFPY=/opt/hf-tools/bin/python
 T=observe_and_pickup
 GPU=${GEN_GPU:-0}
+GATE=${GEN_GATE:-pixel}
 say() { echo "[genobs] $(date '+%F %T') $*"; }
 say "checkout $(git -c safe.directory='*' log --oneline -1 | cut -c1-60); GPU $GPU ($(nvidia-smi -i $GPU --query-gpu=name,memory.used --format=csv,noheader 2>&1))"
 OFF=""
@@ -41,15 +45,21 @@ gen() {     # out, extra args...
   CUDA_VISIBLE_DEVICES=$GPU $PY -m fastwam.memory_v2.online gen --tasks $T --output $out "$@" >> $out.log 2>&1
 }
 C=$G/check
-if [ ! -f $G/GEN_CHECK.json ] || ! grep -q '"pass": true' $G/GEN_CHECK.json; then
-  say "===== 1 render check: seeds $SEEDS"
-  mkdir -p $C; gen $C --gen-seeds $SEEDS; say "gen exit code $? ($(tail -n 1 $C.log | cut -c1-160))"
-  $PY scripts/fullft/gen_check.py --gen $C/demo_clean/$T/aloha_agilex/data --official $OFF/data --n 3 || { say "RENDER CHECK FAILED: stop; nothing generated goes into training (report to Opus)"; exit 1; }
+if [ ! -f $G/GEN_CHECK.json ] || ! grep -q '"pass": true' $G/GEN_CHECK.json || ! grep -q "\"gate\": \"$GATE\"" $G/GEN_CHECK.json; then
+  say "===== 1 render check ($GATE): seeds $SEEDS"
+  if [ ! -f $C/demo_clean/$T/aloha_agilex/data/episode_0000002.hdf5 ]; then
+    mkdir -p $C; gen $C --gen-seeds $SEEDS; say "gen exit code $? ($(tail -n 1 $C.log | cut -c1-160))"
+  fi
+  $PY scripts/fullft/gen_check.py --gen $C/demo_clean/$T/aloha_agilex/data --official $OFF/data --n 3 --gate $GATE || { say "RENDER CHECK FAILED: stop; nothing generated goes into training (report to Opus)"; exit 1; }
 fi
-say "render check passed"
+say "render check ($GATE) passed"
 build() {   # name, source dir (demo_clean/<task>/aloha_agilex), offset
   local name=$1 src=$2 L=$G/links_$1
   [ -f $P/$name/CACHE.json ] && { say "$name cached already"; return 0; }
+  if [ "$GATE" = background ]; then
+    $PY scripts/fullft/gen_stats.py --gen $src --official $OFF 2>&1 | grep -v "Warning\|warn("
+    [ ${PIPESTATUS[0]} = 0 ] || { say "$name: OVERALL STATISTICS FAILED: no cache, no upload (report to Opus)"; return 1; }
+  fi
   rm -rf $L; mkdir -p $L/data $L/instruction
   for f in $src/data/episode_*.hdf5; do
     k=$(basename $f .hdf5); k=${k#episode_}; s=$(cat $src/seed.txt | xargs -n1 | sed -n "$((10#$k + 1))p")
