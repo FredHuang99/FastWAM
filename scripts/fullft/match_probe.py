@@ -102,6 +102,31 @@ def components(mask):
         return lab, n
 
 
+def merge_close(cands, px):
+    """v2: components whose boxes lie within `px` pixels of each other are one object (a split object / its shadow)."""
+    out = [dict(c) for c in cands]
+    changed = True
+    while changed and px > 0:
+        changed = False
+        for i in range(len(out)):
+            for j in range(i + 1, len(out)):
+                a, b = out[i]["bbox"], out[j]["bbox"]
+                gap = max(a[0] - b[2], b[0] - a[2], a[1] - b[3], b[1] - a[3], 0)
+                if gap <= px:
+                    ys = np.concatenate([out[i]["pixels"][0], out[j]["pixels"][0]])
+                    xs = np.concatenate([out[i]["pixels"][1], out[j]["pixels"][1]])
+                    h_, w_ = out[i]["_hw"]
+                    out[i] = {"bbox": [int(xs.min()), int(ys.min()), int(xs.max() + 1), int(ys.max() + 1)],
+                              "centre": [round(float(xs.mean()) / w_, 4), round(float(ys.mean()) / h_, 4)],
+                              "area": int(len(ys)), "pixels": (ys, xs), "_hw": (h_, w_)}
+                    del out[j]
+                    changed = True
+                    break
+            if changed:
+                break
+    return out
+
+
 def candidates(img, fg, min_area, area_box):
     h, w = img.shape[:2]
     x0, y0, x1, y1 = int(CUR_BOX[0] * w), int(CUR_BOX[1] * h), int(CUR_BOX[2] * w), int(CUR_BOX[3] * h)
@@ -119,7 +144,7 @@ def candidates(img, fg, min_area, area_box):
             continue
         out.append({"bbox": [int(xs.min() + x0), int(ys.min() + y0), int(xs.max() + x0 + 1), int(ys.max() + y0 + 1)],
                     "centre": [round(float(cx), 4), round(float(cy), 4)], "area": int(len(ys)),
-                    "pixels": (ys + y0, xs + x0)})
+                    "pixels": (ys + y0, xs + x0), "_hw": (h, w)})
     return out, table
 
 
@@ -204,7 +229,22 @@ def main():
     ap.add_argument("--fg", type=float, default=40.0)
     ap.add_argument("--min-area", type=int, default=12)
     ap.add_argument("--sheets", type=int, default=12)
+    # v2 (11-24 19:00, fixed from run 1's own sanity checks, before any v2 result): the end-effector height at the close
+    # was 0.90-0.92 m while the candidates stand on the table at 0.741 m, and 49 / 50 projected points lay > 10 px
+    # (median 39 px) from every candidate: the logged end-effector is the wrist link ~16 cm above the fingers. The
+    # gripper's position (plan v20 card 13a: "夹爪的位置") is taken as the wrist's x, y at the object height --gt-z; and,
+    # as the plan's fallback, the candidate whose box changes most between frame 0 and the demo's last frame (the
+    # object lifted away) is the second target, their agreement reported. Run 1 found 4-9 components per demo for five
+    # objects: components closer than --merge-px are merged and the --keep largest kept (the env places five).
+    ap.add_argument("--v1", action="store_true", help="run 1's settings (wrist point, no merging)")
+    ap.add_argument("--gt-z", type=float, default=0.76)
+    ap.add_argument("--merge-px", type=int, default=6)
+    ap.add_argument("--keep", type=int, default=5)
+    ap.add_argument("--change", type=float, default=30.0, help="per-pixel |difference| counted as changed")
     args = ap.parse_args()
+    global OUT
+    if not args.v1:
+        OUT = OUT.parent / "match_probe_v2"
     OUT.mkdir(parents=True, exist_ok=True)
     from zoom_tools import delivery, head_camera
     import events_stats as es
@@ -232,6 +272,7 @@ def main():
         raw = data_path.Raw(cfg, rec)
         try:
             img = np.asarray(raw.images(0)[0]).astype(np.uint8)
+            last = np.asarray(raw.images(int(rec["length"]) - 1)[0]).astype(np.uint8)
         finally:
             raw.close()
         h, w = img.shape[:2]
@@ -247,8 +288,12 @@ def main():
             rows.append(row)
             continue
         ee = np.asarray(pos)[g, arm]
-        pt = project(ee, cam)
+        pt = project(ee if args.v1 else (ee[0], ee[1], args.gt_z), cam)
         cands, table = candidates(img, args.fg, args.min_area, area_box)
+        if not args.v1:
+            cands = merge_close(cands, args.merge_px)
+            cands = sorted(cands, key=lambda c: -c["area"])[: args.keep]
+            cands.sort(key=lambda c: c["centre"][0])
         row.update(close_frame=int(g), arm="left" if arm == 0 else "right", ee=[round(float(v), 4) for v in ee],
                    point=[round(pt[0], 4), round(pt[1], 4)] if pt else None, n_candidates=len(cands),
                    table_colour=[round(float(v), 1) for v in table])
@@ -260,6 +305,10 @@ def main():
         tgt = int(np.argmin(dist))
         row.update(target=tgt, target_dist_px=round(dist[tgt], 1),
                    second_dist_px=round(sorted(dist)[1], 1) if len(dist) > 1 else None)
+        diff = np.abs(img.astype(np.int16) - last.astype(np.int16)).max(axis=-1) > args.change
+        changed = [float(diff[c["bbox"][1]:c["bbox"][3], c["bbox"][0]:c["bbox"][2]].mean()) for c in cands]
+        row.update(changed=[round(v, 3) for v in changed], target_change=int(np.argmax(changed)),
+                   targets_agree=int(np.argmax(changed)) == tgt)
         ref_px, rbox = ref_object_pixels(img, args.fg)
         href = hist(ref_px)
         sc = {"colour": [float(np.minimum(href, hist(img[c["pixels"]].astype(np.float32))).sum()) for c in cands]}
@@ -298,9 +347,10 @@ def main():
         for name, s in sc.items():
             best = int(np.argmax(s))
             tie = sum(abs(v - s[best]) < 1e-9 for v in s) > 1
-            picks[name] = {"pick": best, "hit": (best == tgt) and not tie, "scores": [round(v, 4) for v in s]}
+            picks[name] = {"pick": best, "hit": (best == tgt) and not tie, "hit_change": (best == row["target_change"]) and not tie,
+                           "scores": [round(v, 4) for v in s]}
         row["matchers"] = picks
-        row["candidates"] = [{k: v for k, v in c.items() if k != "pixels"} for c in cands]
+        row["candidates"] = [{k: v for k, v in c.items() if k not in ("pixels", "_hw")} for c in cands]
         rows.append(row)
         if len(tiles) < args.sheets:
             from PIL import Image, ImageDraw
@@ -312,6 +362,8 @@ def main():
                 d.rectangle(b, outline=(0, 255, 0) if k == tgt else (255, 255, 0), width=2)
                 d.text((b[0], b[1] - 10), str(k), fill=(255, 255, 255))
             d.ellipse([pt[0] * w * 2 - 4, pt[1] * h * 2 - 4, pt[0] * w * 2 + 4, pt[1] * h * 2 + 4], outline=(0, 0, 255), width=2)
+            cb = [v * 2 for v in cands[row["target_change"]]["bbox"]]
+            d.rectangle([cb[0] - 3, cb[1] - 3, cb[2] + 3, cb[3] + 3], outline=(255, 0, 255), width=1)
             d.text((4, 4), f"{eid.split('/')[-1]} target {tgt} " + " ".join(f"{n[:6]}:{p['pick']}" for n, p in picks.items()),
                    fill=(255, 0, 0))
             tiles.append(im)
@@ -331,6 +383,12 @@ def main():
     summary = {"demos": len(rows), "valid": len(valid), "why_invalid": [r.get("why") for r in rows if "matchers" not in r]}
     for name in (valid[0]["matchers"] if valid else {}):
         summary[name] = sum(r["matchers"][name]["hit"] for r in valid)
+        summary[f"{name}_vs_change_target"] = sum(r["matchers"][name]["hit_change"] for r in valid)
+        agree = [r for r in valid if r.get("targets_agree")]
+        summary[f"{name}_on_agreed"] = f"{sum(r['matchers'][name]['hit'] for r in agree)}/{len(agree)}"
+    summary["targets_agree"] = sum(bool(r.get("targets_agree")) for r in valid)
+    summary["settings"] = "v1 (wrist point, no merging)" if args.v1 else \
+        f"v2: point at z {args.gt_z}; merge {args.merge_px} px; keep {args.keep}; change > {args.change}"
     if valid and "map_argmax_in_target_box" in valid[0]:
         summary["dinov2_map_argmax_in_target_box"] = sum(r["map_argmax_in_target_box"] for r in valid)
     d = sorted(r["target_dist_px"] for r in valid)

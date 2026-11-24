@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # mwam5090, 11-24 night (Opus; plan v20 section 5, the 5090's closed-loop GPU): in order on GPU ${PF_GPUS:-1}
+#   0 card 13a's probe again with run 1's target fix (match_probe.py v2: the gripper at the object height, the lifted
+#     object as a second target, split components merged; minutes) -> outputs/fullft/match_probe_v2/
 #   1 card 5's text table (press_told_text.py --relay, T5 only, a few minutes) -> relay diag/press_told; the new H200's
 #     slot job and the A40 fetch it
 #   2 card 11, the swap_T failure split (card11_5090.sh: scenes 1-10 of both models, the first-10 measurements, then
@@ -20,6 +22,8 @@ G=${PF_GPUS:-1}
 empty() { local u; u=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i $1 2>/dev/null | tr -d ' '); [[ "$u" =~ ^[0-9]+$ ]] && [ "$u" -lt 2000 ]; }
 echo "[night] $(date '+%F %T') checkout $(git -c safe.directory='*' log --oneline -1 | cut -c1-60); GPU $G"
 until empty $G; do echo "[night] $(date '+%F %T') GPU $G in use; waiting 2 min"; sleep 120; done
+echo "[night] ===== 0 card 13a probe v2"
+CUDA_VISIBLE_DEVICES=$G /opt/mwam/bin/python scripts/fullft/match_probe.py --device cuda:0 2>&1 | grep -v "Warning\|warn(\|it/s\]" | tail -n 4
 echo "[night] ===== 1 card 5 text table"
 CUDA_VISIBLE_DEVICES=$G /opt/mwam/bin/python scripts/fullft/press_told_text.py --relay 2>&1 | grep -v "Warning\|warn("
 echo "[night] press_told_text exit code ${PIPESTATUS[0]}"
