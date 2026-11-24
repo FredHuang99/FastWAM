@@ -17,6 +17,8 @@
 # GEN_HOLD=1 (11-24 20:05): generate only -- the render check and the statistics are run and printed but block nothing,
 #   and NO cache is built, NOTHING is uploaded (a training slot can only pick an uploaded cache). Generation is resumable:
 #   the later run without GEN_HOLD (after the user agrees) skips what exists and goes on to the checks, cache, upload.
+# GEN_BUILD=gen155 | gen600 (11-24 20:40, user 20:31 "card 8: the backup gate"): no generation -- the statistics check,
+#   the cache and the upload of one batch already generated (runs beside a generating process; uses GEN_GPU too).
 # Own log: outputs/fullft/GEN_OBS_5090_<time>.txt ; generator logs outputs/fullft/gen_obs/*.log
 set -u
 R=/workspace/FastWAM-memory2
@@ -85,6 +87,15 @@ build() {   # name, source dir (demo_clean/<task>/aloha_agilex), offset
   $HFPY scripts/fullft/cache_relay.py put $P/$name 2>&1 | tail -n 2
   $HFPY scripts/fullft/cache_relay.py ls 2>/dev/null | grep -qx $name && say "$name on the cache relay" || say "$name: UPLOAD FAILED"
 }
+if [ -n "${GEN_BUILD:-}" ]; then
+  [ "$GATE" = background ] && [ "$HOLD" != 1 ] || { say "GEN_BUILD needs GEN_GATE=background without GEN_HOLD: stop"; exit 1; }
+  S=$G/$GEN_BUILD/demo_clean/$T/aloha_agilex
+  [ -f $S/GEN.json ] && grep -q '"finished"' $S/GEN.json || { say "$GEN_BUILD: generation not finished ($S/GEN.json): stop"; exit 1; }
+  say "===== build only: $GEN_BUILD ($(ls $S/data/*.hdf5 | wc -l) hdf5); GPU $GPU $(nvidia-smi -i $GPU --query-gpu=memory.used,memory.total --format=csv,noheader)"
+  build dense_${T}_${GEN_BUILD}_v1 $S; rc=$?
+  say "build only $GEN_BUILD: exit code $rc"
+  exit $rc
+fi
 A=$G/gen155
 say "===== 2 155 scenes from seed 10000000"
 gen $A --start-seed 10000000 --episodes 155; say "gen exit code $?; $(ls $A/demo_clean/$T/aloha_agilex/data/*.hdf5 2>/dev/null | wc -l) hdf5"

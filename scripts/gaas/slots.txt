@@ -10,3 +10,8 @@ B  | swapT_arprop_h2 ranking_v3a ar2_v3c cover_none
 B2 | swapT_long press_told rearr_pw obs_match obs_s200 ar2_v3c ranking_v3a cover_none
 C  | ranking_v3a press_told rearr_pw obs_match ar2_v3c cover_none
 D  | press_told rearr_pw obs_match obs_s200 ar2_v3c ranking_v3a cover_none
+# 11-24 20:40 (Opus): one more slot behind each lane's last job, so cards 7 / 8 (obs_match, obs_s200 / obs_s800) and
+# card 2 get a GPU when press_told / rearr_pw / swapT_long end, still at most 4 GPUs (each follows one of our jobs)
+A3 | obs_match obs_s200 obs_s800 rearr_pw press_told ar2_v3c ranking_v3a cover_none
+B3 | obs_match obs_s200 obs_s800 rearr_pw press_told ar2_v3c ranking_v3a cover_none
+D2 | obs_match obs_s200 obs_s800 rearr_pw press_told ar2_v3c ranking_v3a cover_none

@@ -73,6 +73,10 @@ slot B "$NOVID"                         # card 3 (ar2_prop_novid's GPU)
 slot B2 "$(cat $SD/B.job 2>/dev/null)"  # swapT_long behind it
 slot C "$D1W"                           # card 4 (d1_w's GPU)
 slot D "$PNONE"                         # cards 5 / 6 / 7, else card 2 (press_none's GPU)
+# 11-24 20:40: one more behind each lane's last job (cards 7 / 8, then card 2), still 4 GPUs at most
+slot A3 "$(cat $SD/A2.job 2>/dev/null)"
+slot B3 "$(cat $SD/B2.job 2>/dev/null)"
+slot D2 "$(cat $SD/D.job 2>/dev/null)"
 for j in $(qselect -u "$ME" 2>/dev/null); do
   printf '  %-10s %-12s %-3s %-26s %s\n' "${j%%.*}" "$(qstat -f $j | awk -F' = ' '/Job_Name/{print $2}')" "$(jstate $j)" \
     "$(deps $j)" "$(qstat -f $j | tr -d '\n\t' | grep -o 'RUN=[^,]*' | head -1)"
