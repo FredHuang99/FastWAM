@@ -95,3 +95,22 @@ swapT_none | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dens
 #   both models. Expected if the diagnosis is right: "pressed twice" falls from 18 to a few; "never pressed" (17, the
 #   arm made a press-like motion without registering a press) does not change much.
 rearr_v3c | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks_v3c.json] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && bash scripts/fullft/rearr_v3c_ready.sh
+#
+# 11-24 plan v20 section 5 (Fable 11-24; executed by Opus): H100 next items. The H100 rotates over every free card
+# (user 11-17 19:42), so the item that does not wait on D1 starts on a free card now; the D1-conditional one (rearrange
+# timely writer + decision weighting, only if a D1 arm reads HELPS) is added after the D1 reading.
+# swapT_long_h100 = card 3's question on the H100 class: swapT_arprop (H100, finished 11-22; resume.pt kept, checked
+# 11-24 18:30) trained on from its final resume checkpoint to 60 frame-epochs (60-epoch cosine restarted at the seed
+# point, exports e45 and e60), as ar2_long / swapT_long (new H200). Same data, seed, data order.
+# Registered reading (11-24, before any swapT_long_h100 episode; A40, swap_T 1-100, default noise; both arms H100):
+#   MAIN: D = success(swapT_long_h100 e60) - success(swapT_arprop e30), paired by scene, paired bootstrap 95 % CI
+#   (10,000, seed 0); SESOI +0.15: CI lower > +0.15 -> TRAINING-LIMITED; CI upper < +0.15 -> NOT TRAINING-LIMITED;
+#   otherwise UNCERTAIN (pre-set extension: both again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule).
+#   Reported beside card 3 (the H200 class); the two machine classes are never pooled. Described: e45.
+swapT_long_h100 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_swap_T_v1] data.tasks=[swap_T] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_T.json] schedule.frame_epochs=60 schedule.export_at_epochs=[45,60] schedule.resume_from=/workspace/FastWAM-memory2/outputs/fullft/swapT_arprop/resume.pt | test -f outputs/fullft/swapT_arprop/SUMMARY.json && test -f outputs/fullft/swapT_arprop/resume.pt && test -f outputs/memory_v2/press/dense_swap_T_v1/.verified && test -f outputs/fullft/events/events_swap_T.json && grep -q swap_T outputs/fullft/READY_arprop
+#
+# Filler (plan v20 section 5, H100 "填空"): battery_try clock arm, the main-table clock column (~70-80 GPU-hours). Same
+# recipe as rearrange_clock / swapT_clock (history.variant=arclk, 32 clock entries), battery_ar's machine class.
+# Registered reading (11-24, before any battery_clock episode; A40, battery_try 1-100, default noise): descriptive only
+#   (main-table cell). Described: success 1-100; paired counts against battery_ar e30 and battery_arprop e30.
+battery_clock | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_battery_try_v1] data.tasks=[battery_try] history.variant=arclk history.event_max=32 | test -f outputs/memory_v2/press/dense_battery_try_v1/.verified && bash scripts/fullft/h100_v15_ready.sh battery_clock

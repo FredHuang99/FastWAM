@@ -15,13 +15,17 @@ MWAM_NOISE_SALT=r2 pairs (closed_loop/r2) of the same scenes = 200 pairs, the sa
   ar2v3c   card 2: non-inferiority, margin -0.05, swap_blocks 1-100 e30 (closed_loop/v20 against ar2_prop e30,
            closed_loop/g1): CI lower > -0.05 -> NO HARM; CI upper < -0.05 -> HARM; otherwise UNCERTAIN; put_back_block
            the same rule beside it. Described: e10 swap against ar2_prop e10 (closed_loop/lc).
+  swapth100 the same question on the H100 class: swapT_long_h100 e60 (closed_loop/v20) - swapT_arprop e30 (H100,
+           closed_loop/e6); SESOI +0.15, the same outcomes; reported beside card 3, never pooled with it
+  batclk   battery_clock e30 (H100 filler, main-table clock cell, closed_loop/e6), described against battery_ar /
+           battery_arprop e30
   rankarp  ranking_arprop e30 (main-table cell, closed_loop/e6), described: success; paired counts against ranking_ar e30.
   covnone  cover_none e30 (main-table cell, closed_loop/e6), described: paired counts against cover_ar / cover_arprop e30.
   battmask A2 follow-up (plan v20 2.4c, SHORT MEMORY NEEDED): battery_ar e30, battery_try 1-50, frame 0 masked / the two
            near frames masked (MWAM_HIST_MASK first / near, closed_loop/a2m), against the same 50 scenes unmasked
            (closed_loop/e6). Described only.
 A verdict needs all its MAIN scenes finished on both sides (else WAIT). Writes outputs/fullft/V20_<NAME>.json.
-  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py rv3ch2|swapt|rankv3c|ar2v3c|rankarp|covnone|battmask
+  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py rv3ch2|swapt|swapth100|rankv3c|ar2v3c|rankarp|covnone|batclk|battmask
 """
 from __future__ import annotations
 
@@ -126,6 +130,37 @@ def swapt():
     return out
 
 
+def swapth100():
+    task = "swap_T"
+    order, ref = success("e6", "swapT_arprop_e30", task)
+    _, new = success("v20", "swapT_long_h100_e60", task)
+    out = {"run": "card 3 on the H100 class (swapT_long_h100)", "sesoi": 0.15,
+           "finished": {"swapT_long_h100_e60": len(new), "swapT_arprop_e30": len(ref)}}
+    if len(new) < 100 or len(ref) < 100:
+        out["verdict"] = f"WAIT ({len(new)} / {len(ref)} of 100)"
+    else:
+        c = compare(new, ref, order)
+        rule = lambda x: three(x, 0.15, "TRAINING-LIMITED", "NOT TRAINING-LIMITED")   # noqa: E731
+        with_extension(out, c, rule(c), rule, task, "swapT_long_h100_e60", "v20", "swapT_arprop_e30", "e6")
+    _, e45 = success("v20", "swapT_long_h100_e45", task)
+    if e45 and ref:
+        out["described_e45"] = compare(e45, ref, order)
+    return out
+
+
+def batclk():
+    task = "battery_try"
+    order, new = success("e6", "battery_clock_e30", task)
+    out = {"run": "main-table cell battery clock (described)", "finished": {"battery_clock_e30": len(new)},
+           "success_1_100": sum(new.values())}
+    for ref in ("battery_ar_e30", "battery_arprop_e30"):
+        _, r = success("e6", ref, task)
+        if len(new) == 100 and len(r) == 100:
+            out[f"against_{ref}"] = compare(new, r, order)
+    out["verdict"] = "DESCRIBED" if len(new) == 100 else f"WAIT ({len(new)} of 100)"
+    return out
+
+
 def rankv3c():
     task = "blocks_ranking_try"
     order, ref = success("e6", "ranking_arprop_e30", task)
@@ -212,7 +247,7 @@ def battmask():
 
 def main():
     name = sys.argv[1] if len(sys.argv) > 1 else ""
-    fns = {"rv3ch2": rv3ch2, "swapt": swapt, "rankv3c": rankv3c, "ar2v3c": ar2v3c, "rankarp": rankarp,
+    fns = {"rv3ch2": rv3ch2, "swapt": swapt, "swapth100": swapth100, "batclk": batclk, "rankv3c": rankv3c, "ar2v3c": ar2v3c, "rankarp": rankarp,
            "covnone": covnone, "battmask": battmask}
     if name not in fns:
         print(__doc__)

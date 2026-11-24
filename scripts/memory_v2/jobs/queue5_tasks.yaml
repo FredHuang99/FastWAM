@@ -1333,6 +1333,214 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py rankv3c"
   pass_if: "m['rc'] == 0"
 
+# card 3 on the H100 class: swapT_long_h100 (H100; registered 11-24 in h100_queue.txt above the run's line); MAIN e60 against swapT_arprop e30 (closed_loop/e6)
+- id: A40-fetch-swapT_long_h100-e60
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 168
+  hypothesis: "fetch swapT_long_h100_e60 from the relay (plan v20 section 5, H100; sha256 checked; waits until it is there)"
+  command: "RUN=swapT_long_h100 TAG=e60 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-v20swTlongH-smoke
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_long_h100-e60, A40-prep2-swap_T]
+  requires_pass: [A40-fetch-swapT_long_h100-e60, A40-prep2-swap_T]
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "smoke: swapT_long_h100_e60, swap_T scene 1, one episode finishes on the A40 (closed_loop/v20smoke)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_h100_e60/export_e60.pt
+  label: swapT_long_h100_e60_smoke
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "1"]
+  output: closed_loop/v20smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+  pass_if: "m.get('episodes', 0) >= 1"
+
+- id: A40-v20swTlongH-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTlongH-smoke]
+  requires_pass: [A40-v20swTlongH-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "card 3 on the H100 class (registered 11-24 in h100_queue.txt above the run's line): swapT_long_h100_e60 on swap_T 1-100, paired with swapT_arprop_e30 (closed_loop/e6); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_h100_e60/export_e60.pt
+  label: swapT_long_h100_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlongH-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTlongH-smoke]
+  requires_pass: [A40-v20swTlongH-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "card 3 on the H100 class (registered 11-24 in h100_queue.txt above the run's line): swapT_long_h100_e60 on swap_T 1-100, paired with swapT_arprop_e30 (closed_loop/e6); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_h100_e60/export_e60.pt
+  label: swapT_long_h100_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlongH-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTlongH-smoke]
+  requires_pass: [A40-v20swTlongH-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "card 3 on the H100 class (registered 11-24 in h100_queue.txt above the run's line): swapT_long_h100_e60 on swap_T 1-100, paired with swapT_arprop_e30 (closed_loop/e6); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_h100_e60/export_e60.pt
+  label: swapT_long_h100_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlongH-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTlongH-smoke]
+  requires_pass: [A40-v20swTlongH-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "card 3 on the H100 class (registered 11-24 in h100_queue.txt above the run's line): swapT_long_h100_e60 on swap_T 1-100, paired with swapT_arprop_e30 (closed_loop/e6); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_h100_e60/export_e60.pt
+  label: swapT_long_h100_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlongH-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTlongH-smoke]
+  requires_pass: [A40-v20swTlongH-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "card 3 on the H100 class (registered 11-24 in h100_queue.txt above the run's line): swapT_long_h100_e60 on swap_T 1-100, paired with swapT_arprop_e30 (closed_loop/e6); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_h100_e60/export_e60.pt
+  label: swapT_long_h100_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlongH-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTlongH-smoke]
+  requires_pass: [A40-v20swTlongH-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "card 3 on the H100 class (registered 11-24 in h100_queue.txt above the run's line): swapT_long_h100_e60 on swap_T 1-100, paired with swapT_arprop_e30 (closed_loop/e6); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_h100_e60/export_e60.pt
+  label: swapT_long_h100_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlongH-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTlongH-smoke]
+  requires_pass: [A40-v20swTlongH-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "card 3 on the H100 class (registered 11-24 in h100_queue.txt above the run's line): swapT_long_h100_e60 on swap_T 1-100, paired with swapT_arprop_e30 (closed_loop/e6); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_h100_e60/export_e60.pt
+  label: swapT_long_h100_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlongH-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTlongH-smoke]
+  requires_pass: [A40-v20swTlongH-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "card 3 on the H100 class (registered 11-24 in h100_queue.txt above the run's line): swapT_long_h100_e60 on swap_T 1-100, paired with swapT_arprop_e30 (closed_loop/e6); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_h100_e60/export_e60.pt
+  label: swapT_long_h100_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlongH-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTlongH-smoke]
+  requires_pass: [A40-v20swTlongH-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "card 3 on the H100 class (registered 11-24 in h100_queue.txt above the run's line): swapT_long_h100_e60 on swap_T 1-100, paired with swapT_arprop_e30 (closed_loop/e6); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_h100_e60/export_e60.pt
+  label: swapT_long_h100_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlongH-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-v20swTlongH-smoke]
+  requires_pass: [A40-v20swTlongH-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "card 3 on the H100 class (registered 11-24 in h100_queue.txt above the run's line): swapT_long_h100_e60 on swap_T 1-100, paired with swapT_arprop_e30 (closed_loop/e6); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_h100_e60/export_e60.pt
+  label: swapT_long_h100_e60
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-swapTh100-verdict
+  lane: a40cpu
+  kind: shell
+  after: [A40-v20swTlongH-s0, A40-v20swTlongH-s1, A40-v20swTlongH-s2, A40-v20swTlongH-s3, A40-v20swTlongH-s4, A40-v20swTlongH-s5, A40-v20swTlongH-s6, A40-v20swTlongH-s7, A40-v20swTlongH-s8, A40-v20swTlongH-s9]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "card 3 on the H100 class: v20_verdict.py swapth100 (SESOI +0.15 -> TRAINING-LIMITED / NOT TRAINING-LIMITED / UNCERTAIN); log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py swapth100"
+  pass_if: "m['rc'] == 0"
+
 
 # 11-24 15:20 (Opus, before the switch to Fable): the registered verdicts whose MAIN data is complete while their
 # full card still waits on described parts. B4's MAIN is e10 (done); the e30 parts are described only. D1 is judged per
@@ -6104,6 +6312,394 @@ tasks:
   timeout_h: 2
   hypothesis: "cover without history described: v20_verdict.py covnone (against cover_ar_e30 / cover_arprop_e30); log pushed"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py covnone"
+  pass_if: "m['rc'] == 0"
+
+# described e45 of swapT_long_h100 (after every MAIN evaluation)
+- id: A40-fetch-swapT_long_h100-e45
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 168
+  hypothesis: "fetch swapT_long_h100_e45 from the relay (described e45, H100; sha256 checked; waits until it is there)"
+  command: "RUN=swapT_long_h100 TAG=e45 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-v20swTlongH45-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_long_h100-e45]
+  requires_pass: [A40-fetch-swapT_long_h100-e45]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "card 3 on the H100 class, described: swapT_long_h100_e45 on swap_T 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_h100_e45/export_e45.pt
+  label: swapT_long_h100_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlongH45-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_long_h100-e45]
+  requires_pass: [A40-fetch-swapT_long_h100-e45]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "card 3 on the H100 class, described: swapT_long_h100_e45 on swap_T 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_h100_e45/export_e45.pt
+  label: swapT_long_h100_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlongH45-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_long_h100-e45]
+  requires_pass: [A40-fetch-swapT_long_h100-e45]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "card 3 on the H100 class, described: swapT_long_h100_e45 on swap_T 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_h100_e45/export_e45.pt
+  label: swapT_long_h100_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlongH45-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_long_h100-e45]
+  requires_pass: [A40-fetch-swapT_long_h100-e45]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "card 3 on the H100 class, described: swapT_long_h100_e45 on swap_T 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_h100_e45/export_e45.pt
+  label: swapT_long_h100_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlongH45-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_long_h100-e45]
+  requires_pass: [A40-fetch-swapT_long_h100-e45]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "card 3 on the H100 class, described: swapT_long_h100_e45 on swap_T 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_h100_e45/export_e45.pt
+  label: swapT_long_h100_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlongH45-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_long_h100-e45]
+  requires_pass: [A40-fetch-swapT_long_h100-e45]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "card 3 on the H100 class, described: swapT_long_h100_e45 on swap_T 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_h100_e45/export_e45.pt
+  label: swapT_long_h100_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlongH45-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_long_h100-e45]
+  requires_pass: [A40-fetch-swapT_long_h100-e45]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "card 3 on the H100 class, described: swapT_long_h100_e45 on swap_T 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_h100_e45/export_e45.pt
+  label: swapT_long_h100_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlongH45-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_long_h100-e45]
+  requires_pass: [A40-fetch-swapT_long_h100-e45]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "card 3 on the H100 class, described: swapT_long_h100_e45 on swap_T 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_h100_e45/export_e45.pt
+  label: swapT_long_h100_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlongH45-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_long_h100-e45]
+  requires_pass: [A40-fetch-swapT_long_h100-e45]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "card 3 on the H100 class, described: swapT_long_h100_e45 on swap_T 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_h100_e45/export_e45.pt
+  label: swapT_long_h100_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v20swTlongH45-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_long_h100-e45]
+  requires_pass: [A40-fetch-swapT_long_h100-e45]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "card 3 on the H100 class, described: swapT_long_h100_e45 on swap_T 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_long_h100_e45/export_e45.pt
+  label: swapT_long_h100_e45
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+# battery clock (H100 filler; registered 11-24 in h100_queue.txt above the run's line; main-table clock cell, described)
+- id: A40-fetch-battery_clock-e30
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 240
+  hypothesis: "fetch battery_clock_e30 from the relay (H100 filler; sha256 checked; waits until it is there)"
+  command: "RUN=battery_clock TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-batclk30-smoke
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-battery_clock-e30, A40-prep2-battery_try]
+  requires_pass: [A40-fetch-battery_clock-e30, A40-prep2-battery_try]
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "smoke: battery_clock_e30, battery_try scene 1, one episode finishes on the A40 (closed_loop/e6smoke)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_clock_e30/export_e30.pt
+  label: battery_clock_e30_smoke
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "1"]
+  output: closed_loop/e6smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+  pass_if: "m.get('episodes', 0) >= 1"
+
+- id: A40-batclk30-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-batclk30-smoke]
+  requires_pass: [A40-batclk30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table clock cell: battery_clock_e30 on battery_try 1-100 (closed_loop/e6); shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_clock_e30/export_e30.pt
+  label: battery_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-batclk30-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-batclk30-smoke]
+  requires_pass: [A40-batclk30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table clock cell: battery_clock_e30 on battery_try 1-100 (closed_loop/e6); shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_clock_e30/export_e30.pt
+  label: battery_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-batclk30-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-batclk30-smoke]
+  requires_pass: [A40-batclk30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table clock cell: battery_clock_e30 on battery_try 1-100 (closed_loop/e6); shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_clock_e30/export_e30.pt
+  label: battery_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-batclk30-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-batclk30-smoke]
+  requires_pass: [A40-batclk30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table clock cell: battery_clock_e30 on battery_try 1-100 (closed_loop/e6); shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_clock_e30/export_e30.pt
+  label: battery_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-batclk30-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-batclk30-smoke]
+  requires_pass: [A40-batclk30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table clock cell: battery_clock_e30 on battery_try 1-100 (closed_loop/e6); shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_clock_e30/export_e30.pt
+  label: battery_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-batclk30-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-batclk30-smoke]
+  requires_pass: [A40-batclk30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table clock cell: battery_clock_e30 on battery_try 1-100 (closed_loop/e6); shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_clock_e30/export_e30.pt
+  label: battery_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-batclk30-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-batclk30-smoke]
+  requires_pass: [A40-batclk30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table clock cell: battery_clock_e30 on battery_try 1-100 (closed_loop/e6); shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_clock_e30/export_e30.pt
+  label: battery_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-batclk30-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-batclk30-smoke]
+  requires_pass: [A40-batclk30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table clock cell: battery_clock_e30 on battery_try 1-100 (closed_loop/e6); shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_clock_e30/export_e30.pt
+  label: battery_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-batclk30-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-batclk30-smoke]
+  requires_pass: [A40-batclk30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table clock cell: battery_clock_e30 on battery_try 1-100 (closed_loop/e6); shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_clock_e30/export_e30.pt
+  label: battery_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-batclk30-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-batclk30-smoke]
+  requires_pass: [A40-batclk30-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "main-table clock cell: battery_clock_e30 on battery_try 1-100 (closed_loop/e6); shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/battery_clock_e30/export_e30.pt
+  label: battery_clock_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_battery_try]
+  tasks: [battery_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/e6
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-BATCLK-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-batclk30-s0, A40-batclk30-s1, A40-batclk30-s2, A40-batclk30-s3, A40-batclk30-s4, A40-batclk30-s5, A40-batclk30-s6, A40-batclk30-s7, A40-batclk30-s8, A40-batclk30-s9]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "battery clock described: v20_verdict.py batclk (against battery_ar_e30 / battery_arprop_e30); log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py batclk"
   pass_if: "m['rc'] == 0"
 
 

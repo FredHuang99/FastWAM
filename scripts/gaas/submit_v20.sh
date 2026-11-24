@@ -28,7 +28,9 @@ say "code $(git log --oneline -1 | cut -c1-70); home $(df -h $HOME | tail -n 1 |
 [ -f scripts/gaas/slots.txt ] && grep -q '^rearr_v3c_h2 |' scripts/gaas/gaas_queue.txt || { say "slots.txt / the plan v20 lines are missing (git pull): stop"; exit 1; }
 live() { [ -n "$1" ] && qstat "$1" > /dev/null 2>&1; }
 jstate() { qstat -f "$1" 2>/dev/null | awk -F' = ' '/job_state/{print $2}'; }
-deps() { qstat -f "$1" 2>/dev/null | tr -d '\n\t ' | grep -o 'depend=[^,]*' | head -1; }
+# 11-24 18:35: the depend attribute only (qstat -f prints "    depend = afterany:116646.gaas@gaas"); the earlier
+# squeeze-and-grep also caught Error_Path=...mwam_run.e<own id>, so B2 was refused as "118109 waits on 118109"
+deps() { qstat -f "$1" 2>/dev/null | sed -n 's/^[[:space:]]*depend = //p' | head -1 | cut -d@ -f1; }
 jobof() { local j; j=$(cat $F/$1/GAAS_JOB 2>/dev/null); [ -n "$j" ] || j=$2; live "$j" && echo "$j"; }
 free_starters() {   # our jobs running, or queued without a dependency (they start as soon as a GPU is free)
   local n=0 j s
@@ -73,6 +75,6 @@ slot C "$D1W"                           # card 4 (d1_w's GPU)
 slot D "$PNONE"                         # cards 5 / 6 / 7, else card 2 (press_none's GPU)
 for j in $(qselect -u "$ME" 2>/dev/null); do
   printf '  %-10s %-12s %-3s %-26s %s\n' "${j%%.*}" "$(qstat -f $j | awk -F' = ' '/Job_Name/{print $2}')" "$(jstate $j)" \
-    "$(deps $j)" "$(qstat -f $j | awk -F' = ' '/Variable_List/{print $2}' | tr ',' '\n' | grep -o 'RUN=[^ ]*' | head -1)"
+    "$(deps $j)" "$(qstat -f $j | tr -d '\n\t' | grep -o 'RUN=[^,]*' | head -1)"
 done
 say "done; each slot job writes ~/mwam/logs/PICK_<slot>_<time>.txt (what it picked and why) and RUN_<run>_<time>.txt"

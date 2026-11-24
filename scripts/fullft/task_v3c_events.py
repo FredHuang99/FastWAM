@@ -29,11 +29,17 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--task", required=True)
     ap.add_argument("--relay", action="store_true")
+    # 11-24 (plan v20 card 4 check): other thresholds under another tag; the defaults are the timely writer (v3c)
+    ap.add_argument("--delta", type=float, default=0.012)
+    ap.add_argument("--min-path", type=float, default=0.015)
+    ap.add_argument("--provisional", type=float, default=0.002)
+    ap.add_argument("--tag", default="v3c")
+    ap.add_argument("--no-write", action="store_true", help="print the counts only")
     args = ap.parse_args()
     spec = importlib.util.spec_from_file_location("events_stats", REPO / "scripts/fullft/events_stats.py")
     es = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(es)
-    rule = EventRule(delta=0.012, min_path=0.015, provisional=0.002)
+    rule = EventRule(delta=args.delta, min_path=args.min_path, provisional=args.provisional)
     old = EventRule()
     events, n_new, n_old, lat_new, lat_old = {}, [], [], [], []
     for path in es.demo_files(args.task):
@@ -48,18 +54,25 @@ def main():
     if len(events) < 45:
         print(f"[v3c] {args.task}: only {len(events)} demos found: nothing written")
         return 1
+    if args.tag != "v3c" or args.delta != 0.012 or args.min_path != 0.015 or args.provisional != 0.002:
+        print(f"[v3c] rule {rule} tag {args.tag}")
+    for cap in (32, 69):
+        print(f"[v3c] {args.task}: demos with more than {cap} events: this rule {sum(n > cap for n in n_new)}, "
+              f"rule A {sum(n > cap for n in n_old)}")
+    if args.no_write:
+        return 0
     print(f"[v3c] {args.task}: {len(events)} demos; events per demo timely {min(n_new)}/{statistics.median(n_new)}/"
           f"{max(n_new)} (rule A {min(n_old)}/{statistics.median(n_old)}/{max(n_old)}); write latency in frames: timely "
           f"median {statistics.median(lat_new)}, max {max(lat_new)}; rule A + lag 4 median {statistics.median(lat_old)}, "
           f"max {max(lat_old)}")
     (F / "events").mkdir(parents=True, exist_ok=True)
-    out = F / f"events/events_{args.task}_v3c.json"
+    out = F / f"events/events_{args.task}_{args.tag}.json"
     out.write_text(json.dumps({"rule": str(rule), "episodes": events}) + "\n")
     print(f"[v3c] -> {out}")
     if args.relay:
         hf = "/opt/hf-tools/bin/python" if Path("/opt/hf-tools/bin/python").exists() else sys.executable
         rc = subprocess.run([hf, str(REPO / "scripts/memory_v2/migrate/relay.py"), "put", str(out),
-                             "--prefix", f"diag/{args.task}_v3c"]).returncode
+                             "--prefix", f"diag/{args.task}_{args.tag}"]).returncode
         print(f"[v3c] relay put exit code {rc}")
         return rc
     return 0

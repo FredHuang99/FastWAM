@@ -32,8 +32,8 @@ case $run in
     fi
     echo "[v15] unit tests exit code $rc"
     [ $rc -eq 0 ] && echo "{\"tasks\": [\"battery_try\"], \"checks\": \"READY_arprop + unit tests\"}" > $F/READY_$run ;;
-  rearrange_clock|swapT_clock)
-    task=rearrange_blocks; [ $run = swapT_clock ] && task=swap_T
+  rearrange_clock|swapT_clock|battery_clock)        # 11-24 plan v20 section 5: battery_clock (H100 filler)
+    task=rearrange_blocks; [ $run = swapT_clock ] && task=swap_T; [ $run = battery_clock ] && task=battery_try
     $PY scripts/fullft/ledger_ready.py --variant arclk --tasks $task --no-events --marker READY_$run 2>&1 \
       | grep -v '^\.\+$' | tail -n 6 ;;
   *) echo "[v15] unknown run $run"; exit 1 ;;
