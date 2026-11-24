@@ -31,7 +31,7 @@ MWAM_NOISE_SALT=r2 pairs (closed_loop/r2) of the same scenes = 200 pairs, the sa
            near frames masked (MWAM_HIST_MASK first / near, closed_loop/a2m), against the same 50 scenes unmasked
            (closed_loop/e6). Described only.
 A verdict needs all its MAIN scenes finished on both sides (else WAIT). Writes outputs/fullft/V20_<NAME>.json.
-  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py rv3ch2|swapt|swapth100|rankv3c|ar2v3c|rankarp|covnone|batclk|battmask|presstold|obss
+  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py rv3ch2|swapt|swapth100|rankv3c|ar2v3c|rankarp|covnone|batclk|battmask|presstold|obss|ranknone
 """
 from __future__ import annotations
 
@@ -277,6 +277,19 @@ def rankarp():
     return out
 
 
+def ranknone():
+    task = "blocks_ranking_try"
+    order, new = success("e6", "ranking_none_e30", task)
+    out = {"run": "main-table cell ranking without history (described)", "finished": {"ranking_none_e30": len(new)},
+           "success_1_100": sum(new.values())}
+    for ref in ("ranking_ar_e30", "ranking_arprop_e30"):
+        _, r = success("e6", ref, task)
+        if len(new) == 100 and len(r) == 100:
+            out[f"against_{ref}"] = compare(new, r, order)
+    out["verdict"] = "DESCRIBED" if len(new) == 100 else f"WAIT ({len(new)} of 100)"
+    return out
+
+
 def covnone():
     task = "cover_blocks"
     order, new = success("e6", "cover_none_e30", task)
@@ -307,7 +320,7 @@ def battmask():
 def main():
     name = sys.argv[1] if len(sys.argv) > 1 else ""
     fns = {"rv3ch2": rv3ch2, "swapt": swapt, "swapth100": swapth100, "batclk": batclk, "rankv3c": rankv3c, "ar2v3c": ar2v3c, "rankarp": rankarp,
-           "covnone": covnone, "presstold": presstold, "obss": obss, "battmask": battmask}
+           "covnone": covnone, "presstold": presstold, "obss": obss, "ranknone": ranknone, "battmask": battmask}
     if name not in fns:
         print(__doc__)
         return 2

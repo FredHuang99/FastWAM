@@ -110,3 +110,9 @@ ar2_arev | history.variant=arev history.event_max=12 history.lag=4 data.events=[
 # and keep their most recent 69 during training.
 ranking_arprop | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_blocks_ranking_try_v1] data.tasks=[blocks_ranking_try] history.variant=arprop history.event_max=69 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_blocks_ranking_try.json] | bash scripts/fullft/ranking_ready.sh
 ar2_prop_s18 | seed=18 history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_put_back_block.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_blocks.json] | test $(date +%s) -ge 1795089600 && grep -q swap_blocks outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/events/events_swap_blocks.json
+# 11-24 plan v20 section 5 (old H200 filler, after ar2_prop_s18): ranking without history, one main-table cell (~54 h).
+# Same recipe as ranking_ar (H200 class) with history.variant=none, as obs_none / press_none / cover_none.
+# Registered reading (11-24, before any ranking_none episode; A40, blocks_ranking_try 1-100, default noise): descriptive
+#   only (main-table cell, no-history row). Described: success 1-100; paired counts against ranking_ar e30 and
+#   ranking_arprop e30 on the same scenes.
+ranking_none | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_blocks_ranking_try_v1] data.tasks=[blocks_ranking_try] history.variant=none | test -f outputs/memory_v2/press/dense_blocks_ranking_try_v1/.verified
