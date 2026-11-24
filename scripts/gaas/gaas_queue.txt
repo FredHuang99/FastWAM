@@ -179,3 +179,74 @@ obs_zoom | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_
 #   zero prediction; val_action against obs_ar's (the head must not cost action quality). Plan 3.3: this is the second
 #   find-same round (the first: zoom, NO HELP); still below 28 -> back to Fable.
 obs_pose | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1] data.tasks=[observe_and_pickup] data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_observe_and_pickup.json] model.next_pose_loss=0.18 | test -f outputs/memory_v2/press/dense_observe_and_pickup_v1/.verified && test -s outputs/fullft/events/events_observe_and_pickup.json
+#
+# =====================================================================================================================
+# 11-24 plan v20 (Fable 11-24, three revisions; executed by Opus 11-24 18:xx). Readings below are copied verbatim from
+# plan v20 section 3 (claude/MemWAM_Plan_v20_20261124.md) and committed BEFORE any of these runs trains. Submission:
+# scripts/gaas/submit_v20.sh (login node: qsub / qstat only) puts SLOT jobs (RUN=@<slot>) behind the jobs now running;
+# a slot job picks, when it starts, the first run of its list in scripts/gaas/slots.txt whose line is here, whose
+# scripts/gaas/go/<run> file exists (its content, if any, is a cheap test that must pass) and whose cache / events files
+# can be fetched from the relays inside the job (sha256 checked). Plan v20 2.4a order: card 1 -> card 3 -> card 4 ->
+# first ready of cards 5 / 6 / 7, else card 2; a card whose prerequisites are missing is passed over, no GPU waits.
+# Cache and event files are fetched inside the job (no programs on the login node).
+#
+# Card 1 (plan v20 3.1, P0).
+# rearr_v3c_h2 = rearr_v3c's exact line (h100_queue.txt, 11-23) trained on the H200 class. Purpose: (1) an earlier look
+# at the timely writer on rearrange; (2) the same-machine-class control of the H200 rearrange variants that follow
+# (rearr_pw); (3) a second training of the same recipe (training-level spread).
+# Registered reading (11-24, before any rearr_v3c_h2 episode; A40, official seed-42 bank, default noise):
+#   No verdict of its own against the H100 models (different machine class): rearr_v3c (H100) keeps its reading of 11-23.
+#   Described: success 1-100; rearr_split.py classes (pressed twice / never pressed / which block); rearr_ledger.py
+#   write delay; against rearr_v3c (H100) e30 on the same scenes: paired counts and sign p (training-level spread).
+#   Expected if the write-timing diagnosis is right: "pressed twice" <= 6/100 (18 in rearrange_arprop); "never pressed"
+#   within 17 +- 6.
+rearr_v3c_h2 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks_v3c.json] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && test -f outputs/fullft/READY_arprop_events_rearrange_blocks_v3c
+#
+# Card 3 (plan v20 3.1, P1): swapT_arprop_h2, then swapT_long from its resume.pt (resume.pt kept: no AUTO_CLEAN while
+# a line names it in schedule.resume_from).
+# swapT_arprop_h2 = swapT_arprop's exact line (h100_queue.txt) on the H200 class, resume.pt kept. swapT_long = the same
+# run trained on from its final resume checkpoint to 60 frame-epochs (60-epoch cosine restarted at the seed point,
+# exports e45 and e60), as ar2_long (plan v13 E7).
+# Question: is swap_T (49-51 for every history variant; pure-WAM best 94-97, self-reported) limited by training length?
+# Registered reading (11-24, before any episode of either run; A40, swap_T 1-100, default noise):
+#   MAIN: D = success(swapT_long e60) - success(swapT_arprop_h2 e30), paired by scene, paired bootstrap 95 % CI
+#   (10,000, seed 0); SESOI +0.15: CI lower > +0.15 -> TRAINING-LIMITED; CI upper < +0.15 -> NOT TRAINING-LIMITED;
+#   otherwise UNCERTAIN (pre-set extension: both again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule).
+#   Described: e45; swapT_arprop_h2 e30 against swapT_arprop (H100) e30 on the same scenes (machine / training spread);
+#   the failure classes of the swap_T split (card 11) for both, once its classes are fixed.
+swapT_arprop_h2 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_swap_T_v1] data.tasks=[swap_T] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_T.json] | test -f outputs/memory_v2/press/dense_swap_T_v1/.verified && test -f outputs/fullft/events/events_swap_T.json && test -f outputs/fullft/READY_arprop_swap_T
+# swapT_long: the reading is the one registered above swapT_arprop_h2 (card 3). Seed = swapT_arprop_h2's final resume.pt.
+swapT_long | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_swap_T_v1] data.tasks=[swap_T] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_T.json] schedule.frame_epochs=60 schedule.export_at_epochs=[45,60] schedule.resume_from=/workspace/FastWAM-memory2/outputs/fullft/swapT_arprop_h2/resume.pt | test -f outputs/fullft/swapT_arprop_h2/SUMMARY.json && test -f outputs/fullft/swapT_arprop_h2/resume.pt && test -f outputs/memory_v2/press/dense_swap_T_v1/.verified && test -f outputs/fullft/READY_arprop_swap_T
+#
+# Card 4 (plan v20 3.1, P2 hedge). Text slots: the record holds 69 entries as ranking_arprop (ledger_ready.py --event-max 69).
+# ranking_v3c = ranking_arprop's exact line (69 entries, seed 17) with ONLY the write timing changed to the timely writer
+# (lag 0, delta 0.012, min_path 0.015, provisional 0.002; its events file). A hedge started before ranking_arprop's result:
+# ranking presses a confirm button after every arrangement, the situation in which rearrange_arprop pressed twice.
+# Registered reading (11-24, before any ranking_v3c episode; A40, blocks_ranking_try 1-100, default noise; H200 class):
+#   MAIN: D = success(ranking_v3c e30) - success(ranking_arprop e30), paired by scene, paired bootstrap 95 % CI
+#   (10,000, seed 0); SESOI +0.10: CI lower > +0.10 -> TIMELY WRITING HELPS; CI upper < +0.10 -> NO HELP; otherwise
+#   UNCERTAIN (pre-set extension: both again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule).
+#   Ceiling: ranking_arprop e30 >= 95/100 -> no verdict; then non-inferiority, margin -0.05, the three outcomes of ar2_v3c.
+#   Described: success against 100 (pure-WAM best, self-reported); confirm-press classes if the split exists.
+ranking_v3c | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_blocks_ranking_try_v1] data.tasks=[blocks_ranking_try] history.variant=arprop history.event_max=69 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_blocks_ranking_try_v3c.json] | test -f outputs/memory_v2/press/dense_blocks_ranking_try_v1/.verified && test -f outputs/fullft/READY_arprop_events_blocks_ranking_try_v3c
+#
+# Card 2 (plan v20 3.1, P1; after cards 3, 4 and the ready P0 cards).
+# ar2_v3c = ar2_prop's exact line (two-task body record, seed 17) with ONLY the write timing changed to the timely
+# writer (lag 0, delta 0.012, min_path 0.015, provisional 0.002; events files from task_v3c_events.py). The timely writer
+# is the candidate writer of the final design: it must not hurt where the record already works.
+# Registered reading (11-24, before any ar2_v3c episode; A40, official seed-42 bank, default noise):
+#   MAIN (non-inferiority) swap_blocks 1-100, e30: D = success(ar2_v3c e30) - success(ar2_prop e30), paired by scene,
+#   paired bootstrap 95 % CI (10,000, seed 0); margin -0.05: CI lower > -0.05 -> NO HARM; CI upper < -0.05 -> HARM;
+#   otherwise UNCERTAIN (pre-set extension: both e30 again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule).
+#   put_back_block 1-100: the same rule, reported beside it.
+#   Described: e10 swap against ar2_prop e10 (78/100) = learning speed; E1's pause / fidget / airgrasp cells (swap 1-50,
+#   visible vs hidden) only after NO HARM.
+ar2_v3c | history.variant=arprop history.event_max=32 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_put_back_block_v3c.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_blocks_v3c.json] | test -f outputs/fullft/READY_arprop_events_put_back_block_v3c && test -f outputs/fullft/READY_arprop_events_swap_blocks_v3c
+#
+# Filler (plan v20 section 5, new H200 "填空": cover without history, one main-table cell; ~41 GPU-hours). Last in every
+# slot list, so a slot never ends idle when no card above is ready. Same recipe as cover_ar (H200 class) with
+# history.variant=none, as obs_none / press_none.
+# Registered reading (11-24, before any cover_none episode; A40, cover_blocks 1-100, default noise): descriptive only
+#   (main-table cell, no-history row). Described: success 1-100; paired counts against cover_ar e30 and cover_arprop e30
+#   on the same scenes.
+cover_none | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_cover_blocks_v1] data.tasks=[cover_blocks] history.variant=none | test -f outputs/memory_v2/press/dense_cover_blocks_v1/.verified

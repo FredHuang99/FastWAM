@@ -22,6 +22,12 @@ for f in $F/*/resume.pt; do
   [ -f "$f" ] || continue
   d=$(dirname "$f"); run=$(basename "$d")
   if [ "$run" = ar_2task ] && [ -f $F/ar2_long/SUMMARY.json ]; then gone "$f" "seed of ar2_long, which finished"; continue; fi
+  # 11-24 plan v20: a resume.pt that another queue line starts from (schedule.resume_from, e.g. swapT_long from
+  # swapT_arprop_h2) stays until every such line has finished
+  seedof=$(grep -v '^[[:space:]]*#' $R/scripts/gaas/gaas_queue.txt | grep "schedule.resume_from=[^ ]*/outputs/fullft/$run/resume.pt" \
+           | awk -F'|' '{x = $1; gsub(/[[:space:]]/, "", x); print x}')
+  open=""; for c in $seedof; do [ -f $F/$c/SUMMARY.json ] || open="$open $c"; done
+  if [ -n "$open" ]; then echo "  keep   $f  (seed of$open, not finished)"; continue; fi
   if [ -f $d/SUMMARY.json ] && { [ -f $d/.relayed_e30 ] || [ -f $d/.relayed_final ]; }; then
     gone "$f" "finished; $(ls $d/.relayed_* | xargs -n1 basename | tr '\n' ' ')"
   elif [ -f $d/SUMMARY.json ]; then echo "  keep   $f  (finished, but no .relayed_e30 / .relayed_final)"

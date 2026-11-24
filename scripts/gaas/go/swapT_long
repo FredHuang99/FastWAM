@@ -1,0 +1,1 @@
+test -f outputs/fullft/swapT_arprop_h2/SUMMARY.json && test -f outputs/fullft/swapT_arprop_h2/resume.pt

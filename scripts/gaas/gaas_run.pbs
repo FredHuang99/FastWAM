@@ -37,9 +37,87 @@ HFPY=$W/envs/hf-tools/bin/python
 SIF=$W/sif/pytorch_25.11_417cbf33.sif
 FREEZE_SHA=2707a91e446b2327fb3a9d695d86dc87fe3d8f41d3c29069d87d4270701b4607
 RUN=${RUN:?submit with qsub -v RUN=<run>}
+F=$R/outputs/fullft
+# 11-24 plan v20 (Opus): helpers shared by slot jobs and plain runs. qline: the run's line of gaas_queue.txt.
+# prepare_data: fetch, inside the job, what the line needs and is not here yet (no programs on the login node):
+#   * data.roots dense_<task>_v1 from the cache relay (cache_relay.py get = download + sha256 of every file against its
+#     RELAY_MANIFEST + cache markers); a folder already here but not verified is verified; -> .verified
+#   * data.events files: events_<task>_v3c.json from the relay prefix diag/<task>_v3c (task_v3c_events.py --relay on the
+#     5090); events_<task>.json of the B1 tasks from diag/events_b1 (as fetch_b3.sh); an existing file is never replaced
+# Returns 1 (with the reason in the log) when something cannot be fetched.
+qline() { grep -v '^[[:space:]]*#' $R/scripts/gaas/gaas_queue.txt | awk -F'|' -v r="$1" '{x = $1; gsub(/[[:space:]]/, "", x)} x == r'; }
+prepare_data() {
+  local run=$1 sets root D ev E stem task IN
+  sets=$(qline "$run" | cut -d'|' -f2)
+  for root in $(echo "$sets" | grep -o 'data.roots=\[[^]]*\]' | sed 's/data.roots=\[//; s/\]//' | tr ',' ' '); do
+    case "$root" in /workspace/FastWAM-memory2/outputs/memory_v2/press/dense_*) ;; *) continue;; esac
+    D=$R/${root#/workspace/FastWAM-memory2/}
+    [ -f $D/.verified ] && continue
+    if [ -d $D ] && [ -f $D/RELAY_MANIFEST.json ]; then
+      echo "[prep] $(date '+%F %T') $run: verifying $(basename $D) (here, not verified yet)"
+      $HFPY $R/scripts/fullft/cache_relay.py verify $D 2>&1 | tail -n 3
+      [ ${PIPESTATUS[0]} -eq 0 ] || { echo "[prep] $run: $(basename $D) sha256 check FAILED"; return 1; }
+    else
+      echo "[prep] $(date '+%F %T') $run: fetching $(basename $D) from the cache relay (home $(df -h $HOME | tail -n 1 | awk '{print $4}') free)"
+      (cd $R && HF_HUB_DOWNLOAD_TIMEOUT=60 $HFPY scripts/fullft/cache_relay.py get --name $(basename $D) --dest $(dirname $D) 2>&1 | tail -n 4; exit ${PIPESTATUS[0]})
+      [ $? -eq 0 ] || { echo "[prep] $run: $(basename $D) not fetched / not verified (not on the cache relay?)"; return 1; }
+    fi
+    touch $D/.verified && echo "[prep] $run: $(basename $D) verified ($(du -sh $D | cut -f1))"
+  done
+  for ev in $(echo "$sets" | grep -o 'data.events=\[[^]]*\]' | sed 's/data.events=\[//; s/\]//' | tr ',' ' '); do
+    E=$R/${ev#/workspace/FastWAM-memory2/}
+    [ -s $E ] && continue
+    stem=$(basename $E .json); task=${stem#events_}
+    mkdir -p $(dirname $E)
+    case "$stem" in
+      *_v3c) IN=$F/relay_in/${task}; mkdir -p $IN
+             (cd $R && HF_HUB_DOWNLOAD_TIMEOUT=60 $HFPY scripts/memory_v2/migrate/relay.py get --prefix diag/${task} --out $IN 2>&1 | grep "\[relay\]" | tail -n 2) ;;
+      *)     IN=$F/relay_in/events_b1; mkdir -p $IN
+             (cd $R && HF_HUB_DOWNLOAD_TIMEOUT=60 $HFPY scripts/memory_v2/migrate/relay.py get --prefix diag/events_b1 --out $IN 2>&1 | grep "\[relay\]" | tail -n 2) ;;
+    esac
+    [ -s $IN/$stem.json ] || { echo "[prep] $run: $stem.json is not on the relay"; return 1; }
+    cp $IN/$stem.json $E && echo "[prep] $run: $stem.json fetched ($(stat -c %s $E) bytes, sha256 $(sha256sum $E | cut -c1-16))"
+  done
+  return 0
+}
+# Slot job (RUN=@<slot>, plan v20 2.4a): pick the first ready run of the slot's list (scripts/gaas/slots.txt).
+if [ "${RUN#@}" != "$RUN" ]; then
+  SLOT=${RUN#@}
+  mkdir -p $W/logs
+  PLOG=$W/logs/PICK_${SLOT}_$(date +%Y%m%d_%H%M).txt
+  {
+    echo "[pick] $(date '+%F %T') slot $SLOT; job ${PBS_JOBID:-none}; code $(cd $R && git log --oneline -1 | cut -c1-60)"
+    CANDS=$(grep -v '^[[:space:]]*#' $R/scripts/gaas/slots.txt | awk -F'|' -v s="$SLOT" '{x = $1; gsub(/[[:space:]]/, "", x)} x == s {print $2}')
+    PICKED=""
+    for c in $CANDS; do
+      [ -n "$(qline $c)" ] || { echo "[pick] $c: no line in gaas_queue.txt yet"; continue; }
+      [ -f $R/scripts/gaas/go/$c ] || { echo "[pick] $c: no go file yet"; continue; }
+      if [ -s $R/scripts/gaas/go/$c ] && ! (cd $R && bash $R/scripts/gaas/go/$c) > /dev/null 2>&1; then
+        echo "[pick] $c: go test not met ($(head -c 160 $R/scripts/gaas/go/$c))"; continue; fi
+      [ -f $F/$c/SUMMARY.json ] && { echo "[pick] $c: finished already"; continue; }
+      cj=$(cat $F/$c/.claimed_by 2>/dev/null)
+      if [ -n "$cj" ] && [ "$cj" != "${PBS_JOBID:-none}" ] && qstat "$cj" 2>/dev/null | grep -q " R "; then
+        echo "[pick] $c: running in job $cj"; continue; fi
+      mkdir -p $F/$c
+      if prepare_data $c; then PICKED=$c; echo "${PBS_JOBID:-none}" > $F/$c/.claimed_by; break; fi
+      echo "[pick] $c: data not ready -> next candidate"
+    done
+    echo "[pick] $(date '+%F %T') slot $SLOT -> ${PICKED:-NOTHING}"
+  } 2>&1 | tee -a $PLOG
+  PICKED=$(grep -o 'slot [A-Za-z0-9]* -> [A-Za-z0-9_]*' $PLOG | tail -n 1 | awk '{print $4}')
+  if [ -z "$PICKED" ] || [ "$PICKED" = NOTHING ]; then
+    echo "[pick] nothing ready for slot $SLOT: the job ends (GPU back to the pool); see $PLOG"; exit 0
+  fi
+  RUN=$PICKED
+  NO_RESUBMIT=1                                   # slot jobs are chained (submit_v20.sh): never add a job of their own
+  # AUTO_CLEAN (user 11-22): on, unless another line seeds from this run's resume.pt (schedule.resume_from)
+  if grep -v '^[[:space:]]*#' $R/scripts/gaas/gaas_queue.txt | grep -q "schedule.resume_from=[^ ]*/outputs/fullft/$RUN/resume.pt"; then
+    AUTO_CLEAN=0; else AUTO_CLEAN=1; fi
+  export RUN NO_RESUBMIT AUTO_CLEAN
+  WALL_H=${WALL_H:-96}
+fi
 WALL_H=${WALL_H:-96}
 C=$W/hf/payload/workspace/FastWAM/outputs/s1_dense_joint_h100_v1
-F=$R/outputs/fullft
 mkdir -p $W/logs $F/$RUN
 LOG=$W/logs/RUN_${RUN}_$(date +%Y%m%d_%H%M).txt
 exec > >(tee -a "$LOG") 2>&1
@@ -122,6 +200,7 @@ X /opt/mwam/bin/python -m pytest -q -p no:cacheprovider src/fastwam/fullft/tests
 [ ${PIPESTATUS[0]} -eq 0 ] || fail "unit tests"
 
 step "2 data checks"
+prepare_data $RUN || fail "data of $RUN could not be fetched (see [prep] above)"
 if [ ! -f $C/.verified ]; then
   $HFPY scripts/memory_v2/migrate/manifest.py verify --manifest $W/hf/MANIFEST.json --root $W/hf \
     --prefix /workspace/FastWAM/outputs/s1_dense_joint_h100_v1/cache /workspace/FastWAM/outputs/s1_dense_joint_h100_v1/RECORDS.json \
@@ -196,11 +275,30 @@ if [ -n "$EVF" ] && echo " $SETS " | grep -q ' history.variant=arprop '; then
   STEM=$(basename "$EVF" .json)
   if [ "$STEM" != "events_$T" ] && [ ! -f $F/READY_arprop_$STEM ]; then
     [ -s $R/${EVF#/workspace/FastWAM-memory2/} ] || fail "no events file $EVF (fetch_b4.sh first)"
+    # 11-24 plan v20: the line's record size (ranking 69) and, for cover / rearrange, deviation 44's --check3 subset
+    EMX=$(echo " $SETS " | grep -o ' history.event_max=[0-9]*' | cut -d= -f2); c3=""
+    case "$T" in cover_blocks|rearrange_blocks) c3="--check3 subset";; esac
     X bash -c "CUDA_VISIBLE_DEVICES= /opt/mwam/bin/python scripts/fullft/ledger_ready.py --variant arprop --tasks $T \
-      --events $EVF --marker READY_arprop_$STEM --skip-tests" 2>&1 | tail -n 6
+      --events $EVF --event-max ${EMX:-32} $c3 --marker READY_arprop_$STEM --skip-tests" 2>&1 | tail -n 6
     [ -f $F/READY_arprop_$STEM ] || fail "READY_arprop_$STEM (ledger_ready.py above)"
   fi
   [ "$STEM" != "events_$T" ] && SKIP_DEFAULT_EVENTS=1
+fi
+# 11-24 plan v20 (ar2_v3c): several events files, at least one not the task's default events_<task>.json -> each is
+# checked against its own task (task = the file stem without "events_" and a "_v3c" ending), marker READY_arprop_<stem>.
+EVS=$(echo "$SETS" | grep -o 'data.events=\[[^]]*,[^]]*\]' | sed 's/data.events=\[//; s/\]//' | tr ',' ' ')
+if [ -n "$EVS" ] && echo " $SETS " | grep -q ' history.variant=arprop ' && echo "$EVS" | grep -q '_v3c\.json'; then
+  EMX=$(echo " $SETS " | grep -o ' history.event_max=[0-9]*' | cut -d= -f2)
+  for EV in $EVS; do
+    STEM=$(basename "$EV" .json); T=${STEM#events_}; T=${T%_v3c}
+    [ -f $F/READY_arprop_$STEM ] && continue
+    [ -s $R/${EV#/workspace/FastWAM-memory2/} ] || fail "no events file $EV"
+    c3=""; case "$T" in cover_blocks|rearrange_blocks) c3="--check3 subset";; esac
+    X bash -c "CUDA_VISIBLE_DEVICES= /opt/mwam/bin/python scripts/fullft/ledger_ready.py --variant arprop --tasks $T \
+      --events $EV --event-max ${EMX:-32} $c3 --marker READY_arprop_$STEM --skip-tests" 2>&1 | tail -n 6
+    [ -f $F/READY_arprop_$STEM ] || fail "READY_arprop_$STEM (ledger_ready.py above)"
+  done
+  SKIP_DEFAULT_EVENTS=1
 fi
 if echo " $SETS " | grep -q ' history.variant=arprop ' && [ "${SKIP_DEFAULT_EVENTS:-0}" != 1 ]; then
   for T in $(echo "$SETS" | grep -o 'data.tasks=\[[^]]*\]' | sed 's/data.tasks=\[//; s/\]//' | tr ',' ' '); do

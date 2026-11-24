@@ -1,0 +1,12 @@
+# New H200 slot lists (plan v20 2.4a / section 5; Opus 11-24). A job submitted with RUN=@<slot> runs, when it starts, the
+# FIRST run of its list that (1) has a line in gaas_queue.txt, (2) has scripts/gaas/go/<run> (its content, if any, is a
+# shell test run in the repository root that must pass), (3) is not finished (SUMMARY.json) and not claimed by another
+# running job, and (4) whose cache / events files can be fetched inside the job (relays, sha256 checked).
+# None ready -> the job ends at once (the GPU goes back to the pool) and the log says so.
+# slot | candidates, in order
+A  | rearr_v3c_h2 ranking_v3c ar2_v3c cover_none
+A2 | press_told rearr_pw obs_match obs_s200 ar2_v3c ranking_v3c cover_none
+B  | swapT_arprop_h2 ranking_v3c ar2_v3c cover_none
+B2 | swapT_long press_told rearr_pw obs_match obs_s200 ar2_v3c ranking_v3c cover_none
+C  | ranking_v3c press_told rearr_pw obs_match ar2_v3c cover_none
+D  | press_told rearr_pw obs_match obs_s200 ar2_v3c ranking_v3c cover_none
