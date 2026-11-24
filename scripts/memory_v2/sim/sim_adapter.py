@@ -104,6 +104,7 @@ def ee_poses(environment):
 #   objects_after['_actors']  = {attribute: [x, y, z]} of every posed attribute of the environment, lists by index
 #                               (observe_and_pickup: object[0..4] = the table candidates, target_object = the reference
 #                               shown on the shelf, shelf, wall once it exists)
+#   objects_after['_quat']    = {attribute: [w, x, y, z]} of the same posed attributes (11-24, card 11)
 #   objects_after['_flags']   = the task scalars WATCH (observe_and_pickup: fail_flag = an arm moved > 3 cm before the
 #                               wall appeared, get_obs_cnt, target_object_idx; eval_success)
 #   OBJECTS_META.json (first target): every scalar attribute, short lists of names / ids (object_modelnames,
@@ -164,6 +165,35 @@ def task_actors(environment):
                 p = _entity_position(_posed(v))
                 if p is not None:
                     out[f'{name}[{i}]'] = p
+    return out
+
+
+def _entity_quat(entity):
+    try:
+        pose = entity.get_pose() if hasattr(entity, 'get_pose') else getattr(entity, 'pose', None)
+        q = [float(x) for x in list(pose.q)[:4]]
+        return [round(x, 5) for x in q] if all(math.isfinite(x) for x in q) else None
+    except Exception:                                        # noqa: BLE001
+        return None
+
+
+def task_quats(environment):
+    """11-24 (plan v20 card 11, swap_T: the success test is position AND orientation): {attribute: [w, x, y, z]} of the
+    same posed attributes as task_actors (SAPIEN quaternion order); passive reads like task_actors."""
+    out = {}
+    for name, value in _attributes(environment):
+        if name.startswith('_') or name in SKIP_ATTRS:
+            continue
+        ent = _posed(value)
+        if ent is not None:
+            q = _entity_quat(ent)
+            if q is not None:
+                out[name] = q
+        elif isinstance(value, (list, tuple)) and 0 < len(value) <= 32 and all(_posed(v) is not None for v in value):
+            for i, v in enumerate(value):
+                q = _entity_quat(_posed(v))
+                if q is not None:
+                    out[f'{name}[{i}]'] = q
     return out
 
 
@@ -367,6 +397,7 @@ def main():
                         (directory / 'OBJECTS_META.json').write_text(json.dumps(object_meta(environment), indent=1,
                                                                                 default=str), encoding='utf-8')
                     objects_after['_actors'] = task_actors(environment)
+                    objects_after['_quat'] = task_quats(environment)        # 11-24 card 11 (orientations)
                     objects_after['_flags'] = task_flags(environment)
                 except Exception as error:                   # noqa: BLE001 (diagnostics must never stop an episode)
                     objects_after['_actors_error'] = repr(error)[:300]
