@@ -269,6 +269,29 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py rv3c; PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_split.py rv3c:rearr_v3c_e30 e6:rearrange_arprop_e30; PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_ledger.py rv3c:rearr_v3c_e30 e6:rearrange_arprop_e30"
   pass_if: "m['rc'] == 0"
 
+# 11-24 15:20 (Opus, before the switch to Fable): the registered verdicts whose MAIN data is complete while their
+# full card still waits on described parts. B4's MAIN is e10 (done); the e30 parts are described only. D1 is judged per
+# arm; d1_wn's swap runs are done, d1_w's are not (that arm prints WAIT). The full cards still run later, unchanged.
+- id: A40-B4e10-verdict
+  lane: a40cpu
+  kind: shell
+  after: [A40-b4novid10-swap-s0, A40-b4novid10-swap-s1, A40-b4novid10-swap-s2, A40-b4novid10-swap-s3, A40-b4novid10-swap-s4, A40-b4novid10-swap-s5, A40-b4novid10-swap-s6, A40-b4novid10-swap-s7, A40-b4novid10-swap-s8, A40-b4novid10-swap-s9]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "B4 verdict on its complete MAIN (e10 swap, deed_verdict.py b4, registered 11-22); e30 described later by A40-B4-verdict"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py b4"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-D1wn-verdict
+  lane: a40cpu
+  kind: shell
+  after: [A40-D1-d1_wn30-swap-s0, A40-D1-d1_wn30-swap-s1, A40-D1-d1_wn30-swap-s2, A40-D1-d1_wn30-swap-s3, A40-D1-d1_wn30-swap-s4, A40-D1-d1_wn30-swap-s5, A40-D1-d1_wn30-swap-s6, A40-D1-d1_wn30-swap-s7, A40-D1-d1_wn30-swap-s8, A40-D1-d1_wn30-swap-s9]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "D1 verdict for the arm d1_wn (deed_verdict.py d1, per arm, registered 11-22); d1_w prints WAIT until its runs exist"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py d1"
+  pass_if: "m['rc'] == 0"
+
 # 11-23 23:10 (Opus): report cards for finished table cells that had none (their logs reach the results snapshot):
 # cover_blocks body record vs three-frame, and the no-history versions of swap_T and rearrange (descriptive, 1-100).
 - id: A40-COVER-report

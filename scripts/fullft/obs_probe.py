@@ -14,6 +14,11 @@ Conditions (action loss per anchor, mean over --noises fixed draws):
           action chunk of these anchors holds the start of the reach while the recent frames do not show its direction
           yet: if the model picks the object anywhere, it is here ([g - 48, g - 1] is the final approach, where the
           recent frames already show the direction).
+  --window wait (11-24): anchors evenly in [8, m - 25], before the arm moves (the action is "stay still"; only frame 0
+          says which candidate is the target).
+  Models with the next-pose head (obs_pose, 11-23 part (2b)): per window also the head's squared error (true history /
+  frame 0 swapped) next to the error of predicting "no further motion" (descriptive, the registered obs_pose reading:
+  is the target position known before the reach, and does it come from frame 0?).
 Reading: in the choice window, (swap - true) / true < 2 % -> "frame 0 is not used at the choice"; >= 2 % -> it is used.
 The same for the late window as a contrast, and (none - true) / true for reference. Also: the share of training anchors
 that fall in a 48-frame choice window (how much of the training signal is about the choice).
@@ -74,7 +79,7 @@ def main():
     ap.add_argument("--noises", type=int, default=2)
     ap.add_argument("--choice", type=int, default=6)
     ap.add_argument("--late", type=int, default=3)
-    ap.add_argument("--window", choices=("choice", "onset"), default="choice")
+    ap.add_argument("--window", choices=("choice", "onset", "wait"), default="choice")
     ap.add_argument("--out", default="")
     args = ap.parse_args()
     from fastwam.fullft.data import DenseEpisodes, Samples, collate, load_events, video_polarity
@@ -94,12 +99,12 @@ def main():
             continue
         gs.append(g)
         lens.append(n)
-        if args.window == "onset":
+        if args.window in ("onset", "wait"):
             m = motion_onset(e["proprio"], g)
             if m is None:
                 continue
             ms.append(m)
-            lo, hi = max(1, m - 24), min(g - 1, m + 8)
+            lo, hi = (max(1, m - 24), min(g - 1, m + 8)) if args.window == "onset" else (8, m - 25)
         else:
             lo, hi = max(1, g - 48), g - 1
         for a in evenly(lo, hi, args.choice):
@@ -111,9 +116,12 @@ def main():
           f"a 48-frame choice window = {100 * 48 * len(gs) / sum(lens):.1f} % of the training anchors")
     if ms:
         print(f"[probe] motion onset (5 % of the way to the grasp pose) at frame median {statistics.median(ms)} "
-              f"(min {min(ms)}, max {max(ms)}); window [m - 24, m + 8]")
+              f"(min {min(ms)}, max {max(ms)}); window " + ("[m - 24, m + 8]" if args.window == "onset" else "[8, m - 25]"))
     events = load_events(cfg.data.events) if cfg.data.events else {}      # the body-record model needs its record
-    samples = Samples(episodes, items, cfg.rule, events, video_polarity(episodes), augment=False, seed=cfg.seed)
+    pose = getattr(model, "next_pose_head", None) is not None
+    samples = Samples(episodes, items, cfg.rule, events, video_polarity(episodes), augment=False, seed=cfg.seed,
+                      next_pose=cfg.next_pose if pose else None)
+    pose_err = defaultdict(lambda: defaultdict(list))
     donor = {eid: ids[(k + 1) % len(ids)] for k, eid in enumerate(ids)}
     frame0 = {}
     loss = defaultdict(lambda: defaultdict(list))
@@ -142,12 +150,17 @@ def main():
                 noise = {key: torch.stack([n[key] for n in noises]).squeeze(1) if key.startswith("t_") else
                          torch.stack([n[key] for n in noises]) for key in noises[0]}
                 with torch.autocast("cuda", dtype=torch.bfloat16, cache_enabled=False):
-                    _, at = model.loss(batch, noise, model.history(batch))
-                    _, asw = model.loss(swapped, noise, model.history(swapped))
+                    aux_t, aux_s = ({}, {}) if pose else (None, None)
+                    _, at = model.loss(batch, noise, model.history(batch), aux=aux_t)
+                    _, asw = model.loss(swapped, noise, model.history(swapped), aux=aux_s)
                     _, an = model.loss(batch, noise, None)
                 for j, i in enumerate(idx):
                     for cond, v in (("true", at), ("swap", asw), ("none", an)):
                         loss[i][cond].append(float(v[j].float()))
+                    if pose and float(aux_t["next_pose_valid"][j]) > 0:
+                        pose_err[i]["true"].append(float(aux_t["next_pose"][j]))
+                        pose_err[i]["swap"].append(float(aux_s["next_pose"][j]))
+                        pose_err[i]["zero"].append(float(aux_t["next_pose_zero"][j]))
             if start % 40 == 0:
                 print(f"  {start}/{len(samples)}", flush=True)
     report = {"export": args.export, "run": cfg.name, "rule": str(cfg.rule), "windows": {}}
@@ -160,12 +173,18 @@ def main():
                                 "swap_vs_true": rel_swap, "none_vs_true": rel_none, "swap_higher_at": up}
         print(f"{w:6s}: {len(sel)} anchors; action loss true {m['true']:.5f}, frame-0 swapped {m['swap']:.5f} "
               f"({100 * rel_swap:+.1f} %, higher at {up}/{len(sel)}), no history {m['none']:.5f} ({100 * rel_none:+.1f} %)")
+        psel = [i for i in sel if pose_err[i]["true"]]
+        if psel:
+            pm = {c: statistics.mean(statistics.mean(pose_err[i][c]) for i in psel) for c in ("true", "swap", "zero")}
+            report["windows"][w]["next_pose"] = {"anchors": len(psel), **pm}
+            print(f"{w:6s}  next-pose head on {len(psel)} anchors: squared error {pm['true']:.4f}, frame-0 swapped "
+                  f"{pm['swap']:.4f}, predicting no motion {pm['zero']:.4f}")
     c = report["windows"][args.window]["swap_vs_true"]
-    where = "at the choice" if args.window == "choice" else "at the motion onset"
+    where = {"choice": "at the choice", "onset": "at the motion onset", "wait": "before the arm moves"}[args.window]
     verdict = f"frame 0 is NOT used {where} (< 2 %)" if c < 0.02 else f"frame 0 IS used {where} (>= 2 %)"
     report["reading"] = verdict
     print(f"OBS PROBE {cfg.name}: {verdict}")
-    tail = "" if args.window == "choice" else "_onset"
+    tail = "" if args.window == "choice" else f"_{args.window}"
     out = Path(args.out or f"/workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_{cfg.name}{tail}.json")
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, indent=1) + "\n")
