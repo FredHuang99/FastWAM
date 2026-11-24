@@ -54,6 +54,27 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_split.py"
   pass_if: "m['rc'] == 0"
 
+# 11-24 plan v20 section 8 (zero GPU, A40 CPU; Opus): supplements 1, 4, 5. Descriptive; logs pushed.
+- id: A40-SUP1-press-depth-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-rearr-split-report]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v20 supplement 1: rearrange never-pressed episodes, left EE against the button base (closest approach, height, contact; body-record entry geometry) vs the counted presses; rearr_press_depth.py over e6:rearrange_arprop_e30, e6:rearrange_ar_e30, e16:rearrange_clock_e30"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_press_depth.py"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-SUP5-ranking-split-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-rearr-split-report]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v20 supplement 5: ranking three-frame e30 failure split (orders pressed, repeats, off-slot blocks; the expert's walk); ranking_split.py e6:ranking_ar_e30"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/ranking_split.py e6:ranking_ar_e30"
+  pass_if: "m['rc'] == 0"
+
 # 11-24 plan v20 (Opus): NEW VERSIONS of the five tasks not at target go first (user 11-24: evaluate every new version
 # at once; plan v20 section 5 order 1). Cards written when each run started training; each fetch card waits on the relay.
 # card 3 swapT_arprop_h2 (new H200; registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660). MAIN of card 3 uses its e30 as the control of swapT_long e60.
@@ -4845,6 +4866,102 @@ tasks:
   timeout_h: 2
   hypothesis: "plan v19 B4 verdict (deed_verdict.py b4; e10 swap SESOI -0.15; e30 described); log pushed"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py b4"
+  pass_if: "m['rc'] == 0"
+
+# plan v20 supplement 4: B4 e10 on put_back_block 1-50 (only swap was evaluated at e10), then the stage split
+- id: A40-B4put10-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_prop_novid-e10]
+  requires_pass: [A40-fetch-ar2_prop_novid-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 supplement 4 (described): ar2_prop_novid_e10 on put_back_block 1-50 against ar2_prop_e10 (closed_loop/lc); shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_novid_e10/export_e10.pt
+  label: ar2_prop_novid_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/b4
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-B4put10-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_prop_novid-e10]
+  requires_pass: [A40-fetch-ar2_prop_novid-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 supplement 4 (described): ar2_prop_novid_e10 on put_back_block 1-50 against ar2_prop_e10 (closed_loop/lc); shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_novid_e10/export_e10.pt
+  label: ar2_prop_novid_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/b4
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-B4put10-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_prop_novid-e10]
+  requires_pass: [A40-fetch-ar2_prop_novid-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 supplement 4 (described): ar2_prop_novid_e10 on put_back_block 1-50 against ar2_prop_e10 (closed_loop/lc); shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_novid_e10/export_e10.pt
+  label: ar2_prop_novid_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/b4
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-B4put10-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_prop_novid-e10]
+  requires_pass: [A40-fetch-ar2_prop_novid-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 supplement 4 (described): ar2_prop_novid_e10 on put_back_block 1-50 against ar2_prop_e10 (closed_loop/lc); shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_novid_e10/export_e10.pt
+  label: ar2_prop_novid_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/b4
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-B4put10-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ar2_prop_novid-e10]
+  requires_pass: [A40-fetch-ar2_prop_novid-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 supplement 4 (described): ar2_prop_novid_e10 on put_back_block 1-50 against ar2_prop_e10 (closed_loop/lc); shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_novid_e10/export_e10.pt
+  label: ar2_prop_novid_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_put_back_block]
+  tasks: [put_back_block]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/b4
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-SUP4-b4-stages-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-B4put10-s0, A40-B4put10-s1, A40-B4put10-s2, A40-B4put10-s3, A40-B4put10-s4, A40-B4-verdict]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v20 supplement 4: B4 stage split (furthest stage, failure type, memory decision) for ar2_prop_novid e10 / e30 against ar2_prop e10 / e30, swap and put; b4_stages.py"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/b4_stages.py"
   pass_if: "m['rc'] == 0"
 
 - id: A40-fetch-press_none-e30
