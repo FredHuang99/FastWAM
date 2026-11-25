@@ -7319,10 +7319,10 @@ tasks:
 
 # 11-25 14:45: free space on the HF relay (978.9 GB of 1000 GB). HELD until the user explicitly confirms the exact list
 # (scripts/fullft/hf_prune_list.txt; a permanent deletion). Verifies the A40's own copy of each export by sha256 first.
+# RELEASED 11-25 14:55: the user wrote "确认删除这23个" (the 23 names of hf_prune_list.txt, commit 5bbbc73).
 - id: A40-HF-prune
   lane: a40cpu
   kind: shell
-  hold: true
   need_mib: 0
   timeout_h: 6
   hypothesis: "HF relay prune (user-confirmed list only): delete exports the A40 holds (sha256 verified), then squash the repo history so the quota frees"

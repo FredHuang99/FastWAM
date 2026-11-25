@@ -44,6 +44,7 @@ common() {      # every machine
   nvidia-smi --query-compute-apps=gpu_bus_id,pid,used_memory --format=csv,noheader >> $S/report/gpus.txt 2>/dev/null
   tail -n 60 $OUT/AUTO_PULL.log > $S/fullft/AUTO_PULL.log 2>/dev/null
   tail -n 20 $LOG > $S/fullft/RESULTS_PUSH.log 2>/dev/null
+  tail -n 30 $OUT/RELAY_RETRY.log > $S/fullft/RELAY_RETRY.log 2>/dev/null
   # small result files of the last 4 days (verdicts, reports, splits, checks)
   find $OUT -maxdepth 1 -name '*.json' -size -1500k -mtime -4 -exec cp -p {} $S/fullft/ \; 2>/dev/null
   find $OUT -maxdepth 1 -name '*.tsv' -size -1500k -mtime -4 -exec cp -p {} $S/fullft/ \; 2>/dev/null
@@ -184,7 +185,12 @@ case "${1:-}" in
     [ "$MACHINE" = h200n ] && { echo "h200n: the slot jobs push (gaas_run.pbs); nothing is started on the login node"; exit 0; }
     bash $R/scripts/fullft/results_push.sh start
     ;;
-  once) push_once && { say "pushed"; echo "pushed"; } || { say "push FAILED"; echo "push FAILED (see $LOG)"; };;
+  once)
+    push_once && { say "pushed"; echo "pushed"; } || { say "push FAILED"; echo "push FAILED (see $LOG)"; }
+    # 11-25: exports that missed the (full) HF relay are retried on the container machines (relay_retry.sh, detached)
+    case $MACHINE in h100|h200o) [ -f $R/scripts/fullft/relay_retry.sh ] && \
+      setsid bash $R/scripts/fullft/relay_retry.sh > /dev/null 2>&1 < /dev/null & ;; esac
+    ;;
   start)
     if running; then echo "[push] already running (pid $(cat $PIDF))"; tail -n 3 $LOG; exit 0; fi
     [ -s $W/.git/credentials ] || { echo "[push] run setup first"; exit 1; }

@@ -8,6 +8,10 @@
 gen155-build | gpu0 | grep -q '"finished"' outputs/fullft/gen_obs/gen155/demo_clean/observe_and_pickup/aloha_agilex/GEN.json | GEN_GATE=background GEN_BUILD=gen155 GEN_GPU=$GPU bash scripts/fullft/gen_obs_5090.sh
 gen600-build | gpu0 | grep -q '"finished"' outputs/fullft/gen_obs/gen600/demo_clean/observe_and_pickup/aloha_agilex/GEN.json | GEN_GATE=background GEN_BUILD=gen600 GEN_GPU=$GPU bash scripts/fullft/gen_obs_5090.sh
 #
+# HF relay at 99 % (11-25 14:55): the 12 intermediate exports that exist only on the relay -> this disk, verified, then
+# deleted on the relay one by one (user 14:55: "download them to the 5090, then delete; automatic, one by one")
+hf-offload-12 | cpu | - | /opt/hf-tools/bin/python scripts/fullft/hf_offload.py --list scripts/fullft/hf_offload_list.txt --squash
+#
 # development-scene quick evaluations (plan v20 section 5: every new version's e10 / e20 as soon as it is exported; 30
 # dev scenes, 5090 only, never a verdict). P0 cards first (8, 5, 6, 7), then cards 4 and 3.
 dev-obs_s200_e10 | gpu | bash scripts/fullft/relay_has.sh obs_s200_e10 | PF_GPUS=$GPU DEV_RUNS="obs_s200_e10:observe_and_pickup" bash scripts/fullft/dev_eval_5090.sh

@@ -1,0 +1,14 @@
+# 11-25 14:55 (user confirmed: download these 12 to the 5090, then delete each on the relay, one after another).
+# Intermediate exports that exist only on the HF relay (not on the A40); 12 x 12.04 GB = 144 GB.
+press_count_s18_e10
+press_count_s18_e20
+press_count_s19_e10
+press_count_s19_e20
+obs_pose_e10
+obs_pose_e20
+obs_zoom_e10
+obs_zoom_e20
+press_none_e10
+press_none_e20
+d2_press_e10
+d2_press_e20
