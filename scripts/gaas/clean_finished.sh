@@ -5,6 +5,7 @@
 #   * ar_2task/resume.pt once ar2_long has SUMMARY.json (on this machine it was only the seed of ar2_long, joined from
 #     the old H200's parts; the original stays on the old H200)
 #   * <run>/resume.pt.partial (an unfinished copy written when the disk filled; never read)
+#   * <run>/export_final.pt of a finished run whose last export is on the relay (11-26, user 02:17)
 #   * <run>/export_<tag>.pt with .relayed_<tag> whose size equals the relay's listing (user 13:19: exports may go once
 #     uploaded; the .sha256 stays). An export without the marker or with another size on the relay stays.
 # Everything else stays and is listed with the reason. Refuses while any job of ours is queued or running (a trainer
@@ -28,12 +29,15 @@ for f in $F/*/resume.pt; do
            | awk -F'|' '{x = $1; gsub(/[[:space:]]/, "", x); print x}')
   open=""; for c in $seedof; do [ -f $F/$c/SUMMARY.json ] || open="$open $c"; done
   if [ -n "$open" ]; then echo "  keep   $f  (seed of$open, not finished)"; continue; fi
-  if [ -f $d/SUMMARY.json ] && { [ -f $d/.relayed_e30 ] || [ -f $d/.relayed_final ]; }; then
+  if [ -f $d/SUMMARY.json ] && bash $R/scripts/gaas/last_export_relayed.sh $d; then   # 11-26: the LAST export counts
     gone "$f" "finished; $(ls $d/.relayed_* | xargs -n1 basename | tr '\n' ' ')"
-  elif [ -f $d/SUMMARY.json ]; then echo "  keep   $f  (finished, but no .relayed_e30 / .relayed_final)"
+  elif [ -f $d/SUMMARY.json ]; then echo "  keep   $f  (finished, but its last export is not marked relayed)"
   else echo "  keep   $f  (not finished: needed to resume)"; fi
 done
 for f in $F/*/*.partial; do [ -f "$f" ] && gone "$f" "unfinished copy from the full disk"; done
+# 11-26 (user 02:17): export_final.pt of a finished run whose last export is on the relay (the same moment's weights)
+for f in $F/*/export_final.pt; do [ -f "$f" ] || continue; d=$(dirname "$f")
+  [ -f $d/SUMMARY.json ] && bash $R/scripts/gaas/last_export_relayed.sh $d && gone "$f" "finished; = its last export, which is on the relay"; done
 HFPY=$HOME/mwam/envs/hf-tools/bin/python
 for f in $F/*/export_e*.pt; do
   [ -f "$f" ] || continue

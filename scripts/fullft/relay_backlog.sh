@@ -22,8 +22,10 @@ for round in $(seq 1 48); do
     ac=0; [ -f $OUT/$run/.auto_clean ] && ac=1            # 11-22: the job that trained it had AUTO_CLEAN=1 (user 13:16 / 13:19)
     RUN=$run TAGS="${todo# }" POLL=60 AUTO_CLEAN=$ac bash scripts/fullft/export_watch.sh > /dev/null 2>&1 < /dev/null
     echo "[backlog] $(date '+%F %T') $run relayed now: $(ls $OUT/$run/.relayed_* 2>/dev/null | xargs -n1 basename 2>/dev/null | tr '\n' ' ')"
-    if [ $ac = 1 ] && [ -f $OUT/$run/SUMMARY.json ] && [ -f $OUT/$run/resume.pt ] && { [ -f $OUT/$run/.relayed_e30 ] || [ -f $OUT/$run/.relayed_final ]; }; then
-      rm -f $OUT/$run/resume.pt && echo "[backlog] $(date '+%F %T') AUTO_CLEAN: removed $run/resume.pt (finished, last export on the relay)"
+    # 11-26 (user 02:17): the run's LAST export counts (last_export_relayed.sh); export_final.pt goes with resume.pt
+    if [ $ac = 1 ] && [ -f $OUT/$run/SUMMARY.json ] && bash scripts/gaas/last_export_relayed.sh $OUT/$run; then
+      for x in resume.pt export_final.pt; do [ -f $OUT/$run/$x ] || continue
+        rm -f $OUT/$run/$x && echo "[backlog] $(date '+%F %T') AUTO_CLEAN: removed $run/$x (finished, last export on the relay)"; done
     fi
   done < <(cat "$LIST" "$OUT/RELAY_PENDING.txt" 2>/dev/null)   # 11-22: + the exports jobs handed over (gaas_run.pbs)
   [ $left = 0 ] && { echo "[backlog] $(date '+%F %T') every listed export is on the relay"; exit 0; }

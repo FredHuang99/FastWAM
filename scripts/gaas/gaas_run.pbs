@@ -284,11 +284,15 @@ fi
 # 11-22: all ten jobs died at 05:21 when the home disk filled (two new runs wrote their first resume.pt, about 72 GB
 # each, next to the four older ones) [inferred]. A run needs room for one more resume.pt while it saves (.partial,
 # then the old one is replaced): wait until the home has >= 160 GB free (up to 6 h). Nothing is deleted here.
+# 11-26: + 72 GB for every OTHER run of ours that is training now (metrics.jsonl written in the last 20 min): each of them
+# writes a 72 GB resume.pt.partial at its next save; four runs at once filled the home on 11-25 ~20:54 with 59 GB free.
 for i in $(seq 1 36); do
+  busy=$(find $F -mindepth 2 -maxdepth 2 -name metrics.jsonl -mmin -20 2>/dev/null | grep -v "/$RUN/metrics.jsonl" | wc -l)
+  need=$((160 + 72 * busy))
   free=$(df -BG --output=avail $HOME | tail -n 1 | tr -dc '0-9')
-  [ "${free:-0}" -ge 160 ] && break
-  [ $i = 36 ] && fail "home has ${free} GB free after 6 h (< 160 GB needed for a resume checkpoint)"
-  step "home has ${free} GB free (< 160 GB); waiting 10 min"; sleep 600
+  [ "${free:-0}" -ge $need ] && break
+  [ $i = 36 ] && fail "home has ${free} GB free after 6 h (< $need GB needed: a resume checkpoint + $busy other runs training)"
+  step "home has ${free} GB free (< $need GB: 160 + 72 x $busy other runs training); waiting 10 min"; sleep 600
 done
 step "home ${free} GB free"
 if [ "$RUN" = ar2_long ] && [ ! -f $F/ar_2task/.resume_verified ]; then
@@ -421,9 +425,12 @@ step "export watcher: $(ls $F/$RUN/.relayed_* 2>/dev/null | xargs -n1 basename 2
 # 11-22: AUTO_CLEAN=1 (only when the user approved it for the submission): a finished run's resume.pt (about 72 GB,
 # needed only to continue an unfinished run) is removed once SUMMARY.json exists AND its last export is on the relay
 # (.relayed_e30, or .relayed_final); otherwise it stays and this says why.
-if [ "${AUTO_CLEAN:-0}" = 1 ] && [ -f $F/$RUN/resume.pt ]; then
-  if [ -f $F/$RUN/.relayed_e30 ] || [ -f $F/$RUN/.relayed_final ]; then
-    sz=$(du -sh $F/$RUN/resume.pt | cut -f1); rm -f $F/$RUN/resume.pt && step "AUTO_CLEAN: removed $RUN/resume.pt ($sz)"
+# 11-26 (user 02:17 "同意你的做法"): the LAST export counts (e60 for a 60-epoch run; last_export_relayed.sh), and
+# export_final.pt (the same moment's weights as the last export; never relayed, 12 GB) goes with resume.pt.
+if [ "${AUTO_CLEAN:-0}" = 1 ] && { [ -f $F/$RUN/resume.pt ] || [ -f $F/$RUN/export_final.pt ]; }; then
+  if bash $R/scripts/gaas/last_export_relayed.sh $F/$RUN; then
+    for x in resume.pt export_final.pt; do [ -f $F/$RUN/$x ] || continue
+      sz=$(du -sh $F/$RUN/$x | cut -f1); rm -f $F/$RUN/$x && step "AUTO_CLEAN: removed $RUN/$x ($sz)"; done
   else
     step "AUTO_CLEAN: resume.pt kept (the last export is not on the relay yet)"
   fi
