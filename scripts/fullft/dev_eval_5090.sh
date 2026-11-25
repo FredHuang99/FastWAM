@@ -47,6 +47,7 @@ bank() {            # task -> complete 30-scene dev bank
 }
 say "checkout $(git -c safe.directory='*' log --oneline -1 | cut -c1-60); GPU $G; runs: ${DEV_RUNS:-none}"
 [ -n "${DEV_RUNS:-}" ] || { say "DEV_RUNS is empty: nothing to do"; exit 0; }
+BAD=0
 mkdir -p $OUT; [ -f $F/DEV_EVAL.tsv ] || printf 'time\tlabel\ttask\tsuccess\tfinished\n' > $F/DEV_EVAL.tsv
 for item in $DEV_RUNS; do
   L=${item%%:*}; T=${item#*:}; EV=""
@@ -63,4 +64,9 @@ for item in $DEV_RUNS; do
   k=$(cat $OUT/$L/on/$T/seed_*/result.json 2>/dev/null | grep -c '"success": true')
   printf '%s\t%s\t%s\t%s\t%s\n' "$(date '+%F %T')" "$L" "$T" "$k" "$n" >> $F/DEV_EVAL.tsv
   say "DEV $L on $T: $k / $n (30 dev scenes; 5090 only)"
+  if [ "$n" = 0 ]; then       # 11-25: nothing finished -> the run's own error, and a non-zero exit for the 5090 queue
+    say "no episode finished; the last lines of $C/dev7_$L.log:"; tail -n 25 $C/dev7_$L.log | cut -c1-300
+    BAD=1
+  fi
 done
+exit $BAD

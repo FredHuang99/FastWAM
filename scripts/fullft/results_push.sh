@@ -131,6 +131,7 @@ g5090_part() {  # 5090: the q5090 runner's state and task logs
   [ -f $OUT/Q5090_STATE.txt ] && cp -p $OUT/Q5090_STATE.txt $S/report/
   for f in $(ls -t $OUT/q5090/*.log 2>/dev/null | head -n 40); do tail -n 200 "$f" | tail -c 60000 > $S/q5090/$(basename "$f"); done
   ls $OUT/q5090/ 2>/dev/null | grep -v '\.log$' > $S/q5090/MARKERS.txt
+  for f in $(ls -t $R/outputs/memory_v2/closed_loop/*.log 2>/dev/null | head -n 12); do tail -n 60 "$f" | tail -c 30000 > $S/q5090/cl_$(basename "$f"); done
 }
 
 h200n_part() {  # new H200 (GaaS): slot pick / run logs on the shared home, our jobs
