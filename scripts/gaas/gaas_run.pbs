@@ -38,6 +38,23 @@ SIF=$W/sif/pytorch_25.11_417cbf33.sif
 FREEZE_SHA=2707a91e446b2327fb3a9d695d86dc87fe3d8f41d3c29069d87d4270701b4607
 RUN=${RUN:?submit with qsub -v RUN=<run>}
 F=$R/outputs/fullft
+# 11-25 (user 14:08: every machine syncs its results like the A40): while this job lives, push a results snapshot to the
+# branch results-h200n at most every 25 min (one pusher at a time across our jobs: lock directory on the shared home;
+# the token was stored once by the user: ~/mwam/results_push/.git/credentials). Nothing runs on the login node.
+if [ -s $W/results_push/.git/credentials ] && [ "${MWAM_PUSHER:-0}" != 1 ]; then
+  export MWAM_PUSHER=1                            # once per job (the slot wait re-executes this file in the same process)
+  (
+    while kill -0 $$ 2>/dev/null; do
+      L=$W/results_push.lock S=$W/results_push/LAST_PUSH
+      if [ -d $L ] && [ $(( $(date +%s) - $(stat -c %Y $L) )) -gt 1200 ]; then rmdir $L 2>/dev/null; fi
+      if { [ ! -f $S ] || [ $(( $(date +%s) - $(stat -c %Y $S) )) -ge 1500 ]; } && mkdir $L 2>/dev/null; then
+        MACHINE=h200n R=$R W=$W/results_push timeout 900 bash $R/scripts/fullft/results_push.sh once > /dev/null 2>&1 && touch $S
+        rmdir $L 2>/dev/null
+      fi
+      sleep 300
+    done
+  ) > /dev/null 2>&1 &
+fi
 # 11-24 plan v20 (Opus): helpers shared by slot jobs and plain runs. qline: the run's line of gaas_queue.txt.
 # prepare_data: fetch, inside the job, what the line needs and is not here yet (no programs on the login node):
 #   * data.roots dense_<task>_v1 from the cache relay (cache_relay.py get = download + sha256 of every file against its
@@ -131,7 +148,17 @@ if [ "${RUN#@}" != "$RUN" ]; then
   } 2>&1 | tee -a $PLOG
   PICKED=$(grep -o 'slot [A-Za-z0-9]* -> [A-Za-z0-9_]*' $PLOG | tail -n 1 | awk '{print $4}')
   if [ -z "$PICKED" ] || [ "$PICKED" = NOTHING ]; then
-    echo "[pick] nothing ready for slot $SLOT: the job ends (GPU back to the pool); see $PLOG"; exit 0
+    # 11-25 (unattended until Friday): a chained slot that ends at once would pass the GPU down a chain of empty jobs;
+    # it looks again every 15 min (new code pulled first) for up to SLOT_WAIT_H hours (default 3), then ends
+    WAITED=${WAITED:-0}
+    if [ $WAITED -lt $(( ${SLOT_WAIT_H:-3} * 4 )) ]; then
+      echo "[pick] nothing ready for slot $SLOT: looking again in 15 min ($WAITED / $(( ${SLOT_WAIT_H:-3} * 4 )))" | tee -a $PLOG
+      sleep 900
+      (cd $R && git pull -q --ff-only origin memory2) > /dev/null 2>&1
+      export WAITED=$((WAITED + 1)) MWAM_REEXEC=1
+      exec bash $R/scripts/gaas/gaas_run.pbs "$@"
+    fi
+    echo "[pick] nothing ready for slot $SLOT after ${SLOT_WAIT_H:-3} h: the job ends (GPU back to the pool); see $PLOG"; exit 0
   fi
   RUN=$PICKED
   NO_RESUBMIT=1                                   # slot jobs are chained (submit_v20.sh): never add a job of their own

@@ -15,3 +15,13 @@ D  | press_told rearr_pw obs_match obs_s200 ar2_v3c ranking_v3a cover_none
 A3 | obs_match obs_s200 obs_s800 rearr_pw press_told ar2_v3c ranking_v3a cover_none
 B3 | obs_match obs_s200 obs_s800 rearr_pw press_told ar2_v3c ranking_v3a cover_none
 D2 | obs_match obs_s200 obs_s800 rearr_pw press_told ar2_v3c ranking_v3a cover_none
+# 11-25 14:30 (Opus; user: unattended until Friday 10:00): two more slots behind each lane (C: one behind ranking_v3a,
+# one more); a slot with nothing ready waits up to 3 h (gaas_run.pbs). Opus adds new registered runs to these lists.
+A4 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ar2_v3c ranking_v3a cover_none
+A5 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ar2_v3c ranking_v3a cover_none
+B4 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ar2_v3c ranking_v3a cover_none
+B5 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ar2_v3c ranking_v3a cover_none
+C2 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ar2_v3c ranking_v3a cover_none
+C3 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ar2_v3c ranking_v3a cover_none
+D3 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ar2_v3c ranking_v3a cover_none
+D4 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ar2_v3c ranking_v3a cover_none

@@ -1,0 +1,23 @@
+# 5090 task file for q5090.sh (11-25, Opus). "id | where | condition | command"; re-read every 2 minutes; file order =
+# priority; each id runs once (outputs/fullft/q5090/<id>.done / .failed). where: gpu0 | gpu1 | gpu | cpu. The command
+# gets GPU=<index> and chooses its GPU itself. Work started by hand (the generator on GPU 0, v20_night on GPU 1) keeps
+# its GPU: a line waits until that GPU is empty.
+#
+# card 8 (backup gate agreed by the user 11-24 20:31): caches of the generated scenes -> the cache relay -> the new
+# H200's obs_s200 / obs_s800. gen155 was started by hand 11-24 20:35 (this line only re-checks the upload).
+gen155-build | gpu0 | grep -q '"finished"' outputs/fullft/gen_obs/gen155/demo_clean/observe_and_pickup/aloha_agilex/GEN.json | GEN_GATE=background GEN_BUILD=gen155 GEN_GPU=$GPU bash scripts/fullft/gen_obs_5090.sh
+gen600-build | gpu0 | grep -q '"finished"' outputs/fullft/gen_obs/gen600/demo_clean/observe_and_pickup/aloha_agilex/GEN.json | GEN_GATE=background GEN_BUILD=gen600 GEN_GPU=$GPU bash scripts/fullft/gen_obs_5090.sh
+#
+# development-scene quick evaluations (plan v20 section 5: every new version's e10 / e20 as soon as it is exported; 30
+# dev scenes, 5090 only, never a verdict). P0 cards first (8, 5, 6, 7), then cards 4 and 3.
+dev-obs_s200_e10 | gpu | bash scripts/fullft/relay_has.sh obs_s200_e10 | PF_GPUS=$GPU DEV_RUNS="obs_s200_e10:observe_and_pickup" bash scripts/fullft/dev_eval_5090.sh
+dev-press_told_e10 | gpu | bash scripts/fullft/relay_has.sh press_told_e10 | PF_GPUS=$GPU DEV_RUNS="press_told_e10:press_button:MWAM_TOLD_COUNTS=1" bash scripts/fullft/dev_eval_5090.sh
+dev-press_told_e20 | gpu | bash scripts/fullft/relay_has.sh press_told_e20 | PF_GPUS=$GPU DEV_RUNS="press_told_e20:press_button:MWAM_TOLD_COUNTS=1" bash scripts/fullft/dev_eval_5090.sh
+dev-rearr_pw_e10 | gpu | bash scripts/fullft/relay_has.sh rearr_pw_e10 | PF_GPUS=$GPU DEV_RUNS="rearr_pw_e10:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+dev-obs_match_e10 | gpu | bash scripts/fullft/relay_has.sh obs_match_e10 | PF_GPUS=$GPU DEV_RUNS="obs_match_e10:observe_and_pickup" bash scripts/fullft/dev_eval_5090.sh
+dev-obs_s200_e20 | gpu | bash scripts/fullft/relay_has.sh obs_s200_e20 | PF_GPUS=$GPU DEV_RUNS="obs_s200_e20:observe_and_pickup" bash scripts/fullft/dev_eval_5090.sh
+dev-rearr_pw_e20 | gpu | bash scripts/fullft/relay_has.sh rearr_pw_e20 | PF_GPUS=$GPU DEV_RUNS="rearr_pw_e20:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+dev-obs_match_e20 | gpu | bash scripts/fullft/relay_has.sh obs_match_e20 | PF_GPUS=$GPU DEV_RUNS="obs_match_e20:observe_and_pickup" bash scripts/fullft/dev_eval_5090.sh
+dev-ranking_v3a_e10 | gpu | bash scripts/fullft/relay_has.sh ranking_v3a_e10 | PF_GPUS=$GPU DEV_RUNS="ranking_v3a_e10:blocks_ranking_try" bash scripts/fullft/dev_eval_5090.sh
+dev-swapT_long_e45 | gpu | bash scripts/fullft/relay_has.sh swapT_long_e45 | PF_GPUS=$GPU DEV_RUNS="swapT_long_e45:swap_T" bash scripts/fullft/dev_eval_5090.sh
+dev-ranking_v3a_e20 | gpu | bash scripts/fullft/relay_has.sh ranking_v3a_e20 | PF_GPUS=$GPU DEV_RUNS="ranking_v3a_e20:blocks_ranking_try" bash scripts/fullft/dev_eval_5090.sh

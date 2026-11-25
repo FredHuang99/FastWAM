@@ -77,6 +77,11 @@ slot D "$PNONE"                         # cards 5 / 6 / 7, else card 2 (press_no
 slot A3 "$(cat $SD/A2.job 2>/dev/null)"
 slot B3 "$(cat $SD/B2.job 2>/dev/null)"
 slot D2 "$(cat $SD/D.job 2>/dev/null)"
+# 11-25 14:30: two more behind each lane (unattended until Friday 10:00), still 4 GPUs at most
+slot A4 "$(cat $SD/A3.job 2>/dev/null)"; slot A5 "$(cat $SD/A4.job 2>/dev/null)"
+slot B4 "$(cat $SD/B3.job 2>/dev/null)"; slot B5 "$(cat $SD/B4.job 2>/dev/null)"
+slot C2 "$(cat $SD/C.job 2>/dev/null)";  slot C3 "$(cat $SD/C2.job 2>/dev/null)"
+slot D3 "$(cat $SD/D2.job 2>/dev/null)"; slot D4 "$(cat $SD/D3.job 2>/dev/null)"
 for j in $(qselect -u "$ME" 2>/dev/null); do
   printf '  %-10s %-12s %-3s %-26s %s\n' "${j%%.*}" "$(qstat -f $j | awk -F' = ' '/Job_Name/{print $2}')" "$(jstate $j)" \
     "$(deps $j)" "$(qstat -f $j | tr -d '\n\t' | grep -o 'RUN=[^,]*' | head -1)"

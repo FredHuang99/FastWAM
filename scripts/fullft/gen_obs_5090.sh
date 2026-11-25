@@ -67,25 +67,31 @@ else
 fi
 build() {   # name, source dir (demo_clean/<task>/aloha_agilex), offset
   local name=$1 src=$2 L=$G/links_$1
-  [ -f $P/$name/CACHE.json ] && { say "$name cached already"; return 0; }
-  if [ "$GATE" = background ] || [ "$HOLD" = 1 ]; then
-    $PY scripts/fullft/gen_stats.py --gen $src --official $OFF 2>&1 | grep -v "Warning\|warn("
-    st=${PIPESTATUS[0]}
-    [ "$HOLD" = 1 ] && { say "$name: HOLD -- statistics printed (exit $st); no cache, no upload until the user agrees"; return 0; }
-    [ $st = 0 ] || { say "$name: OVERALL STATISTICS FAILED: no cache, no upload (report to Opus)"; return 1; }
+  if [ -f $P/$name/CACHE.json ]; then
+    say "$name cached already"
+  else
+    if [ "$GATE" = background ] || [ "$HOLD" = 1 ]; then
+      $PY scripts/fullft/gen_stats.py --gen $src --official $OFF 2>&1 | grep -v "Warning\|warn("
+      st=${PIPESTATUS[0]}
+      [ "$HOLD" = 1 ] && { say "$name: HOLD -- statistics printed (exit $st); no cache, no upload until the user agrees"; return 0; }
+      [ $st = 0 ] || { say "$name: OVERALL STATISTICS FAILED: no cache, no upload (report to Opus)"; return 1; }
+    fi
+    rm -rf $L; mkdir -p $L/data $L/instruction
+    for f in $src/data/episode_*.hdf5; do
+      k=$(basename $f .hdf5); k=${k#episode_}; s=$(cat $src/seed.txt | xargs -n1 | sed -n "$((10#$k + 1))p")
+      ln -s $f $L/data/gen_$s.hdf5
+      [ -f $src/instruction/episode_$k.json ] && cp $src/instruction/episode_$k.json $L/instruction/gen_$s.json
+    done
+    say "$name: $(ls $L/data | wc -l) episodes -> build_dense (val 0)"
+    CUDA_VISIBLE_DEVICES=$GPU $PY scripts/memory_v2/press/build_dense.py build --task $T --raw $L/data --out $P/$name --val 0 \
+      > $G/build_$name.log 2>&1; say "build exit code $? ($(tail -n 1 $G/build_$name.log | cut -c1-160))"
+    [ -f $P/$name/CACHE.json ] || { say "$name: no CACHE.json"; return 1; }
   fi
-  rm -rf $L; mkdir -p $L/data $L/instruction
-  for f in $src/data/episode_*.hdf5; do
-    k=$(basename $f .hdf5); k=${k#episode_}; s=$(cat $src/seed.txt | xargs -n1 | sed -n "$((10#$k + 1))p")
-    ln -s $f $L/data/gen_$s.hdf5
-    [ -f $src/instruction/episode_$k.json ] && cp $src/instruction/episode_$k.json $L/instruction/gen_$s.json
-  done
-  say "$name: $(ls $L/data | wc -l) episodes -> build_dense (val 0)"
-  CUDA_VISIBLE_DEVICES=$GPU $PY scripts/memory_v2/press/build_dense.py build --task $T --raw $L/data --out $P/$name --val 0 \
-    > $G/build_$name.log 2>&1; say "build exit code $? ($(tail -n 1 $G/build_$name.log | cut -c1-160))"
-  [ -f $P/$name/CACHE.json ] || { say "$name: no CACHE.json"; return 1; }
+  [ "$HOLD" = 1 ] && return 0
+  # 11-25: the upload is checked every time (a cache built before an upload failure is uploaded now)
+  if $HFPY scripts/fullft/cache_relay.py ls 2>/dev/null | grep -qx $name; then say "$name on the cache relay"; return 0; fi
   $HFPY scripts/fullft/cache_relay.py put $P/$name 2>&1 | tail -n 2
-  $HFPY scripts/fullft/cache_relay.py ls 2>/dev/null | grep -qx $name && say "$name on the cache relay" || say "$name: UPLOAD FAILED"
+  $HFPY scripts/fullft/cache_relay.py ls 2>/dev/null | grep -qx $name && say "$name on the cache relay" || { say "$name: UPLOAD FAILED"; return 1; }
 }
 if [ -n "${GEN_BUILD:-}" ]; then
   [ "$GATE" = background ] && [ "$HOLD" != 1 ] || { say "GEN_BUILD needs GEN_GATE=background without GEN_HOLD: stop"; exit 1; }

@@ -3,7 +3,8 @@
 # (seed 7 -> RMBench's rule 100000 x (1 + 7) = 800,000 upwards; disjoint from the official seed-42 bank 4.3M+, the
 # older 5090 banks 1.8-2.1M, the demos' and card 8's 10M+), on this machine only (5090 = its own comparison group;
 # never a verdict, never the main table). Used to look early at e10 / e20 and to pick checkpoints.
-#   DEV_RUNS="label:task label:task ..."  each = an export exports/<label> (here, else the relay mirror, else the relay;
+#   DEV_RUNS="label:task[:K=V,K=V] ..."  (11-25: an optional third field = env for that run only, e.g.
+#   press_told_e10:press_button:MWAM_TOLD_COUNTS=1)  each = an export exports/<label> (here, else the relay mirror, else the relay;
 #   sha256 checked) on its task's 30 dev scenes, execute 8, default noise -> closed_loop/dev7/<label>
 #   Results: one line per run in outputs/fullft/DEV_EVAL.tsv (time, label, task, successes, finished)
 #   docker exec -d -e DEV_RUNS="ranking_ar_e30:blocks_ranking_try" mwam5090 bash /workspace/FastWAM-memory2/scripts/fullft/dev_eval_5090.sh
@@ -48,14 +49,15 @@ say "checkout $(git -c safe.directory='*' log --oneline -1 | cut -c1-60); GPU $G
 [ -n "${DEV_RUNS:-}" ] || { say "DEV_RUNS is empty: nothing to do"; exit 0; }
 mkdir -p $OUT; [ -f $F/DEV_EVAL.tsv ] || printf 'time\tlabel\ttask\tsuccess\tfinished\n' > $F/DEV_EVAL.tsv
 for item in $DEV_RUNS; do
-  L=${item%%:*}; T=${item#*:}
+  L=${item%%:*}; T=${item#*:}; EV=""
+  case $T in *:*) EV=${T#*:}; T=${T%%:*};; esac
   until empty $G; do say "GPU $G in use; waiting 5 min"; sleep 300; done
   B=$(bank $T) || { say "$T: dev bank failed (see $C/dev7_bank_$T.log)"; continue; }
   CK=$(export_of $L) || true
   [ -n "$CK" ] || { say "$L: no checked export"; continue; }
   for pass in 1 2; do
-    CUDA_VISIBLE_DEVICES=$G $PY -m fastwam.memory_v2.online run --checkpoint $CK --label $L --scenes $B --tasks $T \
-      --limit 30 --execute 8 --output $OUT >> $C/dev7_$L.log 2>&1
+    env $(echo "$EV" | tr ',' ' ') CUDA_VISIBLE_DEVICES=$G $PY -m fastwam.memory_v2.online run --checkpoint $CK --label $L \
+      --scenes $B --tasks $T --limit 30 --execute 8 --output $OUT >> $C/dev7_$L.log 2>&1
   done
   n=$(ls $OUT/$L/on/$T/seed_*/result.json 2>/dev/null | wc -l)
   k=$(cat $OUT/$L/on/$T/seed_*/result.json 2>/dev/null | grep -c '"success": true')
