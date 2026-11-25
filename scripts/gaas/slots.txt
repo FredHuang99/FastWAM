@@ -5,23 +5,29 @@
 # None ready -> the job ends at once (the GPU goes back to the pool) and the log says so.
 # slot | candidates, in order
 A  | rearr_v3c_h2 ranking_v3a ar2_v3c cover_none
-A2 | press_told rearr_pw obs_match obs_s200 ar2_v3c ranking_v3a cover_none
+A2 | press_told rearr_pw obs_match obs_s200 ranking_v3a ar2_v3c cover_none
 B  | swapT_arprop_h2 ranking_v3a ar2_v3c cover_none
-B2 | swapT_long press_told rearr_pw obs_match obs_s200 ar2_v3c ranking_v3a cover_none
+B2 | swapT_long press_told rearr_pw obs_match obs_s200 ranking_v3a ar2_v3c cover_none
 C  | ranking_v3a press_told rearr_pw obs_match ar2_v3c cover_none
-D  | press_told rearr_pw obs_match obs_s200 ar2_v3c ranking_v3a cover_none
+D  | press_told rearr_pw obs_match obs_s200 ranking_v3a ar2_v3c cover_none
 # 11-24 20:40 (Opus): one more slot behind each lane's last job, so cards 7 / 8 (obs_match, obs_s200 / obs_s800) and
 # card 2 get a GPU when press_told / rearr_pw / swapT_long end, still at most 4 GPUs (each follows one of our jobs)
-A3 | obs_match obs_s200 obs_s800 rearr_pw press_told ar2_v3c ranking_v3a cover_none
-B3 | obs_match obs_s200 obs_s800 rearr_pw press_told ar2_v3c ranking_v3a cover_none
-D2 | obs_match obs_s200 obs_s800 rearr_pw press_told ar2_v3c ranking_v3a cover_none
+A3 | obs_match obs_s200 obs_s800 rearr_pw press_told ranking_v3a ar2_v3c cover_none
+B3 | obs_match obs_s200 obs_s800 rearr_pw press_told ranking_v3a ar2_v3c cover_none
+D2 | obs_match obs_s200 obs_s800 rearr_pw press_told ranking_v3a ar2_v3c cover_none
 # 11-25 14:30 (Opus; user: unattended until Friday 10:00): two more slots behind each lane (C: one behind ranking_v3a,
 # one more); a slot with nothing ready waits up to 3 h (gaas_run.pbs). Opus adds new registered runs to these lists.
-A4 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ar2_v3c ranking_v3a cover_none
-A5 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ar2_v3c ranking_v3a cover_none
-B4 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ar2_v3c ranking_v3a cover_none
-B5 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ar2_v3c ranking_v3a cover_none
-C2 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ar2_v3c ranking_v3a cover_none
-C3 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ar2_v3c ranking_v3a cover_none
-D3 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ar2_v3c ranking_v3a cover_none
-D4 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ar2_v3c ranking_v3a cover_none
+A4 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ranking_v3a ar2_v3c cover_none
+A5 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ranking_v3a ar2_v3c cover_none
+B4 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ranking_v3a ar2_v3c cover_none
+B5 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ranking_v3a ar2_v3c cover_none
+C2 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ranking_v3a ar2_v3c cover_none
+C3 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ranking_v3a ar2_v3c cover_none
+D3 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ranking_v3a ar2_v3c cover_none
+D4 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ranking_v3a ar2_v3c cover_none
+# 11-26 02:30 (Opus): ranking_v3a (card 4, half trained, its job died when the home filled) now resumes before card 2
+# ar2_v3c in every list (plan v20 2.4a: card 4 before card 2); one follower more per lane (A6 B6 C4 D5).
+A6 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ranking_v3a ar2_v3c cover_none
+B6 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ranking_v3a ar2_v3c cover_none
+C4 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ranking_v3a ar2_v3c cover_none
+D5 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ranking_v3a ar2_v3c cover_none

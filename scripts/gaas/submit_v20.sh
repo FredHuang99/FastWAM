@@ -82,6 +82,10 @@ slot A4 "$(cat $SD/A3.job 2>/dev/null)"; slot A5 "$(cat $SD/A4.job 2>/dev/null)"
 slot B4 "$(cat $SD/B3.job 2>/dev/null)"; slot B5 "$(cat $SD/B4.job 2>/dev/null)"
 slot C2 "$(cat $SD/C.job 2>/dev/null)";  slot C3 "$(cat $SD/C2.job 2>/dev/null)"
 slot D3 "$(cat $SD/D2.job 2>/dev/null)"; slot D4 "$(cat $SD/D3.job 2>/dev/null)"
+# 11-26 02:25: the home filled on 11-25 ~20:54 and three queued followers (B4, C2, D3) ended at once; one more behind
+# each lane's last job so every lane has a follower again (still 4 GPUs at most)
+slot A6 "$(cat $SD/A5.job 2>/dev/null)"; slot B6 "$(cat $SD/B5.job 2>/dev/null)"
+slot C4 "$(cat $SD/C3.job 2>/dev/null)"; slot D5 "$(cat $SD/D4.job 2>/dev/null)"
 for j in $(qselect -u "$ME" 2>/dev/null); do
   printf '  %-10s %-12s %-3s %-26s %s\n' "${j%%.*}" "$(qstat -f $j | awk -F' = ' '/Job_Name/{print $2}')" "$(jstate $j)" \
     "$(deps $j)" "$(qstat -f $j | tr -d '\n\t' | grep -o 'RUN=[^,]*' | head -1)"
