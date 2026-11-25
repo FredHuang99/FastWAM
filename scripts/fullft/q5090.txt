@@ -33,3 +33,7 @@ dev-ranking_v3a_e20 | gpu | bash scripts/fullft/relay_has.sh ranking_v3a_e20 | P
 # releases (card 9's second condition). Card 13c: find-same at execute 16 / 32 (execute 8 reused from 11-22).
 supp6-swapT-hands | cpu | - | PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/swapT_hands.py
 card13c | gpu | - | bash scripts/fullft/card13c_5090.sh
+#
+# 11-26 02:10 (round 3): both GPUs idle (the dev evals wait on new-H200 exports). Card 13b = supplement 3 (P1): the
+# train / held-out split probe of obs_pose, on obs_ar e30 and obs_none e30 (both on the relay).
+card13b | gpu | - | bash scripts/fullft/card13b_5090.sh
