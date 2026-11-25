@@ -7327,6 +7327,349 @@ tasks:
   output: closed_loop/v20
   env: {MWAM_TEXT_SOURCE: "cache", MWAM_TOLD_COUNTS: "1"}
 
+# 11-25 20:xx re-run of card 5's e10 / e20 (the first cards ended INCONCLUSIVE: every episode hit 'Scene identity mismatch',
+# because the simulator appends the told sentence; fixed in memory_v2/online.py told_base). Same labels and output, so only
+# the ERROR.json episodes run again. Still after every MAIN evaluation.
+- id: A40-v20told10b-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-press_told-e10, A40-fetch-press_told-text]
+  requires_pass: [A40-fetch-press_told-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "RERUN after the 11-25 identity-check fix (every episode of the first run was ERROR.json); plan v20 card 5 described: press_told_e10 on press_button 1-100, counts written in; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e10/export_e10.pt
+  label: press_told_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_TOLD_COUNTS: "1"}
+
+- id: A40-v20told10b-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-press_told-e10, A40-fetch-press_told-text]
+  requires_pass: [A40-fetch-press_told-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "RERUN after the 11-25 identity-check fix (every episode of the first run was ERROR.json); plan v20 card 5 described: press_told_e10 on press_button 1-100, counts written in; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e10/export_e10.pt
+  label: press_told_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_TOLD_COUNTS: "1"}
+
+- id: A40-v20told10b-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-press_told-e10, A40-fetch-press_told-text]
+  requires_pass: [A40-fetch-press_told-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "RERUN after the 11-25 identity-check fix (every episode of the first run was ERROR.json); plan v20 card 5 described: press_told_e10 on press_button 1-100, counts written in; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e10/export_e10.pt
+  label: press_told_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_TOLD_COUNTS: "1"}
+
+- id: A40-v20told10b-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-press_told-e10, A40-fetch-press_told-text]
+  requires_pass: [A40-fetch-press_told-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "RERUN after the 11-25 identity-check fix (every episode of the first run was ERROR.json); plan v20 card 5 described: press_told_e10 on press_button 1-100, counts written in; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e10/export_e10.pt
+  label: press_told_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_TOLD_COUNTS: "1"}
+
+- id: A40-v20told10b-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-press_told-e10, A40-fetch-press_told-text]
+  requires_pass: [A40-fetch-press_told-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "RERUN after the 11-25 identity-check fix (every episode of the first run was ERROR.json); plan v20 card 5 described: press_told_e10 on press_button 1-100, counts written in; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e10/export_e10.pt
+  label: press_told_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_TOLD_COUNTS: "1"}
+
+- id: A40-v20told10b-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-press_told-e10, A40-fetch-press_told-text]
+  requires_pass: [A40-fetch-press_told-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "RERUN after the 11-25 identity-check fix (every episode of the first run was ERROR.json); plan v20 card 5 described: press_told_e10 on press_button 1-100, counts written in; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e10/export_e10.pt
+  label: press_told_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_TOLD_COUNTS: "1"}
+
+- id: A40-v20told10b-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-press_told-e10, A40-fetch-press_told-text]
+  requires_pass: [A40-fetch-press_told-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "RERUN after the 11-25 identity-check fix (every episode of the first run was ERROR.json); plan v20 card 5 described: press_told_e10 on press_button 1-100, counts written in; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e10/export_e10.pt
+  label: press_told_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_TOLD_COUNTS: "1"}
+
+- id: A40-v20told10b-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-press_told-e10, A40-fetch-press_told-text]
+  requires_pass: [A40-fetch-press_told-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "RERUN after the 11-25 identity-check fix (every episode of the first run was ERROR.json); plan v20 card 5 described: press_told_e10 on press_button 1-100, counts written in; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e10/export_e10.pt
+  label: press_told_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_TOLD_COUNTS: "1"}
+
+- id: A40-v20told10b-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-press_told-e10, A40-fetch-press_told-text]
+  requires_pass: [A40-fetch-press_told-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "RERUN after the 11-25 identity-check fix (every episode of the first run was ERROR.json); plan v20 card 5 described: press_told_e10 on press_button 1-100, counts written in; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e10/export_e10.pt
+  label: press_told_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_TOLD_COUNTS: "1"}
+
+- id: A40-v20told10b-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-press_told-e10, A40-fetch-press_told-text]
+  requires_pass: [A40-fetch-press_told-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "RERUN after the 11-25 identity-check fix (every episode of the first run was ERROR.json); plan v20 card 5 described: press_told_e10 on press_button 1-100, counts written in; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e10/export_e10.pt
+  label: press_told_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_TOLD_COUNTS: "1"}
+
+- id: A40-v20told20b-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-press_told-e20, A40-fetch-press_told-text]
+  requires_pass: [A40-fetch-press_told-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "RERUN after the 11-25 identity-check fix (every episode of the first run was ERROR.json); plan v20 card 5 described: press_told_e20 on press_button 1-100, counts written in; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e20/export_e20.pt
+  label: press_told_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_TOLD_COUNTS: "1"}
+
+- id: A40-v20told20b-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-press_told-e20, A40-fetch-press_told-text]
+  requires_pass: [A40-fetch-press_told-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "RERUN after the 11-25 identity-check fix (every episode of the first run was ERROR.json); plan v20 card 5 described: press_told_e20 on press_button 1-100, counts written in; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e20/export_e20.pt
+  label: press_told_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_TOLD_COUNTS: "1"}
+
+- id: A40-v20told20b-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-press_told-e20, A40-fetch-press_told-text]
+  requires_pass: [A40-fetch-press_told-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "RERUN after the 11-25 identity-check fix (every episode of the first run was ERROR.json); plan v20 card 5 described: press_told_e20 on press_button 1-100, counts written in; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e20/export_e20.pt
+  label: press_told_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_TOLD_COUNTS: "1"}
+
+- id: A40-v20told20b-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-press_told-e20, A40-fetch-press_told-text]
+  requires_pass: [A40-fetch-press_told-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "RERUN after the 11-25 identity-check fix (every episode of the first run was ERROR.json); plan v20 card 5 described: press_told_e20 on press_button 1-100, counts written in; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e20/export_e20.pt
+  label: press_told_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_TOLD_COUNTS: "1"}
+
+- id: A40-v20told20b-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-press_told-e20, A40-fetch-press_told-text]
+  requires_pass: [A40-fetch-press_told-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "RERUN after the 11-25 identity-check fix (every episode of the first run was ERROR.json); plan v20 card 5 described: press_told_e20 on press_button 1-100, counts written in; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e20/export_e20.pt
+  label: press_told_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_TOLD_COUNTS: "1"}
+
+- id: A40-v20told20b-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-press_told-e20, A40-fetch-press_told-text]
+  requires_pass: [A40-fetch-press_told-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "RERUN after the 11-25 identity-check fix (every episode of the first run was ERROR.json); plan v20 card 5 described: press_told_e20 on press_button 1-100, counts written in; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e20/export_e20.pt
+  label: press_told_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_TOLD_COUNTS: "1"}
+
+- id: A40-v20told20b-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-press_told-e20, A40-fetch-press_told-text]
+  requires_pass: [A40-fetch-press_told-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "RERUN after the 11-25 identity-check fix (every episode of the first run was ERROR.json); plan v20 card 5 described: press_told_e20 on press_button 1-100, counts written in; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e20/export_e20.pt
+  label: press_told_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_TOLD_COUNTS: "1"}
+
+- id: A40-v20told20b-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-press_told-e20, A40-fetch-press_told-text]
+  requires_pass: [A40-fetch-press_told-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "RERUN after the 11-25 identity-check fix (every episode of the first run was ERROR.json); plan v20 card 5 described: press_told_e20 on press_button 1-100, counts written in; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e20/export_e20.pt
+  label: press_told_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_TOLD_COUNTS: "1"}
+
+- id: A40-v20told20b-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-press_told-e20, A40-fetch-press_told-text]
+  requires_pass: [A40-fetch-press_told-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "RERUN after the 11-25 identity-check fix (every episode of the first run was ERROR.json); plan v20 card 5 described: press_told_e20 on press_button 1-100, counts written in; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e20/export_e20.pt
+  label: press_told_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_TOLD_COUNTS: "1"}
+
+- id: A40-v20told20b-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-press_told-e20, A40-fetch-press_told-text]
+  requires_pass: [A40-fetch-press_told-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "RERUN after the 11-25 identity-check fix (every episode of the first run was ERROR.json); plan v20 card 5 described: press_told_e20 on press_button 1-100, counts written in; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e20/export_e20.pt
+  label: press_told_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_TOLD_COUNTS: "1"}
+
 # 11-25 14:45: free space on the HF relay (978.9 GB of 1000 GB). HELD until the user explicitly confirms the exact list
 # (scripts/fullft/hf_prune_list.txt; a permanent deletion). Verifies the A40's own copy of each export by sha256 first.
 # RELEASED 11-25 14:55: the user wrote "确认删除这23个" (the 23 names of hf_prune_list.txt, commit 5bbbc73).

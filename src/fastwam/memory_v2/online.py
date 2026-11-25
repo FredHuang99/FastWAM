@@ -46,6 +46,18 @@ HORIZON = 32
 REPO = Path(__file__).resolve().parents[3]                   # <memory2>/src/fastwam/memory_v2/online.py -> <memory2>
 SIM_CODE = REPO / "scripts/memory_v2/sim"
 SEED_DIR = re.compile(r"seed_\d+")
+# 11-25 fix (card 5 press_told): with MWAM_TOLD_COUNTS=1 the simulator adapter appends told.py's sentence to the instruction
+# it sends; the scene bank holds the plain instruction, so every episode failed the identity check (A40 v20told10/20 and the
+# 5090 dev evals: all ERROR.json). The check now strips exactly one told sentence, and only when MWAM_TOLD_COUNTS=1; the
+# policy still receives the full instruction (the run's text table). Without the variable nothing changes.
+TOLD_SUFFIX = re.compile(r" Press the left button (one|two|three|four|five|six|seven|eight|nine|ten) times and the middle "
+                         r"button (one|two|three|four|five|six|seven|eight|nine|ten) times\.$")
+
+
+def told_base(instruction: str) -> str:
+    if os.environ.get("MWAM_TOLD_COUNTS", "").strip() != "1":
+        return instruction
+    return TOLD_SUFFIX.sub("", instruction, count=1)
 
 
 def now():
@@ -738,7 +750,7 @@ def run_episode(policy: Policy, scene: dict, mode: str, label: str, out: Path, a
                             frame = int(req["current_id"])
                             if not reset or frame != next_frame:
                                 raise ValueError(f"Invalid decision sequence (frame {frame}, expected {next_frame})")
-                            identity = (req["task"], int(req["episode_seed"]), req["instruction"])
+                            identity = (req["task"], int(req["episode_seed"]), told_base(req["instruction"]))
                             if identity != (task, int(scene["seed"]), scene["instruction"]):
                                 raise ValueError(f"Scene identity mismatch between job and simulator: {identity}")
                             if [int(r["frame_id"]) for r in req["observations"]] != list(range(last + 1, frame + 1)):

@@ -17,7 +17,9 @@ hf-offload-12 | cpu | - | /opt/hf-tools/bin/python scripts/fullft/hf_offload.py 
 dev-obs_s200_e10 | gpu | bash scripts/fullft/relay_has.sh obs_s200_e10 | PF_GPUS=$GPU DEV_RUNS="obs_s200_e10:observe_and_pickup" bash scripts/fullft/dev_eval_5090.sh
 # 11-25 15:45: the first press_told dev runs finished 0 / 0 episodes (cause in dev7_press_told_e10.log); again with the error printed
 dev-press_told_e10b | gpu | bash scripts/fullft/relay_has.sh press_told_e10 | PF_GPUS=$GPU DEV_RUNS="press_told_e10:press_button:MWAM_TOLD_COUNTS=1" bash scripts/fullft/dev_eval_5090.sh
+dev-press_told_e10c | gpu | bash scripts/fullft/relay_has.sh press_told_e10 | PF_GPUS=$GPU DEV_RUNS="press_told_e10:press_button:MWAM_TOLD_COUNTS=1" bash scripts/fullft/dev_eval_5090.sh
 dev-press_told_e20b | gpu | bash scripts/fullft/relay_has.sh press_told_e20 | PF_GPUS=$GPU DEV_RUNS="press_told_e20:press_button:MWAM_TOLD_COUNTS=1" bash scripts/fullft/dev_eval_5090.sh
+dev-press_told_e20c | gpu | bash scripts/fullft/relay_has.sh press_told_e20 | PF_GPUS=$GPU DEV_RUNS="press_told_e20:press_button:MWAM_TOLD_COUNTS=1" bash scripts/fullft/dev_eval_5090.sh
 dev-rearr_pw_e10 | gpu | bash scripts/fullft/relay_has.sh rearr_pw_e10 | PF_GPUS=$GPU DEV_RUNS="rearr_pw_e10:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
 dev-obs_match_e10 | gpu | bash scripts/fullft/relay_has.sh obs_match_e10 | PF_GPUS=$GPU DEV_RUNS="obs_match_e10:observe_and_pickup" bash scripts/fullft/dev_eval_5090.sh
 dev-obs_s200_e20 | gpu | bash scripts/fullft/relay_has.sh obs_s200_e20 | PF_GPUS=$GPU DEV_RUNS="obs_s200_e20:observe_and_pickup" bash scripts/fullft/dev_eval_5090.sh
