@@ -4181,7 +4181,7 @@ tasks:
 
 - id: A40-D1r2-d1_w30-s0
   lane: a40
-  hold: true        # 11-24: only if d1_w's 100-pair reading is UNCERTAIN
+  # 11-25 15:40: released -- d1_w's 100-pair reading was UNCERTAIN (A40-D1-verdict 11-24 23:27: 61 vs 56, CI [-0.06, 0.15])
   kind: closed_loop
   after: [A40-D1-d1_w30-smoke]
   requires_pass: [A40-D1-d1_w30-smoke]
@@ -4199,7 +4199,7 @@ tasks:
 
 - id: A40-D1r2-d1_w30-s1
   lane: a40
-  hold: true        # 11-24: only if d1_w's 100-pair reading is UNCERTAIN
+  # 11-25 15:40: released -- d1_w's 100-pair reading was UNCERTAIN (A40-D1-verdict 11-24 23:27: 61 vs 56, CI [-0.06, 0.15])
   kind: closed_loop
   after: [A40-D1-d1_w30-smoke]
   requires_pass: [A40-D1-d1_w30-smoke]
@@ -4217,7 +4217,7 @@ tasks:
 
 - id: A40-D1r2-d1_w30-s2
   lane: a40
-  hold: true        # 11-24: only if d1_w's 100-pair reading is UNCERTAIN
+  # 11-25 15:40: released -- d1_w's 100-pair reading was UNCERTAIN (A40-D1-verdict 11-24 23:27: 61 vs 56, CI [-0.06, 0.15])
   kind: closed_loop
   after: [A40-D1-d1_w30-smoke]
   requires_pass: [A40-D1-d1_w30-smoke]
@@ -4235,7 +4235,7 @@ tasks:
 
 - id: A40-D1r2-d1_w30-s3
   lane: a40
-  hold: true        # 11-24: only if d1_w's 100-pair reading is UNCERTAIN
+  # 11-25 15:40: released -- d1_w's 100-pair reading was UNCERTAIN (A40-D1-verdict 11-24 23:27: 61 vs 56, CI [-0.06, 0.15])
   kind: closed_loop
   after: [A40-D1-d1_w30-smoke]
   requires_pass: [A40-D1-d1_w30-smoke]
@@ -4253,7 +4253,7 @@ tasks:
 
 - id: A40-D1r2-d1_w30-s4
   lane: a40
-  hold: true        # 11-24: only if d1_w's 100-pair reading is UNCERTAIN
+  # 11-25 15:40: released -- d1_w's 100-pair reading was UNCERTAIN (A40-D1-verdict 11-24 23:27: 61 vs 56, CI [-0.06, 0.15])
   kind: closed_loop
   after: [A40-D1-d1_w30-smoke]
   requires_pass: [A40-D1-d1_w30-smoke]
@@ -4271,7 +4271,7 @@ tasks:
 
 - id: A40-D1r2-d1_w30-s5
   lane: a40
-  hold: true        # 11-24: only if d1_w's 100-pair reading is UNCERTAIN
+  # 11-25 15:40: released -- d1_w's 100-pair reading was UNCERTAIN (A40-D1-verdict 11-24 23:27: 61 vs 56, CI [-0.06, 0.15])
   kind: closed_loop
   after: [A40-D1-d1_w30-smoke]
   requires_pass: [A40-D1-d1_w30-smoke]
@@ -4289,7 +4289,7 @@ tasks:
 
 - id: A40-D1r2-d1_w30-s6
   lane: a40
-  hold: true        # 11-24: only if d1_w's 100-pair reading is UNCERTAIN
+  # 11-25 15:40: released -- d1_w's 100-pair reading was UNCERTAIN (A40-D1-verdict 11-24 23:27: 61 vs 56, CI [-0.06, 0.15])
   kind: closed_loop
   after: [A40-D1-d1_w30-smoke]
   requires_pass: [A40-D1-d1_w30-smoke]
@@ -4307,7 +4307,7 @@ tasks:
 
 - id: A40-D1r2-d1_w30-s7
   lane: a40
-  hold: true        # 11-24: only if d1_w's 100-pair reading is UNCERTAIN
+  # 11-25 15:40: released -- d1_w's 100-pair reading was UNCERTAIN (A40-D1-verdict 11-24 23:27: 61 vs 56, CI [-0.06, 0.15])
   kind: closed_loop
   after: [A40-D1-d1_w30-smoke]
   requires_pass: [A40-D1-d1_w30-smoke]
@@ -4325,7 +4325,7 @@ tasks:
 
 - id: A40-D1r2-d1_w30-s8
   lane: a40
-  hold: true        # 11-24: only if d1_w's 100-pair reading is UNCERTAIN
+  # 11-25 15:40: released -- d1_w's 100-pair reading was UNCERTAIN (A40-D1-verdict 11-24 23:27: 61 vs 56, CI [-0.06, 0.15])
   kind: closed_loop
   after: [A40-D1-d1_w30-smoke]
   requires_pass: [A40-D1-d1_w30-smoke]
@@ -4343,7 +4343,7 @@ tasks:
 
 - id: A40-D1r2-d1_w30-s9
   lane: a40
-  hold: true        # 11-24: only if d1_w's 100-pair reading is UNCERTAIN
+  # 11-25 15:40: released -- d1_w's 100-pair reading was UNCERTAIN (A40-D1-verdict 11-24 23:27: 61 vs 56, CI [-0.06, 0.15])
   kind: closed_loop
   after: [A40-D1-d1_w30-smoke]
   requires_pass: [A40-D1-d1_w30-smoke]
@@ -4358,6 +4358,16 @@ tasks:
   online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
   output: closed_loop/r2
   env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-D1ext2-verdict
+  lane: a40cpu
+  kind: shell
+  after: [A40-D1r2-d1_w30-s0, A40-D1r2-d1_w30-s1, A40-D1r2-d1_w30-s2, A40-D1r2-d1_w30-s3, A40-D1r2-d1_w30-s4, A40-D1r2-d1_w30-s5, A40-D1r2-d1_w30-s6, A40-D1r2-d1_w30-s7, A40-D1r2-d1_w30-s8, A40-D1r2-d1_w30-s9, A40-D1ext-verdict]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v19 D1 verdict once d1_w's pre-set extension (r2, 200 pairs) is in (deed_verdict.py d1, unchanged rule); log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py d1"
+  pass_if: "m['rc'] == 0"
 
 - id: A40-D1ext-verdict
   lane: a40cpu

@@ -25,3 +25,8 @@ dev-obs_match_e20 | gpu | bash scripts/fullft/relay_has.sh obs_match_e20 | PF_GP
 dev-ranking_v3a_e10 | gpu | bash scripts/fullft/relay_has.sh ranking_v3a_e10 | PF_GPUS=$GPU DEV_RUNS="ranking_v3a_e10:blocks_ranking_try" bash scripts/fullft/dev_eval_5090.sh
 dev-swapT_long_e45 | gpu | bash scripts/fullft/relay_has.sh swapT_long_e45 | PF_GPUS=$GPU DEV_RUNS="swapT_long_e45:swap_T" bash scripts/fullft/dev_eval_5090.sh
 dev-ranking_v3a_e20 | gpu | bash scripts/fullft/relay_has.sh ranking_v3a_e20 | PF_GPUS=$GPU DEV_RUNS="ranking_v3a_e20:blocks_ranking_try" bash scripts/fullft/dev_eval_5090.sh
+#
+# 11-25 15:40: zero-training diagnoses of plan v20 (descriptive). Supplement 6 (CPU): swap_T demos, which hand grasps and
+# releases (card 9's second condition). Card 13c: find-same at execute 16 / 32 (execute 8 reused from 11-22).
+supp6-swapT-hands | cpu | - | PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/swapT_hands.py
+card13c | gpu | - | bash scripts/fullft/card13c_5090.sh

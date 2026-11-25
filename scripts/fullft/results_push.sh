@@ -68,7 +68,9 @@ common() {      # every machine
   # health: one line per check; "BAD" marks what needs a look
   {
     echo "machine $MACHINE host $(hostname) at $(TZ=Asia/Shanghai date '+%F %T')"
-    pid_alive $OUT/AUTO_PULL.pid && echo "ok   auto_pull alive (last log $(age_min $OUT/AUTO_PULL.log) min)" || echo "BAD  auto_pull not running"
+    if [ "$MACHINE" != h200n ]; then      # the new H200 has no auto_pull: each job pulls when it starts
+      pid_alive $OUT/AUTO_PULL.pid && echo "ok   auto_pull alive (last log $(age_min $OUT/AUTO_PULL.log) min)" || echo "BAD  auto_pull not running"
+    fi
     case $MACHINE in
       a40|a100) pgrep -f "[p]ool5.py" >/dev/null && echo "ok   pool5 dispatcher alive" || echo "BAD  pool5 dispatcher not running";;
       h100) f=$(ls -t $OUT/H100_QUEUE_*.txt 2>/dev/null | grep -v _dry | head -1)
@@ -81,7 +83,8 @@ common() {      # every machine
     awk -F', ' 'NF >= 5 && $1 ~ /^[0-9]+$/ {u = $5; gsub(/[^0-9]/, "", u); m = $3; gsub(/[^0-9]/, "", m);
       printf "%s  GPU %s: %s MiB, %s %%\n", (u + 0 == 0 && m + 0 < 1500 ? "idle" : "ok  "), $1, m, u}' $S/report/gpus.txt
     awk '{p = $5; gsub("%", "", p); if (p + 0 >= 90) print "BAD  disk " $6 " " $5 " used (" $4 " free)"; else print "ok   disk " $6 " " $5 " used (" $4 " free)"}' $S/report/disk.txt
-    awk -F'last write' '{split($2, a, " "); if (a[1] + 0 > 60 && $0 !~ /FINISHED|FAILED/) print "BAD  trainer silent " a[1] " min: " $1}' $S/report/TRAINING.txt
+    awk -F'last write' '{split($2, a, " "); m = a[1] + 0; if ($0 ~ /FINISHED|FAILED/) next;
+      if (m > 60 && m <= 1440) print "BAD  trainer silent " m " min: " $1; else if (m > 1440) print "info trainer idle " m " min (paused / waiting in its queue?): " $1}' $S/report/TRAINING.txt
     grep -h "FAILED" $S/report/TRAINING.txt | sed 's/^/BAD  /'
   } > $S/report/HEALTH.txt
 }
