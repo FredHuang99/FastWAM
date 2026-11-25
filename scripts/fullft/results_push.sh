@@ -142,6 +142,15 @@ h200n_part() {  # new H200 (GaaS): slot pick / run logs on the shared home, our 
   done
   { qstat -u "$(id -un)" 2>&1 | tail -n +3; } > $S/report/QSTAT.txt 2>/dev/null
   ls $HOME/mwam/slots/ 2>/dev/null | while read -r x; do echo "$x $(cat $HOME/mwam/slots/$x 2>/dev/null)"; done > $S/report/SLOTS.txt
+  # 11-25 21:50: the shared /home is at 94 % (59 G free); what of it is ours (read-only; at most every 3 h, 5-minute cap)
+  local C=$L/DU_OURS.txt
+  if [ ! -f $C ] || [ $(( $(date +%s) - $(stat -c %Y $C 2>/dev/null || echo 0) )) -gt 10800 ]; then
+    { echo "du of our trees, $(date '+%F %T')"; quota -s 2>&1 | tail -n 4
+      timeout 300 du -xsh $HOME/mwam/* 2>/dev/null | sort -h | tail -n 15
+      timeout 300 du -xsh $R/outputs/* $R/outputs/fullft/* 2>/dev/null | sort -h | tail -n 30; } > $C.tmp 2>&1
+    mv -f $C.tmp $C
+  fi
+  cp $C $S/report/DU_OURS.txt 2>/dev/null
 }
 
 snapshot() {

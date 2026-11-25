@@ -36832,6 +36832,192 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 # ---------------------------------------------------------------------------------------------------------------
+# 11-25 21:50 (Opus, unattended round 2b) plan v20 card 17 (P2, order 5; condition 'after the rearr_v3c verdict' met:
+# RV3C_VERDICT.json 20:52 NO HELP, 33 vs 62; rearr_split: pressed twice 45 vs 18, write delay median 9.5 vs 18).
+# Write-delay dose on the timely writer: rearr_v3c e30 with its record pushed later at test time (MWAM_LEDGER_LAG=8 / 16;
+# online.effective_rule; trained lag 0 = closed_loop/rv3c scenes 1-50). rearrange_blocks 1-50 each, default noise, the
+# seed-42 bank, execute 8. Descriptive only (plan v20 3.3): how 'pressed twice' changes with the delay.
+- id: A40-c17-lag8-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-rearr_v3c-e30, A40-prep2-rearrange_blocks]
+  requires_pass: [A40-fetch-rearr_v3c-e30, A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 17 (descriptive): rearr_v3c_e30 with MWAM_LEDGER_LAG=8 on rearrange_blocks 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_v3c_e30/export_e30.pt
+  label: rearr_v3c_e30_lag8
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/c17
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER_LAG: "8"}
+
+- id: A40-c17-lag8-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-rearr_v3c-e30, A40-prep2-rearrange_blocks]
+  requires_pass: [A40-fetch-rearr_v3c-e30, A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 17 (descriptive): rearr_v3c_e30 with MWAM_LEDGER_LAG=8 on rearrange_blocks 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_v3c_e30/export_e30.pt
+  label: rearr_v3c_e30_lag8
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/c17
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER_LAG: "8"}
+
+- id: A40-c17-lag8-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-rearr_v3c-e30, A40-prep2-rearrange_blocks]
+  requires_pass: [A40-fetch-rearr_v3c-e30, A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 17 (descriptive): rearr_v3c_e30 with MWAM_LEDGER_LAG=8 on rearrange_blocks 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_v3c_e30/export_e30.pt
+  label: rearr_v3c_e30_lag8
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/c17
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER_LAG: "8"}
+
+- id: A40-c17-lag8-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-rearr_v3c-e30, A40-prep2-rearrange_blocks]
+  requires_pass: [A40-fetch-rearr_v3c-e30, A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 17 (descriptive): rearr_v3c_e30 with MWAM_LEDGER_LAG=8 on rearrange_blocks 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_v3c_e30/export_e30.pt
+  label: rearr_v3c_e30_lag8
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/c17
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER_LAG: "8"}
+
+- id: A40-c17-lag8-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-rearr_v3c-e30, A40-prep2-rearrange_blocks]
+  requires_pass: [A40-fetch-rearr_v3c-e30, A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 17 (descriptive): rearr_v3c_e30 with MWAM_LEDGER_LAG=8 on rearrange_blocks 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_v3c_e30/export_e30.pt
+  label: rearr_v3c_e30_lag8
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/c17
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER_LAG: "8"}
+
+- id: A40-c17-lag16-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-rearr_v3c-e30, A40-prep2-rearrange_blocks]
+  requires_pass: [A40-fetch-rearr_v3c-e30, A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 17 (descriptive): rearr_v3c_e30 with MWAM_LEDGER_LAG=16 on rearrange_blocks 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_v3c_e30/export_e30.pt
+  label: rearr_v3c_e30_lag16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/c17
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER_LAG: "16"}
+
+- id: A40-c17-lag16-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-rearr_v3c-e30, A40-prep2-rearrange_blocks]
+  requires_pass: [A40-fetch-rearr_v3c-e30, A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 17 (descriptive): rearr_v3c_e30 with MWAM_LEDGER_LAG=16 on rearrange_blocks 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_v3c_e30/export_e30.pt
+  label: rearr_v3c_e30_lag16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/c17
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER_LAG: "16"}
+
+- id: A40-c17-lag16-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-rearr_v3c-e30, A40-prep2-rearrange_blocks]
+  requires_pass: [A40-fetch-rearr_v3c-e30, A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 17 (descriptive): rearr_v3c_e30 with MWAM_LEDGER_LAG=16 on rearrange_blocks 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_v3c_e30/export_e30.pt
+  label: rearr_v3c_e30_lag16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/c17
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER_LAG: "16"}
+
+- id: A40-c17-lag16-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-rearr_v3c-e30, A40-prep2-rearrange_blocks]
+  requires_pass: [A40-fetch-rearr_v3c-e30, A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 17 (descriptive): rearr_v3c_e30 with MWAM_LEDGER_LAG=16 on rearrange_blocks 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_v3c_e30/export_e30.pt
+  label: rearr_v3c_e30_lag16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/c17
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER_LAG: "16"}
+
+- id: A40-c17-lag16-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-rearr_v3c-e30, A40-prep2-rearrange_blocks]
+  requires_pass: [A40-fetch-rearr_v3c-e30, A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 17 (descriptive): rearr_v3c_e30 with MWAM_LEDGER_LAG=16 on rearrange_blocks 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_v3c_e30/export_e30.pt
+  label: rearr_v3c_e30_lag16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/c17
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER_LAG: "16"}
+
+- id: A40-C17-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-c17-lag8-s0, A40-c17-lag8-s1, A40-c17-lag8-s2, A40-c17-lag8-s3, A40-c17-lag8-s4, A40-c17-lag16-s0, A40-c17-lag16-s1, A40-c17-lag16-s2, A40-c17-lag16-s3, A40-c17-lag16-s4]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v20 card 17 described: rearr_split.py classes and rearr_ledger.py write delay at test-time lag 8 / 16 beside rearr_v3c e30 (lag 0; compare on scenes 1-50); log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_split.py c17:rearr_v3c_e30_lag8 c17:rearr_v3c_e30_lag16 rv3c:rearr_v3c_e30 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_ledger.py c17:rearr_v3c_e30_lag8 c17:rearr_v3c_e30_lag16 rv3c:rearr_v3c_e30"
+  pass_if: "m['rc'] == 0"
+
+# ---------------------------------------------------------------------------------------------------------------
 # 11-22 plan v19 section 4 (Opus): the two press_count training-seed replicates (N1, descriptive, no verdict) are
 # evaluated on the A40 instead of the 5090, so their spread is a noise band on the machine where D2 is read (press_count
 # e30 is in closed_loop/e17 here). Lowest priority: at the end of the list.
