@@ -1,0 +1,26 @@
+# 11-25 14:45 (Opus): exports on the HF relay that the A40 already holds (complete, ~12.04 GB each, EXPORTS.txt of the
+# A40 snapshot 14:24) and that no other machine's queue still needs (the 5090's dev evaluations use press_told_e10/e20,
+# rearr_pw_e10, swapT_long_e45: kept). 23 x 12.04 GB = 277 GB. Deleted ONLY after the user's explicit yes.
+ar2_arev_e30
+ar2_prop_novid_e10
+ar2_prop_novid_e30
+ar2_tw_e30
+cover_arprop_e30
+d1_w_e30
+d1_wn_e30
+d2_press_e30
+obs_arprop_e30
+obs_pose_e30
+obs_zoom_e30
+press_clock_e10
+press_clock_e20
+press_clock_e30
+press_count_s18_e30
+press_count_s19_e30
+press_none_e30
+rearr_v3c_h2_e30
+rearrange_arprop_e30
+rearrange_clock_e30
+swapT_arprop_e30
+swapT_arprop_h2_e30
+swapT_clock_e30
