@@ -53,6 +53,7 @@ dev-swapT_joint3_e20 | gpu | bash scripts/fullft/relay_has.sh swapT_joint3_e20 |
 #
 # 11-27 02:40 (Opus; plan v21 6.5 / 6.3 / section 8): one GPU for the zero-training diagnostics, the other for card 25's
 # generator check (and, after a PASS, its generation). Described only; this machine is its own comparison group.
+robomme-base-inspect | cpu | - | PYTHONPATH=src /opt/mwam/bin/python scripts/robomme/inspect_base.py
 card25-check | gpu | - | PART=check bash scripts/fullft/card25_5090.sh
 diag5-b1 | cpu | - | PART=b1 bash scripts/fullft/diag5_5090.sh
 diag5-d | cpu | - | PART=d bash scripts/fullft/diag5_5090.sh
