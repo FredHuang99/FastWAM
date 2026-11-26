@@ -13,6 +13,9 @@
 #   A failed task is not retried by itself (rm its .failed marker to run it again). cpu tasks run beside everything,
 #   at most 2 at a time.
 #   outputs/fullft/Q5090_STOP: start nothing new (running tasks continue); removed when seen.
+#   11-26 18:20 (user 18:07, after GPU0 dropped off the bus again: "set a run-time limit, stop and rest for a while, then
+#   run"): after every GPU task, that GPU rests REST_MIN minutes (20) before it gets the next one, LONG_REST_MIN (45) after a
+#   task that ran longer than 3 h (outputs/fullft/q5090/gpu<N>.rest_until; rm it to end a rest early).
 #   docker exec mwam5090 bash /workspace/FastWAM-memory2/scripts/fullft/q5090.sh start | status | stop
 # Own log: outputs/fullft/Q5090.log ; state outputs/fullft/Q5090_STATE.txt (rewritten every round)
 set -u
@@ -31,15 +34,18 @@ ours_on() { local f; for f in $QD/*.running; do [ -f "$f" ] || continue; kill -0
 n_cpu() { local f n=0; for f in $QD/*.running; do [ -f "$f" ] || continue; kill -0 "$(cut -d' ' -f1 $f)" 2>/dev/null && [ "$(cut -d' ' -f2 $f)" = cpu ] && n=$((n + 1)); done; echo $n; }
 probe() { local u1 u2; ours_on $1 && return 1; u1=$(used $1); [[ "$u1" =~ ^[0-9]+$ ]] && [ $u1 -lt 2000 ] || return 1; sleep 60; u2=$(used $1); [[ "$u2" =~ ^[0-9]+$ ]] && [ $u2 -lt 2000 ]; }
 declare -A FREE
+resting() { local f=$QD/gpu$1.rest_until; [ -f $f ] && [ "$(date +%s)" -lt "$(cat $f 2>/dev/null || echo 0)" ]; }
 gpu_free() {    # looked at once per round; a GPU just given to a task is not free any more this round
-  if [ -z "${FREE[$1]:-}" ]; then probe $1 && FREE[$1]=1 || FREE[$1]=0; fi
+  if [ -z "${FREE[$1]:-}" ]; then if resting $1; then FREE[$1]=0; else probe $1 && FREE[$1]=1 || FREE[$1]=0; fi; fi
   [ "${FREE[$1]}" = 1 ]
 }
 
 launch() {      # id where gpu command
   local id=$1 where=$2 g=$3 cmd=$4
-  ( cd $R && GPU=$g setsid bash -c "$cmd" > $QD/$id.log 2>&1 < /dev/null; rc=$?
+  ( t0=$(date +%s); cd $R && GPU=$g setsid bash -c "$cmd" > $QD/$id.log 2>&1 < /dev/null; rc=$?
     rm -f $QD/$id.running
+    if [ -n "$g" ]; then d=$(( $(date +%s) - t0 )); r=$(( ${REST_MIN:-20} * 60 )); [ $d -gt 10800 ] && r=$(( ${LONG_REST_MIN:-45} * 60 ))
+      echo $(( $(date +%s) + r )) > $QD/gpu$g.rest_until; fi
     if [ $rc = 0 ]; then echo "$(TZ=Asia/Shanghai date '+%F %T')" > $QD/$id.done; else echo "exit $rc $(TZ=Asia/Shanghai date '+%F %T')" > $QD/$id.failed; fi
     echo "[q5090] $(TZ=Asia/Shanghai date '+%F %T') $id finished, exit code $rc" >> $LOG ) &
   echo "$! $([ -n "$g" ] && echo gpu$g || echo cpu) $(TZ=Asia/Shanghai date '+%F %T')" > $QD/$id.running
@@ -71,7 +77,7 @@ round() {
         esac
         if [ "$where" = cpu ] && [ "$g" = cpu ]; then launch "$id" cpu "" "$cmd"; state="started (cpu)"
         elif [ -n "$g" ] && [ "$g" != cpu ]; then launch "$id" "$where" "$g" "$cmd"; FREE[$g]=0; state="started (GPU $g)"
-        else state="waiting ($where busy)"; fi
+        else state="waiting ($where busy$(for x in 0 1; do resting $x && printf '; GPU%s resting' $x; done))"; fi
       fi
     fi
     printf '%-28s %-5s %s\n' "$id" "$where" "$state" >> $OUT/Q5090_STATE.tmp

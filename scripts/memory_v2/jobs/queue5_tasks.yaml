@@ -8249,10 +8249,10 @@ tasks:
 
 # 11-26 18:20: second relay prune, HELD until the user explicitly confirms scripts/fullft/hf_prune_list2.txt (permanent
 # deletion). Same script and checks as A40-HF-prune.
+# RELEASED 11-26 18:07: the user wrote "确认删除这10个" (the 10 names of hf_prune_list2.txt, commit 5b9002a).
 - id: A40-HF-prune2
   lane: a40cpu
   kind: shell
-  hold: true
   need_mib: 0
   timeout_h: 6
   hypothesis: "HF relay prune 2 (user-confirmed list only): the 10 exports of hf_prune_list2.txt that the A40 holds (sha256 verified), then squash"
