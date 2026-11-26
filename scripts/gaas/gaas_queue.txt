@@ -383,3 +383,75 @@ obs_match | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense
 #   Described: swap_T e10 / e20 on the 5090 development scenes; the card 11 classes (swapT_split.py) of swapT_joint3 e30.
 #   A main-table entry from this run carries the note "three tasks trained together".
 swapT_joint3 | data.roots=[/workspace/FastWAM/outputs/s1_dense_joint_h100_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_swap_T_v1] data.tasks=[put_back_block,swap_blocks,swap_T] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_put_back_block.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_blocks.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_T.json] | test -f outputs/memory_v2/press/dense_swap_T_v1/.verified && test -s outputs/fullft/events/events_put_back_block.json && test -s outputs/fullft/events/events_swap_blocks.json && test -f outputs/fullft/events/events_swap_T.json && test -f outputs/fullft/READY_arprop_swap_T
+#
+# 11-27 01:40 (Opus; plan v21 6.1, Fable 11-27, prompt v21 part 3.1). Cards 20 / 21 / 22, readings copied verbatim from
+# plan v21 6.1, registered before any run of these lines; each card's line follows its reading. New H200: cards 20 / 21
+# on the two GPUs freed in the morning (ranking_v3a ~07:30, obs_s800 ~08:00), card 22 on the one freed ~14:00 (ar2_v3c);
+# slots D6 / B6 / A6 (scripts/gaas/slots.txt, submit_v21.sh). Line notes (Opus; not part of the readings):
+#   card 20: rearrange_ar's line (h100_queue.txt: history ar = the default) + rearr_pw's four model.decision_* values +
+#     rearr_pw's events file (events_rearrange_blocks_v3c.json). With history.variant=ar the events enter ONLY the loss
+#     weight (data.py Samples: decision_weight; history.select() never reads events for ar; the ledger is built for
+#     arprop only), the same use as d1_w (D1's weighting-only arm). history.event_delta=0.012 / event_min_path=0.015 are
+#     that file's rule, set only because train.py checks that an events file matches the line's thresholds
+#     (data.load_events); for variant ar they change no input of the model. The pre-event anchors (kind bottom,
+#     frame - 24 <= anchor < frame) are therefore exactly rearr_pw's.
+#   card 21: rearrange_arprop's line (h100_queue.txt: arprop, 32 entries, lag 4, rule A, events_rearrange_blocks.json,
+#     fetched in the job from the relay diag/events_b1 like the B1 files; READY_arprop_rearrange_blocks with --check3
+#     subset as for every rearrange record) + the same four model.decision_* values; anchors from its own events file.
+#   card 22: rearr_pw's line with seed=18.
+#   Cards 20 and 21 end with the seed-extension sentence of plan v21 5.5 item 6 (prompt v21 part 6).
+# Card 20 (plan v21 6.1, P0): rearr_ar_pw = rearrange_ar's exact line (three frames, no record; h100_queue.txt) trained on
+# the H200 class + rearr_pw's pre-event weighting, unchanged (model.decision_weight=3 model.decision_window=0
+# model.decision_pre_window=24 model.decision_pre_kinds=[bottom]; rearr_pw's events file, used for the weighting anchors
+# only: no record token enters the model).
+# Question: rearr_pw reached 93/100 (card 6). Is that a memory result (the record is still needed once the press is
+# trained properly) or a motor result (the press approach was under-trained and the record adds little)?
+# Registered reading (11-27, before any rearr_ar_pw episode; A40, rearrange_blocks 1-100, default noise; both arms H200
+# class, seed 17):
+#   MAIN: D = success(rearr_pw e30) - success(rearr_ar_pw e30), paired by scene, paired bootstrap 95 % CI (10,000,
+#   seed 0); SESOI +0.15: CI lower > +0.15 -> RECORD NEEDED; CI upper < +0.15 -> WEIGHTING ALONE SUFFICES; otherwise
+#   UNCERTAIN (pre-set extension: both e30 again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule).
+#   Described: rearr_split.py classes of rearr_ar_pw beside rearrange_ar (H100: 29 / 34 / 33 / 4; another machine
+#   class, described only); e10 / e20.
+#   Written before the run: if the record matters, "never pressed" falls below 10 and "pressed twice" stays >= 20
+#   (34 in rearrange_ar); if the press was the whole problem, both fall below 10.
+#   Single trainings: the verdict is about these two checkpoints (plan v21 5.5).
+#   Seed extension (plan v21 5.5 item 6): if the verdict is not UNCERTAIN and the difference is within 30 points, both
+#   arms get a seed-18 training; the four trainings are pooled by a bootstrap stratified by seed and scene and the
+#   pooled interval is reported; the single-seed verdict word stands.
+rearr_ar_pw | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.event_delta=0.012 history.event_min_path=0.015 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks_v3c.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[bottom] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && test -s outputs/fullft/events/events_rearrange_blocks_v3c.json
+#
+# Card 21 (plan v21 6.1, P0): rearr_arprop_pw = rearrange_arprop's exact line (body record, rule A events, lag 4;
+# h100_queue.txt) trained on the H200 class + rearr_pw's pre-event weighting, unchanged (weight 3, window 0, pre-window
+# 24, kinds [bottom]; anchors from rearrange_arprop's own events file).
+# Question: with the press trained properly, is the timely writer still needed? (rearr_v3c: NO HELP, 33 vs 62; card 17:
+# no monotone effect of the write delay.)
+# Registered reading (11-27, before any rearr_arprop_pw episode; A40, rearrange_blocks 1-100, default noise; both arms
+# H200 class, seed 17):
+#   MAIN (non-inferiority of the old writer): D = success(rearr_arprop_pw e30) - success(rearr_pw e30), paired by scene,
+#   paired bootstrap 95 % CI (10,000, seed 0); margin -0.10: CI lower > -0.10 -> OLD WRITER SUFFICES; CI upper < -0.10
+#   -> TIMELY WRITER NEEDED; otherwise UNCERTAIN (pre-set extension: both e30 again with MWAM_NOISE_SALT=r2, 200 pairs,
+#   the same rule).
+#   Described: rearr_split.py classes; rearr_ledger.py write delay and, for every "pressed twice" episode, whether the
+#   first press was in the record at the decision that started the second press; e10 / e20; beside rearrange_arprop
+#   (H100: 62 / 18 / 17 / 3; another machine class, described only).
+#   Written before the run: if late writing causes repeats, "pressed twice" stays >= 10 here (0 in rearr_pw).
+#   Seed extension (plan v21 5.5 item 6): if the verdict is not UNCERTAIN and the difference is within 30 points, both
+#   arms get a seed-18 training; the four trainings are pooled by a bootstrap stratified by seed and scene and the
+#   pooled interval is reported; the single-seed verdict word stands.
+rearr_arprop_pw | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[bottom] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && test -f outputs/fullft/events/events_rearrange_blocks.json && test -f outputs/fullft/READY_arprop_rearrange_blocks
+#
+# Card 22 (plan v21 6.1, P0): rearr_pw_s18 = rearr_pw's exact line with seed 18 (H200 class).
+# Purpose: the training-level spread of the headline rearrange cell (93/100, one training).
+# Registered reading (11-27; A40, rearrange_blocks 1-100, default noise): described only. Success 1-100 and
+# rearr_split.py classes beside rearr_pw (seed 17). The main-table cell of this recipe is the mean of the two seeds
+# (rule R1 of plan v19). No verdict.
+rearr_pw_s18 | seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks_v3c.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[bottom] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && test -f outputs/fullft/READY_arprop_events_rearrange_blocks_v3c
+#
+# Fillers (plan v21 6.1 "填空", P2; only when a new-H200 GPU has nothing ready, after cards 20-22 and card 24): the
+# three-frame and the old-writer rearrange lines without weighting on the H200 class, to complete the 2 x 3 rearrange
+# table on one machine class. rearr_ar_h2 = rearrange_ar's exact line; rearr_arprop_h2 = rearrange_arprop's exact line
+# (seed 17 both). Registered reading (11-27 01:40, Opus, before any run): described only - success 1-100 and
+# rearr_split.py classes beside the H100 runs (another machine class) and beside cards 20 / 21 (same class); no verdict.
+rearr_ar_h2 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified
+rearr_arprop_h2 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks.json] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && test -f outputs/fullft/events/events_rearrange_blocks.json && test -f outputs/fullft/READY_arprop_rearrange_blocks

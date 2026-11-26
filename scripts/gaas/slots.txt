@@ -27,9 +27,19 @@ D3 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ranking_v3a ar2_
 D4 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ranking_v3a ar2_v3c swapT_joint3 cover_none
 # 11-26 02:30 (Opus): ranking_v3a (card 4, half trained, its job died when the home filled) now resumes before card 2
 # ar2_v3c in every list (plan v20 2.4a: card 4 before card 2); one follower more per lane (A6 B6 C4 D5).
-A6 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ranking_v3a ar2_v3c swapT_joint3 cover_none
-B6 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ranking_v3a ar2_v3c swapT_joint3 cover_none
+A6 | rearr_ar_pw rearr_arprop_pw rearr_pw_s18 rearr_ar_h2 rearr_arprop_h2 cover_none
+B6 | rearr_ar_pw rearr_arprop_pw rearr_pw_s18 rearr_ar_h2 rearr_arprop_h2 cover_none
 C4 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ranking_v3a ar2_v3c swapT_joint3 cover_none
 D5 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ranking_v3a ar2_v3c swapT_joint3 cover_none
 # 11-26 18:20: swapT_joint3 (card 9b, user 17:53) before cover_none in every list: the project's GPU limit keeps the direct
 # job 119049 queued ("would exceed project ... limit"); the first slot that frees trains it (claims keep it to one job).
+# 11-27 01:40 (Opus; plan v21 6.1 / section 8): cards 20 / 21 on the morning GPUs (D6 behind ranking_v3a ~07:30, B6
+# behind obs_s800 ~08:00), card 22 on the ~14:00 GPU (A6 behind ar2_v3c); tonight's GPUs (D7, B7 behind cards 20 / 21,
+# ~21:00): card 24 when diagnostics 1 / 2 have chosen it (inserted here when registered), else the two fillers; A7, C5
+# behind card 22 / swapT_joint3. A6 / B6 lists rewritten (their jobs 118763 / 118764 are held, they read this file when
+# they start). Every new slot: the same list; claims and SUMMARY.json keep a run from being trained twice.
+D6 | rearr_ar_pw rearr_arprop_pw rearr_pw_s18 rearr_ar_h2 rearr_arprop_h2 cover_none
+D7 | rearr_ar_pw rearr_arprop_pw rearr_pw_s18 rearr_ar_h2 rearr_arprop_h2 cover_none
+B7 | rearr_ar_pw rearr_arprop_pw rearr_pw_s18 rearr_ar_h2 rearr_arprop_h2 cover_none
+A7 | rearr_ar_pw rearr_arprop_pw rearr_pw_s18 rearr_ar_h2 rearr_arprop_h2 cover_none
+C5 | rearr_ar_pw rearr_arprop_pw rearr_pw_s18 rearr_ar_h2 rearr_arprop_h2 cover_none
