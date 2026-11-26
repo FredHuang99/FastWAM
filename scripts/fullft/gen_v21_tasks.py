@@ -1,13 +1,14 @@
 """11-27 (Opus; plan v21 6.1 / 6.5 / section 8): writes the plan v21 A40 tasks into scripts/memory_v2/jobs/queue5_tasks.yaml.
 The queue takes the FIRST runnable task of the file, so the order in the file is the priority:
   block 1 (inserted right after 'tasks:'): MAIN of cards 20 / 21 / 22 (new versions first, plan v20 rule) + verdicts;
-  block 2 (right after block 1): zero-training diagnostics on the A40 GPUs - diagnostic 2 (ranking reading audit),
-           diagnostic 5(a) (swap_T masks), the rearrange re-tests (rearr_pw e30 second noise draw; 256-frame pause);
+  block 2 (after every MAIN evaluation already in the file, above the card 18 audit): zero-training diagnostics on the
+           A40 GPUs - diagnostic 2 (ranking reading audit), diagnostic 5(a) (swap_T masks), the rearrange re-tests
+           (rearr_pw e30 second noise draw; 256-frame pause);
   block 3 (right after block 2): e10 / e20 of cards 20 / 21 (described);
   block 4 (appended at the END of the file, lowest priority): the 'learns fast' step A evaluations (plan v21 6.7),
            written by --step-a once the export inventory is done.
 Run once per block (an id already in the file is never written twice):
-  python3 scripts/fullft/gen_v21_tasks.py --blocks 1 2 3
+  python3 scripts/fullft/gen_v21_tasks.py --blocks 1   then   --blocks 2 3
 """
 from __future__ import annotations
 
@@ -235,10 +236,19 @@ def main():
     dup = [i for i in ids if i in have] + [i for i in set(ids) if ids.count(i) > 1]
     if dup:
         raise SystemExit(f"ids already in the file / repeated: {dup[:8]}")
-    head, sep, rest = text.partition("\ntasks:\n")
-    assert sep, "no 'tasks:' line"
-    YAML.write_text(head + sep + new + "\n" + rest)
-    print(f"inserted {len(ids)} tasks after 'tasks:' (blocks {args.blocks})")
+    if args.blocks == [1]:
+        head, sep, rest = text.partition("\ntasks:\n")
+        assert sep, "no 'tasks:' line"
+        YAML.write_text(head + sep + new + "\n" + rest)
+        print(f"inserted {len(ids)} tasks after 'tasks:' (block 1)")
+    else:
+        # blocks 2 / 3 go AFTER every MAIN evaluation already in the file (plan v20 rule: new versions' MAIN first)
+        # and before the plan v20 card 18 audit (P2): right above its comment block
+        mark = "# 11-26 22:10 (Opus, round 7) plan v20 card 18"
+        i = text.index(mark)
+        i = text.rindex("\n# ----", 0, i) + 1
+        YAML.write_text(text[:i] + new + "\n" + text[i:])
+        print(f"inserted {len(ids)} tasks above the card 18 block (blocks {args.blocks})")
 
 
 if __name__ == "__main__":
