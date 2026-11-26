@@ -41252,3 +41252,886 @@ tasks:
   output: closed_loop/n1
   env: {MWAM_TEXT_SOURCE: "cache"}
 
+# -------------------------------------------------------------------------------------------------------------------
+# 11-27 03:05 (Opus; plan v21 6.7 'learns fast' step A, no training, LOWEST priority = the end of the file):
+# missing 10 / 20-epoch evaluations whose exports still exist (inventory in Status 11-27 section 4), 1-100 each,
+# closed_loop/stepa, described only. Exports gone (not evaluated, recorded): cover_ar e10 / e20, rearrange_ar
+# e10 / e20, rearrange_arprop e10.
+
+- id: A40-stepa-ar_2task_e10-s0
+  lane: a40
+  kind: closed_loop
+  after: []
+  requires_pass: []
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): ar_2task_e10 on swap_blocks 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-ar_2task_e10-s1
+  lane: a40
+  kind: closed_loop
+  after: []
+  requires_pass: []
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): ar_2task_e10 on swap_blocks 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-ar_2task_e10-s2
+  lane: a40
+  kind: closed_loop
+  after: []
+  requires_pass: []
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): ar_2task_e10 on swap_blocks 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-ar_2task_e10-s3
+  lane: a40
+  kind: closed_loop
+  after: []
+  requires_pass: []
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): ar_2task_e10 on swap_blocks 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-ar_2task_e10-s4
+  lane: a40
+  kind: closed_loop
+  after: []
+  requires_pass: []
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): ar_2task_e10 on swap_blocks 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-ar_2task_e10-s5
+  lane: a40
+  kind: closed_loop
+  after: []
+  requires_pass: []
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): ar_2task_e10 on swap_blocks 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-ar_2task_e10-s6
+  lane: a40
+  kind: closed_loop
+  after: []
+  requires_pass: []
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): ar_2task_e10 on swap_blocks 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-ar_2task_e10-s7
+  lane: a40
+  kind: closed_loop
+  after: []
+  requires_pass: []
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): ar_2task_e10 on swap_blocks 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-ar_2task_e10-s8
+  lane: a40
+  kind: closed_loop
+  after: []
+  requires_pass: []
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): ar_2task_e10 on swap_blocks 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-ar_2task_e10-s9
+  lane: a40
+  kind: closed_loop
+  after: []
+  requires_pass: []
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): ar_2task_e10 on swap_blocks 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e10/export_e10.pt
+  label: ar_2task_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-ar_2task_e20-s0
+  lane: a40
+  kind: closed_loop
+  after: []
+  requires_pass: []
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): ar_2task_e20 on swap_blocks 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-ar_2task_e20-s1
+  lane: a40
+  kind: closed_loop
+  after: []
+  requires_pass: []
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): ar_2task_e20 on swap_blocks 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-ar_2task_e20-s2
+  lane: a40
+  kind: closed_loop
+  after: []
+  requires_pass: []
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): ar_2task_e20 on swap_blocks 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-ar_2task_e20-s3
+  lane: a40
+  kind: closed_loop
+  after: []
+  requires_pass: []
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): ar_2task_e20 on swap_blocks 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-ar_2task_e20-s4
+  lane: a40
+  kind: closed_loop
+  after: []
+  requires_pass: []
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): ar_2task_e20 on swap_blocks 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-ar_2task_e20-s5
+  lane: a40
+  kind: closed_loop
+  after: []
+  requires_pass: []
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): ar_2task_e20 on swap_blocks 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-ar_2task_e20-s6
+  lane: a40
+  kind: closed_loop
+  after: []
+  requires_pass: []
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): ar_2task_e20 on swap_blocks 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-ar_2task_e20-s7
+  lane: a40
+  kind: closed_loop
+  after: []
+  requires_pass: []
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): ar_2task_e20 on swap_blocks 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-ar_2task_e20-s8
+  lane: a40
+  kind: closed_loop
+  after: []
+  requires_pass: []
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): ar_2task_e20 on swap_blocks 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-ar_2task_e20-s9
+  lane: a40
+  kind: closed_loop
+  after: []
+  requires_pass: []
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): ar_2task_e20 on swap_blocks 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt
+  label: ar_2task_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fetch-cover_arprop-e10
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 48
+  hypothesis: "fetch cover_arprop_e10 from the relay (plan v21 6.7 step A; sha256 checked; waits until it is there)"
+  command: "RUN=cover_arprop TAG=e10 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-stepa-cover_arprop_e10-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e10]
+  requires_pass: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): cover_arprop_e10 on cover_blocks 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e10/export_e10.pt
+  label: cover_arprop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-cover_arprop_e10-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e10]
+  requires_pass: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): cover_arprop_e10 on cover_blocks 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e10/export_e10.pt
+  label: cover_arprop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-cover_arprop_e10-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e10]
+  requires_pass: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): cover_arprop_e10 on cover_blocks 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e10/export_e10.pt
+  label: cover_arprop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-cover_arprop_e10-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e10]
+  requires_pass: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): cover_arprop_e10 on cover_blocks 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e10/export_e10.pt
+  label: cover_arprop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-cover_arprop_e10-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e10]
+  requires_pass: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): cover_arprop_e10 on cover_blocks 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e10/export_e10.pt
+  label: cover_arprop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-cover_arprop_e10-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e10]
+  requires_pass: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): cover_arprop_e10 on cover_blocks 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e10/export_e10.pt
+  label: cover_arprop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-cover_arprop_e10-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e10]
+  requires_pass: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): cover_arprop_e10 on cover_blocks 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e10/export_e10.pt
+  label: cover_arprop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-cover_arprop_e10-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e10]
+  requires_pass: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): cover_arprop_e10 on cover_blocks 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e10/export_e10.pt
+  label: cover_arprop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-cover_arprop_e10-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e10]
+  requires_pass: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): cover_arprop_e10 on cover_blocks 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e10/export_e10.pt
+  label: cover_arprop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-cover_arprop_e10-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e10]
+  requires_pass: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e10]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): cover_arprop_e10 on cover_blocks 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e10/export_e10.pt
+  label: cover_arprop_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fetch-cover_arprop-e20
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 48
+  hypothesis: "fetch cover_arprop_e20 from the relay (plan v21 6.7 step A; sha256 checked; waits until it is there)"
+  command: "RUN=cover_arprop TAG=e20 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-stepa-cover_arprop_e20-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e20]
+  requires_pass: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): cover_arprop_e20 on cover_blocks 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e20/export_e20.pt
+  label: cover_arprop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-cover_arprop_e20-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e20]
+  requires_pass: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): cover_arprop_e20 on cover_blocks 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e20/export_e20.pt
+  label: cover_arprop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-cover_arprop_e20-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e20]
+  requires_pass: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): cover_arprop_e20 on cover_blocks 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e20/export_e20.pt
+  label: cover_arprop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-cover_arprop_e20-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e20]
+  requires_pass: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): cover_arprop_e20 on cover_blocks 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e20/export_e20.pt
+  label: cover_arprop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-cover_arprop_e20-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e20]
+  requires_pass: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): cover_arprop_e20 on cover_blocks 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e20/export_e20.pt
+  label: cover_arprop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-cover_arprop_e20-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e20]
+  requires_pass: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): cover_arprop_e20 on cover_blocks 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e20/export_e20.pt
+  label: cover_arprop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-cover_arprop_e20-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e20]
+  requires_pass: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): cover_arprop_e20 on cover_blocks 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e20/export_e20.pt
+  label: cover_arprop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-cover_arprop_e20-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e20]
+  requires_pass: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): cover_arprop_e20 on cover_blocks 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e20/export_e20.pt
+  label: cover_arprop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-cover_arprop_e20-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e20]
+  requires_pass: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): cover_arprop_e20 on cover_blocks 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e20/export_e20.pt
+  label: cover_arprop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-cover_arprop_e20-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e20]
+  requires_pass: [A40-prep2-cover_blocks, A40-fetch-cover_arprop-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): cover_arprop_e20 on cover_blocks 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e20/export_e20.pt
+  label: cover_arprop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fetch-rearrange_arprop-e20
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 48
+  hypothesis: "fetch rearrange_arprop_e20 from the relay (plan v21 6.7 step A; sha256 checked; waits until it is there)"
+  command: "RUN=rearrange_arprop TAG=e20 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-stepa-rearrange_arprop_e20-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks, A40-fetch-rearrange_arprop-e20]
+  requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrange_arprop-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): rearrange_arprop_e20 on rearrange_blocks 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e20/export_e20.pt
+  label: rearrange_arprop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-rearrange_arprop_e20-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks, A40-fetch-rearrange_arprop-e20]
+  requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrange_arprop-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): rearrange_arprop_e20 on rearrange_blocks 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e20/export_e20.pt
+  label: rearrange_arprop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-rearrange_arprop_e20-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks, A40-fetch-rearrange_arprop-e20]
+  requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrange_arprop-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): rearrange_arprop_e20 on rearrange_blocks 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e20/export_e20.pt
+  label: rearrange_arprop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-rearrange_arprop_e20-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks, A40-fetch-rearrange_arprop-e20]
+  requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrange_arprop-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): rearrange_arprop_e20 on rearrange_blocks 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e20/export_e20.pt
+  label: rearrange_arprop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-rearrange_arprop_e20-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks, A40-fetch-rearrange_arprop-e20]
+  requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrange_arprop-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): rearrange_arprop_e20 on rearrange_blocks 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e20/export_e20.pt
+  label: rearrange_arprop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-rearrange_arprop_e20-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks, A40-fetch-rearrange_arprop-e20]
+  requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrange_arprop-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): rearrange_arprop_e20 on rearrange_blocks 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e20/export_e20.pt
+  label: rearrange_arprop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-rearrange_arprop_e20-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks, A40-fetch-rearrange_arprop-e20]
+  requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrange_arprop-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): rearrange_arprop_e20 on rearrange_blocks 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e20/export_e20.pt
+  label: rearrange_arprop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-rearrange_arprop_e20-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks, A40-fetch-rearrange_arprop-e20]
+  requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrange_arprop-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): rearrange_arprop_e20 on rearrange_blocks 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e20/export_e20.pt
+  label: rearrange_arprop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-rearrange_arprop_e20-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks, A40-fetch-rearrange_arprop-e20]
+  requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrange_arprop-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): rearrange_arprop_e20 on rearrange_blocks 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e20/export_e20.pt
+  label: rearrange_arprop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-stepa-rearrange_arprop_e20-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks, A40-fetch-rearrange_arprop-e20]
+  requires_pass: [A40-prep2-rearrange_blocks, A40-fetch-rearrange_arprop-e20]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v21 6.7 step A (described): rearrange_arprop_e20 on rearrange_blocks 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e20/export_e20.pt
+  label: rearrange_arprop_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/stepa
+  env: {MWAM_TEXT_SOURCE: "cache"}
+

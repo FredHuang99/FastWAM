@@ -247,17 +247,48 @@ def block5():
     return "\n".join(out) + "\n"
 
 
+STEP_A = [   # (label, task, where): plan v21 6.7 step A, the missing e10 / e20 evaluations whose exports still exist
+    ("ar_2task_e10", "swap_blocks", "a40"), ("ar_2task_e20", "swap_blocks", "a40"),
+    ("cover_arprop_e10", "cover_blocks", "hf"), ("cover_arprop_e20", "cover_blocks", "hf"),
+    ("rearrange_arprop_e20", "rearrange_blocks", "hf"),
+]
+
+
+def block4():
+    out = ["# " + "-" * 115,
+           "# 11-27 03:05 (Opus; plan v21 6.7 'learns fast' step A, no training, LOWEST priority = the end of the file):",
+           "# missing 10 / 20-epoch evaluations whose exports still exist (inventory in Status 11-27 section 4), 1-100 each,",
+           "# closed_loop/stepa, described only. Exports gone (not evaluated, recorded): cover_ar e10 / e20, rearrange_ar",
+           "# e10 / e20, rearrange_arprop e10.", ""]
+    for label, task, where in STEP_A:
+        run, tag = label.rsplit("_", 1)
+        after = [f"A40-prep2-{task}"] if task != "swap_blocks" else []
+        if where == "hf":
+            out.append(fetch(run, tag, "plan v21 6.7 step A", timeout=48))
+            after = after + [f"A40-fetch-{run}-{tag}"]
+        for k in range(10):
+            out.append(loop(f"A40-stepa-{label}-s{k}", after,
+                            f"plan v21 6.7 step A (described): {label} on {task} 1-100; shard {k} of 10",
+                            f"{EXP}/{label}/export_{tag}.pt", label, task,
+                            ["--execute", "8", "--limit", "100", "--shard", f"{k}/10"], "closed_loop/stepa"))
+    return "\n".join(out) + "\n"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--blocks", nargs="+", type=int, default=[1, 2, 3])
     args = ap.parse_args()
     text = YAML.read_text()
     have = set(re.findall(r"^- id: (\S+)", text, re.M))
-    new = "".join({1: block1, 2: block2, 3: block3, 5: block5}[b]() for b in sorted(args.blocks))
+    new = "".join({1: block1, 2: block2, 3: block3, 4: block4, 5: block5}[b]() for b in sorted(args.blocks))
     ids = re.findall(r"^- id: (\S+)", new, re.M)
     dup = [i for i in ids if i in have] + [i for i in set(ids) if ids.count(i) > 1]
     if dup:
         raise SystemExit(f"ids already in the file / repeated: {dup[:8]}")
+    if args.blocks == [4]:                      # step A: the very end of the file (lowest priority)
+        YAML.write_text(text.rstrip("\n") + "\n\n" + new)
+        print(f"appended {len(ids)} tasks at the end (block 4)")
+        return
     if args.blocks == [1]:
         head, sep, rest = text.partition("\ntasks:\n")
         assert sep, "no 'tasks:' line"
