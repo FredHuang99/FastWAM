@@ -168,6 +168,16 @@ if [ "${RUN#@}" != "$RUN" ]; then
   export RUN NO_RESUBMIT AUTO_CLEAN
   WALL_H=${WALL_H:-96}
 fi
+# 11-26 18:20: a job submitted with RUN=<run> (not a slot) also respects and writes the claim, so a slot job and a direct
+# job never train the same run at once (swapT_joint3: direct job 119049 waits on the project's GPU limit, and the slot
+# lists name it too; whichever starts first trains it, the other ends / picks the next run).
+if [ -z "${SLOT:-}" ]; then
+  cj=$(cat $F/$RUN/.claimed_by 2>/dev/null)
+  if [ -n "$cj" ] && [ "$cj" != "${PBS_JOBID:-none}" ] && qstat "$cj" 2>/dev/null | grep -q " R "; then
+    echo "[run] $(date '+%F %T') $RUN is running in job $cj: this job ends (GPU back to the pool)"; exit 0; fi
+  [ -f $F/$RUN/SUMMARY.json ] && { echo "[run] $(date '+%F %T') $RUN finished already: this job ends"; exit 0; }
+  mkdir -p $F/$RUN; echo "${PBS_JOBID:-none}" > $F/$RUN/.claimed_by
+fi
 WALL_H=${WALL_H:-96}
 C=$W/hf/payload/workspace/FastWAM/outputs/s1_dense_joint_h100_v1
 mkdir -p $W/logs $F/$RUN
