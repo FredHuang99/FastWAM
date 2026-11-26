@@ -37595,6 +37595,789 @@ tasks:
   pass_if: "m['rc'] == 0"
 
 # ---------------------------------------------------------------------------------------------------------------
+# 11-26 22:10 (Opus, round 7) plan v20 card 18 (P2, order 5; the A40 had no ready card at 21:45, every MAIN waits on an
+# export): reading audit beyond swap. Body-record models where the record works, test-time record ablations (online.py
+# MWAM_LEDGER): off (no entry), freeze1 (the record stops after the first completed move), addmove (the first move
+# entered twice); scenes 1-50 each, default noise, seed-42 banks, execute 8. Descriptive only (plan v20 3.3): success and
+# the task's failure classes against the unmodified runs on the same scenes (closed_loop/e6 / v20). rearr_pw e30 (card 6,
+# 93/100) added beside the plan's two models: same audit, described.
+
+- id: A40-c18-rearr-off-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearrange_arprop_e30 with MWAM_LEDGER=off on rearrange_blocks 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e30/export_e30.pt
+  label: rearrange_arprop_e30_off
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "off"}
+
+- id: A40-c18-rearr-off-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearrange_arprop_e30 with MWAM_LEDGER=off on rearrange_blocks 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e30/export_e30.pt
+  label: rearrange_arprop_e30_off
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "off"}
+
+- id: A40-c18-rearr-off-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearrange_arprop_e30 with MWAM_LEDGER=off on rearrange_blocks 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e30/export_e30.pt
+  label: rearrange_arprop_e30_off
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "off"}
+
+- id: A40-c18-rearr-off-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearrange_arprop_e30 with MWAM_LEDGER=off on rearrange_blocks 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e30/export_e30.pt
+  label: rearrange_arprop_e30_off
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "off"}
+
+- id: A40-c18-rearr-off-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearrange_arprop_e30 with MWAM_LEDGER=off on rearrange_blocks 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e30/export_e30.pt
+  label: rearrange_arprop_e30_off
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "off"}
+
+- id: A40-c18-rearr-freeze1-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearrange_arprop_e30 with MWAM_LEDGER=freeze1 on rearrange_blocks 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e30/export_e30.pt
+  label: rearrange_arprop_e30_freeze1
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "freeze1"}
+
+- id: A40-c18-rearr-freeze1-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearrange_arprop_e30 with MWAM_LEDGER=freeze1 on rearrange_blocks 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e30/export_e30.pt
+  label: rearrange_arprop_e30_freeze1
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "freeze1"}
+
+- id: A40-c18-rearr-freeze1-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearrange_arprop_e30 with MWAM_LEDGER=freeze1 on rearrange_blocks 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e30/export_e30.pt
+  label: rearrange_arprop_e30_freeze1
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "freeze1"}
+
+- id: A40-c18-rearr-freeze1-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearrange_arprop_e30 with MWAM_LEDGER=freeze1 on rearrange_blocks 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e30/export_e30.pt
+  label: rearrange_arprop_e30_freeze1
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "freeze1"}
+
+- id: A40-c18-rearr-freeze1-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearrange_arprop_e30 with MWAM_LEDGER=freeze1 on rearrange_blocks 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e30/export_e30.pt
+  label: rearrange_arprop_e30_freeze1
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "freeze1"}
+
+- id: A40-c18-rearr-addmove-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearrange_arprop_e30 with MWAM_LEDGER=addmove on rearrange_blocks 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e30/export_e30.pt
+  label: rearrange_arprop_e30_addmove
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "addmove"}
+
+- id: A40-c18-rearr-addmove-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearrange_arprop_e30 with MWAM_LEDGER=addmove on rearrange_blocks 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e30/export_e30.pt
+  label: rearrange_arprop_e30_addmove
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "addmove"}
+
+- id: A40-c18-rearr-addmove-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearrange_arprop_e30 with MWAM_LEDGER=addmove on rearrange_blocks 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e30/export_e30.pt
+  label: rearrange_arprop_e30_addmove
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "addmove"}
+
+- id: A40-c18-rearr-addmove-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearrange_arprop_e30 with MWAM_LEDGER=addmove on rearrange_blocks 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e30/export_e30.pt
+  label: rearrange_arprop_e30_addmove
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "addmove"}
+
+- id: A40-c18-rearr-addmove-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearrange_arprop_e30 with MWAM_LEDGER=addmove on rearrange_blocks 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearrange_arprop_e30/export_e30.pt
+  label: rearrange_arprop_e30_addmove
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "addmove"}
+
+- id: A40-c18-cover-off-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks]
+  requires_pass: [A40-prep2-cover_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): cover_arprop_e30 with MWAM_LEDGER=off on cover_blocks 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e30/export_e30.pt
+  label: cover_arprop_e30_off
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "off"}
+
+- id: A40-c18-cover-off-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks]
+  requires_pass: [A40-prep2-cover_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): cover_arprop_e30 with MWAM_LEDGER=off on cover_blocks 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e30/export_e30.pt
+  label: cover_arprop_e30_off
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "off"}
+
+- id: A40-c18-cover-off-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks]
+  requires_pass: [A40-prep2-cover_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): cover_arprop_e30 with MWAM_LEDGER=off on cover_blocks 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e30/export_e30.pt
+  label: cover_arprop_e30_off
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "off"}
+
+- id: A40-c18-cover-off-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks]
+  requires_pass: [A40-prep2-cover_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): cover_arprop_e30 with MWAM_LEDGER=off on cover_blocks 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e30/export_e30.pt
+  label: cover_arprop_e30_off
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "off"}
+
+- id: A40-c18-cover-off-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks]
+  requires_pass: [A40-prep2-cover_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): cover_arprop_e30 with MWAM_LEDGER=off on cover_blocks 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e30/export_e30.pt
+  label: cover_arprop_e30_off
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "off"}
+
+- id: A40-c18-cover-freeze1-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks]
+  requires_pass: [A40-prep2-cover_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): cover_arprop_e30 with MWAM_LEDGER=freeze1 on cover_blocks 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e30/export_e30.pt
+  label: cover_arprop_e30_freeze1
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "freeze1"}
+
+- id: A40-c18-cover-freeze1-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks]
+  requires_pass: [A40-prep2-cover_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): cover_arprop_e30 with MWAM_LEDGER=freeze1 on cover_blocks 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e30/export_e30.pt
+  label: cover_arprop_e30_freeze1
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "freeze1"}
+
+- id: A40-c18-cover-freeze1-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks]
+  requires_pass: [A40-prep2-cover_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): cover_arprop_e30 with MWAM_LEDGER=freeze1 on cover_blocks 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e30/export_e30.pt
+  label: cover_arprop_e30_freeze1
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "freeze1"}
+
+- id: A40-c18-cover-freeze1-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks]
+  requires_pass: [A40-prep2-cover_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): cover_arprop_e30 with MWAM_LEDGER=freeze1 on cover_blocks 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e30/export_e30.pt
+  label: cover_arprop_e30_freeze1
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "freeze1"}
+
+- id: A40-c18-cover-freeze1-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks]
+  requires_pass: [A40-prep2-cover_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): cover_arprop_e30 with MWAM_LEDGER=freeze1 on cover_blocks 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e30/export_e30.pt
+  label: cover_arprop_e30_freeze1
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "freeze1"}
+
+- id: A40-c18-cover-addmove-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks]
+  requires_pass: [A40-prep2-cover_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): cover_arprop_e30 with MWAM_LEDGER=addmove on cover_blocks 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e30/export_e30.pt
+  label: cover_arprop_e30_addmove
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "addmove"}
+
+- id: A40-c18-cover-addmove-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks]
+  requires_pass: [A40-prep2-cover_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): cover_arprop_e30 with MWAM_LEDGER=addmove on cover_blocks 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e30/export_e30.pt
+  label: cover_arprop_e30_addmove
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "addmove"}
+
+- id: A40-c18-cover-addmove-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks]
+  requires_pass: [A40-prep2-cover_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): cover_arprop_e30 with MWAM_LEDGER=addmove on cover_blocks 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e30/export_e30.pt
+  label: cover_arprop_e30_addmove
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "addmove"}
+
+- id: A40-c18-cover-addmove-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks]
+  requires_pass: [A40-prep2-cover_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): cover_arprop_e30 with MWAM_LEDGER=addmove on cover_blocks 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e30/export_e30.pt
+  label: cover_arprop_e30_addmove
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "addmove"}
+
+- id: A40-c18-cover-addmove-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-cover_blocks]
+  requires_pass: [A40-prep2-cover_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): cover_arprop_e30 with MWAM_LEDGER=addmove on cover_blocks 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e30/export_e30.pt
+  label: cover_arprop_e30_addmove
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_cover_blocks]
+  tasks: [cover_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "addmove"}
+
+- id: A40-c18-rearrpw-off-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearr_pw_e30 with MWAM_LEDGER=off on rearrange_blocks 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_e30/export_e30.pt
+  label: rearr_pw_e30_off
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "off"}
+
+- id: A40-c18-rearrpw-off-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearr_pw_e30 with MWAM_LEDGER=off on rearrange_blocks 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_e30/export_e30.pt
+  label: rearr_pw_e30_off
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "off"}
+
+- id: A40-c18-rearrpw-off-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearr_pw_e30 with MWAM_LEDGER=off on rearrange_blocks 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_e30/export_e30.pt
+  label: rearr_pw_e30_off
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "off"}
+
+- id: A40-c18-rearrpw-off-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearr_pw_e30 with MWAM_LEDGER=off on rearrange_blocks 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_e30/export_e30.pt
+  label: rearr_pw_e30_off
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "off"}
+
+- id: A40-c18-rearrpw-off-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearr_pw_e30 with MWAM_LEDGER=off on rearrange_blocks 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_e30/export_e30.pt
+  label: rearr_pw_e30_off
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "off"}
+
+- id: A40-c18-rearrpw-freeze1-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearr_pw_e30 with MWAM_LEDGER=freeze1 on rearrange_blocks 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_e30/export_e30.pt
+  label: rearr_pw_e30_freeze1
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "freeze1"}
+
+- id: A40-c18-rearrpw-freeze1-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearr_pw_e30 with MWAM_LEDGER=freeze1 on rearrange_blocks 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_e30/export_e30.pt
+  label: rearr_pw_e30_freeze1
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "freeze1"}
+
+- id: A40-c18-rearrpw-freeze1-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearr_pw_e30 with MWAM_LEDGER=freeze1 on rearrange_blocks 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_e30/export_e30.pt
+  label: rearr_pw_e30_freeze1
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "freeze1"}
+
+- id: A40-c18-rearrpw-freeze1-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearr_pw_e30 with MWAM_LEDGER=freeze1 on rearrange_blocks 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_e30/export_e30.pt
+  label: rearr_pw_e30_freeze1
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "freeze1"}
+
+- id: A40-c18-rearrpw-freeze1-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearr_pw_e30 with MWAM_LEDGER=freeze1 on rearrange_blocks 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_e30/export_e30.pt
+  label: rearr_pw_e30_freeze1
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "freeze1"}
+
+- id: A40-c18-rearrpw-addmove-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearr_pw_e30 with MWAM_LEDGER=addmove on rearrange_blocks 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_e30/export_e30.pt
+  label: rearr_pw_e30_addmove
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "addmove"}
+
+- id: A40-c18-rearrpw-addmove-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearr_pw_e30 with MWAM_LEDGER=addmove on rearrange_blocks 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_e30/export_e30.pt
+  label: rearr_pw_e30_addmove
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "addmove"}
+
+- id: A40-c18-rearrpw-addmove-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearr_pw_e30 with MWAM_LEDGER=addmove on rearrange_blocks 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_e30/export_e30.pt
+  label: rearr_pw_e30_addmove
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "addmove"}
+
+- id: A40-c18-rearrpw-addmove-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearr_pw_e30 with MWAM_LEDGER=addmove on rearrange_blocks 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_e30/export_e30.pt
+  label: rearr_pw_e30_addmove
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "addmove"}
+
+- id: A40-c18-rearrpw-addmove-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-prep2-rearrange_blocks]
+  requires_pass: [A40-prep2-rearrange_blocks]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v20 card 18 (descriptive): rearr_pw_e30 with MWAM_LEDGER=addmove on rearrange_blocks 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_e30/export_e30.pt
+  label: rearr_pw_e30_addmove
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/c18
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "addmove"}
+
+- id: A40-C18-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-c18-rearr-off-s0, A40-c18-rearr-off-s1, A40-c18-rearr-off-s2, A40-c18-rearr-off-s3, A40-c18-rearr-off-s4, A40-c18-rearr-freeze1-s0, A40-c18-rearr-freeze1-s1, A40-c18-rearr-freeze1-s2, A40-c18-rearr-freeze1-s3, A40-c18-rearr-freeze1-s4, A40-c18-rearr-addmove-s0, A40-c18-rearr-addmove-s1, A40-c18-rearr-addmove-s2, A40-c18-rearr-addmove-s3, A40-c18-rearr-addmove-s4, A40-c18-cover-off-s0, A40-c18-cover-off-s1, A40-c18-cover-off-s2, A40-c18-cover-off-s3, A40-c18-cover-off-s4, A40-c18-cover-freeze1-s0, A40-c18-cover-freeze1-s1, A40-c18-cover-freeze1-s2, A40-c18-cover-freeze1-s3, A40-c18-cover-freeze1-s4, A40-c18-cover-addmove-s0, A40-c18-cover-addmove-s1, A40-c18-cover-addmove-s2, A40-c18-cover-addmove-s3, A40-c18-cover-addmove-s4, A40-c18-rearrpw-off-s0, A40-c18-rearrpw-off-s1, A40-c18-rearrpw-off-s2, A40-c18-rearrpw-off-s3, A40-c18-rearrpw-off-s4, A40-c18-rearrpw-freeze1-s0, A40-c18-rearrpw-freeze1-s1, A40-c18-rearrpw-freeze1-s2, A40-c18-rearrpw-freeze1-s3, A40-c18-rearrpw-freeze1-s4, A40-c18-rearrpw-addmove-s0, A40-c18-rearrpw-addmove-s1, A40-c18-rearrpw-addmove-s2, A40-c18-rearrpw-addmove-s3, A40-c18-rearrpw-addmove-s4]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v20 card 18 described: rearr_split.py on the rearrange audits beside the unmodified runs (e6 rearrange_arprop, v20 rearr_pw); cover success counted by the pool's DONE lines; log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_split.py c18:rearrange_arprop_e30_off c18:rearrange_arprop_e30_freeze1 c18:rearrange_arprop_e30_addmove c18:rearr_pw_e30_off c18:rearr_pw_e30_freeze1 c18:rearr_pw_e30_addmove e6:rearrange_arprop_e30 v20:rearr_pw_e30"
+  pass_if: "m['rc'] == 0"
+
+# ---------------------------------------------------------------------------------------------------------------
 # 11-22 plan v19 section 4 (Opus): the two press_count training-seed replicates (N1, descriptive, no verdict) are
 # evaluated on the A40 instead of the 5090, so their spread is a noise band on the machine where D2 is read (press_count
 # e30 is in closed_loop/e17 here). Lowest priority: at the end of the list.
