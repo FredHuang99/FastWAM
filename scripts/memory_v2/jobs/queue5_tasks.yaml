@@ -8247,6 +8247,18 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && HFPY=/opt/hf-tools/bin/python; [ -x $HFPY ] || HFPY=/opt/mwam/bin/python; $HFPY scripts/fullft/hf_prune.py --list scripts/fullft/hf_prune_list.txt --squash"
   pass_if: "m['rc'] == 0"
 
+# 11-26 18:20: second relay prune, HELD until the user explicitly confirms scripts/fullft/hf_prune_list2.txt (permanent
+# deletion). Same script and checks as A40-HF-prune.
+- id: A40-HF-prune2
+  lane: a40cpu
+  kind: shell
+  hold: true
+  need_mib: 0
+  timeout_h: 6
+  hypothesis: "HF relay prune 2 (user-confirmed list only): the 10 exports of hf_prune_list2.txt that the A40 holds (sha256 verified), then squash"
+  command: "cd /workspace/FastWAM-memory2 && HFPY=/opt/hf-tools/bin/python; [ -x $HFPY ] || HFPY=/opt/mwam/bin/python; $HFPY scripts/fullft/hf_prune.py --list scripts/fullft/hf_prune_list2.txt --squash"
+  pass_if: "m['rc'] == 0"
+
 # card 6 described e10 / e20 (after every MAIN evaluation)
 - id: A40-fetch-rearr_pw-e10
   lane: a40cpu

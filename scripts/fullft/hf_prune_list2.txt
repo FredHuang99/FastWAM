@@ -1,0 +1,15 @@
+# 11-26 18:20 (Opus, round 6): HF relay at 767.3 GB / 1000 GB (76.7 %, 5090 16:58), rising ~100 GB / day.
+# Intermediate exports the A40 already holds (EXPORTS.txt, 17:42) whose planned uses are done or A40-local:
+# press_told e10 / e20 (card 5 judged), obs_match e10 / e20 (card 7 stopped), rearr_pw e10 / e20 (described),
+# swapT_long / _h100 e45 (described), obs_s200 e10 / e20 (5090 looks done; A40 evaluates its own copies).
+# 10 x 12.04 GB. NOT deleted until the user confirms this exact list (hf_prune.py verifies sha256 first).
+press_told_e10
+press_told_e20
+obs_match_e10
+obs_match_e20
+rearr_pw_e10
+rearr_pw_e20
+swapT_long_e45
+swapT_long_h100_e45
+obs_s200_e10
+obs_s200_e20
