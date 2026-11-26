@@ -40024,6 +40024,53 @@ tasks:
   pass_if: "m['rc'] == 0"
 
 
+# -------------------------------------------------------------------------------------------------------------------
+# 11-27 02:55 (Opus; plan v21 6.5, P0, zero training, CPU): diagnostics 1 (ranking per episode; first-repeat types
+# fixed 11-27 02:45 after the first 10 episodes of each model, Status 11-27), 3 (rearrange press timing), 4(a)
+# (press: pressed x card per button). scripts/fullft/diag_cpu_v21.py; described only. Diagnostic 1 runs again
+# once card 4 (ranking_v3a) is evaluated.
+
+- id: A40-DIAG1-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-prep2-blocks_ranking_try]
+  need_mib: 0
+  timeout_h: 4
+  hypothesis: "plan v21 diagnostic 1 (described): ranking per episode, three-frame / body record e30 (e6) and ranking_v3a e30 when present; log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag_cpu_v21.py diag1"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-DIAG1-v3a-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-rankv3a-verdict]
+  need_mib: 0
+  timeout_h: 4
+  hypothesis: "plan v21 diagnostic 1 again with card 4 (ranking_v3a e30, closed_loop/v20) added; log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag_cpu_v21.py diag1"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-DIAG3-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-prep2-rearrange_blocks]
+  need_mib: 0
+  timeout_h: 4
+  hypothesis: "plan v21 diagnostic 3 (described): rearrange press timing over the timely writer (two trainings), the weighted version, the old writer and the three-frame model; log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag_cpu_v21.py diag3"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-DIAG4A-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-prep2-press_button]
+  need_mib: 0
+  timeout_h: 4
+  hypothesis: "plan v21 diagnostic 4(a) (described): press_button, pressed count x card count per button and the slope, four versions; log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag_cpu_v21.py diag4a"
+  pass_if: "m['rc'] == 0"
+
+
 # ---------------------------------------------------------------------------------------------------------------
 # 11-26 22:10 (Opus, round 7) plan v20 card 18 (P2, order 5; the A40 had no ready card at 21:45, every MAIN waits on an
 # export): reading audit beyond swap. Body-record models where the record works, test-time record ablations (online.py

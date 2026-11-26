@@ -225,13 +225,35 @@ def block3():
     return "\n".join(out) + "\n"
 
 
+def block5():
+    out = ["# " + "-" * 115,
+           "# 11-27 02:55 (Opus; plan v21 6.5, P0, zero training, CPU): diagnostics 1 (ranking per episode; first-repeat types",
+           "# fixed 11-27 02:45 after the first 10 episodes of each model, Status 11-27), 3 (rearrange press timing), 4(a)",
+           "# (press: pressed x card per button). scripts/fullft/diag_cpu_v21.py; described only. Diagnostic 1 runs again",
+           "# once card 4 (ranking_v3a) is evaluated.", ""]
+    out.append(shell("A40-DIAG1-report", ["A40-prep2-blocks_ranking_try"],
+                     "plan v21 diagnostic 1 (described): ranking per episode, three-frame / body record e30 (e6) and "
+                     "ranking_v3a e30 when present; log pushed", f"{PY} scripts/fullft/diag_cpu_v21.py diag1", timeout=4))
+    out.append(shell("A40-DIAG1-v3a-report", ["A40-rankv3a-verdict"],
+                     "plan v21 diagnostic 1 again with card 4 (ranking_v3a e30, closed_loop/v20) added; log pushed",
+                     f"{PY} scripts/fullft/diag_cpu_v21.py diag1", timeout=4))
+    out.append(shell("A40-DIAG3-report", ["A40-prep2-rearrange_blocks"],
+                     "plan v21 diagnostic 3 (described): rearrange press timing over the timely writer (two trainings), "
+                     "the weighted version, the old writer and the three-frame model; log pushed",
+                     f"{PY} scripts/fullft/diag_cpu_v21.py diag3", timeout=4))
+    out.append(shell("A40-DIAG4A-report", ["A40-prep2-press_button"],
+                     "plan v21 diagnostic 4(a) (described): press_button, pressed count x card count per button and the "
+                     "slope, four versions; log pushed", f"{PY} scripts/fullft/diag_cpu_v21.py diag4a", timeout=4))
+    return "\n".join(out) + "\n"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--blocks", nargs="+", type=int, default=[1, 2, 3])
     args = ap.parse_args()
     text = YAML.read_text()
     have = set(re.findall(r"^- id: (\S+)", text, re.M))
-    new = "".join({1: block1, 2: block2, 3: block3}[b]() for b in sorted(args.blocks))
+    new = "".join({1: block1, 2: block2, 3: block3, 5: block5}[b]() for b in sorted(args.blocks))
     ids = re.findall(r"^- id: (\S+)", new, re.M)
     dup = [i for i in ids if i in have] + [i for i in set(ids) if ids.count(i) > 1]
     if dup:
