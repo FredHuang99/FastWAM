@@ -50,3 +50,12 @@ card7-matchprobe | gpu | bash scripts/fullft/relay_has.sh obs_match_e30 | bash s
 # 11-26 18:05 (user 17:53): card 9b swapT_joint3 (new H200, fifth GPU) -> e10 / e20 development-scene looks (described)
 dev-swapT_joint3_e10 | gpu | bash scripts/fullft/relay_has.sh swapT_joint3_e10 | PF_GPUS=$GPU DEV_RUNS="swapT_joint3_e10:swap_T" bash scripts/fullft/dev_eval_5090.sh
 dev-swapT_joint3_e20 | gpu | bash scripts/fullft/relay_has.sh swapT_joint3_e20 | PF_GPUS=$GPU DEV_RUNS="swapT_joint3_e20:swap_T" bash scripts/fullft/dev_eval_5090.sh
+#
+# 11-27 02:40 (Opus; plan v21 6.5 / 6.3 / section 8): one GPU for the zero-training diagnostics, the other for card 25's
+# generator check (and, after a PASS, its generation). Described only; this machine is its own comparison group.
+card25-check | gpu | - | PART=check bash scripts/fullft/card25_5090.sh
+diag5-b1 | cpu | - | PART=b1 bash scripts/fullft/diag5_5090.sh
+diag5-d | cpu | - | PART=d bash scripts/fullft/diag5_5090.sh
+diag5-c | gpu | - | PART=c bash scripts/fullft/diag5_5090.sh
+diag4b | gpu | - | bash scripts/fullft/diag4b_5090.sh
+card25-gen | gpu | grep -q '"pass": true' outputs/fullft/gen_cf/CARD25_CHECK.json | PART=gen bash scripts/fullft/card25_5090.sh

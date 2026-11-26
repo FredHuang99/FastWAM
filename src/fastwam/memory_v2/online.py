@@ -927,6 +927,8 @@ def cmd_gen(args):
         cmd = [sim_cfg["closed_loop"]["simulator_python"], "-B", "-u", str(driver), "--task", task, "--out", str(out)]
         cmd += (["--seeds"] + [str(s) for s in args.gen_seeds]) if args.gen_seeds else \
                ["--start-seed", str(args.start_seed), "--episodes", str(args.episodes)]
+        if int(getattr(args, "gen_target", -1)) >= 0:                      # 11-27 card 25 (off by default)
+            cmd += ["--target", str(int(args.gen_target))]
         root = Path(spec.root) / sim_cfg["closed_loop"]["simulator_root"]
         print(f"[gen] {now()} {task}: {' '.join(cmd[3:])} (cwd {root}; simulator {cmd[0]})", flush=True)
         subprocess.run(cmd, cwd=root, env=env, check=True)
@@ -1306,6 +1308,8 @@ def main(argv=None):
     ap.add_argument("command", choices=("preflight", "parity", "plan", "run", "summary", "gen"))
     ap.add_argument("--start-seed", type=int, default=10_000_000, help="gen: first seed tried (11-24 card 8)")
     ap.add_argument("--gen-seeds", type=int, nargs="*", default=[], help="gen: exactly these seeds (render check)")
+    ap.add_argument("--gen-target", type=int, default=-1, help="gen, 11-27 card 25: force candidate K as the target "
+                    "(observe_and_pickup; -1 = off, the benchmark's own draw)")
     ap.add_argument("--config", type=Path, default=Path("configs/memory_v2/train_v2_A.yaml"), help="only for --checkpoint init")
     ap.add_argument("--set", action="append", default=[], help="config override on top of the checkpoint's config")
     ap.add_argument("--checkpoint", default="init", help="memory_v2 checkpoint (.pt) or 'init'")

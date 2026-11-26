@@ -25,6 +25,11 @@ Reading: in the choice window, (swap - true) / true < 2 % -> "frame 0 is not use
           frame of obs_match; the first hist_ids == -1 slot, data.py) gets ANOTHER demo's, frame 0 untouched.
           The samples are built with the run's data.zoom_root / data.text_table, as in training. Default
           --swap frame0: exactly as before.
+  --task swap_T --window carry (11-27, plan v21 diagnostic 5(c)): swap_T demos; anchors evenly in [g + 16, r - 1],
+          g = the first gripper close (both arms grasp together), r = the first gripper opening after it (the first
+          put-down): while both blocks are carried, where to put them is shown only by frame 0. The contrast window
+          'late' is then [r2 + 8, end], r2 = the second opening (both blocks down). Default --task observe_and_pickup:
+          exactly as before.
 The same for the late window as a contrast, and (none - true) / true for reference. Also: the share of training anchors
 that fall in a 48-frame choice window (how much of the training signal is about the choice).
   PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/obs_probe.py --export outputs/fullft/exports/obs_ar_e30/export_e30.pt
@@ -51,6 +56,22 @@ def first_close(proprio: torch.Tensor):
             elif opened[a] and v < 0.35:
                 return t
     return None
+
+
+def openings_after(proprio: torch.Tensor, g: int):
+    """11-27: frames after g where a gripper that was closed opens again (> 0.65), in time order (either arm)."""
+    gr = proprio[:, [6, 13]].float()
+    closed = [float(gr[g, a]) < 0.35 for a in (0, 1)]
+    out = []
+    for t in range(g + 1, gr.shape[0]):
+        for a in (0, 1):
+            v = float(gr[t, a])
+            if v < 0.35:
+                closed[a] = True
+            elif closed[a] and v > 0.65:
+                out.append(t)
+                closed[a] = False
+    return out
 
 
 ARM_JOINTS = [0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12]
@@ -84,7 +105,8 @@ def main():
     ap.add_argument("--noises", type=int, default=2)
     ap.add_argument("--choice", type=int, default=6)
     ap.add_argument("--late", type=int, default=3)
-    ap.add_argument("--window", choices=("choice", "onset", "wait"), default="choice")
+    ap.add_argument("--window", choices=("choice", "onset", "wait", "carry"), default="choice")
+    ap.add_argument("--task", default="observe_and_pickup", help="11-27: swap_T with --window carry (diagnostic 5(c))")
     ap.add_argument("--split", choices=("all", "train", "val"), default="all",
                     help="11-24: demos of one split only (the dense records' split; the model trained on 'train')")
     ap.add_argument("--swap", choices=("frame0", "matchref"), default="frame0")
@@ -96,7 +118,9 @@ def main():
     device = "cuda"
     model, cfg, _ = load_export(args.export, device)
     episodes = DenseEpisodes(cfg.data.roots, cfg.data.tasks, capacity=cfg.data.episode_cache)
-    recs = [r for r in episodes.records if r["task"] == "observe_and_pickup"
+    if (args.window == "carry") != (args.task == "swap_T"):
+        raise SystemExit("--window carry goes with --task swap_T (and swap_T only with carry)")
+    recs = [r for r in episodes.records if r["task"] == args.task
             and (args.split == "all" or r.get("split") == args.split)]
     ids = [r["episode_id"] for r in recs]
     items, window, gs, lens, ms = [], {}, [], [], []
@@ -108,6 +132,16 @@ def main():
             continue
         gs.append(g)
         lens.append(n)
+        if args.window == "carry":                # 11-27 plan v21 diagnostic 5(c)
+            ops = openings_after(e["proprio"], g)
+            if len(ops) < 1 or ops[0] - 1 < g + 16:
+                continue
+            for a in evenly(g + 16, ops[0] - 1, args.choice):
+                items.append((r["episode_id"], a)); window[len(items) - 1] = "carry"
+            if len(ops) >= 2:
+                for a in evenly(min(ops[1] + 8, n - 1), n - 1, args.late):
+                    items.append((r["episode_id"], a)); window[len(items) - 1] = "late"
+            continue
         if args.window in ("onset", "wait"):
             m = motion_onset(e["proprio"], g)
             if m is None:
@@ -201,12 +235,14 @@ def main():
             print(f"{w:6s}  next-pose head on {len(psel)} anchors: squared error {pm['true']:.4f}, frame-0 swapped "
                   f"{pm['swap']:.4f}, predicting no motion {pm['zero']:.4f}")
     c = report["windows"][args.window]["swap_vs_true"]
-    where = {"choice": "at the choice", "onset": "at the motion onset", "wait": "before the arm moves"}[args.window]
+    where = {"choice": "at the choice", "onset": "at the motion onset", "wait": "before the arm moves",
+             "carry": "while both blocks are carried"}[args.window]
     cue = "the match frame" if args.swap == "matchref" else "frame 0"
     verdict = f"{cue} is NOT used {where} (< 2 %)" if c < 0.02 else f"{cue} IS used {where} (>= 2 %)"
     report["reading"] = verdict
     print(f"OBS PROBE {cfg.name}: {verdict}")
     tail = ("" if args.window == "choice" else f"_{args.window}") + ("" if args.split == "all" else f"_{args.split}")
+    tail += "" if args.task == "observe_and_pickup" else f"_{args.task}"
     tail += "" if args.swap == "frame0" else f"_{args.swap}"
     out = Path(args.out or f"/workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_{cfg.name}{tail}.json")
     out.parent.mkdir(parents=True, exist_ok=True)
