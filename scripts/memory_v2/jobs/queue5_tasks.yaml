@@ -1125,6 +1125,18 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py rankarp"
   pass_if: "m['rc'] == 0"
 
+# 11-26 08:10 (Opus, round 4): ranking_arprop e30 = 65 < 77 (plan v20 section 6: back to Fable; FableQueue F6). For
+# Fable's material: the failure split of the body-record model beside the three-frame one (supplement 5's script).
+- id: A40-RANKARP-split-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-RANKARP-report]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "descriptive: ranking_split.py on ranking_arprop e30 and ranking_ar e30 (closed_loop/e6; orders pressed, repeats, off-slot blocks); log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/ranking_split.py e6:ranking_arprop_e30 e6:ranking_ar_e30"
+  pass_if: "m['rc'] == 0"
+
 # card 4 ranking_v3a (new H200; user 18:32 option b; registered 11-24 in gaas_queue.txt above the run's line, commit 5c5c660)
 - id: A40-fetch-ranking_v3a-e30
   lane: a40cpu

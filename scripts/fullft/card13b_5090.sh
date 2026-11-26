@@ -8,6 +8,8 @@
 # the H200s' training logs (not on this machine): not part of this script.
 # Read-only; fetches the two exports from the relay if they are not here (sha256 checked); one GPU ($GPU from q5090.sh).
 #   q5090.txt line: card13b | gpu | - | bash scripts/fullft/card13b_5090.sh
+# 11-26 08:10: RUNS / TAG (default obs_ar obs_none / e30) also serve card 8's early look (plan v20 card 8: "on held-out
+# generated demos the frame-0 swap at the onset (>= 2 % = frame 0 is used)"): RUNS=obs_s200 TAG=e10 ...
 # Own log: outputs/fullft/CARD13B_5090_<time>.txt
 set -u
 R=/workspace/FastWAM-memory2
@@ -19,13 +21,14 @@ cd $R
 export PYTHONPATH=$R/src PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 G=${GPU:-${PF_GPUS:-1}}
 echo "[13b] $(date '+%F %T') start; checkout $(git -c safe.directory='*' log --oneline -1 | cut -c1-60); GPU $G"
-for RUN in obs_ar obs_none; do
-  RUN=$RUN TAG=e30 POLL=60 bash scripts/fullft/export_fetch.sh || { echo "[13b] ${RUN}_e30: fetch failed"; exit 1; }
-  CK=$F/exports/${RUN}_e30/export_e30.pt
+TAG=${TAG:-e30}
+for RUN in ${RUNS:-obs_ar obs_none}; do
+  RUN=$RUN TAG=$TAG POLL=60 bash scripts/fullft/export_fetch.sh || { echo "[13b] ${RUN}_$TAG: fetch failed"; exit 1; }
+  CK=$F/exports/${RUN}_$TAG/export_$TAG.pt
   for S in val train; do
     n=6; [ $S = val ] && n=20
     for W in wait onset; do
-      echo "[13b] $(date '+%F %T') ${RUN}_e30 split $S window $W"
+      echo "[13b] $(date '+%F %T') ${RUN}_$TAG split $S window $W"
       CUDA_VISIBLE_DEVICES=$G /opt/mwam/bin/python scripts/fullft/obs_probe.py --export $CK --window $W --split $S --choice $n \
         2>&1 | grep -v "Warning\|warn(\|^  [0-9]*/[0-9]*$"
     done
