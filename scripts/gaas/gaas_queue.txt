@@ -363,3 +363,23 @@ obs_s800 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_
 #   swapped for another demo's (>= 2 % at the onset = the cue is read); closed loop on the 5090, 20 scenes, with the
 #   match frame of another scene: does the first close follow the swapped cue (counterfactual, cf. arXiv 2611.26745).
 obs_match | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1] data.tasks=[observe_and_pickup] history.zoom=true history.zoom_ref_box=[0.395,0.06,0.675,0.34] history.zoom_cur_box=[0.0,0.42,1.0,1.0] history.zoom_match=true data.zoom_root=/workspace/FastWAM-memory2/outputs/memory_v2/press/zoom_obs_match_a476d745 | test -f outputs/memory_v2/press/zoom_obs_match_a476d745/ZOOM.json && test -f outputs/memory_v2/press/dense_observe_and_pickup_v1/.verified
+#
+# 11-26 18:05 (Opus; user 17:53: swap_T - "go open one on the new H200 (if it can work)", a fifth GPU is fine for now).
+# Plan v20 card 9b (swapT_joint3), opened on the user's decision although the card's plan condition (card 11: failures
+# mainly unstable grasp / place) is not met: card 11 put most failures in the "wrong place" family (the second block
+# back on its own spot), card 9 is ruled out by supplement 6 (each hand carries one block), and card 3 read NOT
+# TRAINING-LIMITED on both machine classes (36 / 38). The reason kept from the card: put_back / swap are the same
+# "take a block to another block's spot" skill, which the two-task body record does at 100 / 100; self-reported,
+# EventVLA (frame 0 + two recent frames, nine tasks trained together) reaches 87 on swap_T.
+# swapT_joint3 = ar2_prop's two-task body record (arprop, 32 entries, lag 4, rule A events, seed 17, base_2task.yaml,
+# 30 frame-epochs over all three tasks) + swap_T's demos and events (swapT_arprop_h2's data); one model.
+# Registered reading (11-26 18:05, before any swapT_joint3 run; A40, official seed-42 banks, default noise; H200 class):
+#   MAIN swap_T 1-100, e30: D = success(swapT_joint3 e30) - success(swapT_arprop_h2 e30) (closed_loop/v20), paired by
+#   scene, paired bootstrap 95 % CI (10,000, seed 0); SESOI +0.15: CI lower > +0.15 -> CO-TRAINING HELPS; CI upper <
+#   +0.15 -> NO HELP; otherwise UNCERTAIN (pre-set extension: both e30 again with MWAM_NOISE_SALT=r2, 200 pairs, the
+#   same rule).
+#   Non-inferiority, put_back_block 1-100 and swap_blocks 1-100, e30, against ar2_prop e30 (closed_loop/g1), margin
+#   -0.05: CI lower > -0.05 -> NO HARM; CI upper < -0.05 -> HARM; otherwise UNCERTAIN (the same pre-set extension).
+#   Described: swap_T e10 / e20 on the 5090 development scenes; the card 11 classes (swapT_split.py) of swapT_joint3 e30.
+#   A main-table entry from this run carries the note "three tasks trained together".
+swapT_joint3 | data.roots=[/workspace/FastWAM/outputs/s1_dense_joint_h100_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_swap_T_v1] data.tasks=[put_back_block,swap_blocks,swap_T] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_put_back_block.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_blocks.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_T.json] | test -f outputs/memory_v2/press/dense_swap_T_v1/.verified && test -s outputs/fullft/events/events_put_back_block.json && test -s outputs/fullft/events/events_swap_blocks.json && test -f outputs/fullft/events/events_swap_T.json && test -f outputs/fullft/READY_arprop_swap_T

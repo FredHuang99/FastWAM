@@ -288,11 +288,11 @@ fi
 # writes a 72 GB resume.pt.partial at its next save; four runs at once filled the home on 11-25 ~20:54 with 59 GB free.
 for i in $(seq 1 36); do
   busy=$(find $F -mindepth 2 -maxdepth 2 -name metrics.jsonl -mmin -20 2>/dev/null | grep -v "/$RUN/metrics.jsonl" | wc -l)
-  need=$((160 + 72 * busy))
+  need=$((72 * (busy + 1) + 40)); [ $need -lt 160 ] && need=160     # 11-26 18:05: 72 GB per run that may save at once + 40
   free=$(df -BG --output=avail $HOME | tail -n 1 | tr -dc '0-9')
   [ "${free:-0}" -ge $need ] && break
   [ $i = 36 ] && fail "home has ${free} GB free after 6 h (< $need GB needed: a resume checkpoint + $busy other runs training)"
-  step "home has ${free} GB free (< $need GB: 160 + 72 x $busy other runs training); waiting 10 min"; sleep 600
+  step "home has ${free} GB free (< $need GB: 72 x ($busy other runs training + this one) + 40, at least 160); waiting 10 min"; sleep 600
 done
 step "home ${free} GB free"
 if [ "$RUN" = ar2_long ] && [ ! -f $F/ar_2task/.resume_verified ]; then

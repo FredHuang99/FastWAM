@@ -39,7 +39,7 @@ MWAM_NOISE_SALT=r2 pairs (closed_loop/r2) of the same scenes = 200 pairs, the sa
            near frames masked (MWAM_HIST_MASK first / near, closed_loop/a2m), against the same 50 scenes unmasked
            (closed_loop/e6). Described only.
 A verdict needs all its MAIN scenes finished on both sides (else WAIT). Writes outputs/fullft/V20_<NAME>.json.
-  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py rv3ch2|swapt|swapth100|rankv3c|ar2v3c|rankarp|covnone|batclk|battmask|presstold|obss|ranknone|obsmatch|rearrpw
+  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py rv3ch2|swapt|swapth100|rankv3c|ar2v3c|rankarp|covnone|batclk|battmask|presstold|obss|ranknone|obsmatch|rearrpw|joint3
 """
 from __future__ import annotations
 
@@ -366,6 +366,36 @@ def ar2v3c():
     return out
 
 
+def joint3():
+    """11-26 18:05 (user 17:53): plan v20 card 9b swapT_joint3, reading registered in gaas_queue.txt above its line."""
+    task = "swap_T"
+    order, ref = success("v20", "swapT_arprop_h2_e30", task)
+    _, new = success("v20", "swapT_joint3_e30", task)
+    out = {"run": "card 9b swap_T trained together with put / swap (swapT_joint3)", "sesoi": 0.15,
+           "finished": {"swapT_joint3_e30": len(new), "swapT_arprop_h2_e30": len(ref)}}
+    if len(new) < 100 or len(ref) < 100:
+        out["verdict"] = f"WAIT ({len(new)} / {len(ref)} of 100)"
+    else:
+        c = compare(new, ref, order)
+        rule = lambda x: three(x, 0.15, "CO-TRAINING HELPS", "NO HELP")   # noqa: E731
+        with_extension(out, c, rule(c), rule, task, "swapT_joint3_e30", "v20", "swapT_arprop_h2_e30", "v20")
+    main_verdict = out["verdict"]
+    parts = [f"swap_T: {main_verdict}"]
+    for t in ("swap_blocks", "put_back_block"):
+        o2, r2 = success("g1", "ar2_prop_e30", t)
+        _, n2 = success("v20", "swapT_joint3_e30", t)
+        r = {"finished": {"swapT_joint3_e30": len(n2), "ar2_prop_e30": len(r2)}}
+        if len(n2) < 100 or len(r2) < 100:
+            r["verdict"] = f"WAIT ({len(n2)} / {len(r2)} of 100)"
+        else:
+            c2 = compare(n2, r2, o2)
+            with_extension(r, c2, non_inferior(c2), non_inferior, t, "swapT_joint3_e30", "v20", "ar2_prop_e30", "g1")
+        out[f"non_inferiority_{t}"] = r
+        parts.append(f"{t}: {r['verdict']}")
+    out["verdict"] = "; ".join(parts)
+    return out
+
+
 def rankarp():
     task = "blocks_ranking_try"
     order, new = success("e6", "ranking_arprop_e30", task)
@@ -424,7 +454,7 @@ def battmask():
 def main():
     name = sys.argv[1] if len(sys.argv) > 1 else ""
     fns = {"rv3ch2": rv3ch2, "swapt": swapt, "swapth100": swapth100, "batclk": batclk, "rankv3c": rankv3c, "ar2v3c": ar2v3c, "rankarp": rankarp,
-           "covnone": covnone, "presstold": presstold, "obss": obss, "obsmatch": obsmatch, "ranknone": ranknone, "battmask": battmask, "rearrpw": rearrpw}
+           "covnone": covnone, "presstold": presstold, "obss": obss, "obsmatch": obsmatch, "ranknone": ranknone, "battmask": battmask, "rearrpw": rearrpw, "joint3": joint3}
     if name not in fns:
         print(__doc__)
         return 2
