@@ -42,3 +42,7 @@ card13b | gpu | - | bash scripts/fullft/card13b_5090.sh
 # obs_s200's e10 / e20 as soon as each is on the relay (card13b_5090.sh with RUNS / TAG; read-only, ~10 min each)
 probe-obs_s200_e10 | gpu | bash scripts/fullft/relay_has.sh obs_s200_e10 | RUNS=obs_s200 TAG=e10 bash scripts/fullft/card13b_5090.sh
 probe-obs_s200_e20 | gpu | bash scripts/fullft/relay_has.sh obs_s200_e20 | RUNS=obs_s200 TAG=e20 bash scripts/fullft/card13b_5090.sh
+#
+# 11-26 12:20 (round 5): card 7 obs_match read NO HELP (12 vs 13); its registered described parts decide the next step:
+# match-frame swap probe (obs_probe.py --swap matchref) and the first-close-on-target rate (object record, scenes 1-50)
+card7-matchprobe | gpu | bash scripts/fullft/relay_has.sh obs_match_e30 | bash scripts/fullft/card7probe_5090.sh

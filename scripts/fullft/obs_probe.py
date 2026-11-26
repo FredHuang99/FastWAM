@@ -20,6 +20,11 @@ Conditions (action loss per anchor, mean over --noises fixed draws):
   frame 0 swapped) next to the error of predicting "no further motion" (descriptive, the registered obs_pose reading:
   is the target position known before the reach, and does it come from frame 0?).
 Reading: in the choice window, (swap - true) / true < 2 % -> "frame 0 is not used at the choice"; >= 2 % -> it is used.
+  --swap matchref (11-26, plan v20 card 7 described: "obs_probe with the match frame swapped for another demo's
+          (>= 2 % at the onset = the cue is read)"): for a zoom / match model, the REFERENCE zoom slot (the match
+          frame of obs_match; the first hist_ids == -1 slot, data.py) gets ANOTHER demo's, frame 0 untouched.
+          The samples are built with the run's data.zoom_root / data.text_table, as in training. Default
+          --swap frame0: exactly as before.
 The same for the late window as a contrast, and (none - true) / true for reference. Also: the share of training anchors
 that fall in a 48-frame choice window (how much of the training signal is about the choice).
   PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/obs_probe.py --export outputs/fullft/exports/obs_ar_e30/export_e30.pt
@@ -82,6 +87,7 @@ def main():
     ap.add_argument("--window", choices=("choice", "onset", "wait"), default="choice")
     ap.add_argument("--split", choices=("all", "train", "val"), default="all",
                     help="11-24: demos of one split only (the dense records' split; the model trained on 'train')")
+    ap.add_argument("--swap", choices=("frame0", "matchref"), default="frame0")
     ap.add_argument("--out", default="")
     args = ap.parse_args()
     from fastwam.fullft.data import DenseEpisodes, Samples, collate, load_events, video_polarity
@@ -122,8 +128,14 @@ def main():
               f"(min {min(ms)}, max {max(ms)}); window " + ("[m - 24, m + 8]" if args.window == "onset" else "[8, m - 25]"))
     events = load_events(cfg.data.events) if cfg.data.events else {}      # the body-record model needs its record
     pose = getattr(model, "next_pose_head", None) is not None
+    zoom_kw = {}
+    if getattr(cfg.rule, "zoom", False):        # 11-26: zoom / match models need their zoom cache (as in training)
+        zoom_kw = {"zoom_root": getattr(cfg.data, "zoom_root", "") or "", "text_table": getattr(cfg.data, "text_table", "") or ""}
+    elif args.swap == "matchref":
+        raise SystemExit("--swap matchref needs a zoom / match model")
     samples = Samples(episodes, items, cfg.rule, events, video_polarity(episodes), augment=False, seed=cfg.seed,
-                      next_pose=cfg.next_pose if pose else None)
+                      next_pose=cfg.next_pose if pose else None, **zoom_kw)
+    length = {r["episode_id"]: int(r["length"]) for r in recs}
     pose_err = defaultdict(lambda: defaultdict(list))
     donor = {eid: ids[(k + 1) % len(ids)] for k, eid in enumerate(ids)}
     frame0 = {}
@@ -140,9 +152,14 @@ def main():
             for j, i in enumerate(idx):
                 eid = items[i][0]
                 d = donor[eid]
-                if d not in frame0:
-                    frame0[d] = episodes(d)["latent"][0]
-                hit = (batch["hist_ids"][j] == 0).nonzero(as_tuple=False).flatten()
+                if args.swap == "matchref":            # the reference zoom slot only (the first -1 slot)
+                    if d not in frame0:
+                        frame0[d] = samples.zoom_of(d, length[d])["ref"]
+                    hit = (batch["hist_ids"][j] == -1).nonzero(as_tuple=False).flatten()[:1]
+                else:
+                    if d not in frame0:
+                        frame0[d] = episodes(d)["latent"][0]
+                    hit = (batch["hist_ids"][j] == 0).nonzero(as_tuple=False).flatten()
                 for h in hit.tolist():
                     hl[j, h] = frame0[d].to(hl)
             swapped["hist_latent"] = hl
@@ -166,7 +183,8 @@ def main():
                         pose_err[i]["zero"].append(float(aux_t["next_pose_zero"][j]))
             if start % 40 == 0:
                 print(f"  {start}/{len(samples)}", flush=True)
-    report = {"export": args.export, "run": cfg.name, "rule": str(cfg.rule), "windows": {}}
+    what = "match frame" if args.swap == "matchref" else "frame-0"
+    report = {"export": args.export, "run": cfg.name, "rule": str(cfg.rule), "swap": args.swap, "windows": {}}
     for w in (args.window, "late"):
         sel = [i for i in loss if window[i] == w]
         m = {c: statistics.mean(statistics.mean(loss[i][c]) for i in sel) for c in ("true", "swap", "none")}
@@ -174,7 +192,7 @@ def main():
         rel_swap, rel_none = m["swap"] / m["true"] - 1, m["none"] / m["true"] - 1
         report["windows"][w] = {"anchors": len(sel), **{f"action_{c}": v for c, v in m.items()},
                                 "swap_vs_true": rel_swap, "none_vs_true": rel_none, "swap_higher_at": up}
-        print(f"{w:6s}: {len(sel)} anchors; action loss true {m['true']:.5f}, frame-0 swapped {m['swap']:.5f} "
+        print(f"{w:6s}: {len(sel)} anchors; action loss true {m['true']:.5f}, {what} swapped {m['swap']:.5f} "
               f"({100 * rel_swap:+.1f} %, higher at {up}/{len(sel)}), no history {m['none']:.5f} ({100 * rel_none:+.1f} %)")
         psel = [i for i in sel if pose_err[i]["true"]]
         if psel:
@@ -184,10 +202,12 @@ def main():
                   f"{pm['swap']:.4f}, predicting no motion {pm['zero']:.4f}")
     c = report["windows"][args.window]["swap_vs_true"]
     where = {"choice": "at the choice", "onset": "at the motion onset", "wait": "before the arm moves"}[args.window]
-    verdict = f"frame 0 is NOT used {where} (< 2 %)" if c < 0.02 else f"frame 0 IS used {where} (>= 2 %)"
+    cue = "the match frame" if args.swap == "matchref" else "frame 0"
+    verdict = f"{cue} is NOT used {where} (< 2 %)" if c < 0.02 else f"{cue} IS used {where} (>= 2 %)"
     report["reading"] = verdict
     print(f"OBS PROBE {cfg.name}: {verdict}")
     tail = ("" if args.window == "choice" else f"_{args.window}") + ("" if args.split == "all" else f"_{args.split}")
+    tail += "" if args.swap == "frame0" else f"_{args.swap}"
     out = Path(args.out or f"/workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_{cfg.name}{tail}.json")
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, indent=1) + "\n")
