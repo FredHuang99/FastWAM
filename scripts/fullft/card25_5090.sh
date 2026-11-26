@@ -59,7 +59,10 @@ if [ "$PART" = check ]; then
   exit $?
 fi
 [ "$PART" = gen ] || { say "unknown PART"; exit 2; }
-grep -q '"pass": true' $G/CARD25_CHECK.json 2>/dev/null || { say "CARD25_CHECK.json does not pass: nothing generated (report)"; exit 1; }
+# 11-27 04:20: the TOP-LEVEL pass only (a grep for '"pass": true' also matched a single passed check: the 11-27 02:26 BJ run (machine clock 11-26 18:26)
+# generated although check 2 had failed)
+$PY -c "import json,sys; sys.exit(0 if json.load(open('$G/CARD25_CHECK.json'))['pass'] is True else 1)" 2>/dev/null \
+  || { say "CARD25_CHECK.json does not pass: nothing generated (report)"; exit 1; }
 B=$G/cf; N=0; START=20000100; NEED=33
 groups() {  # -> complete groups (seed list) from what exists
   $PY - "$B" <<'PYEOF'

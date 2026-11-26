@@ -38,7 +38,25 @@ R = Path("/workspace/FastWAM-memory2")
 O = R / "outputs/memory_v2/closed_loop"
 F = R / "outputs/fullft"
 BLOCKS = ("T_block1", "T_block2")
-CLASSES_5B = None          # fixed after the first 10 episodes per model (plan v21 6.5); see Status 11-27
+OVER_CM = 5.0              # "over the other start": hand within 5 cm horizontally (twice the benchmark's 2.5 cm block tolerance)
+
+
+def CLASSES_5B(x):
+    """Fixed 11-27 04:30 from the first 10 back-at-own-start failures per model (SWAPT_DIAG5B_FIRST.json, Status 11-27),
+    before the full run. A is card 26's condition (b): the first placer never went over the other block's start."""
+    f, l = x.get("first") or {}, x.get("later") or {}
+    fc, lc, lp = f.get("closest_to_other_start_cm"), l.get("closest_to_other_start_cm"), l.get("at_putdown_to_other_start_cm")
+    if None in (fc, lc, lp):
+        return "E other (a reading missing)"
+    if fc >= OVER_CM:
+        return "A first hand never over the other start"
+    if lc >= OVER_CM:
+        return "B later hand never over the other start"
+    if l.get("block") in x["back_at_own_start"]:
+        if lp >= OVER_CM:
+            return "C both hands went over the other start; the later hand put its block down elsewhere"
+        return "D the later hand put its block down over the other start; that block ended at its own start"
+    return "E other"
 
 
 def _module(name, file):

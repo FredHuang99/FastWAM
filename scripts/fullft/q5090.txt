@@ -57,6 +57,11 @@ robomme-base-inspect | cpu | - | PYTHONPATH=src /opt/mwam/bin/python scripts/rob
 card25-check | gpu | - | PART=check bash scripts/fullft/card25_5090.sh
 diag5-b1 | cpu | - | PART=b1 bash scripts/fullft/diag5_5090.sh
 diag5-d | cpu | - | PART=d bash scripts/fullft/diag5_5090.sh
+# 11-27 04:30: diag 5(b) classes fixed (CLASSES_5B in swapT_diag5_5090.py, from the first 10 per model); the full run:
+diag5-b | cpu | - | PART=b bash scripts/fullft/diag5_5090.sh
 diag5-c | gpu | - | PART=c bash scripts/fullft/diag5_5090.sh
 diag4b | gpu | - | bash scripts/fullft/diag4b_5090.sh
-card25-gen | gpu | grep -q '"pass": true' outputs/fullft/gen_cf/CARD25_CHECK.json | PART=gen bash scripts/fullft/card25_5090.sh
+# 11-27 04:20: the condition above was WRONG (grep found a per-check "pass": true while the overall pass was false): card25-gen
+# ran at 11-27 02:26 BJ (machine clock 11-26 18:26) although CARD25_CHECK failed (check 2). Its caches are NOT registered for any training. Now: top-level pass only.
+card25-gen | gpu | /opt/mwam/bin/python -c "import json,sys; sys.exit(0 if json.load(open('outputs/fullft/gen_cf/CARD25_CHECK.json'))['pass'] is True else 1)" | PART=gen bash scripts/fullft/card25_5090.sh
+card25-detail | cpu | - | PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/card25_detail.py --base outputs/fullft/gen_cf/check
