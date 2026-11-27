@@ -24,7 +24,8 @@ verdict word stands). A verdict needs all 100 MAIN scenes on both sides (else WA
   c24b card 24b ranking_drop (11-27 11:40, user chose it 11:12): see c24b's docstring.
   c25  card 25 obs_cf200 (11-27 12:45): see c25's docstring.
   fs   find-same push (11-27 13:20, user 13:04), described: see fs's docstring.
-  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v21_verdict.py c20|c21|c22|c24b|c25|fs
+  c23  card 23 ar2_pw (11-28 03:32; <BASE2> = ar2_v3c by card 21): see c23's docstring.
+  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v21_verdict.py c20|c21|c22|c23|c24b|c25|fs
 """
 from __future__ import annotations
 
@@ -260,9 +261,40 @@ def fs():
     return out
 
 
+def c23():
+    """11-28 03:32 (Opus, written before any ar2_pw episode): plan v21 6.1 card 23, reading registered verbatim in
+    gaas_queue.txt above ar2_pw. <BASE2> = ar2_v3c (card 21 read TIMELY WRITER NEEDED). MAIN (non-inferiority, margin
+    -0.05) swap_blocks 1-100 e30: D = success(ar2_pw e30, closed_loop/v21) - success(ar2_v3c e30, closed_loop/v20);
+    CI lower > -0.05 -> NO HARM; CI upper < -0.05 -> HARM; otherwise UNCERTAIN (pre-set extension: r2, 200 pairs, the
+    same rule). put_back_block 1-100: the same rule, reported beside it. Described: e10 swap against ar2_v3c e10."""
+    out = {"run": "card 23 ar2_pw (ar2_v3c + rearr_pw's pre-event weighting), non-inferiority against ar2_v3c",
+           "margin": -0.05, "base2": "ar2_v3c (card 21: TIMELY WRITER NEEDED)", "finished": {}}
+    verdicts = []
+    for task in ("swap_blocks", "put_back_block"):
+        order, ref = success("v20", "ar2_v3c_e30", task)
+        _, new = success("v21", "ar2_pw_e30", task)
+        r = {"finished": {"ar2_pw_e30": len(new), "ar2_v3c_e30": len(ref)}}
+        if len(new) < 100 or len(ref) < 100:
+            r["verdict"] = f"WAIT ({len(new)} / {len(ref)} of 100)"
+        else:
+            c = compare(new, ref, order)
+            with_extension(r, c, v20.non_inferior(c), v20.non_inferior, task, "ar2_pw_e30", "v21", "ar2_v3c_e30", "v20")
+        out[task] = r
+        verdicts.append(f"{task}{' (MAIN)' if task == 'swap_blocks' else ' (reported beside)'}: {r['verdict']}")
+    order, ref10 = success("v20", "ar2_v3c_e10", "swap_blocks")
+    _, new10 = success("v21", "ar2_pw_e10", "swap_blocks")
+    if len(new10) == 100 and len(ref10) == 100:
+        out["described_e10_swap"] = compare(new10, ref10, order)
+    out["main"] = out["swap_blocks"].get("main")
+    out["verdict"] = "; ".join(verdicts)
+    sw = out["swap_blocks"]
+    out["seed_extension_v21_5_5_6"] = seed_extension({"main": sw.get("main"), "verdict": sw.get("verdict", "WAIT")})
+    return out
+
+
 def main():
     name = sys.argv[1] if len(sys.argv) > 1 else ""
-    fns = {"c20": c20, "c21": c21, "c22": c22, "c24b": c24b, "c25": c25, "fs": fs}
+    fns = {"c20": c20, "c21": c21, "c22": c22, "c23": c23, "c24b": c24b, "c25": c25, "fs": fs}
     if name not in fns:
         print(__doc__)
         return 2

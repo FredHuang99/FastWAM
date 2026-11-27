@@ -539,7 +539,7 @@ obs_s800_20 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/den
 obs_s800_s18 | seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen155_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen600_v1] data.tasks=[observe_and_pickup] schedule.frame_epochs=10 schedule.export_at_epochs=[5,10] | test -f outputs/memory_v2/press/dense_observe_and_pickup_v1/.verified && test -f outputs/memory_v2/press/dense_observe_and_pickup_gen155_v1/.verified && test -f outputs/memory_v2/press/dense_observe_and_pickup_gen600_v1/.verified
 obs_s1600 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen155_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen600_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen800b_v1] data.tasks=[observe_and_pickup] schedule.frame_epochs=10 schedule.export_at_epochs=[5,10] | test -f outputs/memory_v2/press/dense_observe_and_pickup_v1/.verified && test -f outputs/memory_v2/press/dense_observe_and_pickup_gen155_v1/.verified && test -f outputs/memory_v2/press/dense_observe_and_pickup_gen600_v1/.verified && test -f outputs/memory_v2/press/dense_observe_and_pickup_gen800b_v1/.verified
 #
-# 11-28 03:45 (Opus, weekend round 3/5): card 23 opened after cards 20 and 21 (plan v21 6.1). <BASE2> filled now by the
+# 11-28 03:32 (Opus, weekend round 3/5): card 23 opened after cards 20 and 21 (plan v21 6.1). <BASE2> filled now by the
 # card's own rule: card 21 read TIMELY WRITER NEEDED (A40 fullft/V21_C21.json: rearr_arprop_pw 45 vs rearr_pw 93, D -0.48,
 # CI [-0.59, -0.37]) -> <BASE2> = ar2_v3c (not OLD WRITER SUFFICES). Line = ar2_v3c's exact line (above) + the four
 # model.decision_* values of rearr_pw, unchanged; anchors from ar2_v3c's own events files. Registered before any ar2_pw run.
@@ -553,7 +553,7 @@ obs_s1600 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense
 #   otherwise UNCERTAIN (pre-set extension: both e30 again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule).
 #   put_back_block 1-100: the same rule, reported beside it.
 #   Described: e10 swap against <BASE2> e10 (learning speed).
-#   <BASE2> = ar2_v3c (filled 11-28 03:45, see above).
+#   <BASE2> = ar2_v3c (filled 11-28 03:32, see above).
 #   Seed extension (plan v21 5.5 item 6): if the verdict is not UNCERTAIN and the difference is within 30 points, both
 #   arms get a seed-18 training; the four trainings are pooled by a bootstrap stratified by seed and scene and the
 #   pooled interval is reported; the single-seed verdict word stands.

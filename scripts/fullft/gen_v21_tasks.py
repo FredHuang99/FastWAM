@@ -425,13 +425,63 @@ def block11():
     return "\n".join(out) + "\n"
 
 
+def block12():
+    """11-28 03:32: card 23 ar2_pw (plan v21 6.1; <BASE2> = ar2_v3c by card 21's TIMELY WRITER NEEDED). MAIN first in the
+    file: swap_blocks and put_back_block 1-100 e30 (closed_loop/v21) + verdict c23; e10 swap (described) after it."""
+    run, why = "ar2_pw", "plan v21 card 23, new H200"
+    out = ["# " + "-" * 115,
+           "# 11-28 03:32 (Opus; plan v21 6.1 card 23, registered verbatim in gaas_queue.txt above ar2_pw before any run;",
+           "# <BASE2> = ar2_v3c because card 21 read TIMELY WRITER NEEDED). MAIN first in the file: swap_blocks (MAIN) and",
+           "# put_back_block (reported beside) 1-100, seed-42 bank, default noise, execute 8, closed_loop/v21; reference",
+           "# ar2_v3c e30 in closed_loop/v20. Verdict: scripts/fullft/v21_verdict.py c23. e10 swap (described) at the end.", ""]
+    out.append(fetch(run, "e30", why))
+    out.append(loop(f"A40-v21-{run}-smoke", [f"A40-fetch-{run}-e30"],
+                    f"smoke: {run}_e30, swap_blocks scene 1, one episode finishes on the A40 (closed_loop/v21smoke)",
+                    f"{EXP}/{run}_e30/export_e30.pt", f"{run}_e30_smoke", "swap_blocks",
+                    ["--execute", "8", "--limit", "1"], "closed_loop/v21smoke", timeout=3, smoke=True))
+    ids = []
+    for task, short in (("swap_blocks", "swap"), ("put_back_block", "put")):
+        for k in range(10):
+            tid = f"A40-v21-{run}-{short}-s{k}"
+            ids.append(tid)
+            out.append(loop(tid, [f"A40-v21-{run}-smoke"],
+                            f"plan v21 card 23 {'MAIN' if short == 'swap' else 'reported beside'} (registered 11-28 in "
+                            f"gaas_queue.txt above {run}): {run}_e30 on {task} 1-100, paired with ar2_v3c_e30 "
+                            f"(closed_loop/v20); shard {k} of 10", f"{EXP}/{run}_e30/export_e30.pt", f"{run}_e30", task,
+                            ["--execute", "8", "--limit", "100", "--shard", f"{k}/10"], "closed_loop/v21"))
+    out.append(shell("A40-V21-C23-verdict", ids,
+                     "plan v21 card 23 verdict: v21_verdict.py c23 (non-inferiority against ar2_v3c, margin -0.05 -> NO "
+                     "HARM / HARM / UNCERTAIN; swap MAIN, put_back beside); log pushed",
+                     f"{PY} scripts/fullft/v21_verdict.py c23"))
+    return "\n".join(out) + "\n"
+
+
+def block13():
+    """Card 23 described: e10 swap 1-100 (after every MAIN), then c23 again."""
+    run = "ar2_pw"
+    out = ["# " + "-" * 115,
+           "# 11-28 03:32 (Opus; plan v21 card 23, described): ar2_pw e10 on swap_blocks 1-100 (learning speed against",
+           "# ar2_v3c e10, closed_loop/v20), closed_loop/v21.", ""]
+    out.append(fetch(run, "e10", "plan v21 card 23 (described)"))
+    ids = []
+    for k in range(10):
+        tid = f"A40-v21-{run}-e10-s{k}"
+        ids.append(tid)
+        out.append(loop(tid, [f"A40-fetch-{run}-e10"], f"plan v21 card 23 described: {run}_e10 on swap_blocks 1-100; "
+                        f"shard {k} of 10", f"{EXP}/{run}_e10/export_e10.pt", f"{run}_e10", "swap_blocks",
+                        ["--execute", "8", "--limit", "100", "--shard", f"{k}/10"], "closed_loop/v21"))
+    out.append(shell("A40-V21-C23-report", ids + ["A40-V21-C23-verdict"],
+                     "plan v21 card 23: v21_verdict.py c23 again with e10; log pushed", f"{PY} scripts/fullft/v21_verdict.py c23"))
+    return "\n".join(out) + "\n"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--blocks", nargs="+", type=int, default=[1, 2, 3])
     args = ap.parse_args()
     text = YAML.read_text()
     have = set(re.findall(r"^- id: (\S+)", text, re.M))
-    new = "".join({1: block1, 2: block2, 3: block3, 4: block4, 5: block5, 6: block6, 7: block7, 8: block8, 9: block9, 10: block10, 11: block11}[b]()
+    new = "".join({1: block1, 2: block2, 3: block3, 4: block4, 5: block5, 6: block6, 7: block7, 8: block8, 9: block9, 10: block10, 11: block11, 12: block12, 13: block13}[b]()
                   for b in sorted(args.blocks))
     ids = re.findall(r"^- id: (\S+)", new, re.M)
     dup = [i for i in ids if i in have] + [i for i in set(ids) if ids.count(i) > 1]
@@ -441,7 +491,7 @@ def main():
         YAML.write_text(text.rstrip("\n") + "\n\n" + new)
         print(f"appended {len(ids)} tasks at the end (block 4)")
         return
-    if args.blocks in ([1], [6], [8], [11]):     # new MAIN: right after 'tasks:'
+    if args.blocks in ([1], [6], [8], [11], [12]):     # new MAIN: right after 'tasks:'
         head, sep, rest = text.partition("\ntasks:\n")
         assert sep, "no 'tasks:' line"
         YAML.write_text(head + sep + new + "\n" + rest)
