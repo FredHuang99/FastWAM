@@ -23,6 +23,19 @@ put8: &put8_ref                     # A2C e3 at execute 8 (X1-exec8 / X1-put-nul
 put_scenes: &put_scenes [closed_loop/scenes_seed17_n10, closed_loop/scenes_seed18_n8_put_back_block, closed_loop/scenes_seed19_n8_put_back_block, closed_loop/scenes_seed20_n8_put_back_block]
 
 tasks:
+# ---------------------------------------------------------------------------------------------------------------------
+# 11-27 13:30 (Opus): automatic pruning of intermediate exports on the HF relay above 85 % (user 11-27 13:19 "同意"; rule in
+# scripts/fullft/hf_prune_auto.py: never e30 / a run's last export; A40 copy sha256-verified; A40 evaluation done; relay
+# copy older than 24 h; down to 80 %). Hourly until 11-28 14:00.
+- id: A40-HF-autoprune-loop
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 26
+  hypothesis: "hourly until 11-28 14:00: hf_usage.py then hf_prune_auto.py (nothing at <= 85 %); log outputs/fullft/HF_PRUNE_AUTO.log"
+  command: "bash /workspace/FastWAM-memory2/scripts/fullft/hf_prune_auto_loop.sh"
+  pass_if: "m['rc'] == 0"
+
 # -------------------------------------------------------------------------------------------------------------------
 # 11-27 12:45 (Opus; plan v21 6.3 card 25, registered verbatim in gaas_queue.txt above obs_cf200 before any run;
 # check 2 on card 8's gate, user 11-27 11:12). MAIN first in the file. observe_and_pickup 1-100, seed-42 bank,
