@@ -243,6 +243,7 @@ tasks:
 # scripts/fullft/v21_verdict.py c24b (written before any episode).
 
 - id: A40-fetch-ranking_drop-e30
+  hold: true        # 11-27 13:20: card 24b withdrawn before any run (user 13:04)
   lane: a40cpu
   kind: shell
   need_mib: 0
@@ -252,6 +253,7 @@ tasks:
   pass_if: "m['rc'] == 0"
 
 - id: A40-v21-ranking_drop-smoke
+  hold: true        # 11-27 13:20: card 24b withdrawn before any run (user 13:04)
   lane: a40
   kind: closed_loop
   after: [A40-fetch-ranking_drop-e30, A40-prep2-blocks_ranking_try]
@@ -270,6 +272,7 @@ tasks:
   pass_if: "m.get('episodes', 0) >= 1"
 
 - id: A40-v21-ranking_drop-s0
+  hold: true        # 11-27 13:20: card 24b withdrawn before any run (user 13:04)
   lane: a40
   kind: closed_loop
   after: [A40-v21-ranking_drop-smoke]
@@ -287,6 +290,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-v21-ranking_drop-s1
+  hold: true        # 11-27 13:20: card 24b withdrawn before any run (user 13:04)
   lane: a40
   kind: closed_loop
   after: [A40-v21-ranking_drop-smoke]
@@ -304,6 +308,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-v21-ranking_drop-s2
+  hold: true        # 11-27 13:20: card 24b withdrawn before any run (user 13:04)
   lane: a40
   kind: closed_loop
   after: [A40-v21-ranking_drop-smoke]
@@ -321,6 +326,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-v21-ranking_drop-s3
+  hold: true        # 11-27 13:20: card 24b withdrawn before any run (user 13:04)
   lane: a40
   kind: closed_loop
   after: [A40-v21-ranking_drop-smoke]
@@ -338,6 +344,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-v21-ranking_drop-s4
+  hold: true        # 11-27 13:20: card 24b withdrawn before any run (user 13:04)
   lane: a40
   kind: closed_loop
   after: [A40-v21-ranking_drop-smoke]
@@ -355,6 +362,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-v21-ranking_drop-s5
+  hold: true        # 11-27 13:20: card 24b withdrawn before any run (user 13:04)
   lane: a40
   kind: closed_loop
   after: [A40-v21-ranking_drop-smoke]
@@ -372,6 +380,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-v21-ranking_drop-s6
+  hold: true        # 11-27 13:20: card 24b withdrawn before any run (user 13:04)
   lane: a40
   kind: closed_loop
   after: [A40-v21-ranking_drop-smoke]
@@ -389,6 +398,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-v21-ranking_drop-s7
+  hold: true        # 11-27 13:20: card 24b withdrawn before any run (user 13:04)
   lane: a40
   kind: closed_loop
   after: [A40-v21-ranking_drop-smoke]
@@ -406,6 +416,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-v21-ranking_drop-s8
+  hold: true        # 11-27 13:20: card 24b withdrawn before any run (user 13:04)
   lane: a40
   kind: closed_loop
   after: [A40-v21-ranking_drop-smoke]
@@ -423,6 +434,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-v21-ranking_drop-s9
+  hold: true        # 11-27 13:20: card 24b withdrawn before any run (user 13:04)
   lane: a40
   kind: closed_loop
   after: [A40-v21-ranking_drop-smoke]
@@ -440,6 +452,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 - id: A40-V21-C24B-verdict
+  hold: true        # 11-27 13:20: card 24b withdrawn before any run (user 13:04)
   lane: a40cpu
   kind: shell
   after: [A40-v21-ranking_drop-s0, A40-v21-ranking_drop-s1, A40-v21-ranking_drop-s2, A40-v21-ranking_drop-s3, A40-v21-ranking_drop-s4, A40-v21-ranking_drop-s5, A40-v21-ranking_drop-s6, A40-v21-ranking_drop-s7, A40-v21-ranking_drop-s8, A40-v21-ranking_drop-s9]
@@ -40503,6 +40516,7 @@ tasks:
 # masked, near frames masked; the same 30 scenes, closed_loop/diag2), after its MAIN; c24b is re-run at the end.
 
 - id: A40-c24b-audit-off-s0
+  hold: true        # 11-27 13:20: card 24b withdrawn before any run (user 13:04)
   lane: a40
   kind: closed_loop
   after: [A40-V21-C24B-verdict]
@@ -40520,6 +40534,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "off"}
 
 - id: A40-c24b-audit-off-s1
+  hold: true        # 11-27 13:20: card 24b withdrawn before any run (user 13:04)
   lane: a40
   kind: closed_loop
   after: [A40-V21-C24B-verdict]
@@ -40537,6 +40552,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "off"}
 
 - id: A40-c24b-audit-off-s2
+  hold: true        # 11-27 13:20: card 24b withdrawn before any run (user 13:04)
   lane: a40
   kind: closed_loop
   after: [A40-V21-C24B-verdict]
@@ -40554,6 +40570,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "off"}
 
 - id: A40-c24b-audit-mfirst-s0
+  hold: true        # 11-27 13:20: card 24b withdrawn before any run (user 13:04)
   lane: a40
   kind: closed_loop
   after: [A40-V21-C24B-verdict]
@@ -40571,6 +40588,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache", MWAM_HIST_MASK: "first"}
 
 - id: A40-c24b-audit-mfirst-s1
+  hold: true        # 11-27 13:20: card 24b withdrawn before any run (user 13:04)
   lane: a40
   kind: closed_loop
   after: [A40-V21-C24B-verdict]
@@ -40588,6 +40606,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache", MWAM_HIST_MASK: "first"}
 
 - id: A40-c24b-audit-mfirst-s2
+  hold: true        # 11-27 13:20: card 24b withdrawn before any run (user 13:04)
   lane: a40
   kind: closed_loop
   after: [A40-V21-C24B-verdict]
@@ -40605,6 +40624,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache", MWAM_HIST_MASK: "first"}
 
 - id: A40-c24b-audit-mnear-s0
+  hold: true        # 11-27 13:20: card 24b withdrawn before any run (user 13:04)
   lane: a40
   kind: closed_loop
   after: [A40-V21-C24B-verdict]
@@ -40622,6 +40642,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache", MWAM_HIST_MASK: "near"}
 
 - id: A40-c24b-audit-mnear-s1
+  hold: true        # 11-27 13:20: card 24b withdrawn before any run (user 13:04)
   lane: a40
   kind: closed_loop
   after: [A40-V21-C24B-verdict]
@@ -40639,6 +40660,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache", MWAM_HIST_MASK: "near"}
 
 - id: A40-c24b-audit-mnear-s2
+  hold: true        # 11-27 13:20: card 24b withdrawn before any run (user 13:04)
   lane: a40
   kind: closed_loop
   after: [A40-V21-C24B-verdict]
@@ -40656,6 +40678,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache", MWAM_HIST_MASK: "near"}
 
 - id: A40-V21-C24B-report
+  hold: true        # 11-27 13:20: card 24b withdrawn before any run (user 13:04)
   lane: a40cpu
   kind: shell
   after: [A40-c24b-audit-off-s0, A40-c24b-audit-off-s1, A40-c24b-audit-off-s2, A40-c24b-audit-mfirst-s0, A40-c24b-audit-mfirst-s1, A40-c24b-audit-mfirst-s2, A40-c24b-audit-mnear-s0, A40-c24b-audit-mnear-s1, A40-c24b-audit-mnear-s2]
@@ -41035,6 +41058,1146 @@ tasks:
   timeout_h: 2
   hypothesis: "plan v21 card 25: v21_verdict.py c25 again with e10 / e20; log pushed"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v21_verdict.py c25"
+  pass_if: "m['rc'] == 0"
+
+
+# -------------------------------------------------------------------------------------------------------------------
+# 11-27 13:20 (Opus; user 11-27 13:04 asked to push find-same past 49): obs_s800 e5 (exported 11-27, never
+# evaluated) and the three push runs registered in gaas_queue.txt (obs_s800_20, obs_s800_s18, obs_s1600), each
+# export on observe_and_pickup 1-100, described only; after every MAIN. Report: v21_verdict.py fs.
+
+- id: A40-fetch-obs_s800-e5
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 120
+  hypothesis: "fetch obs_s800_e5 from the relay (find-same push (user 11-27 13:04), described; sha256 checked; waits until it is there)"
+  command: "RUN=obs_s800 TAG=e5 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fs-obs_s800-e5-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800-e5, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800-e5, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_e5 on observe_and_pickup 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e5/export_e5.pt
+  label: obs_s800_e5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800-e5-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800-e5, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800-e5, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_e5 on observe_and_pickup 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e5/export_e5.pt
+  label: obs_s800_e5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800-e5-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800-e5, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800-e5, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_e5 on observe_and_pickup 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e5/export_e5.pt
+  label: obs_s800_e5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800-e5-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800-e5, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800-e5, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_e5 on observe_and_pickup 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e5/export_e5.pt
+  label: obs_s800_e5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800-e5-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800-e5, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800-e5, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_e5 on observe_and_pickup 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e5/export_e5.pt
+  label: obs_s800_e5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800-e5-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800-e5, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800-e5, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_e5 on observe_and_pickup 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e5/export_e5.pt
+  label: obs_s800_e5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800-e5-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800-e5, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800-e5, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_e5 on observe_and_pickup 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e5/export_e5.pt
+  label: obs_s800_e5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800-e5-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800-e5, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800-e5, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_e5 on observe_and_pickup 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e5/export_e5.pt
+  label: obs_s800_e5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800-e5-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800-e5, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800-e5, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_e5 on observe_and_pickup 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e5/export_e5.pt
+  label: obs_s800_e5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800-e5-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800-e5, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800-e5, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_e5 on observe_and_pickup 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e5/export_e5.pt
+  label: obs_s800_e5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v20
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-FS-report-obs_s800-e5
+  lane: a40cpu
+  kind: shell
+  after: [A40-fs-obs_s800-e5-s0, A40-fs-obs_s800-e5-s1, A40-fs-obs_s800-e5-s2, A40-fs-obs_s800-e5-s3, A40-fs-obs_s800-e5-s4, A40-fs-obs_s800-e5-s5, A40-fs-obs_s800-e5-s6, A40-fs-obs_s800-e5-s7, A40-fs-obs_s800-e5-s8, A40-fs-obs_s800-e5-s9]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "find-same push: v21_verdict.py fs after obs_s800_e5; log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v21_verdict.py fs"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fetch-obs_s800_20-e10
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 120
+  hypothesis: "fetch obs_s800_20_e10 from the relay (find-same push (user 11-27 13:04), described; sha256 checked; waits until it is there)"
+  command: "RUN=obs_s800_20 TAG=e10 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fs-obs_s800_20-e10-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_20-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_20-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_20_e10 on observe_and_pickup 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_20_e10/export_e10.pt
+  label: obs_s800_20_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_20-e10-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_20-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_20-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_20_e10 on observe_and_pickup 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_20_e10/export_e10.pt
+  label: obs_s800_20_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_20-e10-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_20-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_20-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_20_e10 on observe_and_pickup 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_20_e10/export_e10.pt
+  label: obs_s800_20_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_20-e10-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_20-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_20-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_20_e10 on observe_and_pickup 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_20_e10/export_e10.pt
+  label: obs_s800_20_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_20-e10-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_20-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_20-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_20_e10 on observe_and_pickup 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_20_e10/export_e10.pt
+  label: obs_s800_20_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_20-e10-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_20-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_20-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_20_e10 on observe_and_pickup 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_20_e10/export_e10.pt
+  label: obs_s800_20_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_20-e10-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_20-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_20-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_20_e10 on observe_and_pickup 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_20_e10/export_e10.pt
+  label: obs_s800_20_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_20-e10-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_20-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_20-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_20_e10 on observe_and_pickup 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_20_e10/export_e10.pt
+  label: obs_s800_20_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_20-e10-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_20-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_20-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_20_e10 on observe_and_pickup 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_20_e10/export_e10.pt
+  label: obs_s800_20_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_20-e10-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_20-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_20-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_20_e10 on observe_and_pickup 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_20_e10/export_e10.pt
+  label: obs_s800_20_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-FS-report-obs_s800_20-e10
+  lane: a40cpu
+  kind: shell
+  after: [A40-fs-obs_s800_20-e10-s0, A40-fs-obs_s800_20-e10-s1, A40-fs-obs_s800_20-e10-s2, A40-fs-obs_s800_20-e10-s3, A40-fs-obs_s800_20-e10-s4, A40-fs-obs_s800_20-e10-s5, A40-fs-obs_s800_20-e10-s6, A40-fs-obs_s800_20-e10-s7, A40-fs-obs_s800_20-e10-s8, A40-fs-obs_s800_20-e10-s9]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "find-same push: v21_verdict.py fs after obs_s800_20_e10; log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v21_verdict.py fs"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fetch-obs_s800_20-e20
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 120
+  hypothesis: "fetch obs_s800_20_e20 from the relay (find-same push (user 11-27 13:04), described; sha256 checked; waits until it is there)"
+  command: "RUN=obs_s800_20 TAG=e20 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fs-obs_s800_20-e20-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_20-e20, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_20-e20, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_20_e20 on observe_and_pickup 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_20_e20/export_e20.pt
+  label: obs_s800_20_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_20-e20-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_20-e20, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_20-e20, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_20_e20 on observe_and_pickup 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_20_e20/export_e20.pt
+  label: obs_s800_20_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_20-e20-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_20-e20, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_20-e20, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_20_e20 on observe_and_pickup 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_20_e20/export_e20.pt
+  label: obs_s800_20_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_20-e20-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_20-e20, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_20-e20, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_20_e20 on observe_and_pickup 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_20_e20/export_e20.pt
+  label: obs_s800_20_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_20-e20-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_20-e20, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_20-e20, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_20_e20 on observe_and_pickup 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_20_e20/export_e20.pt
+  label: obs_s800_20_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_20-e20-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_20-e20, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_20-e20, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_20_e20 on observe_and_pickup 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_20_e20/export_e20.pt
+  label: obs_s800_20_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_20-e20-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_20-e20, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_20-e20, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_20_e20 on observe_and_pickup 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_20_e20/export_e20.pt
+  label: obs_s800_20_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_20-e20-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_20-e20, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_20-e20, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_20_e20 on observe_and_pickup 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_20_e20/export_e20.pt
+  label: obs_s800_20_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_20-e20-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_20-e20, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_20-e20, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_20_e20 on observe_and_pickup 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_20_e20/export_e20.pt
+  label: obs_s800_20_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_20-e20-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_20-e20, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_20-e20, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_20_e20 on observe_and_pickup 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_20_e20/export_e20.pt
+  label: obs_s800_20_e20
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-FS-report-obs_s800_20-e20
+  lane: a40cpu
+  kind: shell
+  after: [A40-fs-obs_s800_20-e20-s0, A40-fs-obs_s800_20-e20-s1, A40-fs-obs_s800_20-e20-s2, A40-fs-obs_s800_20-e20-s3, A40-fs-obs_s800_20-e20-s4, A40-fs-obs_s800_20-e20-s5, A40-fs-obs_s800_20-e20-s6, A40-fs-obs_s800_20-e20-s7, A40-fs-obs_s800_20-e20-s8, A40-fs-obs_s800_20-e20-s9]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "find-same push: v21_verdict.py fs after obs_s800_20_e20; log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v21_verdict.py fs"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fetch-obs_s800_s18-e10
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 120
+  hypothesis: "fetch obs_s800_s18_e10 from the relay (find-same push (user 11-27 13:04), described; sha256 checked; waits until it is there)"
+  command: "RUN=obs_s800_s18 TAG=e10 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fs-obs_s800_s18-e10-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_s18-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_s18-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_s18_e10 on observe_and_pickup 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_s18_e10/export_e10.pt
+  label: obs_s800_s18_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_s18-e10-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_s18-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_s18-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_s18_e10 on observe_and_pickup 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_s18_e10/export_e10.pt
+  label: obs_s800_s18_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_s18-e10-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_s18-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_s18-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_s18_e10 on observe_and_pickup 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_s18_e10/export_e10.pt
+  label: obs_s800_s18_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_s18-e10-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_s18-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_s18-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_s18_e10 on observe_and_pickup 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_s18_e10/export_e10.pt
+  label: obs_s800_s18_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_s18-e10-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_s18-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_s18-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_s18_e10 on observe_and_pickup 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_s18_e10/export_e10.pt
+  label: obs_s800_s18_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_s18-e10-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_s18-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_s18-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_s18_e10 on observe_and_pickup 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_s18_e10/export_e10.pt
+  label: obs_s800_s18_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_s18-e10-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_s18-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_s18-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_s18_e10 on observe_and_pickup 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_s18_e10/export_e10.pt
+  label: obs_s800_s18_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_s18-e10-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_s18-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_s18-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_s18_e10 on observe_and_pickup 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_s18_e10/export_e10.pt
+  label: obs_s800_s18_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_s18-e10-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_s18-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_s18-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_s18_e10 on observe_and_pickup 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_s18_e10/export_e10.pt
+  label: obs_s800_s18_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s800_s18-e10-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s800_s18-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s800_s18-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s800_s18_e10 on observe_and_pickup 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_s18_e10/export_e10.pt
+  label: obs_s800_s18_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-FS-report-obs_s800_s18-e10
+  lane: a40cpu
+  kind: shell
+  after: [A40-fs-obs_s800_s18-e10-s0, A40-fs-obs_s800_s18-e10-s1, A40-fs-obs_s800_s18-e10-s2, A40-fs-obs_s800_s18-e10-s3, A40-fs-obs_s800_s18-e10-s4, A40-fs-obs_s800_s18-e10-s5, A40-fs-obs_s800_s18-e10-s6, A40-fs-obs_s800_s18-e10-s7, A40-fs-obs_s800_s18-e10-s8, A40-fs-obs_s800_s18-e10-s9]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "find-same push: v21_verdict.py fs after obs_s800_s18_e10; log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v21_verdict.py fs"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fetch-obs_s1600-e5
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 120
+  hypothesis: "fetch obs_s1600_e5 from the relay (find-same push (user 11-27 13:04), described; sha256 checked; waits until it is there)"
+  command: "RUN=obs_s1600 TAG=e5 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fs-obs_s1600-e5-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s1600-e5, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s1600-e5, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s1600_e5 on observe_and_pickup 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s1600_e5/export_e5.pt
+  label: obs_s1600_e5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s1600-e5-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s1600-e5, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s1600-e5, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s1600_e5 on observe_and_pickup 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s1600_e5/export_e5.pt
+  label: obs_s1600_e5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s1600-e5-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s1600-e5, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s1600-e5, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s1600_e5 on observe_and_pickup 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s1600_e5/export_e5.pt
+  label: obs_s1600_e5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s1600-e5-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s1600-e5, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s1600-e5, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s1600_e5 on observe_and_pickup 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s1600_e5/export_e5.pt
+  label: obs_s1600_e5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s1600-e5-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s1600-e5, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s1600-e5, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s1600_e5 on observe_and_pickup 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s1600_e5/export_e5.pt
+  label: obs_s1600_e5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s1600-e5-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s1600-e5, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s1600-e5, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s1600_e5 on observe_and_pickup 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s1600_e5/export_e5.pt
+  label: obs_s1600_e5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s1600-e5-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s1600-e5, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s1600-e5, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s1600_e5 on observe_and_pickup 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s1600_e5/export_e5.pt
+  label: obs_s1600_e5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s1600-e5-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s1600-e5, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s1600-e5, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s1600_e5 on observe_and_pickup 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s1600_e5/export_e5.pt
+  label: obs_s1600_e5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s1600-e5-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s1600-e5, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s1600-e5, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s1600_e5 on observe_and_pickup 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s1600_e5/export_e5.pt
+  label: obs_s1600_e5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s1600-e5-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s1600-e5, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s1600-e5, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s1600_e5 on observe_and_pickup 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s1600_e5/export_e5.pt
+  label: obs_s1600_e5
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-FS-report-obs_s1600-e5
+  lane: a40cpu
+  kind: shell
+  after: [A40-fs-obs_s1600-e5-s0, A40-fs-obs_s1600-e5-s1, A40-fs-obs_s1600-e5-s2, A40-fs-obs_s1600-e5-s3, A40-fs-obs_s1600-e5-s4, A40-fs-obs_s1600-e5-s5, A40-fs-obs_s1600-e5-s6, A40-fs-obs_s1600-e5-s7, A40-fs-obs_s1600-e5-s8, A40-fs-obs_s1600-e5-s9]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "find-same push: v21_verdict.py fs after obs_s1600_e5; log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v21_verdict.py fs"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fetch-obs_s1600-e10
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 120
+  hypothesis: "fetch obs_s1600_e10 from the relay (find-same push (user 11-27 13:04), described; sha256 checked; waits until it is there)"
+  command: "RUN=obs_s1600 TAG=e10 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fs-obs_s1600-e10-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s1600-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s1600-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s1600_e10 on observe_and_pickup 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s1600_e10/export_e10.pt
+  label: obs_s1600_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s1600-e10-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s1600-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s1600-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s1600_e10 on observe_and_pickup 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s1600_e10/export_e10.pt
+  label: obs_s1600_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s1600-e10-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s1600-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s1600-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s1600_e10 on observe_and_pickup 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s1600_e10/export_e10.pt
+  label: obs_s1600_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s1600-e10-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s1600-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s1600-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s1600_e10 on observe_and_pickup 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s1600_e10/export_e10.pt
+  label: obs_s1600_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s1600-e10-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s1600-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s1600-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s1600_e10 on observe_and_pickup 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s1600_e10/export_e10.pt
+  label: obs_s1600_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s1600-e10-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s1600-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s1600-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s1600_e10 on observe_and_pickup 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s1600_e10/export_e10.pt
+  label: obs_s1600_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s1600-e10-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s1600-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s1600-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s1600_e10 on observe_and_pickup 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s1600_e10/export_e10.pt
+  label: obs_s1600_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s1600-e10-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s1600-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s1600-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s1600_e10 on observe_and_pickup 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s1600_e10/export_e10.pt
+  label: obs_s1600_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s1600-e10-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s1600-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s1600-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s1600_e10 on observe_and_pickup 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s1600_e10/export_e10.pt
+  label: obs_s1600_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-fs-obs_s1600-e10-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-obs_s1600-e10, A40-prep2-observe_and_pickup]
+  requires_pass: [A40-fetch-obs_s1600-e10, A40-prep2-observe_and_pickup]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "find-same push (described): obs_s1600_e10 on observe_and_pickup 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s1600_e10/export_e10.pt
+  label: obs_s1600_e10
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_observe_and_pickup]
+  tasks: [observe_and_pickup]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-FS-report-obs_s1600-e10
+  lane: a40cpu
+  kind: shell
+  after: [A40-fs-obs_s1600-e10-s0, A40-fs-obs_s1600-e10-s1, A40-fs-obs_s1600-e10-s2, A40-fs-obs_s1600-e10-s3, A40-fs-obs_s1600-e10-s4, A40-fs-obs_s1600-e10-s5, A40-fs-obs_s1600-e10-s6, A40-fs-obs_s1600-e10-s7, A40-fs-obs_s1600-e10-s8, A40-fs-obs_s1600-e10-s9]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "find-same push: v21_verdict.py fs after obs_s1600_e10; log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v21_verdict.py fs"
   pass_if: "m['rc'] == 0"
 
 

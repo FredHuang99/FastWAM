@@ -517,3 +517,24 @@ ranking_drop | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/de
 #   arms get a seed-18 training; the four trainings are pooled by a bootstrap stratified by seed and scene and the
 #   pooled interval is reported; the single-seed verdict word stands.
 obs_cf200 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_cf155_v1] data.tasks=[observe_and_pickup] | test -f outputs/memory_v2/press/dense_observe_and_pickup_v1/.verified && test -f outputs/memory_v2/press/dense_observe_and_pickup_cf155_v1/.verified
+#
+# 11-27 13:20 (Opus): card 24b ranking_drop WITHDRAWN before any run (user 11-27 13:04 agreed: ranking_v3a reached 91
+# vs 65, TIMELY WRITING HELPS, positions 1-2 43/45 - the failure 24b targets is gone on the timely-writer base). Its
+# line stays registered above; it is in no slot list. Left for Fable (FableQueue H8).
+#
+# Find-same push (user 11-27 13:04: "49 vs 27~28 ... 可以继续冲刺，狠狠的拉大收益"; this overrides plan v21 5.8 item 4,
+# "no find-same training after card 25"). obs_s800 (800 generated scenes + the 45 official demos, three frames, 10
+# frame-epochs) reached 49/100 at e10 (A40 closed_loop/v20 pairwise table, 11-27 11:47; frame-0 swap +8.4 % onset /
+# +14.4 % wait on held-out official demos) against 15 for 200 scenes at 30 epochs. Three runs, all H200 class:
+#   obs_s800_20  = obs_s800's exact line with 20 frame-epochs (exports e10 / e20): more passes over the same scenes
+#   obs_s800_s18 = obs_s800's exact line with seed 18: the training-level spread of the 49 (plan v21 5.5; a main-table
+#                  cell of this recipe is the mean of two seeds, rule R1)
+#   obs_s1600    = obs_s800's exact line with 800 more generated scenes (dense_observe_and_pickup_gen800b_v1: the same
+#                  generator and gates as gen155 / gen600, seeds after gen600's; generated on the 5090 from 11-27)
+# Registered reading (11-27 13:20, Opus, before any run of the three; A40, observe_and_pickup 1-100, default noise):
+# described only - success 1-100 of each export paired with obs_s800 e10 (49) and obs_ar e30 (13), against 28 (pure-WAM
+# best, self-reported) and 20 (blind pick); the frame-0 swap probe (5090, held-out official demos). No verdict. Main-table
+# entries from generated scenes carry a dagger (plan v20 card 8).
+obs_s800_20 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen155_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen600_v1] data.tasks=[observe_and_pickup] schedule.frame_epochs=20 schedule.export_at_epochs=[10,20] | test -f outputs/memory_v2/press/dense_observe_and_pickup_v1/.verified && test -f outputs/memory_v2/press/dense_observe_and_pickup_gen155_v1/.verified && test -f outputs/memory_v2/press/dense_observe_and_pickup_gen600_v1/.verified
+obs_s800_s18 | seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen155_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen600_v1] data.tasks=[observe_and_pickup] schedule.frame_epochs=10 schedule.export_at_epochs=[5,10] | test -f outputs/memory_v2/press/dense_observe_and_pickup_v1/.verified && test -f outputs/memory_v2/press/dense_observe_and_pickup_gen155_v1/.verified && test -f outputs/memory_v2/press/dense_observe_and_pickup_gen600_v1/.verified
+obs_s1600 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen155_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen600_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen800b_v1] data.tasks=[observe_and_pickup] schedule.frame_epochs=10 schedule.export_at_epochs=[5,10] | test -f outputs/memory_v2/press/dense_observe_and_pickup_v1/.verified && test -f outputs/memory_v2/press/dense_observe_and_pickup_gen155_v1/.verified && test -f outputs/memory_v2/press/dense_observe_and_pickup_gen600_v1/.verified && test -f outputs/memory_v2/press/dense_observe_and_pickup_gen800b_v1/.verified

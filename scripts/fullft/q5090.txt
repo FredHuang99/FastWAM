@@ -79,3 +79,12 @@ dev-rearr_pw_s18_e20 | gpu | bash scripts/fullft/relay_has.sh rearr_pw_s18_e20 |
 # 11-27 11:50 (Opus): card 25 check 2, what the right-wrist difference is (user 11:12: the card-8 threshold may be used
 # if it does not affect training / evaluation); small PNGs in CARD25_PICS.json (read-only, cpu, ~1 min)
 card25-pics | cpu | - | PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/card25_pics.py --base outputs/fullft/gen_cf/check
+# 11-27 13:20 (Opus; user 13:04: push find-same past 49). gen800b: 800 more scenes (seeds after gen600's), the same
+# generator / gates / cache / upload as card 8 (gen_obs_5090.sh GEN_MORE; the two old batches are skipped), ~1 day on
+# one GPU -> dense_observe_and_pickup_gen800b_v1 on the cache relay (obs_s1600 starts on the new H200 when it is there).
+gen800b | gpu | - | GEN_GPU=$GPU GEN_GATE=background GEN_MORE=gen800b:800 bash scripts/fullft/gen_obs_5090.sh
+# frame-0 swap probes (card 13b's script, held-out official demos) of the find-same runs as their exports arrive
+probe-obs_cf200_e10 | gpu | bash scripts/fullft/relay_has.sh obs_cf200_e10 | RUNS=obs_cf200 TAG=e10 bash scripts/fullft/card13b_5090.sh
+probe-obs_s800_20_e10 | gpu | bash scripts/fullft/relay_has.sh obs_s800_20_e10 | RUNS=obs_s800_20 TAG=e10 bash scripts/fullft/card13b_5090.sh
+probe-obs_s800_s18_e10 | gpu | bash scripts/fullft/relay_has.sh obs_s800_s18_e10 | RUNS=obs_s800_s18 TAG=e10 bash scripts/fullft/card13b_5090.sh
+probe-obs_cf200_e30 | gpu | bash scripts/fullft/relay_has.sh obs_cf200_e30 | RUNS=obs_cf200 TAG=e30 bash scripts/fullft/card13b_5090.sh

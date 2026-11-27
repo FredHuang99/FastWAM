@@ -23,7 +23,8 @@ Both c20 and c21 also report whether the seed extension of plan v21 5.5 item 6 i
 verdict word stands). A verdict needs all 100 MAIN scenes on both sides (else WAIT). Writes outputs/fullft/V21_<NAME>.json.
   c24b card 24b ranking_drop (11-27 11:40, user chose it 11:12): see c24b's docstring.
   c25  card 25 obs_cf200 (11-27 12:45): see c25's docstring.
-  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v21_verdict.py c20|c21|c22|c24b|c25
+  fs   find-same push (11-27 13:20, user 13:04), described: see fs's docstring.
+  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v21_verdict.py c20|c21|c22|c24b|c25|fs
 """
 from __future__ import annotations
 
@@ -238,9 +239,30 @@ def c25():
     return out
 
 
+def fs():
+    """Find-same push (user 11-27 13:04), described only: every find-same export evaluated on 1-100, paired with
+    obs_s800 e10 (v20, 49) and obs_ar e30 (e6, 13); against 28 (pure-WAM best, self-reported) and 20 (blind pick)."""
+    t = "observe_and_pickup"
+    order, ref = success("v20", "obs_s800_e10", t)
+    _, ar = success("e6", "obs_ar_e30", t)
+    out = {"run": "find-same push (described)", "reference_obs_s800_e10": f"{sum(ref.values())}/{len(ref)}", "runs": {}}
+    for folder, label in (("v20", "obs_s200_e30"), ("v20", "obs_s800_e5"), ("v20", "obs_s800_e10"),
+                          ("v21", "obs_s800_20_e10"), ("v21", "obs_s800_20_e20"), ("v21", "obs_s800_s18_e10"),
+                          ("v21", "obs_s1600_e5"), ("v21", "obs_s1600_e10"), ("v21", "obs_cf200_e10"),
+                          ("v21", "obs_cf200_e20"), ("v21", "obs_cf200_e30")):
+        _, x = success(folder, label, t)
+        if not x:
+            continue
+        out["runs"][label] = {"finished": len(x), "success": sum(x.values()),
+                              "against_obs_s800_e10": compare(x, ref, order) if label != "obs_s800_e10" else None,
+                              "against_obs_ar_e30": compare(x, ar, order)}
+    out["verdict"] = "DESCRIBED"
+    return out
+
+
 def main():
     name = sys.argv[1] if len(sys.argv) > 1 else ""
-    fns = {"c20": c20, "c21": c21, "c22": c22, "c24b": c24b, "c25": c25}
+    fns = {"c20": c20, "c21": c21, "c22": c22, "c24b": c24b, "c25": c25, "fs": fs}
     if name not in fns:
         print(__doc__)
         return 2

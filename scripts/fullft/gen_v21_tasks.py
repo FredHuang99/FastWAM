@@ -373,13 +373,41 @@ def block9():
     return "\n".join(out) + "\n"
 
 
+
+FS_PUSH = [("obs_s800", "e5", "closed_loop/v20"), ("obs_s800_20", "e10", "closed_loop/v21"),
+           ("obs_s800_20", "e20", "closed_loop/v21"), ("obs_s800_s18", "e10", "closed_loop/v21"),
+           ("obs_s1600", "e5", "closed_loop/v21"), ("obs_s1600", "e10", "closed_loop/v21")]
+
+
+def block10():
+    """11-27 13:20: find-same push (user 13:04), described: every export on observe_and_pickup 1-100; report v21 fs."""
+    out = ["# " + "-" * 115,
+           "# 11-27 13:20 (Opus; user 11-27 13:04 asked to push find-same past 49): obs_s800 e5 (exported 11-27, never",
+           "# evaluated) and the three push runs registered in gaas_queue.txt (obs_s800_20, obs_s800_s18, obs_s1600), each",
+           "# export on observe_and_pickup 1-100, described only; after every MAIN. Report: v21_verdict.py fs.", ""]
+    ids = []
+    for run, tag, folder in FS_PUSH:
+        out.append(fetch(run, tag, "find-same push (user 11-27 13:04), described", timeout=120))
+        for k in range(10):
+            tid = f"A40-fs-{run}-{tag}-s{k}"
+            ids.append(tid)
+            out.append(loop(tid, [f"A40-fetch-{run}-{tag}", f"A40-prep2-{OT}"],
+                            f"find-same push (described): {run}_{tag} on {OT} 1-100; shard {k} of 10",
+                            f"{EXP}/{run}_{tag}/export_{tag}.pt", f"{run}_{tag}", OT,
+                            ["--execute", "8", "--limit", "100", "--shard", f"{k}/10"], folder))
+        out.append(shell(f"A40-FS-report-{run}-{tag}", [f"A40-fs-{run}-{tag}-s{k}" for k in range(10)],
+                         f"find-same push: v21_verdict.py fs after {run}_{tag}; log pushed",
+                         f"{PY} scripts/fullft/v21_verdict.py fs"))
+    return "\n".join(out) + "\n"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--blocks", nargs="+", type=int, default=[1, 2, 3])
     args = ap.parse_args()
     text = YAML.read_text()
     have = set(re.findall(r"^- id: (\S+)", text, re.M))
-    new = "".join({1: block1, 2: block2, 3: block3, 4: block4, 5: block5, 6: block6, 7: block7, 8: block8, 9: block9}[b]()
+    new = "".join({1: block1, 2: block2, 3: block3, 4: block4, 5: block5, 6: block6, 7: block7, 8: block8, 9: block9, 10: block10}[b]()
                   for b in sorted(args.blocks))
     ids = re.findall(r"^- id: (\S+)", new, re.M)
     dup = [i for i in ids if i in have] + [i for i in set(ids) if ids.count(i) > 1]

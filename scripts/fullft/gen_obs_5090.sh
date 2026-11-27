@@ -19,6 +19,7 @@
 #   the later run without GEN_HOLD (after the user agrees) skips what exists and goes on to the checks, cache, upload.
 # GEN_BUILD=gen155 | gen600 (11-24 20:40, user 20:31 "card 8: the backup gate"): no generation -- the statistics check,
 #   the cache and the upload of one batch already generated (runs beside a generating process; uses GEN_GPU too).
+# GEN_MORE=gen800b:800 (11-27 13:20): after the two batches (skipped when they exist), 800 more as gen800b (see the end).
 # Own log: outputs/fullft/GEN_OBS_5090_<time>.txt ; generator logs outputs/fullft/gen_obs/*.log
 set -u
 R=/workspace/FastWAM-memory2
@@ -110,5 +111,15 @@ B=$G/gen600
 NEXT=$(( $(cat $A/demo_clean/$T/aloha_agilex/seed.txt | xargs -n1 | sort -n | tail -1) + 1 ))
 say "===== 4 600 more from seed $NEXT"
 gen $B --start-seed $NEXT --episodes 600; say "gen exit code $?; $(ls $B/demo_clean/$T/aloha_agilex/data/*.hdf5 2>/dev/null | wc -l) hdf5"
-build dense_${T}_gen600_v1 $B/demo_clean/$T/aloha_agilex
+build dense_${T}_gen600_v1 $B/demo_clean/$T/aloha_agilex || exit 1
+# 11-27 13:20 (Opus; user 13:04 "继续冲刺" on find-same): GEN_MORE=<name>:<n> -> n more scenes from the seed after
+# gen600's last, the same generator, gates (GEN_GATE=background: gen_stats.py before the cache) and cache / upload, as
+# dense_<task>_<name>_v1 (obs_s1600 = obs_s800 + gen800b). Resumable like the batches above.
+if [ -n "${GEN_MORE:-}" ]; then
+  MN=${GEN_MORE%%:*}; MC=${GEN_MORE##*:}; M=$G/$MN
+  NEXT=$(( $(cat $B/demo_clean/$T/aloha_agilex/seed.txt | xargs -n1 | sort -n | tail -1) + 1 ))
+  say "===== 6 $MC more from seed $NEXT ($MN)"
+  gen $M --start-seed $NEXT --episodes $MC; say "gen exit code $?; $(ls $M/demo_clean/$T/aloha_agilex/data/*.hdf5 2>/dev/null | wc -l) hdf5"
+  build dense_${T}_${MN}_v1 $M/demo_clean/$T/aloha_agilex || exit 1
+fi
 say "DONE"
