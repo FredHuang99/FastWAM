@@ -22,7 +22,8 @@ Both c20 and c21 also report whether the seed extension of plan v21 5.5 item 6 i
 |D| < 0.30 -> both arms get a seed-18 training; the pooled interval is computed when those exist; the single-seed
 verdict word stands). A verdict needs all 100 MAIN scenes on both sides (else WAIT). Writes outputs/fullft/V21_<NAME>.json.
   c24b card 24b ranking_drop (11-27 11:40, user chose it 11:12): see c24b's docstring.
-  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v21_verdict.py c20|c21|c22|c24b
+  c25  card 25 obs_cf200 (11-27 12:45): see c25's docstring.
+  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v21_verdict.py c20|c21|c22|c24b|c25
 """
 from __future__ import annotations
 
@@ -207,9 +208,39 @@ def c24b():
     return out
 
 
+def c25():
+    """Card 25 obs_cf200 (counterfactual groups: the same table with every target), registered 11-27 12:45 (plan v21 6.3,
+    verbatim): D = success(obs_cf200 e30, v21) - success(obs_s200 e30, v20); SESOI +0.15: CI lower > +0.15 -> BREAKING
+    THE SHORTCUT HELPS; CI upper < +0.15 -> NO HELP; otherwise UNCERTAIN (pre-set r2 extension, 200 pairs). Described:
+    against obs_ar e30 (13), 20 (blind pick), 28 (pure-WAM best, self-reported); e10 / e20; obs_s800 e10 beside it."""
+    t = "observe_and_pickup"
+    order, ref = success("v20", "obs_s200_e30", t)
+    _, new = success("v21", "obs_cf200_e30", t)
+    out = {"run": "card 25 obs_cf200 (same table, every target) against obs_s200", "sesoi": 0.15,
+           "finished": {"obs_cf200_e30": len(new), "obs_s200_e30": len(ref)}}
+    if len(new) < 100 or len(ref) < 100:
+        out["verdict"] = f"WAIT ({len(new)} / {len(ref)} of 100)"
+        return out
+    c = compare(new, ref, order)                  # D = success(obs_cf200) - success(obs_s200)
+    rule = lambda x: three(x, 0.15, "BREAKING THE SHORTCUT HELPS", "NO HELP")   # noqa: E731
+    with_extension(out, c, rule(c), rule, t, "obs_cf200_e30", "v21", "obs_s200_e30", "v20")
+    o_ar, ar = success("e6", "obs_ar_e30", t)
+    out["described"] = {"against_obs_ar_e30": compare(new, ar, o_ar),
+                        "success_vs_bars": f"{c['new']} vs 13 (obs_ar e30), 20 (blind pick), 28 (pure-WAM best, self-reported)"}
+    _, s800 = success("v20", "obs_s800_e10", t)
+    if s800:
+        out["described"]["against_obs_s800_e10"] = compare(new, s800, order)
+    for tag in ("e10", "e20"):
+        _, x = success("v21", f"obs_cf200_{tag}", t)
+        if x:
+            out["described"][f"obs_cf200_{tag}"] = compare(x, ref, order)
+    out["seed_extension_v21_5_5_6"] = seed_extension(out)
+    return out
+
+
 def main():
     name = sys.argv[1] if len(sys.argv) > 1 else ""
-    fns = {"c20": c20, "c21": c21, "c22": c22, "c24b": c24b}
+    fns = {"c20": c20, "c21": c21, "c22": c22, "c24b": c24b, "c25": c25}
     if name not in fns:
         print(__doc__)
         return 2

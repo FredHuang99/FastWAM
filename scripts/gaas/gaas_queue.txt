@@ -482,3 +482,38 @@ rearr_arprop_h2 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press
 #   arms get a seed-18 training; the four trainings are pooled by a bootstrap stratified by seed and scene and the
 #   pooled interval is reported; the single-seed verdict word stands.
 ranking_drop | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_blocks_ranking_try_v1] data.tasks=[blocks_ranking_try] history.variant=arprop history.event_max=69 history.lag=4 history.record_dropout=0.3 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_blocks_ranking_try.json] | test -f outputs/memory_v2/press/dense_blocks_ranking_try_v1/.verified && test -s outputs/fullft/events/events_blocks_ranking_try.json && test -f outputs/fullft/READY_arprop_blocks_ranking_try
+#
+# Card 25 (plan v21 6.3; registered 11-27 12:45 by Opus). The generator check (card25_check.py, 5090 11-27 02:03): target
+# fixed PASS, expert >= 90 % per target PASS (1.0 / 0.9 / 0.9 / 1.0 / 0.9), card 8's render gate PASS, "same table,
+# pixel-identical" FAIL: the renderer is not bit-identical (head camera: 42-50 % of the pixels differ, table box max
+# 10-22 levels, < 0.07 % above 8 levels); the right wrist camera differs by up to 247 levels on 0.5-1.6 % of its pixels -
+# CARD25_PICS.json (11-27 12:22) shows it is the reference object on the shelf, seen at the left edge of that camera
+# (it must differ). DEVIATION (user 11-27 11:12: "这个对最终的训练结果或评测结果无影响的话，就用这个"): check 2 uses card 8's
+# gate instead (each camera < 2 % of the pixels above 8 levels; user-approved for card 8 on 11-24): 32 / 32 pairs pass.
+# Data: dense_observe_and_pickup_cf155_v1 (31 layouts x 5 targets, seeds 20000100-20000132 without 20000106 / 20000126;
+# generated 11-27 02:26-03:44 by card25_5090.sh, cache relay); the 2 probe layouts (dense_observe_and_pickup_cf10probe_v1)
+# are held out. Card 8's generated scenes start at seed 10,000,000; the evaluation bank is 4300000-4300099.
+# Card 25 (plan v21 6.3, P1; the user approved the generated data on 11-27): obs_cf200 = obs_s200's exact recipe on
+# 200 training scenes built as counterfactual groups: table layouts drawn by the benchmark's own sampler (new seeds,
+# disjoint from the evaluation seeds, the official demos' seeds, the 5090 development scenes and the seeds of obs_s200 /
+# obs_s800), each layout recorded once per candidate on the table, with that candidate as the target and its model on
+# the shelf as the reference (the benchmark's scripted expert; nothing else changed; no annotation). The 45 official
+# training demos are included; 200 scenes in total (31 layouts x 5 targets + 45). 30 frame-epochs (exports e10 / e20 /
+# e30).
+# Why: obs_s200 uses 200 independent scenes, and a scene can be memorised from the table alone (frame-0 swap < 2 %,
+# onset action loss 0.0013 trained vs 0.178 held-out at e20). Here the same table appears with every target, so the
+# table alone no longer predicts the action: the loss can only fall by reading the reference.
+# Registered reading (before any obs_cf200 episode; A40, observe_and_pickup 1-100, default noise):
+#   MAIN: D = success(obs_cf200 e30) - success(obs_s200 e30), paired by scene, paired bootstrap 95 % CI (10,000,
+#   seed 0); SESOI +0.15: CI lower > +0.15 -> BREAKING THE SHORTCUT HELPS; CI upper < +0.15 -> NO HELP; otherwise
+#   UNCERTAIN (pre-set extension: both e30 again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule).
+#   Described: success against obs_ar e30 (13), 20 (blind pick) and 28 (pure-WAM best, self-reported); the frame-0 swap
+#   at the onset on held-out generated demos (>= 2 % = frame 0 is used) for obs_cf200 and obs_s200; the onset action
+#   loss, trained vs held-out; the first-close-on-target rate (5090, MWAM_OBJECT_LOG=1, scenes 1-50).
+#   Written before the run: the frame-0 swap exceeds 2 % for obs_cf200 already at e10 (it stays below 2 % for obs_s200);
+#   the first close is on the target in more than 40 % of the episodes with a close (20 % = blind).
+#   A main-table entry from this run carries a double dagger (generated scenes with a designed target assignment).
+#   Seed extension (plan v21 5.5 item 6): if the verdict is not UNCERTAIN and the difference is within 30 points, both
+#   arms get a seed-18 training; the four trainings are pooled by a bootstrap stratified by seed and scene and the
+#   pooled interval is reported; the single-seed verdict word stands.
+obs_cf200 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_cf155_v1] data.tasks=[observe_and_pickup] | test -f outputs/memory_v2/press/dense_observe_and_pickup_v1/.verified && test -f outputs/memory_v2/press/dense_observe_and_pickup_cf155_v1/.verified

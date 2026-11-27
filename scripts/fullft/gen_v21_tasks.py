@@ -325,13 +325,61 @@ def block7():
     return "\n".join(out) + "\n"
 
 
+
+OT = "observe_and_pickup"
+
+
+def block8():
+    """11-27 12:45: card 25 obs_cf200 MAIN (top of the file) + verdict c25."""
+    run, why = "obs_cf200", "plan v21 card 25, new H200"
+    out = ["# " + "-" * 115,
+           "# 11-27 12:45 (Opus; plan v21 6.3 card 25, registered verbatim in gaas_queue.txt above obs_cf200 before any run;",
+           "# check 2 on card 8's gate, user 11-27 11:12). MAIN first in the file. observe_and_pickup 1-100, seed-42 bank,",
+           "# default noise, execute 8, closed_loop/v21. Verdict: scripts/fullft/v21_verdict.py c25.", ""]
+    out.append(fetch(run, "e30", why))
+    out.append(loop(f"A40-v21-{run}-smoke", [f"A40-fetch-{run}-e30", f"A40-prep2-{OT}"],
+                    f"smoke: {run}_e30, {OT} scene 1, one episode finishes on the A40 (closed_loop/v21smoke)",
+                    f"{EXP}/{run}_e30/export_e30.pt", f"{run}_e30_smoke", OT,
+                    ["--execute", "8", "--limit", "1"], "closed_loop/v21smoke", timeout=3, smoke=True))
+    for k in range(10):
+        out.append(loop(f"A40-v21-{run}-s{k}", [f"A40-v21-{run}-smoke"],
+                        f"plan v21 card 25 MAIN (registered 11-27 in gaas_queue.txt above {run}): {run}_e30 on {OT} "
+                        f"1-100; shard {k} of 10", f"{EXP}/{run}_e30/export_e30.pt", f"{run}_e30", OT,
+                        ["--execute", "8", "--limit", "100", "--shard", f"{k}/10"], "closed_loop/v21"))
+    out.append(shell("A40-V21-C25-verdict", [f"A40-v21-{run}-s{k}" for k in range(10)],
+                     "plan v21 card 25 verdict: v21_verdict.py c25 (D = obs_cf200 - obs_s200, SESOI +0.15 -> BREAKING THE "
+                     "SHORTCUT HELPS / NO HELP / UNCERTAIN); log pushed", f"{PY} scripts/fullft/v21_verdict.py c25"))
+    return "\n".join(out) + "\n"
+
+
+def block9():
+    """Card 25 described: e10 / e20 on 1-100 (after every MAIN)."""
+    run = "obs_cf200"
+    out = ["# " + "-" * 115,
+           "# 11-27 12:45 (Opus; plan v21 card 25, described): obs_cf200 e10 / e20 on observe_and_pickup 1-100, closed_loop/v21.", ""]
+    ids = []
+    for tag in ("e10", "e20"):
+        out.append(fetch(run, tag, "plan v21 card 25 (described)"))
+        for k in range(10):
+            tid = f"A40-v21-{run}-{tag}-s{k}"
+            ids.append(tid)
+            out.append(loop(tid, [f"A40-fetch-{run}-{tag}", f"A40-prep2-{OT}"],
+                            f"plan v21 card 25 described: {run}_{tag} on {OT} 1-100; shard {k} of 10",
+                            f"{EXP}/{run}_{tag}/export_{tag}.pt", f"{run}_{tag}", OT,
+                            ["--execute", "8", "--limit", "100", "--shard", f"{k}/10"], "closed_loop/v21"))
+    out.append(shell("A40-V21-C25-report", ids + ["A40-V21-C25-verdict"],
+                     "plan v21 card 25: v21_verdict.py c25 again with e10 / e20; log pushed",
+                     f"{PY} scripts/fullft/v21_verdict.py c25"))
+    return "\n".join(out) + "\n"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--blocks", nargs="+", type=int, default=[1, 2, 3])
     args = ap.parse_args()
     text = YAML.read_text()
     have = set(re.findall(r"^- id: (\S+)", text, re.M))
-    new = "".join({1: block1, 2: block2, 3: block3, 4: block4, 5: block5, 6: block6, 7: block7}[b]()
+    new = "".join({1: block1, 2: block2, 3: block3, 4: block4, 5: block5, 6: block6, 7: block7, 8: block8, 9: block9}[b]()
                   for b in sorted(args.blocks))
     ids = re.findall(r"^- id: (\S+)", new, re.M)
     dup = [i for i in ids if i in have] + [i for i in set(ids) if ids.count(i) > 1]
@@ -341,7 +389,7 @@ def main():
         YAML.write_text(text.rstrip("\n") + "\n\n" + new)
         print(f"appended {len(ids)} tasks at the end (block 4)")
         return
-    if args.blocks in ([1], [6]):                # new MAIN: right after 'tasks:'
+    if args.blocks in ([1], [6], [8]):           # new MAIN: right after 'tasks:'
         head, sep, rest = text.partition("\ntasks:\n")
         assert sep, "no 'tasks:' line"
         YAML.write_text(head + sep + new + "\n" + rest)
