@@ -358,6 +358,8 @@ class Samples(torch.utils.data.Dataset):
             if rng is not None and (float(self.rule.ledger_drop_p) > 0 or float(self.rule.ledger_over_p) > 0):
                 entries = augment_ledger(self.rule, a, self.events.get(episode_id, []), entries,
                                          lambda f: e["proprio"][f], rng)          # plan v19 3.2 (4), training only
+            if rng is not None and float(self.rule.record_dropout) > 0 and rng.random() < float(self.rule.record_dropout):
+                entries = []                     # plan v21 card 24b: the empty record (training only)
             feat, valid = ledger_tensor(self.rule, entries, lambda f: e["proprio"][f])
             sample.update(ledger=feat, ledger_valid=valid)
         return sample

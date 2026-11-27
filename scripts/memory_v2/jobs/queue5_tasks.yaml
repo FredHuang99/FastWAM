@@ -24,6 +24,220 @@ put_scenes: &put_scenes [closed_loop/scenes_seed17_n10, closed_loop/scenes_seed1
 
 tasks:
 # -------------------------------------------------------------------------------------------------------------------
+# 11-27 11:40 (Opus; plan v21 6.2 card 24b, opened by diagnostics 1 / 2 and the user's choice 11-27 11:12; reading
+# registered verbatim in gaas_queue.txt above ranking_drop before any run). MAIN first in the file (new versions'
+# MAIN first). blocks_ranking_try 1-100, seed-42 bank, default noise, execute 8, closed_loop/v21. Verdict:
+# scripts/fullft/v21_verdict.py c24b (written before any episode).
+
+- id: A40-fetch-ranking_drop-e30
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 240
+  hypothesis: "fetch ranking_drop_e30 from the relay (plan v21 card 24b, new H200 (user 11-27 11:12); sha256 checked; waits until it is there)"
+  command: "RUN=ranking_drop TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-v21-ranking_drop-smoke
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-ranking_drop-e30, A40-prep2-blocks_ranking_try]
+  requires_pass: [A40-fetch-ranking_drop-e30, A40-prep2-blocks_ranking_try]
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "smoke: ranking_drop_e30, blocks_ranking_try scene 1, one episode finishes on the A40 (closed_loop/v21smoke)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_drop_e30/export_e30.pt
+  label: ranking_drop_e30_smoke
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "1"]
+  output: closed_loop/v21smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+  pass_if: "m.get('episodes', 0) >= 1"
+
+- id: A40-v21-ranking_drop-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-v21-ranking_drop-smoke]
+  requires_pass: [A40-v21-ranking_drop-smoke]
+  need_mib: 30000
+  timeout_h: 24
+  hypothesis: "plan v21 card 24b MAIN (registered 11-27 in gaas_queue.txt above ranking_drop): ranking_drop_e30 on blocks_ranking_try 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_drop_e30/export_e30.pt
+  label: ranking_drop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v21-ranking_drop-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-v21-ranking_drop-smoke]
+  requires_pass: [A40-v21-ranking_drop-smoke]
+  need_mib: 30000
+  timeout_h: 24
+  hypothesis: "plan v21 card 24b MAIN (registered 11-27 in gaas_queue.txt above ranking_drop): ranking_drop_e30 on blocks_ranking_try 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_drop_e30/export_e30.pt
+  label: ranking_drop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v21-ranking_drop-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-v21-ranking_drop-smoke]
+  requires_pass: [A40-v21-ranking_drop-smoke]
+  need_mib: 30000
+  timeout_h: 24
+  hypothesis: "plan v21 card 24b MAIN (registered 11-27 in gaas_queue.txt above ranking_drop): ranking_drop_e30 on blocks_ranking_try 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_drop_e30/export_e30.pt
+  label: ranking_drop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v21-ranking_drop-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-v21-ranking_drop-smoke]
+  requires_pass: [A40-v21-ranking_drop-smoke]
+  need_mib: 30000
+  timeout_h: 24
+  hypothesis: "plan v21 card 24b MAIN (registered 11-27 in gaas_queue.txt above ranking_drop): ranking_drop_e30 on blocks_ranking_try 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_drop_e30/export_e30.pt
+  label: ranking_drop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v21-ranking_drop-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-v21-ranking_drop-smoke]
+  requires_pass: [A40-v21-ranking_drop-smoke]
+  need_mib: 30000
+  timeout_h: 24
+  hypothesis: "plan v21 card 24b MAIN (registered 11-27 in gaas_queue.txt above ranking_drop): ranking_drop_e30 on blocks_ranking_try 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_drop_e30/export_e30.pt
+  label: ranking_drop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v21-ranking_drop-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-v21-ranking_drop-smoke]
+  requires_pass: [A40-v21-ranking_drop-smoke]
+  need_mib: 30000
+  timeout_h: 24
+  hypothesis: "plan v21 card 24b MAIN (registered 11-27 in gaas_queue.txt above ranking_drop): ranking_drop_e30 on blocks_ranking_try 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_drop_e30/export_e30.pt
+  label: ranking_drop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v21-ranking_drop-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-v21-ranking_drop-smoke]
+  requires_pass: [A40-v21-ranking_drop-smoke]
+  need_mib: 30000
+  timeout_h: 24
+  hypothesis: "plan v21 card 24b MAIN (registered 11-27 in gaas_queue.txt above ranking_drop): ranking_drop_e30 on blocks_ranking_try 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_drop_e30/export_e30.pt
+  label: ranking_drop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v21-ranking_drop-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-v21-ranking_drop-smoke]
+  requires_pass: [A40-v21-ranking_drop-smoke]
+  need_mib: 30000
+  timeout_h: 24
+  hypothesis: "plan v21 card 24b MAIN (registered 11-27 in gaas_queue.txt above ranking_drop): ranking_drop_e30 on blocks_ranking_try 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_drop_e30/export_e30.pt
+  label: ranking_drop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v21-ranking_drop-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-v21-ranking_drop-smoke]
+  requires_pass: [A40-v21-ranking_drop-smoke]
+  need_mib: 30000
+  timeout_h: 24
+  hypothesis: "plan v21 card 24b MAIN (registered 11-27 in gaas_queue.txt above ranking_drop): ranking_drop_e30 on blocks_ranking_try 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_drop_e30/export_e30.pt
+  label: ranking_drop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v21-ranking_drop-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-v21-ranking_drop-smoke]
+  requires_pass: [A40-v21-ranking_drop-smoke]
+  need_mib: 30000
+  timeout_h: 24
+  hypothesis: "plan v21 card 24b MAIN (registered 11-27 in gaas_queue.txt above ranking_drop): ranking_drop_e30 on blocks_ranking_try 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_drop_e30/export_e30.pt
+  label: ranking_drop_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v21
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-V21-C24B-verdict
+  lane: a40cpu
+  kind: shell
+  after: [A40-v21-ranking_drop-s0, A40-v21-ranking_drop-s1, A40-v21-ranking_drop-s2, A40-v21-ranking_drop-s3, A40-v21-ranking_drop-s4, A40-v21-ranking_drop-s5, A40-v21-ranking_drop-s6, A40-v21-ranking_drop-s7, A40-v21-ranking_drop-s8, A40-v21-ranking_drop-s9]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v21 card 24b verdict: v21_verdict.py c24b (D = ranking_drop - ranking_arprop, SESOI +0.15 -> RECORD DROPOUT HELPS / NO HELP / UNCERTAIN; positions 1-2 / 3 / 4-5; the audit when it exists); log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v21_verdict.py c24b"
+  pass_if: "m['rc'] == 0"
+
+
+# -------------------------------------------------------------------------------------------------------------------
 # 11-27 02:10 (Opus; plan v21 6.1 / section 8, prompt v21 part 3.2): MAIN of cards 20 / 21 / 22 (new H200; readings
 # registered verbatim in gaas_queue.txt above their lines, commit a1aa519, before any run). Placed first in the file
 # (new versions' MAIN first). rearrange_blocks 1-100, seed-42 bank, default noise, execute 8, closed_loop/v21.
@@ -40068,6 +40282,174 @@ tasks:
   timeout_h: 4
   hypothesis: "plan v21 diagnostic 4(a) (described): press_button, pressed count x card count per button and the slope, four versions; log pushed"
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag_cpu_v21.py diag4a"
+  pass_if: "m['rc'] == 0"
+
+
+# -------------------------------------------------------------------------------------------------------------------
+# 11-27 11:40 (Opus; plan v21 card 24b, described): diagnostic 2's audit on ranking_drop e30 (record off, first frame
+# masked, near frames masked; the same 30 scenes, closed_loop/diag2), after its MAIN; c24b is re-run at the end.
+
+- id: A40-c24b-audit-off-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-V21-C24B-verdict]
+  requires_pass: [A40-V21-C24B-verdict]
+  need_mib: 30000
+  timeout_h: 24
+  hypothesis: "plan v21 card 24b audit (described): ranking_drop_e30 off on the 30 audit scenes; shard 0 of 3"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_drop_e30/export_e30.pt
+  label: ranking_drop_e30_off
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--seeds", "blocks_ranking_try:4300001", "blocks_ranking_try:4300003", "blocks_ranking_try:4300006", "blocks_ranking_try:4300007", "blocks_ranking_try:4300008", "blocks_ranking_try:4300012", "blocks_ranking_try:4300014", "blocks_ranking_try:4300016", "blocks_ranking_try:4300017", "blocks_ranking_try:4300024", "blocks_ranking_try:4300026", "blocks_ranking_try:4300027", "blocks_ranking_try:4300028", "blocks_ranking_try:4300030", "blocks_ranking_try:4300031", "blocks_ranking_try:4300000", "blocks_ranking_try:4300002", "blocks_ranking_try:4300004", "blocks_ranking_try:4300005", "blocks_ranking_try:4300009", "blocks_ranking_try:4300011", "blocks_ranking_try:4300013", "blocks_ranking_try:4300015", "blocks_ranking_try:4300018", "blocks_ranking_try:4300019", "blocks_ranking_try:4300020", "blocks_ranking_try:4300021", "blocks_ranking_try:4300022", "blocks_ranking_try:4300035", "blocks_ranking_try:4300037", "--shard", "0/3"]
+  output: closed_loop/diag2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "off"}
+
+- id: A40-c24b-audit-off-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-V21-C24B-verdict]
+  requires_pass: [A40-V21-C24B-verdict]
+  need_mib: 30000
+  timeout_h: 24
+  hypothesis: "plan v21 card 24b audit (described): ranking_drop_e30 off on the 30 audit scenes; shard 1 of 3"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_drop_e30/export_e30.pt
+  label: ranking_drop_e30_off
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--seeds", "blocks_ranking_try:4300001", "blocks_ranking_try:4300003", "blocks_ranking_try:4300006", "blocks_ranking_try:4300007", "blocks_ranking_try:4300008", "blocks_ranking_try:4300012", "blocks_ranking_try:4300014", "blocks_ranking_try:4300016", "blocks_ranking_try:4300017", "blocks_ranking_try:4300024", "blocks_ranking_try:4300026", "blocks_ranking_try:4300027", "blocks_ranking_try:4300028", "blocks_ranking_try:4300030", "blocks_ranking_try:4300031", "blocks_ranking_try:4300000", "blocks_ranking_try:4300002", "blocks_ranking_try:4300004", "blocks_ranking_try:4300005", "blocks_ranking_try:4300009", "blocks_ranking_try:4300011", "blocks_ranking_try:4300013", "blocks_ranking_try:4300015", "blocks_ranking_try:4300018", "blocks_ranking_try:4300019", "blocks_ranking_try:4300020", "blocks_ranking_try:4300021", "blocks_ranking_try:4300022", "blocks_ranking_try:4300035", "blocks_ranking_try:4300037", "--shard", "1/3"]
+  output: closed_loop/diag2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "off"}
+
+- id: A40-c24b-audit-off-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-V21-C24B-verdict]
+  requires_pass: [A40-V21-C24B-verdict]
+  need_mib: 30000
+  timeout_h: 24
+  hypothesis: "plan v21 card 24b audit (described): ranking_drop_e30 off on the 30 audit scenes; shard 2 of 3"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_drop_e30/export_e30.pt
+  label: ranking_drop_e30_off
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--seeds", "blocks_ranking_try:4300001", "blocks_ranking_try:4300003", "blocks_ranking_try:4300006", "blocks_ranking_try:4300007", "blocks_ranking_try:4300008", "blocks_ranking_try:4300012", "blocks_ranking_try:4300014", "blocks_ranking_try:4300016", "blocks_ranking_try:4300017", "blocks_ranking_try:4300024", "blocks_ranking_try:4300026", "blocks_ranking_try:4300027", "blocks_ranking_try:4300028", "blocks_ranking_try:4300030", "blocks_ranking_try:4300031", "blocks_ranking_try:4300000", "blocks_ranking_try:4300002", "blocks_ranking_try:4300004", "blocks_ranking_try:4300005", "blocks_ranking_try:4300009", "blocks_ranking_try:4300011", "blocks_ranking_try:4300013", "blocks_ranking_try:4300015", "blocks_ranking_try:4300018", "blocks_ranking_try:4300019", "blocks_ranking_try:4300020", "blocks_ranking_try:4300021", "blocks_ranking_try:4300022", "blocks_ranking_try:4300035", "blocks_ranking_try:4300037", "--shard", "2/3"]
+  output: closed_loop/diag2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_LEDGER: "off"}
+
+- id: A40-c24b-audit-mfirst-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-V21-C24B-verdict]
+  requires_pass: [A40-V21-C24B-verdict]
+  need_mib: 30000
+  timeout_h: 24
+  hypothesis: "plan v21 card 24b audit (described): ranking_drop_e30 mfirst on the 30 audit scenes; shard 0 of 3"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_drop_e30/export_e30.pt
+  label: ranking_drop_e30_mfirst
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--seeds", "blocks_ranking_try:4300001", "blocks_ranking_try:4300003", "blocks_ranking_try:4300006", "blocks_ranking_try:4300007", "blocks_ranking_try:4300008", "blocks_ranking_try:4300012", "blocks_ranking_try:4300014", "blocks_ranking_try:4300016", "blocks_ranking_try:4300017", "blocks_ranking_try:4300024", "blocks_ranking_try:4300026", "blocks_ranking_try:4300027", "blocks_ranking_try:4300028", "blocks_ranking_try:4300030", "blocks_ranking_try:4300031", "blocks_ranking_try:4300000", "blocks_ranking_try:4300002", "blocks_ranking_try:4300004", "blocks_ranking_try:4300005", "blocks_ranking_try:4300009", "blocks_ranking_try:4300011", "blocks_ranking_try:4300013", "blocks_ranking_try:4300015", "blocks_ranking_try:4300018", "blocks_ranking_try:4300019", "blocks_ranking_try:4300020", "blocks_ranking_try:4300021", "blocks_ranking_try:4300022", "blocks_ranking_try:4300035", "blocks_ranking_try:4300037", "--shard", "0/3"]
+  output: closed_loop/diag2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_HIST_MASK: "first"}
+
+- id: A40-c24b-audit-mfirst-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-V21-C24B-verdict]
+  requires_pass: [A40-V21-C24B-verdict]
+  need_mib: 30000
+  timeout_h: 24
+  hypothesis: "plan v21 card 24b audit (described): ranking_drop_e30 mfirst on the 30 audit scenes; shard 1 of 3"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_drop_e30/export_e30.pt
+  label: ranking_drop_e30_mfirst
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--seeds", "blocks_ranking_try:4300001", "blocks_ranking_try:4300003", "blocks_ranking_try:4300006", "blocks_ranking_try:4300007", "blocks_ranking_try:4300008", "blocks_ranking_try:4300012", "blocks_ranking_try:4300014", "blocks_ranking_try:4300016", "blocks_ranking_try:4300017", "blocks_ranking_try:4300024", "blocks_ranking_try:4300026", "blocks_ranking_try:4300027", "blocks_ranking_try:4300028", "blocks_ranking_try:4300030", "blocks_ranking_try:4300031", "blocks_ranking_try:4300000", "blocks_ranking_try:4300002", "blocks_ranking_try:4300004", "blocks_ranking_try:4300005", "blocks_ranking_try:4300009", "blocks_ranking_try:4300011", "blocks_ranking_try:4300013", "blocks_ranking_try:4300015", "blocks_ranking_try:4300018", "blocks_ranking_try:4300019", "blocks_ranking_try:4300020", "blocks_ranking_try:4300021", "blocks_ranking_try:4300022", "blocks_ranking_try:4300035", "blocks_ranking_try:4300037", "--shard", "1/3"]
+  output: closed_loop/diag2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_HIST_MASK: "first"}
+
+- id: A40-c24b-audit-mfirst-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-V21-C24B-verdict]
+  requires_pass: [A40-V21-C24B-verdict]
+  need_mib: 30000
+  timeout_h: 24
+  hypothesis: "plan v21 card 24b audit (described): ranking_drop_e30 mfirst on the 30 audit scenes; shard 2 of 3"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_drop_e30/export_e30.pt
+  label: ranking_drop_e30_mfirst
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--seeds", "blocks_ranking_try:4300001", "blocks_ranking_try:4300003", "blocks_ranking_try:4300006", "blocks_ranking_try:4300007", "blocks_ranking_try:4300008", "blocks_ranking_try:4300012", "blocks_ranking_try:4300014", "blocks_ranking_try:4300016", "blocks_ranking_try:4300017", "blocks_ranking_try:4300024", "blocks_ranking_try:4300026", "blocks_ranking_try:4300027", "blocks_ranking_try:4300028", "blocks_ranking_try:4300030", "blocks_ranking_try:4300031", "blocks_ranking_try:4300000", "blocks_ranking_try:4300002", "blocks_ranking_try:4300004", "blocks_ranking_try:4300005", "blocks_ranking_try:4300009", "blocks_ranking_try:4300011", "blocks_ranking_try:4300013", "blocks_ranking_try:4300015", "blocks_ranking_try:4300018", "blocks_ranking_try:4300019", "blocks_ranking_try:4300020", "blocks_ranking_try:4300021", "blocks_ranking_try:4300022", "blocks_ranking_try:4300035", "blocks_ranking_try:4300037", "--shard", "2/3"]
+  output: closed_loop/diag2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_HIST_MASK: "first"}
+
+- id: A40-c24b-audit-mnear-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-V21-C24B-verdict]
+  requires_pass: [A40-V21-C24B-verdict]
+  need_mib: 30000
+  timeout_h: 24
+  hypothesis: "plan v21 card 24b audit (described): ranking_drop_e30 mnear on the 30 audit scenes; shard 0 of 3"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_drop_e30/export_e30.pt
+  label: ranking_drop_e30_mnear
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--seeds", "blocks_ranking_try:4300001", "blocks_ranking_try:4300003", "blocks_ranking_try:4300006", "blocks_ranking_try:4300007", "blocks_ranking_try:4300008", "blocks_ranking_try:4300012", "blocks_ranking_try:4300014", "blocks_ranking_try:4300016", "blocks_ranking_try:4300017", "blocks_ranking_try:4300024", "blocks_ranking_try:4300026", "blocks_ranking_try:4300027", "blocks_ranking_try:4300028", "blocks_ranking_try:4300030", "blocks_ranking_try:4300031", "blocks_ranking_try:4300000", "blocks_ranking_try:4300002", "blocks_ranking_try:4300004", "blocks_ranking_try:4300005", "blocks_ranking_try:4300009", "blocks_ranking_try:4300011", "blocks_ranking_try:4300013", "blocks_ranking_try:4300015", "blocks_ranking_try:4300018", "blocks_ranking_try:4300019", "blocks_ranking_try:4300020", "blocks_ranking_try:4300021", "blocks_ranking_try:4300022", "blocks_ranking_try:4300035", "blocks_ranking_try:4300037", "--shard", "0/3"]
+  output: closed_loop/diag2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_HIST_MASK: "near"}
+
+- id: A40-c24b-audit-mnear-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-V21-C24B-verdict]
+  requires_pass: [A40-V21-C24B-verdict]
+  need_mib: 30000
+  timeout_h: 24
+  hypothesis: "plan v21 card 24b audit (described): ranking_drop_e30 mnear on the 30 audit scenes; shard 1 of 3"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_drop_e30/export_e30.pt
+  label: ranking_drop_e30_mnear
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--seeds", "blocks_ranking_try:4300001", "blocks_ranking_try:4300003", "blocks_ranking_try:4300006", "blocks_ranking_try:4300007", "blocks_ranking_try:4300008", "blocks_ranking_try:4300012", "blocks_ranking_try:4300014", "blocks_ranking_try:4300016", "blocks_ranking_try:4300017", "blocks_ranking_try:4300024", "blocks_ranking_try:4300026", "blocks_ranking_try:4300027", "blocks_ranking_try:4300028", "blocks_ranking_try:4300030", "blocks_ranking_try:4300031", "blocks_ranking_try:4300000", "blocks_ranking_try:4300002", "blocks_ranking_try:4300004", "blocks_ranking_try:4300005", "blocks_ranking_try:4300009", "blocks_ranking_try:4300011", "blocks_ranking_try:4300013", "blocks_ranking_try:4300015", "blocks_ranking_try:4300018", "blocks_ranking_try:4300019", "blocks_ranking_try:4300020", "blocks_ranking_try:4300021", "blocks_ranking_try:4300022", "blocks_ranking_try:4300035", "blocks_ranking_try:4300037", "--shard", "1/3"]
+  output: closed_loop/diag2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_HIST_MASK: "near"}
+
+- id: A40-c24b-audit-mnear-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-V21-C24B-verdict]
+  requires_pass: [A40-V21-C24B-verdict]
+  need_mib: 30000
+  timeout_h: 24
+  hypothesis: "plan v21 card 24b audit (described): ranking_drop_e30 mnear on the 30 audit scenes; shard 2 of 3"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_drop_e30/export_e30.pt
+  label: ranking_drop_e30_mnear
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_blocks_ranking_try]
+  tasks: [blocks_ranking_try]
+  online_args: ["--execute", "8", "--seeds", "blocks_ranking_try:4300001", "blocks_ranking_try:4300003", "blocks_ranking_try:4300006", "blocks_ranking_try:4300007", "blocks_ranking_try:4300008", "blocks_ranking_try:4300012", "blocks_ranking_try:4300014", "blocks_ranking_try:4300016", "blocks_ranking_try:4300017", "blocks_ranking_try:4300024", "blocks_ranking_try:4300026", "blocks_ranking_try:4300027", "blocks_ranking_try:4300028", "blocks_ranking_try:4300030", "blocks_ranking_try:4300031", "blocks_ranking_try:4300000", "blocks_ranking_try:4300002", "blocks_ranking_try:4300004", "blocks_ranking_try:4300005", "blocks_ranking_try:4300009", "blocks_ranking_try:4300011", "blocks_ranking_try:4300013", "blocks_ranking_try:4300015", "blocks_ranking_try:4300018", "blocks_ranking_try:4300019", "blocks_ranking_try:4300020", "blocks_ranking_try:4300021", "blocks_ranking_try:4300022", "blocks_ranking_try:4300035", "blocks_ranking_try:4300037", "--shard", "2/3"]
+  output: closed_loop/diag2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_HIST_MASK: "near"}
+
+- id: A40-V21-C24B-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-c24b-audit-off-s0, A40-c24b-audit-off-s1, A40-c24b-audit-off-s2, A40-c24b-audit-mfirst-s0, A40-c24b-audit-mfirst-s1, A40-c24b-audit-mfirst-s2, A40-c24b-audit-mnear-s0, A40-c24b-audit-mnear-s1, A40-c24b-audit-mnear-s2]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v21 card 24b: v21_verdict.py c24b again with the audit; log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v21_verdict.py c24b"
   pass_if: "m['rc'] == 0"
 
 

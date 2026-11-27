@@ -38,8 +38,10 @@ D5 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ranking_v3a ar2_
 # ~21:00): card 24 when diagnostics 1 / 2 have chosen it (inserted here when registered), else the two fillers; A7, C5
 # behind card 22 / swapT_joint3. A6 / B6 lists rewritten (their jobs 118763 / 118764 are held, they read this file when
 # they start). Every new slot: the same list; claims and SUMMARY.json keep a run from being trained twice.
+# 11-27 11:40 (Opus): card 24b ranking_drop registered (user 11:12 chose it) -> first in the D7 / B7 / A7 / C5 lists (jobs
+# 119255 / 119256 / 119258 / 119259, resubmitted 11:08); A6 (119257, behind ar2_v3c ~14:20) keeps card 22 first.
 D6 | rearr_ar_pw rearr_arprop_pw rearr_pw_s18 rearr_ar_h2 rearr_arprop_h2 cover_none
-D7 | rearr_ar_pw rearr_arprop_pw rearr_pw_s18 rearr_ar_h2 rearr_arprop_h2 cover_none
-B7 | rearr_ar_pw rearr_arprop_pw rearr_pw_s18 rearr_ar_h2 rearr_arprop_h2 cover_none
-A7 | rearr_ar_pw rearr_arprop_pw rearr_pw_s18 rearr_ar_h2 rearr_arprop_h2 cover_none
-C5 | rearr_ar_pw rearr_arprop_pw rearr_pw_s18 rearr_ar_h2 rearr_arprop_h2 cover_none
+D7 | ranking_drop rearr_ar_pw rearr_arprop_pw rearr_pw_s18 rearr_ar_h2 rearr_arprop_h2 cover_none
+B7 | ranking_drop rearr_ar_pw rearr_arprop_pw rearr_pw_s18 rearr_ar_h2 rearr_arprop_h2 cover_none
+A7 | ranking_drop rearr_ar_pw rearr_arprop_pw rearr_pw_s18 rearr_ar_h2 rearr_arprop_h2 cover_none
+C5 | ranking_drop rearr_ar_pw rearr_arprop_pw rearr_pw_s18 rearr_ar_h2 rearr_arprop_h2 cover_none

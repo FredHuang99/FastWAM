@@ -455,3 +455,30 @@ rearr_pw_s18 | seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/
 # rearr_split.py classes beside the H100 runs (another machine class) and beside cards 20 / 21 (same class); no verdict.
 rearr_ar_h2 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified
 rearr_arprop_h2 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks.json] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && test -f outputs/fullft/events/events_rearrange_blocks.json && test -f outputs/fullft/READY_arprop_rearrange_blocks
+#
+# Card 24b (plan v21 6.2; opened 11-27 11:40 by Opus): both start conditions of plan v21 5.6 item 6 held (diagnostic 1:
+# more than half of the first repeats are type A under both definitions; diagnostic 2: the body-record model is barely
+# hurt by masked frames and collapses with the record off at positions 4-5, the three-frame model collapses with the
+# first frame masked at positions 4-5; Status 11-27 section 9.2). The plan does not say which card then; the user chose
+# 24b on 11-27 11:12 ("那就用乙先训"; 24a stays a later option once card 21 has fixed its <BASE>). Trained on the H200
+# class (ranking_arprop: old H200, the same class), seed 17. history.record_dropout: new (fullft/history.py + data.py,
+# 11-27; 0 = bit-identical, tests test_record_dropout.py).
+# Card 24b (plan v21 6.2; opens when diagnostics 1 / 2 show that the body-record model does not use the frames where the
+# three-frame model succeeds): ranking_drop = ranking_arprop's exact line + record dropout: with probability 0.3
+# [starting value] all record tokens of a training sample are replaced by the empty-record padding
+# (history.record_dropout=0.3; new, 0 = bit-identical).
+# Why: ranking_ar solves 45/45 scenes whose sorted order is at position 1-2 of the expert's walk and 29/41 at 4-5;
+# ranking_arprop solves 17/45 and 39/41 (A40-RANKARP-split-report, 11-26): the two models read different cues and
+# 96/100 scenes are solved by at least one of them. Dropout keeps the cheap cue from starving the other one.
+# Registered reading (before any ranking_drop episode; A40, blocks_ranking_try 1-100, default noise; H200 class):
+#   MAIN: D = success(ranking_drop e30) - success(ranking_arprop e30), paired by scene, paired bootstrap 95 % CI
+#   (10,000, seed 0); SESOI +0.15: CI lower > +0.15 -> RECORD DROPOUT HELPS; CI upper < +0.15 -> NO HELP; otherwise
+#   UNCERTAIN (pre-set extension: both again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule).
+#   Described: against ranking_ar e30 (77) and 100 (pure-WAM best, self-reported); success by the position of the
+#   sorted order (1-2 / 3 / 4-5); the audit of diagnostic 2 on ranking_drop (record off, first frame masked, near frames
+#   masked; the same 30 scenes).
+#   Written before the run: positions 1-2 reach >= 38/45 (17/45 in ranking_arprop) while positions 4-5 stay >= 35/41.
+#   Seed extension (plan v21 5.5 item 6): if the verdict is not UNCERTAIN and the difference is within 30 points, both
+#   arms get a seed-18 training; the four trainings are pooled by a bootstrap stratified by seed and scene and the
+#   pooled interval is reported; the single-seed verdict word stands.
+ranking_drop | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_blocks_ranking_try_v1] data.tasks=[blocks_ranking_try] history.variant=arprop history.event_max=69 history.lag=4 history.record_dropout=0.3 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_blocks_ranking_try.json] | test -f outputs/memory_v2/press/dense_blocks_ranking_try_v1/.verified && test -s outputs/fullft/events/events_blocks_ranking_try.json && test -f outputs/fullft/READY_arprop_blocks_ranking_try

@@ -274,13 +274,65 @@ def block4():
     return "\n".join(out) + "\n"
 
 
+
+RT = "blocks_ranking_try"
+
+
+def block6():
+    """11-27 11:40: card 24b ranking_drop (user 11:12 chose it). MAIN first in the file (new versions' MAIN first)."""
+    run, why = "ranking_drop", "plan v21 card 24b, new H200 (user 11-27 11:12)"
+    out = ["# " + "-" * 115,
+           "# 11-27 11:40 (Opus; plan v21 6.2 card 24b, opened by diagnostics 1 / 2 and the user's choice 11-27 11:12; reading",
+           "# registered verbatim in gaas_queue.txt above ranking_drop before any run). MAIN first in the file (new versions'",
+           "# MAIN first). blocks_ranking_try 1-100, seed-42 bank, default noise, execute 8, closed_loop/v21. Verdict:",
+           "# scripts/fullft/v21_verdict.py c24b (written before any episode).", ""]
+    out.append(fetch(run, "e30", why))
+    out.append(loop(f"A40-v21-{run}-smoke", [f"A40-fetch-{run}-e30", f"A40-prep2-{RT}"],
+                    f"smoke: {run}_e30, {RT} scene 1, one episode finishes on the A40 (closed_loop/v21smoke)",
+                    f"{EXP}/{run}_e30/export_e30.pt", f"{run}_e30_smoke", RT,
+                    ["--execute", "8", "--limit", "1"], "closed_loop/v21smoke", timeout=3, smoke=True))
+    for k in range(10):
+        out.append(loop(f"A40-v21-{run}-s{k}", [f"A40-v21-{run}-smoke"],
+                        f"plan v21 card 24b MAIN (registered 11-27 in gaas_queue.txt above {run}): {run}_e30 on {RT} "
+                        f"1-100; shard {k} of 10", f"{EXP}/{run}_e30/export_e30.pt", f"{run}_e30", RT,
+                        ["--execute", "8", "--limit", "100", "--shard", f"{k}/10"], "closed_loop/v21", timeout=24))
+    out.append(shell("A40-V21-C24B-verdict", [f"A40-v21-{run}-s{k}" for k in range(10)],
+                     "plan v21 card 24b verdict: v21_verdict.py c24b (D = ranking_drop - ranking_arprop, SESOI +0.15 -> "
+                     "RECORD DROPOUT HELPS / NO HELP / UNCERTAIN; positions 1-2 / 3 / 4-5; the audit when it exists); log pushed",
+                     f"{PY} scripts/fullft/v21_verdict.py c24b"))
+    return "\n".join(out) + "\n"
+
+
+def block7():
+    """Card 24b's described audit (diagnostic 2's three conditions on ranking_drop, the same 30 scenes): after the MAIN."""
+    seeds = [f"{RT}:{s}" for s in D2_P12 + D2_P45]
+    out = ["# " + "-" * 115,
+           "# 11-27 11:40 (Opus; plan v21 card 24b, described): diagnostic 2's audit on ranking_drop e30 (record off, first frame",
+           "# masked, near frames masked; the same 30 scenes, closed_loop/diag2), after its MAIN; c24b is re-run at the end.", ""]
+    ids = []
+    for name, env in (("off", {"MWAM_LEDGER": "off"}), ("mfirst", {"MWAM_HIST_MASK": "first"}),
+                      ("mnear", {"MWAM_HIST_MASK": "near"})):
+        for k in range(3):
+            tid = f"A40-c24b-audit-{name}-s{k}"
+            ids.append(tid)
+            out.append(loop(tid, ["A40-V21-C24B-verdict"],
+                            f"plan v21 card 24b audit (described): ranking_drop_e30 {name} on the 30 audit scenes; shard {k} of 3",
+                            f"{EXP}/ranking_drop_e30/export_e30.pt", f"ranking_drop_e30_{name}", RT,
+                            ["--execute", "8", "--seeds", *seeds, "--shard", f"{k}/3"], "closed_loop/diag2", env=env,
+                            timeout=24))
+    out.append(shell("A40-V21-C24B-report", ids, "plan v21 card 24b: v21_verdict.py c24b again with the audit; log pushed",
+                     f"{PY} scripts/fullft/v21_verdict.py c24b"))
+    return "\n".join(out) + "\n"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--blocks", nargs="+", type=int, default=[1, 2, 3])
     args = ap.parse_args()
     text = YAML.read_text()
     have = set(re.findall(r"^- id: (\S+)", text, re.M))
-    new = "".join({1: block1, 2: block2, 3: block3, 4: block4, 5: block5}[b]() for b in sorted(args.blocks))
+    new = "".join({1: block1, 2: block2, 3: block3, 4: block4, 5: block5, 6: block6, 7: block7}[b]()
+                  for b in sorted(args.blocks))
     ids = re.findall(r"^- id: (\S+)", new, re.M)
     dup = [i for i in ids if i in have] + [i for i in set(ids) if ids.count(i) > 1]
     if dup:
@@ -289,7 +341,7 @@ def main():
         YAML.write_text(text.rstrip("\n") + "\n\n" + new)
         print(f"appended {len(ids)} tasks at the end (block 4)")
         return
-    if args.blocks == [1]:
+    if args.blocks in ([1], [6]):                # new MAIN: right after 'tasks:'
         head, sep, rest = text.partition("\ntasks:\n")
         assert sep, "no 'tasks:' line"
         YAML.write_text(head + sep + new + "\n" + rest)

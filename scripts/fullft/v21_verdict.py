@@ -21,7 +21,8 @@ pre-set extensions pool the default-noise pairs with the MWAM_NOISE_SALT=r2 pair
 Both c20 and c21 also report whether the seed extension of plan v21 5.5 item 6 is due (verdict not UNCERTAIN and
 |D| < 0.30 -> both arms get a seed-18 training; the pooled interval is computed when those exist; the single-seed
 verdict word stands). A verdict needs all 100 MAIN scenes on both sides (else WAIT). Writes outputs/fullft/V21_<NAME>.json.
-  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v21_verdict.py c20|c21|c22
+  c24b card 24b ranking_drop (11-27 11:40, user chose it 11:12): see c24b's docstring.
+  PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v21_verdict.py c20|c21|c22|c24b
 """
 from __future__ import annotations
 
@@ -140,9 +141,75 @@ def c22():
     return out
 
 
+RT = "blocks_ranking_try"
+D2_P12 = [4300001, 4300003, 4300006, 4300007, 4300008, 4300012, 4300014, 4300016, 4300017, 4300024, 4300026, 4300027,
+          4300028, 4300030, 4300031]
+D2_P45 = [4300000, 4300002, 4300004, 4300005, 4300009, 4300011, 4300013, 4300015, 4300018, 4300019, 4300020, 4300021,
+          4300022, 4300035, 4300037]
+
+
+def by_position(folder, label):
+    """Success by the position of the sorted order in the expert's walk (diagnostic 1's reading of each episode):
+    {'1-2': 'k/n', '3': .., '4-5': ..} and the per-position counts."""
+    dg = _module("diag_cpu_v21", "diag_cpu_v21.py")
+    rs = dg._module("ranking_split", "ranking_split.py")
+    root = Path("/workspace/FastWAM-memory2/outputs/memory_v2/closed_loop") / folder / label / "on" / RT
+    tab = {}
+    for d in sorted(root.glob("seed_*")):
+        x = dg.diag1_episode(rs, d)
+        if x is None or x["expert_position_of_sorted"] is None:
+            continue
+        p = x["expert_position_of_sorted"]
+        g = "1-2" if p in (1, 2) else "3" if p == 3 else "4-5" if p in (4, 5) else str(p)
+        ok, n = tab.get(g, (0, 0))
+        tab[g] = (ok + int(x["success"]), n + 1)
+    return {g: f"{ok}/{n}" for g, (ok, n) in sorted(tab.items())}
+
+
+def c24b():
+    """Card 24b ranking_drop (body record + record dropout 0.3), registered 11-27 (plan v21 6.2, verbatim):
+    D = success(ranking_drop e30, v21) - success(ranking_arprop e30, e6); SESOI +0.15: CI lower > +0.15 -> RECORD
+    DROPOUT HELPS; CI upper < +0.15 -> NO HELP; otherwise UNCERTAIN (pre-set r2 extension, 200 pairs). Described: against
+    ranking_ar e30 (77) and 100; success by position (1-2 / 3 / 4-5); diagnostic 2's audit on ranking_drop (closed_loop/
+    diag2, the same 30 scenes) when it exists; the pre-written expectation (positions 1-2 >= 38/45 while 4-5 >= 35/41)."""
+    order, ref = success("e6", "ranking_arprop_e30", RT)
+    _, new = success("v21", "ranking_drop_e30", RT)
+    out = {"run": "card 24b ranking_drop (body record + record dropout 0.3) against ranking_arprop", "sesoi": 0.15,
+           "finished": {"ranking_drop_e30": len(new), "ranking_arprop_e30": len(ref)}}
+    if len(new) < 100 or len(ref) < 100:
+        out["verdict"] = f"WAIT ({len(new)} / {len(ref)} of 100)"
+        return out
+    c = compare(new, ref, order)                  # D = success(ranking_drop) - success(ranking_arprop)
+    rule = lambda x: three(x, 0.15, "RECORD DROPOUT HELPS", "NO HELP")   # noqa: E731
+    with_extension(out, c, rule(c), rule, RT, "ranking_drop_e30", "v21", "ranking_arprop_e30", "e6")
+    order_ar, ar = success("e6", "ranking_ar_e30", RT)
+    out["described"] = {"against_ranking_ar_e30": compare(new, ar, order_ar),
+                        "success_against_100": f"{sum(new.values())}/100",
+                        "by_position": {"ranking_drop_e30": by_position("v21", "ranking_drop_e30"),
+                                        "ranking_arprop_e30": by_position("e6", "ranking_arprop_e30"),
+                                        "ranking_ar_e30": by_position("e6", "ranking_ar_e30")}}
+    pos = out["described"]["by_position"]["ranking_drop_e30"]
+    k12 = int(pos.get("1-2", "0/0").split("/")[0])
+    k45 = int(pos.get("4-5", "0/0").split("/")[0])
+    out["expectation_written_before"] = {"positions_1_2": pos.get("1-2"), "positions_4_5": pos.get("4-5"),
+                                         "1-2 >= 38 and 4-5 >= 35": k12 >= 38 and k45 >= 35}
+    audit = {}
+    for cond in ("off", "mfirst", "mnear"):
+        _, ok = success("diag2", f"ranking_drop_e30_{cond}", RT)
+        if ok:
+            audit[cond] = {"finished": len(ok), "position_1_2": sum(int(ok.get(s, 0)) for s in D2_P12),
+                           "position_4_5": sum(int(ok.get(s, 0)) for s in D2_P45)}
+    if audit:
+        audit["unmodified_same_scenes"] = {"position_1_2": sum(int(new.get(s, 0)) for s in D2_P12),
+                                           "position_4_5": sum(int(new.get(s, 0)) for s in D2_P45)}
+        out["described"]["audit_diag2"] = audit
+    out["seed_extension_v21_5_5_6"] = seed_extension(out)
+    return out
+
+
 def main():
     name = sys.argv[1] if len(sys.argv) > 1 else ""
-    fns = {"c20": c20, "c21": c21, "c22": c22}
+    fns = {"c20": c20, "c21": c21, "c22": c22, "c24b": c24b}
     if name not in fns:
         print(__doc__)
         return 2

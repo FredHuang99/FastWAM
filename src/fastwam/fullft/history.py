@@ -74,6 +74,11 @@ class HistoryRule:
     ledger_keep: int = 4
     ledger_over_p: float = 0.0
     ledger_over_max: int = 2
+    # 11-27 plan v21 card 24b (arprop only; TRAINING ONLY, data.Samples with augment; never online): with probability
+    # record_dropout ALL record entries of a training sample are replaced by the empty record (the padding an
+    # episode's first decision sees: zero features, valid False), so the model also learns to act without the record.
+    # Drawn after the ledger augmentation above. 0 = off (no random number drawn: bit-identical to before).
+    record_dropout: float = 0.0
     # 11-22 plan v19 3.3 (A3, observe_and_pickup): two ZOOM history frames on top of the variant's frames: the head
     # camera of frame 0 cropped to zoom_ref_box (where the reference object is shown) and the head camera of the current
     # frame cropped to zoom_cur_box (the table's candidates), each resized back to the camera's size and encoded like
@@ -107,6 +112,10 @@ class HistoryRule:
                              f"{self.ledger_over_max}")
         if (float(self.ledger_drop_p) > 0.0 or float(self.ledger_over_p) > 0.0) and self.variant != "arprop":
             raise ValueError("ledger augmentation needs variant arprop")
+        if not 0.0 <= float(self.record_dropout) <= 1.0:
+            raise ValueError(f"history record_dropout must be in [0, 1], got {self.record_dropout}")
+        if float(self.record_dropout) > 0.0 and self.variant != "arprop":
+            raise ValueError("history record_dropout drops the record: only with variant arprop")
         if float(self.ledger_over_p) > 0.0 and not float(self.repeat_theta) > 0.0:
             raise ValueError("ledger_over_p marks the end of an in-place run: it needs history.repeat_theta > 0")
         if self.zoom:
