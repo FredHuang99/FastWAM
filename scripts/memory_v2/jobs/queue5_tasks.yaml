@@ -221,6 +221,17 @@ tasks:
   hypothesis: "hourly until 11-28 14:00: hf_usage.py then hf_prune_auto.py (nothing at <= 85 %); log outputs/fullft/HF_PRUNE_AUTO.log"
   command: "bash /workspace/FastWAM-memory2/scripts/fullft/hf_prune_auto_loop.sh"
   pass_if: "m['rc'] == 0"
+# 11-27 22:10 (Opus, round 2/5): the loop above was stopped by the pool's 120-min stall rule three times (it wrote only to
+# HF_PRUNE_AUTO.log, never to its job log) and ended ERROR at 19:59; the relay then stood at 86.8 % (5090, 21:26). Same
+# loop, now also writing to its job log every step (hf_prune_auto_loop.sh); same rule (user 11-27 13:19), until 11-28 14:00.
+- id: A40-HF-autoprune-loop2
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 18
+  hypothesis: "hourly until 11-28 14:00: hf_usage.py then hf_prune_auto.py (nothing at <= 85 %); log outputs/fullft/HF_PRUNE_AUTO.log and the job log"
+  command: "bash /workspace/FastWAM-memory2/scripts/fullft/hf_prune_auto_loop.sh"
+  pass_if: "m['rc'] == 0"
 
 # -------------------------------------------------------------------------------------------------------------------
 # 11-27 12:45 (Opus; plan v21 6.3 card 25, registered verbatim in gaas_queue.txt above obs_cf200 before any run;
