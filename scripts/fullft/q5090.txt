@@ -13,6 +13,10 @@ gen600-build | gpu0 | grep -q '"finished"' outputs/fullft/gen_obs/gen600/demo_cl
 # failed or hung. The machine is rebooted by the user; from now on every pending GPU line runs on GPU 1 only, in this
 # order (lines moved here from below; ids unchanged): gen800b first (its cache gates the new H200's obs_s1600), then
 # the find-same / card 25 frame-0 probes, then the development-scene looks. Retries under new ids (-3 / -2).
+# 11-27 21:30: the kernel log (user, after the reboot) puts GPU 0's loss at 09:57:03, in the middle of probe-obs_s800_e10:
+# its held-out split finished (wait +14.4 %, onset +8.4 %), its training split died (CUDA launch failure) although the
+# script said exit code 0 (fixed in card13b_5090.sh). Again, first (about 5 min):
+probe-obs_s800_e10-2 | gpu1 | bash scripts/fullft/relay_has.sh obs_s800_e10 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); RUNS=obs_s800 TAG=e10 bash scripts/fullft/card13b_5090.sh
 gen800b-3 | gpu1 | - | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); GEN_GPU=$GPU GEN_GATE=background GEN_MORE=gen800b:800 bash scripts/fullft/gen_obs_5090.sh
 probe-obs_cf200_e10 | gpu1 | bash scripts/fullft/relay_has.sh obs_cf200_e10 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); RUNS=obs_cf200 TAG=e10 bash scripts/fullft/card13b_5090.sh
 probe-obs_s800_20_e10 | gpu1 | bash scripts/fullft/relay_has.sh obs_s800_20_e10 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); RUNS=obs_s800_20 TAG=e10 bash scripts/fullft/card13b_5090.sh

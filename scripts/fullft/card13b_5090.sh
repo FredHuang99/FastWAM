@@ -22,6 +22,7 @@ export PYTHONPATH=$R/src PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 G=${GPU:-${PF_GPUS:-1}}
 echo "[13b] $(date '+%F %T') start; checkout $(git -c safe.directory='*' log --oneline -1 | cut -c1-60); GPU $G"
 TAG=${TAG:-e30}
+FAIL=0     # 11-27 21:30: a failed probe part makes the script fail (09:57 a GPU loss mid-run still ended "exit code 0")
 for RUN in ${RUNS:-obs_ar obs_none}; do
   RUN=$RUN TAG=$TAG POLL=60 bash scripts/fullft/export_fetch.sh || { echo "[13b] ${RUN}_$TAG: fetch failed"; exit 1; }
   CK=$F/exports/${RUN}_$TAG/export_$TAG.pt
@@ -31,7 +32,9 @@ for RUN in ${RUNS:-obs_ar obs_none}; do
       echo "[13b] $(date '+%F %T') ${RUN}_$TAG split $S window $W"
       CUDA_VISIBLE_DEVICES=$G /opt/mwam/bin/python scripts/fullft/obs_probe.py --export $CK --window $W --split $S --choice $n \
         2>&1 | grep -v "Warning\|warn(\|^  [0-9]*/[0-9]*$"
+      rc=${PIPESTATUS[0]}; [ "$rc" = 0 ] || { echo "[13b] ${RUN}_$TAG split $S window $W: probe FAILED (exit code $rc)"; FAIL=1; }
     done
   done
 done
 echo "[13b] $(date '+%F %T') CARD 13B done"
+exit $FAIL
