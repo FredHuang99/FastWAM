@@ -8,7 +8,8 @@ exports/<run>_<tag>/ of hhyfred/memwam-fullft is deleted only when ALL hold:
   2 the A40 holds outputs/fullft/exports/<run>_<tag>/export_<tag>.pt whose sha256 (computed now) equals its local .sha256
     AND the relay's .sha256 (as hf_prune.py)
   3 evaluated on the A40: at least one queue5 task uses that checkpoint, and every such task not on hold is done
-  4 the relay copy is older than 24 h (the 5090's early looks / probes fetch new exports from the relay)
+  4 the relay copy is older than 24 h (the 5090's early looks / probes fetch new exports from the relay); measured
+    by the A40 copy's mtime (11-28: a history squash resets the relay's commit dates)
 Oldest first, until the projected usage is at most 80 %. One commit, then super_squash_history (the quota reflects it
 within 36 h; an export deleted once is never counted again). Writes outputs/fullft/HF_PRUNE_AUTO.json.
   /opt/hf-tools/bin/python scripts/fullft/hf_prune_auto.py [--dry]
@@ -108,8 +109,11 @@ def main():
         if tag >= 30 or tag >= last[run]:
             continue                                            # final exports are never touched
         local = OUT / "exports" / name / f"export_e{tag}.pt"
-        date = getattr(getattr(f, "last_commit", None), "date", None)
-        when = date.timestamp() if date else (local.stat().st_mtime if local.exists() else None)   # A40 copy: fetched later
+        # 11-28 03:40: super_squash_history rewrites every file's last commit to the squash time, so after the 22:07 prune
+        # every export looked about 4 h old and all were skipped (HF_PRUNE_AUTO.json 23:10-02:11). The age is now the A40
+        # copy's mtime (written when the A40 fetched it from the relay, i.e. after the upload): it is never older than
+        # the relay copy, so the 24 h guard can only be stricter than intended, never looser.
+        when = local.stat().st_mtime if local.exists() else None
         age_h = (now - when) / 3600 if when else None
         if age_h is None or age_h < 24:
             out["skipped"][name] = f"relay copy younger than 24 h ({age_h})"
