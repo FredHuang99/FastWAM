@@ -401,13 +401,37 @@ def block10():
     return "\n".join(out) + "\n"
 
 
+
+def block11():
+    """11-27 17:40: card 2's pre-set extension (registered reading: UNCERTAIN -> both e30 again with MWAM_NOISE_SALT=r2,
+    200 pairs, the same rule). put_back_block came out UNCERTAIN (89 vs 100, CI [-0.18, -0.05]); ar2_prop e30's r2 side
+    exists (closed_loop/r2); this adds ar2_v3c e30's. MAIN-level: right after 'tasks:'."""
+    out = ["# " + "-" * 115,
+           "# 11-27 17:40 (Opus): plan v20 card 2 (ar2_v3c, non-inferiority margin -0.05) put_back_block UNCERTAIN (89 vs 100, D -0.11,",
+           "# CI [-0.18, -0.05]; V20_AR2V3C.json) -> the registered pre-set extension: ar2_v3c e30 on put_back_block 1-100 with",
+           "# MWAM_NOISE_SALT=r2 (closed_loop/r2; ar2_prop e30's r2 side exists), then v20_verdict.py ar2v3c pools 200 pairs.", ""]
+    ids = []
+    for k in range(10):
+        tid = f"A40-ar2v3c-r2-put-s{k}"
+        ids.append(tid)
+        out.append(loop(tid, ["A40-fetch-ar2_v3c-e30"],
+                        f"plan v20 card 2 pre-set extension: ar2_v3c_e30 on put_back_block 1-100 with MWAM_NOISE_SALT=r2; "
+                        f"shard {k} of 10", f"{EXP}/ar2_v3c_e30/export_e30.pt", "ar2_v3c_e30", "put_back_block",
+                        ["--execute", "8", "--limit", "100", "--shard", f"{k}/10"], "closed_loop/r2",
+                        env={"MWAM_NOISE_SALT": "r2"}))
+    out.append(shell("A40-ar2v3c-ext-verdict", ids, "plan v20 card 2 verdict with the pre-set extension: v20_verdict.py "
+                     "ar2v3c (200 pairs on put_back_block, the same rule); log pushed",
+                     f"{PY} scripts/fullft/v20_verdict.py ar2v3c"))
+    return "\n".join(out) + "\n"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--blocks", nargs="+", type=int, default=[1, 2, 3])
     args = ap.parse_args()
     text = YAML.read_text()
     have = set(re.findall(r"^- id: (\S+)", text, re.M))
-    new = "".join({1: block1, 2: block2, 3: block3, 4: block4, 5: block5, 6: block6, 7: block7, 8: block8, 9: block9, 10: block10}[b]()
+    new = "".join({1: block1, 2: block2, 3: block3, 4: block4, 5: block5, 6: block6, 7: block7, 8: block8, 9: block9, 10: block10, 11: block11}[b]()
                   for b in sorted(args.blocks))
     ids = re.findall(r"^- id: (\S+)", new, re.M)
     dup = [i for i in ids if i in have] + [i for i in set(ids) if ids.count(i) > 1]
@@ -417,7 +441,7 @@ def main():
         YAML.write_text(text.rstrip("\n") + "\n\n" + new)
         print(f"appended {len(ids)} tasks at the end (block 4)")
         return
-    if args.blocks in ([1], [6], [8]):           # new MAIN: right after 'tasks:'
+    if args.blocks in ([1], [6], [8], [11]):     # new MAIN: right after 'tasks:'
         head, sep, rest = text.partition("\ntasks:\n")
         assert sep, "no 'tasks:' line"
         YAML.write_text(head + sep + new + "\n" + rest)

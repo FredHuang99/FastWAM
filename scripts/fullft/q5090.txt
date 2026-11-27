@@ -73,9 +73,9 @@ probe-obs_s800_e10 | gpu | bash scripts/fullft/relay_has.sh obs_s800_e10 | RUNS=
 dev-rearr_ar_pw_e10 | gpu | bash scripts/fullft/relay_has.sh rearr_ar_pw_e10 | PF_GPUS=$GPU DEV_RUNS="rearr_ar_pw_e10:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
 dev-rearr_arprop_pw_e10 | gpu | bash scripts/fullft/relay_has.sh rearr_arprop_pw_e10 | PF_GPUS=$GPU DEV_RUNS="rearr_arprop_pw_e10:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
 dev-rearr_ar_pw_e20 | gpu | bash scripts/fullft/relay_has.sh rearr_ar_pw_e20 | PF_GPUS=$GPU DEV_RUNS="rearr_ar_pw_e20:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
-dev-rearr_arprop_pw_e20 | gpu | bash scripts/fullft/relay_has.sh rearr_arprop_pw_e20 | PF_GPUS=$GPU DEV_RUNS="rearr_arprop_pw_e20:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
-dev-rearr_pw_s18_e10 | gpu | bash scripts/fullft/relay_has.sh rearr_pw_s18_e10 | PF_GPUS=$GPU DEV_RUNS="rearr_pw_s18_e10:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
-dev-rearr_pw_s18_e20 | gpu | bash scripts/fullft/relay_has.sh rearr_pw_s18_e20 | PF_GPUS=$GPU DEV_RUNS="rearr_pw_s18_e20:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+dev-rearr_arprop_pw_e20 | gpu | bash scripts/fullft/relay_has.sh rearr_arprop_pw_e20 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PF_GPUS=$GPU DEV_RUNS="rearr_arprop_pw_e20:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+dev-rearr_pw_s18_e10 | gpu | bash scripts/fullft/relay_has.sh rearr_pw_s18_e10 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PF_GPUS=$GPU DEV_RUNS="rearr_pw_s18_e10:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+dev-rearr_pw_s18_e20 | gpu | bash scripts/fullft/relay_has.sh rearr_pw_s18_e20 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PF_GPUS=$GPU DEV_RUNS="rearr_pw_s18_e20:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
 # 11-27 11:50 (Opus): card 25 check 2, what the right-wrist difference is (user 11:12: the card-8 threshold may be used
 # if it does not affect training / evaluation); small PNGs in CARD25_PICS.json (read-only, cpu, ~1 min)
 card25-pics | cpu | - | PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/card25_pics.py --base outputs/fullft/gen_cf/check
@@ -84,7 +84,16 @@ card25-pics | cpu | - | PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/card2
 # one GPU -> dense_observe_and_pickup_gen800b_v1 on the cache relay (obs_s1600 starts on the new H200 when it is there).
 gen800b | gpu | - | GEN_GPU=$GPU GEN_GATE=background GEN_MORE=gen800b:800 bash scripts/fullft/gen_obs_5090.sh
 # frame-0 swap probes (card 13b's script, held-out official demos) of the find-same runs as their exports arrive
-probe-obs_cf200_e10 | gpu | bash scripts/fullft/relay_has.sh obs_cf200_e10 | RUNS=obs_cf200 TAG=e10 bash scripts/fullft/card13b_5090.sh
-probe-obs_s800_20_e10 | gpu | bash scripts/fullft/relay_has.sh obs_s800_20_e10 | RUNS=obs_s800_20 TAG=e10 bash scripts/fullft/card13b_5090.sh
-probe-obs_s800_s18_e10 | gpu | bash scripts/fullft/relay_has.sh obs_s800_s18_e10 | RUNS=obs_s800_s18 TAG=e10 bash scripts/fullft/card13b_5090.sh
-probe-obs_cf200_e30 | gpu | bash scripts/fullft/relay_has.sh obs_cf200_e30 | RUNS=obs_cf200 TAG=e30 bash scripts/fullft/card13b_5090.sh
+probe-obs_cf200_e10 | gpu | bash scripts/fullft/relay_has.sh obs_cf200_e10 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); RUNS=obs_cf200 TAG=e10 bash scripts/fullft/card13b_5090.sh
+probe-obs_s800_20_e10 | gpu | bash scripts/fullft/relay_has.sh obs_s800_20_e10 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); RUNS=obs_s800_20 TAG=e10 bash scripts/fullft/card13b_5090.sh
+probe-obs_s800_s18_e10 | gpu | bash scripts/fullft/relay_has.sh obs_s800_s18_e10 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); RUNS=obs_s800_s18 TAG=e10 bash scripts/fullft/card13b_5090.sh
+probe-obs_cf200_e30 | gpu | bash scripts/fullft/relay_has.sh obs_cf200_e30 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); RUNS=obs_cf200 TAG=e30 bash scripts/fullft/card13b_5090.sh
+# 11-27 17:45 (Opus): gen800b FAILED at 13:32 BJ within 1 s ("gen exit code 1" also for the two existing batches); its
+# generator logs are under gen_obs/ (not pushed): their tails as a small JSON for the next round
+gen800b-logtail | cpu | - | /opt/mwam/bin/python scripts/fullft/logtail_json.py --out GEN800B_LOGTAIL.json outputs/fullft/gen_obs/gen800b.log outputs/fullft/gen_obs/gen155.log outputs/fullft/gen_obs/gen600.log
+# 11-27 17:50 (Opus): GPU 0 is missing from nvidia-smi again -> every GPU line maps the runner's index to the CUDA ordinal
+# (cuda_ordinal.sh). Retries of what failed on it (new ids; the failed ones stay failed):
+gen800b-2 | gpu | - | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); GEN_GPU=$GPU GEN_GATE=background GEN_MORE=gen800b:800 bash scripts/fullft/gen_obs_5090.sh
+dev-rearr_ar_pw_e10-2 | gpu | bash scripts/fullft/relay_has.sh rearr_ar_pw_e10 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PF_GPUS=$GPU DEV_RUNS="rearr_ar_pw_e10:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+dev-rearr_arprop_pw_e10-2 | gpu | bash scripts/fullft/relay_has.sh rearr_arprop_pw_e10 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PF_GPUS=$GPU DEV_RUNS="rearr_arprop_pw_e10:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+dev-rearr_ar_pw_e20-2 | gpu | bash scripts/fullft/relay_has.sh rearr_ar_pw_e20 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PF_GPUS=$GPU DEV_RUNS="rearr_ar_pw_e20:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
