@@ -47,5 +47,5 @@ D5 | obs_match obs_s200 obs_s800 rearr_pw press_told swapT_long ranking_v3a ar2_
 D6 | rearr_ar_pw rearr_arprop_pw rearr_pw_s18 rearr_ar_h2 rearr_arprop_h2 cover_none
 D7 | rearr_pw_s18 obs_cf200 obs_s800_20 obs_s800_s18 rearr_ar_h2 rearr_arprop_h2 cover_none
 B7 | rearr_pw_s18 obs_s800_20 obs_cf200 obs_s800_s18 rearr_ar_h2 rearr_arprop_h2 cover_none
-A7 | obs_s800_s18 obs_s800_20 obs_cf200 rearr_ar_h2 rearr_arprop_h2 cover_none
-C5 | obs_s1600 obs_s800_s18 obs_s800_20 obs_cf200 rearr_ar_h2 rearr_arprop_h2 cover_none
+A7 | ar2_pw obs_s800_s18 obs_s800_20 obs_cf200 rearr_ar_h2 rearr_arprop_h2 cover_none
+C5 | ar2_pw obs_s1600 obs_s800_s18 obs_s800_20 obs_cf200 rearr_ar_h2 rearr_arprop_h2 cover_none
