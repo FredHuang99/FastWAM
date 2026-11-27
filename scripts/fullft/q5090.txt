@@ -76,3 +76,6 @@ dev-rearr_ar_pw_e20 | gpu | bash scripts/fullft/relay_has.sh rearr_ar_pw_e20 | P
 dev-rearr_arprop_pw_e20 | gpu | bash scripts/fullft/relay_has.sh rearr_arprop_pw_e20 | PF_GPUS=$GPU DEV_RUNS="rearr_arprop_pw_e20:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
 dev-rearr_pw_s18_e10 | gpu | bash scripts/fullft/relay_has.sh rearr_pw_s18_e10 | PF_GPUS=$GPU DEV_RUNS="rearr_pw_s18_e10:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
 dev-rearr_pw_s18_e20 | gpu | bash scripts/fullft/relay_has.sh rearr_pw_s18_e20 | PF_GPUS=$GPU DEV_RUNS="rearr_pw_s18_e20:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+# 11-27 11:50 (Opus): card 25 check 2, what the right-wrist difference is (user 11:12: the card-8 threshold may be used
+# if it does not affect training / evaluation); small PNGs in CARD25_PICS.json (read-only, cpu, ~1 min)
+card25-pics | cpu | - | PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/card25_pics.py --base outputs/fullft/gen_cf/check
