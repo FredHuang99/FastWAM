@@ -42,7 +42,7 @@ OVER_CM = 5.0              # "over the other start": hand within 5 cm horizontal
 
 
 def CLASSES_5B(x):
-    """Fixed 11-27 04:30 from the first 10 back-at-own-start failures per model (SWAPT_DIAG5B_FIRST.json, Status 11-27),
+    """Fixed 11-27 04:10 (commit f8e7728, before the full run at 04:22) from the first 10 back-at-own-start failures per model (SWAPT_DIAG5B_FIRST.json, Status 11-27),
     before the full run. A is card 26's condition (b): the first placer never went over the other block's start."""
     f, l = x.get("first") or {}, x.get("later") or {}
     fc, lc, lp = f.get("closest_to_other_start_cm"), l.get("closest_to_other_start_cm"), l.get("at_putdown_to_other_start_cm")

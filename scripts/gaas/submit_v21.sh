@@ -78,6 +78,9 @@ say "lanes now: A6 $(cat $SD/A6.job 2>/dev/null) B6 $(cat $SD/B6.job 2>/dev/null
 slot D6 "$(cat $SD/D5.job 2>/dev/null)"   # card 20 on ranking_v3a's GPU (~07:30)
 slot D7 "$(cat $SD/D6.job 2>/dev/null)"   # tonight: card 24 or a filler
 slot B7 "$(cat $SD/B6.job 2>/dev/null)"   # tonight: card 24 or a filler
+# 11-27 09:50 (round 9): A6 too. At 09:21 the jobs that were held (A6 118763, D7, B7, A7, C5) and 119049 were no longer
+# in qstat (they were at 03:5x). A rerun is safe: a slot whose job is still queued / running is skipped.
+slot A6 "$(cat $SD/A5.job 2>/dev/null)"   # card 22 on ar2_v3c's GPU (~14:20)
 slot A7 "$(cat $SD/A6.job 2>/dev/null)"   # behind card 22
 slot C5 "$(cat $SD/C4.job 2>/dev/null)"   # behind swapT_joint3
 for j in $(qselect -u "$ME" 2>/dev/null); do

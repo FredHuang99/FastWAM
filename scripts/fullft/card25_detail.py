@@ -1,4 +1,4 @@
-"""Card 25 (11-27 04:20, Opus): WHERE the 'same table' check failed (card25_check.py check 2, 11-27 02:03 on the 5090).
+"""Card 25 (11-27 04:10, Opus): WHERE the 'same table' check failed (card25_check.py check 2, 11-27 02:03 on the 5090).
 Read-only, CPU. For every seed and target pair of <base> (target 0 against target K, frame 0): per camera the largest
 |difference|, the share of pixels differing at all and by more than 8 levels, and the bounding box (normalised x0 y0 x1 y1)
 of the > 8 pixels; the head camera split into inside / outside the shelf box (REF_BOX) and the table box (CUR_BOX).

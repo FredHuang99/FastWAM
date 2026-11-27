@@ -104,6 +104,16 @@ class NextEventHead(nn.Module):
 
 
 # ----------------------------------------------------------------------------- the model
+
+def release_dims(payload: dict) -> tuple:
+    """(action_dim, proprio_dim) of a released base payload: the action encoder's input width and the proprio encoder's
+    input width. 14 / 14 when a key is missing (the RoboTwin layout the code was written for)."""
+    mot = payload.get("mot", {})
+    w = mot.get("mixtures.action.action_encoder.weight")
+    p = payload.get("proprio_encoder", {}).get("weight")
+    return (int(w.shape[1]) if w is not None else 14), (int(p.shape[1]) if p is not None else 14)
+
+
 class FullModel(nn.Module):
     def __init__(self, mot, proprio_encoder: nn.Linear, variant: str = "none", event_slots: int = 0,
                  video_shift: float = 5.0, action_shift: float = 1.0, ledger_features: int = 0,
@@ -161,13 +171,19 @@ class FullModel(nn.Module):
         arch = yaml.safe_load(Path(architecture).read_text())
         video_cfg = dict(arch["video_dit_config"])
         action_cfg = dict(arch["action_dit_config"])
-        video_cfg.update(use_gradient_checkpointing=False, action_dim=14)
-        action_cfg.update(use_gradient_checkpointing=False, action_dim=14)
         if video_cfg.get("video_attention_mask_mode") != "first_frame_causal":
             raise ValueError("FullModel reproduces the released first_frame_causal video mask only.")
-        mot = MoT({"video": WanVideoDiT(**video_cfg), "action": ActionDiT(**action_cfg)}, mot_checkpoint_mixed_attn=False)
-        proprio = nn.Linear(14, int(video_cfg["text_dim"]))
         payload = torch.load(base, map_location="cpu", weights_only=True, mmap=True)
+        # 11-27 (plan v21 6.6, RoboMME): the action / proprio sizes follow the base checkpoint. The RoboTwin base is
+        # 14 / 14 (unchanged: the same modules as before); the LIBERO base (RoboMME, single arm) is 7 / 8
+        # (ROBOMME_BASE_INSPECT.json, 5090 11-27).
+        action_dim, proprio_dim = release_dims(payload)
+        video_dim = int(payload["mot"]["mixtures.video.action_embedding.weight"].shape[1]) \
+            if "mixtures.video.action_embedding.weight" in payload["mot"] else action_dim
+        video_cfg.update(use_gradient_checkpointing=False, action_dim=video_dim)
+        action_cfg.update(use_gradient_checkpointing=False, action_dim=action_dim)
+        mot = MoT({"video": WanVideoDiT(**video_cfg), "action": ActionDiT(**action_cfg)}, mot_checkpoint_mixed_attn=False)
+        proprio = nn.Linear(proprio_dim, int(video_cfg["text_dim"]))
         mot.load_state_dict(payload["mot"], strict=True)
         proprio.load_state_dict(payload["proprio_encoder"], strict=True)
         del payload

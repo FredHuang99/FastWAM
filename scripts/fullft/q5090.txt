@@ -57,11 +57,22 @@ robomme-base-inspect | cpu | - | PYTHONPATH=src /opt/mwam/bin/python scripts/rob
 card25-check | gpu | - | PART=check bash scripts/fullft/card25_5090.sh
 diag5-b1 | cpu | - | PART=b1 bash scripts/fullft/diag5_5090.sh
 diag5-d | cpu | - | PART=d bash scripts/fullft/diag5_5090.sh
-# 11-27 04:30: diag 5(b) classes fixed (CLASSES_5B in swapT_diag5_5090.py, from the first 10 per model); the full run:
+# 11-27 04:10: diag 5(b) classes fixed (CLASSES_5B in swapT_diag5_5090.py, from the first 10 per model); the full run:
 diag5-b | cpu | - | PART=b bash scripts/fullft/diag5_5090.sh
 diag5-c | gpu | - | PART=c bash scripts/fullft/diag5_5090.sh
 diag4b | gpu | - | bash scripts/fullft/diag4b_5090.sh
-# 11-27 04:20: the condition above was WRONG (grep found a per-check "pass": true while the overall pass was false): card25-gen
+# 11-27 04:10: the condition above was WRONG (grep found a per-check "pass": true while the overall pass was false): card25-gen
 # ran at 11-27 02:26 BJ (machine clock 11-26 18:26) although CARD25_CHECK failed (check 2). Its caches are NOT registered for any training. Now: top-level pass only.
 card25-gen | gpu | /opt/mwam/bin/python -c "import json,sys; sys.exit(0 if json.load(open('outputs/fullft/gen_cf/CARD25_CHECK.json'))['pass'] is True else 1)" | PART=gen bash scripts/fullft/card25_5090.sh
 card25-detail | cpu | - | PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/card25_detail.py --base outputs/fullft/gen_cf/check
+# 11-27 09:50 (Opus, round 9): ready work for the 5090 (idle since diag 4(b) / 5(b) / card25-detail finished).
+#   probe-obs_s800_e10: card 8's 800-scene arm (plan v21 5.8 reads "800 also does not move" as: success within 15 of 13
+#   AND the frame-0 swap still < 2 %): the same probe as probe-obs_s200_e10/e20 on obs_s800's final export (10 epochs).
+#   dev-*: early looks of cards 20 / 21 / 22 on the 30 development scenes (this machine only; never a verdict).
+probe-obs_s800_e10 | gpu | bash scripts/fullft/relay_has.sh obs_s800_e10 | RUNS=obs_s800 TAG=e10 bash scripts/fullft/card13b_5090.sh
+dev-rearr_ar_pw_e10 | gpu | bash scripts/fullft/relay_has.sh rearr_ar_pw_e10 | PF_GPUS=$GPU DEV_RUNS="rearr_ar_pw_e10:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+dev-rearr_arprop_pw_e10 | gpu | bash scripts/fullft/relay_has.sh rearr_arprop_pw_e10 | PF_GPUS=$GPU DEV_RUNS="rearr_arprop_pw_e10:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+dev-rearr_ar_pw_e20 | gpu | bash scripts/fullft/relay_has.sh rearr_ar_pw_e20 | PF_GPUS=$GPU DEV_RUNS="rearr_ar_pw_e20:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+dev-rearr_arprop_pw_e20 | gpu | bash scripts/fullft/relay_has.sh rearr_arprop_pw_e20 | PF_GPUS=$GPU DEV_RUNS="rearr_arprop_pw_e20:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+dev-rearr_pw_s18_e10 | gpu | bash scripts/fullft/relay_has.sh rearr_pw_s18_e10 | PF_GPUS=$GPU DEV_RUNS="rearr_pw_s18_e10:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+dev-rearr_pw_s18_e20 | gpu | bash scripts/fullft/relay_has.sh rearr_pw_s18_e20 | PF_GPUS=$GPU DEV_RUNS="rearr_pw_s18_e20:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
