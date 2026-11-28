@@ -493,6 +493,22 @@ class FullSession:
                 self.events.append(e)
             self.detected_upto = i
 
+    def _countdown(self, evs):
+        """Plan v22 card 31: annotate press entries with 'remaining' (history.annotate_remaining) from the told counts
+        in the instruction (MWAM_TOLD_COUNTS=1) and the button nearest the pressing end-effector at the entry's frame
+        (the observations' endpose; the same x thresholds as the events file the run trained on)."""
+        from .history import annotate_remaining, press_button_of, told_targets
+        targets = told_targets(self.instruction)
+        if not targets:
+            raise ValueError("history count_mode=remaining needs the told counts in the instruction (MWAM_TOLD_COUNTS=1)")
+
+        def button_of(e):
+            f = min(int(e["frame"]), max(self.raw))
+            pose = (self.raw.get(f) or {}).get("endpose") or {}
+            side = "left" if int(e["arm"]) == 0 else "right"
+            return press_button_of(pose[side][0]) if pose.get(side) else 3
+        return annotate_remaining(evs, targets, button_of)
+
     def decide(self, request: dict):
         import numpy as np
         from fastwam.memory_s1.common import seed_for
@@ -526,11 +542,15 @@ class FullSession:
                         check_ledger_slots(self.text[0], p.rule.event_max, "(online instruction)")
                     evs = seen + visible_events(self.detector.pending(), self.hide_after)   # 11-19: undecided
                                                                        # provisional entries (none when off)
-                    entries = ledger_entries(self.rule, current, evs, self._proprio)
                     mode = os.environ.get("MWAM_LEDGER", "").strip().lower()      # 11-14: test-time ablations
+                    if getattr(self.rule, "count_mode", "") == "remaining":      # 11-28 plan v22 card 31
+                        evs = self._countdown(evs)
+                    entries = ledger_entries(self.rule, current, evs, self._proprio)
                     if mode == "oracle":                 # 11-21 plan v18 Z0: zero-delay write of the TRUE presses
                         evs_o = [e for e in evs if e.get("kind") != "bottom"] + visible_events(
                             oracle_presses(self.raw, current), self.hide_after)        # Z1b blind: hidden as well
+                        if getattr(self.rule, "count_mode", "") == "remaining":
+                            evs_o = self._countdown(evs_o)
                         entries = ledger_entries(self.rule, current, evs_o, self._proprio)
                     elif mode == "off":
                         entries = []                     # no entry = what the model sees before the first event

@@ -9,7 +9,8 @@ seed-42 banks, default noise; new runs' episodes in closed_loop/v22 (r2 noise in
   c36b  card 36b: D = success(swapT_ar_ow e30) - success(swapT_ar e30, closed_loop/e6), swap_T 1-100; SESOI +0.15:
         RELEASE WEIGHTING HELPS (NO RECORD) / NO HELP / UNCERTAIN (same extension). Described: swapT_ar_ow_s18 e30.
 Each verdict is about these two checkpoints (plan v21 5.5).
-  python3 scripts/fullft/v22_verdict.py c36 | c36b   -> outputs/fullft/V22_C36.json / V22_C36B.json
+  c31   card 31 (press_cd, 11-28 18:40, before any run): see c31() -- COMPARISON IS THE BOTTLENECK / NOT THE COMPARISON
+  python3 scripts/fullft/v22_verdict.py c36 | c36b | c31   -> outputs/fullft/V22_C36.json / V22_C36B.json / V22_C31.json
   python3 scripts/fullft/v22_verdict.py gate c36 UNCERTAIN   -> exit 0 if V22_C36.json's verdict starts with UNCERTAIN
         (100 pairs), else exit 3: releases the pre-set r2 extension tasks on the A40 through requires_pass
 """
@@ -78,6 +79,44 @@ def c36b():
     return out
 
 
+def c31():
+    """Card 31 (press_cd, countdown; a diagnostic, never a main-table entry), registered 11-28 in gaas_queue.txt above
+    press_cd before any run: D = success(press_cd e30) - success(press_told e30, closed_loop/v20), press_button 1-100;
+    SESOI +0.30: COMPARISON IS THE BOTTLENECK / NOT THE COMPARISON / UNCERTAIN (pre-set extension: r2, 200 pairs).
+    press_cd runs with the scene's counts in the instruction and the simulator's true presses in the record
+    (MWAM_TOLD_COUNTS=1, MWAM_LEDGER=oracle). Described: each button's over / right / under; presses beyond the card
+    (made after the countdown read 0) per button; success by N1 + N2; e10 / e20; diagnostic 4(a)'s table."""
+    task = "press_button"
+    out = {"run": "card 31 press_cd (countdown; diagnostic, never a main-table entry) against press_told", "sesoi": 0.30}
+    out, order, new, ref = _main_rule(out, task, "press_cd_e30", "v22", "press_told_e30", "v20", 0.30,
+                                      "COMPARISON IS THE BOTTLENECK", "NOT THE COMPARISON")
+    dv = v20.dv
+    try:
+        rn, rr = dv.press_rows("v22", "press_cd_e30"), dv.press_rows("v20", "press_told_e30")
+        out["described"] = {"press_cd_e30": dv.per_button(rn), "press_told_e30": dv.per_button(rr)}
+        for lab, rows in (("press_cd_e30", rn), ("press_told_e30", rr)):
+            out["described"][lab]["presses_beyond_card"] = {
+                k: sum(max(0, v[k]) for v in rows.values() if isinstance(v.get(k), int)) for k in ("n1_error", "n2_error")}
+        by = {}
+        for s_, v in rn.items():
+            c1, c2 = v.get("card_1"), v.get("card_2")
+            if c1 is not None and c2 is not None:
+                k = int(c1) + int(c2)
+                by.setdefault(k, [0, 0])
+                by[k][0] += int(bool(new.get(s_)))
+                by[k][1] += 1
+        out["described"]["success_by_N1_plus_N2"] = {k: f"{a}/{b}" for k, (a, b) in sorted(by.items())}
+        d4 = _module("diag_cpu_v21", "diag_cpu_v21.py")
+        out["described"]["pressed_x_card"] = d4.diag4a(["v22:press_cd_e30"]).get("items", {}).get("v22:press_cd_e30")
+    except Exception as e:                                                     # noqa: BLE001
+        out["described_error"] = f"{type(e).__name__}: {e}"
+    for tag in ("e10", "e20"):
+        _, x = success("v22", f"press_cd_{tag}", task)
+        if x:
+            out[f"described_{tag}"] = compare(x, ref, order)
+    return out
+
+
 def gate(name, word, anywhere=False):
     """name = c36 / c36b (V22_<NAME>.json) or a verdict file stem such as V21_C23 (11-28 audit: card 23's extension)."""
     f = F / (f"{name}.json" if name.startswith("V2") else f"V22_{name.upper()}.json")
@@ -95,7 +134,7 @@ def main():
     name = sys.argv[1] if len(sys.argv) > 1 else ""
     if name == "gate":
         return gate(sys.argv[2], sys.argv[3], "--anywhere" in sys.argv)
-    fns = {"c36": c36, "c36b": c36b}
+    fns = {"c36": c36, "c36b": c36b, "c31": c31}
     if name not in fns:
         print(__doc__)
         return 2

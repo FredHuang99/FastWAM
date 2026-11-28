@@ -79,6 +79,14 @@ class HistoryRule:
     # episode's first decision sees: zero features, valid False), so the model also learns to act without the record.
     # Drawn after the ledger augmentation above. 0 = off (no random number drawn: bit-identical to before).
     record_dropout: float = 0.0
+    # 11-28 plan v22 card 31 (press_cd; a diagnostic, never a main-table entry; arprop with ordinal, no repeat_theta):
+    # count_mode "remaining" replaces the ordinal's count by a COUNTDOWN: every entry of a press on button b (1 = left,
+    # 2 = middle; 'bottom' and the 'top' that ends it) carries r = N_b - (presses of b made so far, this one included),
+    # coded as the thermometer of r + 1 (so "0 still to do" = the first feature on); every other entry (the check
+    # button, gripper events) carries 0 (all features off). The entries must carry 'remaining' (annotate_remaining:
+    # offline in the events file, online from the scene's told counts). "" = off: every earlier export and run is
+    # bit-identical (the ordinal path is untouched).
+    count_mode: str = ""
     # 11-22 plan v19 3.3 (A3, observe_and_pickup): two ZOOM history frames on top of the variant's frames: the head
     # camera of frame 0 cropped to zoom_ref_box (where the reference object is shown) and the head camera of the current
     # frame cropped to zoom_cur_box (the table's candidates), each resized back to the camera's size and encoded like
@@ -118,6 +126,11 @@ class HistoryRule:
             raise ValueError("history record_dropout drops the record: only with variant arprop")
         if float(self.ledger_over_p) > 0.0 and not float(self.repeat_theta) > 0.0:
             raise ValueError("ledger_over_p marks the end of an in-place run: it needs history.repeat_theta > 0")
+        if self.count_mode not in ("", "remaining"):
+            raise ValueError(f"history count_mode must be '' or 'remaining', got {self.count_mode!r}")
+        if self.count_mode and (self.variant != "arprop" or not int(self.ordinal) or float(self.repeat_theta) > 0.0
+                                or float(self.ledger_over_p) > 0.0):
+            raise ValueError("history count_mode=remaining needs variant arprop, ordinal > 0, no repeat_theta / ledger_over_p")
         if self.zoom:
             if self.variant not in FRAME_VARIANTS:
                 raise ValueError(f"history zoom adds history frames: only with {FRAME_VARIANTS}, got {self.variant!r}")
@@ -305,7 +318,9 @@ def ledger_entries(rule: HistoryRule, t: int, events: Sequence[dict], proprio_of
     known = [e for e in events
              if int(e["frame"]) < t and int(e.get("confirmed", e["frame"])) + int(rule.lag) <= t]
     known.sort(key=lambda e: (int(e["frame"]), int(e["arm"])))
-    if int(rule.ordinal):
+    if int(rule.ordinal) and getattr(rule, "count_mode", "") == "remaining":     # 11-28 card 31: the countdown
+        known = [dict(e, ordinal=(int(e["remaining"]) + 1 if e.get("remaining") is not None else 0)) for e in known]
+    elif int(rule.ordinal):
         if float(rule.repeat_theta) > 0.0:
             if proprio_of is None:
                 raise ValueError("history repeat_theta: ledger_entries needs proprio_of")
@@ -313,6 +328,47 @@ def ledger_entries(rule: HistoryRule, t: int, events: Sequence[dict], proprio_of
         else:
             known = with_ordinals(known)
     return known[-rule.event_max:]
+
+
+BUTTON_X = (-0.15, 0.0, 0.15)      # press_button: left / middle / check button x (press_told_text.py, repeat_theta.py)
+
+
+def press_button_of(x: float) -> int:
+    """1 / 2 / 3 = the press_button button whose x is nearest the pressing end-effector's x."""
+    return 1 + min(range(3), key=lambda i: abs(float(x) - BUTTON_X[i]))
+
+
+def annotate_remaining(events: Sequence[dict], targets: dict, button_of) -> List[dict]:
+    """Plan v22 card 31 (count_mode remaining): copies of the events, each press entry ('bottom', and the 'top' that
+    ends it) on a button b in `targets` ({1: N1, 2: N2}) with 'button' = b and 'remaining' = max(0, N_b - presses of b
+    made so far, this one included); other entries get 'remaining' None. button_of(event) -> 1 / 2 / 3 (the button
+    nearest the pressing end-effector at the event's frame). The same function offline (events file) and online."""
+    out, made, last = [], {}, {}
+    for e in sorted(events, key=lambda x: (int(x["frame"]), int(x["arm"]))):
+        e = dict(e, remaining=None)
+        if e.get("kind") in ("bottom", "top"):
+            b = int(button_of(e))
+            e["button"] = b
+            if b in targets:
+                if e["kind"] == "bottom":
+                    made[b] = made.get(b, 0) + 1
+                    last[(int(e["arm"]), b)] = made[b]
+                n = made.get(b, 0) if e["kind"] == "bottom" else last.get((int(e["arm"]), b), made.get(b, 0))
+                e["remaining"] = max(0, int(targets[b]) - n)
+        out.append(e)
+    return out
+
+
+TOLD_WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10}
+
+
+def told_targets(instruction: str) -> dict:
+    """{1: N1, 2: N2} from the told sentence (scripts/memory_v2/sim/told.py) in the instruction; {} if absent."""
+    import re
+    m = re.search(r"Press the left button (\w+) times and the middle button (\w+) times\.", instruction or "")
+    if not m or m.group(1) not in TOLD_WORDS or m.group(2) not in TOLD_WORDS:
+        return {}
+    return {1: TOLD_WORDS[m.group(1)], 2: TOLD_WORDS[m.group(2)]}
 
 
 def run_ended(latest: dict, events: Sequence[dict], proprio_of, theta: float) -> bool:
