@@ -20,7 +20,7 @@ say() { echo "[v22] $(date '+%F %T') $*"; }
 cd $R
 ME=$(id -un)
 say "code $(git log --oneline -1 | cut -c1-70); home $(df -h $HOME | tail -n 1 | awk '{print $4}') free"
-[ -f scripts/gaas/slots.txt ] && grep -q '^swapT_ow_s18 |' scripts/gaas/gaas_queue.txt && grep -q '^D8 |' scripts/gaas/slots.txt || { say "slots.txt / the plan v22 lines are missing (git pull): stop"; exit 1; }
+[ -f scripts/gaas/slots.txt ] && grep -q '^swapT_ow_s18 |' scripts/gaas/gaas_queue.txt && grep -q '^D8[[:space:]]*|' scripts/gaas/slots.txt || { say "slots.txt / the plan v22 lines are missing (git pull): stop"; exit 1; }
 live() { [ -n "$1" ] && qstat "$1" > /dev/null 2>&1; }
 jstate() { qstat -f "$1" 2>/dev/null | awk -F' = ' '/job_state/{print $2}'; }
 # 11-24 18:35: the depend attribute only (qstat -f prints "    depend = afterany:116646.gaas@gaas"); the earlier
