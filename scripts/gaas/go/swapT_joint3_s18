@@ -1,2 +1,2 @@
 # 11-28 (Opus): plan v22 card 35 opens only if card 9b read CO-TRAINING HELPS and card 37 does not open.
-python3 scripts/fullft/v22_gate.py c35
+"${HFPY:-$HOME/mwam/envs/hf-tools/bin/python}" scripts/fullft/v22_gate.py c35
