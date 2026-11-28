@@ -150,6 +150,34 @@ rearr_pw_h100 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/d
 rearr_pw_h100_s18 | seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks_v3c.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[bottom] schedule.export_at_epochs=[30] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && bash scripts/fullft/rearr_v3c_ready.sh
 rearrange_ar_s18 | seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] schedule.export_at_epochs=[30] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified
 rearrange_arprop_s18 | seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks.json] schedule.export_at_epochs=[30] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && test -f outputs/fullft/events/events_rearrange_blocks.json && grep -q rearrange_blocks outputs/fullft/READY_arprop
+# 11-28 (Opus): plan v22 card 27b = card 27's reading (verbatim in gaas_queue.txt above rearr_pw_long_s18, registered
+# before any run) with the H100-class pair of card 33: rearr_pw_h100_s18 / rearr_pw_h100 trained on from their final
+# resume checkpoints to 60 frame-epochs (60-epoch cosine restarted at the seed point, exports e45 and e60), as swapT_long.
+# The new H200's resume.pt of rearr_pw / rearr_pw_s18 were removed by AUTO_CLEAN (check 1), so this is card 27's formal
+# version (plan v22 2.4 / v22b part 3 section 6). Order: seed 18 first; seed 17 only if V22_C27B's early stop says
+# "train" (v22_gate.py c27bs17: seed 18 gained >= +0.10 from e30 to e60). Verdict v22_verdict.py c27b (A40).
+# Card 27's reading, copied verbatim:
+# Card 27 (plan v22, P0): rearr_pw_long_s18 / rearr_pw_long = rearr_pw_s18 / rearr_pw trained on from their final
+# resume checkpoints to 60 frame-epochs (60-epoch cosine restarted at the seed point, exports e45 and e60), as
+# swapT_long (card 3). H200 class. Opens only if both resume.pt files exist; otherwise the H100-class pair of card 33
+# is trained on in the same way (card 27b, same reading with the H100-class runs).
+# Question: is rearrange (rearr_pw: 93 with seed 17, 61 with seed 18) limited by training length? Seed 17 rose
+# 14 -> 78 -> 93 over e10 / e20 / e30 (A40); seed 18's development look was 5/30 and 1/30 at e10 / e20. Training length
+# has been excluded for swap_T only (card 3).
+# Order: seed 18 first.
+# Registered reading (11-28, before any episode of either run; A40, rearrange_blocks 1-100, default noise):
+#   MAIN, two seeds pooled: D = mean success(e60; s17, s18) - mean success(e30; s17, s18), paired by scene within a
+#   seed, stratified paired bootstrap over seeds and scenes (10,000, seed 0), 95 % CI; SESOI +0.10: CI lower > +0.10 ->
+#   TRAINING-LIMITED; CI upper < +0.10 -> NOT TRAINING-LIMITED; otherwise UNCERTAIN (pre-set extension: all four
+#   checkpoints again with MWAM_NOISE_SALT=r2, 200 pairs per seed, the same rule).
+#   Early stop, written before the run: if success(e60, s18) - success(e30, s18) < +0.10, the seed-17 run is not
+#   trained on and the card reads NOT TRAINING-LIMITED (ONE SEED).
+#   Described: each seed alone at e30 / e45 / e60 with rearr_split.py classes; the gap between the two seeds at e60
+#   beside the gap at e30 (32).
+#   Written before the run: if seed 18 is a slower training of the same solution, its e60 reaches >= 85 with
+#   "pressed twice" < 5 and "never pressed" < 8; seed 17 stays >= 88.
+rearr_pw_h100_long_s18 | seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks_v3c.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[bottom] schedule.frame_epochs=60 schedule.export_at_epochs=[45,60] schedule.resume_from=/workspace/FastWAM-memory2/outputs/fullft/rearr_pw_h100_s18/resume.pt | test -f outputs/fullft/rearr_pw_h100_s18/SUMMARY.json && test -f outputs/fullft/rearr_pw_h100_s18/resume.pt && test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && bash scripts/fullft/rearr_v3c_ready.sh
+rearr_pw_h100_long | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks_v3c.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[bottom] schedule.frame_epochs=60 schedule.export_at_epochs=[45,60] schedule.resume_from=/workspace/FastWAM-memory2/outputs/fullft/rearr_pw_h100/resume.pt | test -f outputs/fullft/rearr_pw_h100/SUMMARY.json && test -f outputs/fullft/rearr_pw_h100/resume.pt && /opt/hf-tools/bin/python scripts/fullft/v22_gate.py c27bs17 && test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && bash scripts/fullft/rearr_v3c_ready.sh
 # Fillers (plan v22, P2; run only when a card has nothing else ready). Described only; no verdict.
 #   rearr_pw_s19 (H200 class); rearr_pw_h100_s19 / rearr_pw_h100_s20 (H100 class) = rearr_pw's exact line with seeds
 #   19 / 20. swapT_ar_s18 = swapT_ar's exact line with seed 18 (H100 class). ranking_arprop_s18 = ranking_arprop's

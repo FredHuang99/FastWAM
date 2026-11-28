@@ -9,6 +9,7 @@ json (never grep). Where they come from: on the A40 its own outputs/fullft; anyw
   c35     card 35 (swapT_joint3_s18): card 9b CO-TRAINING HELPS AND V22_C36 has a final verdict with
           card37_condition_two false (card 37 does not open)
   c27s17  card 27's seed-17 continuation: V22_C27 early_stop says "train" (seed 18 gained >= +0.10 from e30 to e60)
+  c27bs17 the same for card 27b (the H100-class pair; V22_C27B.json)
   c32     card 32 (rearr_joint3): card 9b CO-TRAINING HELPS AND diagnostic 7(a) says most of rearr_pw_s18's "never
           pressed" episodes stopped above the press depth (DIAG_V22_DIAG7A.json majority_above) AND card 27 has not read
           TRAINING-LIMITED (V22_C27, if it exists)
@@ -76,10 +77,10 @@ def gate(name):
         a, wa = joint3_helps()
         b, wb = c36_two()
         return bool(a and b is False), f"{wa}; {wb}"
-    if name == "c27s17":
-        j = a40_json("V22_C27.json")
+    if name in ("c27s17", "c27bs17"):        # 27b (11-28): the same early stop on the H100-class pair (V22_C27B)
+        j = a40_json("V22_C27.json" if name == "c27s17" else "V22_C27B.json")
         es = (j or {}).get("early_stop") or {}
-        return es.get("seed17") == "train", f"card 27 early stop: {es or 'not there'}"
+        return es.get("seed17") == "train", f"card {name[1:-3]} early stop: {es or 'not there'}"
     if name == "c32":
         a, wa = joint3_helps()
         d = a40_json("DIAG_V22_DIAG7A.json") or {}
