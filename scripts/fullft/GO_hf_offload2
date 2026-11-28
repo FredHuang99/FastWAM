@@ -1,0 +1,2 @@
+# 11-28 14:45 user (chat): "模型中转站快满了：同意32个" -> run hf-offload-2 on the 5090 (all 32 names of
+# scripts/fullft/hf_offload_list2.txt: download to the 5090, sha256 check, then delete on the relay, then squash).
