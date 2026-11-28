@@ -1,0 +1,30 @@
+[fullft] 11-29 00:23:48 u 1760/7233 ep 7.303 lr 9.25e-05 video 0.0956 action 0.0059 gn 0.40 3.9 samples/s peak 91.3 GiB gate 0.0855 ETA 25.1 h
+[fullft] 11-29 00:26:32 u 1770/7233 ep 7.344 lr 9.23e-05 video 0.0966 action 0.0058 gn 0.28 3.9 samples/s peak 91.3 GiB gate 0.0860 ETA 25.0 h
+[fullft] 11-29 00:29:17 u 1780/7233 ep 7.386 lr 9.22e-05 video 0.0968 action 0.0056 gn 0.32 3.9 samples/s peak 91.3 GiB gate 0.0865 ETA 25.0 h
+[fullft] 11-29 00:32:02 u 1790/7233 ep 7.427 lr 9.21e-05 video 0.1022 action 0.0055 gn 0.45 3.9 samples/s peak 91.3 GiB gate 0.0871 ETA 25.0 h
+[fullft] 11-29 00:34:47 u 1800/7233 ep 7.469 lr 9.20e-05 video 0.0961 action 0.0065 gn 0.28 3.9 samples/s peak 91.3 GiB gate 0.0876 ETA 24.9 h
+[fullft] 11-29 00:37:32 u 1810/7233 ep 7.510 lr 9.19e-05 video 0.0937 action 0.0058 gn 0.32 3.9 samples/s peak 91.3 GiB gate 0.0881 ETA 24.9 h
+[fullft] 11-29 00:40:15 u 1820/7233 ep 7.552 lr 9.17e-05 video 0.0893 action 0.0060 gn 0.29 3.9 samples/s peak 91.3 GiB gate 0.0887 ETA 24.8 h
+[fullft] 11-29 00:42:58 u 1830/7233 ep 7.593 lr 9.16e-05 video 0.0956 action 0.0059 gn 0.27 3.9 samples/s peak 91.3 GiB gate 0.0891 ETA 24.8 h
+[fullft] 11-29 00:45:41 u 1840/7233 ep 7.635 lr 9.15e-05 video 0.0931 action 0.0057 gn 0.38 3.9 samples/s peak 91.3 GiB gate 0.0896 ETA 24.7 h
+[fullft] 11-29 00:48:22 u 1850/7233 ep 7.676 lr 9.14e-05 video 0.0933 action 0.0049 gn 0.23 3.9 samples/s peak 91.3 GiB gate 0.0900 ETA 24.7 h
+[fullft] 11-29 00:51:05 u 1860/7233 ep 7.718 lr 9.13e-05 video 0.0922 action 0.0047 gn 0.36 3.9 samples/s peak 91.3 GiB gate 0.0905 ETA 24.6 h
+[fullft] 11-29 00:53:48 u 1870/7233 ep 7.759 lr 9.11e-05 video 0.0915 action 0.0072 gn 0.53 3.9 samples/s peak 91.3 GiB gate 0.0910 ETA 24.6 h
+[fullft] 11-29 00:56:32 u 1880/7233 ep 7.801 lr 9.10e-05 video 0.1009 action 0.0080 gn 0.56 3.9 samples/s peak 91.3 GiB gate 0.0916 ETA 24.5 h
+[fullft] 11-29 00:59:18 u 1890/7233 ep 7.842 lr 9.09e-05 video 0.0922 action 0.0076 gn 0.35 3.9 samples/s peak 91.3 GiB gate 0.0920 ETA 24.5 h
+[fullft] 11-29 01:02:04 u 1900/7233 ep 7.883 lr 9.07e-05 video 0.0936 action 0.0065 gn 0.36 3.9 samples/s peak 91.3 GiB gate 0.0926 ETA 24.4 h
+[fullft] 11-29 01:04:49 u 1910/7233 ep 7.925 lr 9.06e-05 video 0.0921 action 0.0054 gn 0.36 3.9 samples/s peak 91.3 GiB gate 0.0930 ETA 24.4 h
+[fullft] 11-29 01:07:39 u 1920/7233 ep 7.966 lr 9.05e-05 video 0.0914 action 0.0055 gn 0.22 3.9 samples/s peak 91.3 GiB gate 0.0934 ETA 24.4 h
+[fullft] 11-29 01:10:27 u 1930/7233 ep 8.008 lr 9.04e-05 video 0.0872 action 0.0053 gn 0.25 3.9 samples/s peak 91.3 GiB gate 0.0940 ETA 24.3 h
+[fullft] 11-29 01:13:10 u 1940/7233 ep 8.050 lr 9.02e-05 video 0.0903 action 0.0056 gn 0.42 3.9 samples/s peak 91.3 GiB gate 0.0945 ETA 24.3 h
+[fullft] 11-29 01:15:54 u 1950/7233 ep 8.091 lr 9.01e-05 video 0.0924 action 0.0059 gn 0.22 3.9 samples/s peak 91.3 GiB gate 0.0949 ETA 24.2 h
+[fullft] 11-29 01:18:39 u 1960/7233 ep 8.133 lr 9.00e-05 video 0.0888 action 0.0059 gn 0.41 3.9 samples/s peak 91.3 GiB gate 0.0955 ETA 24.2 h
+[fullft] 11-29 01:21:24 u 1970/7233 ep 8.174 lr 8.98e-05 video 0.0967 action 0.0058 gn 0.23 3.9 samples/s peak 91.3 GiB gate 0.0959 ETA 24.1 h
+[fullft] 11-29 01:24:09 u 1980/7233 ep 8.216 lr 8.97e-05 video 0.0912 action 0.0047 gn 0.22 3.9 samples/s peak 91.3 GiB gate 0.0963 ETA 24.1 h
+[fullft] 11-29 01:26:55 u 1990/7233 ep 8.257 lr 8.96e-05 video 0.0984 action 0.0048 gn 0.29 3.9 samples/s peak 91.3 GiB gate 0.0967 ETA 24.0 h
+[fullft] 11-29 01:29:41 u 2000/7233 ep 8.299 lr 8.94e-05 video 0.0921 action 0.0047 gn 0.20 3.9 samples/s peak 91.3 GiB gate 0.0972 ETA 24.0 h
+[fullft] 11-29 01:29:54 eval {"val_video": 0.13324212787362436, "val_action": 0.010270909795887443, "val_arm_rmse": 0.02715949504636228, "val_arm_rmse_8": 0.01698865862272214, "update": 2000, "epoch": 8.2986}
+[fullft] 11-29 01:38:15 resume checkpoint saved at update 2000
+[fullft] 11-29 01:41:00 u 2010/7233 ep 8.340 lr 8.93e-05 video 0.0936 action 0.0046 gn 0.27 3.8 samples/s peak 91.3 GiB gate 0.0977 ETA 24.3 h
+[fullft] 11-29 01:43:46 u 2020/7233 ep 8.382 lr 8.92e-05 video 0.0891 action 0.0050 gn 0.39 3.8 samples/s peak 91.3 GiB gate 0.0980 ETA 24.3 h
+[fullft] 11-29 01:46:30 u 2030/7233 ep 8.423 lr 8.90e-05 video 0.0926 action 0.0047 gn 0.33 3.8 samples/s peak 91.3 GiB gate 0.0986 ETA 24.2 h

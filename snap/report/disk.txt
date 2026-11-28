@@ -1,0 +1,2 @@
+/dev/sda1        15T  2.8T   11T  21% /workspace/FastWAM-memory2
+overlay          15T  2.8T   11T  21% /

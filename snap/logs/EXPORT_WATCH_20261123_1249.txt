@@ -1,0 +1,17 @@
+[watch] 2026-11-23 12:53:10 run rearr_v3c, tags e10 e20 e30
+[watch] 2026-11-23 12:53:10 waiting for /workspace/FastWAM-memory2/outputs/fullft/rearr_v3c/export_e10.pt
+[watch] 2026-11-24 07:43:11 e10 appeared (12G)
+[watch] 2026-11-24 07:52:56 e10 relayed (try 1):
+export_e10.pt 12042506437
+export_e10.pt.sha256 80
+[watch] 2026-11-24 07:52:56 waiting for /workspace/FastWAM-memory2/outputs/fullft/rearr_v3c/export_e20.pt
+[watch] 2026-11-24 21:12:57 e20 appeared (12G)
+[watch] 2026-11-24 21:22:04 e20 relayed (try 1):
+export_e20.pt 12042506501
+export_e20.pt.sha256 80
+[watch] 2026-11-24 21:22:04 waiting for /workspace/FastWAM-memory2/outputs/fullft/rearr_v3c/export_e30.pt
+[watch] 2026-11-25 10:47:05 e30 appeared (12G)
+[watch] 2026-11-25 10:58:29 e30 relayed (try 1):
+export_e30.pt 12042506501
+export_e30.pt.sha256 80
+[watch] 2026-11-25 10:58:29 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/EXPORT_WATCH_20261123_1249.txt

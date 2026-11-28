@@ -1,0 +1,5 @@
+swapT_ar_ow              last write     0 min ago | u 2030/7233 ep 8.423 lr 8.90e-05 video 0.0926 action 0.0047 gn 0.33 3.8 |  
+swapT_ar_ow_s18          last write     2 min ago | u 1230/7233 ep 5.104 lr 9.74e-05 video 0.1100 action 0.0071 gn 0.35 3.9 |  
+battery_clock            last write   839 min ago | u 14190/14193 ep 30.000 lr 1.00e-05 video 0.0430 action 0.0007 gn 0.07 3. | FINISHED 
+swapT_long_h100          last write  3956 min ago | u 14460/14466 ep 60.000 lr 1.00e-05 video 0.0319 action 0.0004 gn 0.06 3. | FINISHED 
+rearr_v3c                last write  4728 min ago | u 8470/8478 ep 30.035 lr 1.00e-05 video 0.0360 action 0.0005 gn 0.04 3. | FINISHED 

@@ -1,0 +1,2 @@
+[watch] 2026-11-28 12:08:09 run swapT_ar_ow_s18, tags e10 e20 e30
+[watch] 2026-11-28 12:08:09 waiting for /workspace/FastWAM-memory2/outputs/fullft/swapT_ar_ow_s18/export_e10.pt

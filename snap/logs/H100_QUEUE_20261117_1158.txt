@@ -1,0 +1,369 @@
+[h100q] 2026-11-17 11:58:14 start; checkout ab97cf0 H100 (user 11-17 19:51): rotation and waits exactly ; queue /workspace/FastWAM-memory2/scripts/fullft/h100_queue.txt; GPUs 0 1 2 3
+[h100q] 2026-11-17 11:58:14 micro x accumulation: 2 32
+[h100q] 2026-11-17 11:58:14 GPUs: 0:94727MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94727MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (1 looks, 1% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-17 12:28:28 GPUs: 0:94727MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94727MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (4 looks, 3% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-17 12:58:40 GPUs: 0:94727MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94727MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (7 looks, 5% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-17 13:28:51 GPUs: 0:94727MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94727MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (10 looks, 7% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-17 13:59:03 GPUs: 0:94727MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94727MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (13 looks, 9% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-17 14:29:15 GPUs: 0:94727MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94727MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (16 looks, 11% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-17 14:59:26 GPUs: 0:94727MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94727MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (19 looks, 13% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-17 15:29:38 GPUs: 0:94727MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94727MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (22 looks, 15% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-17 15:59:57 GPUs: 0:94727MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94727MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (25 looks, 17% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-17 16:30:12 GPUs: 0:94727MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94727MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (28 looks, 19% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-17 17:00:25 GPUs: 0:94727MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94727MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (31 looks, 22% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-17 17:30:42 GPUs: 0:94727MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94727MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (34 looks, 24% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-17 18:00:54 GPUs: 0:94727MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94727MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (37 looks, 26% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-17 18:31:05 GPUs: 0:94727MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94727MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (40 looks, 28% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-17 19:01:17 GPUs: 0:94727MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94727MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (43 looks, 30% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-17 19:31:29 GPUs: 0:94727MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94727MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (46 looks, 32% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-17 20:01:41 GPUs: 0:94727MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94727MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (49 looks, 34% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-17 20:31:53 GPUs: 0:94727MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94727MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (52 looks, 36% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-17 21:02:04 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94727MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (55 looks, 38% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-17 21:32:16 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (58 looks, 40% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-17 22:02:28 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (61 looks, 42% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-17 22:32:40 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (64 looks, 44% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-17 23:02:53 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (67 looks, 47% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-17 23:33:04 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (70 looks, 49% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 00:03:16 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (73 looks, 51% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 00:33:28 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (76 looks, 53% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 01:03:40 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (79 looks, 55% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 01:33:52 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (82 looks, 57% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 02:04:03 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (85 looks, 59% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 02:34:15 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (88 looks, 61% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 03:04:27 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (91 looks, 63% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 03:34:50 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (94 looks, 65% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 04:05:01 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (97 looks, 67% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 04:35:13 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (100 looks, 69% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 05:05:25 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (103 looks, 72% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 05:35:36 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (106 looks, 74% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 06:05:48 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (109 looks, 76% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 06:36:06 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (112 looks, 78% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 07:06:18 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (115 looks, 80% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 07:36:30 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (118 looks, 82% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 08:06:41 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (121 looks, 84% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 08:36:54 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (124 looks, 86% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 09:07:12 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (127 looks, 88% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 09:37:24 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (130 looks, 90% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 10:07:37 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (133 looks, 92% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 10:37:51 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (136 looks, 94% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 11:08:10 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (139 looks, 97% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 11:38:22 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (142 looks, 99% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 12:08:34 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (143 looks, 99% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 12:38:47 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (143 looks, 99% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 13:08:59 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (143 looks, 99% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 13:39:11 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (143 looks, 99% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 14:09:23 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 14:39:35 GPUs: 0:94729MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+  battery_ar: training on GPU 2
+  h100_parity: finished
+  battery_arprop: training on GPU 1
+  rearrange_ar: training on GPU 3
+  swapT_ar: finished
+[h100q] 2026-11-18 15:06:52 next: rearrange_arprop on GPU 0
+[h100q] 2026-11-18 15:06:52 ===== rearrange_arprop attempt 1 on GPU 0 (micro 2 x 32; 0 MiB before)
+[h100q] 2026-11-18 15:09:30 rearrange_arprop trainer exit code 1
+[h100q] rearrange_arprop: no SUMMARY.json; one resumed retry on the next free GPU
+[h100q] 2026-11-18 15:09:58 GPUs: 0:33599MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 15:40:11 GPUs: 0:80197MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 16:10:24 GPUs: 0:80197MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 16:40:36 GPUs: 0:80197MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 17:10:50 GPUs: 0:80197MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 17:41:03 GPUs: 0:80197MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 18:11:16 GPUs: 0:80197MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 18:41:29 GPUs: 0:80197MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 19:11:42 GPUs: 0:80197MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 19:42:05 GPUs: 0:80197MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94729MiB(ours) ours alive 4
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 19:51:51 ===== rearrange_arprop attempt 2 on GPU 3 (micro 2 x 32; 0 MiB before)
+  battery_ar: training on GPU 2
+  h100_parity: finished
+  battery_arprop: training on GPU 1
+  rearrange_ar: finished
+  swapT_ar: finished
+  rearrange_arprop: training on GPU 3
+[h100q] 2026-11-18 19:52:10 next: swapT_arprop on GPU 3
+[h100q] 2026-11-18 19:52:11 ===== swapT_arprop attempt 1 on GPU 3 (micro 2 x 32; 0 MiB before)
+[h100q] 2026-11-18 19:52:51 rearrange_arprop trainer exit code 1
+[h100q] rearrange_arprop FAILED twice (reason in /workspace/FastWAM-memory2/outputs/fullft/rearrange_arprop/QUEUE_FAILED); the other runs continue
+[h100q] 2026-11-18 19:52:51 swapT_arprop trainer exit code 1
+[h100q] swapT_arprop: no SUMMARY.json; one resumed retry on the next free GPU
+[h100q] 2026-11-18 20:12:16 GPUs: 0:80197MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 20:42:17 GPUs: 0:80197MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 21:12:18 GPUs: 0:80197MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.1 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 21:42:19 GPUs: 0:80197MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.1 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 22:12:21 GPUs: 0:80197MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.1 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 22:42:22 GPUs: 0:80197MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.1 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 23:12:27 GPUs: 0:80197MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.1 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-18 23:42:28 GPUs: 0:80197MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.2 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 00:12:29 GPUs: 0:80197MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.2 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 00:42:30 GPUs: 0:80197MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.2 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 01:12:32 GPUs: 0:80197MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.2 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 01:42:33 GPUs: 0:80197MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.2 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 02:12:34 GPUs: 0:80197MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.3 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 02:42:36 GPUs: 0:80197MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.3 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 03:12:37 GPUs: 0:80197MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.3 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 03:42:38 GPUs: 0:80197MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.3 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 04:12:39 GPUs: 0:80197MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.3 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 04:42:40 GPUs: 0:80197MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.4 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 05:12:42 GPUs: 0:80197MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.4 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 05:42:58 GPUs: 0:80197MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.4 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 06:13:21 GPUs: 0:80197MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.4 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 06:43:44 GPUs: 0:80197MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.5 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 07:14:06 GPUs: 0:80197MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.5 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 07:20:23 ===== swapT_arprop attempt 2 on GPU 2 (micro 2 x 32; 0 MiB before)
+  battery_ar: finished
+  h100_parity: finished
+  battery_arprop: training on GPU 1
+  rearrange_ar: finished
+  swapT_ar: finished
+  rearrange_arprop: FAILED earlier (see /workspace/FastWAM-memory2/outputs/fullft/rearrange_arprop/QUEUE_FAILED)
+  swapT_arprop: training on GPU 2
+[h100q] 2026-11-19 07:21:19 next: battery_count on GPU 2
+[h100q] 2026-11-19 07:21:19 ===== battery_count attempt 1 on GPU 2 (micro 2 x 32; 0 MiB before)
+[h100q] 2026-11-19 07:22:33 battery_count trainer exit code 1
+[h100q] battery_count: no SUMMARY.json; one resumed retry on the next free GPU
+[h100q] 2026-11-19 07:22:33 swapT_arprop trainer exit code 1
+[h100q] swapT_arprop FAILED twice (reason in /workspace/FastWAM-memory2/outputs/fullft/swapT_arprop/QUEUE_FAILED); the other runs continue
+  battery_ar: finished
+  h100_parity: finished
+  battery_arprop: training on GPU 1
+  rearrange_ar: finished
+  swapT_ar: finished
+  rearrange_arprop: FAILED earlier (see /workspace/FastWAM-memory2/outputs/fullft/rearrange_arprop/QUEUE_FAILED)
+  swapT_arprop: FAILED earlier (see /workspace/FastWAM-memory2/outputs/fullft/swapT_arprop/QUEUE_FAILED)
+  battery_count: training on GPU 2
+[h100q] 2026-11-19 07:22:49 next: rearrange_clock on GPU 3
+[h100q] 2026-11-19 07:22:49 ===== rearrange_clock attempt 1 on GPU 3 (micro 2 x 32; 0 MiB before)
+[h100q] 2026-11-19 07:44:41 GPUs: 0:80197MiB 1:94731MiB(ours) 2:0MiB(ours) 3:94699MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.5 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 08:15:08 GPUs: 0:80197MiB 1:94731MiB(ours) 2:0MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.5 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 08:45:35 GPUs: 0:80197MiB 1:94731MiB(ours) 2:0MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.5 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 09:16:02 GPUs: 0:80197MiB 1:0MiB 2:0MiB(ours) 3:94729MiB(ours) ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.6 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 09:17:03 ===== battery_count attempt 2 on GPU 1 (micro 2 x 32; 0 MiB before)
+  battery_ar: finished
+  h100_parity: finished
+  battery_arprop: finished
+  rearrange_ar: finished
+  swapT_ar: finished
+  rearrange_arprop: FAILED earlier (see /workspace/FastWAM-memory2/outputs/fullft/rearrange_arprop/QUEUE_FAILED)
+  swapT_arprop: FAILED earlier (see /workspace/FastWAM-memory2/outputs/fullft/swapT_arprop/QUEUE_FAILED)
+  battery_count: training on GPU 1
+  rearrange_clock: training on GPU 3
+[h100q] 2026-11-19 09:17:14 next: swapT_clock on GPU 1
+[h100q] 2026-11-19 09:17:14 ===== swapT_clock attempt 1 on GPU 1 (micro 2 x 32; 0 MiB before)
+[h100q] 2026-11-19 09:19:08 swapT_clock trainer exit code 1
+[h100q] swapT_clock: no SUMMARY.json; one resumed retry on the next free GPU
+[h100q] 2026-11-19 09:22:15 ===== swapT_clock attempt 2 on GPU 2 (micro 2 x 32; 0 MiB before)
+[h100q] 2026-11-19 09:47:20 GPUs: 0:80197MiB 1:94677MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.6 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 10:17:21 GPUs: 0:80197MiB 1:94677MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.6 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 10:47:23 GPUs: 0:80197MiB 1:94677MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.6 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 11:17:24 GPUs: 0:80197MiB 1:94677MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.6 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 11:47:26 GPUs: 0:80197MiB 1:94677MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.7 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 12:17:27 GPUs: 0:80197MiB 1:94677MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.7 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 12:47:28 GPUs: 0:80197MiB 1:94677MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.7 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 13:17:30 GPUs: 0:80197MiB 1:94677MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.7 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 13:47:31 GPUs: 0:80197MiB 1:94707MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.7 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 14:17:32 GPUs: 0:80197MiB 1:94707MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.8 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 14:47:34 GPUs: 0:80197MiB 1:94707MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.8 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 15:17:35 GPUs: 0:80197MiB 1:94707MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.8 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 15:47:36 GPUs: 0:80197MiB 1:94707MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.8 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 16:17:38 GPUs: 0:80197MiB 1:94707MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.8 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 16:47:39 GPUs: 0:80197MiB 1:94707MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.9 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 17:17:40 GPUs: 0:80197MiB 1:94707MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.9 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 17:47:42 GPUs: 0:80197MiB 1:94707MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.9 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 18:17:43 GPUs: 0:80197MiB 1:94707MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.9 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 18:47:44 GPUs: 0:80197MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 19:17:46 GPUs: 0:80197MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 19:47:47 GPUs: 0:80197MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 20:17:48 GPUs: 0:80197MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 20:47:50 GPUs: 0:80197MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 21:17:52 GPUs: 0:80197MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 21:47:53 GPUs: 0:80197MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 22:17:55 GPUs: 0:80197MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 22:47:56 GPUs: 0:80197MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 23:17:57 GPUs: 0:80197MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-19 23:47:59 GPUs: 0:80197MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-20 00:18:00 GPUs: 0:80197MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-20 00:48:01 GPUs: 0:80197MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-20 01:18:03 GPUs: 0:80197MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-20 01:48:04 GPUs: 0:80197MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-20 02:18:06 GPUs: 0:80197MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-20 02:48:07 GPUs: 0:80197MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-20 03:18:08 GPUs: 0:80197MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-20 03:48:10 GPUs: 0:80197MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-20 04:18:11 GPUs: 0:80197MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-20 04:48:12 GPUs: 0:80197MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-20 05:18:14 GPUs: 0:0MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-20 05:48:15 GPUs: 0:70858MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-20 06:18:17 GPUs: 0:70860MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-20 06:48:18 GPUs: 0:70860MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.1 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-20 07:18:20 GPUs: 0:72312MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.1 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-20 07:48:21 GPUs: 0:40483MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.1 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-20 08:18:24 GPUs: 0:40875MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.1 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-20 08:48:26 GPUs: 0:40875MiB 1:94709MiB(ours) 2:94729MiB(ours) 3:94729MiB(ours) ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 1), compute 0.1 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] QUEUE_STOP_H100 found: nothing new starts
+[h100q] 2026-11-20 19:56:22 swapT_clock trainer exit code 0
+[h100q] 2026-11-20 19:56:22 swapT_clock finished: {
+ "status": "complete",
+ "updates": 7233,
+ "epochs": 30.012443292287752,
+ "samples_per_s": 3.725495860233965,
+ "peak_gib": 91.2980809211731,
+ "final_eval": {
+  "val_video": 0.1740651469463046,
+  "val_action": 0.009824522445133729,
+  "val_arm_rmse": 0.015664380967791658,
+  "val_arm_rmse_8": 0.007417479770083446
+ }
+}
+[h100q] 2026-11-20 23:51:11 rearrange_clock trainer exit code 0
+[h100q] 2026-11-20 23:51:11 rearrange_clock finished: {
+ "status": "complete",
+ "updates": 8478,
+ "epochs": 30.063695676213644,
+ "samples_per_s": 3.7357943236992814,
+ "peak_gib": 91.2980809211731,
+ "final_eval": {
+  "val_video": 0.07438938466232987,
+  "val_action": 0.0009580906115473908,
+  "val_arm_rmse": 0.005054753142758273,
+  "val_arm_rmse_8": 0.003384524057764793
+ }
+}
+[h100q] 2026-11-28 03:48:57 dispatcher finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/H100_QUEUE_20261117_1158.txt

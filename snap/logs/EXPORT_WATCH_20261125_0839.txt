@@ -1,0 +1,17 @@
+[watch] 2026-11-25 08:40:53 run battery_clock, tags e10 e20 e30
+[watch] 2026-11-25 08:40:53 waiting for /workspace/FastWAM-memory2/outputs/fullft/battery_clock/export_e10.pt
+[watch] 2026-11-26 06:50:54 e10 appeared (12G)
+[watch] 2026-11-26 07:00:38 e10 relayed (try 1):
+export_e10.pt 12042326021
+export_e10.pt.sha256 80
+[watch] 2026-11-26 07:00:38 waiting for /workspace/FastWAM-memory2/outputs/fullft/battery_clock/export_e20.pt
+[watch] 2026-11-27 05:15:39 e20 appeared (12G)
+[watch] 2026-11-27 05:25:15 e20 relayed (try 1):
+export_e20.pt 12042326085
+export_e20.pt.sha256 80
+[watch] 2026-11-27 05:25:15 waiting for /workspace/FastWAM-memory2/outputs/fullft/battery_clock/export_e30.pt
+[watch] 2026-11-28 03:40:15 e30 appeared (12G)
+[watch] 2026-11-28 03:55:31 e30 relayed (try 1):
+export_e30.pt 12042326085
+export_e30.pt.sha256 80
+[watch] 2026-11-28 03:55:31 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/EXPORT_WATCH_20261125_0839.txt

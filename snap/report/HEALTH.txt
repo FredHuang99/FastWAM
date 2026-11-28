@@ -1,0 +1,9 @@
+machine h100 host gpu24 at 2026-11-29 01:47:09
+ok   auto_pull alive (last log 20 min)
+ok   h100_queue alive (log 19 min)
+ok    GPU 0: 94727 MiB, 78 %
+ok    GPU 1: 94729 MiB, 84 %
+ok    GPU 2: 25117 MiB, 99 %
+ok    GPU 3: 65641 MiB, 0 %
+ok   disk /workspace/FastWAM-memory2 21% used (11T free)
+ok   disk / 21% used (11T free)

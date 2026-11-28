@@ -1,0 +1,400 @@
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.2 GPUs on average (max 3), compute 1.4 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-24 19:25:42 GPUs: 0:86249MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:81103MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.2 GPUs on average (max 3), compute 1.4 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-24 19:55:48 GPUs: 0:86249MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:45117MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.2 GPUs on average (max 3), compute 1.4 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-24 20:25:54 GPUs: 0:86249MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:45097MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.2 GPUs on average (max 3), compute 1.4 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-24 20:56:00 GPUs: 0:86249MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:42657MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.2 GPUs on average (max 3), compute 1.5 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-24 21:26:25 GPUs: 0:86249MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:79345MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.2 GPUs on average (max 3), compute 1.5 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-24 21:57:01 GPUs: 0:19987MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:81327MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.2 GPUs on average (max 3), compute 1.5 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-24 22:27:38 GPUs: 0:45097MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:85125MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.2 GPUs on average (max 3), compute 1.5 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-24 22:57:43 GPUs: 0:17183MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:79545MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.2 GPUs on average (max 3), compute 1.5 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-24 23:28:18 GPUs: 0:17183MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:86267MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.2 GPUs on average (max 3), compute 1.5 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-24 23:58:53 GPUs: 0:86267MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:85047MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.2 GPUs on average (max 3), compute 1.5 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-25 00:29:29 GPUs: 0:86267MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:81447MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.2 GPUs on average (max 3), compute 1.5 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-25 00:59:34 GPUs: 0:81487MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:85367MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.2 GPUs on average (max 3), compute 1.6 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-25 01:30:11 GPUs: 0:81527MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:81331MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.2 GPUs on average (max 3), compute 1.6 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-25 02:00:47 GPUs: 0:81427MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:80783MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.2 GPUs on average (max 3), compute 1.6 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-25 02:30:56 GPUs: 0:86267MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:81269MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.2 GPUs on average (max 3), compute 1.6 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-25 03:01:31 GPUs: 0:85827MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:86271MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.2 GPUs on average (max 3), compute 1.6 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-25 03:32:07 GPUs: 0:80781MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:81507MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.2 GPUs on average (max 3), compute 1.6 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-25 04:02:42 GPUs: 0:86267MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:85147MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.2 GPUs on average (max 3), compute 1.7 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-25 04:33:19 GPUs: 0:86267MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:81487MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.2 GPUs on average (max 3), compute 1.7 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-25 05:03:25 GPUs: 0:86267MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:81431MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.2 GPUs on average (max 3), compute 1.7 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-25 05:33:30 GPUs: 0:85829MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:79265MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.2 GPUs on average (max 3), compute 1.7 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-25 06:04:05 GPUs: 0:86267MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:86427MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.2 GPUs on average (max 3), compute 1.7 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-25 06:34:50 GPUs: 0:86267MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:86267MiB ours alive 2
+[h100q] GPU share last 24 h (143 looks, 99% covered): others hold 2.2 GPUs on average (max 3), compute 1.7 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-25 07:05:25 GPUs: 0:86267MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:86267MiB ours alive 2
+[h100q] GPU share last 24 h (143 looks, 99% covered): others hold 2.2 GPUs on average (max 3), compute 1.7 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-25 07:36:02 GPUs: 0:17227MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:86267MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.1 GPUs on average (max 3), compute 1.7 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-25 08:06:10 GPUs: 0:45097MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:45037MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.1 GPUs on average (max 3), compute 1.7 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-25 08:36:47 GPUs: 0:17183MiB 1:94731MiB(ours) 2:94691MiB(ours) 3:45057MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.1 GPUs on average (max 3), compute 1.7 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+  battery_ar: finished
+  h100_parity: finished
+  battery_arprop: finished
+  rearrange_ar: finished
+  swapT_ar: finished
+  rearrange_arprop: finished
+  swapT_arprop: finished
+  battery_count: waits (condition: test -f outputs/fullft/GO_battery_count && test -f outputs/memory_v2/press/dense_battery_try_v1/.verified && test -f outputs/fullft/events/events_battery_try.json && bash scripts/fullft/h100_v15_ready.sh battery_count)
+  rearrange_clock: finished
+  swapT_clock: finished
+  battery_none: finished
+  rearrange_none: finished
+  swapT_none: finished
+  rearr_v3c: training on GPU 1
+  swapT_long_h100: training on GPU 2
+[h100q] 2026-11-25 08:39:53 next: battery_clock on GPU 0
+[h100q] 2026-11-25 08:39:53 ===== battery_clock attempt 1 on GPU 0 (micro 2 x 32; 0 MiB before)
+[h100q] 2026-11-25 09:09:59 GPUs: 0:94699MiB(ours) 1:94731MiB(ours) 2:94691MiB(ours) 3:17183MiB ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.1 GPUs on average (max 3), compute 1.7 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-25 09:40:02 GPUs: 0:94699MiB(ours) 1:94731MiB(ours) 2:94691MiB(ours) 3:86247MiB ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.0 GPUs on average (max 3), compute 1.7 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-25 10:10:04 GPUs: 0:94699MiB(ours) 1:94731MiB(ours) 2:94691MiB(ours) 3:86249MiB ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.0 GPUs on average (max 3), compute 1.6 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-25 10:40:06 GPUs: 0:94699MiB(ours) 1:94731MiB(ours) 2:94691MiB(ours) 3:86249MiB ours alive 3
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 2.0 GPUs on average (max 3), compute 1.6 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-25 10:59:02 rearr_v3c trainer exit code 0
+[h100q] 2026-11-25 10:59:02 rearr_v3c finished: {
+ "status": "complete",
+ "updates": 8478,
+ "epochs": 30.063695676213644,
+ "samples_per_s": 3.736217435851636,
+ "peak_gib": 91.29943180084229,
+ "final_eval": {
+  "val_video": 0.07368283712457924,
+  "val_action": 0.0010355557395342885,
+  "val_arm_rmse": 0.005402579845394939,
+  "val_arm_rmse_8": 0.0038713476387783885
+ }
+}
+[h100q] 2026-11-25 11:10:09 GPUs: 0:94699MiB(ours) 1:86249MiB 2:94691MiB(ours) 3:86249MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.9 GPUs on average (max 3), compute 1.6 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-25 11:40:11 GPUs: 0:94699MiB(ours) 1:86249MiB 2:94691MiB(ours) 3:86249MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.9 GPUs on average (max 3), compute 1.5 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-25 12:10:13 GPUs: 0:94699MiB(ours) 1:86249MiB 2:94691MiB(ours) 3:0MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.9 GPUs on average (max 3), compute 1.5 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-25 12:40:16 GPUs: 0:94699MiB(ours) 1:86247MiB 2:94691MiB(ours) 3:86249MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.9 GPUs on average (max 3), compute 1.5 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-25 13:10:18 GPUs: 0:94729MiB(ours) 1:86249MiB 2:94691MiB(ours) 3:86267MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.8 GPUs on average (max 2), compute 1.5 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-25 13:40:20 GPUs: 0:94729MiB(ours) 1:45137MiB 2:94691MiB(ours) 3:86267MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.8 GPUs on average (max 2), compute 1.5 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-25 14:10:22 GPUs: 0:94729MiB(ours) 1:33607MiB 2:94691MiB(ours) 3:86267MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.8 GPUs on average (max 2), compute 1.5 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-25 14:40:24 GPUs: 0:94729MiB(ours) 1:86267MiB 2:94691MiB(ours) 3:85809MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.8 GPUs on average (max 2), compute 1.5 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-25 15:10:27 GPUs: 0:94729MiB(ours) 1:86267MiB 2:94691MiB(ours) 3:86267MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.8 GPUs on average (max 2), compute 1.5 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-25 15:40:29 GPUs: 0:94729MiB(ours) 1:86267MiB 2:94691MiB(ours) 3:0MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.8 GPUs on average (max 2), compute 1.5 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-25 16:10:31 GPUs: 0:94729MiB(ours) 1:86267MiB 2:94691MiB(ours) 3:85847MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.8 GPUs on average (max 2), compute 1.5 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-25 16:40:34 GPUs: 0:94729MiB(ours) 1:85947MiB 2:94691MiB(ours) 3:86267MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.8 GPUs on average (max 2), compute 1.5 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-25 17:10:36 GPUs: 0:94729MiB(ours) 1:85187MiB 2:94691MiB(ours) 3:81369MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.8 GPUs on average (max 2), compute 1.5 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-25 17:40:38 GPUs: 0:94729MiB(ours) 1:0MiB 2:94691MiB(ours) 3:28127MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.8 GPUs on average (max 2), compute 1.5 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-25 18:10:40 GPUs: 0:94729MiB(ours) 1:0MiB 2:94691MiB(ours) 3:45057MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.8 GPUs on average (max 2), compute 1.4 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-25 18:40:42 GPUs: 0:94729MiB(ours) 1:2059MiB 2:94691MiB(ours) 3:0MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.8 GPUs on average (max 2), compute 1.4 GPU-equivalents; >= 2 GPUs held by nobody in 0% of looks
+[h100q] 2026-11-25 19:10:45 GPUs: 0:94729MiB(ours) 1:0MiB 2:94691MiB(ours) 3:0MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.8 GPUs on average (max 2), compute 1.4 GPU-equivalents; >= 2 GPUs held by nobody in 1% of looks
+[h100q] 2026-11-25 19:40:47 GPUs: 0:94729MiB(ours) 1:0MiB 2:94691MiB(ours) 3:0MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.7 GPUs on average (max 2), compute 1.4 GPU-equivalents; >= 2 GPUs held by nobody in 3% of looks
+[h100q] 2026-11-25 20:10:50 GPUs: 0:94729MiB(ours) 1:0MiB 2:94691MiB(ours) 3:0MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.7 GPUs on average (max 2), compute 1.4 GPU-equivalents; >= 2 GPUs held by nobody in 6% of looks
+[h100q] 2026-11-25 20:40:52 GPUs: 0:94729MiB(ours) 1:0MiB 2:94691MiB(ours) 3:0MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.6 GPUs on average (max 2), compute 1.3 GPU-equivalents; >= 2 GPUs held by nobody in 8% of looks
+[h100q] 2026-11-25 21:10:55 GPUs: 0:94729MiB(ours) 1:0MiB 2:94691MiB(ours) 3:0MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.6 GPUs on average (max 2), compute 1.3 GPU-equivalents; >= 2 GPUs held by nobody in 10% of looks
+[h100q] 2026-11-25 21:40:57 GPUs: 0:94729MiB(ours) 1:0MiB 2:94691MiB(ours) 3:0MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.6 GPUs on average (max 2), compute 1.3 GPU-equivalents; >= 2 GPUs held by nobody in 12% of looks
+[h100q] 2026-11-25 22:11:00 GPUs: 0:94729MiB(ours) 1:0MiB 2:94691MiB(ours) 3:0MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.5 GPUs on average (max 2), compute 1.2 GPU-equivalents; >= 2 GPUs held by nobody in 14% of looks
+[h100q] 2026-11-25 22:41:02 GPUs: 0:94729MiB(ours) 1:0MiB 2:94691MiB(ours) 3:0MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.5 GPUs on average (max 2), compute 1.2 GPU-equivalents; >= 2 GPUs held by nobody in 16% of looks
+[h100q] 2026-11-25 23:11:05 GPUs: 0:94729MiB(ours) 1:0MiB 2:94691MiB(ours) 3:0MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.4 GPUs on average (max 2), compute 1.2 GPU-equivalents; >= 2 GPUs held by nobody in 18% of looks
+[h100q] 2026-11-25 23:41:07 GPUs: 0:94729MiB(ours) 1:0MiB 2:94691MiB(ours) 3:0MiB ours alive 2
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.4 GPUs on average (max 2), compute 1.1 GPU-equivalents; >= 2 GPUs held by nobody in 20% of looks
+[h100q] 2026-11-25 23:50:54 swapT_long_h100 trainer exit code 0
+[h100q] 2026-11-25 23:50:54 swapT_long_h100 finished: {
+ "status": "complete",
+ "updates": 14466,
+ "epochs": 60.024886584575505,
+ "samples_per_s": 3.7317654321707123,
+ "peak_gib": 91.29943180084229,
+ "final_eval": {
+  "val_video": 0.23161880035877402,
+  "val_action": 0.012120135339671378,
+  "val_arm_rmse": 0.01525536815461237,
+  "val_arm_rmse_8": 0.007354890454735141
+ }
+}
+[h100q] 2026-11-26 00:11:10 GPUs: 0:94729MiB(ours) 1:0MiB 2:0MiB 3:0MiB ours alive 1
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.4 GPUs on average (max 2), compute 1.1 GPU-equivalents; >= 2 GPUs held by nobody in 22% of looks
+[h100q] 2026-11-26 00:41:13 GPUs: 0:94729MiB(ours) 1:0MiB 2:0MiB 3:0MiB ours alive 1
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.3 GPUs on average (max 2), compute 1.1 GPU-equivalents; >= 2 GPUs held by nobody in 24% of looks
+[h100q] 2026-11-26 01:11:15 GPUs: 0:94729MiB(ours) 1:0MiB 2:0MiB 3:0MiB ours alive 1
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.3 GPUs on average (max 2), compute 1.0 GPU-equivalents; >= 2 GPUs held by nobody in 26% of looks
+[h100q] 2026-11-26 01:41:18 GPUs: 0:94729MiB(ours) 1:0MiB 2:0MiB 3:0MiB ours alive 1
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.2 GPUs on average (max 2), compute 1.0 GPU-equivalents; >= 2 GPUs held by nobody in 28% of looks
+[h100q] 2026-11-26 02:11:20 GPUs: 0:94729MiB(ours) 1:0MiB 2:0MiB 3:0MiB ours alive 1
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.2 GPUs on average (max 2), compute 1.0 GPU-equivalents; >= 2 GPUs held by nobody in 31% of looks
+[h100q] 2026-11-26 02:41:23 GPUs: 0:94729MiB(ours) 1:0MiB 2:0MiB 3:0MiB ours alive 1
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.1 GPUs on average (max 2), compute 0.9 GPU-equivalents; >= 2 GPUs held by nobody in 33% of looks
+[h100q] 2026-11-26 03:11:26 GPUs: 0:94729MiB(ours) 1:0MiB 2:0MiB 3:0MiB ours alive 1
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.1 GPUs on average (max 2), compute 0.9 GPU-equivalents; >= 2 GPUs held by nobody in 35% of looks
+[h100q] 2026-11-26 03:41:28 GPUs: 0:94729MiB(ours) 1:0MiB 2:0MiB 3:0MiB ours alive 1
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.1 GPUs on average (max 2), compute 0.9 GPU-equivalents; >= 2 GPUs held by nobody in 37% of looks
+[h100q] 2026-11-26 04:11:31 GPUs: 0:94729MiB(ours) 1:0MiB 2:0MiB 3:0MiB ours alive 1
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 2), compute 0.8 GPU-equivalents; >= 2 GPUs held by nobody in 39% of looks
+[h100q] 2026-11-26 04:41:33 GPUs: 0:94731MiB(ours) 1:0MiB 2:0MiB 3:0MiB ours alive 1
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 1.0 GPUs on average (max 2), compute 0.8 GPU-equivalents; >= 2 GPUs held by nobody in 41% of looks
+[h100q] 2026-11-26 05:11:36 GPUs: 0:94731MiB(ours) 1:0MiB 2:0MiB 3:0MiB ours alive 1
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.9 GPUs on average (max 2), compute 0.8 GPU-equivalents; >= 2 GPUs held by nobody in 43% of looks
+[h100q] 2026-11-26 05:41:38 GPUs: 0:94731MiB(ours) 1:0MiB 2:0MiB 3:0MiB ours alive 1
+[h100q] GPU share last 24 h (144 looks, 100% covered): others hold 0.9 GPUs on average (max 2), compute 0.7 GPU-equivalents; >= 2 GPUs held by nobody in 45% of looks
+[h100q] 2026-11-26 06:11:41 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (142 looks, 99% covered): others hold 0.9 GPUs on average (max 2), compute 0.7 GPU-equivalents; >= 2 GPUs held by nobody in 46% of looks
+[h100q] 2026-11-26 06:41:42 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (139 looks, 97% covered): others hold 0.8 GPUs on average (max 2), compute 0.7 GPU-equivalents; >= 2 GPUs held by nobody in 47% of looks
+[h100q] 2026-11-26 07:11:50 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (136 looks, 94% covered): others hold 0.8 GPUs on average (max 2), compute 0.7 GPU-equivalents; >= 2 GPUs held by nobody in 49% of looks
+[h100q] 2026-11-26 07:41:51 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (133 looks, 92% covered): others hold 0.8 GPUs on average (max 2), compute 0.6 GPU-equivalents; >= 2 GPUs held by nobody in 50% of looks
+[h100q] 2026-11-26 08:11:53 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (130 looks, 90% covered): others hold 0.8 GPUs on average (max 2), compute 0.6 GPU-equivalents; >= 2 GPUs held by nobody in 51% of looks
+[h100q] 2026-11-26 08:41:54 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (127 looks, 88% covered): others hold 0.7 GPUs on average (max 2), compute 0.6 GPU-equivalents; >= 2 GPUs held by nobody in 52% of looks
+[h100q] 2026-11-26 09:11:56 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (124 looks, 86% covered): others hold 0.7 GPUs on average (max 2), compute 0.6 GPU-equivalents; >= 2 GPUs held by nobody in 53% of looks
+[h100q] 2026-11-26 09:41:57 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (121 looks, 84% covered): others hold 0.7 GPUs on average (max 2), compute 0.6 GPU-equivalents; >= 2 GPUs held by nobody in 55% of looks
+[h100q] 2026-11-26 10:11:58 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (118 looks, 82% covered): others hold 0.7 GPUs on average (max 2), compute 0.6 GPU-equivalents; >= 2 GPUs held by nobody in 56% of looks
+[h100q] 2026-11-26 10:42:00 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (115 looks, 80% covered): others hold 0.7 GPUs on average (max 2), compute 0.6 GPU-equivalents; >= 2 GPUs held by nobody in 57% of looks
+[h100q] 2026-11-26 11:12:01 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (112 looks, 78% covered): others hold 0.7 GPUs on average (max 2), compute 0.6 GPU-equivalents; >= 2 GPUs held by nobody in 59% of looks
+[h100q] 2026-11-26 11:42:02 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (109 looks, 76% covered): others hold 0.7 GPUs on average (max 2), compute 0.6 GPU-equivalents; >= 2 GPUs held by nobody in 61% of looks
+[h100q] 2026-11-26 12:12:03 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (106 looks, 74% covered): others hold 0.7 GPUs on average (max 2), compute 0.5 GPU-equivalents; >= 2 GPUs held by nobody in 62% of looks
+[h100q] 2026-11-26 12:42:05 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (103 looks, 72% covered): others hold 0.6 GPUs on average (max 2), compute 0.5 GPU-equivalents; >= 2 GPUs held by nobody in 64% of looks
+[h100q] 2026-11-26 13:12:06 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (100 looks, 69% covered): others hold 0.6 GPUs on average (max 2), compute 0.4 GPU-equivalents; >= 2 GPUs held by nobody in 66% of looks
+[h100q] 2026-11-26 13:42:08 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (97 looks, 67% covered): others hold 0.5 GPUs on average (max 2), compute 0.4 GPU-equivalents; >= 2 GPUs held by nobody in 68% of looks
+[h100q] 2026-11-26 14:12:09 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (94 looks, 65% covered): others hold 0.5 GPUs on average (max 2), compute 0.4 GPU-equivalents; >= 2 GPUs held by nobody in 70% of looks
+[h100q] 2026-11-26 14:42:11 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (91 looks, 63% covered): others hold 0.4 GPUs on average (max 2), compute 0.4 GPU-equivalents; >= 2 GPUs held by nobody in 73% of looks
+[h100q] 2026-11-26 15:12:12 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (88 looks, 61% covered): others hold 0.4 GPUs on average (max 2), compute 0.3 GPU-equivalents; >= 2 GPUs held by nobody in 75% of looks
+[h100q] 2026-11-26 15:42:13 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (85 looks, 59% covered): others hold 0.3 GPUs on average (max 2), compute 0.3 GPU-equivalents; >= 2 GPUs held by nobody in 78% of looks
+[h100q] 2026-11-26 16:12:15 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (82 looks, 57% covered): others hold 0.3 GPUs on average (max 2), compute 0.2 GPU-equivalents; >= 2 GPUs held by nobody in 80% of looks
+[h100q] 2026-11-26 16:42:16 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (79 looks, 55% covered): others hold 0.2 GPUs on average (max 2), compute 0.1 GPU-equivalents; >= 2 GPUs held by nobody in 84% of looks
+[h100q] 2026-11-26 17:12:17 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (76 looks, 53% covered): others hold 0.1 GPUs on average (max 1), compute 0.1 GPU-equivalents; >= 2 GPUs held by nobody in 87% of looks
+[h100q] 2026-11-26 17:42:19 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (73 looks, 51% covered): others hold 0.1 GPUs on average (max 1), compute 0.1 GPU-equivalents; >= 2 GPUs held by nobody in 90% of looks
+[h100q] 2026-11-26 18:12:20 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (70 looks, 49% covered): others hold 0.1 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 94% of looks
+[h100q] 2026-11-26 18:42:22 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (67 looks, 47% covered): others hold 0.0 GPUs on average (max 1), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 99% of looks
+[h100q] 2026-11-26 19:12:23 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (64 looks, 44% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 100% of looks
+[h100q] 2026-11-26 19:42:24 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (61 looks, 42% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 100% of looks
+[h100q] 2026-11-26 20:12:26 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (58 looks, 40% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 100% of looks
+[h100q] 2026-11-26 20:42:27 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (55 looks, 38% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 100% of looks
+[h100q] 2026-11-26 21:12:29 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (52 looks, 36% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 100% of looks
+[h100q] 2026-11-26 21:42:30 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (49 looks, 34% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 100% of looks
+[h100q] 2026-11-26 22:12:32 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (46 looks, 32% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 100% of looks
+[h100q] 2026-11-26 22:42:33 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (43 looks, 30% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 100% of looks
+[h100q] 2026-11-26 23:12:34 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (40 looks, 28% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 100% of looks
+[h100q] 2026-11-26 23:42:36 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (37 looks, 26% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 100% of looks
+[h100q] 2026-11-27 00:12:37 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (34 looks, 24% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 100% of looks
+[h100q] 2026-11-27 00:42:38 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (31 looks, 22% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 100% of looks
+[h100q] 2026-11-27 01:12:40 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (28 looks, 19% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 100% of looks
+[h100q] 2026-11-27 01:42:41 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (25 looks, 17% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 100% of looks
+[h100q] 2026-11-27 02:12:43 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (22 looks, 15% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 100% of looks
+[h100q] 2026-11-27 02:42:44 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (19 looks, 13% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 100% of looks
+[h100q] 2026-11-27 03:12:45 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (16 looks, 11% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 100% of looks
+[h100q] 2026-11-27 03:42:47 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (13 looks, 9% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 100% of looks
+[h100q] 2026-11-27 04:12:48 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (10 looks, 7% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 100% of looks
+[h100q] 2026-11-27 04:42:50 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (7 looks, 5% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 100% of looks
+[h100q] 2026-11-27 05:12:51 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (4 looks, 3% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 100% of looks
+[h100q] 2026-11-27 05:42:53 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share last 24 h (1 looks, 1% covered): others hold 0.0 GPUs on average (max 0), compute 0.0 GPU-equivalents; >= 2 GPUs held by nobody in 100% of looks
+[h100q] 2026-11-27 06:12:54 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 06:42:55 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 07:12:57 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 07:42:58 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 08:13:00 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 08:43:01 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 09:13:02 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 09:43:04 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 10:13:05 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 10:43:06 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 11:13:08 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 11:43:09 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 12:13:11 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 12:43:12 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 13:13:14 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 13:43:15 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 14:13:16 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 14:43:18 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 15:13:19 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 15:43:21 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 16:13:22 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 16:43:23 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 17:13:25 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 17:43:26 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 18:13:27 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 18:43:29 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 19:13:30 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 19:43:32 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 20:13:33 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 20:43:35 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 21:13:36 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 21:43:37 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 22:13:39 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 22:43:40 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 23:13:42 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-27 23:43:43 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 00:13:44 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 00:43:45 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 01:13:47 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 01:43:48 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 02:13:49 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 02:43:50 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 03:13:51 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 03:43:52 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB(ours) 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 03:47:34 battery_clock trainer exit code 0
+[h100q] 2026-11-28 03:47:34 battery_clock finished: {
+ "status": "complete",
+ "updates": 14193,
+ "epochs": 30.00634144730323,
+ "samples_per_s": 3.760874410521507,
+ "peak_gib": 91.2980809211731,
+ "final_eval": {
+  "val_video": 0.11695053084925651,
+  "val_action": 0.03396144210529428,
+  "val_arm_rmse": 0.08295995724620298,
+  "val_arm_rmse_8": 0.047424265037989244
+ }
+}
+[h100q] 2026-11-28 04:13:54 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 0
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 04:43:55 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 0
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 05:13:56 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 0
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 05:43:58 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 0
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 06:13:59 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 0
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 06:44:00 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 0
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 07:14:01 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 0
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 07:44:02 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 0
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 08:14:04 GPUs: 0:FailedtoinitializeNVML:UnknownErrorMiB 1:FailedtoinitializeNVML:UnknownErrorMiB 2:FailedtoinitializeNVML:UnknownErrorMiB 3:FailedtoinitializeNVML:UnknownErrorMiB ours alive 0
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)

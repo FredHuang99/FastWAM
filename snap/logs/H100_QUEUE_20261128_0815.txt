@@ -1,0 +1,77 @@
+[h100q] 2026-11-28 08:15:53 start; checkout a0afbed Plan v22: submit_v22.sh (four follower slot jobs per; queue /workspace/FastWAM-memory2/scripts/fullft/h100_queue.txt; GPUs 0 1 2 3
+[h100q] 2026-11-28 08:15:53 micro x accumulation: 2 32
+[h100q] 2026-11-28 08:15:53 GPUs: 0:79233MiB 1:0MiB 2:44153MiB 3:65641MiB ours alive 0
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+  battery_ar: finished
+  h100_parity: finished
+  battery_arprop: finished
+  rearrange_ar: finished
+  swapT_ar: finished
+  rearrange_arprop: finished
+  swapT_arprop: finished
+  battery_count: waits (condition: test -f outputs/fullft/GO_battery_count && test -f outputs/memory_v2/press/dense_battery_try_v1/.verified && test -f outputs/fullft/events/events_battery_try.json && bash scripts/fullft/h100_v15_ready.sh battery_count)
+  rearrange_clock: finished
+  swapT_clock: finished
+  battery_none: finished
+  rearrange_none: finished
+  swapT_none: finished
+  rearr_v3c: finished
+  swapT_long_h100: finished
+  battery_clock: finished
+[h100q] 2026-11-28 08:16:57 next: swapT_ar_ow on GPU 1
+[h100q] 2026-11-28 08:16:57 ===== swapT_ar_ow attempt 1 on GPU 1 (micro 2 x 32; 0 MiB before)
+[h100q] 2026-11-28 08:46:42 GPUs: 0:79233MiB 1:94727MiB(ours) 2:78183MiB 3:65641MiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 09:17:23 GPUs: 0:79263MiB 1:94727MiB(ours) 2:80315MiB 3:65641MiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 09:48:05 GPUs: 0:79263MiB 1:94727MiB(ours) 2:80381MiB 3:65641MiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 10:18:49 GPUs: 0:79263MiB 1:94727MiB(ours) 2:80383MiB 3:65641MiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 10:49:29 GPUs: 0:78917MiB 1:94727MiB(ours) 2:80383MiB 3:65641MiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 11:20:09 GPUs: 0:78919MiB 1:94727MiB(ours) 2:80317MiB 3:65641MiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 11:50:48 GPUs: 0:78919MiB 1:94727MiB(ours) 2:45653MiB 3:65641MiB ours alive 1
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+  battery_ar: finished
+  h100_parity: finished
+  battery_arprop: finished
+  rearrange_ar: finished
+  swapT_ar: finished
+  rearrange_arprop: finished
+  swapT_arprop: finished
+  battery_count: waits (condition: test -f outputs/fullft/GO_battery_count && test -f outputs/memory_v2/press/dense_battery_try_v1/.verified && test -f outputs/fullft/events/events_battery_try.json && bash scripts/fullft/h100_v15_ready.sh battery_count)
+  rearrange_clock: finished
+  swapT_clock: finished
+  battery_none: finished
+  rearrange_none: finished
+  swapT_none: finished
+  rearr_v3c: finished
+  swapT_long_h100: finished
+  battery_clock: finished
+  swapT_ar_ow: training on GPU 1
+[h100q] 2026-11-28 12:06:09 next: swapT_ar_ow_s18 on GPU 0
+[h100q] 2026-11-28 12:06:09 ===== swapT_ar_ow_s18 attempt 1 on GPU 0 (micro 2 x 32; 0 MiB before)
+[h100q] 2026-11-28 12:21:33 GPUs: 0:94725MiB(ours) 1:94727MiB(ours) 2:80247MiB 3:65641MiB ours alive 2
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 12:52:12 GPUs: 0:94725MiB(ours) 1:94727MiB(ours) 2:80247MiB 3:65641MiB ours alive 2
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 13:22:51 GPUs: 0:94725MiB(ours) 1:94729MiB(ours) 2:76725MiB 3:65641MiB ours alive 2
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 13:53:31 GPUs: 0:94727MiB(ours) 1:94729MiB(ours) 2:40125MiB 3:65641MiB ours alive 2
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 14:24:11 GPUs: 0:94727MiB(ours) 1:94729MiB(ours) 2:40125MiB 3:65641MiB ours alive 2
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 14:54:52 GPUs: 0:94727MiB(ours) 1:94729MiB(ours) 2:36603MiB 3:65641MiB ours alive 2
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 15:25:35 GPUs: 0:94727MiB(ours) 1:94729MiB(ours) 2:40197MiB 3:65641MiB ours alive 2
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 15:55:43 GPUs: 0:94727MiB(ours) 1:94729MiB(ours) 2:24935MiB 3:65641MiB ours alive 2
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 16:26:22 GPUs: 0:94727MiB(ours) 1:94729MiB(ours) 2:24935MiB 3:65641MiB ours alive 2
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 16:57:00 GPUs: 0:94727MiB(ours) 1:94729MiB(ours) 2:4031MiB 3:65641MiB ours alive 2
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)
+[h100q] 2026-11-28 17:27:38 GPUs: 0:94727MiB(ours) 1:94729MiB(ours) 2:4031MiB 3:65641MiB ours alive 2
+[h100q] GPU share: no samples (start scripts/fullft/gpu_share.sh)

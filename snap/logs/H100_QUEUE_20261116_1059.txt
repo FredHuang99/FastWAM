@@ -1,0 +1,129 @@
+[h100q] 2026-11-16 10:59:20 start; checkout 42ead08 verify_superseded.py: after delta_lite, the payload ; queue /workspace/FastWAM-memory2/scripts/fullft/h100_queue.txt; GPUs 0 1 2 3
+[h100q] 2026-11-16 10:59:20 smoke: nothing runnable yet; next look in 10 min
+[h100q] 2026-11-16 11:35:07 smoke with micro 4 x accumulation 16 on GPU 3 (data of battery_ar)
+[h100q] 2026-11-16 11:37:29 smoke micro 4 exit code 0: 
+[h100q] 2026-11-16 11:38:30 smoke with micro 2 x accumulation 32 on GPU 2 (data of battery_ar)
+[h100q] 2026-11-16 12:39:06 smoke micro 2 exit code 0: 
+[h100q] 2026-11-16 12:39:06 micro x accumulation: 2 32
+[h100q] 2026-11-16 12:39:06 GPUs: 0:69922MiB 1:69922MiB 2:0MiB 3:34841MiB 
+[h100q] 2026-11-16 12:40:08 next: battery_ar on GPU 2
+[h100q] 2026-11-16 12:40:08 ===== battery_ar attempt 1 on GPU 2 (micro 2 x 32; 0 MiB before)
+[h100q] 2026-11-16 13:09:20 GPUs: 0:52373MiB 1:89808MiB 2:94697MiB(ours) 3:35481MiB 
+  battery_ar: training on GPU 2
+[h100q] 2026-11-16 13:19:29 next: battery_arprop on GPU 1
+[h100q] 2026-11-16 13:19:29 ===== battery_arprop attempt 1 on GPU 1 (micro 2 x 32; 0 MiB before)
+[h100q] 2026-11-16 13:39:34 GPUs: 0:79346MiB 1:94701MiB(ours) 2:94697MiB(ours) 3:35281MiB 
+[h100q] 2026-11-16 14:09:35 GPUs: 0:81622MiB 1:94701MiB(ours) 2:94697MiB(ours) 3:60767MiB 
+[h100q] 2026-11-16 14:39:36 GPUs: 0:58576MiB 1:94701MiB(ours) 2:94697MiB(ours) 3:76812MiB 
+[h100q] 2026-11-16 15:09:37 GPUs: 0:19621MiB 1:94701MiB(ours) 2:94697MiB(ours) 3:36341MiB 
+[h100q] 2026-11-16 15:39:38 GPUs: 0:1343MiB 1:94701MiB(ours) 2:94697MiB(ours) 3:36321MiB 
+[h100q] 2026-11-16 16:09:39 GPUs: 0:81622MiB 1:94701MiB(ours) 2:94697MiB(ours) 3:62465MiB 
+[h100q] 2026-11-16 16:39:40 GPUs: 0:39559MiB 1:94701MiB(ours) 2:94697MiB(ours) 3:60547MiB 
+[h100q] 2026-11-16 17:09:41 GPUs: 0:89952MiB 1:94701MiB(ours) 2:94727MiB(ours) 3:24549MiB 
+[h100q] 2026-11-16 17:39:42 GPUs: 0:0MiB 1:94701MiB(ours) 2:94727MiB(ours) 3:80693MiB 
+[h100q] 2026-11-16 18:09:44 GPUs: 0:0MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:81945MiB 
+[h100q] 2026-11-16 18:39:45 GPUs: 0:50969MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:74515MiB 
+[h100q] 2026-11-16 19:09:46 GPUs: 0:50949MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:75515MiB 
+[h100q] 2026-11-16 19:39:47 GPUs: 0:75555MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:50609MiB 
+[h100q] 2026-11-16 20:09:48 GPUs: 0:75715MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:75555MiB 
+[h100q] 2026-11-16 20:39:49 GPUs: 0:75455MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:75155MiB 
+[h100q] 2026-11-16 21:09:50 GPUs: 0:75235MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:75435MiB 
+[h100q] 2026-11-16 21:39:51 GPUs: 0:51149MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:75395MiB 
+[h100q] 2026-11-16 22:09:52 GPUs: 0:52203MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:50033MiB 
+[h100q] 2026-11-16 22:39:53 GPUs: 0:67663MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:60883MiB 
+[h100q] 2026-11-16 23:09:54 GPUs: 0:50477MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:42257MiB 
+[h100q] 2026-11-16 23:39:55 GPUs: 0:43317MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:43397MiB 
+[h100q] 2026-11-17 00:09:56 GPUs: 0:0MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB 
+[h100q] 2026-11-17 00:39:58 GPUs: 0:45017MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:45017MiB 
+[h100q] 2026-11-17 01:09:59 GPUs: 0:45097MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:45097MiB 
+[h100q] 2026-11-17 01:40:00 GPUs: 0:17267MiB 1:94731MiB(ours) 2:94727MiB(ours) 3:45017MiB 
+  battery_ar: training on GPU 2
+[h100q] 2026-11-17 02:09:14 next: h100_parity on GPU 0
+[h100q] 2026-11-17 02:09:14 ===== h100_parity attempt 1 on GPU 0 (micro 2 x 32; 0 MiB before)
+[h100q] 2026-11-17 02:19:19 GPUs: 0:94697MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB 
+[h100q] 2026-11-17 02:49:21 GPUs: 0:94697MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB 
+[h100q] 2026-11-17 03:19:22 GPUs: 0:94697MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:0MiB 
+  battery_ar: training on GPU 2
+  h100_parity: training on GPU 0
+  battery_arprop: training on GPU 1
+[h100q] 2026-11-17 03:40:26 next: rearrange_ar on GPU 3
+[h100q] 2026-11-17 03:40:26 ===== rearrange_ar attempt 1 on GPU 3 (micro 2 x 32; 0 MiB before)
+[h100q] 2026-11-17 03:50:32 GPUs: 0:94697MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94697MiB(ours) 
+[h100q] 2026-11-17 04:20:40 GPUs: 0:94697MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94697MiB(ours) 
+[h100q] 2026-11-17 04:25:51 h100_parity trainer exit code 0
+[h100q] 2026-11-17 04:25:51 h100_parity finished: {
+ "status": "stopped_after",
+ "updates": 500,
+ "epochs": 1.3468324651319106,
+ "samples_per_s": 3.929087948258493,
+ "peak_gib": 91.29611492156982,
+ "skipped_steps": 0
+}
+  battery_ar: training on GPU 2
+  h100_parity: finished
+  battery_arprop: training on GPU 1
+  rearrange_ar: training on GPU 3
+[h100q] 2026-11-17 04:27:46 next: swapT_ar on GPU 0
+[h100q] 2026-11-17 04:27:46 ===== swapT_ar attempt 1 on GPU 0 (micro 2 x 32; 0 MiB before)
+[h100q] 2026-11-17 04:57:53 GPUs: 0:94725MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94727MiB(ours) 
+[h100q] 2026-11-17 05:28:01 GPUs: 0:94725MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94727MiB(ours) 
+[h100q] 2026-11-17 05:58:19 GPUs: 0:94727MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94727MiB(ours) 
+[h100q] 2026-11-17 06:28:38 GPUs: 0:94727MiB(ours) 1:94731MiB(ours) 2:94727MiB(ours) 3:94727MiB(ours) 
+[h100q] QUEUE_STOP_H100 found: nothing new starts
+[h100q] 2026-11-18 15:04:50 swapT_ar trainer exit code 0
+[h100q] 2026-11-18 15:04:50 swapT_ar finished: {
+ "status": "complete",
+ "updates": 7233,
+ "epochs": 30.012443292287752,
+ "samples_per_s": 3.718886745750159,
+ "peak_gib": 91.29611492156982,
+ "final_eval": {
+  "val_video": 0.17714062540774952,
+  "val_action": 0.010178315380803346,
+  "val_arm_rmse": 0.016258471332548652,
+  "val_arm_rmse_8": 0.007623362878803164
+ }
+}
+[h100q] 2026-11-18 19:50:18 rearrange_ar trainer exit code 0
+[h100q] 2026-11-18 19:50:18 rearrange_ar finished: {
+ "status": "complete",
+ "updates": 8478,
+ "epochs": 30.063695676213644,
+ "samples_per_s": 3.762096348444878,
+ "peak_gib": 91.29611492156982,
+ "final_eval": {
+  "val_video": 0.0743042262220115,
+  "val_action": 0.0010214255373881542,
+  "val_arm_rmse": 0.0055131251756392885,
+  "val_arm_rmse_8": 0.003941342885809718
+ }
+}
+[h100q] 2026-11-19 07:19:15 battery_ar trainer exit code 0
+[h100q] 2026-11-19 07:19:15 battery_ar finished: {
+ "status": "complete",
+ "updates": 14193,
+ "epochs": 30.00634144730323,
+ "samples_per_s": 3.787207710589217,
+ "peak_gib": 91.29611492156982,
+ "final_eval": {
+  "val_video": 0.11851855623505496,
+  "val_action": 0.03358685352619754,
+  "val_arm_rmse": 0.08189095443231054,
+  "val_arm_rmse_8": 0.04765483750088606
+ }
+}
+[h100q] 2026-11-19 09:15:44 battery_arprop trainer exit code 0
+[h100q] 2026-11-19 09:15:44 battery_arprop finished: {
+ "status": "complete",
+ "updates": 14193,
+ "epochs": 30.00634144730323,
+ "samples_per_s": 3.71553211246704,
+ "peak_gib": 91.29943180084229,
+ "final_eval": {
+  "val_video": 0.11799603077997745,
+  "val_action": 0.030442851899915507,
+  "val_arm_rmse": 0.08149507359485142,
+  "val_arm_rmse_8": 0.047820010215218645
+ }
+}
+[h100q] 2026-11-28 03:55:26 dispatcher finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/H100_QUEUE_20261116_1059.txt
