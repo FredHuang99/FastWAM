@@ -15992,6 +15992,19 @@ tasks:
 # 11-28 20:32 (Opus, patrol 1): A40-d8-swapT-report / report100 crashed (ZeroDivisionError: the report also computed the
 # press / rearrange settings, which have no episodes yet); diag8.py now lists those as "no paired episodes yet". The
 # gates were not affected (they exited 3 = below the line). Same command again, nothing else changed.
+# 11-28 20:35 (Opus, patrol 1): diagnostic 7(c)'s reading puts each checkpoint's closed-loop "never pressed" + "pressed
+# twice" beside its press-window loss (5090 DIAG_V22_DIAG7C.json, 12 checkpoints); the A40 has the episodes of 10 of
+# them (seed 18's e10 / e20 were only looked at on the 5090). rearr_split.py classes for those 10, written to their own
+# file (REARR_SPLIT.json untouched). CPU, read-only, described.
+- id: A40-d7c-rearr-split
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v22 diagnostic 7(c), reading side: rearr_split classes of the 10 rearrange checkpoints with A40 episodes (described)"
+  command: "cd /workspace/FastWAM-memory2 && REARR_SPLIT_OUT=REARR_SPLIT_D7C.json PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_split.py v20:rearr_pw_e10 v20:rearr_pw_e20 v20:rearr_pw_e30 v21:rearr_ar_pw_e10 v21:rearr_ar_pw_e20 v21:rearr_ar_pw_e30 v21:rearr_arprop_pw_e10 v21:rearr_arprop_pw_e20 v21:rearr_arprop_pw_e30 v21:rearr_pw_s18_e30"
+  pass_if: "m['rc'] == 0"
+
 - id: A40-d8-swapT-report2
   lane: a40cpu
   kind: shell

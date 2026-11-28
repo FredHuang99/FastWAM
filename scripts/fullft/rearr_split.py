@@ -31,6 +31,7 @@ Writes outputs/fullft/REARR_SPLIT.json.
 from __future__ import annotations
 
 import json
+import os
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -134,8 +135,9 @@ def main():
         for c, k in counts.most_common():
             print(f"  {k:3d}  {c}   e.g. seeds {seeds[c][:4]}")
         out[item] = {"counts": dict(counts), "episodes": per}
-    (F / "REARR_SPLIT.json").write_text(json.dumps(out, indent=1) + "\n")
-    print("\nREARR SPLIT REPORT: written outputs/fullft/REARR_SPLIT.json")
+    name = os.environ.get("REARR_SPLIT_OUT", "").strip() or "REARR_SPLIT.json"   # 11-28: another file (default unchanged)
+    (F / name).write_text(json.dumps(out, indent=1) + "\n")
+    print(f"\nREARR SPLIT REPORT: written outputs/fullft/{name}")
     return 0
 
 
