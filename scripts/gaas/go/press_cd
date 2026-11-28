@@ -1,3 +1,4 @@
 # 11-28 (Opus): plan v22 card 31 opens once the countdown events file is on the relay (press_cd_events.py --relay on
 # the 5090 -> diag/press_button_v3d); the job fetches it there (gaas_run.pbs: data.events *_v3d -> diag/press_button_v3d).
-"${HFPY:-$HOME/mwam/envs/hf-tools/bin/python}" scripts/memory_v2/migrate/relay.py ls --prefix diag/press_button_v3d 2>/dev/null | grep -q '^events_press_button_v3d.json '
+# 11-29 00:33: skipped while scripts/fullft/GO_press_cd_h200o exists (card 31 moved to the old H200).
+test ! -f scripts/fullft/GO_press_cd_h200o && "${HFPY:-$HOME/mwam/envs/hf-tools/bin/python}" scripts/memory_v2/migrate/relay.py ls --prefix diag/press_button_v3d 2>/dev/null | grep -q '^events_press_button_v3d.json '

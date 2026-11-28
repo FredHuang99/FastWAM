@@ -155,6 +155,46 @@ obs_s800_s18 | seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/
 #   Single trainings: the verdict is about these two checkpoints (plan v21 5.5).
 swapT_ow | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_swap_T_v1] data.tasks=[swap_T] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_T.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[open] | bash scripts/fullft/card36_ready.sh
 #
+# 11-29 00:33 (Opus, plan v22 patrol 2): card 31 (press_cd) moved here from the new H200 slot lists (plan v22b 1.1:
+# "old H200, 11-29 -> the next on the list: card 31"; card 36 seed 18 already trains on the new H200 since 11-28 19:43,
+# so this card would otherwise take the filler below at about 04:40). The same H200 class as press_told (control), the
+# identical line; the reading below is the registered one, copied verbatim from gaas_queue.txt (registered 11-28 before
+# any run). GO_press_cd_h200o assigns it here; go/press_cd on the new H200 skips it while that file exists.
+# h200o_v22_ready.sh fetches the countdown events file (relay diag/press_button_v3d) and the told text table (relay
+# diag/press_told, sha256 checked) as the slot job would.
+#
+# 11-28 (Opus): plan v22 card 31 (approved by the user 11-28 15:52, decision A: a diagnostic, never a main-table entry),
+# reading copied verbatim from claude/MemWAM_Plan_v22_20261128.md 6.4, registered before any run. The switch:
+# history.count_mode=remaining (history.py; default "" bit-identical, tests in fullft/tests/test_countdown.py): the
+# ordinal's thermometer carries r + 1 for every entry of a press on button 1 / 2 (r = presses of that button still to
+# do, 0 on the last one), 0 for every other entry. Training: the countdown events file events_press_button_v3d.json =
+# press_told's v3c file with each press entry annotated (scripts/fullft/press_cd_events.py on the 5090: the button
+# nearest the pressing end-effector, the demo's own counts as press_told; relay diag/press_button_v3d). Closed loop:
+# MWAM_TOLD_COUNTS=1 (the scene's cards in the instruction) and MWAM_LEDGER=oracle (the simulator's true presses, zero
+# delay); the countdown is computed online from both (online.py _countdown). resume.pt kept (press_cd_long below seeds
+# from it; that line has no go file and is in no slot list). go/press_cd opens once the events file is on the relay.
+# Card 31 (plan v22; plan v21 5.7 item 5, FableQueue H6; a diagnostic, never a main-table entry; one of the two further
+# press_button trainings the user allowed on 11-24): press_cd = press_told's exact line with the record's ordinal code
+# replaced by a countdown: every entry of a press on button b carries "presses of b still to do" = N_b - (presses of b
+# made so far, this one included), 0 on the last one (history.count_mode=remaining [new; default = bit-identical]).
+# Training: N_b = that demo's own press count of b (from its events; no annotation), as in press_told. Closed loop:
+# N_b = the scene's card value, and the count = the simulator's true count with zero delay (both privileged; the
+# switches of press_told and of diagnostic 4(b)). The instruction text keeps press_told's sentence. resume.pt kept.
+# Question: when the comparison "pressed so far vs target" is done for the model and handed over as one number, does
+# it stop at zero? Diagnostic 4(b): with the target in the instruction and the true count in the record the model
+# still over-pressed the second button in 14/30 development scenes: it holds both numbers and does not compare them.
+# Registered reading (before any press_cd episode; A40, press_button 1-100, default noise; control press_told e30;
+# both arms H200 class, seed 17):
+#   MAIN: D = success(press_cd e30) - success(press_told e30), paired by scene, paired bootstrap 95 % CI (10,000,
+#   seed 0); SESOI +0.30: CI lower > +0.30 -> COMPARISON IS THE BOTTLENECK; CI upper < +0.30 -> NOT THE COMPARISON;
+#   otherwise UNCERTAIN (pre-set extension: both e30 again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule).
+#   Described: each button's over / right / under (D2's definitions); presses made after the countdown read 0, per
+#   button; success by N1 + N2; e10 / e20; the pressed-count x card-count table of diagnostic 4(a).
+#   Written before the run: if the comparison is the bottleneck, both buttons are right in more than 80 % of the scenes
+#   and "over" falls below 10 per button; if stopping itself is not learned, "over" on the second button stays above 30.
+#   Single trainings: the verdict is about these two checkpoints; seed extension as in plan v21 5.5 item 6.
+press_cd | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_press_button_v1] data.tasks=[press_button] data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_press_button_v3d.json] history.variant=arprop history.event_max=32 history.lag=0 history.ordinal=16 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 history.count_mode=remaining data.text_table=/workspace/FastWAM-memory2/outputs/fullft/press_told/TOLD_TEXT.pt | test -f scripts/fullft/GO_press_cd_h200o && bash scripts/fullft/h200o_v22_ready.sh GO_press_cd_h200o press_cd
+#
 # Fillers (plan v22, P2; run only when a card has nothing else ready). Described only; no verdict.
 #   rearr_pw_s19 (H200 class); rearr_pw_h100_s19 / rearr_pw_h100_s20 (H100 class) = rearr_pw's exact line with seeds
 #   19 / 20. swapT_ar_s18 = swapT_ar's exact line with seed 18 (H100 class). ranking_arprop_s18 = ranking_arprop's
