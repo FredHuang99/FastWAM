@@ -10,8 +10,10 @@ unpickles the other's numpy (the two images pin different numpy versions).
   request {"cmd": "close"}                                                     -> {"ok": true}; the server exits
 Per frame the training path (scripts/robomme/robomme_encode.py): libero_image (224 x 448, [-1, 1]) -> the eager
 single-frame VAE (memory_s1.encode_latent); proprio = eef_state (6) + gripper_state (2) normalised with the dense root's
-NORM_STATS.json (robomme_norm.py: min/max -> [-1, 1], clamp +-5). Text: T5 of the goal (memory_s1.encode_text, the
-training call), T5 kept on the CPU, memoised per goal. One decision = fullft.online.decide_encoded (the export's history
+NORM_STATS.json (robomme_norm.py: min/max -> [-1, 1], clamp +-5). Text: the training cache's T5 features of a demo with
+the same goal string (goal from the conversion's episode json, text from the dense root: exactly what training saw);
+a goal no demo has -> T5 (memory_s1.encode_text, the training call) on the GPU (T5 is kept on the CPU and moved over
+for the call, so the 32 GB card holds the model and the VAE between calls); memoised per goal. One decision = fullft.online.decide_encoded (the export's history
 selection, frame cache and sampling; --steps, default the export's sample_steps); the 32 actions are denormalised with
 the inverse min/max map, the gripper clipped to [-1, 1], and the first --execute returned (absolute ee_pose: position 3
 + RPY 3 + gripper 1, RoboMME's ee_pose action space).
@@ -137,8 +139,44 @@ class RoboMMEPolicy:
         self.t5.eval().requires_grad_(False)
         self.tokenizer = HuggingfaceTokenizer(paths["tokenizer"], seq_len=128, clean="whitespace", local_files_only=True)
         self.text_memo: Dict[str, torch.Tensor] = {}
+        self.text_source: Dict[str, str] = {}
+        self.cache_goals = self._cache_goals(root)
         self.salt = os.environ.get("MWAM_NOISE_SALT", "").strip()
         self.reset("", -1, "")
+
+    @staticmethod
+    def _cache_goals(root: Path) -> Dict[str, str]:
+        """goal string -> a dense episode folder whose demo carries it (conversion RECORDS / episode json)."""
+        out: Dict[str, str] = {}
+        try:
+            convert = Path(json.loads((root / "IDENTITY.json").read_text())["convert"])
+            for r in json.loads((convert / "RECORDS.json").read_text()):
+                meta = json.loads((convert / r["file"]).with_suffix(".json").read_text())
+                folder = root / "cache" / r["episode_id"].replace("/", "_")
+                if (folder / "encodings.pt").exists():
+                    out.setdefault(meta["goal"], str(folder))
+        except (OSError, KeyError, ValueError) as e:
+            print(f"[robomme-policy] no goal map from the conversion ({type(e).__name__}: {e}); T5 for every goal", flush=True)
+        return out
+
+    def _text(self, goal: str) -> torch.Tensor:
+        if goal not in self.text_memo:
+            if goal in self.cache_goals:
+                e = torch.load(Path(self.cache_goals[goal]) / "encodings.pt", map_location="cpu", weights_only=True, mmap=True)
+                self.text_memo[goal] = e["text"][None].to(torch.bfloat16).clone()
+                self.text_source[goal] = "cache " + Path(self.cache_goals[goal]).name
+            else:
+                from fastwam.memory_s1.model import encode_text
+                self.t5.to(self.device)
+                try:
+                    f, _ = encode_text(self.t5, self.tokenizer, goal, self.device)
+                finally:
+                    self.t5.to("cpu")
+                    torch.cuda.empty_cache()
+                self.text_memo[goal] = f.to(torch.bfloat16).cpu()
+                self.text_source[goal] = "t5"
+            print(f"[robomme-policy] text for {goal!r}: {self.text_source[goal]}", flush=True)
+        return self.text_memo[goal]
 
     def reset(self, task: str, episode: int, goal: str):
         from .online import FrameCache
@@ -150,11 +188,7 @@ class RoboMMEPolicy:
         self.decisions = 0
         self.seen_upto = -1
         if goal:
-            if goal not in self.text_memo:
-                from fastwam.memory_s1.model import encode_text
-                f, _ = encode_text(self.t5, self.tokenizer, goal, "cpu")
-                self.text_memo[goal] = f.to(torch.bfloat16)
-            self.text = self.text_memo[goal].to(self.device)
+            self.text = self._text(goal).to(self.device)
 
     @torch.no_grad()
     def _encode(self, ids):

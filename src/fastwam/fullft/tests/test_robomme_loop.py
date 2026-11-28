@@ -95,3 +95,24 @@ def test_norm_round_trip_and_noise(tmp_path):
     a, b = rp.noise_for(3, 16, 7), rp.noise_for(3, 16, 7)
     assert a.shape == (1, 32, 7) and torch.equal(a, b) and not torch.equal(a, rp.noise_for(3, 24, 7))
     assert not torch.equal(a, rp.noise_for(3, 16, 7, "r2"))
+
+
+def test_goal_map_from_the_conversion(tmp_path):
+    conv, root = tmp_path / "convert", tmp_path / "dense"
+    (conv / "PickXtimes").mkdir(parents=True)
+    recs = []
+    for k, goal in enumerate(("pick up the cube twice", "pick up the cube twice", "pick up the cube once")):
+        eid = f"PickXtimes/episode_{k}"
+        (conv / f"PickXtimes/episode_{k:07d}.json").write_text(json.dumps({"goal": goal}))
+        recs.append({"episode_id": eid, "task": "PickXtimes", "file": f"PickXtimes/episode_{k:07d}.npz"})
+        d = root / "cache" / eid.replace("/", "_")
+        d.mkdir(parents=True)
+        torch.save({"text": torch.full((4, 3), float(k))}, d / "encodings.pt")
+    (conv / "RECORDS.json").write_text(json.dumps(recs))
+    (root / "IDENTITY.json").write_text(json.dumps({"convert": str(conv), "config": {}}))
+    m = rp.RoboMMEPolicy._cache_goals(root)
+    assert m == {"pick up the cube twice": str(root / "cache/PickXtimes_episode_0"),
+                 "pick up the cube once": str(root / "cache/PickXtimes_episode_2")}
+    fake = type("P", (), {"text_memo": {}, "text_source": {}, "cache_goals": m})()
+    t = rp.RoboMMEPolicy._text(fake, "pick up the cube once")
+    assert t.shape == (1, 4, 3) and float(t[0, 0, 0]) == 2.0 and fake.text_source["pick up the cube once"].startswith("cache")
