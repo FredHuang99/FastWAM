@@ -344,19 +344,24 @@ def annotate_remaining(events: Sequence[dict], targets: dict, button_of) -> List
     """Plan v22 card 31 (count_mode remaining): copies of the events, each press entry ('bottom', and the 'top' that
     ends it) on a button b in `targets` ({1: N1, 2: N2}) with 'button' = b and 'remaining' = max(0, N_b - presses of b
     made so far, this one included); other entries get 'remaining' None. button_of(event) -> 1 / 2 / 3 (the button
-    nearest the pressing end-effector at the event's frame). The same function offline (events file) and online."""
+    nearest the pressing end-effector at the event's frame), asked for 'bottom' entries only: a 'top' entry (the
+    apex after a press, where the hand may already be on its way to another button) takes the button and the count of
+    the same arm's latest 'bottom' (the press it ends); a 'top' before any press of its arm gets none (11-28 fix: the
+    5090 run of press_cd_events.py stopped on 'top' entries 6-10 cm beside every button). The same function offline
+    (events file) and online."""
     out, made, last = [], {}, {}
     for e in sorted(events, key=lambda x: (int(x["frame"]), int(x["arm"]))):
         e = dict(e, remaining=None)
-        if e.get("kind") in ("bottom", "top"):
+        arm = int(e["arm"])
+        if e.get("kind") == "bottom":
             b = int(button_of(e))
             e["button"] = b
             if b in targets:
-                if e["kind"] == "bottom":
-                    made[b] = made.get(b, 0) + 1
-                    last[(int(e["arm"]), b)] = made[b]
-                n = made.get(b, 0) if e["kind"] == "bottom" else last.get((int(e["arm"]), b), made.get(b, 0))
-                e["remaining"] = max(0, int(targets[b]) - n)
+                made[b] = made.get(b, 0) + 1
+                e["remaining"] = max(0, int(targets[b]) - made[b])
+            last[arm] = (b, e["remaining"])
+        elif e.get("kind") == "top" and arm in last:
+            e["button"], e["remaining"] = last[arm]
         out.append(e)
     return out
 

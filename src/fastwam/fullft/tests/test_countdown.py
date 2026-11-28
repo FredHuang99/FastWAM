@@ -101,3 +101,21 @@ def test_online_countdown_annotation():
     assert [e["button"] for e in ann] == [1, 1, 2, 2]
     with pytest.raises(ValueError):
         FullSession._countdown(SimpleNamespace(raw=raw, instruction="Press."), evs)
+
+
+def test_top_takes_the_button_of_its_press():
+    """11-28: a 'top' apex beside every button (the 5090 demos: 6-10 cm off) takes its press's button and count; a top
+    before any press of its arm gets none; button_of is never asked about a top."""
+    asked = []
+
+    def bo(e):
+        asked.append(e["kind"])
+        return press_button_of(e["x"])
+    evs = [{"frame": 2, "arm": 0, "kind": "top", "confirmed": 3, "x": -0.40},
+           ev(10, "bottom", 0), {"frame": 14, "arm": 0, "kind": "top", "confirmed": 16, "x": -0.24},
+           ev(30, "bottom", 1), {"frame": 34, "arm": 0, "kind": "top", "confirmed": 36, "x": 0.24},
+           ev(50, "bottom", 2), {"frame": 54, "arm": 0, "kind": "top", "confirmed": 56, "x": 0.30}]
+    ann = annotate_remaining(evs, {1: 1, 2: 2}, bo)
+    got = [(e["frame"], e.get("button"), e["remaining"]) for e in ann]
+    assert got == [(2, None, None), (10, 1, 0), (14, 1, 0), (30, 2, 1), (34, 2, 1), (50, 3, None), (54, 3, None)]
+    assert set(asked) == {"bottom"}
