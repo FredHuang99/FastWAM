@@ -20,6 +20,9 @@ press-cd-events-2 | cpu | - | PYTHONPATH=src /opt/mwam/bin/python scripts/fullft
 # pending task, above 75 %, hourly until 12-01 12:00 (hf_prune_d.py; nothing below 75 %).
 hf-prune-d-loop | cpu | - | bash scripts/fullft/hf_prune_d_loop.sh
 diag12-first | cpu | - | PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/swapT_diag5_5090.py e --first 10
+# 11-28 17:25: diagnostic 12's classes fixed from diag12-first (swapT_diag5_5090.py CLASSES_12; Status 12.11); the full
+# run on card 11's episodes (CPU)
+diag12-full | cpu | - | PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/swapT_diag5_5090.py e
 diag13 | cpu | - | PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag13_5090.py
 swapdesc-swapT_joint3_e30 | gpu1 | bash scripts/fullft/relay_has.sh swapT_joint3_e30 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); RUN=swapT_joint3 TAG=e30 bash scripts/fullft/swapT_desc_5090.sh
 card30-gen | gpu1 | - | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); bash scripts/fullft/card30_5090.sh

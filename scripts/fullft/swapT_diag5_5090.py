@@ -264,7 +264,37 @@ def part_d():
 # precision problem) or was it within tolerance (the release decision itself)?
 # Classes: fixed by Opus from the first 10 failures per model (--first 10 prints measurements only) BEFORE the full
 # run; until CLASSES_12 is set, the full run refuses.
-CLASSES_12 = None
+# 11-28 17:25 (Opus), fixed from SWAPT_DIAG12_FIRST.json (diag12-first, 5090, card 11's swapT_ar_e30 / swapT_arprop_e30,
+# first 10 failures each; nothing else read): at the closest moment the later arm's gripper read either ~0.41 (closed
+# on the block, block 4-8 cm up) or 0.78-1.0 (open, block on the table, 0-2.3 cm from the other start); the angle to
+# the required orientation was 15.8-64.7 deg in all 20, and 3.5-36.9 deg at best while the block was carried near the
+# other start. Classes (gripper >= 0.6 = open; block < 1 cm above its start height = on the table; 15 deg = the
+# benchmark's tolerance; OVER_CM = 5 cm, as diagnostic 5(b)):
+#   put down there, orientation off      open, on the table, angle > 15 deg at that moment (a precision problem)
+#   put down there within tolerance       open, on the table, angle <= 15 deg (then moved away later)
+#   let go above it                       open, block still up
+#   carried over it, aligned, not let go  closed; the best angle while carried near it <= 15 deg (the release decision)
+#   carried over it, never aligned        closed; the best angle while carried near it > 15 deg (or never measured)
+#   hand never over it                    the closest approach >= 5 cm
+#   no measurement                        no pose / orientation log at that moment
+
+
+def CLASSES_12(x):
+    a = x.get("at_closest")
+    if not a:
+        return "no measurement"
+    hand = a.get("hand_to_other_start_cm")
+    if hand is None or hand >= OVER_CM:
+        return "hand never over it"
+    opened = a.get("gripper") is not None and float(a["gripper"]) >= 0.6
+    if opened:
+        if float(a["block_above_own_start_cm"]) >= 1.0:
+            return "let go above it"
+        return ("put down there within tolerance" if float(a["block_angle_to_required_deg"]) <= 15.0
+                else "put down there, orientation off")
+    best = (x.get("near_other_start") or {}).get("min_angle_deg")
+    return ("carried over it, aligned, not let go" if best is not None and float(best) <= 15.0
+            else "carried over it, never aligned")
 
 
 def measure_e(sp, d: Path):
