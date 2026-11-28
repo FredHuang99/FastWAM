@@ -1,0 +1,60 @@
+[decide] 2026-11-28 02:06:44 obs_cf200_e10/on observe_and_pickup seed=4300045 frame=224/250 hist=3 policy=0.2s elapsed=23s
+[closed-loop] 2026-11-28 02:06:47 done  obs_cf200_e10/on observe_and_pickup seed=4300045 success=False targets=250/250 reward=0.0 lift=None  44s
+[closed-loop] 2026-11-28 02:06:47 start obs_cf200_e10/on observe_and_pickup seed=4300046 target_limit=250 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/c25obj/obs_cf200_e10/on/observe_and_pickup/seed_4300046
+[decide] 2026-11-28 02:07:08 obs_cf200_e10/on observe_and_pickup seed=4300046 frame=0/250 hist=0 policy=0.1s elapsed=4s
+[decide] 2026-11-28 02:07:11 obs_cf200_e10/on observe_and_pickup seed=4300046 frame=32/250 hist=2 policy=0.2s elapsed=7s
+[decide] 2026-11-28 02:07:15 obs_cf200_e10/on observe_and_pickup seed=4300046 frame=64/250 hist=3 policy=0.2s elapsed=10s
+[decide] 2026-11-28 02:07:18 obs_cf200_e10/on observe_and_pickup seed=4300046 frame=96/250 hist=3 policy=0.2s elapsed=13s
+[decide] 2026-11-28 02:07:20 obs_cf200_e10/on observe_and_pickup seed=4300046 frame=128/250 hist=3 policy=0.2s elapsed=16s
+[decide] 2026-11-28 02:07:23 obs_cf200_e10/on observe_and_pickup seed=4300046 frame=160/250 hist=3 policy=0.2s elapsed=18s
+[decide] 2026-11-28 02:07:26 obs_cf200_e10/on observe_and_pickup seed=4300046 frame=192/250 hist=3 policy=0.2s elapsed=21s
+[decide] 2026-11-28 02:07:29 obs_cf200_e10/on observe_and_pickup seed=4300046 frame=224/250 hist=3 policy=0.2s elapsed=24s
+[closed-loop] 2026-11-28 02:07:32 done  obs_cf200_e10/on observe_and_pickup seed=4300046 success=False targets=250/250 reward=0.0 lift=None  45s
+[closed-loop] 2026-11-28 02:07:32 start obs_cf200_e10/on observe_and_pickup seed=4300047 target_limit=250 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/c25obj/obs_cf200_e10/on/observe_and_pickup/seed_4300047
+[decide] 2026-11-28 02:07:54 obs_cf200_e10/on observe_and_pickup seed=4300047 frame=0/250 hist=0 policy=0.1s elapsed=4s
+[decide] 2026-11-28 02:07:57 obs_cf200_e10/on observe_and_pickup seed=4300047 frame=32/250 hist=2 policy=0.2s elapsed=7s
+[decide] 2026-11-28 02:08:00 obs_cf200_e10/on observe_and_pickup seed=4300047 frame=64/250 hist=3 policy=0.2s elapsed=9s
+[decide] 2026-11-28 02:08:02 obs_cf200_e10/on observe_and_pickup seed=4300047 frame=96/250 hist=3 policy=0.2s elapsed=12s
+[decide] 2026-11-28 02:08:05 obs_cf200_e10/on observe_and_pickup seed=4300047 frame=128/250 hist=3 policy=0.2s elapsed=15s
+[decide] 2026-11-28 02:08:08 obs_cf200_e10/on observe_and_pickup seed=4300047 frame=160/250 hist=3 policy=0.2s elapsed=18s
+[decide] 2026-11-28 02:08:11 obs_cf200_e10/on observe_and_pickup seed=4300047 frame=192/250 hist=3 policy=0.2s elapsed=21s
+[decide] 2026-11-28 02:08:13 obs_cf200_e10/on observe_and_pickup seed=4300047 frame=224/250 hist=3 policy=0.2s elapsed=23s
+[closed-loop] 2026-11-28 02:08:17 done  obs_cf200_e10/on observe_and_pickup seed=4300047 success=False targets=250/250 reward=0.0 lift=None  45s
+[closed-loop] 2026-11-28 02:08:17 start obs_cf200_e10/on observe_and_pickup seed=4300048 target_limit=250 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/c25obj/obs_cf200_e10/on/observe_and_pickup/seed_4300048
+[decide] 2026-11-28 02:08:38 obs_cf200_e10/on observe_and_pickup seed=4300048 frame=0/250 hist=0 policy=0.1s elapsed=4s
+[decide] 2026-11-28 02:08:41 obs_cf200_e10/on observe_and_pickup seed=4300048 frame=32/250 hist=2 policy=0.2s elapsed=7s
+[decide] 2026-11-28 02:08:44 obs_cf200_e10/on observe_and_pickup seed=4300048 frame=64/250 hist=3 policy=0.2s elapsed=10s
+[decide] 2026-11-28 02:08:47 obs_cf200_e10/on observe_and_pickup seed=4300048 frame=96/250 hist=3 policy=0.2s elapsed=13s
+[decide] 2026-11-28 02:08:50 obs_cf200_e10/on observe_and_pickup seed=4300048 frame=128/250 hist=3 policy=0.2s elapsed=15s
+[decide] 2026-11-28 02:08:53 obs_cf200_e10/on observe_and_pickup seed=4300048 frame=160/250 hist=3 policy=0.2s elapsed=18s
+[decide] 2026-11-28 02:08:56 obs_cf200_e10/on observe_and_pickup seed=4300048 frame=192/250 hist=3 policy=0.2s elapsed=21s
+[decide] 2026-11-28 02:08:58 obs_cf200_e10/on observe_and_pickup seed=4300048 frame=224/250 hist=3 policy=0.2s elapsed=24s
+[closed-loop] 2026-11-28 02:09:02 done  obs_cf200_e10/on observe_and_pickup seed=4300048 success=False targets=250/250 reward=0.0 lift=None  45s
+[closed-loop] 2026-11-28 02:09:02 start obs_cf200_e10/on observe_and_pickup seed=4300049 target_limit=250 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/c25obj/obs_cf200_e10/on/observe_and_pickup/seed_4300049
+[decide] 2026-11-28 02:09:23 obs_cf200_e10/on observe_and_pickup seed=4300049 frame=0/250 hist=0 policy=0.1s elapsed=4s
+[decide] 2026-11-28 02:09:26 obs_cf200_e10/on observe_and_pickup seed=4300049 frame=32/250 hist=2 policy=0.2s elapsed=7s
+[decide] 2026-11-28 02:09:29 obs_cf200_e10/on observe_and_pickup seed=4300049 frame=64/250 hist=3 policy=0.2s elapsed=10s
+[decide] 2026-11-28 02:09:32 obs_cf200_e10/on observe_and_pickup seed=4300049 frame=96/250 hist=3 policy=0.2s elapsed=13s
+[decide] 2026-11-28 02:09:35 obs_cf200_e10/on observe_and_pickup seed=4300049 frame=128/250 hist=3 policy=0.2s elapsed=15s
+[decide] 2026-11-28 02:09:38 obs_cf200_e10/on observe_and_pickup seed=4300049 frame=160/250 hist=3 policy=0.2s elapsed=18s
+[decide] 2026-11-28 02:09:41 obs_cf200_e10/on observe_and_pickup seed=4300049 frame=192/250 hist=3 policy=0.2s elapsed=21s
+[decide] 2026-11-28 02:09:44 obs_cf200_e10/on observe_and_pickup seed=4300049 frame=224/250 hist=3 policy=0.2s elapsed=24s
+[closed-loop] 2026-11-28 02:09:47 done  obs_cf200_e10/on observe_and_pickup seed=4300049 success=False targets=250/250 reward=0.0 lift=None  45s
+[closed-loop] 2026-11-28 02:09:47 start obs_cf200_e10/on observe_and_pickup seed=4300050 target_limit=250 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/c25obj/obs_cf200_e10/on/observe_and_pickup/seed_4300050
+[decide] 2026-11-28 02:10:09 obs_cf200_e10/on observe_and_pickup seed=4300050 frame=0/250 hist=0 policy=0.2s elapsed=4s
+[decide] 2026-11-28 02:10:12 obs_cf200_e10/on observe_and_pickup seed=4300050 frame=32/250 hist=2 policy=0.2s elapsed=7s
+[decide] 2026-11-28 02:10:15 obs_cf200_e10/on observe_and_pickup seed=4300050 frame=64/250 hist=3 policy=0.2s elapsed=9s
+[closed-loop] 2026-11-28 02:10:19 done  obs_cf200_e10/on observe_and_pickup seed=4300050 success=True targets=91/250 reward=0.0 lift=None  32s
+
+label/mode              task               n  success  95% CI        lift5cm  reward  targets dep_null  dep_off   dep_on  pol_s
+obs_cf200_e10/on        observe_and_pickup  50     0.26  [0.16,0.40]         -    0.00      210        -        -        -    0.2
+
+[summary] 50 episodes, 0 open errors -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/c25obj/SUMMARY.json
+[W1128 02:10:19.638734663 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[closed-loop] 2026-11-28 02:10:58 50 scenes x modes ['on'] -> labels {'on': 'obs_cf200_e10'}; checkpoint /workspace/FastWAM-memory2/outputs/fullft/exports/obs_cf200_e10/export_e10.pt; T5 on CPU; max_targets=official
+
+label/mode              task               n  success  95% CI        lift5cm  reward  targets dep_null  dep_off   dep_on  pol_s
+obs_cf200_e10/on        observe_and_pickup  50     0.26  [0.16,0.40]         -    0.00      210        -        -        -    0.2
+
+[summary] 50 episodes, 0 open errors -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/c25obj/SUMMARY.json
+[W1128 02:10:59.992167265 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())

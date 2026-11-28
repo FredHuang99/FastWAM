@@ -1,0 +1,60 @@
+[closed-loop] 2026-11-28 11:42:19 done  swapT_joint3_e30/on swap_T seed=4300046 success=True targets=296/600 reward=1.0 lift=None  51s
+[closed-loop] 2026-11-28 11:42:19 start swapT_joint3_e30/on swap_T seed=4300047 target_limit=600 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/swaptdiag/swapT_joint3_e30/on/swap_T/seed_4300047
+[decide] 2026-11-28 11:42:40 swapT_joint3_e30/on swap_T seed=4300047 frame=0/600 hist=0 policy=0.1s elapsed=3s
+[decide] 2026-11-28 11:42:43 swapT_joint3_e30/on swap_T seed=4300047 frame=32/600 hist=2 policy=0.2s elapsed=6s
+[decide] 2026-11-28 11:42:46 swapT_joint3_e30/on swap_T seed=4300047 frame=64/600 hist=3 policy=0.2s elapsed=9s
+[decide] 2026-11-28 11:42:49 swapT_joint3_e30/on swap_T seed=4300047 frame=96/600 hist=3 policy=0.2s elapsed=12s
+[decide] 2026-11-28 11:42:52 swapT_joint3_e30/on swap_T seed=4300047 frame=128/600 hist=3 policy=0.2s elapsed=16s
+[decide] 2026-11-28 11:42:56 swapT_joint3_e30/on swap_T seed=4300047 frame=160/600 hist=3 policy=0.2s elapsed=19s
+[decide] 2026-11-28 11:42:59 swapT_joint3_e30/on swap_T seed=4300047 frame=192/600 hist=3 policy=0.2s elapsed=22s
+[decide] 2026-11-28 11:43:02 swapT_joint3_e30/on swap_T seed=4300047 frame=224/600 hist=3 policy=0.2s elapsed=25s
+[decide] 2026-11-28 11:43:05 swapT_joint3_e30/on swap_T seed=4300047 frame=256/600 hist=3 policy=0.2s elapsed=28s
+[closed-loop] 2026-11-28 11:43:09 done  swapT_joint3_e30/on swap_T seed=4300047 success=True targets=287/600 reward=1.0 lift=None  50s
+[closed-loop] 2026-11-28 11:43:09 start swapT_joint3_e30/on swap_T seed=4300048 target_limit=600 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/swaptdiag/swapT_joint3_e30/on/swap_T/seed_4300048
+[decide] 2026-11-28 11:43:30 swapT_joint3_e30/on swap_T seed=4300048 frame=0/600 hist=0 policy=0.1s elapsed=3s
+[decide] 2026-11-28 11:43:33 swapT_joint3_e30/on swap_T seed=4300048 frame=32/600 hist=2 policy=0.2s elapsed=6s
+[decide] 2026-11-28 11:43:36 swapT_joint3_e30/on swap_T seed=4300048 frame=64/600 hist=3 policy=0.2s elapsed=9s
+[decide] 2026-11-28 11:43:40 swapT_joint3_e30/on swap_T seed=4300048 frame=96/600 hist=3 policy=0.2s elapsed=12s
+[decide] 2026-11-28 11:43:43 swapT_joint3_e30/on swap_T seed=4300048 frame=128/600 hist=3 policy=0.2s elapsed=16s
+[decide] 2026-11-28 11:43:46 swapT_joint3_e30/on swap_T seed=4300048 frame=160/600 hist=3 policy=0.2s elapsed=19s
+[decide] 2026-11-28 11:43:49 swapT_joint3_e30/on swap_T seed=4300048 frame=192/600 hist=3 policy=0.2s elapsed=22s
+[decide] 2026-11-28 11:43:52 swapT_joint3_e30/on swap_T seed=4300048 frame=224/600 hist=3 policy=0.2s elapsed=25s
+[decide] 2026-11-28 11:43:55 swapT_joint3_e30/on swap_T seed=4300048 frame=256/600 hist=3 policy=0.2s elapsed=28s
+[decide] 2026-11-28 11:43:58 swapT_joint3_e30/on swap_T seed=4300048 frame=288/600 hist=3 policy=0.2s elapsed=31s
+[closed-loop] 2026-11-28 11:44:00 done  swapT_joint3_e30/on swap_T seed=4300048 success=True targets=295/600 reward=1.0 lift=None  51s
+[closed-loop] 2026-11-28 11:44:00 start swapT_joint3_e30/on swap_T seed=4300049 target_limit=600 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/swaptdiag/swapT_joint3_e30/on/swap_T/seed_4300049
+[decide] 2026-11-28 11:44:21 swapT_joint3_e30/on swap_T seed=4300049 frame=0/600 hist=0 policy=0.1s elapsed=3s
+[decide] 2026-11-28 11:44:24 swapT_joint3_e30/on swap_T seed=4300049 frame=32/600 hist=2 policy=0.2s elapsed=6s
+[decide] 2026-11-28 11:44:27 swapT_joint3_e30/on swap_T seed=4300049 frame=64/600 hist=3 policy=0.2s elapsed=9s
+[decide] 2026-11-28 11:44:31 swapT_joint3_e30/on swap_T seed=4300049 frame=96/600 hist=3 policy=0.2s elapsed=13s
+[decide] 2026-11-28 11:44:34 swapT_joint3_e30/on swap_T seed=4300049 frame=128/600 hist=3 policy=0.2s elapsed=16s
+[decide] 2026-11-28 11:44:37 swapT_joint3_e30/on swap_T seed=4300049 frame=160/600 hist=3 policy=0.2s elapsed=19s
+[decide] 2026-11-28 11:44:40 swapT_joint3_e30/on swap_T seed=4300049 frame=192/600 hist=3 policy=0.2s elapsed=22s
+[decide] 2026-11-28 11:44:43 swapT_joint3_e30/on swap_T seed=4300049 frame=224/600 hist=3 policy=0.2s elapsed=25s
+[decide] 2026-11-28 11:44:46 swapT_joint3_e30/on swap_T seed=4300049 frame=256/600 hist=3 policy=0.2s elapsed=28s
+[closed-loop] 2026-11-28 11:44:51 done  swapT_joint3_e30/on swap_T seed=4300049 success=True targets=288/600 reward=1.0 lift=None  50s
+[closed-loop] 2026-11-28 11:44:51 start swapT_joint3_e30/on swap_T seed=4300050 target_limit=600 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/swaptdiag/swapT_joint3_e30/on/swap_T/seed_4300050
+[decide] 2026-11-28 11:45:12 swapT_joint3_e30/on swap_T seed=4300050 frame=0/600 hist=0 policy=0.1s elapsed=3s
+[decide] 2026-11-28 11:45:15 swapT_joint3_e30/on swap_T seed=4300050 frame=32/600 hist=2 policy=0.2s elapsed=6s
+[decide] 2026-11-28 11:45:18 swapT_joint3_e30/on swap_T seed=4300050 frame=64/600 hist=3 policy=0.2s elapsed=9s
+[decide] 2026-11-28 11:45:21 swapT_joint3_e30/on swap_T seed=4300050 frame=96/600 hist=3 policy=0.2s elapsed=12s
+[decide] 2026-11-28 11:45:24 swapT_joint3_e30/on swap_T seed=4300050 frame=128/600 hist=3 policy=0.2s elapsed=16s
+[decide] 2026-11-28 11:45:28 swapT_joint3_e30/on swap_T seed=4300050 frame=160/600 hist=3 policy=0.2s elapsed=19s
+[decide] 2026-11-28 11:45:31 swapT_joint3_e30/on swap_T seed=4300050 frame=192/600 hist=3 policy=0.2s elapsed=22s
+[decide] 2026-11-28 11:45:34 swapT_joint3_e30/on swap_T seed=4300050 frame=224/600 hist=3 policy=0.2s elapsed=25s
+[decide] 2026-11-28 11:45:37 swapT_joint3_e30/on swap_T seed=4300050 frame=256/600 hist=3 policy=0.2s elapsed=28s
+[decide] 2026-11-28 11:45:40 swapT_joint3_e30/on swap_T seed=4300050 frame=288/600 hist=3 policy=0.2s elapsed=31s
+[closed-loop] 2026-11-28 11:45:42 done  swapT_joint3_e30/on swap_T seed=4300050 success=True targets=294/600 reward=1.0 lift=None  51s
+
+label/mode              task               n  success  95% CI        lift5cm  reward  targets dep_null  dep_off   dep_on  pol_s
+swapT_ar_e30/on         swap_T            50     0.56  [0.42,0.69]         -    0.56      426        -        -        -    0.2
+swapT_arprop_e30/on     swap_T            50     0.48  [0.35,0.61]         -    0.48      455        -        -        -    0.2
+swapT_joint3_e30/on     swap_T            50     0.96  [0.87,0.99]         -    0.96      305        -        -        -    0.2
+
+paired on common scenes (A vs B):                         n  both  only A  only B  neither  McNemar p
+  swapT_ar_e30/on          vs swapT_arprop_e30/on       50    21       7       3       19  0.344
+  swapT_ar_e30/on          vs swapT_joint3_e30/on       50    27       1      21        1  0.000
+  swapT_arprop_e30/on      vs swapT_joint3_e30/on       50    23       1      25        1  0.000
+
+[summary] 150 episodes, 0 open errors -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/swaptdiag/SUMMARY.json
+[W1128 11:45:43.045084323 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())

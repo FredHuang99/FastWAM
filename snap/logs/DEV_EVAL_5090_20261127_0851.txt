@@ -1,0 +1,31 @@
+[dev] 2026-11-27 08:51:48 checkout 7e5d916 A40: hourly automatic pruning of intermediate export; GPU 1; runs: rearr_ar_pw_e20:rearrange_blocks
+[relay] get hhyfred/memwam-fullft/exports/rearr_ar_pw_e20/export_e20.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_ar_pw_e20/export_e20.pt (12042063459 bytes)
+[relay] get hhyfred/memwam-fullft/exports/rearr_ar_pw_e20/export_e20.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_ar_pw_e20/export_e20.pt.sha256 (80 bytes)
+[dev] 2026-11-27 08:54:10 DEV rearr_ar_pw_e20 on rearrange_blocks: 0 / 0 (30 dev scenes; 5090 only)
+[dev] 2026-11-27 08:54:10 no episode finished; the last lines of /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/dev7_rearr_ar_pw_e20.log:
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1373, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 930, in _apply
+    module._apply(fn)
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 930, in _apply
+    module._apply(fn)
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 930, in _apply
+    module._apply(fn)
+  File "/workspace/FastWAM-memory2/src/fastwam/models/wan22/wan_video_dit.py", line 401, in _apply
+    result = super()._apply(fn)
+             ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 930, in _apply
+    module._apply(fn)
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 961, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1359, in convert
+    return t.to(
+           ^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/cuda/__init__.py", line 411, in _lazy_init
+    torch._C._cuda_init()
+RuntimeError: CUDA unknown error - this may be due to an incorrectly set up environment, e.g. changing env variable CUDA_VISIBLE_DEVICES after program start. Setting the available devices to be zero.
+[W1127 08:54:10.538842873 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[dev] 2026-11-27 08:54:10 finished, exit code 1; log /workspace/FastWAM-memory2/outputs/fullft/DEV_EVAL_5090_20261127_0851.txt

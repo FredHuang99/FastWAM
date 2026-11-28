@@ -1,0 +1,1252 @@
+{
+ "per_arm": {
+  "(1, 1, 1, 1)": 38,
+  "(1, 1, 1, 0)": 12
+ },
+ "patterns": {
+  "Lc Rc Lo Ro": 38,
+  "Lc Rc Lo": 12
+ },
+ "episodes": {
+  "swap_T/episode_0000000": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    175,
+    293
+   ]
+  },
+  "swap_T/episode_0000001": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    183,
+    296
+   ]
+  },
+  "swap_T/episode_0000002": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    179,
+    295
+   ]
+  },
+  "swap_T/episode_0000003": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    180,
+    286
+   ]
+  },
+  "swap_T/episode_0000004": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    182,
+    288
+   ]
+  },
+  "swap_T/episode_0000005": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    177,
+    293
+   ]
+  },
+  "swap_T/episode_0000006": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    176,
+    293
+   ]
+  },
+  "swap_T/episode_0000007": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    180,
+    295
+   ]
+  },
+  "swap_T/episode_0000008": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    63,
+    63,
+    185,
+    307
+   ]
+  },
+  "swap_T/episode_0000009": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    174,
+    291
+   ]
+  },
+  "swap_T/episode_0000010": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    178,
+    285
+   ]
+  },
+  "swap_T/episode_0000011": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ]
+   ],
+   "frames": [
+    57,
+    57,
+    173
+   ]
+  },
+  "swap_T/episode_0000012": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    177,
+    284
+   ]
+  },
+  "swap_T/episode_0000013": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    173
+   ]
+  },
+  "swap_T/episode_0000014": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    178,
+    294
+   ]
+  },
+  "swap_T/episode_0000015": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    178,
+    293
+   ]
+  },
+  "swap_T/episode_0000016": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    177
+   ]
+  },
+  "swap_T/episode_0000017": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ]
+   ],
+   "frames": [
+    57,
+    57,
+    171
+   ]
+  },
+  "swap_T/episode_0000018": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    179,
+    286
+   ]
+  },
+  "swap_T/episode_0000019": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    180
+   ]
+  },
+  "swap_T/episode_0000020": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ]
+   ],
+   "frames": [
+    57,
+    57,
+    176
+   ]
+  },
+  "swap_T/episode_0000021": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    184,
+    299
+   ]
+  },
+  "swap_T/episode_0000022": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    174,
+    289
+   ]
+  },
+  "swap_T/episode_0000023": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    180,
+    294
+   ]
+  },
+  "swap_T/episode_0000024": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    178,
+    297
+   ]
+  },
+  "swap_T/episode_0000025": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    177,
+    283
+   ]
+  },
+  "swap_T/episode_0000026": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    179,
+    293
+   ]
+  },
+  "swap_T/episode_0000027": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    184,
+    301
+   ]
+  },
+  "swap_T/episode_0000028": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    175
+   ]
+  },
+  "swap_T/episode_0000029": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    59,
+    59,
+    180,
+    294
+   ]
+  },
+  "swap_T/episode_0000030": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    179,
+    286
+   ]
+  },
+  "swap_T/episode_0000031": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ]
+   ],
+   "frames": [
+    57,
+    57,
+    174
+   ]
+  },
+  "swap_T/episode_0000032": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    174,
+    290
+   ]
+  },
+  "swap_T/episode_0000033": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    59,
+    59,
+    176,
+    295
+   ]
+  },
+  "swap_T/episode_0000034": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    178,
+    291
+   ]
+  },
+  "swap_T/episode_0000035": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    177,
+    292
+   ]
+  },
+  "swap_T/episode_0000036": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ]
+   ],
+   "frames": [
+    59,
+    59,
+    180
+   ]
+  },
+  "swap_T/episode_0000037": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    178,
+    284
+   ]
+  },
+  "swap_T/episode_0000038": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    177,
+    291
+   ]
+  },
+  "swap_T/episode_0000039": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    180,
+    286
+   ]
+  },
+  "swap_T/episode_0000040": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    180,
+    301
+   ]
+  },
+  "swap_T/episode_0000041": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    179,
+    295
+   ]
+  },
+  "swap_T/episode_0000042": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    174,
+    280
+   ]
+  },
+  "swap_T/episode_0000043": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    175
+   ]
+  },
+  "swap_T/episode_0000044": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    177,
+    291
+   ]
+  },
+  "swap_T/episode_0000045": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    182,
+    297
+   ]
+  },
+  "swap_T/episode_0000046": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    178,
+    285
+   ]
+  },
+  "swap_T/episode_0000047": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ],
+    [
+     "R",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    175,
+    290
+   ]
+  },
+  "swap_T/episode_0000048": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ]
+   ],
+   "frames": [
+    59,
+    59,
+    180
+   ]
+  },
+  "swap_T/episode_0000049": {
+   "seq": [
+    [
+     "L",
+     "close"
+    ],
+    [
+     "R",
+     "close"
+    ],
+    [
+     "L",
+     "open"
+    ]
+   ],
+   "frames": [
+    58,
+    58,
+    179
+   ]
+  }
+ }
+}

@@ -1,0 +1,8 @@
+{
+ "time": "2026-11-28 17:09:05",
+ "rule": "user decision D 11-28 15:52 (see the docstring)",
+ "deleted": [],
+ "skipped": {},
+ "usage_age_h": 1.64,
+ "action": "none: 62.6% <= 75%"
+}

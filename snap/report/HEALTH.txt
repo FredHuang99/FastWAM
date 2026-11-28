@@ -1,0 +1,7 @@
+machine g5090 host gpu5090 at 2026-11-29 02:00:59
+ok   auto_pull alive (last log 32 min)
+ok   q5090 runner alive
+idle  GPU 0: 40 MiB, 0 %
+idle  GPU 1: 18 MiB, 0 %
+ok   disk /workspace/FastWAM-memory2 65% used (1.4T free)
+ok   disk / 8% used (3.2T free)

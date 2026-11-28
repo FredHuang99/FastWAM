@@ -1,0 +1,3 @@
+[dev] 2026-11-28 03:33:46 checkout 21d49a1 Card 25 described items on the 5090 (held-out genera; GPU 1; runs: rearr_arprop_pw_e20:rearrange_blocks
+[dev] 2026-11-28 04:06:53 DEV rearr_arprop_pw_e20 on rearrange_blocks: 22 / 30 (30 dev scenes; 5090 only)
+[dev] 2026-11-28 04:06:53 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/DEV_EVAL_5090_20261128_0333.txt

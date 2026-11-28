@@ -1,0 +1,205 @@
+[c7p] 2026-11-26 04:10:26 start; checkout b07e8e3 Round 5 (11-26 12:00): card 7 obs_match NO HELP -> i; GPU 0
+[fetch] disk before: /dev/nvme1n1p1  3.7T  1.8T  2.0T  47% /workspace/FastWAM-memory2
+[fetch] 2026-11-26 04:10:26 fetching obs_match_e30 (attempt 1)
+[relay] get hhyfred/memwam-fullft/exports/obs_match_e30/export_e30.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/obs_match_e30/export_e30.pt (12042063587 bytes)
+[relay] get hhyfred/memwam-fullft/exports/obs_match_e30/export_e30.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/obs_match_e30/export_e30.pt.sha256 (80 bytes)
+export_e30.pt: OK
+total 11759844
+drwxr-xr-x  2 root root        4096 Nov 26 04:12 .
+drwxr-xr-x 45 root root        4096 Nov 26 04:10 ..
+-rw-r--r--  1 root root 12042063587 Nov 26 04:12 export_e30.pt
+-rw-r--r--  1 root root          80 Nov 26 04:12 export_e30.pt.sha256
+[c7p] 2026-11-26 04:12:16 ===== 1 match-frame swap probe
+[c7p] 2026-11-26 04:12:16 window onset split all
+[probe] obs_match split all; 50 demos with a grasp; first close at frame median 116.0 (min 113, max 121) of length median 149.0; a 48-frame choice window = 32.1 % of the training anchors
+[probe] motion onset (5 % of the way to the grasp pose) at frame median 71.0 (min 71, max 72); window [m - 24, m + 8]
+onset : 300 anchors; action loss true 0.01474, match frame swapped 0.01472 (-0.2 %, higher at 146/300), no history 0.01529 (+3.7 %)
+late  : 150 anchors; action loss true 0.00102, match frame swapped 0.00102 (+0.2 %, higher at 74/150), no history 0.00397 (+288.6 %)
+OBS PROBE obs_match: the match frame is NOT used at the motion onset (< 2 %)
+-> /workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_obs_match_onset_matchref.json
+[c7p] 2026-11-26 04:15:15 window onset split train
+[probe] obs_match split train; 45 demos with a grasp; first close at frame median 116 (min 113, max 121) of length median 149; a 48-frame choice window = 32.1 % of the training anchors
+[probe] motion onset (5 % of the way to the grasp pose) at frame median 71 (min 71, max 72); window [m - 24, m + 8]
+onset : 270 anchors; action loss true 0.00109, match frame swapped 0.00109 (+0.1 %, higher at 145/270), no history 0.00213 (+95.4 %)
+late  : 135 anchors; action loss true 0.00046, match frame swapped 0.00046 (+0.3 %, higher at 69/135), no history 0.00350 (+656.1 %)
+OBS PROBE obs_match: the match frame is NOT used at the motion onset (< 2 %)
+-> /workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_obs_match_onset_train_matchref.json
+[c7p] 2026-11-26 04:17:58 window onset split val
+[probe] obs_match split val; 5 demos with a grasp; first close at frame median 116 (min 113, max 117) of length median 149; a 48-frame choice window = 32.3 % of the training anchors
+[probe] motion onset (5 % of the way to the grasp pose) at frame median 71 (min 71, max 72); window [m - 24, m + 8]
+onset : 30 anchors; action loss true 0.17002, match frame swapped 0.16998 (-0.0 %, higher at 18/30), no history 0.16537 (-2.7 %)
+late  : 15 anchors; action loss true 0.00511, match frame swapped 0.00511 (-0.1 %, higher at 8/15), no history 0.00746 (+45.9 %)
+OBS PROBE obs_match: the match frame is NOT used at the motion onset (< 2 %)
+-> /workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_obs_match_onset_val_matchref.json
+[c7p] 2026-11-26 04:18:35 window wait split all
+[probe] obs_match split all; 50 demos with a grasp; first close at frame median 116.0 (min 113, max 121) of length median 149.0; a 48-frame choice window = 32.1 % of the training anchors
+[probe] motion onset (5 % of the way to the grasp pose) at frame median 71.0 (min 71, max 72); window [8, m - 25]
+wait  : 300 anchors; action loss true 0.00074, match frame swapped 0.00074 (-0.1 %, higher at 134/300), no history 0.00076 (+3.5 %)
+late  : 150 anchors; action loss true 0.00102, match frame swapped 0.00102 (+0.3 %, higher at 78/150), no history 0.00397 (+289.2 %)
+OBS PROBE obs_match: the match frame is NOT used before the arm moves (< 2 %)
+-> /workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_obs_match_wait_matchref.json
+[c7p] 2026-11-26 04:21:26 ===== 2 closed loop with the object record (scenes 1-50, execute 8)
+[c7p] 2026-11-26 04:58:44 pass 1 exit code 0; finished 50/50
+[c7p] 2026-11-26 04:59:25 pass 2 exit code 0; finished 50/50
+== a3diag:obs_ar_e30: 50 episodes
+  calibration: x-y distance to the target at the last close of the 4 successes (cm): [0.3, 0.5, 1.5, 0.3]
+  classes (all episodes): {'never closed': 21, 'closed near another object only': 21, 'closed near the target': 6, 'closed in the air only': 2}
+  classes (failed episodes): {'never closed': 21, 'closed near another object only': 21, 'closed near the target': 2, 'closed in the air only': 2}
+  first close: nearest candidate is the target in 6 / 29 (same category, other instance: 4); distance to the nearest candidate median 1.5 cm
+  closes per episode: {0: 21, 1: 29}
+  arms at the first close: {'left': 20, 'right': 9}
+    {"seed": "seed_4300000", "success": false, "target": 0, "class": "never closed"} []
+    {"seed": "seed_4300001", "success": false, "target": 2, "class": "closed near another object only"} [{"t": 103, "arm": "left", "nearest": 1, "cm": 1.7, "target_cm": 41.3, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300002", "success": false, "target": 2, "class": "closed near another object only"} [{"t": 181, "arm": "left", "nearest": 3, "cm": 1.0, "target_cm": 32.5, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300003", "success": false, "target": 1, "class": "closed near another object only"} [{"t": 126, "arm": "left", "nearest": 0, "cm": 2.3, "target_cm": 7.0, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300004", "success": false, "target": 1, "class": "closed near another object only"} [{"t": 101, "arm": "left", "nearest": 3, "cm": 4.0, "target_cm": 29.4, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300005", "success": false, "target": 3, "class": "closed near another object only"} [{"t": 78, "arm": "left", "nearest": 2, "cm": 0.7, "target_cm": 64.0, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300006", "success": false, "target": 3, "class": "closed near the target"} [{"t": 102, "arm": "left", "nearest": 3, "cm": 2.6, "target_cm": 2.6, "is_target": true, "same_category": false}]
+    {"seed": "seed_4300007", "success": false, "target": 3, "class": "closed near another object only"} [{"t": 85, "arm": "left", "nearest": 2, "cm": 0.6, "target_cm": 9.3, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300008", "success": false, "target": 1, "class": "never closed"} []
+    {"seed": "seed_4300009", "success": false, "target": 0, "class": "never closed"} []
+    {"seed": "seed_4300010", "success": false, "target": 2, "class": "never closed"} []
+    {"seed": "seed_4300011", "success": false, "target": 0, "class": "never closed"} []
+    {"seed": "seed_4300012", "success": false, "target": 4, "class": "closed near another object only"} [{"t": 158, "arm": "left", "nearest": 0, "cm": 4.2, "target_cm": 54.9, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300013", "success": false, "target": 3, "class": "closed near another object only"} [{"t": 198, "arm": "right", "nearest": 4, "cm": 4.0, "target_cm": 48.4, "is_target": false, "same_category": true}]
+    {"seed": "seed_4300014", "success": false, "target": 0, "class": "never closed"} []
+    {"seed": "seed_4300015", "success": false, "target": 4, "class": "closed near the target"} [{"t": 103, "arm": "left", "nearest": 4, "cm": 2.7, "target_cm": 2.7, "is_target": true, "same_category": false}]
+    {"seed": "seed_4300016", "success": false, "target": 0, "class": "closed near another object only"} [{"t": 94, "arm": "left", "nearest": 3, "cm": 2.5, "target_cm": 17.1, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300017", "success": false, "target": 4, "class": "closed near another object only"} [{"t": 101, "arm": "right", "nearest": 0, "cm": 0.3, "target_cm": 22.6, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300018", "success": false, "target": 2, "class": "never closed"} []
+    {"seed": "seed_4300019", "success": false, "target": 3, "class": "never closed"} []
+    {"seed": "seed_4300020", "success": false, "target": 3, "class": "closed near another object only"} [{"t": 93, "arm": "right", "nearest": 2, "cm": 0.1, "target_cm": 12.8, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300021", "success": false, "target": 3, "class": "never closed"} []
+    {"seed": "seed_4300022", "success": false, "target": 1, "class": "closed near another object only"} [{"t": 101, "arm": "right", "nearest": 3, "cm": 0.3, "target_cm": 10.6, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300023", "success": false, "target": 0, "class": "closed near another object only"} [{"t": 166, "arm": "left", "nearest": 1, "cm": 2.6, "target_cm": 50.8, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300024", "success": false, "target": 2, "class": "closed near another object only"} [{"t": 88, "arm": "left", "nearest": 1, "cm": 5.0, "target_cm": 14.4, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300025", "success": false, "target": 4, "class": "closed near another object only"} [{"t": 85, "arm": "right", "nearest": 3, "cm": 4.0, "target_cm": 18.0, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300026", "success": false, "target": 1, "class": "never closed"} []
+    {"seed": "seed_4300027", "success": false, "target": 2, "class": "closed in the air only"} [{"t": 86, "arm": "left", "nearest": 0, "cm": 5.2, "target_cm": 18.4, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300028", "success": false, "target": 0, "class": "never closed"} []
+    {"seed": "seed_4300029", "success": false, "target": 2, "class": "closed in the air only"} [{"t": 111, "arm": "left", "nearest": 1, "cm": 11.5, "target_cm": 12.6, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300031", "success": false, "target": 3, "class": "never closed"} []
+    {"seed": "seed_4300032", "success": false, "target": 3, "class": "closed near another object only"} [{"t": 125, "arm": "left", "nearest": 4, "cm": 1.2, "target_cm": 52.5, "is_target": false, "same_category": true}]
+    {"seed": "seed_4300033", "success": false, "target": 2, "class": "closed near another object only"} [{"t": 150, "arm": "left", "nearest": 4, "cm": 2.6, "target_cm": 55.2, "is_target": false, "same_category": true}]
+    {"seed": "seed_4300034", "success": false, "target": 0, "class": "never closed"} []
+    {"seed": "seed_4300035", "success": true, "target": 0, "class": "closed near the target"} [{"t": 174, "arm": "left", "nearest": 0, "cm": 0.3, "target_cm": 0.3, "is_target": true, "same_category": false}]
+    {"seed": "seed_4300036", "success": false, "target": 3, "class": "never closed"} []
+    {"seed": "seed_4300037", "success": false, "target": 4, "class": "never closed"} []
+    {"seed": "seed_4300038", "success": false, "target": 1, "class": "never closed"} []
+    {"seed": "seed_4300039", "success": false, "target": 4, "class": "closed near another object only"} [{"t": 102, "arm": "right", "nearest": 2, "cm": 1.4, "target_cm": 62.4, "is_target": false, "same_category": true}]
+    {"seed": "seed_4300040", "success": true, "target": 3, "class": "closed near the target"} [{"t": 99, "arm": "right", "nearest": 3, "cm": 0.5, "target_cm": 0.5, "is_target": true, "same_category": false}]
+    {"seed": "seed_4300041", "success": false, "target": 0, "class": "closed near another object only"} [{"t": 133, "arm": "right", "nearest": 2, "cm": 0.3, "target_cm": 12.0, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300042", "success": false, "target": 0, "class": "never closed"} []
+    {"seed": "seed_4300043", "success": false, "target": 1, "class": "never closed"} []
+    {"seed": "seed_4300044", "success": false, "target": 0, "class": "never closed"} []
+    {"seed": "seed_4300045", "success": true, "target": 3, "class": "closed near the target"} [{"t": 86, "arm": "left", "nearest": 3, "cm": 1.5, "target_cm": 1.5, "is_target": true, "same_category": false}]
+    {"seed": "seed_4300046", "success": false, "target": 2, "class": "never closed"} []
+    {"seed": "seed_4300047", "success": false, "target": 1, "class": "closed near another object only"} [{"t": 173, "arm": "left", "nearest": 3, "cm": 1.3, "target_cm": 21.7, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300048", "success": false, "target": 4, "class": "never closed"} []
+    {"seed": "seed_4300049", "success": true, "target": 3, "class": "closed near the target"} [{"t": 138, "arm": "right", "nearest": 3, "cm": 0.3, "target_cm": 0.3, "is_target": true, "same_category": false}]
+    {"seed": "seed_4300050", "success": false, "target": 4, "class": "closed near another object only"} [{"t": 94, "arm": "left", "nearest": 1, "cm": 0.1, "target_cm": 65.4, "is_target": false, "same_category": false}]
+== c7obj:obs_match_e30: 50 episodes
+  calibration: x-y distance to the target at the last close of the 6 successes (cm): [0.4, 0.9, 2.4, 1.1, 0.5, 0.4]
+  classes (all episodes): {'closed in the air only': 5, 'closed near another object only': 27, 'never closed': 7, 'closed near the target': 11}
+  classes (failed episodes): {'closed in the air only': 5, 'closed near another object only': 27, 'never closed': 7, 'closed near the target': 5}
+  first close: nearest candidate is the target in 12 / 43 (same category, other instance: 5); distance to the nearest candidate median 1.2 cm
+  closes per episode: {0: 7, 1: 43}
+  arms at the first close: {'left': 35, 'right': 8}
+    {"seed": "seed_4300000", "success": false, "target": 0, "class": "closed in the air only"} [{"t": 111, "arm": "left", "nearest": 2, "cm": 13.0, "target_cm": 47.7, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300001", "success": false, "target": 2, "class": "closed near another object only"} [{"t": 86, "arm": "left", "nearest": 0, "cm": 2.4, "target_cm": 34.0, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300002", "success": false, "target": 2, "class": "closed near another object only"} [{"t": 77, "arm": "left", "nearest": 3, "cm": 0.9, "target_cm": 31.8, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300003", "success": false, "target": 1, "class": "never closed"} []
+    {"seed": "seed_4300004", "success": false, "target": 1, "class": "closed near another object only"} [{"t": 101, "arm": "left", "nearest": 3, "cm": 4.1, "target_cm": 29.3, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300005", "success": false, "target": 3, "class": "closed near another object only"} [{"t": 93, "arm": "left", "nearest": 2, "cm": 0.7, "target_cm": 64.2, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300006", "success": false, "target": 3, "class": "never closed"} []
+    {"seed": "seed_4300007", "success": false, "target": 3, "class": "closed near another object only"} [{"t": 101, "arm": "left", "nearest": 2, "cm": 0.8, "target_cm": 9.1, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300008", "success": true, "target": 1, "class": "closed near the target"} [{"t": 133, "arm": "right", "nearest": 1, "cm": 0.4, "target_cm": 0.4, "is_target": true, "same_category": false}]
+    {"seed": "seed_4300009", "success": false, "target": 0, "class": "closed near the target"} [{"t": 87, "arm": "left", "nearest": 0, "cm": 2.3, "target_cm": 2.3, "is_target": true, "same_category": false}]
+    {"seed": "seed_4300010", "success": false, "target": 2, "class": "never closed"} []
+    {"seed": "seed_4300011", "success": false, "target": 0, "class": "closed near another object only"} [{"t": 214, "arm": "left", "nearest": 4, "cm": 1.8, "target_cm": 10.3, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300012", "success": false, "target": 4, "class": "closed near another object only"} [{"t": 77, "arm": "left", "nearest": 0, "cm": 1.2, "target_cm": 56.3, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300013", "success": true, "target": 3, "class": "closed near the target"} [{"t": 133, "arm": "left", "nearest": 3, "cm": 0.9, "target_cm": 0.9, "is_target": true, "same_category": false}]
+    {"seed": "seed_4300014", "success": false, "target": 0, "class": "closed near another object only"} [{"t": 117, "arm": "right", "nearest": 4, "cm": 1.6, "target_cm": 35.9, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300015", "success": true, "target": 4, "class": "closed near the target"} [{"t": 94, "arm": "left", "nearest": 4, "cm": 2.4, "target_cm": 2.4, "is_target": true, "same_category": false}]
+    {"seed": "seed_4300016", "success": false, "target": 0, "class": "closed near another object only"} [{"t": 125, "arm": "left", "nearest": 3, "cm": 1.4, "target_cm": 16.9, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300017", "success": false, "target": 4, "class": "closed near another object only"} [{"t": 141, "arm": "left", "nearest": 2, "cm": 0.3, "target_cm": 23.2, "is_target": false, "same_category": true}]
+    {"seed": "seed_4300018", "success": false, "target": 2, "class": "closed near another object only"} [{"t": 181, "arm": "left", "nearest": 4, "cm": 1.2, "target_cm": 24.9, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300019", "success": false, "target": 3, "class": "closed near another object only"} [{"t": 116, "arm": "right", "nearest": 1, "cm": 0.5, "target_cm": 43.5, "is_target": false, "same_category": true}]
+    {"seed": "seed_4300020", "success": false, "target": 3, "class": "closed near another object only"} [{"t": 108, "arm": "right", "nearest": 2, "cm": 0.6, "target_cm": 13.2, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300021", "success": false, "target": 3, "class": "closed near another object only"} [{"t": 222, "arm": "left", "nearest": 0, "cm": 1.2, "target_cm": 67.3, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300022", "success": false, "target": 1, "class": "closed near another object only"} [{"t": 110, "arm": "left", "nearest": 0, "cm": 0.7, "target_cm": 48.0, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300023", "success": false, "target": 0, "class": "never closed"} []
+    {"seed": "seed_4300024", "success": false, "target": 2, "class": "closed near another object only"} [{"t": 86, "arm": "left", "nearest": 0, "cm": 0.1, "target_cm": 8.9, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300025", "success": false, "target": 4, "class": "closed near another object only"} [{"t": 117, "arm": "left", "nearest": 0, "cm": 0.5, "target_cm": 20.0, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300026", "success": false, "target": 1, "class": "closed near another object only"} [{"t": 125, "arm": "left", "nearest": 3, "cm": 4.3, "target_cm": 44.3, "is_target": false, "same_category": true}]
+    {"seed": "seed_4300027", "success": false, "target": 2, "class": "closed in the air only"} [{"t": 94, "arm": "left", "nearest": 0, "cm": 7.7, "target_cm": 18.6, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300028", "success": false, "target": 0, "class": "never closed"} []
+    {"seed": "seed_4300029", "success": false, "target": 2, "class": "closed in the air only"} [{"t": 167, "arm": "left", "nearest": 2, "cm": 11.4, "target_cm": 11.4, "is_target": true, "same_category": false}]
+    {"seed": "seed_4300031", "success": false, "target": 3, "class": "never closed"} []
+    {"seed": "seed_4300032", "success": false, "target": 3, "class": "closed near another object only"} [{"t": 109, "arm": "left", "nearest": 4, "cm": 1.2, "target_cm": 53.7, "is_target": false, "same_category": true}]
+    {"seed": "seed_4300033", "success": false, "target": 2, "class": "closed in the air only"} [{"t": 166, "arm": "left", "nearest": 3, "cm": 19.3, "target_cm": 54.6, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300034", "success": false, "target": 0, "class": "closed near another object only"} [{"t": 94, "arm": "left", "nearest": 3, "cm": 2.3, "target_cm": 14.5, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300035", "success": false, "target": 0, "class": "closed near another object only"} [{"t": 182, "arm": "right", "nearest": 3, "cm": 3.6, "target_cm": 42.4, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300036", "success": true, "target": 3, "class": "closed near the target"} [{"t": 93, "arm": "right", "nearest": 3, "cm": 1.1, "target_cm": 1.1, "is_target": true, "same_category": false}]
+    {"seed": "seed_4300037", "success": false, "target": 4, "class": "closed near another object only"} [{"t": 124, "arm": "left", "nearest": 2, "cm": 1.5, "target_cm": 55.3, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300038", "success": false, "target": 1, "class": "never closed"} []
+    {"seed": "seed_4300039", "success": false, "target": 4, "class": "closed near another object only"} [{"t": 102, "arm": "left", "nearest": 0, "cm": 3.3, "target_cm": 18.2, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300040", "success": false, "target": 3, "class": "closed near another object only"} [{"t": 110, "arm": "left", "nearest": 1, "cm": 0.4, "target_cm": 39.6, "is_target": false, "same_category": true}]
+    {"seed": "seed_4300041", "success": false, "target": 0, "class": "closed near another object only"} [{"t": 117, "arm": "left", "nearest": 1, "cm": 0.7, "target_cm": 29.5, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300042", "success": false, "target": 0, "class": "closed near the target"} [{"t": 117, "arm": "left", "nearest": 0, "cm": 1.1, "target_cm": 1.1, "is_target": true, "same_category": false}]
+    {"seed": "seed_4300043", "success": false, "target": 1, "class": "closed near another object only"} [{"t": 198, "arm": "left", "nearest": 2, "cm": 1.0, "target_cm": 66.5, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300044", "success": false, "target": 0, "class": "closed near the target"} [{"t": 110, "arm": "left", "nearest": 0, "cm": 0.9, "target_cm": 0.9, "is_target": true, "same_category": false}]
+    {"seed": "seed_4300045", "success": false, "target": 3, "class": "closed near the target"} [{"t": 85, "arm": "left", "nearest": 3, "cm": 1.1, "target_cm": 1.1, "is_target": true, "same_category": false}]
+    {"seed": "seed_4300046", "success": false, "target": 2, "class": "closed near the target"} [{"t": 109, "arm": "left", "nearest": 2, "cm": 4.2, "target_cm": 4.2, "is_target": true, "same_category": false}]
+    {"seed": "seed_4300047", "success": false, "target": 1, "class": "closed in the air only"} [{"t": 142, "arm": "left", "nearest": 2, "cm": 16.2, "target_cm": 21.5, "is_target": false, "same_category": false}]
+    {"seed": "seed_4300048", "success": true, "target": 4, "class": "closed near the target"} [{"t": 86, "arm": "left", "nearest": 4, "cm": 0.5, "target_cm": 0.5, "is_target": true, "same_category": false}]
+    {"seed": "seed_4300049", "success": true, "target": 3, "class": "closed near the target"} [{"t": 117, "arm": "right", "nearest": 3, "cm": 0.4, "target_cm": 0.4, "is_target": true, "same_category": false}]
+    {"seed": "seed_4300050", "success": false, "target": 4, "class": "closed near another object only"} [{"t": 117, "arm": "right", "nearest": 2, "cm": 2.1, "target_cm": 15.3, "is_target": false, "same_category": false}]
+== a3diag:obs_ar_e30: 50 episodes with the object record
+  classes: {'lifted nothing': 32, 'lifted another object (picked wrong)': 14, 'success': 4}
+  wrong picks: same category as the target 2 / 14
+    {"seed": "seed_4300000", "class": "lifted nothing", "target": 0, "lifted": [], "wrong_same_category": [], "names": ["010_mouse", "009_toycar", "009_toycar", "012_bell", "013_playingcards"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300001", "class": "lifted nothing", "target": 2, "lifted": [], "wrong_same_category": [], "names": ["010_mouse", "013_playingcards", "012_bell", "011_stapler", "013_playingcards"], "rise_cm": {"0": 0.0, "1": 0.1, "2": 0.0, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300002", "class": "lifted another object (picked wrong)", "target": 2, "lifted": [3], "wrong_same_category": [], "names": ["011_stapler", "013_playingcards", "009_toycar", "012_bell", "012_bell"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 10.0, "4": 0.0}}
+    {"seed": "seed_4300003", "class": "lifted nothing", "target": 1, "lifted": [], "wrong_same_category": [], "names": ["010_mouse", "011_stapler", "009_toycar", "009_toycar", "011_stapler"], "rise_cm": {"0": 0.1, "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300004", "class": "lifted nothing", "target": 1, "lifted": [], "wrong_same_category": [], "names": ["009_toycar", "011_stapler", "010_mouse", "012_bell", "013_playingcards"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 0.2, "4": 0.0}}
+    {"seed": "seed_4300005", "class": "lifted another object (picked wrong)", "target": 3, "lifted": [2], "wrong_same_category": [], "names": ["011_stapler", "010_mouse", "011_stapler", "009_toycar", "013_playingcards"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 10.7, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300006", "class": "lifted nothing", "target": 3, "lifted": [], "wrong_same_category": [], "names": ["009_toycar", "011_stapler", "010_mouse", "013_playingcards", "010_mouse"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 0.1, "4": 0.0}}
+    {"seed": "seed_4300007", "class": "lifted another object (picked wrong)", "target": 3, "lifted": [2], "wrong_same_category": [], "names": ["010_mouse", "009_toycar", "012_bell", "013_playingcards", "012_bell"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 10.1, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300008", "class": "lifted nothing", "target": 1, "lifted": [], "wrong_same_category": [], "names": ["011_stapler", "012_bell", "010_mouse", "013_playingcards", "010_mouse"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300009", "class": "lifted nothing", "target": 0, "lifted": [], "wrong_same_category": [], "names": ["013_playingcards", "011_stapler", "009_toycar", "009_toycar", "012_bell"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300010", "class": "lifted nothing", "target": 2, "lifted": [], "wrong_same_category": [], "names": ["012_bell", "009_toycar", "010_mouse", "010_mouse", "013_playingcards"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300011", "class": "lifted nothing", "target": 0, "lifted": [], "wrong_same_category": [], "names": ["012_bell", "013_playingcards", "013_playingcards", "009_toycar", "011_stapler"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300012", "class": "lifted nothing", "target": 4, "lifted": [], "wrong_same_category": [], "names": ["012_bell", "013_playingcards", "009_toycar", "009_toycar", "011_stapler"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300013", "class": "lifted nothing", "target": 3, "lifted": [], "wrong_same_category": [], "names": ["009_toycar", "011_stapler", "012_bell", "010_mouse", "010_mouse"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300014", "class": "lifted nothing", "target": 0, "lifted": [], "wrong_same_category": [], "names": ["010_mouse", "012_bell", "012_bell", "009_toycar", "011_stapler"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300015", "class": "lifted nothing", "target": 4, "lifted": [], "wrong_same_category": [], "names": ["009_toycar", "010_mouse", "012_bell", "009_toycar", "010_mouse"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.7}}
+    {"seed": "seed_4300016", "class": "lifted another object (picked wrong)", "target": 0, "lifted": [3], "wrong_same_category": [], "names": ["012_bell", "011_stapler", "009_toycar", "010_mouse", "011_stapler"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 4.4, "4": 0.0}}
+    {"seed": "seed_4300017", "class": "lifted another object (picked wrong)", "target": 4, "lifted": [0], "wrong_same_category": [], "names": ["009_toycar", "013_playingcards", "012_bell", "013_playingcards", "012_bell"], "rise_cm": {"0": 10.5, "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300018", "class": "lifted nothing", "target": 2, "lifted": [], "wrong_same_category": [], "names": ["013_playingcards", "012_bell", "011_stapler", "009_toycar", "010_mouse"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300019", "class": "lifted nothing", "target": 3, "lifted": [], "wrong_same_category": [], "names": ["011_stapler", "012_bell", "010_mouse", "012_bell", "010_mouse"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.0}}
+== c7obj:obs_match_e30: 50 episodes with the object record
+  classes: {'lifted another object (picked wrong)': 24, 'lifted nothing': 20, 'success': 6}
+  wrong picks: same category as the target 5 / 24
+    {"seed": "seed_4300000", "class": "lifted another object (picked wrong)", "target": 0, "lifted": [3], "wrong_same_category": [], "names": ["010_mouse", "009_toycar", "009_toycar", "012_bell", "013_playingcards"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 9.8, "4": 0.0}}
+    {"seed": "seed_4300001", "class": "lifted nothing", "target": 2, "lifted": [], "wrong_same_category": [], "names": ["010_mouse", "013_playingcards", "012_bell", "011_stapler", "013_playingcards"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300002", "class": "lifted another object (picked wrong)", "target": 2, "lifted": [3, 4], "wrong_same_category": [], "names": ["011_stapler", "013_playingcards", "009_toycar", "012_bell", "012_bell"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 11.4, "4": 4.9}}
+    {"seed": "seed_4300003", "class": "lifted nothing", "target": 1, "lifted": [], "wrong_same_category": [], "names": ["010_mouse", "011_stapler", "009_toycar", "009_toycar", "011_stapler"], "rise_cm": {"0": 0.0, "1": 0.3, "2": 0.0, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300004", "class": "lifted nothing", "target": 1, "lifted": [], "wrong_same_category": [], "names": ["009_toycar", "011_stapler", "010_mouse", "012_bell", "013_playingcards"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300005", "class": "lifted another object (picked wrong)", "target": 3, "lifted": [2], "wrong_same_category": [], "names": ["011_stapler", "010_mouse", "011_stapler", "009_toycar", "013_playingcards"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 11.0, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300006", "class": "lifted nothing", "target": 3, "lifted": [], "wrong_same_category": [], "names": ["009_toycar", "011_stapler", "010_mouse", "013_playingcards", "010_mouse"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300007", "class": "lifted another object (picked wrong)", "target": 3, "lifted": [2], "wrong_same_category": [], "names": ["010_mouse", "009_toycar", "012_bell", "013_playingcards", "012_bell"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 10.5, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300008", "class": "success", "target": 1, "lifted": [1], "wrong_same_category": [], "names": ["011_stapler", "012_bell", "010_mouse", "013_playingcards", "010_mouse"], "rise_cm": {"0": 0.0, "1": 5.9, "2": 0.0, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300009", "class": "lifted nothing", "target": 0, "lifted": [], "wrong_same_category": [], "names": ["013_playingcards", "011_stapler", "009_toycar", "009_toycar", "012_bell"], "rise_cm": {"0": 0.2, "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300010", "class": "lifted nothing", "target": 2, "lifted": [], "wrong_same_category": [], "names": ["012_bell", "009_toycar", "010_mouse", "010_mouse", "013_playingcards"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300011", "class": "lifted another object (picked wrong)", "target": 0, "lifted": [4], "wrong_same_category": [], "names": ["012_bell", "013_playingcards", "013_playingcards", "009_toycar", "011_stapler"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 0.0, "4": 10.2}}
+    {"seed": "seed_4300012", "class": "lifted nothing", "target": 4, "lifted": [], "wrong_same_category": [], "names": ["012_bell", "013_playingcards", "009_toycar", "009_toycar", "011_stapler"], "rise_cm": {"0": 0.3, "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300013", "class": "success", "target": 3, "lifted": [3], "wrong_same_category": [], "names": ["009_toycar", "011_stapler", "012_bell", "010_mouse", "010_mouse"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 5.9, "4": 0.0}}
+    {"seed": "seed_4300014", "class": "lifted another object (picked wrong)", "target": 0, "lifted": [4], "wrong_same_category": [], "names": ["010_mouse", "012_bell", "012_bell", "009_toycar", "011_stapler"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 0.0, "4": 10.8}}
+    {"seed": "seed_4300015", "class": "success", "target": 4, "lifted": [4], "wrong_same_category": [], "names": ["009_toycar", "010_mouse", "012_bell", "009_toycar", "010_mouse"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 0.0, "4": 5.9}}
+    {"seed": "seed_4300016", "class": "lifted another object (picked wrong)", "target": 0, "lifted": [3], "wrong_same_category": [], "names": ["012_bell", "011_stapler", "009_toycar", "010_mouse", "011_stapler"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 9.8, "4": 0.0}}
+    {"seed": "seed_4300017", "class": "lifted another object (picked wrong)", "target": 4, "lifted": [2], "wrong_same_category": [2], "names": ["009_toycar", "013_playingcards", "012_bell", "013_playingcards", "012_bell"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 9.7, "3": 0.0, "4": 0.0}}
+    {"seed": "seed_4300018", "class": "lifted nothing", "target": 2, "lifted": [], "wrong_same_category": [], "names": ["013_playingcards", "012_bell", "011_stapler", "009_toycar", "010_mouse"], "rise_cm": {"0": 0.0, "1": 0.0, "2": 0.0, "3": 0.0, "4": 0.6}}
+    {"seed": "seed_4300019", "class": "lifted another object (picked wrong)", "target": 3, "lifted": [1], "wrong_same_category": [1], "names": ["011_stapler", "012_bell", "010_mouse", "012_bell", "010_mouse"], "rise_cm": {"0": 0.0, "1": 10.1, "2": 0.0, "3": 0.0, "4": 0.0}}
+[c7p] 2026-11-26 05:00:04 CARD 7 PROBE done
+[c7p] 2026-11-26 05:00:04 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/CARD7PROBE_5090_20261126_0410.txt

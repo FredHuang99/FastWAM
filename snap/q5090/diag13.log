@@ -1,0 +1,10 @@
+put_back_block       demos  50 {"bottom": {"min": 1, "median": 1.0, "max": 1}} gap +0 presses {"n": 50, "holding_at_press": 50, "approach_vertical_cm_median": 3.8, "approach_horizontal_cm_median": 0.1}
+rearrange_blocks     demos  50 {"bottom": {"min": 2, "median": 2.0, "max": 3}} gap -7 presses {"n": 104, "holding_at_press": 50, "approach_vertical_cm_median": 1.5, "approach_horizontal_cm_median": 0.0}
+press_button         demos  50 {"bottom": {"min": 3, "median": 8.0, "max": 10}} gap -61
+blocks_ranking_try   demos  50 {"bottom": {"min": 2, "median": 4.0, "max": 6}, "open": {"min": 3, "median": 9.0, "max": 15}} gap -9
+swap_blocks          demos  50 {"open": {"min": 2, "median": 3.0, "max": 3}} gap +0
+cover_blocks         demos  50 {"open": {"min": 5, "median": 6.0, "max": 6}} gap +1
+swap_T               demos  50 {"open arm 0": {"min": 1, "median": 1.0, "max": 1}, "open arm 1": {"min": 0, "median": 1.0, "max": 1}} gap -46
+battery_try          demos  50 {"open": {"min": 3, "median": 4.0, "max": 5}} gap +48
+observe_and_pickup   demos  50 {"first close": {"min": 1, "median": 1.0, "max": 1}} gap -12
+DIAG 13 written outputs/fullft/DIAG_V22_DIAG13.json

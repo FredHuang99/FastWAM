@@ -1,0 +1,5 @@
+[dev] 2026-11-28 05:22:33 checkout 2de5f53 obs_s800_s18 on the old H200, gated (GO_obs_s800_s18; GPU 1; runs: swapT_joint3_e20:swap_T
+[relay] get hhyfred/memwam-fullft/exports/swapT_joint3_e20/export_e20.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_joint3_e20/export_e20.pt (12042506629 bytes)
+[relay] get hhyfred/memwam-fullft/exports/swapT_joint3_e20/export_e20.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_joint3_e20/export_e20.pt.sha256 (80 bytes)
+[dev] 2026-11-28 05:54:16 DEV swapT_joint3_e20 on swap_T: 23 / 30 (30 dev scenes; 5090 only)
+[dev] 2026-11-28 05:54:16 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/DEV_EVAL_5090_20261128_0522.txt

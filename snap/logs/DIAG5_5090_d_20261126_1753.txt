@@ -1,0 +1,8 @@
+[d5] 2026-11-26 17:53:08 part d; checkout f3c1f10 Plan v21 6.7 step A (no training, lowest priority = 
+DIAG 5D: 50 demos from /workspace/FastWAM-memory2/outputs/memory_v2/press/demo_clean/swap_T/aloha_agilex/data; end-effector pose dims 7
+  left release from right grasp: {"joints_of_other_arm": {"position_cm": {"median": 0.23, "mean": 0.24, "max": 0.7}, "angle_deg": {"median": 0.7, "mean": 0.8, "max": 2.1}}, "ee_pose_of_other_arm_base_frame": {"position_cm": {"median": 0.22, "mean": 0.24, "max": 0.72}, "angle_deg": {"median": 0.7, "mean": 0.8, "max": 2.0}}, "copy_other_grasp_position_cm": {"median": 4.29, "mean": 4.3}}
+  right release from left grasp: {"joints_of_other_arm": {"position_cm": {"median": 0.19, "mean": 0.22, "max": 0.64}, "angle_deg": {"median": 0.7, "mean": 0.8, "max": 2.2}}, "ee_pose_of_other_arm_base_frame": {"position_cm": {"median": 0.21, "mean": 0.22, "max": 0.67}, "angle_deg": {"median": 0.7, "mean": 0.8, "max": 2.1}}, "copy_other_grasp_position_cm": {"median": 4.75, "mean": 4.73}}
+DIAG 5D -> /workspace/FastWAM-memory2/outputs/fullft/SWAPT_DIAG5D.json; card 26 part (d): {'ee_below_2.5cm': True, 'joints_at_least_twice_ee': False}
+[W1126 17:53:09.517764324 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[d5] 2026-11-26 17:53:09 DIAG 5 part d done
+[d5] 2026-11-26 17:53:09 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/DIAG5_5090_d_20261126_1753.txt

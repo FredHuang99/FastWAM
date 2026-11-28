@@ -1,0 +1,26 @@
+[genobs] 2026-11-27 15:01:48 checkout 0bd79bc A40: restart the hourly relay auto-prune (loop2); th; GPU 1 (NVIDIA GeForce RTX 5090, 18 MiB)
+xargs: echo: terminated by signal 13
+[genobs] 2026-11-27 15:01:48 official demos /workspace/FastWAM-memory2/outputs/memory_v2/press/demo_clean/observe_and_pickup/aloha_agilex (50 hdf5); first seeds: 0 1 2 ; their max 53
+[genobs] 2026-11-27 15:01:48 render check (background) passed earlier
+[genobs] 2026-11-27 15:01:48 ===== 2 155 scenes from seed 10000000
+[genobs] 2026-11-27 15:01:54 gen exit code 0; 155 hdf5
+[genobs] 2026-11-27 15:01:54 dense_observe_and_pickup_gen155_v1 cached already
+[genobs] 2026-11-27 15:01:56 dense_observe_and_pickup_gen155_v1 on the cache relay
+[genobs] 2026-11-27 15:01:56 ===== 4 600 more from seed 10000158
+[genobs] 2026-11-27 15:02:00 gen exit code 0; 600 hdf5
+[genobs] 2026-11-27 15:02:00 dense_observe_and_pickup_gen600_v1 cached already
+[genobs] 2026-11-27 15:02:02 dense_observe_and_pickup_gen600_v1 on the cache relay
+[genobs] 2026-11-27 15:02:02 ===== 6 800 more from seed 10000778 (gen800b)
+[genobs] 2026-11-27 17:13:35 gen exit code 0; 800 hdf5
+[genstats] frames: {'official_median': 149.0, 'generated_median': 149.0, 'pass': True}
+[genstats] success_rate: {'official': 0.9259, 'generated': 0.9744, 'pass': True}
+[genstats] head_brightness: {'official_min': 217.68, 'official_max': 225.64, 'generated_median': 222.89, 'pass': True}
+[genstats] frames official 147-154 (n 50), generated 146-162 (n 800); head brightness official median 223.55
+GEN STATS PASS
+[genobs] 2026-11-27 17:16:53 dense_observe_and_pickup_gen800b_v1: 800 episodes -> build_dense (val 0)
+[genobs] 2026-11-27 19:09:32 build exit code 0 ([W1127 19:09:32.692932451 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator()))
+[cache] dense_observe_and_pickup_gen800b_v1: uploaded in 916 s (attempt 1)
+[cache] PUT DONE dense_observe_and_pickup_gen800b_v1 -> hhyfred/memwam-caches/dense_observe_and_pickup_gen800b_v1
+[genobs] 2026-11-27 19:25:06 dense_observe_and_pickup_gen800b_v1 on the cache relay
+[genobs] 2026-11-27 19:25:06 DONE
+[genobs] 2026-11-27 19:25:06 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/GEN_OBS_5090_20261127_1501.txt

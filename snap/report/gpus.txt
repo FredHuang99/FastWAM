@@ -1,0 +1,2 @@
+0, NVIDIA GeForce RTX 5090, 40 MiB, 32607 MiB, 0 %, 21
+1, NVIDIA GeForce RTX 5090, 18 MiB, 32607 MiB, 0 %, 20

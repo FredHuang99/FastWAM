@@ -1,0 +1,96 @@
+[13b] 2026-11-27 01:52:45 start; checkout 7d07d85 Round 9 (11-27 09:30): RoboMME dims from the base, r; GPU 0
+[fetch] disk before: /dev/nvme1n1p1  3.7T  1.8T  2.0T  49% /workspace/FastWAM-memory2
+[fetch] 2026-11-27 01:52:45 fetching obs_s800_e10 (attempt 1)
+[relay] get hhyfred/memwam-fullft/exports/obs_s800_e10/export_e10.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e10/export_e10.pt (12042063459 bytes)
+[relay] get hhyfred/memwam-fullft/exports/obs_s800_e10/export_e10.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e10/export_e10.pt.sha256 (80 bytes)
+export_e10.pt: OK
+total 11759844
+drwxr-xr-x  2 root root        4096 Nov 27 01:54 .
+drwxr-xr-x 49 root root        4096 Nov 27 01:52 ..
+-rw-r--r--  1 root root 12042063459 Nov 27 01:54 export_e10.pt
+-rw-r--r--  1 root root          80 Nov 27 01:54 export_e10.pt.sha256
+[13b] 2026-11-27 01:54:26 obs_s800_e10 split val window wait
+[probe] obs_s800 split val; 5 demos with a grasp; first close at frame median 116 (min 113, max 117) of length median 149; a 48-frame choice window = 32.3 % of the training anchors
+[probe] motion onset (5 % of the way to the grasp pose) at frame median 71 (min 71, max 72); window [8, m - 25]
+wait  : 100 anchors; action loss true 0.00326, frame-0 swapped 0.00372 (+14.4 %, higher at 54/100), no history 0.02103 (+545.9 %)
+late  : 15 anchors; action loss true 0.00064, frame-0 swapped 0.00064 (-0.7 %, higher at 11/15), no history 0.00183 (+186.1 %)
+OBS PROBE obs_s800: frame 0 IS used before the arm moves (>= 2 %)
+-> /workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_obs_s800_wait_val.json
+[13b] 2026-11-27 01:55:18 obs_s800_e10 split val window onset
+[probe] obs_s800 split val; 5 demos with a grasp; first close at frame median 116 (min 113, max 117) of length median 149; a 48-frame choice window = 32.3 % of the training anchors
+[probe] motion onset (5 % of the way to the grasp pose) at frame median 71 (min 71, max 72); window [m - 24, m + 8]
+onset : 100 anchors; action loss true 0.21529, frame-0 swapped 0.23343 (+8.4 %, higher at 59/100), no history 0.24278 (+12.8 %)
+late  : 15 anchors; action loss true 0.00064, frame-0 swapped 0.00064 (-1.0 %, higher at 10/15), no history 0.00183 (+185.0 %)
+OBS PROBE obs_s800: frame 0 IS used at the motion onset (>= 2 %)
+-> /workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_obs_s800_onset_val.json
+[13b] 2026-11-27 01:56:13 obs_s800_e10 split train window wait
+[probe] obs_s800 split train; 800 demos with a grasp; first close at frame median 116.0 (min 112, max 125) of length median 149.0; a 48-frame choice window = 32.1 % of the training anchors
+[probe] motion onset (5 % of the way to the grasp pose) at frame median 71.0 (min 71, max 73); window [8, m - 25]
+Traceback (most recent call last):
+  File "/workspace/FastWAM-memory2/scripts/fullft/obs_probe.py", line 254, in <module>
+    main()
+  File "/workspace/FastWAM-memory2/scripts/fullft/obs_probe.py", line 209, in main
+    _, asw = model.loss(swapped, noise, model.history(swapped), aux=aux_s)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/FastWAM-memory2/src/fastwam/fullft/model.py", line 393, in loss
+    xv, xa = self._joint_layer(*args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/FastWAM-memory2/src/fastwam/fullft/model.py", line 340, in _joint_layer
+    qv, kv, vv, rv, gv, sv, scv, fgv, _ = self.mot._build_expert_attention_io(
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/FastWAM-memory2/src/fastwam/models/wan22/mot.py", line 194, in _build_expert_attention_io
+    k = block.self_attn.norm_k(block.self_attn.k(attn_input))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1777, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1788, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/FastWAM-memory2/src/fastwam/models/wan22/wan_video_dit.py", line 157, in forward
+    return self.norm(x.float()).to(dtype) * self.weight
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/FastWAM-memory2/src/fastwam/models/wan22/wan_video_dit.py", line 153, in norm
+    return x * torch.rsqrt(x.pow(2).mean(dim=-1, keepdim=True) + self.eps)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.AcceleratorError: CUDA error: unspecified launch failure
+Search for `cudaErrorLaunchFailure' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+[13b] 2026-11-27 01:57:04 obs_s800_e10 split train window onset
+Traceback (most recent call last):
+  File "/workspace/FastWAM-memory2/scripts/fullft/obs_probe.py", line 254, in <module>
+    main()
+  File "/workspace/FastWAM-memory2/scripts/fullft/obs_probe.py", line 119, in main
+    model, cfg, _ = load_export(args.export, device)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/FastWAM-memory2/src/fastwam/fullft/online.py", line 49, in load_export
+    model.to(device=device, dtype=torch.bfloat16).eval()
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1373, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 930, in _apply
+    module._apply(fn)
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 930, in _apply
+    module._apply(fn)
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 930, in _apply
+    module._apply(fn)
+  File "/workspace/FastWAM-memory2/src/fastwam/models/wan22/wan_video_dit.py", line 401, in _apply
+    result = super()._apply(fn)
+             ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 930, in _apply
+    module._apply(fn)
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 961, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1359, in convert
+    return t.to(
+           ^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/cuda/__init__.py", line 411, in _lazy_init
+    torch._C._cuda_init()
+RuntimeError: CUDA unknown error - this may be due to an incorrectly set up environment, e.g. changing env variable CUDA_VISIBLE_DEVICES after program start. Setting the available devices to be zero.
+[13b] 2026-11-27 01:57:21 CARD 13B done
+[13b] 2026-11-27 01:57:21 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/CARD13B_5090_20261127_0152.txt

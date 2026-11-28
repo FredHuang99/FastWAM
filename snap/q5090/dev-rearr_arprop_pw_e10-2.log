@@ -1,0 +1,3 @@
+[dev] 2026-11-28 00:06:00 checkout 2165bd1 Relay auto-prune: measure an export's age by the A40; GPU 1; runs: rearr_arprop_pw_e10:rearrange_blocks
+[dev] 2026-11-28 00:45:53 DEV rearr_arprop_pw_e10 on rearrange_blocks: 8 / 30 (30 dev scenes; 5090 only)
+[dev] 2026-11-28 00:45:53 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/DEV_EVAL_5090_20261128_0006.txt

@@ -1,0 +1,152 @@
+[q5090] 2026-11-25 14:24:10 loop start on gpu5090; task file /workspace/FastWAM-memory2/scripts/fullft/q5090.txt
+[q5090] 2026-11-25 14:25:10 start gen155-build on GPU 0: GEN_GATE=background GEN_BUILD=gen155 GEN_GPU=$GPU bash scripts/fullft/gen_obs_5090.sh
+[q5090] 2026-11-25 14:25:11 gen155-build finished, exit code 0
+[q5090] 2026-11-25 14:26:11 start dev-press_told_e10 on GPU 1: PF_GPUS=$GPU DEV_RUNS="press_told_e10:press_button:MWAM_TOLD_COUNTS=1" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-25 14:29:12 start gen600-build on GPU 0: GEN_GATE=background GEN_BUILD=gen600 GEN_GPU=$GPU bash scripts/fullft/gen_obs_5090.sh
+[q5090] 2026-11-25 14:51:58 dev-press_told_e10 finished, exit code 0
+[q5090] 2026-11-25 14:54:19 start dev-press_told_e20 on GPU 1: PF_GPUS=$GPU DEV_RUNS="press_told_e20:press_button:MWAM_TOLD_COUNTS=1" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-25 15:08:24 start hf-offload-12 on cpu: /opt/hf-tools/bin/python scripts/fullft/hf_offload.py --list scripts/fullft/hf_offload_list.txt --squash
+[q5090] 2026-11-25 15:20:52 dev-press_told_e20 finished, exit code 0
+[q5090] 2026-11-25 15:23:28 start dev-rearr_pw_e10 on GPU 1: PF_GPUS=$GPU DEV_RUNS="rearr_pw_e10:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-25 15:30:08 hf-offload-12 finished, exit code 0
+[q5090] 2026-11-25 15:47:36 start supp6-swapT-hands on cpu: PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/swapT_hands.py
+[q5090] 2026-11-25 15:47:39 supp6-swapT-hands finished, exit code 0
+[q5090] 2026-11-25 16:09:49 dev-rearr_pw_e10 finished, exit code 0
+[q5090] 2026-11-25 16:12:45 start dev-press_told_e10b on GPU 1: PF_GPUS=$GPU DEV_RUNS="press_told_e10:press_button:MWAM_TOLD_COUNTS=1" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-25 16:16:50 gen600-build finished, exit code 0
+[q5090] 2026-11-25 16:19:47 start dev-press_told_e20b on GPU 0: PF_GPUS=$GPU DEV_RUNS="press_told_e20:press_button:MWAM_TOLD_COUNTS=1" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-25 16:36:44 dev-press_told_e10b finished, exit code 1
+[q5090] 2026-11-25 16:38:52 start dev-ranking_v3a_e10 on GPU 1: PF_GPUS=$GPU DEV_RUNS="ranking_v3a_e10:blocks_ranking_try" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-25 16:44:04 dev-press_told_e20b finished, exit code 1
+[q5090] 2026-11-25 16:45:54 start dev-swapT_long_e45 on GPU 0: PF_GPUS=$GPU DEV_RUNS="swapT_long_e45:swap_T" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-25 17:22:42 dev-swapT_long_e45 finished, exit code 0
+[q5090] 2026-11-25 17:25:03 start card13c on GPU 0: bash scripts/fullft/card13c_5090.sh
+[q5090] 2026-11-25 18:39:38 card13c finished, exit code 0
+[q5090] 2026-11-25 18:42:19 start dev-rearr_pw_e20 on GPU 0: PF_GPUS=$GPU DEV_RUNS="rearr_pw_e20:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-25 19:15:33 dev-ranking_v3a_e10 finished, exit code 0
+[q5090] 2026-11-25 19:17:28 dev-rearr_pw_e20 finished, exit code 0
+[q5090] 2026-11-25 20:19:44 start dev-press_told_e10c on GPU 0: PF_GPUS=$GPU DEV_RUNS="press_told_e10:press_button:MWAM_TOLD_COUNTS=1" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-25 20:20:44 start dev-press_told_e20c on GPU 1: PF_GPUS=$GPU DEV_RUNS="press_told_e20:press_button:MWAM_TOLD_COUNTS=1" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-25 21:37:50 dev-press_told_e20c finished, exit code 0
+[q5090] 2026-11-25 21:40:25 dev-press_told_e10c finished, exit code 0
+[q5090] 2026-11-26 02:09:15 start card13b on GPU 0: bash scripts/fullft/card13b_5090.sh
+[q5090] 2026-11-26 02:18:47 card13b finished, exit code 0
+[q5090] 2026-11-26 02:54:28 start dev-obs_match_e10 on GPU 0: PF_GPUS=$GPU DEV_RUNS="obs_match_e10:observe_and_pickup" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-26 03:19:55 dev-obs_match_e10 finished, exit code 0
+[q5090] 2026-11-26 04:55:58 start dev-obs_match_e20 on GPU 0: PF_GPUS=$GPU DEV_RUNS="obs_match_e20:observe_and_pickup" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-26 05:21:47 dev-obs_match_e20 finished, exit code 0
+[q5090] 2026-11-26 08:37:47 start dev-obs_s200_e10 on GPU 0: PF_GPUS=$GPU DEV_RUNS="obs_s200_e10:observe_and_pickup" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-26 08:38:47 start probe-obs_s200_e10 on GPU 1: RUNS=obs_s200 TAG=e10 bash scripts/fullft/card13b_5090.sh
+[q5090] 2026-11-26 09:03:25 probe-obs_s200_e10 finished, exit code 0
+[q5090] 2026-11-26 09:03:59 dev-obs_s200_e10 finished, exit code 0
+[q5090] 2026-11-26 12:10:26 start card7-matchprobe on GPU 0: bash scripts/fullft/card7probe_5090.sh
+[q5090] 2026-11-26 13:00:04 card7-matchprobe finished, exit code 0
+[q5090] 2026-11-26 15:20:06 start dev-ranking_v3a_e20 on GPU 0: PF_GPUS=$GPU DEV_RUNS="ranking_v3a_e20:blocks_ranking_try" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-26 16:01:13 start dev-obs_s200_e20 on GPU 1: PF_GPUS=$GPU DEV_RUNS="obs_s200_e20:observe_and_pickup" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-26 16:26:53 dev-obs_s200_e20 finished, exit code 0
+[q5090] 2026-11-26 16:28:16 start probe-obs_s200_e20 on GPU 1: RUNS=obs_s200 TAG=e20 bash scripts/fullft/card13b_5090.sh
+[q5090] 2026-11-26 16:48:12 probe-obs_s200_e20 finished, exit code 0
+[q5090] 2026-11-26 17:20:55 dev-ranking_v3a_e20 finished, exit code 0
+[q5090] 2026-11-26 18:20:32 loop start on gpu5090; task file /workspace/FastWAM-memory2/scripts/fullft/q5090.txt
+[q5090] 2026-11-27 01:52:08 start robomme-base-inspect on cpu: PYTHONPATH=src /opt/mwam/bin/python scripts/robomme/inspect_base.py
+[q5090] 2026-11-27 01:52:10 robomme-base-inspect finished, exit code 0
+[q5090] 2026-11-27 01:53:08 start card25-check on GPU 0: PART=check bash scripts/fullft/card25_5090.sh
+[q5090] 2026-11-27 01:53:08 start diag5-b1 on cpu: PART=b1 bash scripts/fullft/diag5_5090.sh
+[q5090] 2026-11-27 01:53:08 start diag5-d on cpu: PART=d bash scripts/fullft/diag5_5090.sh
+[q5090] 2026-11-27 01:53:09 diag5-d finished, exit code 0
+[q5090] 2026-11-27 01:53:48 diag5-b1 finished, exit code 0
+[q5090] 2026-11-27 01:54:08 start diag5-c on GPU 1: PART=c bash scripts/fullft/diag5_5090.sh
+[q5090] 2026-11-27 02:01:02 diag5-c finished, exit code 0
+[q5090] 2026-11-27 02:03:25 card25-check finished, exit code 1
+[q5090] 2026-11-27 02:23:14 start diag4b on GPU 1: bash scripts/fullft/diag4b_5090.sh
+[q5090] 2026-11-27 02:26:15 start card25-gen on GPU 0: PART=gen bash scripts/fullft/card25_5090.sh
+[q5090] 2026-11-27 03:44:49 card25-gen finished, exit code 0
+[q5090] 2026-11-27 04:22:35 start diag5-b on cpu: PART=b bash scripts/fullft/diag5_5090.sh
+[q5090] 2026-11-27 04:22:35 start card25-detail on cpu: PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/card25_detail.py --base outputs/fullft/gen_cf/check
+[q5090] 2026-11-27 04:22:37 card25-detail finished, exit code 0
+[q5090] 2026-11-27 04:23:14 diag5-b finished, exit code 0
+[q5090] 2026-11-27 04:36:29 diag4b finished, exit code 0
+[q5090] 2026-11-27 09:52:45 start probe-obs_s800_e10 on GPU 0: RUNS=obs_s800 TAG=e10 bash scripts/fullft/card13b_5090.sh
+[q5090] 2026-11-27 09:57:21 probe-obs_s800_e10 finished, exit code 0
+[q5090] 2026-11-27 11:23:10 start card25-pics on cpu: PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/card25_pics.py --base outputs/fullft/gen_cf/check
+[q5090] 2026-11-27 11:23:13 card25-pics finished, exit code 0
+[q5090] 2026-11-27 12:26:28 start dev-rearr_ar_pw_e10 on GPU 1: PF_GPUS=$GPU DEV_RUNS="rearr_ar_pw_e10:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-27 12:28:43 dev-rearr_ar_pw_e10 finished, exit code 1
+[q5090] 2026-11-27 13:07:39 start dev-rearr_arprop_pw_e10 on GPU 1: PF_GPUS=$GPU DEV_RUNS="rearr_arprop_pw_e10:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-27 13:09:53 dev-rearr_arprop_pw_e10 finished, exit code 1
+[q5090] 2026-11-27 13:32:46 start gen800b on GPU 1: GEN_GPU=$GPU GEN_GATE=background GEN_MORE=gen800b:800 bash scripts/fullft/gen_obs_5090.sh
+[q5090] 2026-11-27 13:32:54 gen800b finished, exit code 1
+[q5090] 2026-11-27 13:55:54 start dev-swapT_joint3_e10 on GPU 1: PF_GPUS=$GPU DEV_RUNS="swapT_joint3_e10:swap_T" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-27 13:58:08 dev-swapT_joint3_e10 finished, exit code 1
+[q5090] 2026-11-27 16:51:48 start dev-rearr_ar_pw_e20 on GPU 1: PF_GPUS=$GPU DEV_RUNS="rearr_ar_pw_e20:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-27 16:54:10 dev-rearr_ar_pw_e20 finished, exit code 1
+[q5090] 2026-11-27 17:33:00 start dev-rearr_arprop_pw_e20 on GPU 1: PF_GPUS=$GPU DEV_RUNS="rearr_arprop_pw_e20:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-27 17:35:13 dev-rearr_arprop_pw_e20 finished, exit code 1
+[q5090] 2026-11-27 17:43:03 start gen800b-logtail on cpu: /opt/mwam/bin/python scripts/fullft/logtail_json.py --out GEN800B_LOGTAIL.json outputs/fullft/gen_obs/gen800b.log outputs/fullft/gen_obs/gen155.log outputs/fullft/gen_obs/gen600.log
+[q5090] 2026-11-27 17:43:03 gen800b-logtail finished, exit code 0
+[q5090] 2026-11-27 17:58:08 start gen800b-2 on GPU 1: export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); GEN_GPU=$GPU GEN_GATE=background GEN_MORE=gen800b:800 bash scripts/fullft/gen_obs_5090.sh
+[q5090] 2026-11-27 17:58:16 gen800b-2 finished, exit code 1
+[q5090] 2026-11-27 18:21:16 start dev-rearr_ar_pw_e10-2 on GPU 1: export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PF_GPUS=$GPU DEV_RUNS="rearr_ar_pw_e10:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-27 21:26:50 loop start on gpu5090; task file /workspace/FastWAM-memory2/scripts/fullft/q5090.txt
+[q5090] 2026-11-27 21:27:51 start probe-obs_s800_e10-2 on GPU 1: export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); RUNS=obs_s800 TAG=e10 bash scripts/fullft/card13b_5090.sh
+[q5090] 2026-11-27 22:39:58 probe-obs_s800_e10-2 finished, exit code 0
+[q5090] 2026-11-27 23:01:48 start gen800b-3 on GPU 1: export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); GEN_GPU=$GPU GEN_GATE=background GEN_MORE=gen800b:800 bash scripts/fullft/gen_obs_5090.sh
+[q5090] 2026-11-28 03:25:06 gen800b-3 finished, exit code 0
+[q5090] 2026-11-28 04:11:58 start dev-rearr_pw_s18_e10 on GPU 1: export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PF_GPUS=$GPU DEV_RUNS="rearr_pw_s18_e10:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-28 04:54:31 dev-rearr_pw_s18_e10 finished, exit code 0
+[q5090] 2026-11-28 05:15:35 start probe-obs_cf200_e10 on GPU 1: export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); RUNS=obs_cf200 TAG=e10 bash scripts/fullft/card13b_5090.sh
+[q5090] 2026-11-28 05:37:03 probe-obs_cf200_e10 finished, exit code 0
+[q5090] 2026-11-28 05:58:59 start dev-rearr_pw_s18_e20 on GPU 1: export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PF_GPUS=$GPU DEV_RUNS="rearr_pw_s18_e20:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-28 06:42:46 dev-rearr_pw_s18_e20 finished, exit code 0
+[q5090] 2026-11-28 07:04:31 start dev-rearr_ar_pw_e10-2 on GPU 1: export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PF_GPUS=$GPU DEV_RUNS="rearr_ar_pw_e10:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-28 07:43:55 dev-rearr_ar_pw_e10-2 finished, exit code 0
+[q5090] 2026-11-28 08:06:00 start dev-rearr_arprop_pw_e10-2 on GPU 1: export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PF_GPUS=$GPU DEV_RUNS="rearr_arprop_pw_e10:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-28 08:45:53 dev-rearr_arprop_pw_e10-2 finished, exit code 0
+[q5090] 2026-11-28 09:07:29 start c25desc-probe-e10 on GPU 1: export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PART=probe RUNS="obs_cf200:e10 obs_s200:e30" bash scripts/fullft/card25desc_5090.sh
+[q5090] 2026-11-28 09:12:21 c25desc-probe-e10 finished, exit code 0
+[q5090] 2026-11-28 09:34:44 start c25desc-close-e10 on GPU 1: export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PART=close RUN=obs_cf200 TAG=e10 bash scripts/fullft/card25desc_5090.sh
+[q5090] 2026-11-28 10:11:35 c25desc-close-e10 finished, exit code 0
+[q5090] 2026-11-28 10:34:16 start dev-rearr_ar_pw_e20-2 on GPU 1: export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PF_GPUS=$GPU DEV_RUNS="rearr_ar_pw_e20:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-28 11:12:39 dev-rearr_ar_pw_e20-2 finished, exit code 0
+[q5090] 2026-11-28 11:33:45 start dev-rearr_arprop_pw_e20-2 on GPU 1: export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PF_GPUS=$GPU DEV_RUNS="rearr_arprop_pw_e20:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-28 12:06:53 dev-rearr_arprop_pw_e20-2 finished, exit code 0
+[q5090] 2026-11-28 12:29:10 start dev-swapT_joint3_e10-2 on GPU 1: export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PF_GPUS=$GPU DEV_RUNS="swapT_joint3_e10:swap_T" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-28 13:00:17 dev-swapT_joint3_e10-2 finished, exit code 0
+[q5090] 2026-11-28 13:22:32 start dev-swapT_joint3_e20 on GPU 1: export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PF_GPUS=$GPU DEV_RUNS="swapT_joint3_e20:swap_T" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-28 13:54:16 dev-swapT_joint3_e20 finished, exit code 0
+[q5090] 2026-11-28 14:49:07 start hf-offload-2 on cpu: /opt/hf-tools/bin/python scripts/fullft/hf_offload.py --list scripts/fullft/hf_offload_list2.txt --squash
+[q5090] 2026-11-28 15:42:54 hf-offload-2 finished, exit code 0
+[q5090] 2026-11-28 16:47:54 start diag12-first on cpu: PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/swapT_diag5_5090.py e --first 10
+[q5090] 2026-11-28 16:48:49 diag12-first finished, exit code 0
+[q5090] 2026-11-28 16:48:54 start card30-gen on GPU 1: export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); bash scripts/fullft/card30_5090.sh
+[q5090] 2026-11-28 16:48:55 start ar2s18-e10-relay on cpu: D=outputs/fullft/exports_hf_backup/exports/ar2_prop_s18_e10; (cd $D && sha256sum -c --quiet export_e10.pt.sha256) && /opt/hf-tools/bin/python scripts/memory_v2/migrate/relay.py put $D/export_e10.pt $D
+[q5090] 2026-11-28 16:50:03 ar2s18-e10-relay finished, exit code 0
+[q5090] 2026-11-28 16:58:59 start press-cd-events on cpu: PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/press_cd_events.py --relay
+[q5090] 2026-11-28 16:59:00 press-cd-events finished, exit code 1
+[q5090] 2026-11-28 17:09:04 start hf-prune-d-loop on cpu: bash scripts/fullft/hf_prune_d_loop.sh
+[q5090] 2026-11-28 17:09:04 start diag13 on cpu: PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag13_5090.py
+[q5090] 2026-11-28 17:09:07 diag13 finished, exit code 0
+[q5090] 2026-11-28 17:29:14 start press-cd-events-2 on cpu: PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/press_cd_events.py --relay
+[q5090] 2026-11-28 17:29:17 press-cd-events-2 finished, exit code 0
+[q5090] 2026-11-28 17:31:15 start diag12-full on cpu: PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/swapT_diag5_5090.py e
+[q5090] 2026-11-28 17:32:15 diag12-full finished, exit code 0
+[q5090] 2026-11-28 17:33:17 start robomme-norm on cpu: PYTHONPATH=src /opt/mwam/bin/python scripts/robomme/robomme_norm.py
+[q5090] 2026-11-28 17:33:35 robomme-norm finished, exit code 0
+[q5090] 2026-11-28 17:39:20 start robomme-base-export on cpu: mkdir -p outputs/robomme/base_export && PYTHONPATH=src /opt/mwam/bin/python -m fastwam.fullft.train export --config configs/fullft/robomme_ar.yaml --out outputs/robomme/base_export/export_e0.pt
+[q5090] 2026-11-28 17:39:42 robomme-base-export finished, exit code 0
+[q5090] 2026-11-28 17:43:15 card30-gen finished, exit code 1
+[q5090] 2026-11-28 18:04:34 start dev-rearr_pw_s18_e30 on GPU 1: export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PF_GPUS=$GPU DEV_RUNS="rearr_pw_s18_e30:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+[q5090] 2026-11-28 18:38:42 dev-rearr_pw_s18_e30 finished, exit code 0
+[q5090] 2026-11-28 19:00:03 start swapdesc-swapT_joint3_e30 on GPU 1: export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); RUN=swapT_joint3 TAG=e30 bash scripts/fullft/swapT_desc_5090.sh
+[q5090] 2026-11-28 19:46:05 swapdesc-swapT_joint3_e30 finished, exit code 0
+[q5090] 2026-11-28 20:07:34 start diag7c on GPU 1: export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); CUDA_VISIBLE_DEVICES=$GPU PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag7c_5090.py
+[q5090] 2026-11-28 20:19:48 diag7c finished, exit code 0
+[q5090] 2026-11-28 20:40:50 start card30-gen-2 on GPU 1: export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); bash scripts/fullft/card30_5090.sh
+[q5090] 2026-11-29 00:32:09 card30-gen-2 finished, exit code 0
+[q5090] 2026-11-29 00:34:40 Q5090_STOP: nothing new starts
+[q5090] 2026-11-29 01:20:01 start c25desc-close-obs_s800_e10 on GPU 1: export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PART=close RUN=obs_s800 TAG=e10 bash scripts/fullft/card25desc_5090.sh
+[q5090] 2026-11-29 01:30:05 start robomme-norm-2 on cpu: PYTHONPATH=src /opt/mwam/bin/python scripts/robomme/robomme_norm.py
+[q5090] 2026-11-29 01:30:06 robomme-norm-2 finished, exit code 0
+[q5090] 2026-11-29 01:32:06 start robomme-cache-put on cpu: /opt/hf-tools/bin/python scripts/fullft/cache_relay.py put outputs/robomme/dense_robomme_v1 --name dense_robomme_v1
+[q5090] 2026-11-29 01:46:14 robomme-cache-put finished, exit code 0
+[q5090] 2026-11-29 01:55:30 c25desc-close-obs_s800_e10 finished, exit code 0

@@ -1,0 +1,154 @@
+{
+ "run": "plan v22 diagnostic 13: key decisions per demo (described)",
+ "tasks": {
+  "put_back_block": {
+   "demos": 50,
+   "key_decisions_per_demo": {
+    "bottom": {
+     "min": 1,
+     "median": 1.0,
+     "max": 1
+    }
+   },
+   "ours_best": 100,
+   "pure_wam_best_self_reported": 100,
+   "gap": 0,
+   "two_training_spread": null,
+   "presses": {
+    "n": 50,
+    "holding_at_press": 50,
+    "approach_vertical_cm_median": 3.8,
+    "approach_horizontal_cm_median": 0.1
+   }
+  },
+  "rearrange_blocks": {
+   "demos": 50,
+   "key_decisions_per_demo": {
+    "bottom": {
+     "min": 2,
+     "median": 2.0,
+     "max": 3
+    }
+   },
+   "ours_best": 93,
+   "pure_wam_best_self_reported": 100,
+   "gap": -7,
+   "two_training_spread": "93 / 61 (rearr_pw seeds 17 / 18), 33 / 47 (rearr_v3c H100 / H200)",
+   "presses": {
+    "n": 104,
+    "holding_at_press": 50,
+    "approach_vertical_cm_median": 1.5,
+    "approach_horizontal_cm_median": 0.0
+   }
+  },
+  "press_button": {
+   "demos": 50,
+   "key_decisions_per_demo": {
+    "bottom": {
+     "min": 3,
+     "median": 8.0,
+     "max": 10
+    }
+   },
+   "ours_best": 26,
+   "pure_wam_best_self_reported": 87,
+   "gap": -61,
+   "two_training_spread": null
+  },
+  "blocks_ranking_try": {
+   "demos": 50,
+   "key_decisions_per_demo": {
+    "bottom": {
+     "min": 2,
+     "median": 4.0,
+     "max": 6
+    },
+    "open": {
+     "min": 3,
+     "median": 9.0,
+     "max": 15
+    }
+   },
+   "ours_best": 91,
+   "pure_wam_best_self_reported": 100,
+   "gap": -9,
+   "two_training_spread": null
+  },
+  "swap_blocks": {
+   "demos": 50,
+   "key_decisions_per_demo": {
+    "open": {
+     "min": 2,
+     "median": 3.0,
+     "max": 3
+    }
+   },
+   "ours_best": 100,
+   "pure_wam_best_self_reported": 100,
+   "gap": 0,
+   "two_training_spread": null
+  },
+  "cover_blocks": {
+   "demos": 50,
+   "key_decisions_per_demo": {
+    "open": {
+     "min": 5,
+     "median": 6.0,
+     "max": 6
+    }
+   },
+   "ours_best": 99,
+   "pure_wam_best_self_reported": 98,
+   "gap": 1,
+   "two_training_spread": null
+  },
+  "swap_T": {
+   "demos": 50,
+   "key_decisions_per_demo": {
+    "open arm 0": {
+     "min": 1,
+     "median": 1.0,
+     "max": 1
+    },
+    "open arm 1": {
+     "min": 0,
+     "median": 1.0,
+     "max": 1
+    }
+   },
+   "ours_best": 51,
+   "pure_wam_best_self_reported": 97,
+   "gap": -46,
+   "two_training_spread": "49 / 39 (swapT_arprop H100 / H200)"
+  },
+  "battery_try": {
+   "demos": 50,
+   "key_decisions_per_demo": {
+    "open": {
+     "min": 3,
+     "median": 4.0,
+     "max": 5
+    }
+   },
+   "ours_best": 96,
+   "pure_wam_best_self_reported": 48,
+   "gap": 48,
+   "two_training_spread": null
+  },
+  "observe_and_pickup": {
+   "demos": 50,
+   "key_decisions_per_demo": {
+    "first close": {
+     "min": 1,
+     "median": 1.0,
+     "max": 1
+    }
+   },
+   "ours_best": 16,
+   "pure_wam_best_self_reported": 28,
+   "gap": -12,
+   "two_training_spread": null
+  }
+ },
+ "verdict": "DESCRIBED"
+}

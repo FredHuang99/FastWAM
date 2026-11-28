@@ -1,0 +1,31 @@
+[d5] 2026-11-26 17:54:08 part c; checkout f3c1f10 Plan v21 6.7 step A (no training, lowest priority = 
+[d5] events /workspace/FastWAM-memory2/outputs/fullft/events/events_swap_T.json sha256 bbca2ce149ff2411
+Fetching ... files: 0it [00:00, ?it/s]Fetching ... files: 1it [00:02,  2.02s/it]Fetching ... files: 9it [00:02,  3.90it/s]Fetching ... files: 17it [00:02,  6.56it/s]Fetching ... files: 25it [00:03,  8.20it/s]Fetching ... files: 33it [00:03,  9.76it/s]Fetching ... files: 41it [00:03, 10.87it/s]Fetching ... files: 49it [00:04, 11.92it/s]Fetching ... files: 57it [00:04, 12.63it/s]Fetching ... files: 65it [00:04, 13.30it/s]Fetching ... files: 73it [00:05, 13.85it/s]Fetching ... files: 81it [00:05, 14.37it/s]Fetching ... files: 89it [00:06, 14.77it/s]Fetching ... files: 97it [00:06, 15.10it/s]Fetching ... files: 105it [00:06, 15.46it/s]Fetching ... files: 107it [00:06, 15.42it/s]
+[cache] dense_swap_T_v1: downloaded in 7 s (attempt 1)
+[cache] GET OK dense_swap_T_v1: 106 files, 2.99 GiB in /workspace/FastWAM-memory2/outputs/memory_v2/press/dense_swap_T_v1
+[d5] 2026-11-26 17:54:22 swapT_ar_e30 split val window carry
+[probe] swapT_ar split val; 5 demos with a grasp; first close at frame median 50 (min 50, max 51) of length median 345; a 48-frame choice window = 14.0 % of the training anchors
+carry : 100 anchors; action loss true 0.00608, frame-0 swapped 0.01148 (+88.8 %, higher at 80/100), no history 0.01309 (+115.2 %)
+late  : 15 anchors; action loss true 0.00301, frame-0 swapped 0.00301 (-0.0 %, higher at 6/15), no history 0.00718 (+138.6 %)
+OBS PROBE swapT_ar: frame 0 IS used while both blocks are carried (>= 2 %)
+-> /workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_swapT_ar_carry_val_swap_T.json
+[d5] 2026-11-26 17:55:18 swapT_ar_e30 split train window carry
+[probe] swapT_ar split train; 45 demos with a grasp; first close at frame median 50 (min 49, max 55) of length median 343; a 48-frame choice window = 14.0 % of the training anchors
+carry : 270 anchors; action loss true 0.00060, frame-0 swapped 0.00600 (+895.6 %, higher at 247/270), no history 0.00433 (+619.0 %)
+late  : 135 anchors; action loss true 0.00049, frame-0 swapped 0.00052 (+5.0 %, higher at 85/135), no history 0.00621 (+1158.6 %)
+OBS PROBE swapT_ar: frame 0 IS used while both blocks are carried (>= 2 %)
+-> /workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_swapT_ar_carry_train_swap_T.json
+[d5] 2026-11-26 17:57:45 swapT_arprop_e30 split val window carry
+[probe] swapT_arprop split val; 5 demos with a grasp; first close at frame median 50 (min 50, max 51) of length median 345; a 48-frame choice window = 14.0 % of the training anchors
+carry : 100 anchors; action loss true 0.00593, frame-0 swapped 0.01189 (+100.4 %, higher at 85/100), no history 0.01302 (+119.4 %)
+late  : 15 anchors; action loss true 0.00331, frame-0 swapped 0.00331 (+0.3 %, higher at 9/15), no history 0.00713 (+115.7 %)
+OBS PROBE swapT_arprop: frame 0 IS used while both blocks are carried (>= 2 %)
+-> /workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_swapT_arprop_carry_val_swap_T.json
+[d5] 2026-11-26 17:58:40 swapT_arprop_e30 split train window carry
+[probe] swapT_arprop split train; 45 demos with a grasp; first close at frame median 50 (min 49, max 55) of length median 343; a 48-frame choice window = 14.0 % of the training anchors
+carry : 270 anchors; action loss true 0.00061, frame-0 swapped 0.00798 (+1202.8 %, higher at 246/270), no history 0.00539 (+779.7 %)
+late  : 135 anchors; action loss true 0.00039, frame-0 swapped 0.00042 (+6.7 %, higher at 85/135), no history 0.00544 (+1277.2 %)
+OBS PROBE swapT_arprop: frame 0 IS used while both blocks are carried (>= 2 %)
+-> /workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_swapT_arprop_carry_train_swap_T.json
+[d5] 2026-11-26 18:01:02 DIAG 5 part c done
+[d5] 2026-11-26 18:01:02 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/DIAG5_5090_c_20261126_1754.txt

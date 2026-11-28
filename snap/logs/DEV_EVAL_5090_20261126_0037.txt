@@ -1,0 +1,5 @@
+[dev] 2026-11-26 00:37:47 checkout 4aea31c Round 4 (11-26 08:00): ranking_arprop 65 < 77 (plan ; GPU 0; runs: obs_s200_e10:observe_and_pickup
+[relay] get hhyfred/memwam-fullft/exports/obs_s200_e10/export_e10.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e10/export_e10.pt (12042063331 bytes)
+[relay] get hhyfred/memwam-fullft/exports/obs_s200_e10/export_e10.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e10/export_e10.pt.sha256 (80 bytes)
+[dev] 2026-11-26 01:03:59 DEV obs_s200_e10 on observe_and_pickup: 1 / 30 (30 dev scenes; 5090 only)
+[dev] 2026-11-26 01:03:59 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/DEV_EVAL_5090_20261126_0037.txt

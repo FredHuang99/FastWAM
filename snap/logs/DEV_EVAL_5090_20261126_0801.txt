@@ -1,0 +1,5 @@
+[dev] 2026-11-26 08:01:13 checkout b07e8e3 Round 5 (11-26 12:00): card 7 obs_match NO HELP -> i; GPU 1; runs: obs_s200_e20:observe_and_pickup
+[relay] get hhyfred/memwam-fullft/exports/obs_s200_e20/export_e20.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e20/export_e20.pt (12042063395 bytes)
+[relay] get hhyfred/memwam-fullft/exports/obs_s200_e20/export_e20.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e20/export_e20.pt.sha256 (80 bytes)
+[dev] 2026-11-26 08:26:53 DEV obs_s200_e20 on observe_and_pickup: 3 / 30 (30 dev scenes; 5090 only)
+[dev] 2026-11-26 08:26:53 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/DEV_EVAL_5090_20261126_0801.txt

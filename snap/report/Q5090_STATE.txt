@@ -1,0 +1,78 @@
+q5090 2026-11-29 02:00:19; GPU0 40 MiB, GPU1 18 MiB
+press-cd-events              cpu   FAILED exit 1 2026-11-28 16:59:00
+press-cd-events-2            cpu   done 2026-11-28 17:29:17
+hf-prune-d-loop              cpu   running cpu 2026-11-28 17:09:04
+diag12-first                 cpu   done 2026-11-28 16:48:49
+diag12-full                  cpu   done 2026-11-28 17:32:15
+diag13                       cpu   done 2026-11-28 17:09:07
+swapdesc-swapT_joint3_e30    gpu1  done 2026-11-28 19:46:05
+card30-gen                   gpu1  FAILED exit 1 2026-11-28 17:43:15
+card30-gen-2                 gpu1  done 2026-11-29 00:32:09
+dev-rearr_pw_s18_e30         gpu1  done 2026-11-28 18:38:42
+diag7c                       gpu1  done 2026-11-28 20:19:48
+robomme-norm                 cpu   done 2026-11-28 17:33:35
+robomme-norm-2               cpu   done 2026-11-29 01:30:06
+robomme-base-export          cpu   done 2026-11-28 17:39:42
+robomme-cache-put            cpu   done 2026-11-29 01:46:14
+c25desc-close-obs_s800_e10   gpu1  done 2026-11-29 01:55:30
+ar2s18-e10-relay             cpu   done 2026-11-28 16:50:03
+gen155-build                 gpu0  done 2026-11-25 14:25:11
+gen600-build                 gpu0  done 2026-11-25 16:16:50
+probe-obs_s800_e10-2         gpu1  done 2026-11-27 22:39:58
+gen800b-3                    gpu1  done 2026-11-28 03:25:06
+probe-obs_cf200_e10          gpu1  done 2026-11-28 05:37:03
+c25desc-probe-e10            gpu1  done 2026-11-28 09:12:21
+c25desc-close-e10            gpu1  done 2026-11-28 10:11:35
+c25desc-probe-e30            gpu1  waiting (gpu1 busy; GPU1 resting)
+c25desc-close-e30            gpu1  waiting (gpu1 busy; GPU1 resting)
+probe-obs_s800_20_e10        gpu1  waiting (condition)
+probe-obs_s800_s18_e10       gpu1  waiting (condition)
+probe-obs_cf200_e30          gpu1  waiting (gpu1 busy; GPU1 resting)
+dev-rearr_pw_s18_e10         gpu1  done 2026-11-28 04:54:31
+dev-rearr_pw_s18_e20         gpu1  done 2026-11-28 06:42:46
+dev-rearr_ar_pw_e10-2        gpu1  done 2026-11-28 07:43:55
+dev-rearr_arprop_pw_e10-2    gpu1  done 2026-11-28 08:45:53
+dev-rearr_ar_pw_e20-2        gpu1  done 2026-11-28 11:12:39
+dev-rearr_arprop_pw_e20-2    gpu1  done 2026-11-28 12:06:53
+dev-swapT_joint3_e10-2       gpu1  done 2026-11-28 13:00:17
+dev-swapT_joint3_e20         gpu1  done 2026-11-28 13:54:16
+hf-offload-12                cpu   done 2026-11-25 15:30:08
+hf-offload-2                 cpu   done 2026-11-28 15:42:54
+dev-obs_s200_e10             gpu   done 2026-11-26 09:03:59
+dev-press_told_e10b          gpu   FAILED exit 1 2026-11-25 16:36:44
+dev-press_told_e10c          gpu   done 2026-11-25 21:40:25
+dev-press_told_e20b          gpu   FAILED exit 1 2026-11-25 16:44:04
+dev-press_told_e20c          gpu   done 2026-11-25 21:37:50
+dev-rearr_pw_e10             gpu   done 2026-11-25 16:09:49
+dev-obs_match_e10            gpu   done 2026-11-26 03:19:55
+dev-obs_s200_e20             gpu   done 2026-11-26 16:26:53
+dev-rearr_pw_e20             gpu   done 2026-11-25 19:17:28
+dev-obs_match_e20            gpu   done 2026-11-26 05:21:47
+dev-ranking_v3a_e10          gpu   done 2026-11-25 19:15:33
+dev-swapT_long_e45           gpu   done 2026-11-25 17:22:42
+dev-ranking_v3a_e20          gpu   done 2026-11-26 17:20:55
+supp6-swapT-hands            cpu   done 2026-11-25 15:47:39
+card13c                      gpu   done 2026-11-25 18:39:38
+card13b                      gpu   done 2026-11-26 02:18:47
+probe-obs_s200_e10           gpu   done 2026-11-26 09:03:25
+probe-obs_s200_e20           gpu   done 2026-11-26 16:48:12
+card7-matchprobe             gpu   done 2026-11-26 13:00:04
+dev-swapT_joint3_e10         gpu   FAILED exit 1 2026-11-27 13:58:08
+robomme-base-inspect         cpu   done 2026-11-27 01:52:10
+card25-check                 gpu   FAILED exit 1 2026-11-27 02:03:25
+diag5-b1                     cpu   done 2026-11-27 01:53:48
+diag5-d                      cpu   done 2026-11-27 01:53:09
+diag5-b                      cpu   done 2026-11-27 04:23:14
+diag5-c                      gpu   done 2026-11-27 02:01:02
+diag4b                       gpu   done 2026-11-27 04:36:29
+card25-gen                   gpu   done 2026-11-27 03:44:49
+card25-detail                cpu   done 2026-11-27 04:22:37
+probe-obs_s800_e10           gpu   done 2026-11-27 09:57:21
+dev-rearr_ar_pw_e10          gpu   FAILED exit 1 2026-11-27 12:28:43
+dev-rearr_arprop_pw_e10      gpu   FAILED exit 1 2026-11-27 13:09:53
+dev-rearr_ar_pw_e20          gpu   FAILED exit 1 2026-11-27 16:54:10
+dev-rearr_arprop_pw_e20      gpu   FAILED exit 1 2026-11-27 17:35:13
+card25-pics                  cpu   done 2026-11-27 11:23:13
+gen800b                      gpu   FAILED exit 1 2026-11-27 13:32:54
+gen800b-logtail              cpu   done 2026-11-27 17:43:03
+gen800b-2                    gpu   FAILED exit 1 2026-11-27 17:58:16

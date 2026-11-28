@@ -1,0 +1,284 @@
+[d5] 2026-11-26 20:22:35 part b; checkout f8e7728 Round 8 (11-27 04:00): card 25 gate fix, diag 5(b) c
+
+== swapT_ar_e30: back-at-own-start failures 19, successes 28
+  BACK 4300002: back ['T_block2']; hands closest 17.7 cm at 451
+     first T_block1 by left: lifted 72 down 175; closest to OTHER start 0.7 cm at 153 (at put-down 0.8); farthest from own start 27.6 cm, turned back at 116; final to target 22.4 / own start 39.7 cm
+     later T_block2 by right: lifted 72 down 554; closest to OTHER start 0.4 cm at 303 (at put-down 43.6); farthest from own start 29.7 cm, turned back at 200; final to target 18.2 / own start 0.5 cm
+  BACK 4300004: back ['T_block2']; hands closest 17.3 cm at 41
+     first T_block1 by left: lifted 72 down 175; closest to OTHER start 1.2 cm at 167 (at put-down 1.2); farthest from own start 27.2 cm, turned back at 120; final to target 14.0 / own start 31.9 cm
+     later T_block2 by right: lifted 72 down 530; closest to OTHER start 0.8 cm at 266 (at put-down 43.3); farthest from own start 29.9 cm, turned back at 499; final to target 18.4 / own start 0.2 cm
+  BACK 4300010: back ['T_block2']; hands closest 17.5 cm at 39
+     first T_block1 by left: lifted 72 down 173; closest to OTHER start 0.5 cm at 173 (at put-down 0.5); farthest from own start 28.5 cm, turned back at 117; final to target 4.1 / own start 15.1 cm
+     later T_block2 by right: lifted 72 down 519; closest to OTHER start 0.5 cm at 295 (at put-down 44.1); farthest from own start 27.6 cm, turned back at 479; final to target 18.3 / own start 1.9 cm
+  BACK 4300011: back ['T_block2']; hands closest 17.7 cm at 436
+     first T_block1 by left: lifted 71 down 174; closest to OTHER start 0.0 cm at 157 (at put-down 0.2); farthest from own start 29.0 cm, turned back at 116; final to target 19.3 / own start 37.3 cm
+     later T_block2 by right: lifted 71 down 538; closest to OTHER start 1.0 cm at 284 (at put-down 44.4); farthest from own start 28.8 cm, turned back at 208; final to target 18.2 / own start 0.7 cm
+  BACK 4300012: back ['T_block2']; hands closest 17.7 cm at 421
+     first T_block1 by left: lifted 72 down 176; closest to OTHER start 0.2 cm at 154 (at put-down 0.9); farthest from own start 29.1 cm, turned back at 118; final to target 0.8 / own start 17.3 cm
+     later T_block2 by right: lifted 72 down 523; closest to OTHER start 0.1 cm at 276 (at put-down 44.5); farthest from own start 28.2 cm, turned back at 483; final to target 18.1 / own start 0.3 cm
+  BACK 4300013: back ['T_block2']; hands closest 17.6 cm at 70
+     first T_block1 by left: lifted 71 down 175; closest to OTHER start 0.6 cm at 172 (at put-down 0.6); farthest from own start 27.6 cm, turned back at 114; final to target 22.2 / own start 39.4 cm
+     later T_block2 by right: lifted 71 down 544; closest to OTHER start 0.5 cm at 295 (at put-down 43.6); farthest from own start 29.8 cm, turned back at 206; final to target 18.2 / own start 0.3 cm
+  BACK 4300018: back ['T_block2']; hands closest 17.8 cm at 427
+     first T_block1 by left: lifted 73 down 177; closest to OTHER start 0.1 cm at 158 (at put-down 0.2); farthest from own start 28.3 cm, turned back at 115; final to target 10.7 / own start 28.7 cm
+     later T_block2 by right: lifted 73 down 528; closest to OTHER start 0.4 cm at 280 (at put-down 44.0); farthest from own start 28.2 cm, turned back at 192; final to target 18.1 / own start 0.7 cm
+  BACK 4300022: back ['T_block2']; hands closest 17.6 cm at 419
+     first T_block1 by left: lifted 73 down 177; closest to OTHER start 1.6 cm at 176 (at put-down 1.6); farthest from own start 28.1 cm, turned back at 115; final to target 5.4 / own start 13.4 cm
+     later T_block2 by right: lifted 73 down 519; closest to OTHER start 0.7 cm at 295 (at put-down 43.9); farthest from own start 27.5 cm, turned back at 197; final to target 18.0 / own start 1.5 cm
+  BACK 4300023: back ['T_block2']; hands closest 17.2 cm at 41
+     first T_block1 by left: lifted 73 down 174; closest to OTHER start 1.1 cm at 167 (at put-down 1.1); farthest from own start 29.5 cm, turned back at 116; final to target 22.5 / own start 40.0 cm
+     later T_block2 by right: lifted 73 down 592; closest to OTHER start 2.6 cm at 306 (at put-down 44.8); farthest from own start 30.0 cm, turned back at 553; final to target 18.2 / own start 0.5 cm
+  BACK 4300028: back ['T_block2']; hands closest 16.8 cm at 41
+     first T_block1 by left: lifted 71 down 170; closest to OTHER start 1.1 cm at 168 (at put-down 1.1); farthest from own start 29.8 cm, turned back at 113; final to target 22.2 / own start 40.1 cm
+     later T_block2 by right: lifted 72 down 279; closest to OTHER start 3.1 cm at 256 (at put-down 3.4); farthest from own start 29.5 cm, turned back at 188; final to target 18.0 / own start 0.4 cm
+  BACK 4300033: back ['T_block2']; hands closest 17.8 cm at 71
+     first T_block1 by left: lifted 71 down 174; closest to OTHER start 0.1 cm at 166 (at put-down 0.2); farthest from own start 27.1 cm, turned back at 116; final to target 11.9 / own start 29.9 cm
+     later T_block2 by right: lifted 71 down 528; closest to OTHER start 0.5 cm at 298 (at put-down 43.3); farthest from own start 28.6 cm, turned back at 131; final to target 18.3 / own start 0.3 cm
+  BACK 4300035: back ['T_block2']; hands closest 17.2 cm at 69
+     first T_block1 by left: lifted 70 down 174; closest to OTHER start 0.4 cm at 173 (at put-down 0.4); farthest from own start 28.0 cm, turned back at 117; final to target 4.7 / own start 22.4 cm
+     later T_block2 by right: lifted 70 down 527; closest to OTHER start 0.7 cm at 280 (at put-down 43.8); farthest from own start 29.3 cm, turned back at 204; final to target 18.1 / own start 0.2 cm
+  BACK 4300036: back ['T_block2']; hands closest 17.4 cm at 73
+     first T_block1 by left: lifted 72 down 172; closest to OTHER start 0.4 cm at 167 (at put-down 0.5); farthest from own start 26.5 cm, turned back at 118; final to target 17.9 / own start 35.8 cm
+     later T_block2 by right: lifted 73 down 534; closest to OTHER start 0.7 cm at 295 (at put-down 42.9); farthest from own start 28.1 cm, turned back at 189; final to target 18.2 / own start 0.7 cm
+  BACK 4300038: back ['T_block2']; hands closest 17.6 cm at 70
+     first T_block1 by left: lifted 70 down 171; closest to OTHER start 0.4 cm at 158 (at put-down 0.5); farthest from own start 26.5 cm, turned back at 115; final to target 6.3 / own start 12.5 cm
+     later T_block2 by right: lifted 70 down 518; closest to OTHER start 1.8 cm at 295 (at put-down 42.9); farthest from own start 27.9 cm, turned back at 193; final to target 18.1 / own start 0.9 cm
+  BACK 4300039: back ['T_block2']; hands closest 17.5 cm at 419
+     first T_block1 by left: lifted 73 down 176; closest to OTHER start 0.1 cm at 154 (at put-down 0.9); farthest from own start 26.5 cm, turned back at 118; final to target 9.9 / own start 8.9 cm
+     later T_block2 by right: lifted 73 down 519; closest to OTHER start 2.1 cm at 296 (at put-down 42.9); farthest from own start 28.3 cm, turned back at 199; final to target 18.1 / own start 0.4 cm
+  BACK 4300040: back ['T_block2']; hands closest 17.4 cm at 433
+     first T_block1 by left: lifted 70 down 176; closest to OTHER start 0.8 cm at 153 (at put-down 1.2); farthest from own start 26.7 cm, turned back at 117; final to target 16.3 / own start 34.1 cm
+     later T_block2 by right: lifted 70 down 536; closest to OTHER start 1.7 cm at 292 (at put-down 43.0); farthest from own start 29.1 cm, turned back at 504; final to target 18.3 / own start 0.1 cm
+  BACK 4300044: back ['T_block2']; hands closest 17.5 cm at 417
+     first T_block1 by left: lifted 71 down 177; closest to OTHER start 0.2 cm at 153 (at put-down 0.9); farthest from own start 26.6 cm, turned back at 113; final to target 8.8 / own start 11.0 cm
+     later T_block2 by right: lifted 71 down 520; closest to OTHER start 1.1 cm at 261 (at put-down 43.0); farthest from own start 29.1 cm, turned back at 208; final to target 18.3 / own start 0.7 cm
+  BACK 4300047: back ['T_block2']; hands closest 17.3 cm at 453
+     first T_block1 by left: lifted 74 down 176; closest to OTHER start 0.3 cm at 154 (at put-down 0.8); farthest from own start 27.2 cm, turned back at 117; final to target 21.7 / own start 39.6 cm
+     later T_block2 by right: lifted 74 down 553; closest to OTHER start 1.6 cm at 303 (at put-down 43.3); farthest from own start 28.0 cm, turned back at 200; final to target 17.7 / own start 1.0 cm
+  BACK 4300050: back ['T_block2']; hands closest 17.7 cm at 420
+     first T_block1 by left: lifted 72 down 175; closest to OTHER start 0.2 cm at 153 (at put-down 1.0); farthest from own start 26.5 cm, turned back at 115; final to target 2.7 / own start 15.9 cm
+     later T_block2 by right: lifted 72 down 522; closest to OTHER start 2.1 cm at 295 (at put-down 42.9); farthest from own start 28.5 cm, turned back at 144; final to target 18.3 / own start 0.2 cm
+  SUCCESS 4300001: back []; hands closest 17.4 cm at 70
+     first T_block1 by left: lifted 70 down 171; closest to OTHER start 0.4 cm at 167 (at put-down 0.5); farthest from own start 29.0 cm, turned back at 115; final to target 0.8 / own start 18.2 cm
+     later T_block2 by right: lifted 70 down 281; closest to OTHER start 2.3 cm at 258 (at put-down 2.5); farthest from own start 29.6 cm, turned back at 191; final to target 1.2 / own start 18.0 cm
+  SUCCESS 4300003: back []; hands closest 17.5 cm at 71
+     first T_block1 by left: lifted 72 down 173; closest to OTHER start 2.2 cm at 167 (at put-down 2.3); farthest from own start 29.3 cm, turned back at 117; final to target 0.6 / own start 18.2 cm
+     later T_block2 by right: lifted 72 down 280; closest to OTHER start 2.3 cm at 278 (at put-down 2.4); farthest from own start 30.4 cm, turned back at 194; final to target 1.1 / own start 18.1 cm
+  SUCCESS 4300005: back []; hands closest 17.6 cm at 71
+     first T_block1 by left: lifted 71 down 173; closest to OTHER start 0.9 cm at 173 (at put-down 0.9); farthest from own start 28.5 cm, turned back at 114; final to target 1.9 / own start 18.1 cm
+     later T_block2 by right: lifted 71 down 284; closest to OTHER start 0.8 cm at 277 (at put-down 0.9); farthest from own start 27.6 cm, turned back at 128; final to target 0.4 / own start 18.1 cm
+  SUCCESS 4300006: back []; hands closest 17.6 cm at 73
+     first T_block1 by left: lifted 72 down 175; closest to OTHER start 0.9 cm at 153 (at put-down 1.2); farthest from own start 27.6 cm, turned back at 115; final to target 1.8 / own start 18.0 cm
+     later T_block2 by right: lifted 72 down 279; closest to OTHER start 0.8 cm at 274 (at put-down 0.9); farthest from own start 27.3 cm, turned back at 144; final to target 0.4 / own start 18.0 cm
+  SUCCESS 4300007: back []; hands closest 18.1 cm at 73
+     first T_block1 by left: lifted 73 down 175; closest to OTHER start 1.1 cm at 169 (at put-down 1.2); farthest from own start 27.4 cm, turned back at 115; final to target 0.1 / own start 18.4 cm
+     later T_block2 by right: lifted 73 down 288; closest to OTHER start 0.2 cm at 267 (at put-down 0.4); farthest from own start 30.2 cm, turned back at 205; final to target 1.1 / own start 18.0 cm
+  SUCCESS 4300008: back []; hands closest 18.0 cm at 71
+     first T_block1 by left: lifted 72 down 177; closest to OTHER start 0.0 cm at 154 (at put-down 1.0); farthest from own start 27.6 cm, turned back at 118; final to target 0.8 / own start 18.4 cm
+     later T_block2 by right: lifted 72 down 286; closest to OTHER start 0.9 cm at 264 (at put-down 1.0); farthest from own start 28.8 cm, turned back at 192; final to target 0.3 / own start 18.1 cm
+  SUCCESS 4300014: back []; hands closest 17.7 cm at 73
+     first T_block1 by left: lifted 71 down 175; closest to OTHER start 0.8 cm at 153 (at put-down 1.2); farthest from own start 27.4 cm, turned back at 117; final to target 0.5 / own start 18.4 cm
+     later T_block2 by right: lifted 71 down 278; closest to OTHER start 0.7 cm at 275 (at put-down 0.7); farthest from own start 29.5 cm, turned back at 191; final to target 0.8 / own start 18.1 cm
+  SUCCESS 4300015: back []; hands closest 17.4 cm at 70
+     first T_block1 by left: lifted 71 down 175; closest to OTHER start 0.8 cm at 159 (at put-down 0.9); farthest from own start 28.2 cm, turned back at 115; final to target 1.9 / own start 18.1 cm
+     later T_block2 by right: lifted 71 down 288; closest to OTHER start 0.4 cm at 283 (at put-down 0.5); farthest from own start 28.3 cm, turned back at 216; final to target 0.7 / own start 18.0 cm
+  SUCCESS 4300016: back []; hands closest 18.1 cm at 72
+     first T_block1 by left: lifted 72 down 175; closest to OTHER start 1.1 cm at 165 (at put-down 1.1); farthest from own start 26.6 cm, turned back at 117; final to target 0.3 / own start 18.6 cm
+     later T_block2 by right: lifted 72 down 288; closest to OTHER start 0.9 cm at 273 (at put-down 1.0); farthest from own start 29.6 cm, turned back at 201; final to target 2.0 / own start 18.1 cm
+  SUCCESS 4300019: back []; hands closest 17.0 cm at 71
+     first T_block1 by left: lifted 71 down 173; closest to OTHER start 1.0 cm at 166 (at put-down 1.0); farthest from own start 29.1 cm, turned back at 118; final to target 0.6 / own start 18.3 cm
+     later T_block2 by right: lifted 71 down 277; closest to OTHER start 3.5 cm at 273 (at put-down 3.5); farthest from own start 29.3 cm, turned back at 190; final to target 2.3 / own start 18.0 cm
+  SUCCESS 4300020: back []; hands closest 18.1 cm at 75
+     first T_block1 by left: lifted 75 down 177; closest to OTHER start 0.6 cm at 155 (at put-down 0.8); farthest from own start 27.7 cm, turned back at 117; final to target 0.3 / own start 18.3 cm
+     later T_block2 by right: lifted 75 down 291; closest to OTHER start 0.7 cm at 274 (at put-down 0.8); farthest from own start 29.7 cm, turned back at 196; final to target 1.8 / own start 18.0 cm
+  SUCCESS 4300021: back []; hands closest 17.5 cm at 75
+     first T_block1 by left: lifted 74 down 178; closest to OTHER start 0.4 cm at 156 (at put-down 0.6); farthest from own start 28.1 cm, turned back at 118; final to target 0.6 / own start 18.2 cm
+     later T_block2 by right: lifted 74 down 291; closest to OTHER start 0.5 cm at 286 (at put-down 0.6); farthest from own start 29.8 cm, turned back at 199; final to target 1.2 / own start 17.9 cm
+  SUCCESS 4300025: back []; hands closest 18.5 cm at 73
+     first T_block1 by left: lifted 72 down 176; closest to OTHER start 1.3 cm at 154 (at put-down 1.7); farthest from own start 27.5 cm, turned back at 116; final to target 0.6 / own start 18.3 cm
+     later T_block2 by right: lifted 72 down 285; closest to OTHER start 1.5 cm at 262 (at put-down 1.7); farthest from own start 29.7 cm, turned back at 200; final to target 0.6 / own start 18.3 cm
+  SUCCESS 4300026: back []; hands closest 17.0 cm at 39
+     first T_block1 by left: lifted 72 down 174; closest to OTHER start 1.1 cm at 174 (at put-down 1.1); farthest from own start 27.5 cm, turned back at 120; final to target 0.2 / own start 18.2 cm
+     later T_block2 by right: lifted 72 down 284; closest to OTHER start 0.6 cm at 284 (at put-down 0.6); farthest from own start 28.9 cm, turned back at 193; final to target 1.4 / own start 17.9 cm
+  SUCCESS 4300027: back []; hands closest 18.5 cm at 71
+     first T_block1 by left: lifted 72 down 177; closest to OTHER start 1.0 cm at 153 (at put-down 1.1); farthest from own start 29.2 cm, turned back at 113; final to target 1.4 / own start 18.3 cm
+     later T_block2 by right: lifted 72 down 288; closest to OTHER start 0.7 cm at 266 (at put-down 1.0); farthest from own start 28.0 cm, turned back at 200; final to target 0.2 / own start 18.2 cm
+  SUCCESS 4300029: back []; hands closest 17.2 cm at 71
+     first T_block1 by left: lifted 71 down 174; closest to OTHER start 1.9 cm at 169 (at put-down 1.9); farthest from own start 28.3 cm, turned back at 116; final to target 0.6 / own start 18.3 cm
+     later T_block2 by right: lifted 71 down 284; closest to OTHER start 1.5 cm at 276 (at put-down 1.6); farthest from own start 30.4 cm, turned back at 198; final to target 0.1 / own start 18.2 cm
+  SUCCESS 4300030: back []; hands closest 17.6 cm at 72
+     first T_block1 by left: lifted 71 down 174; closest to OTHER start 0.1 cm at 169 (at put-down 0.1); farthest from own start 26.8 cm, turned back at 118; final to target 0.9 / own start 18.5 cm
+     later T_block2 by right: lifted 71 down 286; closest to OTHER start 0.3 cm at 284 (at put-down 0.3); farthest from own start 29.2 cm, turned back at 128; final to target 1.4 / own start 17.8 cm
+  SUCCESS 4300031: back []; hands closest 17.4 cm at 72
+     first T_block1 by left: lifted 71 down 176; closest to OTHER start 0.6 cm at 153 (at put-down 1.0); farthest from own start 29.1 cm, turned back at 116; final to target 0.4 / own start 18.1 cm
+     later T_block2 by right: lifted 71 down 278; closest to OTHER start 2.6 cm at 275 (at put-down 2.6); farthest from own start 29.3 cm, turned back at 199; final to target 1.6 / own start 18.1 cm
+  SUCCESS 4300032: back []; hands closest 17.7 cm at 71
+     first T_block1 by left: lifted 72 down 176; closest to OTHER start 0.6 cm at 155 (at put-down 0.8); farthest from own start 28.6 cm, turned back at 114; final to target 1.5 / own start 18.2 cm
+     later T_block2 by right: lifted 72 down 287; closest to OTHER start 0.8 cm at 286 (at put-down 0.8); farthest from own start 28.2 cm, turned back at 196; final to target 0.3 / own start 18.0 cm
+  SUCCESS 4300034: back []; hands closest 17.3 cm at 40
+     first T_block1 by left: lifted 71 down 174; closest to OTHER start 0.6 cm at 165 (at put-down 0.7); farthest from own start 27.4 cm, turned back at 119; final to target 0.3 / own start 18.3 cm
+     later T_block2 by right: lifted 71 down 279; closest to OTHER start 0.4 cm at 279 (at put-down 0.4); farthest from own start 29.0 cm, turned back at 139; final to target 1.0 / own start 17.9 cm
+  SUCCESS 4300037: back []; hands closest 17.7 cm at 74
+     first T_block1 by left: lifted 73 down 173; closest to OTHER start 1.1 cm at 171 (at put-down 1.2); farthest from own start 26.8 cm, turned back at 117; final to target 0.3 / own start 18.5 cm
+     later T_block2 by right: lifted 73 down 283; closest to OTHER start 0.4 cm at 262 (at put-down 0.8); farthest from own start 29.3 cm, turned back at 148; final to target 0.4 / own start 17.9 cm
+  SUCCESS 4300041: back []; hands closest 17.7 cm at 71
+     first T_block1 by left: lifted 71 down 176; closest to OTHER start 0.5 cm at 153 (at put-down 0.9); farthest from own start 27.4 cm, turned back at 115; final to target 0.6 / own start 18.5 cm
+     later T_block2 by right: lifted 71 down 288; closest to OTHER start 0.8 cm at 286 (at put-down 0.8); farthest from own start 29.7 cm, turned back at 206; final to target 1.5 / own start 18.0 cm
+  SUCCESS 4300042: back []; hands closest 17.1 cm at 70
+     first T_block1 by left: lifted 70 down 174; closest to OTHER start 0.5 cm at 164 (at put-down 0.6); farthest from own start 28.7 cm, turned back at 117; final to target 0.7 / own start 18.0 cm
+     later T_block2 by right: lifted 70 down 279; closest to OTHER start 2.3 cm at 274 (at put-down 2.3); farthest from own start 29.0 cm, turned back at 196; final to target 1.2 / own start 18.0 cm
+  SUCCESS 4300043: back []; hands closest 17.0 cm at 71
+     first T_block1 by left: lifted 71 down 173; closest to OTHER start 0.1 cm at 159 (at put-down 0.2); farthest from own start 27.4 cm, turned back at 118; final to target 1.5 / own start 18.1 cm
+     later T_block2 by right: lifted 71 down 283; closest to OTHER start 0.8 cm at 283 (at put-down 0.8); farthest from own start 27.6 cm, turned back at 197; final to target 1.9 / own start 18.2 cm
+  SUCCESS 4300045: back []; hands closest 17.5 cm at 71
+     first T_block1 by left: lifted 72 down 173; closest to OTHER start 0.7 cm at 167 (at put-down 0.7); farthest from own start 27.2 cm, turned back at 120; final to target 0.4 / own start 17.9 cm
+     later T_block2 by right: lifted 72 down 282; closest to OTHER start 1.1 cm at 277 (at put-down 1.1); farthest from own start 27.8 cm, turned back at 211; final to target 0.2 / own start 17.8 cm
+  SUCCESS 4300046: back []; hands closest 17.9 cm at 69
+     first T_block1 by left: lifted 69 down 175; closest to OTHER start 1.9 cm at 152 (at put-down 2.1); farthest from own start 26.8 cm, turned back at 115; final to target 0.6 / own start 18.7 cm
+     later T_block2 by right: lifted 69 down 279; closest to OTHER start 0.8 cm at 279 (at put-down 0.8); farthest from own start 30.3 cm, turned back at 198; final to target 1.5 / own start 18.2 cm
+  SUCCESS 4300048: back []; hands closest 17.5 cm at 72
+     first T_block1 by left: lifted 72 down 174; closest to OTHER start 0.5 cm at 151 (at put-down 1.1); farthest from own start 28.8 cm, turned back at 115; final to target 1.6 / own start 18.2 cm
+     later T_block2 by right: lifted 72 down 283; closest to OTHER start 0.7 cm at 282 (at put-down 0.7); farthest from own start 27.6 cm, turned back at 192; final to target 0.6 / own start 18.1 cm
+  SUCCESS 4300049: back []; hands closest 17.6 cm at 71
+     first T_block1 by left: lifted 71 down 173; closest to OTHER start 0.2 cm at 161 (at put-down 0.3); farthest from own start 27.1 cm, turned back at 115; final to target 1.1 / own start 18.0 cm
+     later T_block2 by right: lifted 71 down 283; closest to OTHER start 0.9 cm at 283 (at put-down 0.9); farthest from own start 27.7 cm, turned back at 194; final to target 2.1 / own start 18.0 cm
+  classes: {'C both hands went over the other start; the later hand put its block down elsewhere': 18, 'D the later hand put its block down over the other start; that block ended at its own start': 1}
+
+== swapT_arprop_e30: back-at-own-start failures 20, successes 24
+  BACK 4300000: back ['T_block2']; hands closest 17.5 cm at 443
+     first T_block1 by left: lifted 75 down 173; closest to OTHER start 0.1 cm at 173 (at put-down 0.1); farthest from own start 27.7 cm, turned back at 119; final to target 21.5 / own start 39.4 cm
+     later T_block2 by right: lifted 74 down 543; closest to OTHER start 0.5 cm at 272 (at put-down 43.7); farthest from own start 27.9 cm, turned back at 510; final to target 18.4 / own start 1.2 cm
+  BACK 4300002: back ['T_block2']; hands closest 17.2 cm at 449
+     first T_block1 by left: lifted 73 down 176; closest to OTHER start 0.7 cm at 155 (at put-down 0.9); farthest from own start 27.6 cm, turned back at 118; final to target 22.4 / own start 39.7 cm
+     later T_block2 by right: lifted 73 down 551; closest to OTHER start 0.5 cm at 303 (at put-down 43.6); farthest from own start 29.7 cm, turned back at 514; final to target 18.6 / own start 0.5 cm
+  BACK 4300004: back ['T_block2']; hands closest 17.1 cm at 488
+     first T_block1 by left: lifted 73 down 175; closest to OTHER start 1.3 cm at 172 (at put-down 1.3); farthest from own start 27.2 cm, turned back at 120; final to target 22.6 / own start 39.7 cm
+     later T_block2 by right: lifted 73 down 589; closest to OTHER start 0.9 cm at 266 (at put-down 43.3); farthest from own start 29.9 cm, turned back at 554; final to target 18.9 / own start 0.7 cm
+  BACK 4300005: back ['T_block2']; hands closest 17.4 cm at 416
+     first T_block1 by left: lifted 71 down 174; closest to OTHER start 0.9 cm at 159 (at put-down 0.9); farthest from own start 28.5 cm, turned back at 116; final to target 12.3 / own start 6.0 cm
+     later T_block2 by right: lifted 71 down 517; closest to OTHER start 2.1 cm at 268 (at put-down 44.1); farthest from own start 27.6 cm, turned back at 484; final to target 18.2 / own start 1.2 cm
+  BACK 4300009: back ['T_block2']; hands closest 17.8 cm at 450
+     first T_block1 by left: lifted 70 down 169; closest to OTHER start 1.0 cm at 165 (at put-down 1.1); farthest from own start 28.5 cm, turned back at 113; final to target 22.4 / own start 39.8 cm
+     later T_block2 by right: lifted 70 down 552; closest to OTHER start 0.9 cm at 298 (at put-down 44.2); farthest from own start 29.7 cm, turned back at 516; final to target 18.2 / own start 0.2 cm
+  BACK 4300010: back ['T_block2']; hands closest 17.1 cm at 440
+     first T_block1 by left: lifted 71 down 174; closest to OTHER start 0.2 cm at 174 (at put-down 0.2); farthest from own start 28.5 cm, turned back at 117; final to target 19.3 / own start 37.4 cm
+     later T_block2 by right: lifted 71 down 540; closest to OTHER start 0.7 cm at 294 (at put-down 44.1); farthest from own start 27.6 cm, turned back at 507; final to target 18.3 / own start 1.2 cm
+  BACK 4300011: back ['T_block2']; hands closest 17.3 cm at 447
+     first T_block1 by left: lifted 73 down 175; closest to OTHER start 0.1 cm at 155 (at put-down 0.3); farthest from own start 29.0 cm, turned back at 118; final to target 21.9 / own start 39.8 cm
+     later T_block2 by right: lifted 73 down 547; closest to OTHER start 0.9 cm at 286 (at put-down 44.5); farthest from own start 28.8 cm, turned back at 513; final to target 18.2 / own start 0.5 cm
+  BACK 4300013: back ['T_block2']; hands closest 17.4 cm at 500
+     first T_block1 by left: lifted 71 down 174; closest to OTHER start 0.9 cm at 166 (at put-down 0.9); farthest from own start 27.6 cm, turned back at 119; final to target 22.4 / own start 39.6 cm
+     later T_block2 by right: lifted 71 down 287; closest to OTHER start 0.5 cm at 266 (at put-down 0.6); farthest from own start 29.8 cm, turned back at 126; final to target 18.7 / own start 0.8 cm
+  BACK 4300016: back ['T_block2']; hands closest 17.3 cm at 447
+     first T_block1 by left: lifted 74 down 176; closest to OTHER start 1.1 cm at 157 (at put-down 1.1); farthest from own start 26.6 cm, turned back at 119; final to target 22.2 / own start 39.4 cm
+     later T_block2 by right: lifted 74 down 548; closest to OTHER start 1.1 cm at 304 (at put-down 43.0); farthest from own start 29.7 cm, turned back at 504; final to target 18.6 / own start 0.5 cm
+  BACK 4300017: back ['T_block2']; hands closest 17.2 cm at 462
+     first T_block1 by left: lifted 72 down 176; closest to OTHER start 0.2 cm at 154 (at put-down 0.7); farthest from own start 26.8 cm, turned back at 114; final to target 22.1 / own start 39.5 cm
+     later T_block2 by right: lifted 72 down 564; closest to OTHER start 0.5 cm at 303 (at put-down 43.1); farthest from own start 28.9 cm, turned back at 527; final to target 18.3 / own start 0.2 cm
+  BACK 4300018: back ['T_block2']; hands closest 17.4 cm at 472
+     first T_block1 by left: lifted 74 down 177; closest to OTHER start 0.2 cm at 162 (at put-down 0.2); farthest from own start 28.4 cm, turned back at 120; final to target 21.9 / own start 39.9 cm
+     later T_block2 by right: lifted 74 down 572; closest to OTHER start 0.6 cm at 279 (at put-down 44.1); farthest from own start 28.2 cm, turned back at 539; final to target 18.0 / own start 0.6 cm
+  BACK 4300021: back ['T_block2']; hands closest 17.3 cm at 454
+     first T_block1 by left: lifted 74 down 178; closest to OTHER start 0.7 cm at 158 (at put-down 0.8); farthest from own start 28.1 cm, turned back at 120; final to target 22.5 / own start 39.7 cm
+     later T_block2 by right: lifted 74 down 552; closest to OTHER start 0.2 cm at 285 (at put-down 43.9); farthest from own start 29.8 cm, turned back at 515; final to target 18.5 / own start 0.7 cm
+  BACK 4300022: back ['T_block2']; hands closest 17.3 cm at 460
+     first T_block1 by left: lifted 74 down 178; closest to OTHER start 1.3 cm at 155 (at put-down 1.4); farthest from own start 28.1 cm, turned back at 120; final to target 21.6 / own start 39.7 cm
+     later T_block2 by right: lifted 74 down 559; closest to OTHER start 0.6 cm at 294 (at put-down 43.9); farthest from own start 27.5 cm, turned back at 526; final to target 18.0 / own start 1.4 cm
+  BACK 4300032: back ['T_block2']; hands closest 17.2 cm at 451
+     first T_block1 by left: lifted 72 down 175; closest to OTHER start 0.7 cm at 158 (at put-down 0.9); farthest from own start 28.6 cm, turned back at 116; final to target 21.8 / own start 39.8 cm
+     later T_block2 by right: lifted 72 down 552; closest to OTHER start 0.7 cm at 287 (at put-down 44.2); farthest from own start 28.2 cm, turned back at 196; final to target 18.3 / own start 0.7 cm
+  BACK 4300036: back ['T_block2']; hands closest 17.2 cm at 462
+     first T_block1 by left: lifted 72 down 172; closest to OTHER start 0.4 cm at 165 (at put-down 0.5); farthest from own start 26.5 cm, turned back at 116; final to target 21.8 / own start 39.5 cm
+     later T_block2 by right: lifted 72 down 565; closest to OTHER start 1.4 cm at 295 (at put-down 42.9); farthest from own start 28.1 cm, turned back at 524; final to target 18.8 / own start 1.5 cm
+  BACK 4300038: back ['T_block2']; hands closest 17.5 cm at 459
+     first T_block1 by left: lifted 71 down 172; closest to OTHER start 0.3 cm at 158 (at put-down 0.4); farthest from own start 26.5 cm, turned back at 116; final to target 21.7 / own start 39.5 cm
+     later T_block2 by right: lifted 71 down 560; closest to OTHER start 0.8 cm at 295 (at put-down 42.9); farthest from own start 27.9 cm, turned back at 520; final to target 18.4 / own start 1.2 cm
+  BACK 4300039: back ['T_block2']; hands closest 17.2 cm at 441
+     first T_block1 by left: lifted 73 down 175; closest to OTHER start 0.5 cm at 153 (at put-down 1.2); farthest from own start 26.5 cm, turned back at 114; final to target 21.0 / own start 38.6 cm
+     later T_block2 by right: lifted 73 down 543; closest to OTHER start 0.6 cm at 290 (at put-down 42.9); farthest from own start 28.4 cm, turned back at 136; final to target 18.2 / own start 0.2 cm
+  BACK 4300040: back ['T_block2']; hands closest 17.1 cm at 455
+     first T_block1 by left: lifted 71 down 176; closest to OTHER start 0.6 cm at 153 (at put-down 1.2); farthest from own start 26.7 cm, turned back at 117; final to target 22.2 / own start 39.5 cm
+     later T_block2 by right: lifted 71 down 558; closest to OTHER start 0.1 cm at 280 (at put-down 43.0); farthest from own start 29.1 cm, turned back at 525; final to target 18.3 / own start 0.3 cm
+  BACK 4300044: back ['T_block2']; hands closest 17.1 cm at 470
+     first T_block1 by left: lifted 72 down 176; closest to OTHER start 0.2 cm at 153 (at put-down 1.0); farthest from own start 26.6 cm, turned back at 116; final to target 22.2 / own start 39.5 cm
+     later T_block2 by right: lifted 72 down 572; closest to OTHER start 0.8 cm at 263 (at put-down 43.0); farthest from own start 29.1 cm, turned back at 539; final to target 18.4 / own start 0.5 cm
+  BACK 4300050: back ['T_block2']; hands closest 17.2 cm at 449
+     first T_block1 by left: lifted 74 down 176; closest to OTHER start 0.7 cm at 155 (at put-down 1.2); farthest from own start 26.5 cm, turned back at 119; final to target 21.9 / own start 39.5 cm
+     later T_block2 by right: lifted 74 down 551; closest to OTHER start 1.2 cm at 296 (at put-down 42.9); farthest from own start 28.5 cm, turned back at 502; final to target 18.2 / own start 0.1 cm
+  SUCCESS 4300001: back []; hands closest 17.5 cm at 72
+     first T_block1 by left: lifted 71 down 173; closest to OTHER start 0.5 cm at 165 (at put-down 0.5); farthest from own start 29.0 cm, turned back at 116; final to target 0.7 / own start 18.2 cm
+     later T_block2 by right: lifted 71 down 282; closest to OTHER start 2.3 cm at 260 (at put-down 2.4); farthest from own start 29.6 cm, turned back at 143; final to target 1.2 / own start 18.0 cm
+  SUCCESS 4300003: back []; hands closest 17.5 cm at 71
+     first T_block1 by left: lifted 72 down 172; closest to OTHER start 2.3 cm at 167 (at put-down 2.3); farthest from own start 29.3 cm, turned back at 116; final to target 0.8 / own start 18.3 cm
+     later T_block2 by right: lifted 72 down 279; closest to OTHER start 2.4 cm at 274 (at put-down 2.4); farthest from own start 30.4 cm, turned back at 190; final to target 1.1 / own start 18.2 cm
+  SUCCESS 4300006: back []; hands closest 17.6 cm at 73
+     first T_block1 by left: lifted 72 down 175; closest to OTHER start 1.0 cm at 151 (at put-down 1.4); farthest from own start 27.6 cm, turned back at 114; final to target 1.7 / own start 18.0 cm
+     later T_block2 by right: lifted 72 down 278; closest to OTHER start 0.7 cm at 274 (at put-down 0.8); farthest from own start 27.3 cm, turned back at 136; final to target 0.5 / own start 18.0 cm
+  SUCCESS 4300008: back []; hands closest 18.1 cm at 71
+     first T_block1 by left: lifted 72 down 176; closest to OTHER start 0.4 cm at 154 (at put-down 1.0); farthest from own start 27.6 cm, turned back at 117; final to target 0.4 / own start 18.3 cm
+     later T_block2 by right: lifted 72 down 288; closest to OTHER start 0.6 cm at 272 (at put-down 0.7); farthest from own start 28.8 cm, turned back at 199; final to target 1.9 / own start 18.3 cm
+  SUCCESS 4300012: back []; hands closest 18.2 cm at 73
+     first T_block1 by left: lifted 72 down 177; closest to OTHER start 0.7 cm at 155 (at put-down 1.1); farthest from own start 29.1 cm, turned back at 115; final to target 1.4 / own start 18.2 cm
+     later T_block2 by right: lifted 72 down 288; closest to OTHER start 0.5 cm at 266 (at put-down 0.9); farthest from own start 28.2 cm, turned back at 209; final to target 0.5 / own start 18.4 cm
+  SUCCESS 4300014: back []; hands closest 17.6 cm at 73
+     first T_block1 by left: lifted 72 down 175; closest to OTHER start 1.1 cm at 152 (at put-down 1.4); farthest from own start 27.4 cm, turned back at 115; final to target 0.4 / own start 18.4 cm
+     later T_block2 by right: lifted 72 down 276; closest to OTHER start 0.8 cm at 268 (at put-down 0.8); farthest from own start 29.5 cm, turned back at 197; final to target 0.4 / own start 18.2 cm
+  SUCCESS 4300015: back []; hands closest 17.3 cm at 70
+     first T_block1 by left: lifted 71 down 175; closest to OTHER start 0.5 cm at 158 (at put-down 0.7); farthest from own start 28.2 cm, turned back at 114; final to target 1.5 / own start 18.2 cm
+     later T_block2 by right: lifted 71 down 292; closest to OTHER start 0.6 cm at 289 (at put-down 0.6); farthest from own start 28.3 cm, turned back at 193; final to target 0.6 / own start 18.0 cm
+  SUCCESS 4300020: back []; hands closest 18.3 cm at 72
+     first T_block1 by left: lifted 73 down 175; closest to OTHER start 0.8 cm at 154 (at put-down 0.9); farthest from own start 27.7 cm, turned back at 116; final to target 0.2 / own start 18.3 cm
+     later T_block2 by right: lifted 73 down 288; closest to OTHER start 0.2 cm at 266 (at put-down 0.4); farthest from own start 29.7 cm, turned back at 196; final to target 0.8 / own start 18.0 cm
+  SUCCESS 4300025: back []; hands closest 18.4 cm at 74
+     first T_block1 by left: lifted 74 down 180; closest to OTHER start 1.1 cm at 157 (at put-down 1.5); farthest from own start 27.5 cm, turned back at 120; final to target 0.4 / own start 18.4 cm
+     later T_block2 by right: lifted 74 down 289; closest to OTHER start 1.3 cm at 268 (at put-down 1.7); farthest from own start 29.7 cm, turned back at 207; final to target 0.6 / own start 18.3 cm
+  SUCCESS 4300027: back []; hands closest 18.6 cm at 71
+     first T_block1 by left: lifted 72 down 177; closest to OTHER start 1.0 cm at 154 (at put-down 1.2); farthest from own start 29.2 cm, turned back at 118; final to target 1.5 / own start 18.2 cm
+     later T_block2 by right: lifted 72 down 289; closest to OTHER start 0.6 cm at 265 (at put-down 0.9); farthest from own start 28.0 cm, turned back at 199; final to target 0.2 / own start 18.2 cm
+  SUCCESS 4300029: back []; hands closest 17.4 cm at 41
+     first T_block1 by left: lifted 72 down 175; closest to OTHER start 1.9 cm at 168 (at put-down 1.9); farthest from own start 28.3 cm, turned back at 120; final to target 0.7 / own start 18.4 cm
+     later T_block2 by right: lifted 72 down 284; closest to OTHER start 1.9 cm at 277 (at put-down 1.9); farthest from own start 30.4 cm, turned back at 208; final to target 0.4 / own start 18.4 cm
+  SUCCESS 4300030: back []; hands closest 17.6 cm at 72
+     first T_block1 by left: lifted 71 down 175; closest to OTHER start 0.4 cm at 164 (at put-down 0.4); farthest from own start 26.8 cm, turned back at 118; final to target 0.7 / own start 18.5 cm
+     later T_block2 by right: lifted 71 down 286; closest to OTHER start 0.1 cm at 267 (at put-down 0.2); farthest from own start 29.2 cm, turned back at 197; final to target 1.0 / own start 18.0 cm
+  SUCCESS 4300031: back []; hands closest 17.4 cm at 72
+     first T_block1 by left: lifted 71 down 175; closest to OTHER start 0.4 cm at 152 (at put-down 1.0); farthest from own start 29.1 cm, turned back at 116; final to target 0.6 / own start 18.3 cm
+     later T_block2 by right: lifted 71 down 276; closest to OTHER start 2.7 cm at 269 (at put-down 2.9); farthest from own start 29.3 cm, turned back at 200; final to target 1.9 / own start 18.1 cm
+  SUCCESS 4300034: back []; hands closest 17.4 cm at 39
+     first T_block1 by left: lifted 72 down 174; closest to OTHER start 0.9 cm at 165 (at put-down 1.0); farthest from own start 27.4 cm, turned back at 118; final to target 0.2 / own start 18.3 cm
+     later T_block2 by right: lifted 72 down 283; closest to OTHER start 0.3 cm at 281 (at put-down 0.3); farthest from own start 29.0 cm, turned back at 203; final to target 1.0 / own start 17.9 cm
+  SUCCESS 4300035: back []; hands closest 17.3 cm at 73
+     first T_block1 by left: lifted 71 down 174; closest to OTHER start 0.6 cm at 164 (at put-down 0.6); farthest from own start 28.0 cm, turned back at 115; final to target 0.5 / own start 18.0 cm
+     later T_block2 by right: lifted 71 down 277; closest to OTHER start 1.8 cm at 270 (at put-down 1.9); farthest from own start 29.3 cm, turned back at 197; final to target 0.8 / own start 18.2 cm
+  SUCCESS 4300037: back []; hands closest 17.8 cm at 71
+     first T_block1 by left: lifted 72 down 173; closest to OTHER start 0.6 cm at 170 (at put-down 0.7); farthest from own start 26.8 cm, turned back at 117; final to target 0.5 / own start 18.4 cm
+     later T_block2 by right: lifted 72 down 284; closest to OTHER start 0.3 cm at 263 (at put-down 0.7); farthest from own start 29.3 cm, turned back at 147; final to target 0.6 / own start 17.7 cm
+  SUCCESS 4300041: back []; hands closest 17.8 cm at 73
+     first T_block1 by left: lifted 73 down 175; closest to OTHER start 0.8 cm at 153 (at put-down 1.1); farthest from own start 27.4 cm, turned back at 116; final to target 0.3 / own start 18.4 cm
+     later T_block2 by right: lifted 73 down 288; closest to OTHER start 0.7 cm at 287 (at put-down 0.7); farthest from own start 29.7 cm, turned back at 199; final to target 1.3 / own start 18.1 cm
+  SUCCESS 4300042: back []; hands closest 17.2 cm at 70
+     first T_block1 by left: lifted 70 down 175; closest to OTHER start 0.3 cm at 163 (at put-down 0.4); farthest from own start 28.7 cm, turned back at 117; final to target 0.8 / own start 18.1 cm
+     later T_block2 by right: lifted 70 down 285; closest to OTHER start 1.7 cm at 282 (at put-down 1.7); farthest from own start 29.0 cm, turned back at 198; final to target 0.6 / own start 18.2 cm
+  SUCCESS 4300043: back []; hands closest 17.1 cm at 71
+     first T_block1 by left: lifted 71 down 172; closest to OTHER start 0.0 cm at 166 (at put-down 0.1); farthest from own start 27.4 cm, turned back at 117; final to target 1.4 / own start 18.1 cm
+     later T_block2 by right: lifted 71 down 281; closest to OTHER start 0.5 cm at 281 (at put-down 0.5); farthest from own start 27.6 cm, turned back at 185; final to target 1.6 / own start 18.1 cm
+  SUCCESS 4300045: back []; hands closest 17.4 cm at 71
+     first T_block1 by left: lifted 71 down 173; closest to OTHER start 0.6 cm at 166 (at put-down 0.6); farthest from own start 27.2 cm, turned back at 116; final to target 0.4 / own start 17.9 cm
+     later T_block2 by right: lifted 72 down 281; closest to OTHER start 1.0 cm at 278 (at put-down 1.1); farthest from own start 27.8 cm, turned back at 129; final to target 0.2 / own start 17.8 cm
+  SUCCESS 4300046: back []; hands closest 18.0 cm at 70
+     first T_block1 by left: lifted 70 down 175; closest to OTHER start 1.9 cm at 152 (at put-down 2.1); farthest from own start 26.8 cm, turned back at 115; final to target 0.6 / own start 18.7 cm
+     later T_block2 by right: lifted 70 down 277; closest to OTHER start 0.7 cm at 277 (at put-down 0.7); farthest from own start 30.3 cm, turned back at 194; final to target 1.1 / own start 18.2 cm
+  SUCCESS 4300047: back []; hands closest 17.6 cm at 73
+     first T_block1 by left: lifted 73 down 175; closest to OTHER start 0.2 cm at 152 (at put-down 1.0); farthest from own start 27.2 cm, turned back at 116; final to target 1.0 / own start 18.2 cm
+     later T_block2 by right: lifted 73 down 282; closest to OTHER start 0.8 cm at 281 (at put-down 0.9); farthest from own start 27.9 cm, turned back at 197; final to target 1.3 / own start 17.8 cm
+  SUCCESS 4300048: back []; hands closest 17.6 cm at 73
+     first T_block1 by left: lifted 73 down 173; closest to OTHER start 0.6 cm at 150 (at put-down 1.0); farthest from own start 28.8 cm, turned back at 113; final to target 1.3 / own start 18.1 cm
+     later T_block2 by right: lifted 73 down 273; closest to OTHER start 1.6 cm at 267 (at put-down 1.6); farthest from own start 27.6 cm, turned back at 189; final to target 0.6 / own start 18.0 cm
+  SUCCESS 4300049: back []; hands closest 17.6 cm at 72
+     first T_block1 by left: lifted 71 down 173; closest to OTHER start 0.1 cm at 168 (at put-down 0.1); farthest from own start 27.1 cm, turned back at 118; final to target 1.0 / own start 18.0 cm
+     later T_block2 by right: lifted 71 down 285; closest to OTHER start 0.3 cm at 285 (at put-down 0.3); farthest from own start 27.7 cm, turned back at 129; final to target 1.5 / own start 17.9 cm
+  classes: {'C both hands went over the other start; the later hand put its block down elsewhere': 19, 'D the later hand put its block down over the other start; that block ended at its own start': 1}
+
+DIAG 5B -> /workspace/FastWAM-memory2/outputs/fullft/SWAPT_DIAG5B.json
+[d5] 2026-11-26 20:23:14 DIAG 5 part b done
+[d5] 2026-11-26 20:23:14 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/DIAG5_5090_b_20261126_2022.txt

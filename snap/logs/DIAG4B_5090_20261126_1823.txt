@@ -1,0 +1,19 @@
+[d4b] 2026-11-26 18:23:14 checkout f3c1f10 Plan v21 6.7 step A (no training, lowest priority = ; GPU 1
+[fetch] disk before: /dev/nvme1n1p1  3.7T  1.8T  2.0T  48% /workspace/FastWAM-memory2
+[fetch] 2026-11-26 18:23:15 fetching press_told_e30 (attempt 1)
+[relay] get hhyfred/memwam-fullft/exports/press_told_e30/export_e30.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e30/export_e30.pt (12042637701 bytes)
+[relay] get hhyfred/memwam-fullft/exports/press_told_e30/export_e30.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e30/export_e30.pt.sha256 (80 bytes)
+export_e30.pt: OK
+total 11760408
+drwxr-xr-x  2 root root        4096 Nov 26 18:24 .
+drwxr-xr-x 48 root root        4096 Nov 26 18:23 ..
+-rw-r--r--  1 root root 12042637701 Nov 26 18:24 export_e30.pt
+-rw-r--r--  1 root root          80 Nov 26 18:24 export_e30.pt.sha256
+[d4b] 2026-11-26 19:30:01 press_told_e30 pass 1 exit 0; episodes 30
+[d4b] 2026-11-26 19:30:41 press_told_e30 pass 2 exit 0; episodes 30
+[d4b] 2026-11-26 20:35:32 press_told_e30_oracle pass 1 exit 0; episodes 30
+[d4b] 2026-11-26 20:36:11 press_told_e30_oracle pass 2 exit 0; episodes 30
+[d4b] press_told_e30 {"episodes": 30, "success": 10, "n1_error": {"over": 11, "right": 19, "under": 0}, "n2_error": {"over": 13, "right": 16, "under": 1}}
+[d4b] press_told_e30_oracle {"episodes": 30, "success": 8, "n1_error": {"over": 7, "right": 23, "under": 0}, "n2_error": {"over": 14, "right": 9, "under": 7}}
+[d4b] 2026-11-26 20:36:29 DIAG 4B done (this machine only; never a verdict, never the main table)
+[d4b] 2026-11-26 20:36:29 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/DIAG4B_5090_20261126_1823.txt

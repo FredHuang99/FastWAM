@@ -1,0 +1,22 @@
+[c25] 2026-11-26 18:26:15 part gen; checkout f3c1f10 Plan v21 6.7 step A (no training, lowest priority = ; GPU 0
+[c25] 2026-11-26 18:26:15 batch 0: seeds 20000100-20000144 x 5 targets (complete groups so far 0)
+[c25] 2026-11-26 18:33:48   target 0 exit 0
+[c25] 2026-11-26 18:41:28   target 1 exit 0
+[c25] 2026-11-26 18:49:13   target 2 exit 0
+[c25] 2026-11-26 18:56:51   target 3 exit 0
+[c25] 2026-11-26 19:04:31   target 4 exit 0
+xargs: echo: terminated by signal 13
+xargs: echo: terminated by signal 13
+[c25] 2026-11-26 19:04:31 groups: train 20000100 20000101 20000102 20000103 20000104 20000105 20000107 20000108 20000109 20000110 20000111 20000112 20000113 20000114 20000115 20000116 20000117 20000118 20000119 20000120 20000121 20000122 20000123 20000124 20000125 20000127 20000128 20000129 20000130 20000131 20000132  | probe 20000133 20000134 
+[c25] 2026-11-26 19:04:33 dense_observe_and_pickup_cf155_v1: 155 episodes -> build_dense (val 0)
+[c25] 2026-11-26 19:27:18 build exit 0 ([W1126 19:27:17.861996442 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator()))
+[cache] dense_observe_and_pickup_cf155_v1: uploaded in 738 s (attempt 1)
+[cache] PUT DONE dense_observe_and_pickup_cf155_v1 -> hhyfred/memwam-caches/dense_observe_and_pickup_cf155_v1
+[c25] 2026-11-26 19:39:42 dense_observe_and_pickup_cf155_v1 on the cache relay
+[c25] 2026-11-26 19:39:43 dense_observe_and_pickup_cf10probe_v1: 10 episodes -> build_dense (val 0)
+[c25] 2026-11-26 19:41:50 build exit 0 ([W1126 19:41:50.357626158 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator()))
+[cache] dense_observe_and_pickup_cf10probe_v1: uploaded in 174 s (attempt 1)
+[cache] PUT DONE dense_observe_and_pickup_cf10probe_v1 -> hhyfred/memwam-caches/dense_observe_and_pickup_cf10probe_v1
+[c25] 2026-11-26 19:44:49 dense_observe_and_pickup_cf10probe_v1 on the cache relay
+[c25] 2026-11-26 19:44:49 CARD25 GEN DONE (register the 6.3 reading verbatim, then train)
+[c25] 2026-11-26 19:44:49 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/CARD25_5090_gen_20261126_1826.txt

@@ -1,0 +1,43 @@
+[c25d] 2026-11-28 01:07:29 start PART=probe; checkout 21d49a1 Card 25 described items on the 5090 (held-out genera; GPU 1
+[c25d] 2026-11-28 01:07:29 probe groups: CACHE.json IDENTITY.json PLAN.json ... (273M)
+[fetch] 2026-11-28 01:07:33 obs_cf200_e10 already here and checked
+[c25d] 2026-11-28 01:07:33 obs_cf200_e10 held-out generated probe groups, window onset
+[probe] obs_cf200 split all; 10 demos with a grasp; first close at frame median 116.0 (min 113, max 118) of length median 149.0; a 48-frame choice window = 32.2 % of the training anchors
+[probe] motion onset (5 % of the way to the grasp pose) at frame median 71.0 (min 71, max 72); window [m - 24, m + 8]
+onset : 60 anchors; action loss true 0.01314, frame-0 swapped 0.01714 (+30.5 %, higher at 36/60), no history 0.03984 (+203.3 %)
+late  : 30 anchors; action loss true 0.00259, frame-0 swapped 0.00259 (-0.1 %, higher at 13/30), no history 0.00478 (+84.8 %)
+OBS PROBE obs_cf200: frame 0 IS used at the motion onset (>= 2 %)
+-> /workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_obs_cf200_e10_onset_cf10probe.json
+[c25d] 2026-11-28 01:08:22 obs_cf200_e10 held-out generated probe groups, window wait
+[probe] obs_cf200 split all; 10 demos with a grasp; first close at frame median 116.0 (min 113, max 118) of length median 149.0; a 48-frame choice window = 32.2 % of the training anchors
+[probe] motion onset (5 % of the way to the grasp pose) at frame median 71.0 (min 71, max 72); window [8, m - 25]
+wait  : 60 anchors; action loss true 0.00214, frame-0 swapped 0.00222 (+3.8 %, higher at 34/60), no history 0.00471 (+119.9 %)
+late  : 30 anchors; action loss true 0.00257, frame-0 swapped 0.00259 (+0.7 %, higher at 13/30), no history 0.00478 (+86.1 %)
+OBS PROBE obs_cf200: frame 0 IS used before the arm moves (>= 2 %)
+-> /workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_obs_cf200_e10_wait_cf10probe.json
+[fetch] disk before: /dev/nvme0n1p1  3.7T  1.9T  1.8T  52% /workspace/FastWAM-memory2
+[fetch] 2026-11-28 01:09:08 fetching obs_s200_e30 (attempt 1)
+[relay] get hhyfred/memwam-fullft/exports/obs_s200_e30/export_e30.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e30/export_e30.pt (12042063395 bytes)
+[relay] get hhyfred/memwam-fullft/exports/obs_s200_e30/export_e30.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e30/export_e30.pt.sha256 (80 bytes)
+export_e30.pt: OK
+total 11759844
+drwxr-xr-x  2 root root        4096 Nov 28 01:10 .
+drwxr-xr-x 58 root root        4096 Nov 28 01:09 ..
+-rw-r--r--  1 root root 12042063395 Nov 28 01:10 export_e30.pt
+-rw-r--r--  1 root root          80 Nov 28 01:10 export_e30.pt.sha256
+[c25d] 2026-11-28 01:10:49 obs_s200_e30 held-out generated probe groups, window onset
+[probe] obs_s200 split all; 10 demos with a grasp; first close at frame median 116.0 (min 113, max 118) of length median 149.0; a 48-frame choice window = 32.2 % of the training anchors
+[probe] motion onset (5 % of the way to the grasp pose) at frame median 71.0 (min 71, max 72); window [m - 24, m + 8]
+onset : 60 anchors; action loss true 0.22417, frame-0 swapped 0.22456 (+0.2 %, higher at 40/60), no history 0.26496 (+18.2 %)
+late  : 30 anchors; action loss true 0.00092, frame-0 swapped 0.00092 (+0.6 %, higher at 12/30), no history 0.00462 (+403.2 %)
+OBS PROBE obs_s200: frame 0 is NOT used at the motion onset (< 2 %)
+-> /workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_obs_s200_e30_onset_cf10probe.json
+[c25d] 2026-11-28 01:11:36 obs_s200_e30 held-out generated probe groups, window wait
+[probe] obs_s200 split all; 10 demos with a grasp; first close at frame median 116.0 (min 113, max 118) of length median 149.0; a 48-frame choice window = 32.2 % of the training anchors
+[probe] motion onset (5 % of the way to the grasp pose) at frame median 71.0 (min 71, max 72); window [8, m - 25]
+wait  : 60 anchors; action loss true 0.00834, frame-0 swapped 0.00837 (+0.3 %, higher at 37/60), no history 0.04224 (+406.6 %)
+late  : 30 anchors; action loss true 0.00092, frame-0 swapped 0.00092 (-0.2 %, higher at 10/30), no history 0.00462 (+402.0 %)
+OBS PROBE obs_s200: frame 0 is NOT used before the arm moves (< 2 %)
+-> /workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_obs_s200_e30_wait_cf10probe.json
+[c25d] 2026-11-28 01:12:21 CARD 25 DESCRIBED PROBE done
+[c25d] 2026-11-28 01:12:21 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/CARD25DESC_5090_probe_20261128_0107.txt

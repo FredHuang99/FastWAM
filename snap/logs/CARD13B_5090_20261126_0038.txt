@@ -1,0 +1,42 @@
+[13b] 2026-11-26 00:38:47 start; checkout 4aea31c Round 4 (11-26 08:00): ranking_arprop 65 < 77 (plan ; GPU 1
+[fetch] disk before: /dev/nvme1n1p1  3.7T  1.8T  2.0T  47% /workspace/FastWAM-memory2
+[fetch] 2026-11-26 00:38:48 fetching obs_s200_e10 (attempt 1)
+[relay] get exports/obs_s200_e10/export_e10.pt: attempt 1 failed (FileNotFoundError); retry in 60 s
+[relay] get hhyfred/memwam-fullft/exports/obs_s200_e10/export_e10.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e10/export_e10.pt (12042063331 bytes)
+[relay] get hhyfred/memwam-fullft/exports/obs_s200_e10/export_e10.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s200_e10/export_e10.pt.sha256 (80 bytes)
+export_e10.pt: OK
+total 11759844
+drwxr-xr-x  2 root root        4096 Nov 26 00:43 .
+drwxr-xr-x 44 root root        4096 Nov 26 00:37 ..
+-rw-r--r--  1 root root 12042063331 Nov 26 00:43 export_e10.pt
+-rw-r--r--  1 root root          80 Nov 26 00:43 export_e10.pt.sha256
+[13b] 2026-11-26 00:43:34 obs_s200_e10 split val window wait
+[probe] obs_s200 split val; 5 demos with a grasp; first close at frame median 116 (min 113, max 117) of length median 149; a 48-frame choice window = 32.3 % of the training anchors
+[probe] motion onset (5 % of the way to the grasp pose) at frame median 71 (min 71, max 72); window [8, m - 25]
+wait  : 100 anchors; action loss true 0.00346, frame-0 swapped 0.00345 (-0.2 %, higher at 51/100), no history 0.00398 (+14.9 %)
+late  : 15 anchors; action loss true 0.00329, frame-0 swapped 0.00327 (-0.6 %, higher at 2/15), no history 0.00553 (+67.9 %)
+OBS PROBE obs_s200: frame 0 is NOT used before the arm moves (< 2 %)
+-> /workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_obs_s200_wait_val.json
+[13b] 2026-11-26 00:44:27 obs_s200_e10 split val window onset
+[probe] obs_s200 split val; 5 demos with a grasp; first close at frame median 116 (min 113, max 117) of length median 149; a 48-frame choice window = 32.3 % of the training anchors
+[probe] motion onset (5 % of the way to the grasp pose) at frame median 71 (min 71, max 72); window [m - 24, m + 8]
+onset : 100 anchors; action loss true 0.16554, frame-0 swapped 0.16418 (-0.8 %, higher at 47/100), no history 0.15499 (-6.4 %)
+late  : 15 anchors; action loss true 0.00329, frame-0 swapped 0.00328 (-0.6 %, higher at 3/15), no history 0.00553 (+67.7 %)
+OBS PROBE obs_s200: frame 0 is NOT used at the motion onset (< 2 %)
+-> /workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_obs_s200_onset_val.json
+[13b] 2026-11-26 00:45:22 obs_s200_e10 split train window wait
+[probe] obs_s200 split train; 200 demos with a grasp; first close at frame median 116.0 (min 112, max 125) of length median 149.0; a 48-frame choice window = 32.1 % of the training anchors
+[probe] motion onset (5 % of the way to the grasp pose) at frame median 71.0 (min 71, max 73); window [8, m - 25]
+wait  : 1200 anchors; action loss true 0.00075, frame-0 swapped 0.00075 (+1.0 %, higher at 594/1200), no history 0.00128 (+71.7 %)
+late  : 600 anchors; action loss true 0.00264, frame-0 swapped 0.00267 (+1.4 %, higher at 306/600), no history 0.00636 (+141.2 %)
+OBS PROBE obs_s200: frame 0 is NOT used before the arm moves (< 2 %)
+-> /workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_obs_s200_wait_train.json
+[13b] 2026-11-26 00:54:08 obs_s200_e10 split train window onset
+[probe] obs_s200 split train; 200 demos with a grasp; first close at frame median 116.0 (min 112, max 125) of length median 149.0; a 48-frame choice window = 32.1 % of the training anchors
+[probe] motion onset (5 % of the way to the grasp pose) at frame median 71.0 (min 71, max 73); window [m - 24, m + 8]
+onset : 1200 anchors; action loss true 0.00401, frame-0 swapped 0.00404 (+0.9 %, higher at 601/1200), no history 0.00844 (+110.6 %)
+late  : 600 anchors; action loss true 0.00264, frame-0 swapped 0.00268 (+1.5 %, higher at 320/600), no history 0.00636 (+141.5 %)
+OBS PROBE obs_s200: frame 0 is NOT used at the motion onset (< 2 %)
+-> /workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_obs_s200_onset_train.json
+[13b] 2026-11-26 01:03:25 CARD 13B done
+[13b] 2026-11-26 01:03:25 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/CARD13B_5090_20261126_0038.txt

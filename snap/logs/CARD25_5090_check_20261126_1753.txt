@@ -1,0 +1,21 @@
+[c25] 2026-11-26 17:53:08 part check; checkout f3c1f10 Plan v21 6.7 step A (no training, lowest priority = ; GPU 0
+xargs: echo: terminated by signal 13
+[c25] 2026-11-26 17:53:59 render seeds 0 1 2 : gen exit 0
+[gencheck] episode 0: PASS; cam 0 mean 0.472 >8 0.00393; cam 1 mean 0.344 >8 0.00035; cam 2 mean 0.566 >8 0.00335 (away 0.586, 0.331, 0.467); frames [149, 148]; instruction same True
+[gencheck] episode 1: PASS; cam 0 mean 0.509 >8 0.00312; cam 1 mean 0.442 >8 0.0004; cam 2 mean 0.646 >8 0.00647 (away 0.702, 0.416, 0.438); frames [150, 149]; instruction same True
+[gencheck] episode 2: PASS; cam 0 mean 0.545 >8 0.00142; cam 1 mean 0.442 >8 0.00023; cam 2 mean 1.127 >8 0.01717 (away 0.69, 0.423, 0.524); frames [150, 151]; instruction same True
+GEN CHECK (background) PASS
+[W1126 17:54:01.257900940 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[c25] 2026-11-26 17:54:01 card 8's render gate (background, user 11-24): exit 0
+[c25] 2026-11-26 17:56:03 target 0: gen exit 0; 10 episodes
+[c25] 2026-11-26 17:57:51 target 1: gen exit 0; 9 episodes
+[c25] 2026-11-26 17:59:43 target 2: gen exit 0; 9 episodes
+[c25] 2026-11-26 18:01:38 target 3: gen exit 0; 10 episodes
+[c25] 2026-11-26 18:03:23 target 4: gen exit 0; 9 episodes
+[card25] 1_target_fixed: {"pass": true, "per_target": {"0": {"seeds_tried": 10, "expert_success": 10, "rate": 1.0, "too_few_candidates": 0, "target_not_forced": 0, "drawn_equals_forced": 0}, "1": {"seeds_tried": 10, "expert_success": 9, "rate": 0.9, "too_few_candidates": 0, "target_not_forced": 0, "drawn_equals_forced": 2}, "2": {"seeds_tried": 10, "expert_success": 9, "rate": 0.9, "too_few_candidates": 0, "target_not_forced": 0, "drawn_equals_forced": 5}, "3": {"seeds_tried": 10, "expert_success": 10, "rate": 1.0, "too_few_candidates": 0, "target_not_forced": 0, "drawn_equals_forced": 1}, "4": {"seeds_tried": 10, "ex
+[card25] 3_expert_success_per_target: {"pass": true, "rates": {"0": 1.0, "1": 0.9, "2": 0.9, "3": 1.0, "4": 0.9}}
+[card25] 2_same_table: {"pass": false, "seeds_compared": 8, "shelf_differs_in": 32}
+[card25] 4_card8_render_gate: {"pass": true, "gate": "background", "file": "/workspace/FastWAM-memory2/outputs/fullft/gen_cf/GEN_CHECK_RENDER.json"}
+CARD25 CHECK FAIL
+[W1126 18:03:25.035209985 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[c25] 2026-11-26 18:03:25 finished, exit code 1; log /workspace/FastWAM-memory2/outputs/fullft/CARD25_5090_check_20261126_1753.txt

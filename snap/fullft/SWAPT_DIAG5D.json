@@ -1,0 +1,71 @@
+{
+ "run": "plan v21 diagnostic 5(d): release pose from the other arm's grasp readings (described)",
+ "demos": 50,
+ "ee_keys_dims": 7,
+ "arms": {
+  "left_release_from_right_grasp": {
+   "joints_of_other_arm": {
+    "position_cm": {
+     "median": 0.23,
+     "mean": 0.24,
+     "max": 0.7
+    },
+    "angle_deg": {
+     "median": 0.7,
+     "mean": 0.8,
+     "max": 2.1
+    }
+   },
+   "ee_pose_of_other_arm_base_frame": {
+    "position_cm": {
+     "median": 0.22,
+     "mean": 0.24,
+     "max": 0.72
+    },
+    "angle_deg": {
+     "median": 0.7,
+     "mean": 0.8,
+     "max": 2.0
+    }
+   },
+   "copy_other_grasp_position_cm": {
+    "median": 4.29,
+    "mean": 4.3
+   }
+  },
+  "right_release_from_left_grasp": {
+   "joints_of_other_arm": {
+    "position_cm": {
+     "median": 0.19,
+     "mean": 0.22,
+     "max": 0.64
+    },
+    "angle_deg": {
+     "median": 0.7,
+     "mean": 0.8,
+     "max": 2.2
+    }
+   },
+   "ee_pose_of_other_arm_base_frame": {
+    "position_cm": {
+     "median": 0.21,
+     "mean": 0.22,
+     "max": 0.67
+    },
+    "angle_deg": {
+     "median": 0.7,
+     "mean": 0.8,
+     "max": 2.1
+    }
+   },
+   "copy_other_grasp_position_cm": {
+    "median": 4.75,
+    "mean": 4.73
+   }
+  }
+ },
+ "card26_condition_d (mean position error, both arms)": {
+  "ee_below_2.5cm": true,
+  "joints_at_least_twice_ee": false
+ }
+}

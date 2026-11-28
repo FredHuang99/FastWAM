@@ -1,0 +1,6 @@
+[norm] /workspace/FastWAM-memory2/outputs/robomme/dense_robomme_v1: 200 episodes, 180 train
+[norm] proprio: min [-0.294, -0.234, 0.009, -3.191, -0.1, -1.842, 0.0, 0.0] max [0.14, 0.264, 0.521, -3.116, 0.013, 1.588, 0.04, 0.04]
+[norm] actions: min [-0.294, -0.234, -0.003, 3.096, -0.094, -1.842, -1.0] max [0.141, 0.264, 0.521, 3.166, 0.013, 1.588, 1.0]
+[norm] ee vs joint gripper command, same sign on 114002/114002 valid frames
+[norm] invalid action frames 0; angle wraps in 0 episode-keys; stats sha256 e791b810e9af4ab1
+[norm] DONE: 0 written, 200 already done, 200/200 marked (stats sha256 e791b810e9af4ab1)

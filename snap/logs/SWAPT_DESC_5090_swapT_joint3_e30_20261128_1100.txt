@@ -1,0 +1,178 @@
+[swd] 2026-11-28 11:00:03 start swapT_joint3_e30; checkout ab5eced robomme_norm reports how often the ee gripper comman; GPU 1
+[fetch] disk before: /dev/nvme0n1p1  3.7T  2.3T  1.4T  63% /workspace/FastWAM-memory2
+[fetch] 2026-11-28 11:00:03 fetching swapT_joint3_e30 (attempt 1)
+[relay] get hhyfred/memwam-fullft/exports/swapT_joint3_e30/export_e30.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_joint3_e30/export_e30.pt (12042506693 bytes)
+[relay] get hhyfred/memwam-fullft/exports/swapT_joint3_e30/export_e30.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_joint3_e30/export_e30.pt.sha256 (80 bytes)
+export_e30.pt: OK
+total 11760280
+drwxr-xr-x  2 root root        4096 Nov 28 11:01 .
+drwxr-xr-x 61 root root        4096 Nov 28 11:00 ..
+-rw-r--r--  1 root root 12042506693 Nov 28 11:01 export_e30.pt
+-rw-r--r--  1 root root          80 Nov 28 11:01 export_e30.pt.sha256
+[swd] 2026-11-28 11:45:43 scenes 1-50 pass 1 exit code 0; episodes with a result 50
+
+== swaptdiag:swapT_joint3_e30: 50 episodes
+  seed 4300000: success 1; targets 292; grippers [1.0, 0.71]; start yaw diff 27.2
+     T1: lifted True at 74 by left (max 20.1 cm), down at 173 z 0.76; to target 0.3 cm / 9.8 deg; to own start 18.1 cm
+     T2: lifted True at 74 by right (max 19.7 cm), down at 286 z 0.758; to target 0.5 cm / 11.2 deg; to own start 17.6 cm
+  seed 4300001: success 0; targets 600; grippers [0.18, 0.99]; start yaw diff 26.3
+     T1: lifted True at 74 by left (max 19.2 cm), down at 177 z 0.76; to target 0.5 cm / 16.5 deg; to own start 18.3 cm
+     T2: lifted True at 74 by right (max 19.7 cm), down at 290 z 0.758; to target 0.4 cm / 2.1 deg; to own start 18.0 cm
+  seed 4300002: success 1; targets 300; grippers [1.0, 0.71]; start yaw diff 54.1
+     T1: lifted True at 74 by left (max 19.1 cm), down at 176 z 0.76; to target 0.4 cm / 6.1 deg; to own start 18.5 cm
+     T2: lifted True at 74 by right (max 19.4 cm), down at 294 z 0.758; to target 0.5 cm / 8.5 deg; to own start 18.0 cm
+  seed 4300003: success 1; targets 296; grippers [1.0, 0.71]; start yaw diff 16.3
+     T1: lifted True at 74 by left (max 19.2 cm), down at 177 z 0.76; to target 0.5 cm / 3.5 deg; to own start 18.2 cm
+     T2: lifted True at 75 by right (max 19.7 cm), down at 290 z 0.758; to target 0.3 cm / 2.6 deg; to own start 17.8 cm
+  seed 4300004: success 1; targets 295; grippers [1.0, 0.72]; start yaw diff 44.3
+     T1: lifted True at 75 by left (max 20.1 cm), down at 175 z 0.76; to target 0.4 cm / 9.2 deg; to own start 18.2 cm
+     T2: lifted True at 75 by right (max 20.1 cm), down at 289 z 0.758; to target 0.4 cm / 11.2 deg; to own start 18.2 cm
+  seed 4300005: success 1; targets 294; grippers [1.0, 0.7]; start yaw diff 5.5
+     T1: lifted True at 73 by left (max 19.7 cm), down at 173 z 0.76; to target 0.7 cm / 14.6 deg; to own start 18.3 cm
+     T2: lifted True at 73 by right (max 19.5 cm), down at 288 z 0.758; to target 0.0 cm / 2.3 deg; to own start 18.1 cm
+  seed 4300006: success 1; targets 293; grippers [1.0, 0.73]; start yaw diff 11.8
+     T1: lifted True at 73 by left (max 19.2 cm), down at 175 z 0.76; to target 0.5 cm / 2.4 deg; to own start 18.1 cm
+     T2: lifted True at 73 by right (max 19.5 cm), down at 287 z 0.758; to target 0.3 cm / 8.8 deg; to own start 18.0 cm
+  seed 4300007: success 1; targets 297; grippers [1.0, 0.7]; start yaw diff 27.1
+     T1: lifted True at 74 by left (max 19.0 cm), down at 176 z 0.76; to target 0.3 cm / 2.5 deg; to own start 18.5 cm
+     T2: lifted True at 74 by right (max 19.6 cm), down at 291 z 0.758; to target 0.4 cm / 0.3 deg; to own start 18.0 cm
+  seed 4300008: success 1; targets 297; grippers [1.0, 0.69]; start yaw diff 39.2
+     T1: lifted True at 74 by left (max 19.2 cm), down at 178 z 0.76; to target 0.2 cm / 3.1 deg; to own start 18.2 cm
+     T2: lifted True at 74 by right (max 19.5 cm), down at 291 z 0.758; to target 0.4 cm / 6.5 deg; to own start 17.8 cm
+  seed 4300009: success 1; targets 297; grippers [1.0, 0.68]; start yaw diff 30.7
+     T1: lifted True at 74 by left (max 19.2 cm), down at 175 z 0.76; to target 0.3 cm / 6.0 deg; to own start 18.3 cm
+     T2: lifted True at 74 by right (max 19.5 cm), down at 291 z 0.758; to target 0.4 cm / 5.6 deg; to own start 17.8 cm
+  seed 4300010: success 1; targets 288; grippers [1.0, 0.7]; start yaw diff 34.6
+     T1: lifted True at 73 by left (max 23.3 cm), down at 171 z 0.76; to target 0.2 cm / 14.5 deg; to own start 18.2 cm
+     T2: lifted True at 73 by right (max 19.8 cm), down at 282 z 0.758; to target 0.3 cm / 0.5 deg; to own start 17.8 cm
+  seed 4300011: success 1; targets 294; grippers [1.0, 0.73]; start yaw diff 6.7
+     T1: lifted True at 74 by left (max 19.1 cm), down at 176 z 0.76; to target 0.2 cm / 9.2 deg; to own start 18.2 cm
+     T2: lifted True at 74 by right (max 21.8 cm), down at 288 z 0.758; to target 0.3 cm / 8.3 deg; to own start 18.0 cm
+  seed 4300012: success 1; targets 295; grippers [1.0, 0.72]; start yaw diff 60.4
+     T1: lifted True at 74 by left (max 19.1 cm), down at 177 z 0.76; to target 0.3 cm / 5.8 deg; to own start 18.4 cm
+     T2: lifted True at 74 by right (max 21.2 cm), down at 289 z 0.758; to target 0.1 cm / 5.0 deg; to own start 18.1 cm
+  seed 4300013: success 1; targets 294; grippers [1.0, 0.72]; start yaw diff 19.5
+     T1: lifted True at 74 by left (max 19.1 cm), down at 175 z 0.76; to target 0.2 cm / 9.0 deg; to own start 18.3 cm
+     T2: lifted True at 74 by right (max 19.6 cm), down at 288 z 0.758; to target 0.5 cm / 1.5 deg; to own start 17.8 cm
+  seed 4300014: success 1; targets 294; grippers [1.0, 0.69]; start yaw diff 10.6
+     T1: lifted True at 73 by left (max 19.2 cm), down at 177 z 0.76; to target 0.6 cm / 2.0 deg; to own start 18.6 cm
+     T2: lifted True at 73 by right (max 19.4 cm), down at 288 z 0.758; to target 0.3 cm / 1.6 deg; to own start 18.1 cm
+  seed 4300015: success 1; targets 288; grippers [1.0, 0.72]; start yaw diff 21.0
+     T1: lifted True at 74 by left (max 19.4 cm), down at 175 z 0.76; to target 0.2 cm / 10.1 deg; to own start 18.1 cm
+     T2: lifted True at 74 by right (max 22.6 cm), down at 281 z 0.758; to target 0.3 cm / 6.3 deg; to own start 17.8 cm
+  seed 4300016: success 1; targets 299; grippers [1.0, 0.71]; start yaw diff 26.2
+     T1: lifted True at 74 by left (max 19.3 cm), down at 176 z 0.76; to target 0.4 cm / 5.3 deg; to own start 18.5 cm
+     T2: lifted True at 74 by right (max 30.9 cm), down at 293 z 0.758; to target 0.6 cm / 12.0 deg; to own start 18.2 cm
+  seed 4300017: success 1; targets 296; grippers [1.0, 0.72]; start yaw diff 34.3
+     T1: lifted True at 74 by left (max 19.3 cm), down at 176 z 0.76; to target 0.2 cm / 0.8 deg; to own start 18.4 cm
+     T2: lifted True at 74 by right (max 19.5 cm), down at 289 z 0.758; to target 0.3 cm / 5.2 deg; to own start 17.9 cm
+  seed 4300018: success 1; targets 293; grippers [1.0, 0.69]; start yaw diff 51.4
+     T1: lifted True at 74 by left (max 22.7 cm), down at 172 z 0.76; to target 0.2 cm / 4.2 deg; to own start 18.1 cm
+     T2: lifted True at 74 by right (max 20.4 cm), down at 287 z 0.758; to target 0.4 cm / 10.6 deg; to own start 17.9 cm
+  seed 4300019: success 1; targets 297; grippers [1.0, 0.69]; start yaw diff 47.0
+     T1: lifted True at 74 by left (max 19.4 cm), down at 176 z 0.76; to target 0.3 cm / 7.5 deg; to own start 18.3 cm
+     T2: lifted True at 74 by right (max 19.9 cm), down at 290 z 0.758; to target 0.1 cm / 8.7 deg; to own start 17.9 cm
+  seed 4300020: success 1; targets 298; grippers [1.0, 0.69]; start yaw diff 38.5
+     T1: lifted True at 75 by left (max 19.1 cm), down at 178 z 0.76; to target 0.3 cm / 0.5 deg; to own start 18.3 cm
+     T2: lifted True at 75 by right (max 21.4 cm), down at 292 z 0.758; to target 0.6 cm / 6.2 deg; to own start 18.0 cm
+  seed 4300021: success 1; targets 297; grippers [1.0, 0.67]; start yaw diff 23.8
+     T1: lifted True at 75 by left (max 19.2 cm), down at 179 z 0.76; to target 0.3 cm / 4.1 deg; to own start 18.2 cm
+     T2: lifted True at 75 by right (max 19.5 cm), down at 291 z 0.758; to target 0.3 cm / 3.7 deg; to own start 17.9 cm
+  seed 4300022: success 1; targets 293; grippers [1.0, 0.72]; start yaw diff 14.0
+     T1: lifted True at 73 by left (max 19.4 cm), down at 174 z 0.76; to target 0.6 cm / 1.4 deg; to own start 18.2 cm
+     T2: lifted True at 74 by right (max 19.4 cm), down at 287 z 0.758; to target 0.3 cm / 7.4 deg; to own start 18.0 cm
+  seed 4300023: success 0; targets 600; grippers [0.18, 0.99]; start yaw diff 44.3
+     T1: lifted True at 75 by left (max 19.2 cm), down at 176 z 0.76; to target 0.4 cm / 16.6 deg; to own start 18.2 cm
+     T2: lifted True at 75 by right (max 20.2 cm), down at 293 z 0.758; to target 0.2 cm / 11.7 deg; to own start 17.9 cm
+  seed 4300025: success 1; targets 297; grippers [1.0, 0.72]; start yaw diff 59.6
+     T1: lifted True at 74 by left (max 19.1 cm), down at 179 z 0.76; to target 0.2 cm / 4.6 deg; to own start 18.3 cm
+     T2: lifted True at 74 by right (max 19.5 cm), down at 290 z 0.758; to target 0.4 cm / 2.1 deg; to own start 18.3 cm
+  seed 4300026: success 1; targets 295; grippers [1.0, 0.72]; start yaw diff 52.3
+     T1: lifted True at 74 by left (max 19.7 cm), down at 174 z 0.76; to target 0.4 cm / 12.7 deg; to own start 18.2 cm
+     T2: lifted True at 74 by right (max 19.7 cm), down at 288 z 0.758; to target 0.4 cm / 14.9 deg; to own start 17.7 cm
+  seed 4300027: success 1; targets 297; grippers [1.0, 0.69]; start yaw diff 82.5
+     T1: lifted True at 74 by left (max 19.4 cm), down at 176 z 0.76; to target 0.3 cm / 13.2 deg; to own start 18.4 cm
+     T2: lifted True at 74 by right (max 19.6 cm), down at 291 z 0.758; to target 0.4 cm / 12.5 deg; to own start 17.9 cm
+  seed 4300028: success 1; targets 295; grippers [1.0, 0.69]; start yaw diff 65.8
+     T1: lifted True at 74 by left (max 20.0 cm), down at 175 z 0.76; to target 0.8 cm / 6.2 deg; to own start 18.6 cm
+     T2: lifted True at 74 by right (max 19.9 cm), down at 289 z 0.758; to target 0.4 cm / 12.0 deg; to own start 17.8 cm
+  seed 4300029: success 1; targets 294; grippers [1.0, 0.66]; start yaw diff 36.5
+     T1: lifted True at 74 by left (max 19.6 cm), down at 176 z 0.76; to target 0.6 cm / 0.8 deg; to own start 18.3 cm
+     T2: lifted True at 74 by right (max 20.1 cm), down at 288 z 0.758; to target 0.4 cm / 3.7 deg; to own start 18.2 cm
+  seed 4300030: success 1; targets 285; grippers [1.0, 0.71]; start yaw diff 14.0
+     T1: lifted True at 74 by left (max 19.7 cm), down at 175 z 0.76; to target 0.1 cm / 9.1 deg; to own start 18.3 cm
+     T2: lifted True at 74 by right (max 23.1 cm), down at 280 z 0.758; to target 0.4 cm / 6.7 deg; to own start 17.9 cm
+  seed 4300031: success 1; targets 288; grippers [1.0, 0.71]; start yaw diff 15.4
+     T1: lifted True at 73 by left (max 19.3 cm), down at 177 z 0.76; to target 0.7 cm / 1.1 deg; to own start 18.4 cm
+     T2: lifted True at 74 by right (max 24.4 cm), down at 282 z 0.758; to target 0.4 cm / 2.6 deg; to own start 17.8 cm
+  seed 4300032: success 1; targets 289; grippers [1.0, 0.69]; start yaw diff 0.2
+     T1: lifted True at 73 by left (max 19.3 cm), down at 176 z 0.76; to target 0.4 cm / 4.1 deg; to own start 18.2 cm
+     T2: lifted True at 74 by right (max 22.9 cm), down at 283 z 0.758; to target 0.6 cm / 11.4 deg; to own start 17.8 cm
+  seed 4300033: success 1; targets 292; grippers [1.0, 0.7]; start yaw diff 29.9
+     T1: lifted True at 74 by left (max 19.2 cm), down at 174 z 0.76; to target 0.1 cm / 4.6 deg; to own start 18.1 cm
+     T2: lifted True at 74 by right (max 19.5 cm), down at 286 z 0.758; to target 0.5 cm / 3.4 deg; to own start 17.7 cm
+  seed 4300034: success 1; targets 289; grippers [1.0, 0.7]; start yaw diff 36.9
+     T1: lifted True at 74 by left (max 19.7 cm), down at 174 z 0.76; to target 0.3 cm / 6.0 deg; to own start 18.2 cm
+     T2: lifted True at 74 by right (max 19.9 cm), down at 284 z 0.758; to target 0.5 cm / 1.4 deg; to own start 17.8 cm
+  seed 4300035: success 1; targets 293; grippers [1.0, 0.73]; start yaw diff 33.3
+     T1: lifted True at 74 by left (max 19.4 cm), down at 175 z 0.76; to target 0.2 cm / 7.3 deg; to own start 18.0 cm
+     T2: lifted True at 74 by right (max 24.8 cm), down at 287 z 0.758; to target 0.2 cm / 0.3 deg; to own start 18.0 cm
+  seed 4300036: success 1; targets 290; grippers [1.0, 0.7]; start yaw diff 21.9
+     T1: lifted True at 74 by left (max 22.0 cm), down at 172 z 0.76; to target 0.2 cm / 9.3 deg; to own start 18.1 cm
+     T2: lifted True at 74 by right (max 19.8 cm), down at 284 z 0.758; to target 0.7 cm / 4.4 deg; to own start 17.6 cm
+  seed 4300037: success 1; targets 295; grippers [1.0, 0.7]; start yaw diff 13.9
+     T1: lifted True at 74 by left (max 20.8 cm), down at 175 z 0.76; to target 1.5 cm / 6.4 deg; to own start 19.1 cm
+     T2: lifted True at 74 by right (max 19.7 cm), down at 289 z 0.758; to target 0.7 cm / 10.4 deg; to own start 17.6 cm
+  seed 4300038: success 1; targets 289; grippers [1.0, 0.68]; start yaw diff 23.3
+     T1: lifted True at 73 by left (max 20.7 cm), down at 171 z 0.76; to target 0.3 cm / 7.9 deg; to own start 18.1 cm
+     T2: lifted True at 73 by right (max 19.4 cm), down at 282 z 0.758; to target 0.5 cm / 2.5 deg; to own start 17.7 cm
+  seed 4300039: success 1; targets 289; grippers [1.0, 0.69]; start yaw diff 43.5
+     T1: lifted True at 74 by left (max 19.3 cm), down at 177 z 0.76; to target 0.2 cm / 1.9 deg; to own start 18.3 cm
+     T2: lifted True at 74 by right (max 21.8 cm), down at 283 z 0.758; to target 0.6 cm / 12.9 deg; to own start 17.9 cm
+  seed 4300040: success 1; targets 288; grippers [1.0, 0.71]; start yaw diff 2.1
+     T1: lifted True at 73 by left (max 19.2 cm), down at 179 z 0.76; to target 0.3 cm / 0.1 deg; to own start 18.5 cm
+     T2: lifted True at 74 by right (max 21.4 cm), down at 282 z 0.758; to target 0.4 cm / 2.4 deg; to own start 18.0 cm
+  seed 4300041: success 1; targets 297; grippers [1.0, 0.69]; start yaw diff 10.4
+     T1: lifted True at 73 by left (max 19.2 cm), down at 177 z 0.76; to target 0.3 cm / 0.1 deg; to own start 18.4 cm
+     T2: lifted True at 74 by right (max 19.4 cm), down at 291 z 0.758; to target 0.3 cm / 1.1 deg; to own start 18.2 cm
+  seed 4300042: success 1; targets 294; grippers [1.0, 0.68]; start yaw diff 29.1
+     T1: lifted True at 74 by left (max 19.6 cm), down at 176 z 0.76; to target 0.2 cm / 8.7 deg; to own start 18.2 cm
+     T2: lifted True at 74 by right (max 21.2 cm), down at 288 z 0.758; to target 0.3 cm / 0.7 deg; to own start 17.8 cm
+  seed 4300043: success 1; targets 287; grippers [1.0, 0.73]; start yaw diff 47.1
+     T1: lifted True at 73 by left (max 20.0 cm), down at 173 z 0.76; to target 0.6 cm / 11.0 deg; to own start 18.0 cm
+     T2: lifted True at 73 by right (max 19.7 cm), down at 281 z 0.758; to target 0.0 cm / 1.0 deg; to own start 18.0 cm
+  seed 4300044: success 1; targets 295; grippers [1.0, 0.72]; start yaw diff 16.0
+     T1: lifted True at 74 by left (max 19.2 cm), down at 180 z 0.76; to target 0.3 cm / 0.2 deg; to own start 18.5 cm
+     T2: lifted True at 74 by right (max 19.4 cm), down at 289 z 0.758; to target 0.6 cm / 6.0 deg; to own start 17.9 cm
+  seed 4300045: success 1; targets 287; grippers [1.0, 0.72]; start yaw diff 25.5
+     T1: lifted True at 74 by left (max 22.8 cm), down at 172 z 0.76; to target 0.3 cm / 13.5 deg; to own start 18.0 cm
+     T2: lifted True at 74 by right (max 19.7 cm), down at 281 z 0.758; to target 0.4 cm / 4.6 deg; to own start 17.6 cm
+  seed 4300046: success 1; targets 296; grippers [1.0, 0.72]; start yaw diff 1.0
+     T1: lifted True at 73 by left (max 19.2 cm), down at 177 z 0.76; to target 0.3 cm / 2.0 deg; to own start 18.5 cm
+     T2: lifted True at 73 by right (max 19.5 cm), down at 289 z 0.758; to target 0.5 cm / 2.6 deg; to own start 18.4 cm
+  seed 4300047: success 1; targets 287; grippers [1.0, 0.72]; start yaw diff 7.7
+     T1: lifted True at 73 by left (max 19.4 cm), down at 176 z 0.76; to target 0.2 cm / 1.9 deg; to own start 18.1 cm
+     T2: lifted True at 73 by right (max 22.8 cm), down at 281 z 0.758; to target 0.2 cm / 4.6 deg; to own start 17.9 cm
+  seed 4300048: success 1; targets 295; grippers [1.0, 0.71]; start yaw diff 3.2
+     T1: lifted True at 74 by left (max 19.3 cm), down at 177 z 0.76; to target 0.2 cm / 3.4 deg; to own start 18.3 cm
+     T2: lifted True at 74 by right (max 19.6 cm), down at 289 z 0.758; to target 0.2 cm / 7.4 deg; to own start 18.0 cm
+  seed 4300049: success 1; targets 288; grippers [1.0, 0.73]; start yaw diff 1.1
+     T1: lifted True at 73 by left (max 21.5 cm), down at 171 z 0.76; to target 0.4 cm / 14.3 deg; to own start 18.0 cm
+     T2: lifted True at 73 by right (max 19.3 cm), down at 282 z 0.758; to target 0.4 cm / 0.7 deg; to own start 17.6 cm
+  seed 4300050: success 1; targets 294; grippers [1.0, 0.71]; start yaw diff 39.2
+     T1: lifted True at 74 by left (max 19.1 cm), down at 176 z 0.76; to target 0.5 cm / 1.2 deg; to own start 18.6 cm
+     T2: lifted True at 74 by right (max 19.8 cm), down at 288 z 0.758; to target 0.6 cm / 6.7 deg; to own start 18.0 cm
+   48  success   e.g. seeds ['4300000', '4300002', '4300003', '4300004']
+    2  POSE: both within 2.5 cm, an angle >= 15 deg off   e.g. seeds ['4300001', '4300023']
+
+SWAPT SPLIT: written outputs/fullft/SWAPT_SPLIT_swapT_joint3_e30.json
+
+== swaptdiag:swapT_joint3_e30: back-at-own-start failures 0, successes 5
+  SUCCESS 4300000: later T_block2 (right); at closest {"target": 262, "hand_to_other_start_cm": 0.4, "block_angle_to_required_deg": 9.2, "block_to_other_start_cm": 1.2, "block_above_own_start_cm": 8.0, "gripper": 0.41}; near the other start {"targets": 27, "min_angle_deg": 9.2}
+  SUCCESS 4300002: later T_block2 (right); at closest {"target": 270, "hand_to_other_start_cm": 0.2, "block_angle_to_required_deg": 7.2, "block_to_other_start_cm": 1.3, "block_above_own_start_cm": 7.5, "gripper": 0.41}; near the other start {"targets": 27, "min_angle_deg": 7.0}
+  SUCCESS 4300003: later T_block2 (right); at closest {"target": 288, "hand_to_other_start_cm": 1.5, "block_angle_to_required_deg": 2.6, "block_to_other_start_cm": 0.1, "block_above_own_start_cm": 4.9, "gripper": 0.41}; near the other start {"targets": 25, "min_angle_deg": 2.6}
+  SUCCESS 4300004: later T_block2 (right); at closest {"target": 279, "hand_to_other_start_cm": 1.0, "block_angle_to_required_deg": 12.7, "block_to_other_start_cm": 0.6, "block_above_own_start_cm": 5.3, "gripper": 0.41}; near the other start {"targets": 25, "min_angle_deg": 11.2}
+  SUCCESS 4300005: later T_block2 (right); at closest {"target": 267, "hand_to_other_start_cm": 1.1, "block_angle_to_required_deg": 3.2, "block_to_other_start_cm": 0.3, "block_above_own_start_cm": 7.2, "gripper": 0.41}; near the other start {"targets": 26, "min_angle_deg": 2.3}
+DIAG 12: written outputs/fullft/SWAPT_DIAG12_swapT_joint3_e30.json
+[swd] 2026-11-28 11:46:05 SWAPT DESC swapT_joint3_e30 done
+[swd] 2026-11-28 11:46:05 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/SWAPT_DESC_5090_swapT_joint3_e30_20261128_1100.txt

@@ -1,0 +1,5 @@
+[dev] 2026-11-26 07:20:06 checkout b07e8e3 Round 5 (11-26 12:00): card 7 obs_match NO HELP -> i; GPU 0; runs: ranking_v3a_e20:blocks_ranking_try
+[relay] get hhyfred/memwam-fullft/exports/ranking_v3a_e20/export_e20.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_v3a_e20/export_e20.pt (12042809541 bytes)
+[relay] get hhyfred/memwam-fullft/exports/ranking_v3a_e20/export_e20.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_v3a_e20/export_e20.pt.sha256 (80 bytes)
+[dev] 2026-11-26 09:20:55 DEV ranking_v3a_e20 on blocks_ranking_try: 20 / 30 (30 dev scenes; 5090 only)
+[dev] 2026-11-26 09:20:55 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/DEV_EVAL_5090_20261126_0720.txt

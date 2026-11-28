@@ -1,0 +1,5 @@
+[dev] 2026-11-27 20:11:58 checkout 2165bd1 Relay auto-prune: measure an export's age by the A40; GPU 1; runs: rearr_pw_s18_e10:rearrange_blocks
+[relay] get hhyfred/memwam-fullft/exports/rearr_pw_s18_e10/export_e10.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_s18_e10/export_e10.pt (12042506501 bytes)
+[relay] get hhyfred/memwam-fullft/exports/rearr_pw_s18_e10/export_e10.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_s18_e10/export_e10.pt.sha256 (80 bytes)
+[dev] 2026-11-27 20:54:31 DEV rearr_pw_s18_e10 on rearrange_blocks: 5 / 30 (30 dev scenes; 5090 only)
+[dev] 2026-11-27 20:54:31 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/DEV_EVAL_5090_20261127_2011.txt

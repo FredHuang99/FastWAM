@@ -1,0 +1,227 @@
+{
+ "run": "plan v22 diagnostic 7(c): rearrange press-window action loss on the held-out demos (described)",
+ "anchors": "press [p-24, p+16] x 9, rest outside [p-48, p+48] x 9; p = first 'bottom' of events_rearrange_blocks_v3c",
+ "noises": 2,
+ "items": {
+  "rearr_pw:e10": {
+   "run": "rearr_pw",
+   "history": "HistoryRule(variant='arprop', index='rank', recent=(16, 32), event_max=32, tw_stride=32, tw_max=12, time_unit=16.0, anchor=True, drop_event_p=0.0, spurious_event_p=0.0, lag=0, event_delta=0.012, event_min_path=0.015, event_provisional=0.002, ordinal=0, repeat_theta=0.0, ledger_drop_p=0.0, ledger_keep=4, ledger_over_p=0.0, ledger_over_max=2, record_dropout=0.0, count_mode='', zoom=False, zoom_ref_box=(0.0, 0.0, 1.0, 1.0), zoom_cur_box=(0.0, 0.0, 1.0, 1.0), zoom_camera=0, zoom_match=False)",
+   "val_demos": [
+    "rearrange_blocks/episode_0000018",
+    "rearrange_blocks/episode_0000019",
+    "rearrange_blocks/episode_0000023",
+    "rearrange_blocks/episode_0000026",
+    "rearrange_blocks/episode_0000033"
+   ],
+   "anchors": 90,
+   "press_anchors": 45,
+   "press_action_loss": 0.002801232794364397,
+   "rest_anchors": 45,
+   "rest_action_loss": 0.004598385403733118,
+   "press_over_rest": 0.6091774717469888,
+   "from": "/workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_e10"
+  },
+  "rearr_pw:e20": {
+   "run": "rearr_pw",
+   "history": "HistoryRule(variant='arprop', index='rank', recent=(16, 32), event_max=32, tw_stride=32, tw_max=12, time_unit=16.0, anchor=True, drop_event_p=0.0, spurious_event_p=0.0, lag=0, event_delta=0.012, event_min_path=0.015, event_provisional=0.002, ordinal=0, repeat_theta=0.0, ledger_drop_p=0.0, ledger_keep=4, ledger_over_p=0.0, ledger_over_max=2, record_dropout=0.0, count_mode='', zoom=False, zoom_ref_box=(0.0, 0.0, 1.0, 1.0), zoom_cur_box=(0.0, 0.0, 1.0, 1.0), zoom_camera=0, zoom_match=False)",
+   "val_demos": [
+    "rearrange_blocks/episode_0000018",
+    "rearrange_blocks/episode_0000019",
+    "rearrange_blocks/episode_0000023",
+    "rearrange_blocks/episode_0000026",
+    "rearrange_blocks/episode_0000033"
+   ],
+   "anchors": 90,
+   "press_anchors": 45,
+   "press_action_loss": 0.001087762739371101,
+   "rest_anchors": 45,
+   "rest_action_loss": 0.0016660924249764422,
+   "press_over_rest": 0.6528825910642271,
+   "from": "/workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_e20"
+  },
+  "rearr_pw:e30": {
+   "run": "rearr_pw",
+   "history": "HistoryRule(variant='arprop', index='rank', recent=(16, 32), event_max=32, tw_stride=32, tw_max=12, time_unit=16.0, anchor=True, drop_event_p=0.0, spurious_event_p=0.0, lag=0, event_delta=0.012, event_min_path=0.015, event_provisional=0.002, ordinal=0, repeat_theta=0.0, ledger_drop_p=0.0, ledger_keep=4, ledger_over_p=0.0, ledger_over_max=2, record_dropout=0.0, count_mode='', zoom=False, zoom_ref_box=(0.0, 0.0, 1.0, 1.0), zoom_cur_box=(0.0, 0.0, 1.0, 1.0), zoom_camera=0, zoom_match=False)",
+   "val_demos": [
+    "rearrange_blocks/episode_0000018",
+    "rearrange_blocks/episode_0000019",
+    "rearrange_blocks/episode_0000023",
+    "rearrange_blocks/episode_0000026",
+    "rearrange_blocks/episode_0000033"
+   ],
+   "anchors": 90,
+   "press_anchors": 45,
+   "press_action_loss": 0.0011428776855559085,
+   "rest_anchors": 45,
+   "rest_action_loss": 0.0012020508308827023,
+   "press_over_rest": 0.9507731754710064,
+   "from": "/workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_e30"
+  },
+  "rearr_pw_s18:e10": {
+   "run": "rearr_pw_s18",
+   "history": "HistoryRule(variant='arprop', index='rank', recent=(16, 32), event_max=32, tw_stride=32, tw_max=12, time_unit=16.0, anchor=True, drop_event_p=0.0, spurious_event_p=0.0, lag=0, event_delta=0.012, event_min_path=0.015, event_provisional=0.002, ordinal=0, repeat_theta=0.0, ledger_drop_p=0.0, ledger_keep=4, ledger_over_p=0.0, ledger_over_max=2, record_dropout=0.0, count_mode='', zoom=False, zoom_ref_box=(0.0, 0.0, 1.0, 1.0), zoom_cur_box=(0.0, 0.0, 1.0, 1.0), zoom_camera=0, zoom_match=False)",
+   "val_demos": [
+    "rearrange_blocks/episode_0000018",
+    "rearrange_blocks/episode_0000019",
+    "rearrange_blocks/episode_0000023",
+    "rearrange_blocks/episode_0000026",
+    "rearrange_blocks/episode_0000033"
+   ],
+   "anchors": 90,
+   "press_anchors": 45,
+   "press_action_loss": 0.0025449836860287987,
+   "rest_anchors": 45,
+   "rest_action_loss": 0.0034276668751974486,
+   "press_over_rest": 0.7424827962262804,
+   "from": "/workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_s18_e10"
+  },
+  "rearr_pw_s18:e20": {
+   "run": "rearr_pw_s18",
+   "history": "HistoryRule(variant='arprop', index='rank', recent=(16, 32), event_max=32, tw_stride=32, tw_max=12, time_unit=16.0, anchor=True, drop_event_p=0.0, spurious_event_p=0.0, lag=0, event_delta=0.012, event_min_path=0.015, event_provisional=0.002, ordinal=0, repeat_theta=0.0, ledger_drop_p=0.0, ledger_keep=4, ledger_over_p=0.0, ledger_over_max=2, record_dropout=0.0, count_mode='', zoom=False, zoom_ref_box=(0.0, 0.0, 1.0, 1.0), zoom_cur_box=(0.0, 0.0, 1.0, 1.0), zoom_camera=0, zoom_match=False)",
+   "val_demos": [
+    "rearrange_blocks/episode_0000018",
+    "rearrange_blocks/episode_0000019",
+    "rearrange_blocks/episode_0000023",
+    "rearrange_blocks/episode_0000026",
+    "rearrange_blocks/episode_0000033"
+   ],
+   "anchors": 90,
+   "press_anchors": 45,
+   "press_action_loss": 0.001354469966155294,
+   "rest_anchors": 45,
+   "rest_action_loss": 0.0019088938688178636,
+   "press_over_rest": 0.7095575025310799,
+   "from": "/workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_s18_e20"
+  },
+  "rearr_pw_s18:e30": {
+   "run": "rearr_pw_s18",
+   "history": "HistoryRule(variant='arprop', index='rank', recent=(16, 32), event_max=32, tw_stride=32, tw_max=12, time_unit=16.0, anchor=True, drop_event_p=0.0, spurious_event_p=0.0, lag=0, event_delta=0.012, event_min_path=0.015, event_provisional=0.002, ordinal=0, repeat_theta=0.0, ledger_drop_p=0.0, ledger_keep=4, ledger_over_p=0.0, ledger_over_max=2, record_dropout=0.0, count_mode='', zoom=False, zoom_ref_box=(0.0, 0.0, 1.0, 1.0), zoom_cur_box=(0.0, 0.0, 1.0, 1.0), zoom_camera=0, zoom_match=False)",
+   "val_demos": [
+    "rearrange_blocks/episode_0000018",
+    "rearrange_blocks/episode_0000019",
+    "rearrange_blocks/episode_0000023",
+    "rearrange_blocks/episode_0000026",
+    "rearrange_blocks/episode_0000033"
+   ],
+   "anchors": 90,
+   "press_anchors": 45,
+   "press_action_loss": 0.001055160925241378,
+   "rest_anchors": 45,
+   "rest_action_loss": 0.0013734392376439548,
+   "press_over_rest": 0.7682618177207734,
+   "from": "/workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_s18_e30"
+  },
+  "rearr_ar_pw:e10": {
+   "run": "rearr_ar_pw",
+   "history": "HistoryRule(variant='ar', index='rank', recent=(16, 32), event_max=8, tw_stride=32, tw_max=12, time_unit=16.0, anchor=True, drop_event_p=0.0, spurious_event_p=0.0, lag=0, event_delta=0.012, event_min_path=0.015, event_provisional=0.0, ordinal=0, repeat_theta=0.0, ledger_drop_p=0.0, ledger_keep=4, ledger_over_p=0.0, ledger_over_max=2, record_dropout=0.0, count_mode='', zoom=False, zoom_ref_box=(0.0, 0.0, 1.0, 1.0), zoom_cur_box=(0.0, 0.0, 1.0, 1.0), zoom_camera=0, zoom_match=False)",
+   "val_demos": [
+    "rearrange_blocks/episode_0000018",
+    "rearrange_blocks/episode_0000019",
+    "rearrange_blocks/episode_0000023",
+    "rearrange_blocks/episode_0000026",
+    "rearrange_blocks/episode_0000033"
+   ],
+   "anchors": 90,
+   "press_anchors": 45,
+   "press_action_loss": 0.002850655344991537,
+   "rest_anchors": 45,
+   "rest_action_loss": 0.003798505212479439,
+   "press_over_rest": 0.7504676670249448,
+   "from": "/workspace/FastWAM-memory2/outputs/fullft/exports/rearr_ar_pw_e10"
+  },
+  "rearr_ar_pw:e20": {
+   "run": "rearr_ar_pw",
+   "history": "HistoryRule(variant='ar', index='rank', recent=(16, 32), event_max=8, tw_stride=32, tw_max=12, time_unit=16.0, anchor=True, drop_event_p=0.0, spurious_event_p=0.0, lag=0, event_delta=0.012, event_min_path=0.015, event_provisional=0.0, ordinal=0, repeat_theta=0.0, ledger_drop_p=0.0, ledger_keep=4, ledger_over_p=0.0, ledger_over_max=2, record_dropout=0.0, count_mode='', zoom=False, zoom_ref_box=(0.0, 0.0, 1.0, 1.0), zoom_cur_box=(0.0, 0.0, 1.0, 1.0), zoom_camera=0, zoom_match=False)",
+   "val_demos": [
+    "rearrange_blocks/episode_0000018",
+    "rearrange_blocks/episode_0000019",
+    "rearrange_blocks/episode_0000023",
+    "rearrange_blocks/episode_0000026",
+    "rearrange_blocks/episode_0000033"
+   ],
+   "anchors": 90,
+   "press_anchors": 45,
+   "press_action_loss": 0.0010434298171276169,
+   "rest_anchors": 45,
+   "rest_action_loss": 0.0017472388898265004,
+   "press_over_rest": 0.5971878391690496,
+   "from": "/workspace/FastWAM-memory2/outputs/fullft/exports/rearr_ar_pw_e20"
+  },
+  "rearr_ar_pw:e30": {
+   "run": "rearr_ar_pw",
+   "history": "HistoryRule(variant='ar', index='rank', recent=(16, 32), event_max=8, tw_stride=32, tw_max=12, time_unit=16.0, anchor=True, drop_event_p=0.0, spurious_event_p=0.0, lag=0, event_delta=0.012, event_min_path=0.015, event_provisional=0.0, ordinal=0, repeat_theta=0.0, ledger_drop_p=0.0, ledger_keep=4, ledger_over_p=0.0, ledger_over_max=2, record_dropout=0.0, count_mode='', zoom=False, zoom_ref_box=(0.0, 0.0, 1.0, 1.0), zoom_cur_box=(0.0, 0.0, 1.0, 1.0), zoom_camera=0, zoom_match=False)",
+   "val_demos": [
+    "rearrange_blocks/episode_0000018",
+    "rearrange_blocks/episode_0000019",
+    "rearrange_blocks/episode_0000023",
+    "rearrange_blocks/episode_0000026",
+    "rearrange_blocks/episode_0000033"
+   ],
+   "anchors": 90,
+   "press_anchors": 45,
+   "press_action_loss": 0.0012074792256902987,
+   "rest_anchors": 45,
+   "rest_action_loss": 0.0011887158898187206,
+   "press_over_rest": 1.0157845419854188,
+   "from": "/workspace/FastWAM-memory2/outputs/fullft/exports/rearr_ar_pw_e30"
+  },
+  "rearr_arprop_pw:e10": {
+   "run": "rearr_arprop_pw",
+   "history": "HistoryRule(variant='arprop', index='rank', recent=(16, 32), event_max=32, tw_stride=32, tw_max=12, time_unit=16.0, anchor=True, drop_event_p=0.0, spurious_event_p=0.0, lag=4, event_delta=0.015, event_min_path=0.03, event_provisional=0.0, ordinal=0, repeat_theta=0.0, ledger_drop_p=0.0, ledger_keep=4, ledger_over_p=0.0, ledger_over_max=2, record_dropout=0.0, count_mode='', zoom=False, zoom_ref_box=(0.0, 0.0, 1.0, 1.0), zoom_cur_box=(0.0, 0.0, 1.0, 1.0), zoom_camera=0, zoom_match=False)",
+   "val_demos": [
+    "rearrange_blocks/episode_0000018",
+    "rearrange_blocks/episode_0000019",
+    "rearrange_blocks/episode_0000023",
+    "rearrange_blocks/episode_0000026",
+    "rearrange_blocks/episode_0000033"
+   ],
+   "anchors": 90,
+   "press_anchors": 45,
+   "press_action_loss": 0.0025498862040775646,
+   "rest_anchors": 45,
+   "rest_action_loss": 0.003763528951215752,
+   "press_over_rest": 0.6775253325084325,
+   "from": "/workspace/FastWAM-memory2/outputs/fullft/exports/rearr_arprop_pw_e10"
+  },
+  "rearr_arprop_pw:e20": {
+   "run": "rearr_arprop_pw",
+   "history": "HistoryRule(variant='arprop', index='rank', recent=(16, 32), event_max=32, tw_stride=32, tw_max=12, time_unit=16.0, anchor=True, drop_event_p=0.0, spurious_event_p=0.0, lag=4, event_delta=0.015, event_min_path=0.03, event_provisional=0.0, ordinal=0, repeat_theta=0.0, ledger_drop_p=0.0, ledger_keep=4, ledger_over_p=0.0, ledger_over_max=2, record_dropout=0.0, count_mode='', zoom=False, zoom_ref_box=(0.0, 0.0, 1.0, 1.0), zoom_cur_box=(0.0, 0.0, 1.0, 1.0), zoom_camera=0, zoom_match=False)",
+   "val_demos": [
+    "rearrange_blocks/episode_0000018",
+    "rearrange_blocks/episode_0000019",
+    "rearrange_blocks/episode_0000023",
+    "rearrange_blocks/episode_0000026",
+    "rearrange_blocks/episode_0000033"
+   ],
+   "anchors": 90,
+   "press_anchors": 45,
+   "press_action_loss": 0.0010958518321482794,
+   "rest_anchors": 45,
+   "rest_action_loss": 0.0016373478587209118,
+   "press_over_rest": 0.669284676625988,
+   "from": "/workspace/FastWAM-memory2/outputs/fullft/exports/rearr_arprop_pw_e20"
+  },
+  "rearr_arprop_pw:e30": {
+   "run": "rearr_arprop_pw",
+   "history": "HistoryRule(variant='arprop', index='rank', recent=(16, 32), event_max=32, tw_stride=32, tw_max=12, time_unit=16.0, anchor=True, drop_event_p=0.0, spurious_event_p=0.0, lag=4, event_delta=0.015, event_min_path=0.03, event_provisional=0.0, ordinal=0, repeat_theta=0.0, ledger_drop_p=0.0, ledger_keep=4, ledger_over_p=0.0, ledger_over_max=2, record_dropout=0.0, count_mode='', zoom=False, zoom_ref_box=(0.0, 0.0, 1.0, 1.0), zoom_cur_box=(0.0, 0.0, 1.0, 1.0), zoom_camera=0, zoom_match=False)",
+   "val_demos": [
+    "rearrange_blocks/episode_0000018",
+    "rearrange_blocks/episode_0000019",
+    "rearrange_blocks/episode_0000023",
+    "rearrange_blocks/episode_0000026",
+    "rearrange_blocks/episode_0000033"
+   ],
+   "anchors": 90,
+   "press_anchors": 45,
+   "press_action_loss": 0.0012163907239533323,
+   "rest_anchors": 45,
+   "rest_action_loss": 0.001435212118334069,
+   "press_over_rest": 0.8475337606299375,
+   "from": "/workspace/FastWAM-memory2/outputs/fullft/exports/rearr_arprop_pw_e30"
+  }
+ },
+ "missing": [
+  "rearr_v3c_h2:e30"
+ ],
+ "verdict": "DESCRIBED"
+}

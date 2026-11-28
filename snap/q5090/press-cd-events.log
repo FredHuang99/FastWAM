@@ -1,0 +1,22 @@
+[cd] 50 demos; pairs [(1, 2), (1, 5), (1, 7), (1, 8), (1, 9), (2, 1), (2, 4), (2, 5), (2, 6), (2, 7), (3, 4), (3, 5), (4, 3), (4, 4), (4, 5), (5, 1), (5, 2), (5, 3), (5, 5), (6, 1), (6, 2), (6, 4), (7, 1), (7, 2), (7, 3), (8, 1), (8, 2), (9, 1)]
+[cd] STOP:
+  press_button/episode_0000000: a press entry at x -0.238 is near no button
+  press_button/episode_0000000: a press entry at x -0.211 is near no button
+  press_button/episode_0000000: a press entry at x 0.243 is near no button
+  press_button/episode_0000001: a press entry at x -0.246 is near no button
+  press_button/episode_0000001: a press entry at x -0.211 is near no button
+  press_button/episode_0000001: a press entry at x 0.244 is near no button
+  press_button/episode_0000002: a press entry at x -0.247 is near no button
+  press_button/episode_0000002: a press entry at x 0.244 is near no button
+  press_button/episode_0000003: a press entry at x -0.238 is near no button
+  press_button/episode_0000003: a press entry at x -0.211 is near no button
+  press_button/episode_0000003: a press entry at x 0.252 is near no button
+  press_button/episode_0000004: a press entry at x -0.247 is near no button
+  press_button/episode_0000004: a press entry at x -0.211 is near no button
+  press_button/episode_0000004: a press entry at x 0.252 is near no button
+  press_button/episode_0000005: a press entry at x -0.239 is near no button
+  press_button/episode_0000005: a press entry at x 0.243 is near no button
+  press_button/episode_0000006: a press entry at x -0.238 is near no button
+  press_button/episode_0000006: a press entry at x -0.210 is near no button
+  press_button/episode_0000006: a press entry at x 0.244 is near no button
+  press_button/episode_0000007: a press entry at x -0.246 is near no button

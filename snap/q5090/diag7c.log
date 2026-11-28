@@ -1,0 +1,48 @@
+[d7c] dense_rearrange_blocks_v1 not verified here: fetching it from the cache relay
+Fetching ... files: 0it [00:00, ?it/s]Fetching ... files: 1it [00:03,  3.20s/it]Fetching ... files: 9it [00:03,  2.56it/s]Fetching ... files: 17it [00:03,  4.45it/s]Fetching ... files: 25it [00:04,  5.98it/s]Fetching ... files: 33it [00:04,  7.19it/s]Fetching ... files: 41it [00:04,  8.26it/s]Fetching ... files: 49it [00:05,  9.16it/s]Fetching ... files: 57it [00:05,  9.95it/s]Fetching ... files: 65it [00:06, 10.64it/s]Fetching ... files: 73it [00:06, 11.25it/s]Fetching ... files: 81it [00:06, 11.80it/s]Fetching ... files: 89it [00:07, 12.25it/s]Fetching ... files: 97it [00:07, 12.69it/s]Fetching ... files: 105it [00:08, 13.11it/s]Fetching ... files: 107it [00:08, 13.05it/s]
+[cache] dense_rearrange_blocks_v1: downloaded in 8 s (attempt 1)
+[cache] GET OK dense_rearrange_blocks_v1: 106 files, 3.50 GiB in /workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1
+[d7c] rearr_pw:e10: press 0.00280 rest 0.00460 ratio 0.609 (90 anchors, 5 demos)
+[d7c] rearr_pw:e20: press 0.00109 rest 0.00167 ratio 0.653 (90 anchors, 5 demos)
+[fetch] disk before: /dev/nvme0n1p1  3.7T  2.4T  1.4T  63% /workspace/FastWAM-memory2
+[fetch] 2026-11-28 12:08:55 fetching rearr_pw_e30 (attempt 1)
+[relay] get hhyfred/memwam-fullft/exports/rearr_pw_e30/export_e30.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_e30/export_e30.pt (12042506501 bytes)
+[relay] get hhyfred/memwam-fullft/exports/rearr_pw_e30/export_e30.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_e30/export_e30.pt.sha256 (80 bytes)
+export_e30.pt: OK
+total 11760280
+drwxr-xr-x  2 root root        4096 Nov 28 12:10 .
+drwxr-xr-x 62 root root        4096 Nov 28 12:08 ..
+-rw-r--r--  1 root root 12042506501 Nov 28 12:10 export_e30.pt
+-rw-r--r--  1 root root          80 Nov 28 12:10 export_e30.pt.sha256
+[d7c] rearr_pw:e30: press 0.00114 rest 0.00120 ratio 0.951 (90 anchors, 5 demos)
+[d7c] rearr_pw_s18:e10: press 0.00254 rest 0.00343 ratio 0.742 (90 anchors, 5 demos)
+[d7c] rearr_pw_s18:e20: press 0.00135 rest 0.00191 ratio 0.710 (90 anchors, 5 demos)
+[d7c] rearr_pw_s18:e30: press 0.00106 rest 0.00137 ratio 0.768 (90 anchors, 5 demos)
+[d7c] rearr_ar_pw:e10: press 0.00285 rest 0.00380 ratio 0.750 (90 anchors, 5 demos)
+[d7c] rearr_ar_pw:e20: press 0.00104 rest 0.00175 ratio 0.597 (90 anchors, 5 demos)
+[fetch] disk before: /dev/nvme0n1p1  3.7T  2.4T  1.4T  64% /workspace/FastWAM-memory2
+[fetch] 2026-11-28 12:14:04 fetching rearr_ar_pw_e30 (attempt 1)
+[relay] get hhyfred/memwam-fullft/exports/rearr_ar_pw_e30/export_e30.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_ar_pw_e30/export_e30.pt (12042063459 bytes)
+[relay] get hhyfred/memwam-fullft/exports/rearr_ar_pw_e30/export_e30.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_ar_pw_e30/export_e30.pt.sha256 (80 bytes)
+export_e30.pt: OK
+total 11759844
+drwxr-xr-x  2 root root        4096 Nov 28 12:15 .
+drwxr-xr-x 63 root root        4096 Nov 28 12:14 ..
+-rw-r--r--  1 root root 12042063459 Nov 28 12:15 export_e30.pt
+-rw-r--r--  1 root root          80 Nov 28 12:15 export_e30.pt.sha256
+[d7c] rearr_ar_pw:e30: press 0.00121 rest 0.00119 ratio 1.016 (90 anchors, 5 demos)
+[d7c] rearr_arprop_pw:e10: press 0.00255 rest 0.00376 ratio 0.678 (90 anchors, 5 demos)
+[d7c] rearr_arprop_pw:e20: press 0.00110 rest 0.00164 ratio 0.669 (90 anchors, 5 demos)
+[fetch] disk before: /dev/nvme0n1p1  3.7T  2.4T  1.4T  64% /workspace/FastWAM-memory2
+[fetch] 2026-11-28 12:17:33 fetching rearr_arprop_pw_e30 (attempt 1)
+[relay] get hhyfred/memwam-fullft/exports/rearr_arprop_pw_e30/export_e30.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_arprop_pw_e30/export_e30.pt (12042506437 bytes)
+[relay] get hhyfred/memwam-fullft/exports/rearr_arprop_pw_e30/export_e30.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_arprop_pw_e30/export_e30.pt.sha256 (80 bytes)
+export_e30.pt: OK
+total 11760280
+drwxr-xr-x  2 root root        4096 Nov 28 12:19 .
+drwxr-xr-x 64 root root        4096 Nov 28 12:17 ..
+-rw-r--r--  1 root root 12042506437 Nov 28 12:19 export_e30.pt
+-rw-r--r--  1 root root          80 Nov 28 12:19 export_e30.pt.sha256
+[d7c] rearr_arprop_pw:e30: press 0.00122 rest 0.00144 ratio 0.848 (90 anchors, 5 demos)
+[d7c] rearr_v3c_h2:e30: not on this machine and not on the relay: skipped
+DIAG 7C DESCRIBED: 12 checkpoints, missing ['rearr_v3c_h2:e30'] -> /workspace/FastWAM-memory2/outputs/fullft/DIAG_V22_DIAG7C.json

@@ -1,0 +1,47 @@
+[c30] 2026-11-28 08:48:55 checkout e5dee13 Plan v22: register cards 30 (obs_cf800) and 32 (rear; GPU 1
+xargs: echo: terminated by signal 13
+[c30] 2026-11-28 08:49:42 render seeds 0 1 2 : gen exit 0
+[gencheck] episode 0: PASS; cam 0 mean 0.472 >8 0.00393; cam 1 mean 0.344 >8 0.00035; cam 2 mean 0.566 >8 0.00335 (away 0.586, 0.331, 0.467); frames [148, 148]; instruction same True
+[gencheck] episode 1: PASS; cam 0 mean 0.509 >8 0.00312; cam 1 mean 0.442 >8 0.0004; cam 2 mean 0.646 >8 0.00647 (away 0.702, 0.416, 0.438); frames [149, 149]; instruction same True
+[gencheck] episode 2: PASS; cam 0 mean 0.545 >8 0.00142; cam 1 mean 0.442 >8 0.00023; cam 2 mean 1.127 >8 0.01717 (away 0.69, 0.423, 0.524); frames [150, 151]; instruction same True
+GEN CHECK (background) PASS
+[W1128 08:49:44.206664440 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[c30] 2026-11-28 08:49:44 card 8's render gate (background): exit 0
+[c30] 2026-11-28 08:49:44 batch 0: seeds 30000000-30000059 x 5 targets (complete groups so far 0)
+[c30] 2026-11-28 08:59:23   target 0 exit 0
+[c30] 2026-11-28 09:08:47   target 1 exit 0
+[c30] 2026-11-28 09:18:19   target 2 exit 0
+[c30] 2026-11-28 09:27:57   target 3 exit 0
+[c30] 2026-11-28 09:37:41   target 4 exit 0
+[c30] 2026-11-28 09:37:41 batch 1: seeds 30000060-30000119 x 5 targets (complete groups so far 56)
+[c30] 2026-11-28 09:38:28   target 0 exit 0
+[c30] 2026-11-28 09:39:25   target 1 exit 0
+[c30] 2026-11-28 09:40:17   target 2 exit 0
+[c30] 2026-11-28 09:41:05   target 3 exit 0
+[c30] 2026-11-28 09:41:53   target 4 exit 0
+[c30] 2026-11-28 09:41:53 batch 2: seeds 30000120-30000179 x 5 targets (complete groups so far 59)
+[c30] 2026-11-28 09:41:57   target 0 exit 0
+[c30] 2026-11-28 09:42:01   target 1 exit 0
+[c30] 2026-11-28 09:42:05   target 2 exit 0
+[c30] 2026-11-28 09:42:09   target 3 exit 0
+[c30] 2026-11-28 09:42:14   target 4 exit 0
+[c30] 2026-11-28 09:42:14 batch 3: seeds 30000180-30000239 x 5 targets (complete groups so far 59)
+[c30] 2026-11-28 09:42:18   target 0 exit 0
+[c30] 2026-11-28 09:42:22   target 1 exit 0
+[c30] 2026-11-28 09:42:26   target 2 exit 0
+[c30] 2026-11-28 09:42:30   target 3 exit 0
+[c30] 2026-11-28 09:42:34   target 4 exit 0
+[c30] 2026-11-28 09:42:34 batch 4: seeds 30000240-30000299 x 5 targets (complete groups so far 59)
+[c30] 2026-11-28 09:42:38   target 0 exit 0
+[c30] 2026-11-28 09:42:42   target 1 exit 0
+[c30] 2026-11-28 09:42:46   target 2 exit 0
+[c30] 2026-11-28 09:42:50   target 3 exit 0
+[c30] 2026-11-28 09:42:54   target 4 exit 0
+[c30] 2026-11-28 09:42:54 batch 5: seeds 30000300-30000359 x 5 targets (complete groups so far 59)
+[c30] 2026-11-28 09:42:58   target 0 exit 0
+[c30] 2026-11-28 09:43:02   target 1 exit 0
+[c30] 2026-11-28 09:43:06   target 2 exit 0
+[c30] 2026-11-28 09:43:10   target 3 exit 0
+[c30] 2026-11-28 09:43:14   target 4 exit 0
+[c30] 2026-11-28 09:43:15 only 59 complete groups after 6 batches: stop (report; the registration is amended before training)
+[c30] 2026-11-28 09:43:15 finished, exit code 1; log /workspace/FastWAM-memory2/outputs/fullft/CARD30_5090_20261128_0848.txt

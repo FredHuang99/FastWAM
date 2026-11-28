@@ -1,0 +1,3 @@
+[dev] 2026-11-28 04:29:11 checkout 21d49a1 Card 25 described items on the 5090 (held-out genera; GPU 1; runs: swapT_joint3_e10:swap_T
+[dev] 2026-11-28 05:00:17 DEV swapT_joint3_e10 on swap_T: 21 / 30 (30 dev scenes; 5090 only)
+[dev] 2026-11-28 05:00:17 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/DEV_EVAL_5090_20261128_0429.txt

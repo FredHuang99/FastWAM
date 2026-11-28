@@ -1,0 +1,42 @@
+[c30] 2026-11-28 12:40:50 checkout 5ebe75f Diagnostic 7(c) reading side: A40 rearr_split classe; GPU 1
+xargs: echo: terminated by signal 13
+[gencheck] episode 0: PASS; cam 0 mean 0.472 >8 0.00393; cam 1 mean 0.344 >8 0.00035; cam 2 mean 0.566 >8 0.00335 (away 0.586, 0.331, 0.467); frames [148, 148]; instruction same True
+[gencheck] episode 1: PASS; cam 0 mean 0.509 >8 0.00312; cam 1 mean 0.442 >8 0.0004; cam 2 mean 0.646 >8 0.00647 (away 0.702, 0.416, 0.438); frames [149, 149]; instruction same True
+[gencheck] episode 2: PASS; cam 0 mean 0.545 >8 0.00142; cam 1 mean 0.442 >8 0.00023; cam 2 mean 1.127 >8 0.01717 (away 0.69, 0.423, 0.524); frames [150, 151]; instruction same True
+GEN CHECK (background) PASS
+[W1128 12:40:52.252963726 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[c30] 2026-11-28 12:40:52 card 8's render gate (background): exit 0
+[c30] 2026-11-28 12:40:52 batch 1: seeds 30000060-30000119 x 5 targets (complete groups so far 59)
+[c30] 2026-11-28 12:50:03   target 0 exit 0
+[c30] 2026-11-28 12:59:17   target 1 exit 0
+[c30] 2026-11-28 13:08:34   target 2 exit 0
+[c30] 2026-11-28 13:17:54   target 3 exit 0
+[c30] 2026-11-28 13:27:16   target 4 exit 0
+[c30] 2026-11-28 13:27:16 batch 2: seeds 30000120-30000179 x 5 targets (complete groups so far 110)
+[c30] 2026-11-28 13:37:29   target 0 exit 0
+[c30] 2026-11-28 13:47:34   target 1 exit 0
+[c30] 2026-11-28 13:57:32   target 2 exit 0
+[c30] 2026-11-28 14:07:32   target 3 exit 0
+[c30] 2026-11-28 14:17:38   target 4 exit 0
+xargs: echo: terminated by signal 13
+xargs: echo: terminated by signal 13
+[c30] 2026-11-28 14:17:38 groups: 151 train, probe 30000159 30000160 
+[card25] 1_target_fixed: {"pass": true, "per_target": {"0": {"seeds_tried": 175, "expert_success": 174, "rate": 0.994, "too_few_candidates": 0, "target_not_forced": 0, "drawn_equals_forced": 43}, "1": {"seeds_tried": 175, "expert_success": 173, "rate": 0.989, "too_few_candidates": 0, "target_not_forced": 0, "drawn_equals_forced": 30}, "2": {"seeds_tried": 175, "expert_success": 174, "rate": 0.994, "too_few_candidates": 0, "target_not_forced": 0, "drawn_equals_forced": 40}, "3": {"seeds_tried": 175, "expert_success": 173, "rate": 0.989, "too_few_candidates": 0, "target_not_forced": 0, "drawn_equals_forced": 27}, "4": {
+[card25] 3_expert_success_per_target: {"pass": true, "rates": {"0": 0.994, "1": 0.989, "2": 0.994, "3": 0.989, "4": 1.0}}
+[card25] 2_same_table: {"pass": true, "gate": "over8 < 2 %", "seeds_compared": 40, "largest_over8": 0.019062, "shelf_differs_in": 160}
+[card25] 4_card8_render_gate: {"pass": true, "gate": "background", "file": "/workspace/FastWAM-memory2/outputs/fullft/gen_cf800/GEN_CHECK_RENDER.json"}
+CARD25 CHECK PASS
+[W1128 14:17:42.527133855 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[c30] 2026-11-28 14:17:42 CARD30 CHECK PASS
+[c30] 2026-11-28 14:18:23 dense_observe_and_pickup_cf755_v1: 755 episodes -> build_dense (val 0)
+[c30] 2026-11-28 16:05:26 build exit 0 ([W1128 16:05:26.504863765 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator()))
+[cache] dense_observe_and_pickup_cf755_v1: uploaded in 1284 s (attempt 1)
+[cache] PUT DONE dense_observe_and_pickup_cf755_v1 -> hhyfred/memwam-caches/dense_observe_and_pickup_cf755_v1
+[c30] 2026-11-28 16:27:11 dense_observe_and_pickup_cf755_v1 on the cache relay
+[c30] 2026-11-28 16:27:12 dense_observe_and_pickup_cf10probe2_v1: 10 episodes -> build_dense (val 0)
+[c30] 2026-11-28 16:29:18 build exit 0 ([W1128 16:29:18.359167503 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator()))
+[cache] dense_observe_and_pickup_cf10probe2_v1: uploaded in 160 s (attempt 1)
+[cache] PUT DONE dense_observe_and_pickup_cf10probe2_v1 -> hhyfred/memwam-caches/dense_observe_and_pickup_cf10probe2_v1
+[c30] 2026-11-28 16:32:09 dense_observe_and_pickup_cf10probe2_v1 on the cache relay
+[c30] 2026-11-28 16:32:09 CARD30 GEN DONE (151 groups x 5 = 755 scenes + 45 official)
+[c30] 2026-11-28 16:32:09 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/CARD30_5090_20261128_1240.txt

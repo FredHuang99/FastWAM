@@ -1,0 +1,33 @@
+[genobs] 2026-11-27 05:32:47 checkout 7e5d916 A40: hourly automatic pruning of intermediate export; GPU 1 (NVIDIA GeForce RTX 5090, 18 MiB)
+xargs: echo: terminated by signal 13
+[genobs] 2026-11-27 05:32:47 official demos /workspace/FastWAM-memory2/outputs/memory_v2/press/demo_clean/observe_and_pickup/aloha_agilex (50 hdf5); first seeds: 0 1 2 ; their max 53
+[genobs] 2026-11-27 05:32:47 render check (background) passed earlier
+[genobs] 2026-11-27 05:32:47 ===== 2 155 scenes from seed 10000000
+[genobs] 2026-11-27 05:32:47 gen exit code 1; 155 hdf5
+[genobs] 2026-11-27 05:32:47 dense_observe_and_pickup_gen155_v1 cached already
+[genobs] 2026-11-27 05:32:49 dense_observe_and_pickup_gen155_v1 on the cache relay
+[genobs] 2026-11-27 05:32:49 ===== 4 600 more from seed 10000158
+[genobs] 2026-11-27 05:32:50 gen exit code 1; 600 hdf5
+[genobs] 2026-11-27 05:32:50 dense_observe_and_pickup_gen600_v1 cached already
+[genobs] 2026-11-27 05:32:52 dense_observe_and_pickup_gen600_v1 on the cache relay
+[genobs] 2026-11-27 05:32:52 ===== 6 800 more from seed 10000778 (gen800b)
+[genobs] 2026-11-27 05:32:53 gen exit code 1; 0 hdf5
+Traceback (most recent call last):
+  File "/workspace/FastWAM-memory2/scripts/fullft/gen_stats.py", line 80, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/FastWAM-memory2/scripts/fullft/gen_stats.py", line 55, in main
+    g = side(Path(args.gen), bd, common, data_path, cfg, args.task)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/FastWAM-memory2/scripts/fullft/gen_stats.py", line 26, in side
+    seeds = [int(x) for x in (folder / "seed.txt").read_text().split()]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/pathlib.py", line 1029, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/pathlib.py", line 1015, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/FastWAM-memory2/outputs/fullft/gen_obs/gen800b/demo_clean/observe_and_pickup/aloha_agilex/seed.txt'
+[genobs] 2026-11-27 05:32:54 dense_observe_and_pickup_gen800b_v1: OVERALL STATISTICS FAILED: no cache, no upload (report to Opus)
+[genobs] 2026-11-27 05:32:54 finished, exit code 1; log /workspace/FastWAM-memory2/outputs/fullft/GEN_OBS_5090_20261127_0532.txt

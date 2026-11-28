@@ -1,0 +1,5 @@
+[dev] 2026-11-28 10:04:34 checkout ab5eced robomme_norm reports how often the ee gripper comman; GPU 1; runs: rearr_pw_s18_e30:rearrange_blocks
+[relay] get hhyfred/memwam-fullft/exports/rearr_pw_s18_e30/export_e30.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_s18_e30/export_e30.pt (12042506501 bytes)
+[relay] get hhyfred/memwam-fullft/exports/rearr_pw_s18_e30/export_e30.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_s18_e30/export_e30.pt.sha256 (80 bytes)
+[dev] 2026-11-28 10:38:42 DEV rearr_pw_s18_e30 on rearrange_blocks: 23 / 30 (30 dev scenes; 5090 only)
+[dev] 2026-11-28 10:38:42 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/DEV_EVAL_5090_20261128_1004.txt

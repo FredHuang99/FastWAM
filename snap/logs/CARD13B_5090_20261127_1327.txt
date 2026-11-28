@@ -1,0 +1,32 @@
+[13b] 2026-11-27 13:27:51 start; checkout cb2cc81 5090: rerun the frame-0 probe of obs_s800 e10 on GPU; GPU 1
+[fetch] 2026-11-27 13:27:57 obs_s800_e10 already here and checked
+[13b] 2026-11-27 13:27:57 obs_s800_e10 split val window wait
+[probe] obs_s800 split val; 5 demos with a grasp; first close at frame median 116 (min 113, max 117) of length median 149; a 48-frame choice window = 32.3 % of the training anchors
+[probe] motion onset (5 % of the way to the grasp pose) at frame median 71 (min 71, max 72); window [8, m - 25]
+wait  : 100 anchors; action loss true 0.00326, frame-0 swapped 0.00372 (+14.4 %, higher at 54/100), no history 0.02103 (+545.9 %)
+late  : 15 anchors; action loss true 0.00064, frame-0 swapped 0.00064 (-0.7 %, higher at 11/15), no history 0.00183 (+186.1 %)
+OBS PROBE obs_s800: frame 0 IS used before the arm moves (>= 2 %)
+-> /workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_obs_s800_wait_val.json
+[13b] 2026-11-27 13:28:51 obs_s800_e10 split val window onset
+[probe] obs_s800 split val; 5 demos with a grasp; first close at frame median 116 (min 113, max 117) of length median 149; a 48-frame choice window = 32.3 % of the training anchors
+[probe] motion onset (5 % of the way to the grasp pose) at frame median 71 (min 71, max 72); window [m - 24, m + 8]
+onset : 100 anchors; action loss true 0.21529, frame-0 swapped 0.23343 (+8.4 %, higher at 59/100), no history 0.24278 (+12.8 %)
+late  : 15 anchors; action loss true 0.00064, frame-0 swapped 0.00064 (-1.0 %, higher at 10/15), no history 0.00183 (+185.0 %)
+OBS PROBE obs_s800: frame 0 IS used at the motion onset (>= 2 %)
+-> /workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_obs_s800_onset_val.json
+[13b] 2026-11-27 13:29:45 obs_s800_e10 split train window wait
+[probe] obs_s800 split train; 800 demos with a grasp; first close at frame median 116.0 (min 112, max 125) of length median 149.0; a 48-frame choice window = 32.1 % of the training anchors
+[probe] motion onset (5 % of the way to the grasp pose) at frame median 71.0 (min 71, max 73); window [8, m - 25]
+wait  : 4800 anchors; action loss true 0.00016, frame-0 swapped 0.00017 (+4.2 %, higher at 2555/4800), no history 0.04569 (+27643.0 %)
+late  : 2400 anchors; action loss true 0.00036, frame-0 swapped 0.00038 (+5.8 %, higher at 1506/2400), no history 0.00185 (+407.9 %)
+OBS PROBE obs_s800: frame 0 IS used before the arm moves (>= 2 %)
+-> /workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_obs_s800_wait_train.json
+[13b] 2026-11-27 14:03:54 obs_s800_e10 split train window onset
+[probe] obs_s800 split train; 800 demos with a grasp; first close at frame median 116.0 (min 112, max 125) of length median 149.0; a 48-frame choice window = 32.1 % of the training anchors
+[probe] motion onset (5 % of the way to the grasp pose) at frame median 71.0 (min 71, max 73); window [m - 24, m + 8]
+onset : 4800 anchors; action loss true 0.00054, frame-0 swapped 0.00067 (+24.2 %, higher at 3494/4800), no history 0.08773 (+16247.5 %)
+late  : 2400 anchors; action loss true 0.00036, frame-0 swapped 0.00038 (+5.8 %, higher at 1519/2400), no history 0.00185 (+408.4 %)
+OBS PROBE obs_s800: frame 0 IS used at the motion onset (>= 2 %)
+-> /workspace/FastWAM-memory2/outputs/fullft/align/OBS_PROBE_obs_s800_onset_train.json
+[13b] 2026-11-27 14:39:58 CARD 13B done
+[13b] 2026-11-27 14:39:58 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/CARD13B_5090_20261127_1327.txt
