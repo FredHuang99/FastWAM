@@ -53,6 +53,8 @@ while true; do
   [ "${DRY:-0}" = 1 ] && exit 0
   until used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i 0 | tr -d ' ') && [ "$used" -lt 2000 ] \
         && ! pgrep -f "fastwam.fullft.train" >/dev/null; do
+    # 11-28 (plan v22b part 3 section 4 item 3): say it plainly when nvidia-smi itself fails (no training can start)
+    nvidia-smi -L > /dev/null 2>&1 || echo "[queue] $(date '+%F %T') HEALTH BAD: nvidia-smi fails ($(nvidia-smi -L 2>&1 | head -1 | cut -c1-80)); fix: container_restart.sh on the host"
     echo "[queue] $(date '+%F %T') GPU0 busy ($used MiB) or a trainer runs; waiting"; sleep 300
   done
   ARGS=(); for s in $SETS; do ARGS+=(--set "$s"); done

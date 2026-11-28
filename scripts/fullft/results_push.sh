@@ -80,6 +80,11 @@ common() {      # every machine
       g5090) pid_alive $OUT/Q5090.pid && echo "ok   q5090 runner alive" || echo "BAD  q5090 runner not running";;
       h200n) echo "info pushed from slot job ${PBS_JOBID:-?} on $(hostname)";;
     esac
+    # 11-28 (plan v22b part 3 section 4 item 3): a container whose nvidia-smi fails cannot start any training (the old
+    # H200 and the H100 sat 26 h like this before anyone knew); the user's fix is one command (container_restart.sh)
+    if grep -qiE "Failed to initialize NVML|NVIDIA-SMI has failed|couldn't communicate with the NVIDIA driver" $S/report/gpus.txt 2>/dev/null; then
+      echo "BAD  nvidia-smi fails inside the container: $(grep -iE 'NVML|NVIDIA-SMI|driver' $S/report/gpus.txt | head -1 | cut -c1-100) -- fix: scripts/fullft/container_restart.sh (user, on the host)"
+    fi
     awk -F', ' 'NF >= 5 && $1 ~ /^[0-9]+$/ {u = $5; gsub(/[^0-9]/, "", u); m = $3; gsub(/[^0-9]/, "", m);
       printf "%s  GPU %s: %s MiB, %s %%\n", (u + 0 == 0 && m + 0 < 1500 ? "idle" : "ok  "), $1, m, u}' $S/report/gpus.txt
     awk '{p = $5; gsub("%", "", p); if (p + 0 >= 90) print "BAD  disk " $6 " " $5 " used (" $4 " free)"; else print "ok   disk " $6 " " $5 " used (" $4 " free)"}' $S/report/disk.txt

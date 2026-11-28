@@ -129,6 +129,9 @@ if [ "${RUN#@}" != "$RUN" ]; then
   PLOG=$W/logs/PICK_${SLOT}_$(date +%Y%m%d_%H%M).txt
   {
     echo "[pick] $(date '+%F %T') slot $SLOT; job ${PBS_JOBID:-none}; code $(cd $R && git log --oneline -1 | cut -c1-60)"
+    # 11-28 plan v22b check 2 (read-only probe, submits nothing): can a compute node see the scheduler? If yes, a later
+    # version may let each slot job queue its own follower (automation item 1); until then the user submits deep chains.
+    echo "[pick] qsub probe: qsub $(command -v qsub || echo 'not on PATH'); qstat $(timeout 30 qstat -u $(id -un) > /dev/null 2>&1 && echo 'answers' || echo 'does not answer')"
     CANDS=$(grep -v '^[[:space:]]*#' $R/scripts/gaas/slots.txt | awk -F'|' -v s="$SLOT" '{x = $1; gsub(/[[:space:]]/, "", x)} x == s {print $2}')
     PICKED=""
     for c in $CANDS; do

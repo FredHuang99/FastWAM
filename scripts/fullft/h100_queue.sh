@@ -164,6 +164,8 @@ while true; do
     beat=$(date +%s)
     echo "[h100q] $(date '+%F %T') GPUs: $(for g in $GPUS; do printf '%s:%sMiB%s ' $g "$(used $g)" "$(ours_on $g && echo '(ours)')"; done)ours alive $(running)"
     echo "[h100q] $($PY scripts/fullft/gpu_share_report.py --short 2>/dev/null || echo 'GPU share: no samples (start scripts/fullft/gpu_share.sh)')"
+    # 11-28 (plan v22b part 3 section 4 item 3): say it plainly when nvidia-smi itself fails (no training can start)
+    nvidia-smi -L > /dev/null 2>&1 || echo "[h100q] $(date '+%F %T') HEALTH BAD: nvidia-smi fails ($(nvidia-smi -L 2>&1 | head -1 | cut -c1-80)); fix: container_restart.sh on the host"
   fi
   if ! NEXT=$(pick 2>/dev/null); then sleep 600; continue; fi
   if ! g=$(free_gpu); then sleep 60; continue; fi
