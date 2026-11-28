@@ -558,3 +558,95 @@ obs_s1600 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense
 #   arms get a seed-18 training; the four trainings are pooled by a bootstrap stratified by seed and scene and the
 #   pooled interval is reported; the single-seed verdict word stands.
 ar2_pw | history.variant=arprop history.event_max=32 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_put_back_block_v3c.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_blocks_v3c.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[bottom] | test -f outputs/fullft/READY_arprop_events_put_back_block_v3c && test -f outputs/fullft/READY_arprop_events_swap_blocks_v3c
+
+#
+# 11-28 (Opus; plan v22 rev. 1, registered before any run of these lines; user 15:52 "你的默认我同意"). Reading copied
+# verbatim from claude/MemWAM_Plan_v22_20261128.md. Card 36: seed 17 trains on the old H200 (h200_queue.txt), seed 18 here (one
+# machine queue per run). Card 27 opens only if the resume.pt is there (its condition). Exports: card 28 and the
+# fillers only e30, card 29 e20 / e30 (plan v22b part 3 section 4 item 7).
+# Card 36 (plan v22 rev. 1, P0): swapT_ow / swapT_ow_s18 = swapT_arprop_h2's exact line (seeds 17 / 18) + pre-event
+# weighting on the release approach: model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24
+# model.decision_pre_kinds=[open] (the training anchors in the 24 frames before a gripper-open event of either arm get
+# loss weight 3 on the video and action losses; anchors from the run's own events file; card 6's starting values
+# unchanged). H200 class. Order: seed 17 first.
+# Why: in 37 of the 39 "a block back at its own place" failures (diagnostic 5(b), three-frame and body-record models)
+# the arm that releases second reached the other block's original place (within 5 cm) and did not open the gripper
+# there; it carried the block back later. Each arm releases once per demo: the same kind of rare action as the single
+# press of rearrange, where this weighting cut "never pressed" from 15 to 4 (card 6; 4, 4, 10 and 17 over four
+# weighted trainings).
+# Registered reading (11-28, before any episode of either run; A40, swap_T 1-100, default noise; control
+# swapT_arprop_h2 e30 = 39/100, H200 class, seed 17):
+#   MAIN (seed 17): D = success(swapT_ow e30) - success(swapT_arprop_h2 e30), paired by scene, paired bootstrap 95 % CI
+#   (10,000, seed 0); SESOI +0.15: CI lower > +0.15 -> RELEASE WEIGHTING HELPS; CI upper < +0.15 -> NO HELP; otherwise
+#   UNCERTAIN (pre-set extension: both e30 again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule).
+#   Early stop, written before the run: if success(swapT_ow e30) - 39 < 5, the seed-18 run is not trained (stopped
+#   gracefully if already started).
+#   Described: swapT_ow_s18 e30 (the main-table cell of this recipe is the mean of the two seeds, rule R1 of plan v19);
+#   swapT_split classes on the 5090 (scenes 1-50; "a block back at its own place" 19/50 in swapT_arprop) and the
+#   quantities of diagnostic 5(b); against 51 (three frames, H100 class) and 94-97 (pure-WAM best, self-reported);
+#   e10 / e20.
+#   Written before the run: "a block back at its own place" falls below 8/50; success of both seeds >= 60.
+#   Single trainings: the verdict is about these two checkpoints (plan v21 5.5).
+swapT_ow_s18 | seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_swap_T_v1] data.tasks=[swap_T] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_T.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[open] | test -f outputs/memory_v2/press/dense_swap_T_v1/.verified && test -f outputs/fullft/events/events_swap_T.json && test -f outputs/fullft/READY_arprop_swap_T
+# Card 27 (plan v22, P0): rearr_pw_long_s18 / rearr_pw_long = rearr_pw_s18 / rearr_pw trained on from their final
+# resume checkpoints to 60 frame-epochs (60-epoch cosine restarted at the seed point, exports e45 and e60), as
+# swapT_long (card 3). H200 class. Opens only if both resume.pt files exist; otherwise the H100-class pair of card 33
+# is trained on in the same way (card 27b, same reading with the H100-class runs).
+# Question: is rearrange (rearr_pw: 93 with seed 17, 61 with seed 18) limited by training length? Seed 17 rose
+# 14 -> 78 -> 93 over e10 / e20 / e30 (A40); seed 18's development look was 5/30 and 1/30 at e10 / e20. Training length
+# has been excluded for swap_T only (card 3).
+# Order: seed 18 first.
+# Registered reading (11-28, before any episode of either run; A40, rearrange_blocks 1-100, default noise):
+#   MAIN, two seeds pooled: D = mean success(e60; s17, s18) - mean success(e30; s17, s18), paired by scene within a
+#   seed, stratified paired bootstrap over seeds and scenes (10,000, seed 0), 95 % CI; SESOI +0.10: CI lower > +0.10 ->
+#   TRAINING-LIMITED; CI upper < +0.10 -> NOT TRAINING-LIMITED; otherwise UNCERTAIN (pre-set extension: all four
+#   checkpoints again with MWAM_NOISE_SALT=r2, 200 pairs per seed, the same rule).
+#   Early stop, written before the run: if success(e60, s18) - success(e30, s18) < +0.10, the seed-17 run is not
+#   trained on and the card reads NOT TRAINING-LIMITED (ONE SEED).
+#   Described: each seed alone at e30 / e45 / e60 with rearr_split.py classes; the gap between the two seeds at e60
+#   beside the gap at e30 (32).
+#   Written before the run: if seed 18 is a slower training of the same solution, its e60 reaches >= 85 with
+#   "pressed twice" < 5 and "never pressed" < 8; seed 17 stays >= 88.
+rearr_pw_long_s18 | seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks_v3c.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[bottom] schedule.frame_epochs=60 schedule.export_at_epochs=[45,60] schedule.resume_from=/workspace/FastWAM-memory2/outputs/fullft/rearr_pw_s18/resume.pt | test -f outputs/fullft/rearr_pw_s18/SUMMARY.json && test -f outputs/fullft/rearr_pw_s18/resume.pt && test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && test -f outputs/fullft/READY_arprop_events_rearrange_blocks_v3c
+rearr_pw_long | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks_v3c.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[bottom] schedule.frame_epochs=60 schedule.export_at_epochs=[45,60] schedule.resume_from=/workspace/FastWAM-memory2/outputs/fullft/rearr_pw/resume.pt | test -f outputs/fullft/rearr_pw/SUMMARY.json && test -f outputs/fullft/rearr_pw/resume.pt && test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && test -f outputs/fullft/READY_arprop_events_rearrange_blocks_v3c
+# Card 28 (plan v22, P0): rearr_ar_pw_s18 = rearr_ar_pw's exact line with seed 18; rearr_arprop_pw_s18 =
+# rearr_arprop_pw's exact line with seed 18 (H200 class).
+# Why: card 22 (rearr_pw with seed 18) reached 61/100 against 93/100 for seed 17. Cards 20 and 21 compared against the
+# seed-17 checkpoint; their verdicts (RECORD NEEDED; TIMELY WRITER NEEDED) stand as statements about those checkpoints
+# (plan v21 5.5). This card adds the second seed of the two other arms, so that a recipe-level statement rests on two
+# seeds per arm. It does not re-judge cards 20 / 21 and changes no registered criterion.
+# Registered reading (11-28, before any episode of either run; A40, rearrange_blocks 1-100, default noise): described
+# only; no verdict.
+#   Described: success 1-100 and rearr_split.py classes of each run beside its seed-17 run; rearr_ledger.py for
+#   rearr_arprop_pw_s18.
+#   Pooled, two seeds per arm (stratified paired bootstrap over seeds and scenes, 10,000, seed 0; plan v21 5.5 item 6):
+#   D_record = mean success(rearr_pw; s17, s18) - mean success(rearr_ar_pw; s17, s18), 95 % CI, beside card 20's SESOI
+#   (+0.15); D_writer = mean success(rearr_arprop_pw; s17, s18) - mean success(rearr_pw; s17, s18), 95 % CI, beside
+#   card 21's margin (-0.10).
+#   Written before the run: if the record is needed at the recipe level, rearr_ar_pw_s18 stays 15 or more below
+#   rearr_pw_s18 (61) with "pressed twice" >= 20; if seed 17's 93 was one lucky training, both seed-18 runs land within
+#   15 of 61.
+rearr_ar_pw_s18 | seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.event_delta=0.012 history.event_min_path=0.015 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks_v3c.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[bottom] schedule.export_at_epochs=[30] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && test -s outputs/fullft/events/events_rearrange_blocks_v3c.json
+rearr_arprop_pw_s18 | seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[bottom] schedule.export_at_epochs=[30] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && test -f outputs/fullft/events/events_rearrange_blocks.json && test -f outputs/fullft/READY_arprop_rearrange_blocks
+# Card 29 (plan v22, P0): ranking_v3a_s18 = ranking_v3a's exact line with seed 18 (H200 class; the two H200s are
+# identical).
+# Purpose: the training-level spread of the ranking cell (91/100, one training). Card 4 read TIMELY WRITING HELPS
+# (91 vs 65, D +0.26): inside the 15-30 band of plan v21 5.5, where a recipe-level statement needs a second seed.
+# Registered reading (11-28; A40, blocks_ranking_try 1-100, default noise): described only. Success 1-100;
+# ranking_split.py classes; success by the position of the sorted order in the expert's walk; the first-repeat types
+# of diagnostic 1; beside ranking_v3a (seed 17). The main-table cell of this recipe is the mean of the two seeds
+# (rule R1 of plan v19). No verdict; card 4's verdict stands as a statement about its two checkpoints.
+ranking_v3a_s18 | seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_blocks_ranking_try_v1] data.tasks=[blocks_ranking_try] history.variant=arprop history.event_max=69 history.lag=0 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_blocks_ranking_try_v3a.json] schedule.export_at_epochs=[20,30] | test -f outputs/memory_v2/press/dense_blocks_ranking_try_v1/.verified && test -f outputs/fullft/READY_arprop_events_blocks_ranking_try_v3a
+# Fillers (plan v22, P2; run only when a card has nothing else ready). Described only; no verdict.
+#   rearr_pw_s19 (H200 class); rearr_pw_h100_s19 / rearr_pw_h100_s20 (H100 class) = rearr_pw's exact line with seeds
+#   19 / 20. swapT_ar_s18 = swapT_ar's exact line with seed 18 (H100 class). ranking_arprop_s18 = ranking_arprop's
+#   exact line with seed 18 (H200 class). The fillers of plan v21 stay behind these: rearr_ar_h2, rearr_arprop_h2,
+#   cover_none.
+# Registered reading (11-28; A40, the task's official scenes 1-100, default noise): success 1-100 and the task's split
+#   classes beside the other seeds of the same recipe.
+#   A main-table cell is the mean of ALL seeds trained of its recipe on the cell's machine class, with the number of
+#   seeds stated (rule R1 of plan v19 asks for at least two).
+#   ranking_arprop_s18 together with card 29: D = mean success(ranking_v3a; s17, s18) - mean success(ranking_arprop;
+#   s17, s18), stratified paired bootstrap over seeds and scenes (10,000, seed 0), 95 % CI, beside card 4's SESOI
+#   (+0.10); card 4's verdict stands.
+rearr_pw_s19 | seed=19 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks_v3c.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[bottom] schedule.export_at_epochs=[30] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && test -f outputs/fullft/READY_arprop_events_rearrange_blocks_v3c

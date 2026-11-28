@@ -125,3 +125,46 @@ ranking_none | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/de
 # The GO file also makes the new H200's go test for obs_s800_s18 fail (scripts/gaas/go/obs_s800_s18), so it is
 # trained once.
 obs_s800_s18 | seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen155_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen600_v1] data.tasks=[observe_and_pickup] schedule.frame_epochs=10 schedule.export_at_epochs=[5,10] | bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1
+
+#
+# 11-28 (Opus; plan v22 rev. 1, registered before any run of these lines; user 15:52 "你的默认我同意"). Reading copied
+# verbatim from claude/MemWAM_Plan_v22_20261128.md. Card 36 seed 17 (the seed-18 line is in scripts/gaas/gaas_queue.txt). This
+# machine never trained swap_T: card36_ready.sh fetches the cache / events and runs ledger_ready (GO_card36).
+# Card 36 (plan v22 rev. 1, P0): swapT_ow / swapT_ow_s18 = swapT_arprop_h2's exact line (seeds 17 / 18) + pre-event
+# weighting on the release approach: model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24
+# model.decision_pre_kinds=[open] (the training anchors in the 24 frames before a gripper-open event of either arm get
+# loss weight 3 on the video and action losses; anchors from the run's own events file; card 6's starting values
+# unchanged). H200 class. Order: seed 17 first.
+# Why: in 37 of the 39 "a block back at its own place" failures (diagnostic 5(b), three-frame and body-record models)
+# the arm that releases second reached the other block's original place (within 5 cm) and did not open the gripper
+# there; it carried the block back later. Each arm releases once per demo: the same kind of rare action as the single
+# press of rearrange, where this weighting cut "never pressed" from 15 to 4 (card 6; 4, 4, 10 and 17 over four
+# weighted trainings).
+# Registered reading (11-28, before any episode of either run; A40, swap_T 1-100, default noise; control
+# swapT_arprop_h2 e30 = 39/100, H200 class, seed 17):
+#   MAIN (seed 17): D = success(swapT_ow e30) - success(swapT_arprop_h2 e30), paired by scene, paired bootstrap 95 % CI
+#   (10,000, seed 0); SESOI +0.15: CI lower > +0.15 -> RELEASE WEIGHTING HELPS; CI upper < +0.15 -> NO HELP; otherwise
+#   UNCERTAIN (pre-set extension: both e30 again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule).
+#   Early stop, written before the run: if success(swapT_ow e30) - 39 < 5, the seed-18 run is not trained (stopped
+#   gracefully if already started).
+#   Described: swapT_ow_s18 e30 (the main-table cell of this recipe is the mean of the two seeds, rule R1 of plan v19);
+#   swapT_split classes on the 5090 (scenes 1-50; "a block back at its own place" 19/50 in swapT_arprop) and the
+#   quantities of diagnostic 5(b); against 51 (three frames, H100 class) and 94-97 (pure-WAM best, self-reported);
+#   e10 / e20.
+#   Written before the run: "a block back at its own place" falls below 8/50; success of both seeds >= 60.
+#   Single trainings: the verdict is about these two checkpoints (plan v21 5.5).
+swapT_ow | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_swap_T_v1] data.tasks=[swap_T] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_T.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[open] | bash scripts/fullft/card36_ready.sh
+#
+# Fillers (plan v22, P2; run only when a card has nothing else ready). Described only; no verdict.
+#   rearr_pw_s19 (H200 class); rearr_pw_h100_s19 / rearr_pw_h100_s20 (H100 class) = rearr_pw's exact line with seeds
+#   19 / 20. swapT_ar_s18 = swapT_ar's exact line with seed 18 (H100 class). ranking_arprop_s18 = ranking_arprop's
+#   exact line with seed 18 (H200 class). The fillers of plan v21 stay behind these: rearr_ar_h2, rearr_arprop_h2,
+#   cover_none.
+# Registered reading (11-28; A40, the task's official scenes 1-100, default noise): success 1-100 and the task's split
+#   classes beside the other seeds of the same recipe.
+#   A main-table cell is the mean of ALL seeds trained of its recipe on the cell's machine class, with the number of
+#   seeds stated (rule R1 of plan v19 asks for at least two).
+#   ranking_arprop_s18 together with card 29: D = mean success(ranking_v3a; s17, s18) - mean success(ranking_arprop;
+#   s17, s18), stratified paired bootstrap over seeds and scenes (10,000, seed 0), 95 % CI, beside card 4's SESOI
+#   (+0.10); card 4's verdict stands.
+ranking_arprop_s18 | seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_blocks_ranking_try_v1] data.tasks=[blocks_ranking_try] history.variant=arprop history.event_max=69 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_blocks_ranking_try.json] schedule.export_at_epochs=[30] | bash scripts/fullft/ranking_ready.sh

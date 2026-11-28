@@ -114,3 +114,54 @@ swapT_long_h100 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press
 # Registered reading (11-24, before any battery_clock episode; A40, battery_try 1-100, default noise): descriptive only
 #   (main-table cell). Described: success 1-100; paired counts against battery_ar e30 and battery_arprop e30.
 battery_clock | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_battery_try_v1] data.tasks=[battery_try] history.variant=arclk history.event_max=32 | test -f outputs/memory_v2/press/dense_battery_try_v1/.verified && bash scripts/fullft/h100_v15_ready.sh battery_clock
+
+#
+# 11-28 (Opus; plan v22 rev. 1, registered before any run of these lines; user 15:52 "你的默认我同意"). Reading copied
+# verbatim from claude/MemWAM_Plan_v22_20261128.md. H100 class. Cards 36b and the second half of card 33 first (four GPUs), then
+# the first half of card 33 and the fillers. Card 33 / fillers export only e30 (plan v22b part 3 section 4 item 7);
+# card 33's rearr_pw_h100 pair keeps resume.pt (card 27b continues them to 60 frame-epochs).
+# Card 36b (plan v22 rev. 1, P1; H100 class, cards otherwise idle): swapT_ar_ow / swapT_ar_ow_s18 = swapT_ar's exact
+# line (three frames, no record; seeds 17 / 18) + the release weighting of card 36 (weight 3, window 0, pre-window 24,
+# kinds [open]; swapT_arprop's events file, used for the weighting anchors only: no record token enters the model).
+# Question: does the release weighting help without the record (a motor fix, booked apart from memory: plan v21
+# section 2), and does it lift the current main-table swap_T cell (three frames, 51, H100 class)?
+# Registered reading (11-28, before any episode; A40, swap_T 1-100, default noise; control swapT_ar e30 = 51/100,
+# H100 class, seed 17):
+#   MAIN (seed 17): D = success(swapT_ar_ow e30) - success(swapT_ar e30), paired by scene, paired bootstrap 95 % CI
+#   (10,000, seed 0); SESOI +0.15: CI lower > +0.15 -> RELEASE WEIGHTING HELPS (NO RECORD); CI upper < +0.15 ->
+#   NO HELP; otherwise UNCERTAIN (pre-set extension: both e30 again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule).
+#   Described: swapT_ar_ow_s18 e30 (the main-table cell of this recipe is the mean of the two seeds); swapT_split
+#   classes (5090, scenes 1-50).
+#   Single trainings: the verdict is about these two checkpoints (plan v21 5.5).
+swapT_ar_ow | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_swap_T_v1] data.tasks=[swap_T] data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_T.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[open] | test -f outputs/memory_v2/press/dense_swap_T_v1/.verified && test -s outputs/fullft/events/events_swap_T.json
+swapT_ar_ow_s18 | seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_swap_T_v1] data.tasks=[swap_T] data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_T.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[open] | test -f outputs/memory_v2/press/dense_swap_T_v1/.verified && test -s outputs/fullft/events/events_swap_T.json
+# Card 33 (plan v22, P1; H100 class, cards otherwise idle): four trainings, described only.
+#   rearrange_ar_s18 / rearrange_arprop_s18 = rearrange_ar's / rearrange_arprop's exact lines with seed 18: the second
+#   seed of B1's two arms (LEDGER HELPS, 62 vs 29, seed 17, H100 class).
+#   rearr_pw_h100 / rearr_pw_h100_s18 = rearr_pw's exact line with seeds 17 / 18 trained on the H100 class, resume.pt
+#   kept: the recipe of the rearrange headline cell on a second machine class (93 / 61 on the H200 class).
+# Registered reading (11-28, before any episode; A40, rearrange_blocks 1-100, default noise): described only; no
+# verdict.
+#   Success 1-100 and rearr_split.py classes of each run. B1 with two seeds per arm: mean success(rearrange_arprop;
+#   s17, s18) - mean success(rearrange_ar; s17, s18), stratified paired bootstrap over seeds and scenes (10,000,
+#   seed 0), 95 % CI, beside B1's verdict (which stands). rearr_pw on the two machine classes: the four successes side
+#   by side (training-level spread of the recipe; they replace the +-15 starting value of plan v21 5.5 item 2).
+rearr_pw_h100 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks_v3c.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[bottom] schedule.export_at_epochs=[30] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && bash scripts/fullft/rearr_v3c_ready.sh
+rearr_pw_h100_s18 | seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks_v3c.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[bottom] schedule.export_at_epochs=[30] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && bash scripts/fullft/rearr_v3c_ready.sh
+rearrange_ar_s18 | seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] schedule.export_at_epochs=[30] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified
+rearrange_arprop_s18 | seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks.json] schedule.export_at_epochs=[30] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && test -f outputs/fullft/events/events_rearrange_blocks.json && grep -q rearrange_blocks outputs/fullft/READY_arprop
+# Fillers (plan v22, P2; run only when a card has nothing else ready). Described only; no verdict.
+#   rearr_pw_s19 (H200 class); rearr_pw_h100_s19 / rearr_pw_h100_s20 (H100 class) = rearr_pw's exact line with seeds
+#   19 / 20. swapT_ar_s18 = swapT_ar's exact line with seed 18 (H100 class). ranking_arprop_s18 = ranking_arprop's
+#   exact line with seed 18 (H200 class). The fillers of plan v21 stay behind these: rearr_ar_h2, rearr_arprop_h2,
+#   cover_none.
+# Registered reading (11-28; A40, the task's official scenes 1-100, default noise): success 1-100 and the task's split
+#   classes beside the other seeds of the same recipe.
+#   A main-table cell is the mean of ALL seeds trained of its recipe on the cell's machine class, with the number of
+#   seeds stated (rule R1 of plan v19 asks for at least two).
+#   ranking_arprop_s18 together with card 29: D = mean success(ranking_v3a; s17, s18) - mean success(ranking_arprop;
+#   s17, s18), stratified paired bootstrap over seeds and scenes (10,000, seed 0), 95 % CI, beside card 4's SESOI
+#   (+0.10); card 4's verdict stands.
+rearr_pw_h100_s19 | seed=19 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks_v3c.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[bottom] schedule.export_at_epochs=[30] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && bash scripts/fullft/rearr_v3c_ready.sh
+rearr_pw_h100_s20 | seed=20 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks_v3c.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[bottom] schedule.export_at_epochs=[30] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && bash scripts/fullft/rearr_v3c_ready.sh
+swapT_ar_s18 | seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_swap_T_v1] data.tasks=[swap_T] schedule.export_at_epochs=[30] | test -f outputs/memory_v2/press/dense_swap_T_v1/.verified
