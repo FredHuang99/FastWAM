@@ -1,0 +1,16 @@
+
+[queue5] 2026-10-26 17:27:53 $ /opt/mwam/bin/python -m fastwam.memory_v2.online run --checkpoint /workspace/FastWAM-memory2/outputs/memory_v2/a2C/checkpoints/update_002010.pt --label a2C_e3_smoke8 --modes on --scenes frozen --output /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/smoke_exec8 --tasks put_back_block --execute 8 --max-targets 48
+[dense] WARNING runtime packages differ from the dense preparation receipt (cache is read, not re-encoded): {"python": {"recorded": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]", "actual": "3.12.3 (main, Nov  6 2024, 18:32:19) [GCC 13.2.0]"}, "packages.numpy": {"recorded": "2.1.0", "actual": "1.26.4"}, "packages.torch": {"recorded": "2.10.0a0+b558c986e8.nv25.11", "actual": "2.6.0a0+df5bbc09d1.nv24.12"}, "packages.torchvision": {"recorded": "0.25.0a0+7a13ad0f", "actual": "0.20.0a0"}}
+[closed-loop] 2026-10-26 09:30:08 1 scenes x modes ['on'] -> labels {'on': 'a2C_e3_smoke8'}; checkpoint /workspace/FastWAM-memory2/outputs/memory_v2/a2C/checkpoints/update_002010.pt; T5 on CPU; max_targets=48
+[closed-loop] WARNING dense config was recorded for sm9.0; this GPU is sm8.0: TORCH_EXTENSIONS_DIR -> /workspace/FastWAM/outputs/fused_environment_memory_v2_sm80/torch_extensions (give --extensions-dir to reuse built kernels)
+[closed-loop] 2026-10-26 09:30:08 start a2C_e3_smoke8/on put_back_block seed=1800000 target_limit=48 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/smoke_exec8/a2C_e3_smoke8/on/put_back_block/seed_1800000
+/restore-tmp/dense_joint_v1/data_path.py:16: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /opt/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:206.)
+  return torch.stack([TF.resize(torch.from_numpy(np.ascontiguousarray(a)).permute(2,0,1).float()/255.,
+[decide] 2026-10-26 09:31:17 a2C_e3_smoke8/on put_back_block seed=1800000 frame=0/48 hist=0 s1=0 policy=8.6s elapsed=15s 
+[decide] 2026-10-26 09:31:52 a2C_e3_smoke8/on put_back_block seed=1800000 frame=32/48 hist=3 s1=6 policy=3.6s elapsed=50s 
+[closed-loop] 2026-10-26 09:32:08 done  a2C_e3_smoke8/on put_back_block seed=1800000 success=False targets=48/48 reward=0.0 lift=4.172325134277344e-07  120s
+
+label/mode              task               n  success  95% CI        lift5cm  reward  targets dep_null  dep_off   dep_on  pol_s
+a2C_e3_smoke8/on        put_back_block     1     0.00  [0.00,0.79]      0.00    0.00       48        -        -        -    4.6   (1 truncated by --max-targets)
+
+[summary] 1 episodes, 0 open errors -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/smoke_exec8/SUMMARY.json

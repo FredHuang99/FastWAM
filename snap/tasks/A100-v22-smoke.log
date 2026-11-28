@@ -1,0 +1,34 @@
+
+[queue5] 2026-11-28 16:27:29 $ /opt/mwam/bin/python -m fastwam.memory_v2.online run --checkpoint /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt --label ar2_prop_e30_a100smoke --modes on --scenes /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/scenes_seed42_n100_swap_blocks --output /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/a100smoke --tasks swap_blocks --execute 8 --limit 1
+[dense] WARNING runtime packages differ from the dense preparation receipt (cache is read, not re-encoded): {"python": {"recorded": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]", "actual": "3.12.3 (main, Nov  6 2024, 18:32:19) [GCC 13.2.0]"}, "packages.numpy": {"recorded": "2.1.0", "actual": "1.26.4"}, "packages.torch": {"recorded": "2.10.0a0+b558c986e8.nv25.11", "actual": "2.6.0a0+df5bbc09d1.nv24.12"}, "packages.torchvision": {"recorded": "0.25.0a0+7a13ad0f", "actual": "0.20.0a0"}}
+[closed-loop] 2026-11-28 08:29:25 1 scenes x modes ['on'] -> labels {'on': 'ar2_prop_e30_a100smoke'}; checkpoint /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt; T5 on CPU; max_targets=official
+[closed-loop] WARNING dense config was recorded for sm9.0; this GPU is sm8.0: TORCH_EXTENSIONS_DIR -> /workspace/FastWAM/outputs/fused_environment_memory_v2_sm80/torch_extensions (give --extensions-dir to reuse built kernels)
+[closed-loop] 2026-11-28 08:29:25 start ar2_prop_e30_a100smoke/on swap_blocks seed=4300000 target_limit=1000 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/a100smoke/ar2_prop_e30_a100smoke/on/swap_blocks/seed_4300000
+[fullft] text from the training cache (swap_blocks/episode_0000000, 50 episodes share it; fingerprint 63ee709c830f)
+/restore-tmp/dense_joint_v1/data_path.py:16: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /opt/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:206.)
+  return torch.stack([TF.resize(torch.from_numpy(np.ascontiguousarray(a)).permute(2,0,1).float()/255.,
+[decide] 2026-11-28 08:30:35 ar2_prop_e30_a100smoke/on swap_blocks seed=4300000 frame=0/1000 hist=0 policy=1.1s elapsed=9s
+[decide] 2026-11-28 08:30:58 ar2_prop_e30_a100smoke/on swap_blocks seed=4300000 frame=32/1000 hist=2 policy=0.7s elapsed=32s
+[decide] 2026-11-28 08:31:23 ar2_prop_e30_a100smoke/on swap_blocks seed=4300000 frame=64/1000 hist=3 policy=0.7s elapsed=57s
+[decide] 2026-11-28 08:31:49 ar2_prop_e30_a100smoke/on swap_blocks seed=4300000 frame=96/1000 hist=3 policy=0.7s elapsed=82s
+[decide] 2026-11-28 08:32:15 ar2_prop_e30_a100smoke/on swap_blocks seed=4300000 frame=128/1000 hist=3 policy=0.6s elapsed=109s
+[decide] 2026-11-28 08:32:39 ar2_prop_e30_a100smoke/on swap_blocks seed=4300000 frame=160/1000 hist=3 policy=0.7s elapsed=133s
+[decide] 2026-11-28 08:33:01 ar2_prop_e30_a100smoke/on swap_blocks seed=4300000 frame=192/1000 hist=3 policy=0.7s elapsed=155s
+[decide] 2026-11-28 08:33:26 ar2_prop_e30_a100smoke/on swap_blocks seed=4300000 frame=224/1000 hist=3 policy=0.7s elapsed=180s
+[decide] 2026-11-28 08:33:52 ar2_prop_e30_a100smoke/on swap_blocks seed=4300000 frame=256/1000 hist=3 policy=0.7s elapsed=206s
+[decide] 2026-11-28 08:34:18 ar2_prop_e30_a100smoke/on swap_blocks seed=4300000 frame=288/1000 hist=3 policy=0.7s elapsed=232s
+[decide] 2026-11-28 08:34:43 ar2_prop_e30_a100smoke/on swap_blocks seed=4300000 frame=320/1000 hist=3 policy=0.7s elapsed=257s
+[decide] 2026-11-28 08:35:07 ar2_prop_e30_a100smoke/on swap_blocks seed=4300000 frame=352/1000 hist=3 policy=0.6s elapsed=280s
+[decide] 2026-11-28 08:35:29 ar2_prop_e30_a100smoke/on swap_blocks seed=4300000 frame=384/1000 hist=3 policy=0.6s elapsed=303s
+[decide] 2026-11-28 08:35:54 ar2_prop_e30_a100smoke/on swap_blocks seed=4300000 frame=416/1000 hist=3 policy=0.6s elapsed=328s
+[decide] 2026-11-28 08:36:20 ar2_prop_e30_a100smoke/on swap_blocks seed=4300000 frame=448/1000 hist=3 policy=0.6s elapsed=353s
+[decide] 2026-11-28 08:36:44 ar2_prop_e30_a100smoke/on swap_blocks seed=4300000 frame=480/1000 hist=3 policy=0.6s elapsed=378s
+[decide] 2026-11-28 08:37:09 ar2_prop_e30_a100smoke/on swap_blocks seed=4300000 frame=512/1000 hist=3 policy=0.7s elapsed=402s
+[decide] 2026-11-28 08:37:31 ar2_prop_e30_a100smoke/on swap_blocks seed=4300000 frame=544/1000 hist=3 policy=0.7s elapsed=425s
+[decide] 2026-11-28 08:37:57 ar2_prop_e30_a100smoke/on swap_blocks seed=4300000 frame=576/1000 hist=3 policy=0.6s elapsed=450s
+[closed-loop] 2026-11-28 08:38:06 done  ar2_prop_e30_a100smoke/on swap_blocks seed=4300000 success=True targets=584/1000 reward=1.0 lift=0.10095816850662231  521s
+
+label/mode              task               n  success  95% CI        lift5cm  reward  targets dep_null  dep_off   dep_on  pol_s
+ar2_prop_e30_a100smoke/onswap_blocks        1     1.00  [0.21,1.00]      1.00    1.00      584        -        -        -    0.7
+
+[summary] 1 episodes, 0 open errors -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/a100smoke/SUMMARY.json

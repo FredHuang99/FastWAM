@@ -1,0 +1,12 @@
+
+[queue5] 2026-11-20 17:13:08 $ bash -c RUN=ar2_clock TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh
+[fetch] disk before: /dev/nvme1n1p1  7.0T  6.1T  547G  92% /migration
+[fetch] 2026-11-20 09:13:10 fetching ar2_clock_e30 (attempt 1)
+[relay] get hhyfred/memwam-fullft/exports/ar2_clock_e30/export_e30.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt (12042325701 bytes)
+[relay] get hhyfred/memwam-fullft/exports/ar2_clock_e30/export_e30.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt.sha256 (80 bytes)
+export_e30.pt: OK
+total 11760104
+drwxr-xr-x 2 root root        4096 Nov 20 09:28 .
+drwxr-xr-x 6 root root        4096 Nov 20 09:13 ..
+-rw-r--r-- 1 root root 12042325701 Nov 20 09:28 export_e30.pt
+-rw-r--r-- 1 root root          80 Nov 20 09:28 export_e30.pt.sha256

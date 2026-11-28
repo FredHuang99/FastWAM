@@ -1,0 +1,12 @@
+
+[queue5] 2026-11-12 01:12:31 $ bash -c cd /workspace/FastWAM-memory2 && export PYTHONPATH=src && P=/opt/mwam/bin/python && $P scripts/fullft/pair_eq.py --name al5_put --rule al5 --divergence --a-folders closed_loop/al5 --a-label x7_al5_oidn233 --b-folders closed_loop/official/put_x7_s0 closed_loop/official/put_x7_s1 --b-label a2C6_e6 --tasks put_back_block && $P scripts/fullft/pair_eq.py --name al5_swap --rule al5 --divergence --a-folders closed_loop/al5 --a-label x7_al5_oidn233 --b-folders closed_loop/official/swap8_x7_s0 closed_loop/official/swap8_x7_s1 closed_loop/official/swap8_x7_s2 --b-label a2C6_e6_exec8 --tasks swap_blocks
+PAIR al5_put: rule al5; A = ['closed_loop/al5'] x7_al5_oidn233; B = ['closed_loop/official/put_x7_s0', 'closed_loop/official/put_x7_s1'] a2C6_e6
+  put_back_block: paired n=20 (unpaired A 0, B 50); progress A 0.592 B 0.600; delta -0.008 CI [-0.117, +0.100]; lifted A 20/20 B 20/20; success A 3 B 4 (only A 1, only B 2, sign p 1.000) -> NOT CAUSE 
+    executed targets: identical in 0/20 scenes; first divergence median target 0, earliest 0
+report: /workspace/FastWAM-memory2/outputs/fullft/align/PAIR_al5_put_20261112_0113.json
+PAIR VERDICT al5_put: put_back_block: NOT CAUSE
+PAIR al5_swap: rule al5; A = ['closed_loop/al5'] x7_al5_oidn233; B = ['closed_loop/official/swap8_x7_s0', 'closed_loop/official/swap8_x7_s1', 'closed_loop/official/swap8_x7_s2'] a2C6_e6_exec8
+  swap_blocks: paired n=20 (unpaired A 0, B 80); progress A 0.583 B 0.725; delta -0.142 CI [-0.250, -0.042]; s1 A 20/20 B 20/20; success A 4 B 9 (only A 0, only B 5, sign p 0.062) -> CAUSE (the denoiser version lowers the A100's own closed loop) 
+    executed targets: identical in 0/20 scenes; first divergence median target 0, earliest 0
+report: /workspace/FastWAM-memory2/outputs/fullft/align/PAIR_al5_swap_20261112_0115.json
+PAIR VERDICT al5_swap: swap_blocks: CAUSE (the denoiser version lowers the A100's own closed loop)

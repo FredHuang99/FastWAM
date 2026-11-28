@@ -1,0 +1,38 @@
+
+[queue5] 2026-11-29 01:08:49 $ bash -c cd /workspace/FastWAM-memory2 && D=outputs/fullft/bank_swap_T_a40 && C=outputs/memory_v2/closed_loop && mkdir -p $D && until /opt/hf-tools/bin/python scripts/memory_v2/migrate/relay.py get --prefix diag/bank_swap_T_a40 --out $D && [ -s $D/bank_swap_T_a40.tgz.sha256 ]; do echo "waiting for diag/bank_swap_T_a40 $(date '+%F %T')"; sleep 300; done && (cd $D && sha256sum -c bank_swap_T_a40.tgz.sha256) && if [ -d $C/scenes_seed42_n100_swap_T ]; then mkdir -p $D/x && tar xzf $D/bank_swap_T_a40.tgz -C $D/x && diff -r -q $D/x/scenes_seed42_n100_swap_T $C/scenes_seed42_n100_swap_T; else tar xzf $D/bank_swap_T_a40.tgz -C $C; fi && bash scripts/fullft/a40_prep_task.sh swap_T
+Traceback (most recent call last):
+  File "/opt/hf-tools/lib/python3.12/site-packages/huggingface_hub/utils/_http.py", line 866, in hf_raise_for_status
+    response.raise_for_status()
+  File "/opt/hf-tools/lib/python3.12/site-packages/httpx2/_models.py", line 827, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx2.HTTPStatusError: Client error '404 Not Found' for url 'https://huggingface.co/api/models/hhyfred/memwam-diag-v1/tree/main/diag%2Fbank_swap_T_a40?recursive=true&expand=false'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/migrate/relay.py", line 81, in <module>
+    main()
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/migrate/relay.py", line 49, in main
+    names = [x.path for x in api.list_repo_tree(args.repo, path_in_repo=prefix, repo_type="model", recursive=True)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hf-tools/lib/python3.12/site-packages/huggingface_hub/hf_api.py", line 3969, in list_repo_tree
+    for path_info in paginate(path=tree_url, headers=headers, params={"recursive": recursive, "expand": expand}):
+  File "/opt/hf-tools/lib/python3.12/site-packages/huggingface_hub/utils/_pagination.py", line 36, in paginate
+    hf_raise_for_status(r)
+  File "/opt/hf-tools/lib/python3.12/site-packages/huggingface_hub/utils/_http.py", line 886, in hf_raise_for_status
+    raise _format(RemoteEntryNotFoundError, message, response, repo_type=repo_type, repo_id=repo_id) from e
+huggingface_hub.errors.RemoteEntryNotFoundError: 404 Client Error. (Request ID: Root=1-6b0b0aa2-57d35e3b3a6ace1529b863b8;09996107-3bc8-42ed-be3a-d7df57e891b3)
+
+Entry Not Found for url: https://huggingface.co/api/models/hhyfred/memwam-diag-v1/tree/main/diag%2Fbank_swap_T_a40?recursive=true&expand=false.
+diag/bank_swap_T_a40 does not exist on "main"
+waiting for diag/bank_swap_T_a40 2026-11-28 17:08:50
+[relay] get hhyfred/memwam-diag-v1/diag/bank_swap_T_a40/bank_swap_T_a40.tgz -> outputs/fullft/bank_swap_T_a40/bank_swap_T_a40.tgz (17125 bytes)
+[relay] get hhyfred/memwam-diag-v1/diag/bank_swap_T_a40/bank_swap_T_a40.tgz.sha256 -> outputs/fullft/bank_swap_T_a40/bank_swap_T_a40.tgz.sha256 (86 bytes)
+bank_swap_T_a40.tgz: OK
+[prep] 2026-11-28 17:13:55 swap_T; disk: /dev/nvme1n1p1  7.0T  6.2T  459G  94% /migration
+swap_T: outputs/memory_v2/closed_loop/scenes_seed42_n100_swap_T/swap_T.json complete (100 scenes, next seed 4300108)
+[text] swap_T: 'Swap the poses of the two T-blocks, including both position and orientation.' -> cache/swap_T_episode_0000000/encodings.pt (62 MiB; 50 training episodes share the instruction)
+[text] swap_T: 2 files checked against dense_swap_T_v1/RELAY_MANIFEST.json (sha256); marker .text_only
+[text] swap_T: 'Swap the poses of the two T-blocks, including both position and orientation.' -> cache/swap_T_episode_0000000/encodings.pt (50 training episodes share it); fingerprint 0e5f5bc1105d
+[prep] 2026-11-28 17:14:08 swap_T ready

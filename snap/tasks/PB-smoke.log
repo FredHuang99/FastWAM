@@ -1,0 +1,21 @@
+
+[queue5] 2026-11-04 20:18:41 $ /opt/mwam/bin/python -m fastwam.memory_v2.online run --checkpoint /workspace/FastWAM-memory2/outputs/memory_v2/a2C_6ep/checkpoints/update_004020.pt --label x7_press_smoke --modes on --scenes /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/scenes_seed17_n10_press_button --output /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/press_smoke --tasks press_button --execute 8 --max-targets 200 --limit 1
+[dense] WARNING runtime packages differ from the dense preparation receipt (cache is read, not re-encoded): {"python": {"recorded": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]", "actual": "3.12.3 (main, Nov  6 2024, 18:32:19) [GCC 13.2.0]"}, "packages.numpy": {"recorded": "2.1.0", "actual": "1.26.4"}, "packages.torch": {"recorded": "2.10.0a0+b558c986e8.nv25.11", "actual": "2.6.0a0+df5bbc09d1.nv24.12"}, "packages.torchvision": {"recorded": "0.25.0a0+7a13ad0f", "actual": "0.20.0a0"}}
+[closed-loop] 2026-11-04 12:20:50 1 scenes x modes ['on'] -> labels {'on': 'x7_press_smoke'}; checkpoint /workspace/FastWAM-memory2/outputs/memory_v2/a2C_6ep/checkpoints/update_004020.pt; T5 on CPU; max_targets=200
+[closed-loop] WARNING dense config was recorded for sm9.0; this GPU is sm8.0: TORCH_EXTENSIONS_DIR -> /workspace/FastWAM/outputs/fused_environment_memory_v2_sm80/torch_extensions (give --extensions-dir to reuse built kernels)
+[closed-loop] 2026-11-04 12:20:51 start x7_press_smoke/on press_button seed=1800000 target_limit=200 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/press_smoke/x7_press_smoke/on/press_button/seed_1800000
+/restore-tmp/dense_joint_v1/data_path.py:16: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /opt/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:206.)
+  return torch.stack([TF.resize(torch.from_numpy(np.ascontiguousarray(a)).permute(2,0,1).float()/255.,
+[decide] 2026-11-04 12:22:06 x7_press_smoke/on press_button seed=1800000 frame=0/200 hist=0 s1=0 policy=8.5s elapsed=18s 
+[decide] 2026-11-04 12:22:43 x7_press_smoke/on press_button seed=1800000 frame=32/200 hist=3 s1=6 policy=3.8s elapsed=54s 
+[decide] 2026-11-04 12:23:21 x7_press_smoke/on press_button seed=1800000 frame=64/200 hist=4 s1=11 policy=3.7s elapsed=93s 
+[decide] 2026-11-04 12:24:00 x7_press_smoke/on press_button seed=1800000 frame=96/200 hist=6 s1=16 policy=3.9s elapsed=131s 
+[decide] 2026-11-04 12:24:37 x7_press_smoke/on press_button seed=1800000 frame=128/200 hist=7 s1=22 policy=3.9s elapsed=169s 
+[decide] 2026-11-04 12:25:15 x7_press_smoke/on press_button seed=1800000 frame=160/200 hist=8 s1=27 policy=3.9s elapsed=206s 
+[decide] 2026-11-04 12:25:53 x7_press_smoke/on press_button seed=1800000 frame=192/200 hist=10 s1=32 policy=3.7s elapsed=244s 
+[closed-loop] 2026-11-04 12:26:00 done  x7_press_smoke/on press_button seed=1800000 success=False targets=200/200 reward=0.0 lift=None  309s
+
+label/mode              task               n  success  95% CI        lift5cm  reward  targets dep_null  dep_off   dep_on  pol_s
+x7_press_smoke/on       press_button       1     0.00  [0.00,0.79]         -    0.00      200        -        -        -    4.0   (1 truncated by --max-targets)
+
+[summary] 1 episodes, 0 open errors -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/press_smoke/SUMMARY.json

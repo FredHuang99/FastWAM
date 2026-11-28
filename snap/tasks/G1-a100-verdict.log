@@ -1,0 +1,24 @@
+
+[queue5] 2026-11-13 16:23:47 $ bash -c cd /workspace/FastWAM-memory2 && RUN=ar_2task TAG=e30 N=50 VERDICT_ONLY=1 bash scripts/fullft/g1_loop.sh && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/migrate/export_stages.py --label ar_2task_e30 --mode on --folders /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/g1 --out closed_loop/check_a100/ar_2task_e30_stages.json --relay diag/a100_ar_2task_e30_stages
+GPU 0: 0 MiB in use; checkout 2cef657 X7-12ep-loop-b: swap 31-50 (wider margin before the ; text source t5; denoiser default
+
+[g1] 2026-11-13 08:23:47 ===== 4 stage table
+# loop_peek 2026-11-13 16:23:47: closed_loop/g1 label ar_2task_e30 (read-only)
+
+== ar_2task_e30: finished episodes with executed_actions.jsonl
+  put_back_block/on            n=50   progress=1.000  lifted=50 centre=50 pressed=50 stage1=50 regrasp=50 returned=50 success=50
+  swap_blocks/on               n=50   progress=0.887  lifted=50 s1=50 s2=48 s3=48 pressed=38 success=34
+  on/put_back_block: n=50 success=50 decisions=43.9 targets=347.7 policy_s=0.7 wall_s=333.7 steps=[10] termination=[('success', 50)]
+  on/swap_blocks: n=50 success=34 decisions=90.0 targets=717.4 policy_s=0.7 wall_s=628.5 steps=[10] termination=[('success', 34), ('official_target_limit', 16)]
+
+== errors: 0 open (seed folders without result.json), 0 in renamed *_interrupted_* folders of earlier attempts
+LOOP_PEEK: /dev/null
+put_back_block: finished 50, success 50, lifted 50, mean progress 1.000
+swap_blocks: finished 50, success 34, lifted 50, mean progress 0.887
+G1 VERDICT: PARTIAL (put 50/50, swap 34/50)
+[g1] 2026-11-13 08:25:05 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/memory_v2/report/G1_ar_2task_e30_verdict_20261113_0823.txt
+[relay] put /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/check_a100/ar_2task_e30_stages.json (33805 bytes) -> hhyfred/memwam-diag-v1/diag/a100_ar_2task_e30_stages/ar_2task_e30_stages.json
+put_back_block: 50 episodes, mean progress 1.000, success 50
+swap_blocks: 50 episodes, mean progress 0.887, success 34
+folders: ['/workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/g1']
+EXPORT: /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/check_a100/ar_2task_e30_stages.json

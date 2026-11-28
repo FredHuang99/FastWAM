@@ -1,0 +1,212 @@
+
+[queue5] 2026-11-06 17:08:53 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/replay_check.py --run v2_press_cf --micro 2
+Traceback (most recent call last):
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/replay_check.py", line 171, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/replay_check.py", line 68, in main
+    c, enc = timed(lambda: model.conditions(batch), torch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/replay_check.py", line 43, in timed
+    out = fn()
+          ^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/replay_check.py", line 68, in <lambda>
+    c, enc = timed(lambda: model.conditions(batch), torch)
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/model.py", line 92, in conditions
+    memory = self.memory.tokenizer(batch["history"], batch["frame_ids"], batch["roles"],
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/modules.py", line 100, in forward
+    x = self.project(self._pool(self.norm(history.to(self.project.weight.dtype))))   # [B, N, P', D]
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/normalization.py", line 217, in forward
+    return F.layer_norm(
+           ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/functional.py", line 2910, in layer_norm
+    return torch.layer_norm(
+           ^^^^^^^^^^^^^^^^^
+TypeError: layer_norm(): argument 'eps' (position 5) must be float, not str
+
+[queue5] 2026-11-06 17:20:31 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/replay_check.py --run v2_press_cf --micro 2
+Traceback (most recent call last):
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/replay_check.py", line 171, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/replay_check.py", line 68, in main
+    c, enc = timed(lambda: model.conditions(batch), torch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/replay_check.py", line 43, in timed
+    out = fn()
+          ^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/replay_check.py", line 68, in <lambda>
+    c, enc = timed(lambda: model.conditions(batch), torch)
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/model.py", line 92, in conditions
+    memory = self.memory.tokenizer(batch["history"], batch["frame_ids"], batch["roles"],
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/modules.py", line 100, in forward
+    x = self.project(self._pool(self.norm(history.to(self.project.weight.dtype))))   # [B, N, P', D]
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/normalization.py", line 217, in forward
+    return F.layer_norm(
+           ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/functional.py", line 2910, in layer_norm
+    return torch.layer_norm(
+           ^^^^^^^^^^^^^^^^^
+TypeError: layer_norm(): argument 'eps' (position 5) must be float, not str
+
+[queue5] 2026-11-06 17:32:10 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/replay_check.py --run v2_press_cf --micro 2
+Traceback (most recent call last):
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/replay_check.py", line 171, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/replay_check.py", line 68, in main
+    c, enc = timed(lambda: model.conditions(batch), torch)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/replay_check.py", line 43, in timed
+    out = fn()
+          ^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/replay_check.py", line 68, in <lambda>
+    c, enc = timed(lambda: model.conditions(batch), torch)
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/model.py", line 92, in conditions
+    memory = self.memory.tokenizer(batch["history"], batch["frame_ids"], batch["roles"],
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/modules.py", line 100, in forward
+    x = self.project(self._pool(self.norm(history.to(self.project.weight.dtype))))   # [B, N, P', D]
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/normalization.py", line 217, in forward
+    return F.layer_norm(
+           ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/functional.py", line 2910, in layer_norm
+    return torch.layer_norm(
+           ^^^^^^^^^^^^^^^^^
+TypeError: layer_norm(): argument 'eps' (position 5) must be float, not str
+
+[queue5] 2026-11-06 20:38:29 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/replay_check.py --run v2_press_cf --micro 2
+Traceback (most recent call last):
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/replay_check.py", line 171, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/replay_check.py", line 136, in main
+    q = mot._build_expert_attention_io(expert=expert, block=expert.blocks[index], x=h, freqs=freqs,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/models/wan22/mot.py", line 193, in _build_expert_attention_io
+    q = block.self_attn.norm_q(block.self_attn.q(attn_input))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/linear.py", line 125, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: mat1 and mat2 must have the same dtype, but got BFloat16 and Float
+
+[queue5] 2026-11-06 20:51:09 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/replay_check.py --run v2_press_cf --micro 2
+Traceback (most recent call last):
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/replay_check.py", line 171, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/replay_check.py", line 136, in main
+    q = mot._build_expert_attention_io(expert=expert, block=expert.blocks[index], x=h, freqs=freqs,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/models/wan22/mot.py", line 193, in _build_expert_attention_io
+    q = block.self_attn.norm_q(block.self_attn.q(attn_input))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/linear.py", line 125, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: mat1 and mat2 must have the same dtype, but got BFloat16 and Float
+
+[queue5] 2026-11-06 21:03:48 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/replay_check.py --run v2_press_cf --micro 2
+Traceback (most recent call last):
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/replay_check.py", line 171, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/replay_check.py", line 136, in main
+    q = mot._build_expert_attention_io(expert=expert, block=expert.blocks[index], x=h, freqs=freqs,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/models/wan22/mot.py", line 193, in _build_expert_attention_io
+    q = block.self_attn.norm_q(block.self_attn.q(attn_input))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/linear.py", line 125, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: mat1 and mat2 must have the same dtype, but got BFloat16 and Float
+
+[queue5] 2026-11-07 06:06:06 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/replay_check.py --run v2_press_cf --micro 2
+# kv_replay acceptance (2026-11-07 06:06:10; config of v2_press_cf)
+
+## 1. Layer replica vs ABModel 'action'
+
+max relative L2 over 30 layers: 2.97e-03 (layer 29); median 1.23e-03 -> **PASS** (<= 2e-2)
+
+## 2. Zero start: on == null == off (bit-identical)
+
+**PASS**
+
+## 3. Gates at 0.5 (test only)
+
+velocity relative change on vs off: 4.429e-02; history attention mass (joint softmax over [history; current] keys, base trajectory): {0: 0.4499, 15: 0.447, 29: 0.4473}
+
+## 4. Cost per micro-batch (no grad)
+
+| path | history frames | conditions s | velocity s | peak GB |
+|---|---|---|---|---|
+| inject (run config) | 9 | 0.72 | 0.29 | 14.0 |
+| kv_replay, gate 0 | 9 | 0.68 | 0.46 | 15.2 |
+| kv_replay, gate 0.5 | 9 | - | 0.52 | - |
+
+**overall: PASS** (checks 1 and 2)
+REPLAY_CHECK: /workspace/FastWAM-memory2/outputs/memory_v2/report/REPLAY_CHECK_20261107_0608.md

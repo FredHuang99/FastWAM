@@ -1,0 +1,2 @@
+/dev/nvme1n1p1  7.0T  6.2T  459G  94% /migration
+overlay         1.8T  1.5T  155G  91% /

@@ -1,0 +1,379 @@
+
+[queue5] 2026-11-06 17:36:44 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/latency_bench.py --checkpoint outputs/memory_v2/a2C_6ep/checkpoints/update_004020.pt --demo task:put_back_block --decisions 12 --steps 10 1 --warmup 2 --label smoke_x7 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/latency_bench.py --run a2C_6ep --set memory_v2.memory.read=kv_replay memory_v2.history.mode=periodic memory_v2.history.period=8 memory_v2.history.max_frames=96 --open-gates --demo task:put_back_block --decisions 12 --steps 10 1 --warmup 2 --label smoke_n1
+[dense] WARNING runtime packages differ from the dense preparation receipt (cache is read, not re-encoded): {"python": {"recorded": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]", "actual": "3.12.3 (main, Nov  6 2024, 18:32:19) [GCC 13.2.0]"}, "packages.numpy": {"recorded": "2.1.0", "actual": "1.26.4"}, "packages.torch": {"recorded": "2.10.0a0+b558c986e8.nv25.11", "actual": "2.6.0a0+df5bbc09d1.nv24.12"}, "packages.torchvision": {"recorded": "0.25.0a0+7a13ad0f", "actual": "0.20.0a0"}}
+[latency] smoke_x7: 89 frames of episode_0000000.hdf5 decoded in 1s; task=put_back_block read=inject history=landmark
+/restore-tmp/dense_joint_v1/data_path.py:16: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /opt/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:206.)
+  return torch.stack([TF.resize(torch.from_numpy(np.ascontiguousarray(a)).permute(2,0,1).float()/255.,
+[decide] 2026-11-06 09:39:18 latency/steps10 frame=0/89 hist=0 s1=0 policy=9.1s elapsed=9s 
+[decide] 2026-11-06 09:39:33 latency/steps10 frame=32/89 hist=3 s1=6 policy=3.6s elapsed=24s 
+[decide] 2026-11-06 09:39:49 latency/steps10 frame=64/89 hist=4 s1=11 policy=3.9s elapsed=39s 
+[latency] steps10    total   3799.3 ms (p90 3940.2)  encode 562.7  conditions 273.4  sample 2962.5  hist 3.8  prefilled 0.0
+[decide] 2026-11-06 09:40:06 latency/steps1 frame=0/89 hist=0 s1=0 policy=6.1s elapsed=6s 
+[decide] 2026-11-06 09:40:11 latency/steps1 frame=32/89 hist=3 s1=6 policy=1.1s elapsed=11s 
+[decide] 2026-11-06 09:40:16 latency/steps1 frame=64/89 hist=4 s1=11 policy=1.1s elapsed=15s 
+[latency] steps1     total   1174.5 ms (p90 1304.4)  encode 587.5  conditions 281.7  sample 304.5  hist 3.8  prefilled 0.0
+[decide] 2026-11-06 09:40:29 latency/nohist10 frame=0/89 hist=0 s1=0 policy=10.3s elapsed=10s 
+[decide] 2026-11-06 09:40:45 latency/nohist10 frame=32/89 hist=0 s1=6 policy=3.7s elapsed=26s 
+[decide] 2026-11-06 09:41:00 latency/nohist10 frame=64/89 hist=0 s1=11 policy=3.6s elapsed=41s 
+[latency] nohist10   total   3770.5 ms (p90 3936.2)  encode 592.2  conditions 275.6  sample 2902.0  hist 0.0  prefilled 0.0
+[decide] 2026-11-06 09:41:18 latency/nohist1 frame=0/89 hist=0 s1=0 policy=6.6s elapsed=7s 
+[decide] 2026-11-06 09:41:22 latency/nohist1 frame=32/89 hist=0 s1=6 policy=1.1s elapsed=11s 
+[decide] 2026-11-06 09:41:27 latency/nohist1 frame=64/89 hist=0 s1=11 policy=1.1s elapsed=16s 
+[latency] nohist1    total   1156.0 ms (p90 1281.5)  encode 579.0  conditions 277.8  sample 298.6  hist 0.0  prefilled 0.0
+# Deployment latency without the simulator: smoke_x7 (2026-11-06 17:41:30)
+
+- checkpoint `outputs/memory_v2/a2C_6ep/checkpoints/update_004020.pt`; read = inject; history = landmark (period 8, cap 48); overrides -
+- demo `/workspace/FastWAM/resources/RMBench/data/demo_clean/put_back_block/aloha_agilex/data/episode_0000000.hdf5` (put_back_block), 89 frames, one decision every 8 frames, 12 decisions per variant, first 2 excluded
+- GPU before the run: `0, NVIDIA A100-SXM4-40GB, 37 %, 38754 MiB, 40960 MiB
+1, NVIDIA A100-SXM4-40GB, 99 %, 22152 MiB, 40960 MiB
+2, NVIDIA A100-SXM4-40GB, 29 %, 38404 MiB, 40960 MiB
+3, NVIDIA A100-SXM4-40GB, 0 %, 16334 MiB, 40960 MiB`
+
+| variant | steps | memory | total ms (mean / p50 / p90) | encode | conditions | sample | speed-up vs steps10 | history frames (mean / last) | prefilled per decision | peak GiB |
+|---|---|---|---|---|---|---|---|---|---|---|
+| steps10 | 10 | on | 3799.3 / 3816.6 / 3940.2 | 562.7 | 273.4 | 2962.5 | 1.00x | 3.8 / 5 | 0.0 | 25.6 |
+| steps1 | 1 | on | 1174.5 / 1144.5 / 1304.4 | 587.5 | 281.7 | 304.5 | 3.23x | 3.8 / 5 | 0.0 | 25.6 |
+| nohist10 | 10 | empty history | 3770.5 / 3812.1 / 3936.2 | 592.2 | 275.6 | 2902.0 | 1.01x | 0.0 / 0 | 0.0 | 25.6 |
+| nohist1 | 1 | empty history | 1156.0 / 1133.8 / 1281.5 | 579.0 | 277.8 | 298.6 | 3.29x | 0.0 / 0 | 0.0 | 25.6 |
+
+Reading: encode = VAE (+ readout prefill for inject / memory_s1) of the frames new at this decision; conditions = current-frame prefill + history (kv_replay: only frames not yet in the episode cache are prefilled); sample = all denoising steps. total also includes batch assembly and host transfers. Memory overhead = steps<K> minus nohist<K>; step-distillation headroom = steps10 / steps1. nohist empties only the memory_v2 history: a memory_s1 base keeps reading its own frames (memory_s1 frames per decision: steps10 9, steps1 9, nohist10 9, nohist1 9).
+
+LATENCY: /workspace/FastWAM-memory2/outputs/memory_v2/report/LATENCY_smoke_x7_20261106_1741.md
+[dense] WARNING runtime packages differ from the dense preparation receipt (cache is read, not re-encoded): {"python": {"recorded": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]", "actual": "3.12.3 (main, Nov  6 2024, 18:32:19) [GCC 13.2.0]"}, "packages.numpy": {"recorded": "2.1.0", "actual": "1.26.4"}, "packages.torch": {"recorded": "2.10.0a0+b558c986e8.nv25.11", "actual": "2.6.0a0+df5bbc09d1.nv24.12"}, "packages.torchvision": {"recorded": "0.25.0a0+7a13ad0f", "actual": "0.20.0a0"}}
+[latency] smoke_n1: 89 frames of episode_0000000.hdf5 decoded in 0s; task=put_back_block read=kv_replay history=periodic
+/restore-tmp/dense_joint_v1/data_path.py:16: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /opt/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:206.)
+  return torch.stack([TF.resize(torch.from_numpy(np.ascontiguousarray(a)).permute(2,0,1).float()/255.,
+[decide] 2026-11-06 09:44:02 latency/steps10 frame=0/89 hist=0 s1=0 policy=8.4s elapsed=8s 
+Traceback (most recent call last):
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/latency_bench.py", line 224, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/latency_bench.py", line 177, in main
+    rows, peak = run_variant(policy, name, steps, cache, instruction, observations, args.execute, task, out_dir)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/latency_bench.py", line 84, in run_variant
+    session.decide(request)
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/online.py", line 323, in decide
+    samples.append((n_k, p.model.sample(conditions, n_k, guidance, memory_mode=self.mode)[0]))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/model.py", line 188, in sample
+    velocity = self.velocity(actions, timestep, conditions, memory_mode).to(actions.dtype)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/model.py", line 127, in velocity
+    return self._velocity_replay(actions, timestep, conditions, memory_mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/model.py", line 168, in _velocity_replay
+    x = self.backbone.block(index, x, aux, conditions.current_kv,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/dense.py", line 282, in block
+    delta = maybe_checkpoint(lambda x_, hk_, hv_: mot_replay_delta(mot, index, x_, aux, keys[index], values[index],
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/replay.py", line 275, in maybe_checkpoint
+    return fn(*args)
+           ^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/dense.py", line 282, in <lambda>
+    delta = maybe_checkpoint(lambda x_, hk_, hv_: mot_replay_delta(mot, index, x_, aux, keys[index], values[index],
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/replay.py", line 243, in mot_replay_delta
+    with_history, without = mot_replay_parts(mot, index, x, aux, current_k, current_v, hist_k, hist_v, hist_valid)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/replay.py", line 256, in mot_replay_parts
+    q, k, v, residual, gate, shift, scale, ffn_gate, _ = mot._build_expert_attention_io(
+                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/models/wan22/mot.py", line 193, in _build_expert_attention_io
+    q = block.self_attn.norm_q(block.self_attn.q(attn_input))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/linear.py", line 125, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: mat1 and mat2 must have the same dtype, but got BFloat16 and Float
+
+[queue5] 2026-11-06 17:54:27 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/latency_bench.py --checkpoint outputs/memory_v2/a2C_6ep/checkpoints/update_004020.pt --demo task:put_back_block --decisions 12 --steps 10 1 --warmup 2 --label smoke_x7 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/latency_bench.py --run a2C_6ep --set memory_v2.memory.read=kv_replay memory_v2.history.mode=periodic memory_v2.history.period=8 memory_v2.history.max_frames=96 --open-gates --demo task:put_back_block --decisions 12 --steps 10 1 --warmup 2 --label smoke_n1
+[dense] WARNING runtime packages differ from the dense preparation receipt (cache is read, not re-encoded): {"python": {"recorded": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]", "actual": "3.12.3 (main, Nov  6 2024, 18:32:19) [GCC 13.2.0]"}, "packages.numpy": {"recorded": "2.1.0", "actual": "1.26.4"}, "packages.torch": {"recorded": "2.10.0a0+b558c986e8.nv25.11", "actual": "2.6.0a0+df5bbc09d1.nv24.12"}, "packages.torchvision": {"recorded": "0.25.0a0+7a13ad0f", "actual": "0.20.0a0"}}
+[latency] smoke_x7: 89 frames of episode_0000000.hdf5 decoded in 1s; task=put_back_block read=inject history=landmark
+/restore-tmp/dense_joint_v1/data_path.py:16: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /opt/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:206.)
+  return torch.stack([TF.resize(torch.from_numpy(np.ascontiguousarray(a)).permute(2,0,1).float()/255.,
+[decide] 2026-11-06 09:56:58 latency/steps10 frame=0/89 hist=0 s1=0 policy=8.1s elapsed=8s 
+[decide] 2026-11-06 09:57:13 latency/steps10 frame=32/89 hist=3 s1=6 policy=3.7s elapsed=23s 
+[decide] 2026-11-06 09:57:28 latency/steps10 frame=64/89 hist=4 s1=11 policy=3.8s elapsed=38s 
+[latency] steps10    total   3759.8 ms (p90 3869.0)  encode 562.9  conditions 276.7  sample 2919.5  hist 3.8  prefilled 0.0
+[decide] 2026-11-06 09:57:45 latency/steps1 frame=0/89 hist=0 s1=0 policy=6.1s elapsed=6s 
+[decide] 2026-11-06 09:57:49 latency/steps1 frame=32/89 hist=3 s1=6 policy=1.1s elapsed=11s 
+[decide] 2026-11-06 09:57:54 latency/steps1 frame=64/89 hist=4 s1=11 policy=1.1s elapsed=15s 
+[latency] steps1     total   1160.0 ms (p90 1254.7)  encode 585.1  conditions 277.2  sample 297.1  hist 3.8  prefilled 0.0
+[decide] 2026-11-06 09:58:06 latency/nohist10 frame=0/89 hist=0 s1=0 policy=8.2s elapsed=8s 
+[decide] 2026-11-06 09:58:21 latency/nohist10 frame=32/89 hist=0 s1=6 policy=3.8s elapsed=23s 
+[decide] 2026-11-06 09:58:36 latency/nohist10 frame=64/89 hist=0 s1=11 policy=3.8s elapsed=39s 
+[latency] nohist10   total   3851.2 ms (p90 4003.8)  encode 600.0  conditions 281.8  sample 2968.8  hist 0.0  prefilled 0.0
+[decide] 2026-11-06 09:58:54 latency/nohist1 frame=0/89 hist=0 s1=0 policy=6.4s elapsed=6s 
+[decide] 2026-11-06 09:58:59 latency/nohist1 frame=32/89 hist=0 s1=6 policy=1.1s elapsed=11s 
+[decide] 2026-11-06 09:59:04 latency/nohist1 frame=64/89 hist=0 s1=11 policy=1.1s elapsed=15s 
+[latency] nohist1    total   1152.2 ms (p90 1268.6)  encode 575.2  conditions 277.5  sample 298.9  hist 0.0  prefilled 0.0
+# Deployment latency without the simulator: smoke_x7 (2026-11-06 17:59:07)
+
+- checkpoint `outputs/memory_v2/a2C_6ep/checkpoints/update_004020.pt`; read = inject; history = landmark (period 8, cap 48); overrides -
+- demo `/workspace/FastWAM/resources/RMBench/data/demo_clean/put_back_block/aloha_agilex/data/episode_0000000.hdf5` (put_back_block), 89 frames, one decision every 8 frames, 12 decisions per variant, first 2 excluded
+- GPU before the run: `0, NVIDIA A100-SXM4-40GB, 34 %, 38754 MiB, 40960 MiB
+1, NVIDIA A100-SXM4-40GB, 99 %, 22152 MiB, 40960 MiB
+2, NVIDIA A100-SXM4-40GB, 29 %, 38404 MiB, 40960 MiB
+3, NVIDIA A100-SXM4-40GB, 0 %, 16334 MiB, 40960 MiB`
+
+| variant | steps | memory | total ms (mean / p50 / p90) | encode | conditions | sample | speed-up vs steps10 | history frames (mean / last) | prefilled per decision | peak GiB |
+|---|---|---|---|---|---|---|---|---|---|---|
+| steps10 | 10 | on | 3759.8 / 3783.0 / 3869.0 | 562.9 | 276.7 | 2919.5 | 1.00x | 3.8 / 5 | 0.0 | 25.6 |
+| steps1 | 1 | on | 1160.0 / 1122.4 / 1254.7 | 585.1 | 277.2 | 297.1 | 3.24x | 3.8 / 5 | 0.0 | 25.6 |
+| nohist10 | 10 | empty history | 3851.2 / 3832.7 / 4003.8 | 600.0 | 281.8 | 2968.8 | 0.98x | 0.0 / 0 | 0.0 | 25.6 |
+| nohist1 | 1 | empty history | 1152.2 / 1132.9 / 1268.6 | 575.2 | 277.5 | 298.9 | 3.26x | 0.0 / 0 | 0.0 | 25.6 |
+
+Reading: encode = VAE (+ readout prefill for inject / memory_s1) of the frames new at this decision; conditions = current-frame prefill + history (kv_replay: only frames not yet in the episode cache are prefilled); sample = all denoising steps. total also includes batch assembly and host transfers. Memory overhead = steps<K> minus nohist<K>; step-distillation headroom = steps10 / steps1. nohist empties only the memory_v2 history: a memory_s1 base keeps reading its own frames (memory_s1 frames per decision: steps10 9, steps1 9, nohist10 9, nohist1 9).
+
+LATENCY: /workspace/FastWAM-memory2/outputs/memory_v2/report/LATENCY_smoke_x7_20261106_1759.md
+[dense] WARNING runtime packages differ from the dense preparation receipt (cache is read, not re-encoded): {"python": {"recorded": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]", "actual": "3.12.3 (main, Nov  6 2024, 18:32:19) [GCC 13.2.0]"}, "packages.numpy": {"recorded": "2.1.0", "actual": "1.26.4"}, "packages.torch": {"recorded": "2.10.0a0+b558c986e8.nv25.11", "actual": "2.6.0a0+df5bbc09d1.nv24.12"}, "packages.torchvision": {"recorded": "0.25.0a0+7a13ad0f", "actual": "0.20.0a0"}}
+[latency] smoke_n1: 89 frames of episode_0000000.hdf5 decoded in 0s; task=put_back_block read=kv_replay history=periodic
+/restore-tmp/dense_joint_v1/data_path.py:16: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /opt/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:206.)
+  return torch.stack([TF.resize(torch.from_numpy(np.ascontiguousarray(a)).permute(2,0,1).float()/255.,
+[decide] 2026-11-06 10:01:21 latency/steps10 frame=0/89 hist=0 s1=0 policy=8.4s elapsed=8s 
+Traceback (most recent call last):
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/latency_bench.py", line 224, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/latency_bench.py", line 177, in main
+    rows, peak = run_variant(policy, name, steps, cache, instruction, observations, args.execute, task, out_dir)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/latency_bench.py", line 84, in run_variant
+    session.decide(request)
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/online.py", line 323, in decide
+    samples.append((n_k, p.model.sample(conditions, n_k, guidance, memory_mode=self.mode)[0]))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/model.py", line 188, in sample
+    velocity = self.velocity(actions, timestep, conditions, memory_mode).to(actions.dtype)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/model.py", line 127, in velocity
+    return self._velocity_replay(actions, timestep, conditions, memory_mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/model.py", line 168, in _velocity_replay
+    x = self.backbone.block(index, x, aux, conditions.current_kv,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/dense.py", line 282, in block
+    delta = maybe_checkpoint(lambda x_, hk_, hv_: mot_replay_delta(mot, index, x_, aux, keys[index], values[index],
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/replay.py", line 275, in maybe_checkpoint
+    return fn(*args)
+           ^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/dense.py", line 282, in <lambda>
+    delta = maybe_checkpoint(lambda x_, hk_, hv_: mot_replay_delta(mot, index, x_, aux, keys[index], values[index],
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/replay.py", line 243, in mot_replay_delta
+    with_history, without = mot_replay_parts(mot, index, x, aux, current_k, current_v, hist_k, hist_v, hist_valid)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/replay.py", line 256, in mot_replay_parts
+    q, k, v, residual, gate, shift, scale, ffn_gate, _ = mot._build_expert_attention_io(
+                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/models/wan22/mot.py", line 193, in _build_expert_attention_io
+    q = block.self_attn.norm_q(block.self_attn.q(attn_input))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/linear.py", line 125, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: mat1 and mat2 must have the same dtype, but got BFloat16 and Float
+
+[queue5] 2026-11-06 18:11:39 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/latency_bench.py --checkpoint outputs/memory_v2/a2C_6ep/checkpoints/update_004020.pt --demo task:put_back_block --decisions 12 --steps 10 1 --warmup 2 --label smoke_x7 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/latency_bench.py --run a2C_6ep --set memory_v2.memory.read=kv_replay memory_v2.history.mode=periodic memory_v2.history.period=8 memory_v2.history.max_frames=96 --open-gates --demo task:put_back_block --decisions 12 --steps 10 1 --warmup 2 --label smoke_n1
+[dense] WARNING runtime packages differ from the dense preparation receipt (cache is read, not re-encoded): {"python": {"recorded": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]", "actual": "3.12.3 (main, Nov  6 2024, 18:32:19) [GCC 13.2.0]"}, "packages.numpy": {"recorded": "2.1.0", "actual": "1.26.4"}, "packages.torch": {"recorded": "2.10.0a0+b558c986e8.nv25.11", "actual": "2.6.0a0+df5bbc09d1.nv24.12"}, "packages.torchvision": {"recorded": "0.25.0a0+7a13ad0f", "actual": "0.20.0a0"}}
+[latency] smoke_x7: 89 frames of episode_0000000.hdf5 decoded in 1s; task=put_back_block read=inject history=landmark
+/restore-tmp/dense_joint_v1/data_path.py:16: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /opt/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:206.)
+  return torch.stack([TF.resize(torch.from_numpy(np.ascontiguousarray(a)).permute(2,0,1).float()/255.,
+[decide] 2026-11-06 10:14:11 latency/steps10 frame=0/89 hist=0 s1=0 policy=8.9s elapsed=9s 
+[decide] 2026-11-06 10:14:26 latency/steps10 frame=32/89 hist=3 s1=6 policy=3.6s elapsed=24s 
+[decide] 2026-11-06 10:14:41 latency/steps10 frame=64/89 hist=4 s1=11 policy=3.9s elapsed=39s 
+[latency] steps10    total   3810.1 ms (p90 3962.0)  encode 569.6  conditions 277.4  sample 2962.4  hist 3.8  prefilled 0.0
+[decide] 2026-11-06 10:15:02 latency/steps1 frame=0/89 hist=0 s1=0 policy=9.3s elapsed=9s 
+[decide] 2026-11-06 10:15:06 latency/steps1 frame=32/89 hist=3 s1=6 policy=1.2s elapsed=14s 
+[decide] 2026-11-06 10:15:11 latency/steps1 frame=64/89 hist=4 s1=11 policy=1.2s elapsed=19s 
+[latency] steps1     total   1235.1 ms (p90 1531.0)  encode 629.9  conditions 287.9  sample 316.5  hist 3.8  prefilled 0.0
+[decide] 2026-11-06 10:15:26 latency/nohist10 frame=0/89 hist=0 s1=0 policy=10.6s elapsed=11s 
+[decide] 2026-11-06 10:15:41 latency/nohist10 frame=32/89 hist=0 s1=6 policy=3.6s elapsed=25s 
+[decide] 2026-11-06 10:15:55 latency/nohist10 frame=64/89 hist=0 s1=11 policy=3.6s elapsed=40s 
+[latency] nohist10   total   3747.5 ms (p90 3917.5)  encode 590.6  conditions 275.5  sample 2880.7  hist 0.0  prefilled 0.0
+[decide] 2026-11-06 10:16:15 latency/nohist1 frame=0/89 hist=0 s1=0 policy=8.3s elapsed=8s 
+[decide] 2026-11-06 10:16:20 latency/nohist1 frame=32/89 hist=0 s1=6 policy=1.1s elapsed=13s 
+[decide] 2026-11-06 10:16:24 latency/nohist1 frame=64/89 hist=0 s1=11 policy=1.1s elapsed=17s 
+[latency] nohist1    total   1158.0 ms (p90 1267.2)  encode 581.5  conditions 278.3  sample 297.2  hist 0.0  prefilled 0.0
+# Deployment latency without the simulator: smoke_x7 (2026-11-06 18:16:28)
+
+- checkpoint `outputs/memory_v2/a2C_6ep/checkpoints/update_004020.pt`; read = inject; history = landmark (period 8, cap 48); overrides -
+- demo `/workspace/FastWAM/resources/RMBench/data/demo_clean/put_back_block/aloha_agilex/data/episode_0000000.hdf5` (put_back_block), 89 frames, one decision every 8 frames, 12 decisions per variant, first 2 excluded
+- GPU before the run: `0, NVIDIA A100-SXM4-40GB, 40 %, 38754 MiB, 40960 MiB
+1, NVIDIA A100-SXM4-40GB, 97 %, 22152 MiB, 40960 MiB
+2, NVIDIA A100-SXM4-40GB, 26 %, 38404 MiB, 40960 MiB
+3, NVIDIA A100-SXM4-40GB, 0 %, 16334 MiB, 40960 MiB`
+
+| variant | steps | memory | total ms (mean / p50 / p90) | encode | conditions | sample | speed-up vs steps10 | history frames (mean / last) | prefilled per decision | peak GiB |
+|---|---|---|---|---|---|---|---|---|---|---|
+| steps10 | 10 | on | 3810.1 / 3838.6 / 3962.0 | 569.6 | 277.4 | 2962.4 | 1.00x | 3.8 / 5 | 0.0 | 25.6 |
+| steps1 | 1 | on | 1235.1 / 1185.0 / 1531.0 | 629.9 | 287.9 | 316.5 | 3.08x | 3.8 / 5 | 0.0 | 25.6 |
+| nohist10 | 10 | empty history | 3747.5 / 3778.2 / 3917.5 | 590.6 | 275.5 | 2880.7 | 1.02x | 0.0 / 0 | 0.0 | 25.6 |
+| nohist1 | 1 | empty history | 1158.0 / 1129.3 / 1267.2 | 581.5 | 278.3 | 297.2 | 3.29x | 0.0 / 0 | 0.0 | 25.6 |
+
+Reading: encode = VAE (+ readout prefill for inject / memory_s1) of the frames new at this decision; conditions = current-frame prefill + history (kv_replay: only frames not yet in the episode cache are prefilled); sample = all denoising steps. total also includes batch assembly and host transfers. Memory overhead = steps<K> minus nohist<K>; step-distillation headroom = steps10 / steps1. nohist empties only the memory_v2 history: a memory_s1 base keeps reading its own frames (memory_s1 frames per decision: steps10 9, steps1 9, nohist10 9, nohist1 9).
+
+LATENCY: /workspace/FastWAM-memory2/outputs/memory_v2/report/LATENCY_smoke_x7_20261106_1816.md
+[dense] WARNING runtime packages differ from the dense preparation receipt (cache is read, not re-encoded): {"python": {"recorded": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]", "actual": "3.12.3 (main, Nov  6 2024, 18:32:19) [GCC 13.2.0]"}, "packages.numpy": {"recorded": "2.1.0", "actual": "1.26.4"}, "packages.torch": {"recorded": "2.10.0a0+b558c986e8.nv25.11", "actual": "2.6.0a0+df5bbc09d1.nv24.12"}, "packages.torchvision": {"recorded": "0.25.0a0+7a13ad0f", "actual": "0.20.0a0"}}
+[latency] smoke_n1: 89 frames of episode_0000000.hdf5 decoded in 0s; task=put_back_block read=kv_replay history=periodic
+/restore-tmp/dense_joint_v1/data_path.py:16: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /opt/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:206.)
+  return torch.stack([TF.resize(torch.from_numpy(np.ascontiguousarray(a)).permute(2,0,1).float()/255.,
+[decide] 2026-11-06 10:18:57 latency/steps10 frame=0/89 hist=0 s1=0 policy=8.0s elapsed=8s 
+Traceback (most recent call last):
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/latency_bench.py", line 224, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/latency_bench.py", line 177, in main
+    rows, peak = run_variant(policy, name, steps, cache, instruction, observations, args.execute, task, out_dir)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/scripts/memory_v2/latency_bench.py", line 84, in run_variant
+    session.decide(request)
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/online.py", line 323, in decide
+    samples.append((n_k, p.model.sample(conditions, n_k, guidance, memory_mode=self.mode)[0]))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/model.py", line 188, in sample
+    velocity = self.velocity(actions, timestep, conditions, memory_mode).to(actions.dtype)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/model.py", line 127, in velocity
+    return self._velocity_replay(actions, timestep, conditions, memory_mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/model.py", line 168, in _velocity_replay
+    x = self.backbone.block(index, x, aux, conditions.current_kv,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/dense.py", line 282, in block
+    delta = maybe_checkpoint(lambda x_, hk_, hv_: mot_replay_delta(mot, index, x_, aux, keys[index], values[index],
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/replay.py", line 275, in maybe_checkpoint
+    return fn(*args)
+           ^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/dense.py", line 282, in <lambda>
+    delta = maybe_checkpoint(lambda x_, hk_, hv_: mot_replay_delta(mot, index, x_, aux, keys[index], values[index],
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/replay.py", line 243, in mot_replay_delta
+    with_history, without = mot_replay_parts(mot, index, x, aux, current_k, current_v, hist_k, hist_v, hist_valid)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/memory_v2/replay.py", line 256, in mot_replay_parts
+    q, k, v, residual, gate, shift, scale, ffn_gate, _ = mot._build_expert_attention_io(
+                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/migration/raid_runtime_v1/payload/memory2/src/fastwam/models/wan22/mot.py", line 193, in _build_expert_attention_io
+    q = block.self_attn.norm_q(block.self_attn.q(attn_input))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/linear.py", line 125, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: mat1 and mat2 must have the same dtype, but got BFloat16 and Float
+
+[queue5] 2026-11-06 21:09:23 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/latency_bench.py --checkpoint outputs/memory_v2/a2C_6ep/checkpoints/update_004020.pt --demo task:put_back_block --decisions 12 --steps 10 1 --warmup 2 --label smoke_x7 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/latency_bench.py --run a2C_6ep --set memory_v2.memory.read=kv_replay memory_v2.history.mode=periodic memory_v2.history.period=8 memory_v2.history.max_frames=96 --open-gates --demo task:put_back_block --decisions 12 --steps 10 1 --warmup 2 --label smoke_n1
+[dense] WARNING runtime packages differ from the dense preparation receipt (cache is read, not re-encoded): {"python": {"recorded": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]", "actual": "3.12.3 (main, Nov  6 2024, 18:32:19) [GCC 13.2.0]"}, "packages.numpy": {"recorded": "2.1.0", "actual": "1.26.4"}, "packages.torch": {"recorded": "2.10.0a0+b558c986e8.nv25.11", "actual": "2.6.0a0+df5bbc09d1.nv24.12"}, "packages.torchvision": {"recorded": "0.25.0a0+7a13ad0f", "actual": "0.20.0a0"}}
+[latency] smoke_x7: 89 frames of episode_0000000.hdf5 decoded in 1s; task=put_back_block read=inject history=landmark
+/restore-tmp/dense_joint_v1/data_path.py:16: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /opt/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:206.)
+  return torch.stack([TF.resize(torch.from_numpy(np.ascontiguousarray(a)).permute(2,0,1).float()/255.,
+[decide] 2026-11-06 13:12:09 latency/steps10 frame=0/89 hist=0 s1=0 policy=9.1s elapsed=9s 
+[decide] 2026-11-06 13:12:25 latency/steps10 frame=32/89 hist=3 s1=6 policy=3.8s elapsed=25s 
+[decide] 2026-11-06 13:12:40 latency/steps10 frame=64/89 hist=4 s1=11 policy=3.9s elapsed=40s 
+[latency] steps10    total   3890.4 ms (p90 4026.3)  encode 579.7  conditions 289.6  sample 3020.3  hist 3.8  prefilled 0.0
+[decide] 2026-11-06 13:12:59 latency/steps1 frame=0/89 hist=0 s1=0 policy=6.6s elapsed=7s 
+[decide] 2026-11-06 13:13:03 latency/steps1 frame=32/89 hist=3 s1=6 policy=1.1s elapsed=11s 
+[decide] 2026-11-06 13:13:08 latency/steps1 frame=64/89 hist=4 s1=11 policy=1.2s elapsed=16s 
+[latency] steps1     total   1185.2 ms (p90 1345.4)  encode 587.9  conditions 288.2  sample 308.4  hist 3.8  prefilled 0.0
+[decide] 2026-11-06 13:13:19 latency/nohist10 frame=0/89 hist=0 s1=0 policy=7.8s elapsed=8s 
+[decide] 2026-11-06 13:13:35 latency/nohist10 frame=32/89 hist=0 s1=6 policy=3.7s elapsed=23s 
+[decide] 2026-11-06 13:13:50 latency/nohist10 frame=64/89 hist=0 s1=11 policy=3.7s elapsed=38s 
+[latency] nohist10   total   3775.6 ms (p90 3942.1)  encode 593.4  conditions 274.2  sample 2907.3  hist 0.0  prefilled 0.0
+[decide] 2026-11-06 13:14:09 latency/nohist1 frame=0/89 hist=0 s1=0 policy=8.4s elapsed=8s 
+[decide] 2026-11-06 13:14:14 latency/nohist1 frame=32/89 hist=0 s1=6 policy=1.1s elapsed=13s 
+[decide] 2026-11-06 13:14:18 latency/nohist1 frame=64/89 hist=0 s1=11 policy=1.1s elapsed=18s 
+[latency] nohist1    total   1154.4 ms (p90 1316.5)  encode 578.5  conditions 276.3  sample 298.9  hist 0.0  prefilled 0.0
+# Deployment latency without the simulator: smoke_x7 (2026-11-06 21:14:22)
+
+- checkpoint `outputs/memory_v2/a2C_6ep/checkpoints/update_004020.pt`; read = inject; history = landmark (period 8, cap 48); overrides -
+- demo `/workspace/FastWAM/resources/RMBench/data/demo_clean/put_back_block/aloha_agilex/data/episode_0000000.hdf5` (put_back_block), 89 frames, one decision every 8 frames, 12 decisions per variant, first 2 excluded
+- GPU before the run: `0, NVIDIA A100-SXM4-40GB, 33 %, 38754 MiB, 40960 MiB
+1, NVIDIA A100-SXM4-40GB, 0 %, 22152 MiB, 40960 MiB
+2, NVIDIA A100-SXM4-40GB, 46 %, 38404 MiB, 40960 MiB
+3, NVIDIA A100-SXM4-40GB, 0 %, 16334 MiB, 40960 MiB`
+
+| variant | steps | memory | total ms (mean / p50 / p90) | encode | conditions | sample | speed-up vs steps10 | history frames (mean / last) | prefilled per decision | peak GiB |
+|---|---|---|---|---|---|---|---|---|---|---|
+| steps10 | 10 | on | 3890.4 / 3907.9 / 4026.3 | 579.7 | 289.6 | 3020.3 | 1.00x | 3.8 / 5 | 0.0 | 25.6 |
+| steps1 | 1 | on | 1185.2 / 1170.6 / 1345.4 | 587.9 | 288.2 | 308.4 | 3.28x | 3.8 / 5 | 0.0 | 25.6 |
+| nohist10 | 10 | empty history | 3775.6 / 3792.3 / 3942.1 | 593.4 | 274.2 | 2907.3 | 1.03x | 0.0 / 0 | 0.0 | 25.6 |
+| nohist1 | 1 | empty history | 1154.4 / 1124.3 / 1316.5 | 578.5 | 276.3 | 298.9 | 3.37x | 0.0 / 0 | 0.0 | 25.6 |
+
+Reading: encode = VAE (+ readout prefill for inject / memory_s1) of the frames new at this decision; conditions = current-frame prefill + history (kv_replay: only frames not yet in the episode cache are prefilled); sample = all denoising steps. total also includes batch assembly and host transfers. Memory overhead = steps<K> minus nohist<K>; step-distillation headroom = steps10 / steps1. nohist empties only the memory_v2 history: a memory_s1 base keeps reading its own frames (memory_s1 frames per decision: steps10 9, steps1 9, nohist10 9, nohist1 9).
+
+LATENCY: /workspace/FastWAM-memory2/outputs/memory_v2/report/LATENCY_smoke_x7_20261106_2114.md
+[dense] WARNING runtime packages differ from the dense preparation receipt (cache is read, not re-encoded): {"python": {"recorded": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]", "actual": "3.12.3 (main, Nov  6 2024, 18:32:19) [GCC 13.2.0]"}, "packages.numpy": {"recorded": "2.1.0", "actual": "1.26.4"}, "packages.torch": {"recorded": "2.10.0a0+b558c986e8.nv25.11", "actual": "2.6.0a0+df5bbc09d1.nv24.12"}, "packages.torchvision": {"recorded": "0.25.0a0+7a13ad0f", "actual": "0.20.0a0"}}
+[latency] smoke_n1: 89 frames of episode_0000000.hdf5 decoded in 0s; task=put_back_block read=kv_replay history=periodic
+/restore-tmp/dense_joint_v1/data_path.py:16: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /opt/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:206.)
+  return torch.stack([TF.resize(torch.from_numpy(np.ascontiguousarray(a)).permute(2,0,1).float()/255.,
+[decide] 2026-11-06 13:16:53 latency/steps10 frame=0/89 hist=0 s1=0 policy=8.5s elapsed=9s 
+[decide] 2026-11-06 13:17:18 latency/steps10 frame=32/89 hist=4 s1=6 policy=6.2s elapsed=33s 
+[decide] 2026-11-06 13:17:43 latency/steps10 frame=64/89 hist=8 s1=11 policy=6.1s elapsed=59s 
+[latency] steps10    total   6225.1 ms (p90 6900.2)  encode 565.0  conditions 613.2  sample 5046.0  hist 6.5  prefilled 1.0
+[decide] 2026-11-06 13:18:13 latency/steps1 frame=0/89 hist=0 s1=0 policy=11.8s elapsed=12s 
+[decide] 2026-11-06 13:18:20 latency/steps1 frame=32/89 hist=4 s1=6 policy=1.6s elapsed=18s 
+[decide] 2026-11-06 13:18:26 latency/steps1 frame=64/89 hist=8 s1=11 policy=1.7s elapsed=25s 
+[latency] steps1     total   1638.0 ms (p90 1762.1)  encode 591.1  conditions 558.7  sample 487.5  hist 6.5  prefilled 1.0
+[decide] 2026-11-06 13:18:42 latency/nohist10 frame=0/89 hist=0 s1=0 policy=10.8s elapsed=11s 
+[decide] 2026-11-06 13:18:57 latency/nohist10 frame=32/89 hist=0 s1=6 policy=3.8s elapsed=26s 
+[decide] 2026-11-06 13:19:13 latency/nohist10 frame=64/89 hist=0 s1=11 policy=4.0s elapsed=42s 
+[latency] nohist10   total   3917.7 ms (p90 4078.9)  encode 614.3  conditions 303.4  sample 2999.2  hist 0.0  prefilled 0.0
+[decide] 2026-11-06 13:19:34 latency/nohist1 frame=0/89 hist=0 s1=0 policy=8.6s elapsed=9s 
+[decide] 2026-11-06 13:19:38 latency/nohist1 frame=32/89 hist=0 s1=6 policy=1.2s elapsed=13s 
+[decide] 2026-11-06 13:19:43 latency/nohist1 frame=64/89 hist=0 s1=11 policy=1.2s elapsed=18s 
+[latency] nohist1    total   1211.3 ms (p90 1350.3)  encode 611.2  conditions 296.7  sample 302.7  hist 0.0  prefilled 0.0
+[decide] 2026-11-06 13:19:58 latency/nocache10 frame=0/89 hist=0 s1=0 policy=11.3s elapsed=11s 
+[decide] 2026-11-06 13:20:24 latency/nocache10 frame=32/89 hist=4 s1=6 policy=6.2s elapsed=37s 
+[decide] 2026-11-06 13:20:48 latency/nocache10 frame=64/89 hist=8 s1=11 policy=6.1s elapsed=61s 
+[latency] nocache10  total   6128.5 ms (p90 6409.1)  encode 563.7  conditions 560.6  sample 5003.5  hist 6.5  prefilled 6.5
+# Deployment latency without the simulator: smoke_n1 (2026-11-06 21:21:06)
+
+- checkpoint `init`; read = kv_replay; history = periodic (period 8, cap 96); overrides ['memory_v2.memory.read=kv_replay', 'memory_v2.history.mode=periodic', 'memory_v2.history.period=8', 'memory_v2.history.max_frames=96']
+- demo `/workspace/FastWAM/resources/RMBench/data/demo_clean/put_back_block/aloha_agilex/data/episode_0000000.hdf5` (put_back_block), 89 frames, one decision every 8 frames, 12 decisions per variant, first 2 excluded
+- GPU before the run: `0, NVIDIA A100-SXM4-40GB, 31 %, 38754 MiB, 40960 MiB
+1, NVIDIA A100-SXM4-40GB, 26 %, 22152 MiB, 40960 MiB
+2, NVIDIA A100-SXM4-40GB, 30 %, 38404 MiB, 40960 MiB
+3, NVIDIA A100-SXM4-40GB, 0 %, 16320 MiB, 40960 MiB`
+
+| variant | steps | memory | total ms (mean / p50 / p90) | encode | conditions | sample | speed-up vs steps10 | history frames (mean / last) | prefilled per decision | peak GiB |
+|---|---|---|---|---|---|---|---|---|---|---|
+| steps10 | 10 | on, cache | 6225.1 / 6206.5 / 6900.2 | 565.0 | 613.2 | 5046.0 | 1.00x | 6.5 / 11 | 1.0 | 25.5 |
+| steps1 | 1 | on, cache | 1638.0 / 1617.6 / 1762.1 | 591.1 | 558.7 | 487.5 | 3.80x | 6.5 / 11 | 1.0 | 25.5 |
+| nohist10 | 10 | empty history | 3917.7 / 3960.3 / 4078.9 | 614.3 | 303.4 | 2999.2 | 1.59x | 0.0 / 0 | 0.0 | 25.5 |
+| nohist1 | 1 | empty history | 1211.3 / 1204.9 / 1350.3 | 611.2 | 296.7 | 302.7 | 5.14x | 0.0 / 0 | 0.0 | 25.5 |
+| nocache10 | 10 | on, no cache | 6128.5 / 6111.4 / 6409.1 | 563.7 | 560.6 | 5003.5 | 1.02x | 6.5 / 11 | 6.5 | 25.5 |
+
+Reading: encode = VAE (+ readout prefill for inject / memory_s1) of the frames new at this decision; conditions = current-frame prefill + history (kv_replay: only frames not yet in the episode cache are prefilled); sample = all denoising steps. total also includes batch assembly and host transfers. Memory overhead = steps<K> minus nohist<K>; step-distillation headroom = steps10 / steps1. nohist empties only the memory_v2 history: a memory_s1 base keeps reading its own frames (memory_s1 frames per decision: steps10 9, steps1 9, nohist10 9, nohist1 9, nocache10 9).
+
+LATENCY: /workspace/FastWAM-memory2/outputs/memory_v2/report/LATENCY_smoke_n1_20261106_2121.md

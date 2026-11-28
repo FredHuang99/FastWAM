@@ -1,0 +1,7 @@
+
+[queue5] 2026-11-12 03:00:13 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/pair_eq.py --name al5_ctrl_put --rule report --divergence --a-folders closed_loop/al5 --a-label x7_al5_ctrl --b-folders closed_loop/official/put_x7_s0 closed_loop/official/put_x7_s1 --b-label a2C6_e6 --tasks put_back_block
+PAIR al5_ctrl_put: rule report; A = ['closed_loop/al5'] x7_al5_ctrl; B = ['closed_loop/official/put_x7_s0', 'closed_loop/official/put_x7_s1'] a2C6_e6
+  put_back_block: paired n=20 (unpaired A 0, B 50); progress A 0.600 B 0.600; delta +0.000 CI [+0.000, +0.000]; lifted A 20/20 B 20/20; success A 4 B 4 (only A 0, only B 0, sign p 1.000) -> report 
+    executed targets: identical in 20/20 scenes; first divergence median target None, earliest None
+report: /workspace/FastWAM-memory2/outputs/fullft/align/PAIR_al5_ctrl_put_20261112_0300.json
+PAIR VERDICT al5_ctrl_put: REPORT ONLY

@@ -1,0 +1,9 @@
+machine a100 host 6e4b37a15066 at 2026-11-29 01:36:57
+ok   auto_pull alive (last log 8 min)
+ok   pool5 dispatcher alive
+ok    GPU 0: 12100 MiB, 0 %
+ok    GPU 1: 29718 MiB, 0 %
+ok    GPU 2: 25694 MiB, 99 %
+ok    GPU 3: 20909 MiB, 0 %
+BAD  disk /migration 94% used (459G free)
+BAD  disk / 91% used (155G free)

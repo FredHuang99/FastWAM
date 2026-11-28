@@ -1,0 +1,11 @@
+
+[queue5] 2026-11-15 12:42:24 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/ledger_verdict.py --folder closed_loop/g1 --arm ar2_prop_e30 --control ar_2task_e30 && PYTHONPATH=src /opt/mwam/bin/python scripts/memory_v2/migrate/export_stages.py --label ar2_prop_e30 --mode on --folders /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/g1 --out closed_loop/check_a100/ar2_prop_e30_stages.json --relay diag/a100_ar2_prop_e30_stages
+swap: paired n=50; success ar2_prop_e30 50 vs ar_2task_e30 34 (only arm 16, only control 0, sign p 0.0000); kept moving after s3 0 vs 12; s3 50 vs 48
+put: paired n=50; success ar2_prop_e30 50 vs ar_2task_e30 50
+LEDGER VERDICT ar2_prop_e30 vs ar_2task_e30: USEFUL; put kept
+-> /workspace/FastWAM-memory2/outputs/memory_v2/report/LEDGER_VERDICT_ar2_prop_e30_vs_ar_2task_e30.json
+[relay] put /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/check_a100/ar2_prop_e30_stages.json (33719 bytes) -> hhyfred/memwam-diag-v1/diag/a100_ar2_prop_e30_stages/ar2_prop_e30_stages.json
+put_back_block: 50 episodes, mean progress 1.000, success 50
+swap_blocks: 50 episodes, mean progress 1.000, success 50
+folders: ['/workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/g1']
+EXPORT: /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/check_a100/ar2_prop_e30_stages.json

@@ -1,0 +1,59 @@
+
+[queue5] 2026-11-03 18:19:26 $ bash -c cd /workspace/FastWAM-memory2 && /opt/mwam/bin/python scripts/memory_v2/press/fetch.py --task press_button
+== 2026-11-03 18:19:26 press fetch: task press_button, out /workspace/FastWAM-memory2/outputs/memory_v2/press
+hub: data/press_button/demo_clean.zip @ 5d8ff21038fb: 1.27 GB (LFS sha256 3305ff9e3c3fc85d58cb280e7897ec761d60f5226ad2394364284001ca1f8cab); free here 1.93 TB
+downloaded /workspace/FastWAM-memory2/outputs/memory_v2/press/download/data/press_button/demo_clean.zip in 1.9 min
+zip: 158 entries; first: ['press_button/', 'press_button/aloha_agilex/', 'press_button/aloha_agilex/data/', 'press_button/aloha_agilex/video/', 'press_button/aloha_agilex/instruction/', 'press_button/aloha_agilex/scene_info.json']
+-> /workspace/FastWAM-memory2/outputs/memory_v2/press/demo_clean/press_button/aloha_agilex: {'data': 50, 'video': 50, 'instruction': 50}; DOWNLOAD.json written
+zip removed (its sha256 is in DOWNLOAD.json; --keep-zip keeps it)
+
+== /workspace/FastWAM-memory2/outputs/memory_v2/press/demo_clean/press_button/DOWNLOAD.json: revision 5d8ff21038fb, zip sha256 3305ff9e3c3fc85d.. (hub 3305ff9e3c3fc85d..), counts {'data': 50, 'video': 50, 'instruction': 50}
+names: episode_0000000.hdf5 .. episode_0000049.hdf5
+
+== hdf5 layout: episode_0000000.hdf5 (press) vs episode_0000000.hdf5 (put_back)  attrs {'source_format': 'RMBench', 'source_path': 'native_collection'}
+  action/left_arm_joint_states                     press ((573, 6), 'float32')              put_back ((347, 6), 'float32')
+  action/left_ee_joint_states                      press ((573, 1), 'float32')              put_back ((347, 1), 'float32')
+  action/left_ee_poses                             press ((573, 7), 'float32')              put_back ((347, 7), 'float32')
+  action/right_arm_joint_states                    press ((573, 6), 'float32')              put_back ((347, 6), 'float32')
+  action/right_ee_joint_states                     press ((573, 1), 'float32')              put_back ((347, 1), 'float32')
+  action/right_ee_poses                            press ((573, 7), 'float32')              put_back ((347, 7), 'float32')
+  additional_info/frequency                        press ((), 'int32')                      put_back ((), 'int32')
+  data_format_version                              press ((), 'object')                     put_back ((), 'object')
+  instructions                                     press ((), 'object')                     put_back ((), 'object')
+  state/left_arm_joint_states                      press ((573, 6), 'float32')              put_back ((347, 6), 'float32')
+  state/left_ee_joint_states                       press ((573, 1), 'float32')              put_back ((347, 1), 'float32')
+  state/left_ee_poses                              press ((573, 7), 'float32')              put_back ((347, 7), 'float32')
+  state/right_arm_joint_states                     press ((573, 6), 'float32')              put_back ((347, 6), 'float32')
+  state/right_ee_joint_states                      press ((573, 1), 'float32')              put_back ((347, 1), 'float32')
+  state/right_ee_poses                             press ((573, 7), 'float32')              put_back ((347, 7), 'float32')
+  vision/cam_head/colors                           press ((573,), '|S18895')                put_back ((347,), '|S19806')
+  vision/cam_head/extrinsics_matrix                press ((573, 4, 4), 'float32')           put_back ((347, 4, 4), 'float32')
+  vision/cam_head/intrinsic_matrix                 press ((573, 3, 3), 'float32')           put_back ((347, 3, 3), 'float32')
+  vision/cam_head/shape                            press ((3,), 'int32')                    put_back ((3,), 'int32')
+  vision/cam_left_wrist/colors                     press ((573,), '|S18956')                put_back ((347,), '|S12126')
+  vision/cam_left_wrist/extrinsics_matrix          press ((573, 4, 4), 'float32')           put_back ((347, 4, 4), 'float32')
+  vision/cam_left_wrist/intrinsic_matrix           press ((573, 3, 3), 'float32')           put_back ((347, 3, 3), 'float32')
+  vision/cam_left_wrist/shape                      press ((3,), 'int32')                    put_back ((3,), 'int32')
+  vision/cam_right_wrist/colors                    press ((573,), '|S12155')                put_back ((347,), '|S15930')
+  vision/cam_right_wrist/extrinsics_matrix         press ((573, 4, 4), 'float32')           put_back ((347, 4, 4), 'float32')
+  vision/cam_right_wrist/intrinsic_matrix          press ((573, 3, 3), 'float32')           put_back ((347, 3, 3), 'float32')
+  vision/cam_right_wrist/shape                     press ((3,), 'int32')                    put_back ((3,), 'int32')
+  vision/cam_third_view/colors                     press ((573,), '|S18385')                put_back ((347,), '|S15176')
+  vision/cam_third_view/extrinsics_matrix          press ((573, 4, 4), 'float32')           put_back ((347, 4, 4), 'float32')
+  vision/cam_third_view/intrinsic_matrix           press ((573, 3, 3), 'float32')           put_back ((347, 3, 3), 'float32')
+  vision/cam_third_view/shape                      press ((3,), 'int32')                    put_back ((3,), 'int32')
+
+== episode lengths (50 files): min 283 median 528.0 max 629; total 26302 frames (put_back demos: see RECORDS length, e.g. 347)
+end-effector pose datasets (to locate presses in the demos): ['action/left_ee_poses', 'action/right_ee_poses', 'state/left_ee_poses', 'state/right_ee_poses']
+
+== instruction episode_0000000.json (50 files): {
+  "seen": [
+    "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  ],
+  "unseen": [
+    "Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm."
+  ]
+}
+videos: 50 (episode_0000000.mp4)
+disk: 1.82 GB in /workspace/FastWAM-memory2/outputs/memory_v2/press/demo_clean/press_button/aloha_agilex
+PRESS_FETCH: /workspace/FastWAM-memory2/outputs/memory_v2/report/PRESS_FETCH_20261103_1821.txt

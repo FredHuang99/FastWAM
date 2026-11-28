@@ -1,0 +1,16 @@
+
+[queue5] 2026-11-20 04:51:32 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e1_verdict.py --task swap_blocks --folder /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/e19 --out outputs/fullft/E19_VERDICT_A100_swap_blocks.json && /opt/mwam/bin/python -c "import json; v = json.load(open('outputs/fullft/E19_VERDICT_A100_swap_blocks.json')); a40 = {'structural': 'NOT IMMUNE BY CONSTRUCTION', 'behaviour': 'IMMUNE', 'airgrasp': 'NOT FOOLED'}; same = {k: v[k] == w for k, w in a40.items()}; print('A100 vs A40:', {k: (v[k], a40[k]) for k in a40}); print('E19:', 'REPLICATED' if all(same.values()) else 'NOT REPLICATED in ' + str([k for k, s in same.items() if not s]))"
+E1 swap_blocks: 50 scenes; folder /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/e19
+model   inject    | valid | vis succ | hid succ | Delta | vis-only hid-only | p      | entries in injected frames (vis)
+AR      pause     |    48 |       34 |       35 |    -1 |        0        1 | 1.0000 | zero-entry share 1.00, mean 0.0
+AR      fidget    |     0 |        0 |        0 |    +0 |        0        0 | 1.0000 | zero-entry share nan, mean None
+AR      airgrasp  |     0 |        0 |        0 |    +0 |        0        0 | 1.0000 | zero-entry share nan, mean None
+ledger  pause     |    50 |       50 |       50 |    +0 |        0        0 | 1.0000 | zero-entry share 0.72, mean 0.28
+ledger  fidget    |    50 |       50 |       50 |    +0 |        0        0 | 1.0000 | zero-entry share 0.72, mean 0.28
+ledger  airgrasp  |    50 |       49 |       50 |    -1 |        0        1 | 1.0000 | zero-entry share 0.40, mean 0.6
+STRUCTURAL (ledger, pause + fidget, vis): NOT IMMUNE BY CONSTRUCTION
+BEHAVIOUR (ledger, pause + fidget): IMMUNE
+AIRGRASP (ledger): NOT FOOLED
+AR: reported only (rows above)
+A100 vs A40: {'structural': ('NOT IMMUNE BY CONSTRUCTION', 'NOT IMMUNE BY CONSTRUCTION'), 'behaviour': ('IMMUNE', 'IMMUNE'), 'airgrasp': ('NOT FOOLED', 'NOT FOOLED')}
+E19: REPLICATED

@@ -1,0 +1,4 @@
+
+[queue5] 2026-11-20 17:55:34 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/stress_smoke_check.py e22smoke ar2_clock_e30_p1024_vis swap_blocks 1024
+SMOKE swap_blocks seed 4300000: finished True, success False, injections 1, {"frame": 352, "k": 1024, "arm": "history", "active_arm": 1, "open_frame": 317, "shown": 1024, "displacement_m": 0.0, "counters_changed": [], "arm_return_rad": 0.004986166954040527}
+SMOKE: PASS

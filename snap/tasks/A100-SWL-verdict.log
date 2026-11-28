@@ -1,0 +1,7 @@
+
+[queue5] 2026-11-22 03:14:56 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/swap_lag_verdict.py && /opt/hf-tools/bin/python scripts/memory_v2/migrate/relay.py put outputs/fullft/SWAP_LAG_VERDICT.json --prefix diag/swap_lag
+as trained: {'n': 50, 'success': 50}
+lag 16: {'n': 50, 'success': 50, 'pairs': 50, 'drop': 0, 'only_as_trained': 0, 'only_lag': 0, 'p': 1.0, 'word': 'TOLERATED'}
+lag 32: {'n': 50, 'success': 49, 'pairs': 50, 'drop': 1, 'only_as_trained': 1, 'only_lag': 0, 'p': 1.0, 'word': 'TOLERATED'}
+lag 64: {'n': 50, 'success': 36, 'pairs': 50, 'drop': 14, 'only_as_trained': 14, 'only_lag': 0, 'p': 0.0001220703125, 'word': 'HURT'}
+[relay] put outputs/fullft/SWAP_LAG_VERDICT.json (538 bytes) -> hhyfred/memwam-diag-v1/diag/swap_lag/SWAP_LAG_VERDICT.json
