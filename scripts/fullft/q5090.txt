@@ -24,6 +24,9 @@ dev-rearr_pw_s18_e30 | gpu1 | bash scripts/fullft/relay_has.sh rearr_pw_s18_e30 
 # plan v22 diagnostic 7(c): rearrange press-window action loss of 13 checkpoints on the 5 held-out demos (GPU 1, read-only;
 # a checkpoint found nowhere is skipped, never waited for); the closed-loop counts are put beside it at reading time.
 diag7c | gpu1 | test -s outputs/fullft/events/events_rearrange_blocks_v3c.json | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); CUDA_VISIBLE_DEVICES=$GPU PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag7c_5090.py
+# RoboMME step 2 (plan v22 6.6): normalised proprio / actions keys in the RoboMME dense root (min/max from its train
+# split, absolute actions; stops before writing anything if an orientation angle wraps). CPU.
+robomme-norm | cpu | test -s outputs/robomme/dense_robomme_v1/RECORDS.json | PYTHONPATH=src /opt/mwam/bin/python scripts/robomme/robomme_norm.py
 c25desc-close-obs_s800_e10 | gpu1 | bash scripts/fullft/relay_has.sh obs_s800_e10 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PART=close RUN=obs_s800 TAG=e10 bash scripts/fullft/card25desc_5090.sh
 # plan v22 diagnostic 11 needs ar2_prop_s18_e10 on the A40: it was moved here by offload batch 2 (user 14:45); put it
 # back on the relay (sha256 checked first; the A40 task A40-fetch-ar2_prop_s18-e10 waits for it).
