@@ -413,7 +413,7 @@ tasks:
 # MWAM_NOISE_SALT=r2 (closed_loop/r2; ar2_prop e30's r2 side exists), then v20_verdict.py ar2v3c pools 200 pairs.
 
 
-# 11-28 18:30 (Opus; code audit): card 23's registered pre-set extension (r2, 200 pairs) was not queued. Released only
+# 11-28 16:24 (Opus; code audit): card 23's registered pre-set extension (r2, 200 pairs) was not queued. Released only
 # if V21_C23.json still has an unresolved UNCERTAIN part (gate); ar2_v3c's put r2 side exists (card 2), its swap r2 not.
 
 - id: A40-V21-C23-gate-r2
@@ -9388,10 +9388,10 @@ tasks:
 # 1-100, closed_loop/v22), verdict v22_verdict.py c36 / c36b (synthetic data tested), the seed-18 runs described, the
 # pre-set r2 extension released only when the verdict says UNCERTAIN (gate). Verdict evaluations sit above diagnostic 8.
 
-# 11-28 18:50 (Opus): plan v22 card 31 (press_cd, countdown; a diagnostic, never a main-table entry; registered 11-28 in gaas_queue.txt above press_cd): fetch, smoke, MAIN (press_button 1-100, closed_loop/v22; the scene's counts in the
+# 11-28 16:52 (Opus): plan v22 card 31 (press_cd, countdown; a diagnostic, never a main-table entry; registered 11-28 in gaas_queue.txt above press_cd): fetch, smoke, MAIN (press_button 1-100, closed_loop/v22; the scene's counts in the
 # instruction and the true presses in the record: MWAM_TOLD_COUNTS=1, MWAM_LEDGER=oracle), v22_verdict.py c31 (written and
 # synthetic-tested before any episode), the pre-set r2 extension released only on UNCERTAIN. Among the v22 MAINs.
-# 11-28 19:30 (Opus): plan v22 new cards' MAIN evaluations, placed among the v22 MAINs (v22b 1.2: new verdict evaluations
+# 11-28 17:02 (Opus): plan v22 new cards' MAIN evaluations, placed among the v22 MAINs (v22b 1.2: new verdict evaluations
 # first): card 27 (H200 pair) and 27b (H100 pair) training length, card 30 obs_cf800, card 32 rearr_joint3, card 37
 # swapT_joint3_ow; verdicts v22_verdict.py c27 / c27b / c30 / c32 / c37 (synthetic-tested before any episode); pre-set
 # r2 extensions released only on UNCERTAIN. Fetch tasks wait for the exports (cards 32 / 37 / 27 open only if their
@@ -16709,7 +16709,7 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag8.py report"
   pass_if: "m['rc'] == 0"
 
-# 11-28 18:05 (Opus): plan v22 rev. 1 diagnostic 7(a) (CPU, existing episodes; its majority_above feeds card 32's gate) and diagnostic 9
+# 11-28 16:44 (Opus): plan v22 rev. 1 diagnostic 7(a) (CPU, existing episodes; its majority_above feeds card 32's gate) and diagnostic 9
 # (record off at test time, both seeds of rearr_pw e30, scenes 1-50), after diagnostic 8 (v22b 1.2 order).
 # Reports scripts/fullft/diag7a.py / diag_v22.py diag9, written before any of these numbers.
 - id: A40-d7a-report
@@ -16901,7 +16901,7 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag_v22.py diag9"
   pass_if: "m['rc'] == 0"
 
-# 11-28 18:50 (Opus): plan v22 card 31 (press_cd, countdown; a diagnostic, never a main-table entry; registered 11-28 in gaas_queue.txt above press_cd): e10 / e20 described (plan v22b 1.2: lagging tasks' e10 / e20 on 100 scenes), after
+# 11-28 16:52 (Opus): plan v22 card 31 (press_cd, countdown; a diagnostic, never a main-table entry; registered 11-28 in gaas_queue.txt above press_cd): e10 / e20 described (plan v22b 1.2: lagging tasks' e10 / e20 on 100 scenes), after
 # diagnostic 9.
 - id: A40-fetch-press_cd-e10
   lane: a40cpu
@@ -17261,7 +17261,7 @@ tasks:
   output: closed_loop/v22
   env: {MWAM_TEXT_SOURCE: "cache", MWAM_TOLD_COUNTS: "1", MWAM_LEDGER: "oracle"}
 
-# 11-28 19:30 (Opus): plan v22 described evaluations of the new cards (v22b 1.2: after the verdict evaluations and
+# 11-28 17:02 (Opus): plan v22 described evaluations of the new cards (v22b 1.2: after the verdict evaluations and
 # diagnostics 8-9): card 27 e45, card 28 (two arms seed 18), card 29 (ranking seed 18, e20 / e30), card 33 (B1's two
 # arms seed 18), card 35 (co-training seed 18), cards 32 / 37 e10 / e20, the fillers; reports v22_verdict.py desc.
 - id: A40-fetch-rearr_pw_long_s18-e45
@@ -55818,7 +55818,7 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v21_verdict.py fs"
   pass_if: "m['rc'] == 0"
 
-# 11-28 18:05 (Opus): plan v22 rev. 1 diagnostic 11 (seed 18 of the two-task body record: e30 put / swap 1-100, e10 swap 1-100; ar2_v3c's
+# 11-28 16:44 (Opus): plan v22 rev. 1 diagnostic 11 (seed 18 of the two-task body record: e30 put / swap 1-100, e10 swap 1-100; ar2_v3c's
 # put failures by stage) and diagnostic 10 (ranking_v3a reading audit on diagnostic 2's 30 scenes), after the described
 # evaluations (v22b 1.2 order). ar2_prop_s18_e10 was moved to the 5090 (offload batch 2, user 14:45); the 5090 puts it
 # back on the relay (q5090 ar2s18-e10-relay). Reports scripts/fullft/diag_v22.py diag11 / diag10, written before.
@@ -58783,7 +58783,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
 
 
-# 11-28 18:10 (Opus; plan v22b part 3 1.2 / check 5): does the A100's pool5 (dispatcher alive, lanes loop / train /
+# 11-28 16:21 (Opus; plan v22b part 3 1.2 / check 5): does the A100's pool5 (dispatcher alive, lanes loop / train /
 # extra / gpu0 / cpu; GPUs 0 and 3 free) take a task without a restart? One episode of an export it already holds; the
 # A100 only describes, never a verdict. If this finishes, user step 4 is not needed.
 - id: A100-v22-smoke
@@ -58802,7 +58802,7 @@ tasks:
   env: {MWAM_TEXT_SOURCE: "cache"}
   pass_if: "m.get('episodes', 0) >= 1"
 
-# 11-28 19:00 (Opus; the 11-28 code audit, user informed 16:3x): E22a's hidden arm re-run. The 25 A100-E22-*-hid-*
+# 11-28 16:55 (Opus; the 11-28 code audit, user informed 16:3x): E22a's hidden arm re-run. The 25 A100-E22-*-hid-*
 # cards ran with --stress event:pause:L:history = the VISIBLE arm (every other hidden cell of E1 / E5 / E19 uses
 # :hidden), so the 256 / 1024 '_hid' cells and the FLOOR NOT MET read from them are void. Same cards with :hidden, new
 # labels '_hid2' (nothing old is touched or overwritten), then pack hid2 -> the A40 -> e22_verdict.py --part a

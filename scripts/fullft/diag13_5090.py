@@ -1,4 +1,4 @@
-"""Plan v22 diagnostic 13 (appendix of claude/MemWAM_Plan_v22_20261128.md), 11-28 18:20 Opus, written before any of
+"""Plan v22 diagnostic 13 (appendix of claude/MemWAM_Plan_v22_20261128.md), 11-28 17:05 Opus, written before any of
 these counts is read. CPU, the 5090 (the official demos are there). DESCRIBED ONLY.
 Per task: how many times its KEY DECISION occurs in each of the 50 official demos, from the demos' own proprioceptive
 events (events_stats.py / events.py rule A, recomputed here from the hdf5 with the detector the events files use), next to

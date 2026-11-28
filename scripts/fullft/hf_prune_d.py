@@ -1,4 +1,4 @@
-"""Relay auto-clean, rule D (11-28 19:45, Opus; plan v22 1.12 decision D, user 11-28 15:52: "你的默认我同意" to the
+"""Relay auto-clean, rule D (11-28 17:04, Opus; plan v22 1.12 decision D, user 11-28 15:52: "你的默认我同意" to the
 recommendation: also delete intermediate exports that have a sha256-checked copy on the 5090 and that no pending task
 uses, when the relay is above 75 %; final exports are never deleted). Runs on the 5090 (its huggingface_hub login; the
 token is never printed). Nothing happens unless HF storage is above 75 % of the quota (HF_USAGE.json, refreshed by

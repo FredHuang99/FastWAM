@@ -9,7 +9,7 @@ seed-42 banks, default noise; new runs' episodes in closed_loop/v22 (r2 noise in
   c36b  card 36b: D = success(swapT_ar_ow e30) - success(swapT_ar e30, closed_loop/e6), swap_T 1-100; SESOI +0.15:
         RELEASE WEIGHTING HELPS (NO RECORD) / NO HELP / UNCERTAIN (same extension). Described: swapT_ar_ow_s18 e30.
 Each verdict is about these two checkpoints (plan v21 5.5).
-  c31   card 31 (press_cd, 11-28 18:40, before any run): see c31() -- COMPARISON IS THE BOTTLENECK / NOT THE COMPARISON
+  c31   card 31 (press_cd, 11-28 16:52, before any run): see c31() -- COMPARISON IS THE BOTTLENECK / NOT THE COMPARISON
   python3 scripts/fullft/v22_verdict.py c36 | c36b | c31   -> outputs/fullft/V22_C36.json / V22_C36B.json / V22_C31.json
   python3 scripts/fullft/v22_verdict.py gate c36 UNCERTAIN   -> exit 0 if V22_C36.json's verdict starts with UNCERTAIN
         (100 pairs), else exit 3: releases the pre-set r2 extension tasks on the A40 through requires_pass

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Plan v22 (Fable, rev. 1) diagnostics 9, 10 and 11, A40 reports (appendix of claude/MemWAM_Plan_v22_20261128.md).
-Written 11-28 18:00 (Opus) before any episode of these runs. Read-only, CPU, DESCRIBED ONLY (no verdict word).
+Written 11-28 16:44 (Opus) before any episode of these runs. Read-only, CPU, DESCRIBED ONLY (no verdict word).
   diag9   rearrange, the two seeds of rearr_pw e30 (seed 17 v20:rearr_pw_e30, 93; seed 18 v21:rearr_pw_s18_e30, 61) with
           the record switched off at test time (MWAM_LEDGER=off), scenes 1-50 (closed_loop/d9): success and rearr_split
           classes beside the unmodified episodes of the same scenes. Written before (plan v22 2.3): if the record is read,

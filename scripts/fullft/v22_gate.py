@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Plan v22 (Fable, rev. 1) decision tree as go tests (v22b part 3 section 3, written 11-28 18:00 by Opus before any of
+"""Plan v22 (Fable, rev. 1) decision tree as go tests (v22b part 3 section 3, written 11-28 16:20 by Opus before any of
 these results exists). Exit 0 = the gate is open (the run may start), 1 = closed. Parses the A40 verdict JSONs with
 json (never grep). Where they come from: on the A40 its own outputs/fullft; anywhere else the A40's results branch
 (git fetch origin +results-a40, then `git show <ref>:snap/fullft/<file>`), refreshed at most every 10 minutes.
