@@ -8850,6 +8850,1352 @@ tasks:
 
 # described checkpoints after every MAIN evaluation (plan v20 section 5): swapT_long e45, ar2_v3c e10 (swap)
 
+# 11-28 17:50 (Opus; plan v22 rev. 1 cards 36 / 36b, registered c3787d8 before any run): fetch, smoke, MAIN (swap_T
+# 1-100, closed_loop/v22), verdict v22_verdict.py c36 / c36b (synthetic data tested), the seed-18 runs described, the
+# pre-set r2 extension released only when the verdict says UNCERTAIN (gate). Verdict evaluations sit above diagnostic 8.
+
+- id: A40-fetch-swapT_ow-e30
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 240
+  hypothesis: "fetch swapT_ow_e30 from the relay (plan v22 card 36, old / new H200; sha256 checked; waits until it is there)"
+  command: "RUN=swapT_ow TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-v22-swapT_ow-smoke
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_ow-e30]
+  requires_pass: [A40-fetch-swapT_ow-e30]
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "smoke: swapT_ow_e30, swap_T scene 1, one episode finishes on the A40 (closed_loop/v22smoke)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_e30/export_e30.pt
+  label: swapT_ow_e30_smoke
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "1"]
+  output: closed_loop/v22smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+  pass_if: "m.get('episodes', 0) >= 1"
+
+- id: A40-v22-swapT_ow-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-v22-swapT_ow-smoke]
+  requires_pass: [A40-v22-swapT_ow-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 MAIN (registered c3787d8): swapT_ow_e30 on swap_T 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_e30/export_e30.pt
+  label: swapT_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ow-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-v22-swapT_ow-smoke]
+  requires_pass: [A40-v22-swapT_ow-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 MAIN (registered c3787d8): swapT_ow_e30 on swap_T 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_e30/export_e30.pt
+  label: swapT_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ow-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-v22-swapT_ow-smoke]
+  requires_pass: [A40-v22-swapT_ow-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 MAIN (registered c3787d8): swapT_ow_e30 on swap_T 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_e30/export_e30.pt
+  label: swapT_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ow-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-v22-swapT_ow-smoke]
+  requires_pass: [A40-v22-swapT_ow-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 MAIN (registered c3787d8): swapT_ow_e30 on swap_T 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_e30/export_e30.pt
+  label: swapT_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ow-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-v22-swapT_ow-smoke]
+  requires_pass: [A40-v22-swapT_ow-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 MAIN (registered c3787d8): swapT_ow_e30 on swap_T 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_e30/export_e30.pt
+  label: swapT_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ow-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-v22-swapT_ow-smoke]
+  requires_pass: [A40-v22-swapT_ow-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 MAIN (registered c3787d8): swapT_ow_e30 on swap_T 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_e30/export_e30.pt
+  label: swapT_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ow-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-v22-swapT_ow-smoke]
+  requires_pass: [A40-v22-swapT_ow-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 MAIN (registered c3787d8): swapT_ow_e30 on swap_T 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_e30/export_e30.pt
+  label: swapT_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ow-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-v22-swapT_ow-smoke]
+  requires_pass: [A40-v22-swapT_ow-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 MAIN (registered c3787d8): swapT_ow_e30 on swap_T 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_e30/export_e30.pt
+  label: swapT_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ow-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-v22-swapT_ow-smoke]
+  requires_pass: [A40-v22-swapT_ow-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 MAIN (registered c3787d8): swapT_ow_e30 on swap_T 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_e30/export_e30.pt
+  label: swapT_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ow-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-v22-swapT_ow-smoke]
+  requires_pass: [A40-v22-swapT_ow-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 MAIN (registered c3787d8): swapT_ow_e30 on swap_T 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_e30/export_e30.pt
+  label: swapT_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-V22-C36-verdict
+  lane: a40cpu
+  kind: shell
+  after: [A40-v22-swapT_ow-s0, A40-v22-swapT_ow-s1, A40-v22-swapT_ow-s2, A40-v22-swapT_ow-s3, A40-v22-swapT_ow-s4, A40-v22-swapT_ow-s5, A40-v22-swapT_ow-s6, A40-v22-swapT_ow-s7, A40-v22-swapT_ow-s8, A40-v22-swapT_ow-s9]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v22 card 36 verdict: v22_verdict.py c36 (SESOI +0.15); log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v22_verdict.py c36"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-V22-C36-gate-r2
+  lane: a40cpu
+  kind: shell
+  after: [A40-V22-C36-verdict]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v22 card 36: release the pre-set r2 extension only if the verdict is UNCERTAIN (exit 0) -- otherwise hold (exit 3)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v22_verdict.py gate c36 UNCERTAIN"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-v22-swapT_ow-r2-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36-gate-r2]
+  requires_pass: [A40-V22-C36-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 pre-set extension: swapT_ow_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_e30/export_e30.pt
+  label: swapT_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_ow-r2-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36-gate-r2]
+  requires_pass: [A40-V22-C36-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 pre-set extension: swapT_ow_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_e30/export_e30.pt
+  label: swapT_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_ow-r2-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36-gate-r2]
+  requires_pass: [A40-V22-C36-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 pre-set extension: swapT_ow_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_e30/export_e30.pt
+  label: swapT_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_ow-r2-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36-gate-r2]
+  requires_pass: [A40-V22-C36-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 pre-set extension: swapT_ow_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_e30/export_e30.pt
+  label: swapT_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_ow-r2-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36-gate-r2]
+  requires_pass: [A40-V22-C36-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 pre-set extension: swapT_ow_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_e30/export_e30.pt
+  label: swapT_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_ow-r2-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36-gate-r2]
+  requires_pass: [A40-V22-C36-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 pre-set extension: swapT_ow_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_e30/export_e30.pt
+  label: swapT_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_ow-r2-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36-gate-r2]
+  requires_pass: [A40-V22-C36-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 pre-set extension: swapT_ow_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_e30/export_e30.pt
+  label: swapT_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_ow-r2-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36-gate-r2]
+  requires_pass: [A40-V22-C36-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 pre-set extension: swapT_ow_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_e30/export_e30.pt
+  label: swapT_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_ow-r2-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36-gate-r2]
+  requires_pass: [A40-V22-C36-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 pre-set extension: swapT_ow_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_e30/export_e30.pt
+  label: swapT_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_ow-r2-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36-gate-r2]
+  requires_pass: [A40-V22-C36-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 pre-set extension: swapT_ow_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_e30/export_e30.pt
+  label: swapT_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_arprop_h2-r2-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36-gate-r2]
+  requires_pass: [A40-V22-C36-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 pre-set extension: swapT_arprop_h2_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_arprop_h2_e30/export_e30.pt
+  label: swapT_arprop_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_arprop_h2-r2-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36-gate-r2]
+  requires_pass: [A40-V22-C36-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 pre-set extension: swapT_arprop_h2_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_arprop_h2_e30/export_e30.pt
+  label: swapT_arprop_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_arprop_h2-r2-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36-gate-r2]
+  requires_pass: [A40-V22-C36-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 pre-set extension: swapT_arprop_h2_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_arprop_h2_e30/export_e30.pt
+  label: swapT_arprop_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_arprop_h2-r2-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36-gate-r2]
+  requires_pass: [A40-V22-C36-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 pre-set extension: swapT_arprop_h2_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_arprop_h2_e30/export_e30.pt
+  label: swapT_arprop_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_arprop_h2-r2-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36-gate-r2]
+  requires_pass: [A40-V22-C36-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 pre-set extension: swapT_arprop_h2_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_arprop_h2_e30/export_e30.pt
+  label: swapT_arprop_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_arprop_h2-r2-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36-gate-r2]
+  requires_pass: [A40-V22-C36-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 pre-set extension: swapT_arprop_h2_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_arprop_h2_e30/export_e30.pt
+  label: swapT_arprop_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_arprop_h2-r2-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36-gate-r2]
+  requires_pass: [A40-V22-C36-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 pre-set extension: swapT_arprop_h2_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_arprop_h2_e30/export_e30.pt
+  label: swapT_arprop_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_arprop_h2-r2-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36-gate-r2]
+  requires_pass: [A40-V22-C36-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 pre-set extension: swapT_arprop_h2_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_arprop_h2_e30/export_e30.pt
+  label: swapT_arprop_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_arprop_h2-r2-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36-gate-r2]
+  requires_pass: [A40-V22-C36-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 pre-set extension: swapT_arprop_h2_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_arprop_h2_e30/export_e30.pt
+  label: swapT_arprop_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_arprop_h2-r2-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36-gate-r2]
+  requires_pass: [A40-V22-C36-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 pre-set extension: swapT_arprop_h2_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_arprop_h2_e30/export_e30.pt
+  label: swapT_arprop_h2_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-V22-C36-ext-verdict
+  lane: a40cpu
+  kind: shell
+  after: [A40-v22-swapT_ow-r2-s0, A40-v22-swapT_ow-r2-s1, A40-v22-swapT_ow-r2-s2, A40-v22-swapT_ow-r2-s3, A40-v22-swapT_ow-r2-s4, A40-v22-swapT_ow-r2-s5, A40-v22-swapT_ow-r2-s6, A40-v22-swapT_ow-r2-s7, A40-v22-swapT_ow-r2-s8, A40-v22-swapT_ow-r2-s9, A40-v22-swapT_arprop_h2-r2-s0, A40-v22-swapT_arprop_h2-r2-s1, A40-v22-swapT_arprop_h2-r2-s2, A40-v22-swapT_arprop_h2-r2-s3, A40-v22-swapT_arprop_h2-r2-s4, A40-v22-swapT_arprop_h2-r2-s5, A40-v22-swapT_arprop_h2-r2-s6, A40-v22-swapT_arprop_h2-r2-s7, A40-v22-swapT_arprop_h2-r2-s8, A40-v22-swapT_arprop_h2-r2-s9]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v22 card 36: the verdict again with the r2 pairs pooled (200 pairs, the same rule)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v22_verdict.py c36"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fetch-swapT_ow_s18-e30
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 240
+  hypothesis: "fetch swapT_ow_s18_e30 from the relay (plan v22 card 36 seed 18, described; sha256 checked; waits until it is there)"
+  command: "RUN=swapT_ow_s18 TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-v22-swapT_ow_s18-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_ow_s18-e30]
+  requires_pass: [A40-fetch-swapT_ow_s18-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 described: swapT_ow_s18_e30 on swap_T 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_s18_e30/export_e30.pt
+  label: swapT_ow_s18_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ow_s18-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_ow_s18-e30]
+  requires_pass: [A40-fetch-swapT_ow_s18-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 described: swapT_ow_s18_e30 on swap_T 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_s18_e30/export_e30.pt
+  label: swapT_ow_s18_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ow_s18-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_ow_s18-e30]
+  requires_pass: [A40-fetch-swapT_ow_s18-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 described: swapT_ow_s18_e30 on swap_T 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_s18_e30/export_e30.pt
+  label: swapT_ow_s18_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ow_s18-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_ow_s18-e30]
+  requires_pass: [A40-fetch-swapT_ow_s18-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 described: swapT_ow_s18_e30 on swap_T 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_s18_e30/export_e30.pt
+  label: swapT_ow_s18_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ow_s18-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_ow_s18-e30]
+  requires_pass: [A40-fetch-swapT_ow_s18-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 described: swapT_ow_s18_e30 on swap_T 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_s18_e30/export_e30.pt
+  label: swapT_ow_s18_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ow_s18-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_ow_s18-e30]
+  requires_pass: [A40-fetch-swapT_ow_s18-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 described: swapT_ow_s18_e30 on swap_T 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_s18_e30/export_e30.pt
+  label: swapT_ow_s18_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ow_s18-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_ow_s18-e30]
+  requires_pass: [A40-fetch-swapT_ow_s18-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 described: swapT_ow_s18_e30 on swap_T 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_s18_e30/export_e30.pt
+  label: swapT_ow_s18_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ow_s18-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_ow_s18-e30]
+  requires_pass: [A40-fetch-swapT_ow_s18-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 described: swapT_ow_s18_e30 on swap_T 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_s18_e30/export_e30.pt
+  label: swapT_ow_s18_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ow_s18-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_ow_s18-e30]
+  requires_pass: [A40-fetch-swapT_ow_s18-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 described: swapT_ow_s18_e30 on swap_T 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_s18_e30/export_e30.pt
+  label: swapT_ow_s18_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ow_s18-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_ow_s18-e30]
+  requires_pass: [A40-fetch-swapT_ow_s18-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36 described: swapT_ow_s18_e30 on swap_T 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ow_s18_e30/export_e30.pt
+  label: swapT_ow_s18_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-V22-C36-s18-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-v22-swapT_ow_s18-s0, A40-v22-swapT_ow_s18-s1, A40-v22-swapT_ow_s18-s2, A40-v22-swapT_ow_s18-s3, A40-v22-swapT_ow_s18-s4, A40-v22-swapT_ow_s18-s5, A40-v22-swapT_ow_s18-s6, A40-v22-swapT_ow_s18-s7, A40-v22-swapT_ow_s18-s8, A40-v22-swapT_ow_s18-s9, A40-V22-C36-verdict]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v22 card 36: the verdict JSON again with seed 18 described beside (two-seed mean)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v22_verdict.py c36"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fetch-swapT_ar_ow-e30
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 240
+  hypothesis: "fetch swapT_ar_ow_e30 from the relay (plan v22 card 36b, H100; sha256 checked; waits until it is there)"
+  command: "RUN=swapT_ar_ow TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-v22-swapT_ar_ow-smoke
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_ar_ow-e30]
+  requires_pass: [A40-fetch-swapT_ar_ow-e30]
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "smoke: swapT_ar_ow_e30, swap_T scene 1, one episode finishes on the A40 (closed_loop/v22smoke)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_e30/export_e30.pt
+  label: swapT_ar_ow_e30_smoke
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "1"]
+  output: closed_loop/v22smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+  pass_if: "m.get('episodes', 0) >= 1"
+
+- id: A40-v22-swapT_ar_ow-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-v22-swapT_ar_ow-smoke]
+  requires_pass: [A40-v22-swapT_ar_ow-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b MAIN (registered c3787d8): swapT_ar_ow_e30 on swap_T 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_e30/export_e30.pt
+  label: swapT_ar_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ar_ow-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-v22-swapT_ar_ow-smoke]
+  requires_pass: [A40-v22-swapT_ar_ow-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b MAIN (registered c3787d8): swapT_ar_ow_e30 on swap_T 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_e30/export_e30.pt
+  label: swapT_ar_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ar_ow-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-v22-swapT_ar_ow-smoke]
+  requires_pass: [A40-v22-swapT_ar_ow-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b MAIN (registered c3787d8): swapT_ar_ow_e30 on swap_T 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_e30/export_e30.pt
+  label: swapT_ar_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ar_ow-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-v22-swapT_ar_ow-smoke]
+  requires_pass: [A40-v22-swapT_ar_ow-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b MAIN (registered c3787d8): swapT_ar_ow_e30 on swap_T 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_e30/export_e30.pt
+  label: swapT_ar_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ar_ow-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-v22-swapT_ar_ow-smoke]
+  requires_pass: [A40-v22-swapT_ar_ow-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b MAIN (registered c3787d8): swapT_ar_ow_e30 on swap_T 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_e30/export_e30.pt
+  label: swapT_ar_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ar_ow-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-v22-swapT_ar_ow-smoke]
+  requires_pass: [A40-v22-swapT_ar_ow-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b MAIN (registered c3787d8): swapT_ar_ow_e30 on swap_T 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_e30/export_e30.pt
+  label: swapT_ar_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ar_ow-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-v22-swapT_ar_ow-smoke]
+  requires_pass: [A40-v22-swapT_ar_ow-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b MAIN (registered c3787d8): swapT_ar_ow_e30 on swap_T 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_e30/export_e30.pt
+  label: swapT_ar_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ar_ow-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-v22-swapT_ar_ow-smoke]
+  requires_pass: [A40-v22-swapT_ar_ow-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b MAIN (registered c3787d8): swapT_ar_ow_e30 on swap_T 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_e30/export_e30.pt
+  label: swapT_ar_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ar_ow-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-v22-swapT_ar_ow-smoke]
+  requires_pass: [A40-v22-swapT_ar_ow-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b MAIN (registered c3787d8): swapT_ar_ow_e30 on swap_T 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_e30/export_e30.pt
+  label: swapT_ar_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ar_ow-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-v22-swapT_ar_ow-smoke]
+  requires_pass: [A40-v22-swapT_ar_ow-smoke]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b MAIN (registered c3787d8): swapT_ar_ow_e30 on swap_T 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_e30/export_e30.pt
+  label: swapT_ar_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-V22-C36B-verdict
+  lane: a40cpu
+  kind: shell
+  after: [A40-v22-swapT_ar_ow-s0, A40-v22-swapT_ar_ow-s1, A40-v22-swapT_ar_ow-s2, A40-v22-swapT_ar_ow-s3, A40-v22-swapT_ar_ow-s4, A40-v22-swapT_ar_ow-s5, A40-v22-swapT_ar_ow-s6, A40-v22-swapT_ar_ow-s7, A40-v22-swapT_ar_ow-s8, A40-v22-swapT_ar_ow-s9]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v22 card 36b verdict: v22_verdict.py c36b (SESOI +0.15); log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v22_verdict.py c36b"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-V22-C36B-gate-r2
+  lane: a40cpu
+  kind: shell
+  after: [A40-V22-C36B-verdict]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v22 card 36b: release the pre-set r2 extension only if the verdict is UNCERTAIN (exit 0) -- otherwise hold (exit 3)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v22_verdict.py gate c36b UNCERTAIN"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-v22-swapT_ar_ow-r2-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36B-gate-r2]
+  requires_pass: [A40-V22-C36B-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b pre-set extension: swapT_ar_ow_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_e30/export_e30.pt
+  label: swapT_ar_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_ar_ow-r2-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36B-gate-r2]
+  requires_pass: [A40-V22-C36B-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b pre-set extension: swapT_ar_ow_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_e30/export_e30.pt
+  label: swapT_ar_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_ar_ow-r2-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36B-gate-r2]
+  requires_pass: [A40-V22-C36B-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b pre-set extension: swapT_ar_ow_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_e30/export_e30.pt
+  label: swapT_ar_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_ar_ow-r2-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36B-gate-r2]
+  requires_pass: [A40-V22-C36B-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b pre-set extension: swapT_ar_ow_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_e30/export_e30.pt
+  label: swapT_ar_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_ar_ow-r2-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36B-gate-r2]
+  requires_pass: [A40-V22-C36B-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b pre-set extension: swapT_ar_ow_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_e30/export_e30.pt
+  label: swapT_ar_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_ar_ow-r2-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36B-gate-r2]
+  requires_pass: [A40-V22-C36B-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b pre-set extension: swapT_ar_ow_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_e30/export_e30.pt
+  label: swapT_ar_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_ar_ow-r2-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36B-gate-r2]
+  requires_pass: [A40-V22-C36B-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b pre-set extension: swapT_ar_ow_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_e30/export_e30.pt
+  label: swapT_ar_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_ar_ow-r2-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36B-gate-r2]
+  requires_pass: [A40-V22-C36B-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b pre-set extension: swapT_ar_ow_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_e30/export_e30.pt
+  label: swapT_ar_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_ar_ow-r2-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36B-gate-r2]
+  requires_pass: [A40-V22-C36B-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b pre-set extension: swapT_ar_ow_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_e30/export_e30.pt
+  label: swapT_ar_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-v22-swapT_ar_ow-r2-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-V22-C36B-gate-r2]
+  requires_pass: [A40-V22-C36B-gate-r2]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b pre-set extension: swapT_ar_ow_e30 on swap_T 1-100 with MWAM_NOISE_SALT=r2; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_e30/export_e30.pt
+  label: swapT_ar_ow_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/r2
+  env: {MWAM_TEXT_SOURCE: "cache", MWAM_NOISE_SALT: "r2"}
+
+- id: A40-V22-C36B-ext-verdict
+  lane: a40cpu
+  kind: shell
+  after: [A40-v22-swapT_ar_ow-r2-s0, A40-v22-swapT_ar_ow-r2-s1, A40-v22-swapT_ar_ow-r2-s2, A40-v22-swapT_ar_ow-r2-s3, A40-v22-swapT_ar_ow-r2-s4, A40-v22-swapT_ar_ow-r2-s5, A40-v22-swapT_ar_ow-r2-s6, A40-v22-swapT_ar_ow-r2-s7, A40-v22-swapT_ar_ow-r2-s8, A40-v22-swapT_ar_ow-r2-s9]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v22 card 36b: the verdict again with the r2 pairs pooled (200 pairs, the same rule)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v22_verdict.py c36b"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-fetch-swapT_ar_ow_s18-e30
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 240
+  hypothesis: "fetch swapT_ar_ow_s18_e30 from the relay (plan v22 card 36b seed 18, described; sha256 checked; waits until it is there)"
+  command: "RUN=swapT_ar_ow_s18 TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-v22-swapT_ar_ow_s18-s0
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_ar_ow_s18-e30]
+  requires_pass: [A40-fetch-swapT_ar_ow_s18-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b described: swapT_ar_ow_s18_e30 on swap_T 1-100; shard 0 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_s18_e30/export_e30.pt
+  label: swapT_ar_ow_s18_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "0/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ar_ow_s18-s1
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_ar_ow_s18-e30]
+  requires_pass: [A40-fetch-swapT_ar_ow_s18-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b described: swapT_ar_ow_s18_e30 on swap_T 1-100; shard 1 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_s18_e30/export_e30.pt
+  label: swapT_ar_ow_s18_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "1/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ar_ow_s18-s2
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_ar_ow_s18-e30]
+  requires_pass: [A40-fetch-swapT_ar_ow_s18-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b described: swapT_ar_ow_s18_e30 on swap_T 1-100; shard 2 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_s18_e30/export_e30.pt
+  label: swapT_ar_ow_s18_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "2/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ar_ow_s18-s3
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_ar_ow_s18-e30]
+  requires_pass: [A40-fetch-swapT_ar_ow_s18-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b described: swapT_ar_ow_s18_e30 on swap_T 1-100; shard 3 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_s18_e30/export_e30.pt
+  label: swapT_ar_ow_s18_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "3/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ar_ow_s18-s4
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_ar_ow_s18-e30]
+  requires_pass: [A40-fetch-swapT_ar_ow_s18-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b described: swapT_ar_ow_s18_e30 on swap_T 1-100; shard 4 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_s18_e30/export_e30.pt
+  label: swapT_ar_ow_s18_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "4/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ar_ow_s18-s5
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_ar_ow_s18-e30]
+  requires_pass: [A40-fetch-swapT_ar_ow_s18-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b described: swapT_ar_ow_s18_e30 on swap_T 1-100; shard 5 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_s18_e30/export_e30.pt
+  label: swapT_ar_ow_s18_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "5/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ar_ow_s18-s6
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_ar_ow_s18-e30]
+  requires_pass: [A40-fetch-swapT_ar_ow_s18-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b described: swapT_ar_ow_s18_e30 on swap_T 1-100; shard 6 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_s18_e30/export_e30.pt
+  label: swapT_ar_ow_s18_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "6/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ar_ow_s18-s7
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_ar_ow_s18-e30]
+  requires_pass: [A40-fetch-swapT_ar_ow_s18-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b described: swapT_ar_ow_s18_e30 on swap_T 1-100; shard 7 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_s18_e30/export_e30.pt
+  label: swapT_ar_ow_s18_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "7/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ar_ow_s18-s8
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_ar_ow_s18-e30]
+  requires_pass: [A40-fetch-swapT_ar_ow_s18-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b described: swapT_ar_ow_s18_e30 on swap_T 1-100; shard 8 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_s18_e30/export_e30.pt
+  label: swapT_ar_ow_s18_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "8/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-v22-swapT_ar_ow_s18-s9
+  lane: a40
+  kind: closed_loop
+  after: [A40-fetch-swapT_ar_ow_s18-e30]
+  requires_pass: [A40-fetch-swapT_ar_ow_s18-e30]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 card 36b described: swapT_ar_ow_s18_e30 on swap_T 1-100; shard 9 of 10"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_ow_s18_e30/export_e30.pt
+  label: swapT_ar_ow_s18_e30
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--limit", "100", "--shard", "9/10"]
+  output: closed_loop/v22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-V22-C36B-s18-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-v22-swapT_ar_ow_s18-s0, A40-v22-swapT_ar_ow_s18-s1, A40-v22-swapT_ar_ow_s18-s2, A40-v22-swapT_ar_ow_s18-s3, A40-v22-swapT_ar_ow_s18-s4, A40-v22-swapT_ar_ow_s18-s5, A40-v22-swapT_ar_ow_s18-s6, A40-v22-swapT_ar_ow_s18-s7, A40-v22-swapT_ar_ow_s18-s8, A40-v22-swapT_ar_ow_s18-s9, A40-V22-C36B-verdict]
+  need_mib: 0
+  timeout_h: 2
+  hypothesis: "plan v22 card 36b: the verdict JSON again with seed 18 described beside (two-seed mean)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v22_verdict.py c36b"
+  pass_if: "m['rc'] == 0"
+
 # 11-28 17:30 (Opus; plan v22b part 3 1.2: diagnostic 8 is the first diagnostic, after the new verdict evaluations
 # above). Scenes 1-50 per setting; a setting that gains >= 8 on 1-50 is re-evaluated on 51-100 (gate task, diag8.py);
 # swap_T first, then press_button, then rearrange seed 18. New episodes in closed_loop/d8.
