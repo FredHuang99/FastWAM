@@ -111,7 +111,8 @@ def gpu_table():
     for line in out.strip().splitlines():
         p = [x.strip() for x in line.split(",")]
         if len(p) == 4 and p[0].isdigit():
-            table[int(p[0])] = {"used": int(p[1]) if p[1].isdigit() else 10**6, "total": int(p[2]) if p[2].isdigit() else 0,
+            table[int(p[0])] = {"used": int(p[1]) if p[1].isdigit() and p[3].isdigit() else 10**6,   # 11-29: [N/A]
+                                "total": int(p[2]) if p[2].isdigit() else 0,                              # util = sick
                                 "util": int(p[3]) if p[3].isdigit() else 100}
     return table
 
@@ -290,9 +291,48 @@ def fmt_eta(eta):
 
 
 # ============================================================================ exec: one task, one attempt
+def unhealthy_gpus():
+    """11-29 00:37 (A40: GPUs 4-7 'requires reset' report 1 MiB used, so the dispatcher took them for empty and every
+    task sent there failed within a minute): indices whose utilization nvidia-smi cannot read ([N/A] / requires
+    reset / not a number) -> {index: reason}."""
+    try:
+        r = subprocess.run(["nvidia-smi", "--query-gpu=index,utilization.gpu", "--format=csv,noheader,nounits"],
+                           capture_output=True, text=True, timeout=60)
+    except (OSError, subprocess.SubprocessError):
+        return {}
+    bad = {}
+    for line in r.stdout.strip().splitlines():
+        p = [x.strip() for x in line.split(",")]
+        if len(p) >= 2 and p[0].isdigit() and not p[1].isdigit():
+            bad[int(p[0])] = p[1][:40]
+    return bad
+
+
+def drop_unhealthy(tid, gpu):
+    """True if `gpu` is unhealthy: every unhealthy GPU leaves the allowed list (POOL_CONFIG.json, re-read by the
+    dispatcher every cycle; `pool5.py allow --gpus ...` puts them back after a reset) and the task goes back to the
+    queue with its attempt counter unchanged."""
+    bad = unhealthy_gpus()
+    if gpu is None or int(gpu) not in bad:
+        return False
+    cfg = config()
+    keep = [g for g in cfg["gpus"] if int(g) not in bad]
+    if keep != cfg["gpus"]:
+        cfg["gpus"] = keep
+        q.write_json(CFG_PATH, {k: v for k, v in cfg.items()})
+    s = q.state(tid)
+    q.set_state(tid, status="pending", pid=None, child_pid=None, attempt=max(0, int(s.get("attempt") or 1) - 1),
+                waiting=f"GPU {gpu} unhealthy ({bad[int(gpu)]}); allowed GPUs now {keep}", retry_after=time.time() + 60)
+    log(f"{tid}: GPU {gpu} is unhealthy ({bad}); dropped {sorted(bad)} from the allowed GPUs (now {keep}); "
+        f"back in the queue, attempt counter unchanged")
+    return True
+
+
 def cmd_exec(args):
     tasks = {t["id"]: t for t in q.load_tasks()}
     task, tid = tasks[args.id], args.id
+    if not args.adopt and not args.judge_only and drop_unhealthy(tid, args.gpu):
+        return
     cfg = config()
     s = q.state(tid)
     attempt = int(s.get("attempt") or 1)
