@@ -1,0 +1,4 @@
+
+[queue5] 2026-11-27 12:07:48 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py rankv3c
+{"run": "card 4 ranking timely writer (ranking_v3a, user 18:32 option b)", "finished": {"ranking_v3a_e30": 100, "ranking_arprop_e30": 100}, "sesoi": 0.1, "main": {"scenes": 100, "new": 91, "ref": 65, "D": 0.26, "ci95": [0.15, 0.37], "only_new": 33, "only_ref": 7}, "verdict": "TIMELY WRITING HELPS", "success_vs_100": "91 vs 100 (pure-WAM best, self-reported)"}
+V20 RANKV3C: TIMELY WRITING HELPS

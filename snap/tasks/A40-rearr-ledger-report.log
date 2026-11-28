@@ -1,0 +1,15 @@
+
+[queue5] 2026-11-22 23:25:24 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_ledger.py e6:rearrange_arprop_e30
+
+== e6:rearrange_arprop_e30
+    8  never pressed: left-arm entries at the last decision bottom,close,top   e.g. []
+    8  never pressed: left-arm entries at the last decision bottom,top   e.g. []
+    1  never pressed: left-arm entries at the last decision close,top   e.g. []
+    3  pressed once, failed later: first press sometimes in the record   e.g. ['4300021', '4300040', '4300098']
+   16  pressed twice: first press never in the record   e.g. ['4300006', '4300018', '4300024', '4300026']
+    2  pressed twice: first press sometimes in the record   e.g. ['4300008', '4300071']
+    3  success: first press never in the record   e.g. ['4300002', '4300010', '4300095']
+   59  success: first press sometimes in the record   e.g. ['4300000', '4300001', '4300003', '4300004']
+  write delay (targets from the press to the first decision whose record has it): median 18.0, min 9, max 48, n 76
+
+REARR LEDGER REPORT done

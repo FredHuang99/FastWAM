@@ -1,0 +1,12 @@
+
+[queue5] 2026-11-19 08:06:59 $ bash -c RUN=press_count TAG=e20 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh
+[fetch] disk before: /dev/sdb         19T  9.4T  8.0T  55% /workspace/FastWAM-memory2
+[fetch] 2026-11-19 00:07:00 fetching press_count_e20 (attempt 1)
+[relay] get hhyfred/memwam-fullft/exports/press_count_e20/export_e20.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/press_count_e20/export_e20.pt (12042637189 bytes)
+[relay] get hhyfred/memwam-fullft/exports/press_count_e20/export_e20.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/press_count_e20/export_e20.pt.sha256 (80 bytes)
+export_e20.pt: OK
+total 11760408
+drwxr-xr-x  2 root root        4096 Nov 19 01:18 .
+drwxr-xr-x 26 root root        4096 Nov 19 00:07 ..
+-rw-r--r--  1 root root 12042637189 Nov 19 01:18 export_e20.pt
+-rw-r--r--  1 root root          80 Nov 19 01:18 export_e20.pt.sha256

@@ -1,0 +1,12 @@
+
+[queue5] 2026-11-22 00:21:06 $ bash -c RUN=obs_ar TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh
+[fetch] disk before: /dev/sdb         19T  9.7T  7.6T  56% /workspace/FastWAM-memory2
+[fetch] 2026-11-21 16:21:08 fetching obs_ar_e30 (attempt 1)
+[relay] get hhyfred/memwam-fullft/exports/obs_ar_e30/export_e30.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/obs_ar_e30/export_e30.pt (12042062883 bytes)
+[relay] get hhyfred/memwam-fullft/exports/obs_ar_e30/export_e30.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/obs_ar_e30/export_e30.pt.sha256 (80 bytes)
+export_e30.pt: OK
+total 11759844
+drwxr-xr-x  2 root root        4096 Nov 21 16:48 .
+drwxr-xr-x 41 root root        4096 Nov 21 16:31 ..
+-rw-r--r--  1 root root 12042062883 Nov 21 16:48 export_e30.pt
+-rw-r--r--  1 root root          80 Nov 21 16:48 export_e30.pt.sha256

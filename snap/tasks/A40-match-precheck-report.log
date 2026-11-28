@@ -1,0 +1,4 @@
+
+[queue5] 2026-11-24 19:03:00 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python -c "import scipy, transformers; from fastwam.fullft import match; print('area', match.candidate_area()); s = match.Scorer('cpu'); print('encoder OK', match.MODEL, match.REVISION, match.SHA256[:16], transformers.__version__)"
+area [-0.05838104722701711, 0.5157684332390409, 1.1554907945708464, 0.9558749118962628]
+encoder OK facebook/dinov2-base f9e44c814b77203eaa57a6bdbbd535f21ede1415 d73036b56966966d 4.49.0

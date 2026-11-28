@@ -1,0 +1,29 @@
+{
+ "time": "2026-11-26 10:19:15",
+ "verified": [
+  "press_told_e10",
+  "press_told_e20",
+  "obs_match_e10",
+  "obs_match_e20",
+  "rearr_pw_e10",
+  "rearr_pw_e20",
+  "swapT_long_e45",
+  "swapT_long_h100_e45",
+  "obs_s200_e10",
+  "obs_s200_e20"
+ ],
+ "skipped": {},
+ "deleted": [
+  "press_told_e10",
+  "press_told_e20",
+  "obs_match_e10",
+  "obs_match_e20",
+  "rearr_pw_e10",
+  "rearr_pw_e20",
+  "swapT_long_e45",
+  "swapT_long_h100_e45",
+  "obs_s200_e10",
+  "obs_s200_e20"
+ ],
+ "squashed": true
+}

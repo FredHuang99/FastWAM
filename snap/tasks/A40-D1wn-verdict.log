@@ -1,0 +1,4 @@
+
+[queue5] 2026-11-24 15:43:59 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py d1
+{"run": "D1 decision training", "sesoi": 0.15, "arms": {"d1_w": {"finished_swap": 0, "finished_put": 0, "verdict": "WAIT (d1_w 0, ar_2task 100 of 100)"}, "d1_wn": {"finished_swap": 100, "finished_put": 67, "main": {"scenes": 100, "new": 61, "ref": 56, "D": 0.05, "ci95": [-0.06, 0.15], "only_new": 17, "only_ref": 12}, "verdict": "UNCERTAIN", "described_put_back": {"scenes": 67, "new": 65, "ref": 67, "D": -0.0299, "ci95": [-0.0746, 0.0], "only_new": 0, "only_ref": 2}}}, "plan_6_2_back_to_fable": [], "verdict": "d1_w: WAIT (d1_w 0, ar_2task 100 of 100); d1_wn: UNCERTAIN"}
+D1 VERDICT: d1_w: WAIT (d1_w 0, ar_2task 100 of 100); d1_wn: UNCERTAIN

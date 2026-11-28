@@ -1,0 +1,3 @@
+
+[queue5] 2026-11-23 21:21:16 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e23_verdict.py
+E23 swap e10 on 100 common scenes: ledger 78, clock 43; only ledger 43, only clock 8, sign p 0.0000 -> EVENT LEARNS FASTER

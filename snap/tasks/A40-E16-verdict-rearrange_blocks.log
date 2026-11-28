@@ -1,0 +1,8 @@
+
+[queue5] 2026-11-23 19:26:55 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e16_verdict.py --task rearrange_blocks
+E16 rearrange_blocks no stress 1-100: {'clock': '62/100', 'AR': '29/100', 'ledger': '62/100', 'clock_vs_AR': {'n': 100, 'clock': 62, 'AR': 29, 'only_clock': 38, 'only_AR': 5, 'p': 2.4995097192004323e-07}, 'clock_vs_ledger': {'n': 100, 'clock': 62, 'ledger': 62, 'only_clock': 16, 'only_ledger': 16, 'p': 1.0}}
+  rearrange_clock_e30_p64            rearrange_blocks pairs 50, Delta +0 (vis-only 5, hid-only 5), p 1.0000, hidden 32/50 -> FLOOR NOT MET
+  rearrange_clock_e30_p256           rearrange_blocks pairs 50, Delta -35 (vis-only 0, hid-only 35), p 0.0000, hidden 35/50 -> HURT
+  rearrange_ar_e30_p64               rearrange_blocks pairs 50, Delta -2 (vis-only 4, hid-only 6), p 0.7539, hidden 15/50 -> NOT HURT
+  rearrange_arprop_e30_p64           rearrange_blocks pairs 50, Delta +8 (vis-only 11, hid-only 3), p 0.0574, hidden 26/50 -> NOT HURT
+E16 VERDICT (rearrange_blocks): NO VERDICT (floor: clock no stress 62/100 < 70); rule C (rearrange cur)

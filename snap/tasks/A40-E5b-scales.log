@@ -1,0 +1,7 @@
+
+[queue5] 2026-11-19 10:32:55 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e5b_verdict.py --scales
+ar2_clock_e30            put 1-50: {'success': 49, 'skipped -> returned': 1}
+ar2_clock_e30_ts1.5      put 1-50: {}
+ar2_clock_e30_ts0.5      put 1-50: {}
+dominant failure class: {'ar2_clock_e30': 'skipped -> returned', 'ar2_clock_e30_ts1.5': 'none', 'ar2_clock_e30_ts0.5': 'none'}
+FAILURE DIRECTION FLIPS between x1.5 and x0.5 on put: NO (reported only)

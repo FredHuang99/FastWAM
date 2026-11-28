@@ -1,0 +1,11 @@
+
+[queue5] 2026-11-22 17:56:03 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e16_verdict.py --task rearrange_blocks; PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e16_verdict.py --task swap_T
+E16 rearrange_blocks no stress 1-100: {'clock': '62/100', 'AR': '29/100', 'ledger': '62/100', 'clock_vs_AR': {'n': 100, 'clock': 62, 'AR': 29, 'only_clock': 38, 'only_AR': 5, 'p': 2.4995097192004323e-07}, 'clock_vs_ledger': {'n': 100, 'clock': 62, 'ledger': 62, 'only_clock': 16, 'only_ledger': 16, 'p': 1.0}}
+  rearrange_clock_e30_p64            rearrange_blocks pairs 50, Delta +0 (vis-only 5, hid-only 5), p 1.0000, hidden 32/50 -> FLOOR NOT MET
+  rearrange_clock_e30_p256           rearrange_blocks pairs 50, Delta -35 (vis-only 0, hid-only 35), p 0.0000, hidden 35/50 -> HURT
+  rearrange_ar_e30_p64               rearrange_blocks pairs 0, Delta +0 (vis-only 0, hid-only 0), p 1.0000, hidden 0/50 -> WAIT
+  rearrange_arprop_e30_p64           rearrange_blocks pairs 0, Delta +0 (vis-only 0, hid-only 0), p 1.0000, hidden 0/50 -> WAIT
+E16 VERDICT (rearrange_blocks): NO VERDICT (floor: clock no stress 62/100 < 70); rule C (rearrange cur)
+E16 swap_T no stress 1-100: {'clock': '36/60', 'AR': '51/100', 'ledger': '49/100', 'clock_vs_AR': {'n': 60, 'clock': 36, 'AR': 31, 'only_clock': 9, 'only_AR': 4, 'p': 0.266845703125}, 'clock_vs_ledger': {'n': 60, 'clock': 36, 'ledger': 30, 'only_clock': 10, 'only_ledger': 4, 'p': 0.1795654296875}}
+  swapT_clock_e30_p64                swap_T          pairs 0, Delta +0 (vis-only 0, hid-only 0), p 1.0000, hidden 0/50 -> WAIT
+E16 VERDICT (swap_T): WAIT (clock no-stress run not finished); descriptive only (no E2 prediction)

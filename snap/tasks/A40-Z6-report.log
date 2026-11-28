@@ -1,0 +1,38 @@
+
+[queue5] 2026-11-20 08:08:27 $ bash -c cat /workspace/FastWAM-memory2/outputs/fullft/Z6_OCCUPANCY.json
+{
+ "swap_blocks": {
+  "episodes": 50,
+  "share_mean": 0.165625,
+  "share_min": 0.125,
+  "share_max": 0.1875,
+  "inject_frame_median": 344,
+  "inject_frame_min": 320,
+  "inject_frame_max": 536,
+  "share_at_L_from_median_frame": {
+   "64": 0.157,
+   "128": 0.271,
+   "256": 0.427,
+   "512": 0.598,
+   "768": 0.691,
+   "1024": 0.749
+  }
+ },
+ "put_back_block": {
+  "episodes": 50,
+  "share_mean": 0.17125,
+  "share_min": 0.15625,
+  "share_max": 0.1875,
+  "inject_frame_median": 336,
+  "inject_frame_min": 320,
+  "inject_frame_max": 352,
+  "share_at_L_from_median_frame": {
+   "64": 0.16,
+   "128": 0.276,
+   "256": 0.432,
+   "512": 0.604,
+   "768": 0.696,
+   "1024": 0.753
+  }
+ }
+}

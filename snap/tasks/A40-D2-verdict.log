@@ -1,0 +1,4 @@
+
+[queue5] 2026-11-23 16:25:31 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py d2
+{"run": "D2 press merged", "finished": {"d2_press_e30": 100, "press_v3c_e30": 100}, "excluded_unknown_cards": 0, "sesoi": -0.35, "over": {"scenes": 100, "new": 66, "ref": 70, "D": -0.04, "ci95": [-0.16, 0.08], "only_new": 18, "only_ref": 22}, "under": {"scenes": 100, "new": 30, "ref": 23, "D": 0.07, "ci95": [-0.05, 0.19], "only_new": 23, "only_ref": 16}, "verdict": "NOT HALVED", "plan_6_2_back_to_fable": true, "described": {"d2_press_e30": {"n1_error": {"over": 29, "right": 64, "under": 7}, "n2_error": {"over": 48, "right": 28, "under": 24}, "success": 16}, "press_v3c_e30": {"n1_error": {"over": 20, "right": 69, "under": 11}, "n2_error": {"over": 61, "right": 25, "under": 14}, "success": 17}}}
+D2 VERDICT: NOT HALVED

@@ -1,0 +1,10 @@
+
+[queue5] 2026-11-29 00:24:27 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag8.py report
+swapT_x16    1-50: 26 vs 27 of 50 (gain -1; line reached False)
+swapT_x32    1-50: 29 vs 27 of 50 (gain 2; line reached False)
+swapT_s50    1-50: 23 vs 27 of 50 (gain -4; line reached False)
+press_x16    1-50: 8 vs 13 of 43 (gain -5; line reached False)
+press_x32    1-50: 1 vs 3 of 10 (gain -2; line reached False)
+press_s50    no paired episodes yet
+rearr18_x16  no paired episodes yet
+DIAG8 REPORT written /workspace/FastWAM-memory2/outputs/fullft/DIAG_V22_DIAG8.json

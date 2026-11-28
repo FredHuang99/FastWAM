@@ -1,0 +1,5180 @@
+{
+ "run": "plan v21 diagnostic 2: ranking reading audit (described)",
+ "scenes": {
+  "position_1_2": [
+   4300001,
+   4300003,
+   4300006,
+   4300007,
+   4300008,
+   4300012,
+   4300014,
+   4300016,
+   4300017,
+   4300024,
+   4300026,
+   4300027,
+   4300028,
+   4300030,
+   4300031
+  ],
+  "position_4_5": [
+   4300000,
+   4300002,
+   4300004,
+   4300005,
+   4300009,
+   4300011,
+   4300013,
+   4300015,
+   4300018,
+   4300019,
+   4300020,
+   4300021,
+   4300022,
+   4300035,
+   4300037
+  ]
+ },
+ "models": {
+  "ranking_arprop_e30": {
+   "unmodified_e6": {
+    "position_1_2": 2,
+    "position_4_5": 15
+   },
+   "off": {
+    "finished": 30,
+    "position_1_2": {
+     "scenes": 15,
+     "new": 11,
+     "ref": 2,
+     "only_new": 10,
+     "only_ref": 1
+    },
+    "position_4_5": {
+     "scenes": 15,
+     "new": 1,
+     "ref": 15,
+     "only_new": 0,
+     "only_ref": 14
+    },
+    "classes": {
+     "repeated an order already pressed (counting error)": 18,
+     "success": 12
+    },
+    "episodes": {
+     "4300000": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300001": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300002": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        1,
+        2,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300003": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300004": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300005": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300006": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300007": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300008": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300009": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300011": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300012": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300013": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300014": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300015": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300016": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300017": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300018": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300019": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300020": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300021": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300022": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300024": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300026": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300027": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300028": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300030": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300031": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        2,
+        0,
+        1
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300035": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300037": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        1,
+        2,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     }
+    }
+   },
+   "mfirst": {
+    "finished": 30,
+    "position_1_2": {
+     "scenes": 15,
+     "new": 10,
+     "ref": 2,
+     "only_new": 10,
+     "only_ref": 2
+    },
+    "position_4_5": {
+     "scenes": 15,
+     "new": 14,
+     "ref": 15,
+     "only_new": 0,
+     "only_ref": 1
+    },
+    "classes": {
+     "success": 24,
+     "repeated an order already pressed (counting error)": 6
+    },
+    "episodes": {
+     "4300000": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300001": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300002": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300003": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300004": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300005": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300006": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300007": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300008": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300009": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300011": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300012": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300013": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300014": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300015": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300016": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300017": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300018": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300019": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300020": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300021": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300022": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300024": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300026": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300027": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300028": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300030": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300031": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300035": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300037": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     }
+    }
+   },
+   "mnear": {
+    "finished": 30,
+    "position_1_2": {
+     "scenes": 15,
+     "new": 11,
+     "ref": 2,
+     "only_new": 9,
+     "only_ref": 0
+    },
+    "position_4_5": {
+     "scenes": 15,
+     "new": 12,
+     "ref": 15,
+     "only_new": 0,
+     "only_ref": 3
+    },
+    "classes": {
+     "success": 23,
+     "repeated an order already pressed (counting error)": 6,
+     "never pressed": 1
+    },
+    "episodes": {
+     "4300000": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300001": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300002": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300003": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300004": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300005": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300006": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300007": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300008": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300009": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300011": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300012": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300013": {
+      "cls": "never pressed",
+      "orders_pressed": [],
+      "expert_position_of_sorted": 5
+     },
+     "4300014": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300015": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300016": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300017": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300018": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300019": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300020": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300021": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300022": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300024": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        2,
+        0,
+        1
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300026": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300027": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300028": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300030": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300031": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300035": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300037": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     }
+    }
+   }
+  },
+  "ranking_ar_e30": {
+   "unmodified_e6": {
+    "position_1_2": 15,
+    "position_4_5": 12
+   },
+   "mfirst": {
+    "finished": 30,
+    "position_1_2": {
+     "scenes": 15,
+     "new": 15,
+     "ref": 15,
+     "only_new": 0,
+     "only_ref": 0
+    },
+    "position_4_5": {
+     "scenes": 15,
+     "new": 2,
+     "ref": 12,
+     "only_new": 0,
+     "only_ref": 10
+    },
+    "classes": {
+     "repeated an order already pressed (counting error)": 13,
+     "success": 17
+    },
+    "episodes": {
+     "4300000": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300001": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300002": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300003": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300004": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300005": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300006": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300007": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300008": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300009": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300011": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300012": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300013": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300014": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300015": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300016": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300017": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300018": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300019": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300020": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300021": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300022": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300024": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300026": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300027": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300028": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300030": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300031": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300035": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300037": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        2,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     }
+    }
+   },
+   "mnear": {
+    "finished": 30,
+    "position_1_2": {
+     "scenes": 15,
+     "new": 11,
+     "ref": 15,
+     "only_new": 0,
+     "only_ref": 4
+    },
+    "position_4_5": {
+     "scenes": 15,
+     "new": 5,
+     "ref": 12,
+     "only_new": 2,
+     "only_ref": 9
+    },
+    "classes": {
+     "success": 16,
+     "repeated an order already pressed (counting error)": 11,
+     "a block off the slots at the end (manipulation)": 2,
+     "never pressed": 1
+    },
+    "episodes": {
+     "4300000": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300001": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300002": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300003": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300004": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300005": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300006": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300007": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300008": {
+      "cls": "a block off the slots at the end (manipulation)",
+      "orders_pressed": [
+       [
+        2,
+        1,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300009": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300011": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        1,
+        2,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300012": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300013": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        1,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300014": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300015": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300016": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300017": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        1,
+        2,
+        0
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300018": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300019": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300020": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300021": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ]
+      ],
+      "expert_position_of_sorted": 4
+     },
+     "4300022": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300024": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300026": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300027": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        0,
+        1,
+        2
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        0,
+        2
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        2,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300028": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 2
+     },
+     "4300030": {
+      "cls": "success",
+      "orders_pressed": [
+       [
+        0,
+        1,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 1
+     },
+     "4300031": {
+      "cls": "never pressed",
+      "orders_pressed": [],
+      "expert_position_of_sorted": 1
+     },
+     "4300035": {
+      "cls": "a block off the slots at the end (manipulation)",
+      "orders_pressed": [
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        1,
+        0
+       ],
+       [
+        1,
+        0,
+        2
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     },
+     "4300037": {
+      "cls": "repeated an order already pressed (counting error)",
+      "orders_pressed": [
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ],
+       [
+        0,
+        2,
+        1
+       ],
+       [
+        2,
+        0,
+        1
+       ]
+      ],
+      "expert_position_of_sorted": 5
+     }
+    }
+   }
+  }
+ },
+ "verdict": "DESCRIBED"
+}

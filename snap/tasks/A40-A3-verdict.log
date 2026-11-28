@@ -1,0 +1,4 @@
+
+[queue5] 2026-11-23 05:01:57 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py a3
+{"run": "A3 obs_zoom", "sesoi": 0.1, "finished": {"obs_zoom_e30": 100, "obs_ar_e30": 100}, "main": {"scenes": 100, "new": 11, "ref": 13, "D": -0.02, "ci95": [-0.09, 0.05], "only_new": 5, "only_ref": 7}, "verdict": "NO HELP", "success_vs_bar28": "11 vs 28", "described_obs_ar_minus_obs_none": {"scenes": 100, "new": 13, "ref": 15, "D": -0.02, "ci95": [-0.09, 0.05], "only_new": 6, "only_ref": 8, "note": "HISTORY NOT USED"}}
+A3 VERDICT: NO HELP

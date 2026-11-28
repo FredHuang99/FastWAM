@@ -1,0 +1,62 @@
+
+[queue5] 2026-11-23 15:15:36 $ /opt/mwam/bin/python -m fastwam.memory_v2.online run --checkpoint /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e30/export_e30.pt --label cover_arprop_e30_smoke --modes on --scenes /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/scenes_seed42_n100_cover_blocks --output /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/e6smoke --tasks cover_blocks --execute 8 --limit 1
+[dense] WARNING runtime packages differ from the dense preparation receipt (cache is read, not re-encoded): {"python": {"recorded": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]", "actual": "3.12.3 (main, Nov  6 2024, 18:32:19) [GCC 13.2.0]"}, "packages.Pillow": {"recorded": "12.0.0", "actual": "11.0.0"}, "packages.numpy": {"recorded": "2.1.0", "actual": "1.26.4"}, "packages.torch": {"recorded": "2.10.0a0+b558c986e8.nv25.11", "actual": "2.6.0a0+df5bbc09d1.nv24.12"}, "packages.torchvision": {"recorded": "0.25.0a0+7a13ad0f", "actual": "0.20.0a0"}}
+[closed-loop] 2026-11-23 07:16:50 1 scenes x modes ['on'] -> labels {'on': 'cover_arprop_e30_smoke'}; checkpoint /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e30/export_e30.pt; T5 on CPU; max_targets=official
+[closed-loop] WARNING dense config was recorded for sm9.0; this GPU is sm8.6: TORCH_EXTENSIONS_DIR -> /workspace/FastWAM/outputs/fused_environment_memory_v2_sm86/torch_extensions (give --extensions-dir to reuse built kernels)
+[closed-loop] 2026-11-23 07:16:50 start cover_arprop_e30_smoke/on cover_blocks seed=4300000 target_limit=1500 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/e6smoke/cover_arprop_e30_smoke/on/cover_blocks/seed_4300000
+[fullft] text from the training cache (cover_blocks/episode_0000000, 50 episodes share it; fingerprint 4be5f4b2ed31)
+/restore-tmp/dense_joint_v1/data_path.py:16: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /opt/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:206.)
+  return torch.stack([TF.resize(torch.from_numpy(np.ascontiguousarray(a)).permute(2,0,1).float()/255.,
+[decide] 2026-11-23 07:17:43 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=0/1500 hist=0 policy=0.7s elapsed=8s
+[decide] 2026-11-23 07:17:58 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=32/1500 hist=2 policy=0.5s elapsed=23s
+[decide] 2026-11-23 07:18:08 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=64/1500 hist=3 policy=0.5s elapsed=33s
+[decide] 2026-11-23 07:18:18 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=96/1500 hist=3 policy=0.6s elapsed=43s
+[decide] 2026-11-23 07:18:28 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=128/1500 hist=3 policy=0.6s elapsed=53s
+[decide] 2026-11-23 07:18:40 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=160/1500 hist=3 policy=0.6s elapsed=65s
+[decide] 2026-11-23 07:18:55 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=192/1500 hist=3 policy=0.6s elapsed=80s
+[decide] 2026-11-23 07:19:05 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=224/1500 hist=3 policy=0.6s elapsed=90s
+[decide] 2026-11-23 07:19:16 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=256/1500 hist=3 policy=0.6s elapsed=101s
+[decide] 2026-11-23 07:19:26 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=288/1500 hist=3 policy=0.6s elapsed=111s
+[decide] 2026-11-23 07:19:37 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=320/1500 hist=3 policy=0.6s elapsed=121s
+[decide] 2026-11-23 07:19:47 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=352/1500 hist=3 policy=0.6s elapsed=132s
+[decide] 2026-11-23 07:19:57 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=384/1500 hist=3 policy=0.6s elapsed=142s
+[decide] 2026-11-23 07:20:07 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=416/1500 hist=3 policy=0.6s elapsed=152s
+[decide] 2026-11-23 07:20:17 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=448/1500 hist=3 policy=0.6s elapsed=162s
+[decide] 2026-11-23 07:20:27 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=480/1500 hist=3 policy=0.6s elapsed=172s
+[decide] 2026-11-23 07:20:37 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=512/1500 hist=3 policy=0.6s elapsed=182s
+[decide] 2026-11-23 07:20:47 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=544/1500 hist=3 policy=0.6s elapsed=192s
+[decide] 2026-11-23 07:20:56 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=576/1500 hist=3 policy=0.6s elapsed=201s
+[decide] 2026-11-23 07:21:09 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=608/1500 hist=3 policy=0.6s elapsed=214s
+[decide] 2026-11-23 07:21:23 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=640/1500 hist=3 policy=0.6s elapsed=228s
+[decide] 2026-11-23 07:21:35 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=672/1500 hist=3 policy=0.6s elapsed=240s
+[decide] 2026-11-23 07:21:50 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=704/1500 hist=3 policy=0.5s elapsed=255s
+[decide] 2026-11-23 07:22:03 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=736/1500 hist=3 policy=0.6s elapsed=267s
+[decide] 2026-11-23 07:22:17 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=768/1500 hist=3 policy=0.6s elapsed=282s
+[decide] 2026-11-23 07:22:28 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=800/1500 hist=3 policy=0.5s elapsed=292s
+[decide] 2026-11-23 07:22:38 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=832/1500 hist=3 policy=0.6s elapsed=303s
+[decide] 2026-11-23 07:22:48 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=864/1500 hist=3 policy=0.5s elapsed=313s
+[decide] 2026-11-23 07:22:57 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=896/1500 hist=3 policy=0.5s elapsed=322s
+[decide] 2026-11-23 07:23:08 cover_arprop_e30_smoke/on cover_blocks seed=4300000 frame=928/1500 hist=3 policy=0.5s elapsed=333s
+[closed-loop] 2026-11-23 07:23:14 done  cover_arprop_e30_smoke/on cover_blocks seed=4300000 success=True targets=938/1500 reward=1.0 lift=None  384s
+
+label/mode              task               n  success  95% CI        lift5cm  reward  targets dep_null  dep_off   dep_on  pol_s
+battery_ar_e30_smoke/on battery_try        1     1.00  [0.21,1.00]         -    0.00      587        -        -        -    0.6
+battery_arprop_e30_smoke/onbattery_try        1     1.00  [0.21,1.00]         -    0.00      581        -        -        -    0.6
+cover_ar_e30_smoke/on   cover_blocks       1     1.00  [0.21,1.00]         -    1.00      943        -        -        -    0.6
+cover_arprop_e30_smoke/oncover_blocks       1     1.00  [0.21,1.00]         -    1.00      938        -        -        -    0.6
+obs_ar_e30_smoke/on     observe_and_pickup   1     0.00  [0.00,0.79]         -    0.00      250        -        -        -    0.6
+obs_arprop_e30_smoke/on observe_and_pickup   1     0.00  [0.00,0.79]         -    0.00      250        -        -        -    0.6
+ranking_ar_e30_smoke/on blocks_ranking_try   1     0.00  [0.00,0.79]      1.00    0.00     3500        -        -        -    0.6
+rearrange_ar_e30_smoke/onrearrange_blocks   1     0.00  [0.00,0.79]      1.00    0.00      700        -        -        -    0.6
+rearrange_arprop_e30_smoke/onrearrange_blocks   1     1.00  [0.21,1.00]      1.00    1.00      389        -        -        -    0.6
+swapT_ar_e30_smoke/on   swap_T             1     0.00  [0.00,0.79]         -    0.00      600        -        -        -    0.5
+swapT_arprop_e30_smoke/onswap_T             1     0.00  [0.00,0.79]         -    0.00      600        -        -        -    0.6
+
+paired on common scenes (A vs B):                         n  both  only A  only B  neither  McNemar p
+  battery_ar_e30_smoke/on  vs battery_arprop_e30_smoke/on   1     1       0       0        0  1.000
+  cover_ar_e30_smoke/on    vs cover_arprop_e30_smoke/on   1     1       0       0        0  1.000
+  obs_ar_e30_smoke/on      vs obs_arprop_e30_smoke/on    1     0       0       0        1  1.000
+  rearrange_ar_e30_smoke/on vs rearrange_arprop_e30_smoke/on   1     0       0       1        0  1.000
+  swapT_ar_e30_smoke/on    vs swapT_arprop_e30_smoke/on   1     0       0       0        1  1.000
+
+[summary] 11 episodes, 0 open errors -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/e6smoke/SUMMARY.json

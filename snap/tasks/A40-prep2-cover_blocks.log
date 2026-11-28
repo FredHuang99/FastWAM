@@ -1,0 +1,8 @@
+
+[queue5] 2026-11-22 00:40:29 $ bash -c bash /workspace/FastWAM-memory2/scripts/fullft/a40_prep_task.sh cover_blocks
+[prep] 2026-11-21 16:40:29 cover_blocks; disk: /dev/sdb         19T  9.7T  7.6T  57% /workspace/FastWAM-memory2
+cover_blocks: outputs/memory_v2/closed_loop/scenes_seed42_n100_cover_blocks/cover_blocks.json complete (100 scenes, next seed 4300100)
+[text] cover_blocks: 'On the table, red, green, and blue blocks are arranged randomly along with three lids. From the current viewpoint, cover the blocks from left to right using the lids, and then uncover them again in the sequence red, green, and blue.' -> cache/cover_blocks_episode_0000000/encodings.pt (178 MiB; 50 training episodes share the instruction)
+[text] cover_blocks: 2 files checked against dense_cover_blocks_v1/RELAY_MANIFEST.json (sha256); marker .text_only
+[text] cover_blocks: 'On the table, red, green, and blue blocks are arranged randomly along with three lids. From the current viewpoint, cover the blocks from left to right using the lids, and then uncover them again in the sequence red, green, and blue.' -> cache/cover_blocks_episode_0000000/encodings.pt (50 training episodes share it); fingerprint 4be5f4b2ed31
+[prep] 2026-11-21 16:42:51 cover_blocks ready

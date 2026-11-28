@@ -1,0 +1,4 @@
+
+[queue5] 2026-11-24 18:03:39 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py a2
+{"run": "A2 battery without history", "sesoi": -0.15, "finished": {"battery_none_e30": 100, "battery_ar_e30": 100}, "main": {"scenes": 100, "new": 54, "ref": 91, "D": -0.37, "ci95": [-0.48, -0.26], "only_new": 4, "only_ref": 41}, "verdict": "SHORT MEMORY NEEDED"}
+A2 VERDICT: SHORT MEMORY NEEDED

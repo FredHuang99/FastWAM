@@ -1,0 +1,81 @@
+{
+ "run": "plan v21 diagnostic 5(a): swap_T masks and record off, scenes 1-50 (described)",
+ "models": {
+  "swapT_ar_e30": {
+   "unmodified_e6_1_50": 27,
+   "mfirst": {
+    "finished": 50,
+    "paired": {
+     "scenes": 50,
+     "new": 9,
+     "ref": 27,
+     "only_new": 3,
+     "only_ref": 21
+    },
+    "failures": {
+     "a block back at its own start": 22,
+     "no block back at its own start": 19
+    }
+   },
+   "mnear": {
+    "finished": 50,
+    "paired": {
+     "scenes": 50,
+     "new": 23,
+     "ref": 27,
+     "only_new": 4,
+     "only_ref": 8
+    },
+    "failures": {
+     "a block back at its own start": 15,
+     "no block back at its own start": 12
+    }
+   }
+  },
+  "swapT_arprop_e30": {
+   "unmodified_e6_1_50": 26,
+   "mfirst": {
+    "finished": 50,
+    "paired": {
+     "scenes": 50,
+     "new": 11,
+     "ref": 26,
+     "only_new": 3,
+     "only_ref": 18
+    },
+    "failures": {
+     "a block back at its own start": 24,
+     "no block back at its own start": 15
+    }
+   },
+   "mnear": {
+    "finished": 50,
+    "paired": {
+     "scenes": 50,
+     "new": 27,
+     "ref": 26,
+     "only_new": 5,
+     "only_ref": 4
+    },
+    "failures": {
+     "no block back at its own start": 6,
+     "a block back at its own start": 17
+    }
+   },
+   "off": {
+    "finished": 50,
+    "paired": {
+     "scenes": 50,
+     "new": 24,
+     "ref": 26,
+     "only_new": 3,
+     "only_ref": 5
+    },
+    "failures": {
+     "a block back at its own start": 26
+    }
+   }
+  }
+ },
+ "verdict": "DESCRIBED"
+}

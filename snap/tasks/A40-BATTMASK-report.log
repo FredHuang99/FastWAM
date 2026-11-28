@@ -1,0 +1,4 @@
+
+[queue5] 2026-11-24 23:53:01 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py battmask
+{"run": "A2 follow-up: which history frame battery_ar uses (described)", "unmasked_1_50": 45, "mask_first": {"finished": 50, "scenes": 50, "new": 45, "ref": 45, "D": 0.0, "ci95": [0.0, 0.0], "only_new": 0, "only_ref": 0}, "mask_near": {"finished": 50, "scenes": 50, "new": 14, "ref": 45, "D": -0.62, "ci95": [-0.76, -0.48], "only_new": 0, "only_ref": 31}, "verdict": "DESCRIBED"}
+V20 BATTMASK: DESCRIBED

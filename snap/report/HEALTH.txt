@@ -1,0 +1,13 @@
+machine a40 host GPU18 at 2026-11-29 01:52:49
+ok   auto_pull alive (last log 24 min)
+ok   pool5 dispatcher alive
+ok    GPU 0: 45334 MiB, 100 %
+ok    GPU 1: 23959 MiB, 100 %
+ok    GPU 2: 32725 MiB, 0 %
+ok    GPU 3: 45430 MiB, 100 %
+idle  GPU 4: 1 MiB,  %
+idle  GPU 5: 1 MiB,  %
+idle  GPU 6: 1 MiB,  %
+idle  GPU 7: 0 MiB,  %
+ok   disk /workspace/FastWAM-memory2 63% used (6.6T free)
+ok   disk / 63% used (6.6T free)

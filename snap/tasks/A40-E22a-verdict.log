@@ -1,0 +1,13 @@
+
+[queue5] 2026-11-22 21:06:27 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e22_verdict.py --part a
+ar2_clock_e30  swap_blocks     pause   64: valid pairs 50, vis-only 0, hid-only 3, Delta -3, p 0.2500, hidden 50/50, slot share 0.17 -> NOT HURT
+ar2_clock_e30  swap_blocks     pause  256: valid pairs 50, vis-only 0, hid-only 0, Delta +0, p 1.0000, hidden 7/50, slot share 0.42 -> FLOOR NOT MET
+ar2_clock_e30  swap_blocks     pause 1024: valid pairs 50, vis-only 0, hid-only 0, Delta +0, p 1.0000, hidden 7/50, slot share 0.73 -> FLOOR NOT MET
+ar2_prop_e30   swap_blocks     pause   64: valid pairs 50, vis-only 0, hid-only 0, Delta +0, p 1.0000, hidden 50/50, slot share 0.00 -> NOT HURT
+ar2_prop_e30   swap_blocks     pause 1024: valid pairs 50, vis-only 0, hid-only 0, Delta +0, p 1.0000, hidden 50/50, slot share 0.00 -> NOT HURT
+E22a swap_blocks: PARTIAL
+ar2_clock_e30  put_back_block  pause   64: valid pairs 50, vis-only 0, hid-only 0, Delta +0, p 1.0000, hidden 49/50, slot share 0.17 -> NOT HURT
+ar2_clock_e30  put_back_block  pause  256: valid pairs 50, vis-only 0, hid-only 0, Delta +0, p 1.0000, hidden 49/50, slot share 0.44 -> NOT HURT
+ar2_prop_e30   put_back_block  pause   64: valid pairs 50, vis-only 0, hid-only 0, Delta +0, p 1.0000, hidden 50/50, slot share 0.00 -> NOT HURT
+ar2_prop_e30   put_back_block  pause  256: valid pairs 50, vis-only 0, hid-only 0, Delta +0, p 1.0000, hidden 50/50, slot share 0.00 -> NOT HURT
+E22a put_back_block: NO DOSE EFFECT

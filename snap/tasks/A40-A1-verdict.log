@@ -1,0 +1,4 @@
+
+[queue5] 2026-11-22 16:34:53 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/a1_verdict.py
+{"registered": "5dcb216 (A1 card hypothesis)", "sesoi": -0.2, "finished": {"execute8": 100, "execute16": 100, "execute32": 100}, "verdict": "NOT EXECUTION LENGTH", "execute16": 92, "execute8": 91, "D": 0.01, "ci95": [-0.03, 0.05], "only16": 3, "only8": 2, "execute32_descriptive": {"scenes": 100, "execute32": 89, "execute8": 91, "D": -0.02, "ci95": [-0.08, 0.04]}}
+A1 VERDICT: NOT EXECUTION LENGTH

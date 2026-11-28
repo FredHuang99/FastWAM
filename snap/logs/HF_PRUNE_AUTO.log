@@ -1,0 +1,86 @@
+[autoprune-loop] 2026-11-27 13:27:06 usage refresh + check
+HF PRUNE AUTO: 78.4% <= 85 %, nothing to do
+[autoprune-loop] 2026-11-27 14:27:10 usage refresh + check
+HF PRUNE AUTO: 80.8% <= 85 %, nothing to do
+[autoprune-loop] 2026-11-27 15:27:14 usage refresh + check
+HF PRUNE AUTO: 80.8% <= 85 %, nothing to do
+[autoprune-loop] 2026-11-27 15:41:59 usage refresh + check
+HF PRUNE AUTO: 80.8% <= 85 %, nothing to do
+[autoprune-loop] 2026-11-27 16:42:03 usage refresh + check
+HF PRUNE AUTO: 82.0% <= 85 %, nothing to do
+[autoprune-loop] 2026-11-27 17:42:07 usage refresh + check
+HF PRUNE AUTO: 83.2% <= 85 %, nothing to do
+[autoprune-loop] 2026-11-27 17:55:48 usage refresh + check
+HF PRUNE AUTO: 83.2% <= 85 %, nothing to do
+[autoprune-loop] 2026-11-27 18:55:52 usage refresh + check
+HF PRUNE AUTO: 83.2% <= 85 %, nothing to do
+[autoprune-loop] 2026-11-27 19:56:00 usage refresh + check
+HF PRUNE AUTO: 84.4% <= 85 %, nothing to do
+[autoprune-loop] 2026-11-27 22:07:36 usage refresh + check
+[autoprune-loop] 2026-11-27 22:07:39 usage refreshed; prune check
+[autoprune] ar2_v3c_e10: A40 copy verified (199901fee4a3b491), 12.0 GB
+HF PRUNE AUTO: deleted ['ar2_v3c_e10']; projected 86.8%
+[autoprune-loop] 2026-11-27 22:10:45 next check in 60 min
+[autoprune-loop] 2026-11-27 23:10:45 usage refresh + check
+[autoprune-loop] 2026-11-27 23:10:49 usage refreshed; prune check
+HF PRUNE AUTO: deleted []; projected 86.8%
+[autoprune-loop] 2026-11-27 23:10:51 next check in 60 min
+[autoprune-loop] 2026-11-28 00:10:51 usage refresh + check
+[autoprune-loop] 2026-11-28 00:10:55 usage refreshed; prune check
+HF PRUNE AUTO: deleted []; projected 88.0%
+[autoprune-loop] 2026-11-28 00:10:57 next check in 60 min
+[autoprune-loop] 2026-11-28 01:10:57 usage refresh + check
+[autoprune-loop] 2026-11-28 01:11:01 usage refreshed; prune check
+HF PRUNE AUTO: deleted []; projected 88.0%
+[autoprune-loop] 2026-11-28 01:11:03 next check in 60 min
+[autoprune-loop] 2026-11-28 02:11:03 usage refresh + check
+[autoprune-loop] 2026-11-28 02:11:07 usage refreshed; prune check
+HF PRUNE AUTO: deleted []; projected 88.0%
+[autoprune-loop] 2026-11-28 02:11:09 next check in 60 min
+[autoprune-loop] 2026-11-28 03:11:09 usage refresh + check
+[autoprune-loop] 2026-11-28 03:11:12 usage refreshed; prune check
+HF PRUNE AUTO: deleted []; projected 88.0%
+[autoprune-loop] 2026-11-28 03:11:14 next check in 60 min
+[autoprune-loop] 2026-11-28 04:11:14 usage refresh + check
+[autoprune-loop] 2026-11-28 04:11:20 usage refreshed; prune check
+HF PRUNE AUTO: deleted []; projected 92.7%
+[autoprune-loop] 2026-11-28 04:11:32 next check in 60 min
+[autoprune-loop] 2026-11-28 05:11:32 usage refresh + check
+[autoprune-loop] 2026-11-28 05:11:37 usage refreshed; prune check
+HF PRUNE AUTO: deleted []; projected 93.9%
+[autoprune-loop] 2026-11-28 05:11:50 next check in 60 min
+[autoprune-loop] 2026-11-28 06:11:50 usage refresh + check
+[autoprune-loop] 2026-11-28 06:11:55 usage refreshed; prune check
+HF PRUNE AUTO: deleted []; projected 93.9%
+[autoprune-loop] 2026-11-28 06:12:08 next check in 60 min
+[autoprune-loop] 2026-11-28 07:12:08 usage refresh + check
+[autoprune-loop] 2026-11-28 07:12:13 usage refreshed; prune check
+HF PRUNE AUTO: deleted []; projected 93.9%
+[autoprune-loop] 2026-11-28 07:12:25 next check in 60 min
+[autoprune-loop] 2026-11-28 08:12:25 usage refresh + check
+[autoprune-loop] 2026-11-28 08:12:30 usage refreshed; prune check
+HF PRUNE AUTO: deleted []; projected 93.9%
+[autoprune-loop] 2026-11-28 08:12:43 next check in 60 min
+[autoprune-loop] 2026-11-28 09:12:43 usage refresh + check
+[autoprune-loop] 2026-11-28 09:12:48 usage refreshed; prune check
+HF PRUNE AUTO: deleted []; projected 93.9%
+[autoprune-loop] 2026-11-28 09:13:03 next check in 60 min
+[autoprune-loop] 2026-11-28 10:13:03 usage refresh + check
+[autoprune-loop] 2026-11-28 10:13:08 usage refreshed; prune check
+HF PRUNE AUTO: deleted []; projected 95.1%
+[autoprune-loop] 2026-11-28 10:13:25 next check in 60 min
+[autoprune-loop] 2026-11-28 11:13:25 usage refresh + check
+[autoprune-loop] 2026-11-28 11:13:30 usage refreshed; prune check
+HF PRUNE AUTO: deleted []; projected 95.1%
+[autoprune-loop] 2026-11-28 11:13:42 next check in 60 min
+[autoprune-loop] 2026-11-28 12:13:42 usage refresh + check
+[autoprune-loop] 2026-11-28 12:13:47 usage refreshed; prune check
+HF PRUNE AUTO: deleted []; projected 96.4%
+[autoprune-loop] 2026-11-28 12:14:00 next check in 60 min
+[autoprune-loop] 2026-11-28 13:14:00 usage refresh + check
+[autoprune-loop] 2026-11-28 13:14:04 usage refreshed; prune check
+[autoprune] rearr_ar_pw_e10: A40 copy verified (9a68dbff30635c66), 12.0 GB
+[autoprune] rearr_arprop_pw_e10: A40 copy verified (c8636f76d12059b0), 12.0 GB
+HF PRUNE AUTO: deleted ['rearr_ar_pw_e10', 'rearr_arprop_pw_e10']; projected 95.1%
+[autoprune-loop] 2026-11-28 13:16:20 next check in 60 min
+[autoprune-loop] 2026-11-28 14:16:20 window over (11-28 14:00)

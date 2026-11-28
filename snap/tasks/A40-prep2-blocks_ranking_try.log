@@ -1,0 +1,8 @@
+
+[queue5] 2026-11-22 00:56:09 $ bash -c bash /workspace/FastWAM-memory2/scripts/fullft/a40_prep_task.sh blocks_ranking_try
+[prep] 2026-11-21 16:56:10 blocks_ranking_try; disk: /dev/sdb         19T  9.7T  7.6T  57% /workspace/FastWAM-memory2
+blocks_ranking_try: outputs/memory_v2/closed_loop/scenes_seed42_n100_blocks_ranking_try/blocks_ranking_try.json complete (100 scenes, next seed 4300101)
+[text] blocks_ranking_try: 'There is a button and three colored cubes arranged in a random row on the table. Each time the cubes are rearranged, the arm presses the button until the arrangement is successful.' -> cache/blocks_ranking_try_episode_0000000/encodings.pt (182 MiB; 50 training episodes share the instruction)
+[text] blocks_ranking_try: 2 files checked against dense_blocks_ranking_try_v1/RELAY_MANIFEST.json (sha256); marker .text_only
+[text] blocks_ranking_try: 'There is a button and three colored cubes arranged in a random row on the table. Each time the cubes are rearranged, the arm presses the button until the arrangement is successful.' -> cache/blocks_ranking_try_episode_0000000/encodings.pt (50 training episodes share it); fingerprint fb87cfdef741
+[prep] 2026-11-21 16:56:36 blocks_ranking_try ready

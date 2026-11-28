@@ -1,0 +1,8 @@
+
+[queue5] 2026-11-19 12:22:24 $ bash -c bash /workspace/FastWAM-memory2/scripts/fullft/a40_prep_task.sh press_button
+[prep] 2026-11-19 04:22:24 press_button; disk: /dev/sdb         19T  9.5T  7.8T  55% /workspace/FastWAM-memory2
+press_button: outputs/memory_v2/closed_loop/scenes_seed42_n100_press_button/press_button.json complete (100 scenes, next seed 4300100)
+[text] press_button: 'Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm.' -> cache/press_button_episode_0000000/encodings.pt (102 MiB; 50 training episodes share the instruction)
+[text] press_button: 2 files checked against dense_press_button_v1/RELAY_MANIFEST.json (sha256); marker .text_only
+[text] press_button: 'Observe the two numbers on the table. Press the left button the number of times corresponding to the number on the left, and press the middle button the number of times corresponding to the number on the right. Then press the right button once to confirm.' -> cache/press_button_episode_0000000/encodings.pt (50 training episodes share it); fingerprint 86b7d3c298c6
+[prep] 2026-11-19 04:22:35 press_button ready

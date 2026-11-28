@@ -1,0 +1,15 @@
+
+[queue5] 2026-11-22 13:41:11 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e6_report.py --labels battery_try:battery_ar_e30 battery_try:battery_arprop_e30 rearrange_blocks:rearrange_ar_e30 swap_T:swapT_ar_e30 blocks_ranking_try:ranking_ar_e30 cover_blocks:cover_ar_e30 observe_and_pickup:obs_ar_e30 observe_and_pickup:obs_arprop_e30 --pairs observe_and_pickup:obs_arprop_e30:obs_ar_e30
+battery_try        battery_ar_e30         1-50: 45/50  51-100: 46/50  1-100: 91/100
+battery_try        battery_arprop_e30     1-50: 45/50  51-100: 46/50  1-100: 91/100
+rearrange_blocks   rearrange_ar_e30       1-50: 15/50  51-100: 14/50  1-100: 29/100
+swap_T             swapT_ar_e30           1-50: 27/50  51-100: 24/50  1-100: 51/100
+blocks_ranking_try ranking_ar_e30         1-50: 41/50  51-100: 36/50  1-100: 77/100
+cover_blocks       cover_ar_e30           1-50: 36/50  51-100: 36/50  1-100: 72/100
+observe_and_pickup obs_ar_e30             1-50: 7/50  51-100: 6/50  1-100: 13/100
+observe_and_pickup obs_arprop_e30         1-50: 11/50  51-100: 5/50  1-100: 16/100
+pair observe_and_pickup:obs_arprop_e30:obs_ar_e30 (descriptive, 1-100): {'scenes': 100, 'obs_arprop_e30': 16, 'obs_ar_e30': 13, 'a_only': 8, 'b_only': 5, 'p': 0.5810546875}
+S-C (b) battery_try scenes 1-50: AR 45, ledger 45 on 50 paired scenes (finished AR 50, ledger 50); ledger-only 1, AR-only 1, sign p 1.0000
+S-C (b) VERDICT: NOT SHOWN (S-C (b) not met)
+  battery_try 51-100 (descriptive): AR 46, ledger 46 on 50 paired scenes; ledger-only 2, AR-only 2, sign p 1.0000
+  battery_try 1-100 (descriptive): AR 91, ledger 91 on 100 paired scenes; ledger-only 3, AR-only 3, sign p 1.0000

@@ -1,0 +1,12 @@
+
+[queue5] 2026-11-24 18:33:00 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/ranking_split.py e6:ranking_ar_e30
+
+e6:ranking_ar_e30: 100 episodes
+   77  success   e.g. seeds [4300001, 4300002, 4300003, 4300004]
+   23  repeated an order already pressed (counting error)   e.g. seeds [4300000, 4300010, 4300020, 4300022]
+  failures: presses per episode Counter({13: 5, 9: 3, 8: 3, 11: 2, 17: 2, 19: 2, 10: 1, 14: 1, 15: 1, 24: 1, 16: 1, 18: 1}); distinct orders pressed Counter({4: 11, 5: 11, 3: 1})
+  failures: where the sorted order sits in the expert's walk (0 = start) Counter({3: 11, 5: 9, 4: 3})
+  successes: where the sorted order sits in the expert's walk Counter({2: 26, 1: 19, 5: 15, 4: 14, 3: 3})
+  pressed orders follow the expert's swap order (True / False / None = no press): {'False': 94, 'True': 6}
+
+RANKING SPLIT REPORT: written outputs/fullft/RANKING_SPLIT.json

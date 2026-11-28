@@ -1,0 +1,41 @@
+
+[queue5] 2026-11-16 20:52:09 $ bash -c RUN=ar2_none TAG=e10 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh
+[fetch] 2026-11-16 12:52:09 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 12:57:10 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 13:02:11 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 13:07:11 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 13:12:12 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 13:17:12 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 13:22:13 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 13:27:13 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 13:32:14 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 13:37:14 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 13:42:15 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 13:47:15 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 13:52:16 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 13:57:16 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 14:02:17 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 14:07:18 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 14:12:18 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 14:17:19 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 14:22:19 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 14:27:20 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 14:32:21 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 14:37:21 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 14:42:22 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 14:47:22 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 14:52:23 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 14:57:23 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 15:02:24 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 15:07:24 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 15:12:25 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 15:17:25 waiting for exports/ar2_none_e10 on the relay
+[fetch] 2026-11-16 15:22:26 fetching ar2_none_e10 (attempt 1)
+[relay] get hhyfred/memwam-fullft/exports/ar2_none_e10/export_e10.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e10/export_e10.pt (12042062819 bytes)
+[relay] get hhyfred/memwam-fullft/exports/ar2_none_e10/export_e10.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_none_e10/export_e10.pt.sha256 (80 bytes)
+export_e10.pt: OK
+total 11759840
+drwxr-xr-x 2 root root        4096 Nov 16 15:31 .
+drwxr-xr-x 5 root root        4096 Nov 16 15:22 ..
+-rw-r--r-- 1 root root 12042062819 Nov 16 15:31 export_e10.pt
+-rw-r--r-- 1 root root          80 Nov 16 15:31 export_e10.pt.sha256

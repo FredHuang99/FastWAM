@@ -1,0 +1,17 @@
+
+[queue5] 2026-11-23 13:39:13 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e24_verdict.py --stress
+  press_clock_sel_p64                press_button    pairs 50, Delta -2 (vis-only 1, hid-only 3), p 0.6250, hidden 3/50 -> FLOOR NOT MET
+  press_count_sel_p64                press_button    pairs 50, Delta +0 (vis-only 3, hid-only 3), p 1.0000, hidden 3/50 -> FLOOR NOT MET
+press_arprop_e10 on 1-50: success 0/50, first right 2
+press_arprop_e20 on 1-50: success 4/50, first right 28
+press_arprop_e30 on 1-50: success 0/50, first right 10
+press_fast_e10 on 1-50: success 1/50, first right 4
+press_fast_e20 on 1-50: success 11/50, first right 33
+press_fast_e30 on 1-50: success 13/50, first right 35
+press_count_e10 on 1-50: success 0/50, first right 3
+press_count_e20 on 1-50: success 0/50, first right 1
+press_count_e30 on 1-50: success 8/50, first right 27
+press_v3c_e10 on 1-50: success 0/50, first right 5
+press_v3c_e20 on 1-50: success 1/50, first right 5
+press_v3c_e30 on 1-50: success 9/50, first right 36
+E24 STRESS VERDICT: NO VERDICT (FLOOR NOT MET); press_count Delta +0; ledger picks on 51-100 {'press_arprop_e20': 4, 'press_fast_e30': 13, 'press_count_e30': 5, 'press_v3c_e30': 8}; clock 7; switch to Fable: False

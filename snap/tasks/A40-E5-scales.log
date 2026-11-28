@@ -1,0 +1,7 @@
+
+[queue5] 2026-11-19 09:32:21 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e5_verdict.py --scales
+ar2_clock_e30            swap 1-50: 50/50; failures {}
+ar2_clock_e30_ts1.5      swap 1-50: 0/0; failures {}
+ar2_clock_e30_ts0.5      swap 1-50: 0/0; failures {}
+failure direction (more 'pressed before s3' = early, more 'kept moving / idle after s3' = late): {'ar2_clock_e30': 'none', 'ar2_clock_e30_ts1.5': 'none', 'ar2_clock_e30_ts0.5': 'none'}
+FAILURE DIRECTION FLIPS between x1.5 and x0.5: NO (reported only)

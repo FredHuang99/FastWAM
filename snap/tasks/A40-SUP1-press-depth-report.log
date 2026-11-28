@@ -1,0 +1,46 @@
+
+[queue5] 2026-11-24 18:33:00 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_press_depth.py
+
+== e6:rearrange_arprop_e30: 100 episodes
+  -- never pressed: 17
+     closest approach, horizontal EE-button distance (m): median 0.007 (q1 0.005, q3 0.008, min 0.002, max 0.009, n 17)
+     EE height above the button base there (m):           median 0.223 (q1 0.222, q3 0.224, min 0.222, max 0.224, n 17)
+     lowest EE height while within 4 cm (m):              median 0.220 (q1 0.219, q3 0.221, min 0.192, max 0.223, n 17)
+     episodes never within 4 cm: 0
+     left finger touched the button (any target): {'unknown': 17}
+     body record: a left 'bottom' entry at the last decision in 16/17
+       at that entry: dxy median 0.009 (q1 0.008, q3 0.011, min 0.005, max 0.021, n 16)
+                      dz  median 0.220 (q1 0.219, q3 0.221, min 0.192, max 0.223, n 16)
+  -- pressed (env counted >= 1 press): 83
+     at the counted press: dxy median 0.004 (q1 0.002, q3 0.006, min 0.000, max 0.015, n 83)
+                           dz  median 0.189 (q1 0.189, q3 0.190, min 0.186, max 0.191, n 83)
+
+== e6:rearrange_ar_e30: 100 episodes
+  -- never pressed: 33
+     closest approach, horizontal EE-button distance (m): median 0.004 (q1 0.003, q3 0.005, min 0.001, max 0.009, n 33)
+     EE height above the button base there (m):           median 0.223 (q1 0.223, q3 0.224, min 0.222, max 0.224, n 33)
+     lowest EE height while within 4 cm (m):              median 0.222 (q1 0.219, q3 0.222, min 0.205, max 0.224, n 33)
+     episodes never within 4 cm: 0
+     left finger touched the button (any target): {'unknown': 33}
+     body record: a left 'bottom' entry at the last decision in 0/33
+       at that entry: dxy n 0
+                      dz  n 0
+  -- pressed (env counted >= 1 press): 67
+     at the counted press: dxy median 0.005 (q1 0.003, q3 0.008, min 0.000, max 0.018, n 67)
+                           dz  median 0.189 (q1 0.189, q3 0.190, min 0.187, max 0.191, n 67)
+
+== e16:rearrange_clock_e30: 100 episodes
+  -- never pressed: 7
+     closest approach, horizontal EE-button distance (m): median 0.007 (q1 0.006, q3 0.008, min 0.005, max 0.009, n 7)
+     EE height above the button base there (m):           median 0.223 (q1 0.223, q3 0.224, min 0.222, max 0.224, n 7)
+     lowest EE height while within 4 cm (m):              median 0.211 (q1 0.197, q3 0.218, min 0.192, max 0.223, n 7)
+     episodes never within 4 cm: 0
+     left finger touched the button (any target): {'unknown': 7}
+     body record: a left 'bottom' entry at the last decision in 0/7
+       at that entry: dxy n 0
+                      dz  n 0
+  -- pressed (env counted >= 1 press): 93
+     at the counted press: dxy median 0.004 (q1 0.003, q3 0.006, min 0.001, max 0.014, n 93)
+                           dz  median 0.190 (q1 0.189, q3 0.190, min 0.185, max 0.191, n 93)
+
+REARR PRESS DEPTH REPORT: written outputs/fullft/REARR_PRESS_DEPTH.json (the cap's travel is not logged: geometry of the EE link against the button base only)

@@ -1,0 +1,29 @@
+
+[queue5] 2026-11-27 01:35:56 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag_cpu_v21.py diag1
+
+== e6:ranking_ar_e30: 100 episodes
+  first_repeat: {'failure': {'A same order pressed again, no swap between': 23}, 'success': {'no repeat': 10, 'A same order pressed again, no swap between': 66, 'B swapped away and straight back': 1}}
+  first_repeat_record: {'A / prev press in record False / last swap in record None': 85, 'B / prev press in record False / last swap in record False': 1, 'A / prev press in record False / last swap in record False': 4}
+  first_repeat_record_entries: {'median': 0.0, 'max': 0, 'n': 90}
+  first_repeat_after_first_swap: {'failure': {'B swapped away and straight back': 11, 'A same order pressed again, no swap between': 12}, 'success': {'no repeat': 63, 'A same order pressed again, no swap between': 11, 'B swapped away and straight back': 3}}
+  first_repeat_after_first_swap_record: {'B / prev press in record False / last swap in record False': 14, 'A / prev press in record False / last swap in record False': 23}
+  first_repeat_after_first_swap_record_entries: {'median': 0, 'max': 0, 'n': 37}
+  success_by_expert_position: {'1': '19/19', '2': '26/26', '3': '3/14', '4': '14/17', '5': '15/24'}
+  success_by_model_position: {'1': '18/18', '2': '27/27', '3': '15/15', '4': '13/13', '5': '3/3', 'never': '1/24'}
+  first_swap_is_experts: {'True': 100}
+  start_presses_before_first_swap: {5: 4, 1: 15, 6: 9, 8: 5, 3: 10, 9: 6, 4: 11, 2: 11, 14: 2, 10: 2, 23: 1, 15: 1, 7: 8, 12: 3, 16: 3, 17: 2, 11: 2, 22: 1, 13: 3, 21: 1}
+
+== e6:ranking_arprop_e30: 100 episodes
+  first_repeat: {'success': {'A same order pressed again, no swap between': 59, 'no repeat': 6}, 'failure': {'A same order pressed again, no swap between': 34, 'B swapped away and straight back': 1}}
+  first_repeat_record: {'A / prev press in record False / last swap in record None': 89, 'A / prev press in record True / last swap in record None': 4, 'B / prev press in record True / last swap in record True': 1}
+  first_repeat_record_entries: {'median': 2.0, 'max': 69, 'n': 94}
+  first_repeat_after_first_swap: {'success': {'no repeat': 58, 'A same order pressed again, no swap between': 7}, 'failure': {'B swapped away and straight back': 12, 'A same order pressed again, no swap between': 22, 'no repeat': 1}}
+  first_repeat_after_first_swap_record: {'B / prev press in record True / last swap in record True': 11, 'A / prev press in record True / last swap in record True': 27, 'A / prev press in record False / last swap in record True': 2, 'B / prev press in record False / last swap in record True': 1}
+  first_repeat_after_first_swap_record_entries: {'median': 69, 'max': 69, 'n': 41}
+  success_by_expert_position: {'1': '7/19', '2': '10/26', '3': '9/14', '4': '15/17', '5': '24/24'}
+  success_by_model_position: {'1': '22/24', '2': '15/15', '3': '18/18', '4': '8/8', '5': '2/2', 'never': '0/33'}
+  first_swap_is_experts: {'True': 100}
+  start_presses_before_first_swap: {4: 9, 2: 63, 1: 7, 3: 20, 5: 1}
+v20:ranking_v3a_e30: no episodes
+
+DIAG V21 DIAG1: DESCRIBED

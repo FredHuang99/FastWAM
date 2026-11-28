@@ -1,0 +1,11 @@
+
+[queue5] 2026-11-19 09:10:13 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e5_verdict.py
+clock no stress swap_blocks: 100/100 finished of 100; swap failures {}
+clock no stress put_back_block: 97/100 finished of 100
+no stress, swap, paired on 100 scenes: ledger e30 (A40, /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/g1) 100 vs clock 100; ledger-only 0, clock-only 0, sign p 1.0000
+clock pause vis: 47/50 finished; failures {'pressed before s3': 3}
+clock pause hid: 50/50 finished; failures {}
+clock pause: valid pairs 50; vis-only 0, hid-only 3; Delta -3; sign p 0.2500 (finished vis 50, hid 50)
+ledger model's E1 Delta (pause, swap 1-50, A40): 0; AR's: -1 (reported)
+FLOOR (clock no-stress swap >= 70/100): True
+E5 VERDICT: NOT REPRODUCED

@@ -1,0 +1,21 @@
+{
+ "run": "rearrange timely writer",
+ "sesoi": 0.15,
+ "finished": {
+  "rearr_v3c_e30": 100,
+  "rearrange_arprop_e30": 100
+ },
+ "main": {
+  "scenes": 100,
+  "new": 33,
+  "ref": 62,
+  "D": -0.29,
+  "ci95": [
+   -0.42,
+   -0.16
+  ],
+  "only_new": 10,
+  "only_ref": 39
+ },
+ "verdict": "NO HELP"
+}

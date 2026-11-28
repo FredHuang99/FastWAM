@@ -1,0 +1,80 @@
+{
+ "run": "find-same push (described)",
+ "reference_obs_s800_e10": "49/100",
+ "runs": {
+  "obs_s200_e30": {
+   "finished": 100,
+   "success": 15,
+   "against_obs_s800_e10": {
+    "scenes": 100,
+    "new": 15,
+    "ref": 49,
+    "D": -0.34,
+    "ci95": [
+     -0.45,
+     -0.24
+    ],
+    "only_new": 3,
+    "only_ref": 37
+   },
+   "against_obs_ar_e30": {
+    "scenes": 100,
+    "new": 15,
+    "ref": 13,
+    "D": 0.02,
+    "ci95": [
+     -0.07,
+     0.11
+    ],
+    "only_new": 12,
+    "only_ref": 10
+   }
+  },
+  "obs_s800_e5": {
+   "finished": 100,
+   "success": 46,
+   "against_obs_s800_e10": {
+    "scenes": 100,
+    "new": 46,
+    "ref": 49,
+    "D": -0.03,
+    "ci95": [
+     -0.14,
+     0.08
+    ],
+    "only_new": 15,
+    "only_ref": 18
+   },
+   "against_obs_ar_e30": {
+    "scenes": 100,
+    "new": 46,
+    "ref": 13,
+    "D": 0.33,
+    "ci95": [
+     0.21,
+     0.45
+    ],
+    "only_new": 41,
+    "only_ref": 8
+   }
+  },
+  "obs_s800_e10": {
+   "finished": 100,
+   "success": 49,
+   "against_obs_s800_e10": null,
+   "against_obs_ar_e30": {
+    "scenes": 100,
+    "new": 49,
+    "ref": 13,
+    "D": 0.36,
+    "ci95": [
+     0.24,
+     0.47
+    ],
+    "only_new": 41,
+    "only_ref": 5
+   }
+  }
+ },
+ "verdict": "DESCRIBED"
+}

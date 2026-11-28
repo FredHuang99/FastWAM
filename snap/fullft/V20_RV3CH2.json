@@ -1,0 +1,22 @@
+{
+ "run": "card 1 rearr_v3c_h2 (described only)",
+ "finished": {
+  "rearr_v3c_h2_e30": 100,
+  "rearr_v3c_e30": 0,
+  "rearrange_arprop_e30": 100
+ },
+ "success_1_100": 47,
+ "against_rearrange_arprop": {
+  "scenes": 100,
+  "new": 47,
+  "ref": 62,
+  "D": -0.15,
+  "ci95": [
+   -0.26,
+   -0.04
+  ],
+  "only_new": 10,
+  "only_ref": 25
+ },
+ "verdict": "DESCRIBED"
+}

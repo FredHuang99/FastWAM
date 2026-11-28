@@ -1,0 +1,4 @@
+
+[queue5] 2026-11-28 06:08:34 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v21_verdict.py c22
+{"run": "card 22 rearr_pw_s18 (seed 18), described only", "finished": {"rearr_pw_s18_e30": 100, "rearr_pw_e30": 100}, "success_1_100": {"seed18": 61, "seed17": 93, "mean_of_two_seeds": 77.0}, "paired_counts": {"scenes": 100, "new": 61, "ref": 93, "D": -0.32, "ci95": [-0.43, -0.21], "only_new": 4, "only_ref": 36}, "classes": {"rearr_pw_s18_e30": {"never pressed: block1 placed on the empty mat": 17, "success": 61, "pressed twice or more (after step 1 was complete)": 22}, "rearr_pw_e30": {"success": 93, "never pressed: block1 placed on the empty mat": 4, "stage 1, then moved block1 again (which-block error)": 2, "pressed too early (block1 not on the empty mat at the press)": 1}}, "verdict": "DESCRIBED"}
+V21 C22: DESCRIBED

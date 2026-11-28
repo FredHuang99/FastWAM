@@ -1,0 +1,4 @@
+
+[queue5] 2026-11-27 02:05:25 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py obss
+{"run": "card 8 find-same with more scenes (dagger)", "sesoi": 0.15, "finished": {"obs_s200_e30": 100, "obs_ar_e30": 100}, "main": {"scenes": 100, "new": 15, "ref": 13, "D": 0.02, "ci95": [-0.07, 0.11], "only_new": 12, "only_ref": 10}, "verdict": "NOT SCENE-LIMITED AT 200", "success_vs_bars": "15 vs 28 (pure-WAM best, self-reported) and 20 (blind pick)", "described_obs_s200_e10": {"scenes": 100, "new": 14, "ref": 13, "D": 0.01, "ci95": [-0.08, 0.1], "only_new": 11, "only_ref": 10}, "described_obs_s200_e20": {"scenes": 100, "new": 13, "ref": 13, "D": 0.0, "ci95": [-0.09, 0.09], "only_new": 10, "only_ref": 10}}
+V20 OBSS: NOT SCENE-LIMITED AT 200

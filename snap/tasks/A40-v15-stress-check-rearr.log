@@ -1,0 +1,5 @@
+
+[queue5] 2026-11-19 22:32:12 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/stress_smoke_check.py v15smoke rearrange_ar_e30_smoke_p64_vis rearrange_blocks 64
+SMOKE rearrange_blocks seed 4300000: finished True, success False, injections 1, {"frame": 160, "k": 64, "arm": "history", "active_arm": 1, "open_frame": 126, "shown": 64, "displacement_m": 0.0, "counters_changed": [], "arm_return_rad": 0.004873141646385193}
+SMOKE rearrange_blocks seed 4300001: finished True, success False, injections 1, {"frame": 160, "k": 64, "arm": "history", "active_arm": 1, "open_frame": 125, "shown": 64, "displacement_m": 0.0, "counters_changed": [], "arm_return_rad": 0.004969298839569092}
+SMOKE: PASS

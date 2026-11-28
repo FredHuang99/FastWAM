@@ -1,0 +1,148 @@
+{
+ "run": "plan v22 diagnostic 8: execution protocol re-evaluation (described)",
+ "line": 8,
+ "settings": {
+  "swapT_x16": {
+   "task": "swap_T",
+   "new": "d8:swapT_ar_e30_x16",
+   "original": "e6:swapT_ar_e30",
+   "finished_1_50": {
+    "new": 50,
+    "original": 50
+   },
+   "scenes_1_50": {
+    "scenes": 50,
+    "new": 26,
+    "ref": 27,
+    "D": -0.02,
+    "ci95": [
+     -0.12,
+     0.08
+    ],
+    "only_new": 3,
+    "only_ref": 4
+   },
+   "gain_1_50": -1,
+   "reaches_line": false
+  },
+  "swapT_x32": {
+   "task": "swap_T",
+   "new": "d8:swapT_ar_e30_x32",
+   "original": "e6:swapT_ar_e30",
+   "finished_1_50": {
+    "new": 50,
+    "original": 50
+   },
+   "scenes_1_50": {
+    "scenes": 50,
+    "new": 29,
+    "ref": 27,
+    "D": 0.04,
+    "ci95": [
+     -0.1,
+     0.18
+    ],
+    "only_new": 7,
+    "only_ref": 5
+   },
+   "gain_1_50": 2,
+   "reaches_line": false
+  },
+  "swapT_s50": {
+   "task": "swap_T",
+   "new": "d8:swapT_ar_e30_s50",
+   "original": "e6:swapT_ar_e30",
+   "finished_1_50": {
+    "new": 50,
+    "original": 50
+   },
+   "scenes_1_50": {
+    "scenes": 50,
+    "new": 23,
+    "ref": 27,
+    "D": -0.08,
+    "ci95": [
+     -0.22,
+     0.06
+    ],
+    "only_new": 4,
+    "only_ref": 8
+   },
+   "gain_1_50": -4,
+   "reaches_line": false
+  },
+  "press_x16": {
+   "task": "press_button",
+   "new": "d8:press_fast_e30_x16",
+   "original": "e17:press_fast_e30",
+   "finished_1_50": {
+    "new": 43,
+    "original": 50
+   },
+   "scenes_1_50": {
+    "scenes": 43,
+    "new": 8,
+    "ref": 13,
+    "D": -0.1163,
+    "ci95": [
+     -0.2791,
+     0.0465
+    ],
+    "only_new": 4,
+    "only_ref": 9
+   },
+   "gain_1_50": -5,
+   "reaches_line": false
+  },
+  "press_x32": {
+   "task": "press_button",
+   "new": "d8:press_fast_e30_x32",
+   "original": "e17:press_fast_e30",
+   "finished_1_50": {
+    "new": 10,
+    "original": 50
+   },
+   "scenes_1_50": {
+    "scenes": 10,
+    "new": 1,
+    "ref": 3,
+    "D": -0.2,
+    "ci95": [
+     -0.6,
+     0.2
+    ],
+    "only_new": 1,
+    "only_ref": 3
+   },
+   "gain_1_50": -2,
+   "reaches_line": false
+  },
+  "press_s50": {
+   "task": "press_button",
+   "new": "d8:press_fast_e30_s50",
+   "original": "e17:press_fast_e30",
+   "finished_1_50": {
+    "new": 0,
+    "original": 50
+   },
+   "scenes_1_50": null,
+   "gain_1_50": null,
+   "reaches_line": false,
+   "status": "no paired episodes yet"
+  },
+  "rearr18_x16": {
+   "task": "rearrange_blocks",
+   "new": "d8:rearr_pw_s18_e30_x16",
+   "original": "v21:rearr_pw_s18_e30",
+   "finished_1_50": {
+    "new": 0,
+    "original": 50
+   },
+   "scenes_1_50": null,
+   "gain_1_50": null,
+   "reaches_line": false,
+   "status": "no paired episodes yet"
+  }
+ },
+ "verdict": "DESCRIBED"
+}

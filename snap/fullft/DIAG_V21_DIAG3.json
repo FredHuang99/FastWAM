@@ -1,0 +1,1119 @@
+{
+ "run": "plan v21 diagnostic 3: rearrange press timing (described)",
+ "items": {
+  "rv3c:rearr_v3c_e30": {
+   "summary": {
+    "pressed_twice": 45,
+    "second_press": {
+     "immediately (no block lifted in between)": 45
+    },
+    "targets_between": {
+     "median": 17
+    },
+    "lowest_ee_at_first_press_m": [
+     0.184,
+     0.185,
+     0.185,
+     0.185,
+     0.185,
+     0.185,
+     0.185,
+     0.185,
+     0.185,
+     0.185,
+     0.185,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.187,
+     0.187,
+     0.187,
+     0.187,
+     0.187,
+     0.187,
+     0.187,
+     0.187,
+     0.187,
+     0.187,
+     0.187,
+     0.188,
+     0.188,
+     0.188,
+     0.189,
+     0.191
+    ],
+    "first_press_in_record_between": {
+     "sometimes": 31,
+     "always": 14
+    },
+    "first_press_in_record_at_the_starting_decision": {
+     "None": 45
+    },
+    "write_delay_targets": {
+     "median": 9.5,
+     "min": 4,
+     "max": 14,
+     "n": 86
+    }
+   },
+   "episodes": {
+    "4300009": {
+     "targets_between": 21,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1875687837600708,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300010": {
+     "targets_between": 14,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18692278861999512,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300011": {
+     "targets_between": 14,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1861822009086609,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300013": {
+     "targets_between": 15,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18492358922958374,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300018": {
+     "targets_between": 17,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18691229820251465,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300019": {
+     "targets_between": 24,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18574261665344238,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300022": {
+     "targets_between": 15,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18689066171646118,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300024": {
+     "targets_between": 18,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18625527620315552,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300025": {
+     "targets_between": 17,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18685561418533325,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300027": {
+     "targets_between": 14,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1860600709915161,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300028": {
+     "targets_between": 21,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18620961904525757,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300031": {
+     "targets_between": 14,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18631607294082642,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300033": {
+     "targets_between": 14,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18620342016220093,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    },
+    "4300034": {
+     "targets_between": 16,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18534362316131592,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300038": {
+     "targets_between": 17,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18502336740493774,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    },
+    "4300040": {
+     "targets_between": 24,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18936419486999512,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300041": {
+     "targets_between": 21,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1856931447982788,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300044": {
+     "targets_between": 17,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1845274567604065,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    },
+    "4300046": {
+     "targets_between": 16,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18462318181991577,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300051": {
+     "targets_between": 19,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18501430749893188,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300052": {
+     "targets_between": 13,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.19055074453353882,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    },
+    "4300053": {
+     "targets_between": 18,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18586087226867676,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    },
+    "4300056": {
+     "targets_between": 15,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1869085431098938,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300059": {
+     "targets_between": 16,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18607914447784424,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300060": {
+     "targets_between": 18,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1858595609664917,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    },
+    "4300061": {
+     "targets_between": 17,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1844530701637268,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300063": {
+     "targets_between": 17,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18492937088012695,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300066": {
+     "targets_between": 36,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18680590391159058,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    },
+    "4300067": {
+     "targets_between": 17,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1880461573600769,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    },
+    "4300070": {
+     "targets_between": 14,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1856313943862915,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300073": {
+     "targets_between": 14,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18749386072158813,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300074": {
+     "targets_between": 15,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1864222288131714,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300076": {
+     "targets_between": 19,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18470865488052368,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300078": {
+     "targets_between": 20,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18473511934280396,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300079": {
+     "targets_between": 18,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18525278568267822,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300081": {
+     "targets_between": 15,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18616533279418945,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300084": {
+     "targets_between": 18,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1867184042930603,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300085": {
+     "targets_between": 25,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18572121858596802,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    },
+    "4300086": {
+     "targets_between": 36,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18651235103607178,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    },
+    "4300088": {
+     "targets_between": 17,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18716299533843994,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    },
+    "4300091": {
+     "targets_between": 16,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18717175722122192,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    },
+    "4300096": {
+     "targets_between": 26,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18647253513336182,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    },
+    "4300097": {
+     "targets_between": 15,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18578499555587769,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300098": {
+     "targets_between": 17,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1879194974899292,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    },
+    "4300099": {
+     "targets_between": 19,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18552929162979126,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    }
+   }
+  },
+  "rv3c:rearr_v3c_h2_e30": {
+   "summary": {
+    "pressed_twice": 27,
+    "second_press": {
+     "immediately (no block lifted in between)": 27
+    },
+    "targets_between": {
+     "median": 17
+    },
+    "lowest_ee_at_first_press_m": [
+     0.185,
+     0.185,
+     0.185,
+     0.185,
+     0.185,
+     0.185,
+     0.185,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.187,
+     0.187,
+     0.187,
+     0.187,
+     0.187,
+     0.188,
+     0.188,
+     0.189,
+     0.19
+    ],
+    "first_press_in_record_between": {
+     "always": 10,
+     "sometimes": 16,
+     "never": 1
+    },
+    "first_press_in_record_at_the_starting_decision": {
+     "None": 27
+    },
+    "write_delay_targets": {
+     "median": 10.0,
+     "min": 5,
+     "max": 13,
+     "n": 84
+    }
+   },
+   "episodes": {
+    "4300004": {
+     "targets_between": 35,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18590295314788818,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    },
+    "4300005": {
+     "targets_between": 16,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1856703758239746,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300006": {
+     "targets_between": 15,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1856834888458252,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300007": {
+     "targets_between": 20,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18693995475769043,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    },
+    "4300010": {
+     "targets_between": 11,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18914616107940674,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    },
+    "4300011": {
+     "targets_between": 14,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18552547693252563,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300024": {
+     "targets_between": 19,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18599337339401245,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300026": {
+     "targets_between": 19,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18521004915237427,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300028": {
+     "targets_between": 24,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1850653886795044,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300031": {
+     "targets_between": 14,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18573695421218872,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300034": {
+     "targets_between": 21,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18495476245880127,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300045": {
+     "targets_between": 15,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18685680627822876,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    },
+    "4300046": {
+     "targets_between": 16,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1858246922492981,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300048": {
+     "targets_between": 22,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18635821342468262,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    },
+    "4300049": {
+     "targets_between": 17,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18685489892959595,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300050": {
+     "targets_between": 18,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18828243017196655,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300057": {
+     "targets_between": 17,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1854906678199768,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    },
+    "4300058": {
+     "targets_between": 28,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18553262948989868,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    },
+    "4300062": {
+     "targets_between": 18,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1864219307899475,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    },
+    "4300063": {
+     "targets_between": 21,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1851900815963745,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300068": {
+     "targets_between": 14,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1865871548652649,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300071": {
+     "targets_between": 19,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1848543882369995,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300076": {
+     "targets_between": 16,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18484193086624146,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300085": {
+     "targets_between": 16,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18644118309020996,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300093": {
+     "targets_between": 8,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1884167194366455,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300096": {
+     "targets_between": 15,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.19044220447540283,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    },
+    "4300098": {
+     "targets_between": 12,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18729835748672485,
+     "descent_start_target": null,
+     "first_press_in_record_between": "always"
+    }
+   }
+  },
+  "v20:rearr_pw_e30": {
+   "summary": {
+    "pressed_twice": 0,
+    "second_press": {},
+    "targets_between": null,
+    "lowest_ee_at_first_press_m": [],
+    "write_delay_targets": {
+     "median": 9.5,
+     "min": 5,
+     "max": 14,
+     "n": 96
+    }
+   },
+   "episodes": {}
+  },
+  "e6:rearrange_arprop_e30": {
+   "summary": {
+    "pressed_twice": 18,
+    "second_press": {
+     "immediately (no block lifted in between)": 18
+    },
+    "targets_between": {
+     "median": 16.0
+    },
+    "lowest_ee_at_first_press_m": [
+     0.184,
+     0.184,
+     0.184,
+     0.185,
+     0.185,
+     0.185,
+     0.185,
+     0.185,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.188,
+     0.188,
+     0.188,
+     0.189,
+     0.19
+    ],
+    "first_press_in_record_between": {
+     "never": 15,
+     "sometimes": 3
+    },
+    "first_press_in_record_at_the_starting_decision": {
+     "None": 18
+    },
+    "write_delay_targets": {
+     "median": 18.0,
+     "min": 9,
+     "max": 48,
+     "n": 76
+    }
+   },
+   "episodes": {
+    "4300006": {
+     "targets_between": 10,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18838346004486084,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300008": {
+     "targets_between": 22,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18564707040786743,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300018": {
+     "targets_between": 18,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18827039003372192,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300024": {
+     "targets_between": 11,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1886155605316162,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300026": {
+     "targets_between": 17,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18499183654785156,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300028": {
+     "targets_between": 17,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18548619747161865,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300031": {
+     "targets_between": 18,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18503159284591675,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300032": {
+     "targets_between": 16,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18520313501358032,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300033": {
+     "targets_between": 11,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18565714359283447,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300034": {
+     "targets_between": 13,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18478655815124512,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300045": {
+     "targets_between": 12,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.19008678197860718,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300050": {
+     "targets_between": 12,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18756335973739624,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300057": {
+     "targets_between": 12,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18585717678070068,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300060": {
+     "targets_between": 17,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18557339906692505,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300071": {
+     "targets_between": 20,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18408048152923584,
+     "descent_start_target": null,
+     "first_press_in_record_between": "sometimes"
+    },
+    "4300076": {
+     "targets_between": 18,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18393969535827637,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300094": {
+     "targets_between": 16,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18411880731582642,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300096": {
+     "targets_between": 12,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18641185760498047,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    }
+   }
+  },
+  "e6:rearrange_ar_e30": {
+   "summary": {
+    "pressed_twice": 34,
+    "second_press": {
+     "immediately (no block lifted in between)": 34
+    },
+    "targets_between": {
+     "median": 16.5
+    },
+    "lowest_ee_at_first_press_m": [
+     0.183,
+     0.185,
+     0.185,
+     0.185,
+     0.185,
+     0.185,
+     0.185,
+     0.185,
+     0.185,
+     0.185,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.186,
+     0.187,
+     0.187,
+     0.187,
+     0.187,
+     0.187,
+     0.187,
+     0.187,
+     0.188,
+     0.189
+    ],
+    "first_press_in_record_between": {
+     "never": 34
+    },
+    "first_press_in_record_at_the_starting_decision": {
+     "None": 34
+    }
+   },
+   "episodes": {
+    "4300001": {
+     "targets_between": 17,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18661749362945557,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300002": {
+     "targets_between": 40,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18566632270812988,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300003": {
+     "targets_between": 13,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18543106317520142,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300005": {
+     "targets_between": 107,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18592989444732666,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300009": {
+     "targets_between": 13,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1856585144996643,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300011": {
+     "targets_between": 28,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1853967308998108,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300015": {
+     "targets_between": 15,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1869146227836609,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300018": {
+     "targets_between": 21,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18615561723709106,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300019": {
+     "targets_between": 13,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18646955490112305,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300021": {
+     "targets_between": 16,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18683576583862305,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300026": {
+     "targets_between": 18,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1857391595840454,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300027": {
+     "targets_between": 14,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1852104663848877,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300028": {
+     "targets_between": 14,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18508422374725342,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300031": {
+     "targets_between": 13,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18531590700149536,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300041": {
+     "targets_between": 17,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18531590700149536,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300042": {
+     "targets_between": 28,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18556243181228638,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300050": {
+     "targets_between": 24,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1833617091178894,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300056": {
+     "targets_between": 14,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18604177236557007,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300057": {
+     "targets_between": 29,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1848331093788147,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300060": {
+     "targets_between": 7,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1889861822128296,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300063": {
+     "targets_between": 14,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1856432557106018,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300067": {
+     "targets_between": 25,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1869407296180725,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300069": {
+     "targets_between": 15,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18614518642425537,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300072": {
+     "targets_between": 25,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1870632767677307,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300073": {
+     "targets_between": 30,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18506091833114624,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300074": {
+     "targets_between": 16,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18582284450531006,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300076": {
+     "targets_between": 17,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18501383066177368,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300081": {
+     "targets_between": 29,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18685346841812134,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300082": {
+     "targets_between": 14,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18600678443908691,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300084": {
+     "targets_between": 14,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18578016757965088,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300089": {
+     "targets_between": 13,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18550735712051392,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300091": {
+     "targets_between": 32,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18815898895263672,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300092": {
+     "targets_between": 30,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.18588244915008545,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    },
+    "4300098": {
+     "targets_between": 16,
+     "second_press": "immediately (no block lifted in between)",
+     "lowest_ee_at_first_press_m": 0.1868070363998413,
+     "descent_start_target": null,
+     "first_press_in_record_between": "never"
+    }
+   }
+  }
+ },
+ "verdict": "DESCRIBED"
+}

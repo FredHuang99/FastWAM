@@ -1,0 +1,82 @@
+
+[queue5] 2026-11-23 15:06:16 $ bash -c RUN=swapT_none TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh
+[fetch] 2026-11-23 07:06:17 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 07:11:18 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 07:16:18 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 07:21:19 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 07:26:19 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 07:31:20 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 07:36:20 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 07:41:21 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 07:46:21 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 07:51:22 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 07:56:22 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 08:01:23 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 08:06:23 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 08:11:24 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 08:16:25 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 08:21:25 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 08:26:26 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 08:31:26 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 08:36:27 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 08:41:27 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 08:46:28 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 08:51:28 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 08:56:29 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 09:01:29 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 09:06:30 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 09:11:31 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 09:16:31 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 09:21:32 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 09:26:32 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 09:31:33 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 09:36:33 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 09:41:34 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 09:46:34 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 09:51:35 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 09:56:35 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 10:01:36 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 10:06:37 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 10:11:37 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 10:16:38 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 10:21:38 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 10:26:39 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 10:31:39 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 10:36:40 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 10:41:40 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 10:46:41 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 10:51:42 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 10:56:42 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 11:01:43 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 11:06:43 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 11:11:44 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 11:16:44 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 11:21:45 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 11:26:45 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 11:31:46 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 11:36:46 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 11:41:47 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 11:46:48 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 11:51:48 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 11:56:49 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 12:01:49 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 12:06:50 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 12:11:50 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 12:16:51 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 12:21:51 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 12:26:52 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 12:31:52 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 12:36:53 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 12:41:54 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 12:46:54 waiting for exports/swapT_none_e30 on the relay
+[fetch] 2026-11-23 12:51:55 waiting for exports/swapT_none_e30 on the relay
+[fetch] disk before: /dev/sdb         19T  9.9T  7.4T  58% /workspace/FastWAM-memory2
+[fetch] 2026-11-23 12:56:55 fetching swapT_none_e30 (attempt 1)
+[relay] get hhyfred/memwam-fullft/exports/swapT_none_e30/export_e30.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_none_e30/export_e30.pt (12042063139 bytes)
+[relay] get hhyfred/memwam-fullft/exports/swapT_none_e30/export_e30.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_none_e30/export_e30.pt.sha256 (80 bytes)
+export_e30.pt: OK
+total 11759844
+drwxr-xr-x  2 root root        4096 Nov 23 13:04 .
+drwxr-xr-x 53 root root        4096 Nov 23 12:56 ..
+-rw-r--r--  1 root root 12042063139 Nov 23 13:04 export_e30.pt
+-rw-r--r--  1 root root          80 Nov 23 13:04 export_e30.pt.sha256

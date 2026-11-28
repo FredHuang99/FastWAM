@@ -1,0 +1,12 @@
+
+[queue5] 2026-11-27 01:35:56 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag_cpu_v21.py diag4a
+
+== e17:press_v3c_e30: success 17; slopes 0.996 / 0.953
+
+== v20:press_told_e30: success 22; slopes 1.027 / 0.981
+
+== e17:press_fast_e30: success 26; slopes 1.007 / 1.067
+
+== d2:d2_press_e30: success 16; slopes 0.951 / 1.036
+
+DIAG V21 DIAG4A: DESCRIBED

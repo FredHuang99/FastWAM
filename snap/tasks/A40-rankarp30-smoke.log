@@ -1,0 +1,101 @@
+
+[queue5] 2026-11-25 21:58:45 $ /opt/mwam/bin/python -m fastwam.memory_v2.online run --checkpoint /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_arprop_e30/export_e30.pt --label ranking_arprop_e30_smoke --modes on --scenes /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/scenes_seed42_n100_blocks_ranking_try --output /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/e6smoke --tasks blocks_ranking_try --execute 8 --limit 1
+[dense] WARNING runtime packages differ from the dense preparation receipt (cache is read, not re-encoded): {"python": {"recorded": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]", "actual": "3.12.3 (main, Nov  6 2024, 18:32:19) [GCC 13.2.0]"}, "packages.Pillow": {"recorded": "12.0.0", "actual": "11.0.0"}, "packages.numpy": {"recorded": "2.1.0", "actual": "1.26.4"}, "packages.torch": {"recorded": "2.10.0a0+b558c986e8.nv25.11", "actual": "2.6.0a0+df5bbc09d1.nv24.12"}, "packages.torchvision": {"recorded": "0.25.0a0+7a13ad0f", "actual": "0.20.0a0"}}
+[closed-loop] 2026-11-25 14:00:02 1 scenes x modes ['on'] -> labels {'on': 'ranking_arprop_e30_smoke'}; checkpoint /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_arprop_e30/export_e30.pt; T5 on CPU; max_targets=official
+[closed-loop] WARNING dense config was recorded for sm9.0; this GPU is sm8.6: TORCH_EXTENSIONS_DIR -> /workspace/FastWAM/outputs/fused_environment_memory_v2_sm86/torch_extensions (give --extensions-dir to reuse built kernels)
+[closed-loop] 2026-11-25 14:00:02 start ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 target_limit=3500 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/e6smoke/ranking_arprop_e30_smoke/on/blocks_ranking_try/seed_4300000
+[fullft] text from the training cache (blocks_ranking_try/episode_0000000, 50 episodes share it; fingerprint fb87cfdef741)
+/restore-tmp/dense_joint_v1/data_path.py:16: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /opt/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:206.)
+  return torch.stack([TF.resize(torch.from_numpy(np.ascontiguousarray(a)).permute(2,0,1).float()/255.,
+[decide] 2026-11-25 14:00:46 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=0/3500 hist=0 policy=0.7s elapsed=5s
+[decide] 2026-11-25 14:00:55 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=32/3500 hist=2 policy=0.5s elapsed=15s
+[decide] 2026-11-25 14:01:05 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=64/3500 hist=3 policy=0.5s elapsed=24s
+[decide] 2026-11-25 14:01:14 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=96/3500 hist=3 policy=0.5s elapsed=34s
+[decide] 2026-11-25 14:01:24 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=128/3500 hist=3 policy=0.6s elapsed=43s
+[decide] 2026-11-25 14:01:33 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=160/3500 hist=3 policy=0.5s elapsed=53s
+[decide] 2026-11-25 14:01:43 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=192/3500 hist=3 policy=0.5s elapsed=63s
+[decide] 2026-11-25 14:02:00 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=224/3500 hist=3 policy=0.6s elapsed=80s
+[decide] 2026-11-25 14:02:11 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=256/3500 hist=3 policy=0.6s elapsed=90s
+[decide] 2026-11-25 14:02:21 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=288/3500 hist=3 policy=0.6s elapsed=100s
+[decide] 2026-11-25 14:02:33 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=320/3500 hist=3 policy=0.6s elapsed=112s
+[decide] 2026-11-25 14:02:47 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=352/3500 hist=3 policy=0.6s elapsed=127s
+[decide] 2026-11-25 14:02:57 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=384/3500 hist=3 policy=0.6s elapsed=137s
+[decide] 2026-11-25 14:03:07 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=416/3500 hist=3 policy=0.6s elapsed=147s
+[decide] 2026-11-25 14:03:17 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=448/3500 hist=3 policy=0.6s elapsed=157s
+[decide] 2026-11-25 14:03:28 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=480/3500 hist=3 policy=0.6s elapsed=167s
+[decide] 2026-11-25 14:03:38 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=512/3500 hist=3 policy=0.6s elapsed=178s
+[decide] 2026-11-25 14:03:51 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=544/3500 hist=3 policy=0.6s elapsed=191s
+[decide] 2026-11-25 14:04:03 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=576/3500 hist=3 policy=0.5s elapsed=203s
+[decide] 2026-11-25 14:04:13 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=608/3500 hist=3 policy=0.6s elapsed=213s
+[decide] 2026-11-25 14:04:23 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=640/3500 hist=3 policy=0.5s elapsed=223s
+[decide] 2026-11-25 14:04:36 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=672/3500 hist=3 policy=0.5s elapsed=236s
+[decide] 2026-11-25 14:04:51 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=704/3500 hist=3 policy=0.5s elapsed=251s
+[decide] 2026-11-25 14:05:01 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=736/3500 hist=3 policy=0.6s elapsed=261s
+[decide] 2026-11-25 14:05:11 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=768/3500 hist=3 policy=0.5s elapsed=271s
+[decide] 2026-11-25 14:05:21 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=800/3500 hist=3 policy=0.6s elapsed=281s
+[decide] 2026-11-25 14:05:31 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=832/3500 hist=3 policy=0.6s elapsed=291s
+[decide] 2026-11-25 14:05:41 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=864/3500 hist=3 policy=0.6s elapsed=301s
+[decide] 2026-11-25 14:05:52 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=896/3500 hist=3 policy=0.5s elapsed=312s
+[decide] 2026-11-25 14:06:02 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=928/3500 hist=3 policy=0.5s elapsed=322s
+[decide] 2026-11-25 14:06:13 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=960/3500 hist=3 policy=0.5s elapsed=333s
+[decide] 2026-11-25 14:06:23 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=992/3500 hist=3 policy=0.6s elapsed=342s
+[decide] 2026-11-25 14:06:32 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1024/3500 hist=3 policy=0.5s elapsed=352s
+[decide] 2026-11-25 14:06:43 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1056/3500 hist=3 policy=0.6s elapsed=363s
+[decide] 2026-11-25 14:06:53 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1088/3500 hist=3 policy=0.6s elapsed=373s
+[decide] 2026-11-25 14:07:03 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1120/3500 hist=3 policy=0.5s elapsed=383s
+[decide] 2026-11-25 14:07:14 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1152/3500 hist=3 policy=0.6s elapsed=394s
+[decide] 2026-11-25 14:07:24 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1184/3500 hist=3 policy=0.6s elapsed=404s
+[decide] 2026-11-25 14:07:34 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1216/3500 hist=3 policy=0.6s elapsed=414s
+[decide] 2026-11-25 14:07:44 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1248/3500 hist=3 policy=0.6s elapsed=424s
+[decide] 2026-11-25 14:07:54 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1280/3500 hist=3 policy=0.6s elapsed=434s
+[decide] 2026-11-25 14:08:05 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1312/3500 hist=3 policy=0.6s elapsed=445s
+[decide] 2026-11-25 14:08:15 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1344/3500 hist=3 policy=0.6s elapsed=455s
+[decide] 2026-11-25 14:08:26 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1376/3500 hist=3 policy=0.6s elapsed=465s
+[decide] 2026-11-25 14:08:36 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1408/3500 hist=3 policy=0.6s elapsed=475s
+[decide] 2026-11-25 14:08:45 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1440/3500 hist=3 policy=0.5s elapsed=485s
+[decide] 2026-11-25 14:08:55 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1472/3500 hist=3 policy=0.5s elapsed=495s
+[decide] 2026-11-25 14:09:06 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1504/3500 hist=3 policy=0.5s elapsed=506s
+[decide] 2026-11-25 14:09:16 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1536/3500 hist=3 policy=0.6s elapsed=515s
+[decide] 2026-11-25 14:09:26 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1568/3500 hist=3 policy=0.5s elapsed=525s
+[decide] 2026-11-25 14:09:35 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1600/3500 hist=3 policy=0.5s elapsed=535s
+[decide] 2026-11-25 14:09:45 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1632/3500 hist=3 policy=0.5s elapsed=545s
+[decide] 2026-11-25 14:09:56 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1664/3500 hist=3 policy=0.5s elapsed=556s
+[decide] 2026-11-25 14:10:08 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1696/3500 hist=3 policy=0.6s elapsed=567s
+[decide] 2026-11-25 14:10:22 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1728/3500 hist=3 policy=0.5s elapsed=582s
+[decide] 2026-11-25 14:10:32 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1760/3500 hist=3 policy=0.5s elapsed=592s
+[decide] 2026-11-25 14:10:44 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1792/3500 hist=3 policy=0.6s elapsed=604s
+[decide] 2026-11-25 14:10:58 ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 frame=1824/3500 hist=3 policy=0.6s elapsed=618s
+[closed-loop] 2026-11-25 14:11:11 done  ranking_arprop_e30_smoke/on blocks_ranking_try seed=4300000 success=True targets=1855/3500 reward=0.0 lift=0.10296648740768433  669s
+
+label/mode              task               n  success  95% CI        lift5cm  reward  targets dep_null  dep_off   dep_on  pol_s
+battery_ar_e30_smoke/on battery_try        1     1.00  [0.21,1.00]         -    0.00      587        -        -        -    0.6
+battery_arprop_e30_smoke/onbattery_try        1     1.00  [0.21,1.00]         -    0.00      581        -        -        -    0.6
+battery_none_e30_smoke/onbattery_try        1     1.00  [0.21,1.00]         -    0.00      962        -        -        -    0.5
+cover_ar_e30_smoke/on   cover_blocks       1     1.00  [0.21,1.00]         -    1.00      943        -        -        -    0.6
+cover_arprop_e30_smoke/oncover_blocks       1     1.00  [0.21,1.00]         -    1.00      938        -        -        -    0.6
+obs_ar_e30_smoke/on     observe_and_pickup   1     0.00  [0.00,0.79]         -    0.00      250        -        -        -    0.6
+obs_arprop_e30_smoke/on observe_and_pickup   1     0.00  [0.00,0.79]         -    0.00      250        -        -        -    0.6
+ranking_ar_e30_smoke/on blocks_ranking_try   1     0.00  [0.00,0.79]      1.00    0.00     3500        -        -        -    0.6
+ranking_arprop_e30_smoke/onblocks_ranking_try   1     1.00  [0.21,1.00]      1.00    0.00     1855        -        -        -    0.6
+rearrange_ar_e30_smoke/onrearrange_blocks   1     0.00  [0.00,0.79]      1.00    0.00      700        -        -        -    0.6
+rearrange_arprop_e30_smoke/onrearrange_blocks   1     1.00  [0.21,1.00]      1.00    1.00      389        -        -        -    0.6
+rearrange_none_e30_smoke/onrearrange_blocks   1     0.00  [0.00,0.79]      1.00    0.00      700        -        -        -    0.5
+swapT_ar_e30_smoke/on   swap_T             1     0.00  [0.00,0.79]         -    0.00      600        -        -        -    0.5
+swapT_arprop_e30_smoke/onswap_T             1     0.00  [0.00,0.79]         -    0.00      600        -        -        -    0.6
+swapT_none_e30_smoke/on swap_T             1     0.00  [0.00,0.79]         -    0.00      600        -        -        -    0.5
+
+paired on common scenes (A vs B):                         n  both  only A  only B  neither  McNemar p
+  battery_ar_e30_smoke/on  vs battery_arprop_e30_smoke/on   1     1       0       0        0  1.000
+  battery_ar_e30_smoke/on  vs battery_none_e30_smoke/on   1     1       0       0        0  1.000
+  battery_arprop_e30_smoke/on vs battery_none_e30_smoke/on   1     1       0       0        0  1.000
+  cover_ar_e30_smoke/on    vs cover_arprop_e30_smoke/on   1     1       0       0        0  1.000
+  obs_ar_e30_smoke/on      vs obs_arprop_e30_smoke/on    1     0       0       0        1  1.000
+  ranking_ar_e30_smoke/on  vs ranking_arprop_e30_smoke/on   1     0       0       1        0  1.000
+  rearrange_ar_e30_smoke/on vs rearrange_arprop_e30_smoke/on   1     0       0       1        0  1.000
+  rearrange_ar_e30_smoke/on vs rearrange_none_e30_smoke/on   1     0       0       0        1  1.000
+  rearrange_arprop_e30_smoke/on vs rearrange_none_e30_smoke/on   1     0       1       0        0  1.000
+  swapT_ar_e30_smoke/on    vs swapT_arprop_e30_smoke/on   1     0       0       0        1  1.000
+  swapT_ar_e30_smoke/on    vs swapT_none_e30_smoke/on    1     0       0       0        1  1.000
+  swapT_arprop_e30_smoke/on vs swapT_none_e30_smoke/on    1     0       0       0        1  1.000
+
+[summary] 15 episodes, 0 open errors -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/e6smoke/SUMMARY.json

@@ -1,0 +1,4 @@
+
+[queue5] 2026-11-25 01:58:07 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py b4
+{"run": "B4 body record without the video loss", "sesoi": -0.15, "finished": {"ar2_prop_novid_e10": 100, "ar2_prop_e10": 100}, "main": {"scenes": 100, "new": 1, "ref": 78, "D": -0.77, "ci95": [-0.85, -0.69], "only_new": 0, "only_ref": 77}, "verdict": "VIDEO LOSS HELPS LEARNING", "described_e30_swap_blocks": {"finished": 100, "success": 82}, "described_e30_put_back_block": {"finished": 100, "success": 67}}
+B4 VERDICT: VIDEO LOSS HELPS LEARNING

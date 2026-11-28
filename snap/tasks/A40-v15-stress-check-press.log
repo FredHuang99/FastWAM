@@ -1,0 +1,5 @@
+
+[queue5] 2026-11-19 22:56:51 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/stress_smoke_check.py v15smoke press_count_e30_smoke_p64_vis press_button 64
+SMOKE press_button seed 4300000: finished True, success False, injections 1, {"frame": 72, "k": 64, "arm": "history", "active_arm": 0, "open_frame": 62, "shown": 64, "displacement_m": 0.0, "counters_changed": [], "arm_return_rad": 0.005215644836425781}
+SMOKE press_button seed 4300001: finished True, success False, injections 1, {"frame": 72, "k": 64, "arm": "history", "active_arm": 0, "open_frame": 65, "shown": 64, "displacement_m": 0.0, "counters_changed": [], "arm_return_rad": 0.005350351333618164}
+SMOKE: PASS

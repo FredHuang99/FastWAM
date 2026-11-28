@@ -1,0 +1,36 @@
+
+[queue5] 2026-11-25 10:05:14 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py rv3ch2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_split.py rv3c:rearr_v3c_h2_e30 rv3c:rearr_v3c_e30 e6:rearrange_arprop_e30 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_ledger.py rv3c:rearr_v3c_h2_e30 rv3c:rearr_v3c_e30
+{"run": "card 1 rearr_v3c_h2 (described only)", "finished": {"rearr_v3c_h2_e30": 100, "rearr_v3c_e30": 0, "rearrange_arprop_e30": 100}, "success_1_100": 47, "against_rearrange_arprop": {"scenes": 100, "new": 47, "ref": 62, "D": -0.15, "ci95": [-0.26, -0.04], "only_new": 10, "only_ref": 25}, "verdict": "DESCRIBED"}
+V20 RV3CH2: DESCRIBED
+
+rv3c:rearr_v3c_h2_e30: 100 episodes
+   47  success   e.g. seeds [4300000, 4300002, 4300003, 4300008]
+   27  pressed twice or more (after step 1 was complete)   e.g. seeds [4300004, 4300005, 4300006, 4300007]
+   15  never pressed: block1 placed on the empty mat   e.g. seeds [4300012, 4300016, 4300017, 4300022]
+   11  stage 1, then moved block1 again (which-block error)   e.g. seeds [4300001, 4300015, 4300021, 4300023]
+rv3c:rearr_v3c_e30: no episodes
+
+e6:rearrange_arprop_e30: 100 episodes
+   62  success   e.g. seeds [4300000, 4300001, 4300002, 4300003]
+   18  pressed twice or more (after step 1 was complete)   e.g. seeds [4300006, 4300008, 4300018, 4300024]
+   17  never pressed: block1 placed on the empty mat   e.g. seeds [4300007, 4300014, 4300016, 4300017]
+    3  stage 1, then moved block1 again (which-block error)   e.g. seeds [4300021, 4300040, 4300098]
+
+REARR SPLIT REPORT: written outputs/fullft/REARR_SPLIT.json
+
+== rv3c:rearr_v3c_h2_e30
+    2  never pressed: left-arm entries at the last decision bottom   e.g. []
+   12  never pressed: left-arm entries at the last decision bottom,close,top   e.g. []
+    1  never pressed: left-arm entries at the last decision bottom,top   e.g. []
+    3  pressed once, failed later: first press always in the record   e.g. ['4300023', '4300052', '4300088']
+    8  pressed once, failed later: first press sometimes in the record   e.g. ['4300001', '4300015', '4300021', '4300025']
+   10  pressed twice: first press always in the record   e.g. ['4300004', '4300007', '4300010', '4300045']
+    1  pressed twice: first press never in the record   e.g. ['4300093']
+   16  pressed twice: first press sometimes in the record   e.g. ['4300005', '4300006', '4300011', '4300024']
+   15  success: first press always in the record   e.g. ['4300008', '4300014', '4300018', '4300020']
+   32  success: first press sometimes in the record   e.g. ['4300000', '4300002', '4300003', '4300009']
+  write delay (targets from the press to the first decision whose record has it): median 10.0, min 5, max 13, n 84
+
+== rv3c:rearr_v3c_e30
+
+REARR LEDGER REPORT done

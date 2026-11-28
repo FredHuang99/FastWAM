@@ -1,0 +1,33 @@
+{
+ "run": "card 3 on the H100 class (swapT_long_h100)",
+ "sesoi": 0.15,
+ "finished": {
+  "swapT_long_h100_e60": 100,
+  "swapT_arprop_e30": 100
+ },
+ "main": {
+  "scenes": 100,
+  "new": 38,
+  "ref": 49,
+  "D": -0.11,
+  "ci95": [
+   -0.21,
+   0.0
+  ],
+  "only_new": 10,
+  "only_ref": 21
+ },
+ "verdict": "NOT TRAINING-LIMITED",
+ "described_e45": {
+  "scenes": 80,
+  "new": 41,
+  "ref": 39,
+  "D": 0.025,
+  "ci95": [
+   -0.1,
+   0.15
+  ],
+  "only_new": 13,
+  "only_ref": 11
+ }
+}

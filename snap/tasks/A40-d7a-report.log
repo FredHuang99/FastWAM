@@ -1,0 +1,14 @@
+
+[queue5] 2026-11-28 16:48:24 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag7a.py
+
+== seed18 v21:rearr_pw_s18_e30: 100 episodes; classes {'never pressed: block1 placed on the empty mat': 17, 'success': 61, 'pressed twice or more (after step 1 was complete)': 22}
+   pressed twice, first press in the record between the presses: {'always in the record': 4, 'sometimes in the record': 18}
+   never pressed, depth: {'ABOVE': 15, 'AT DEPTH': 2}; lowest heights [0.191, 0.191, 0.2019, 0.2048, 0.2056, 0.2059, 0.2065, 0.2082, 0.2163, 0.2208, 0.2217, 0.2223, 0.2224, 0.2224, 0.2224, 0.2226, 0.2227]
+   write delay: {'median': 9, 'min': 5, 'max': 13, 'n': 83}
+
+== seed17 v20:rearr_pw_e30: 100 episodes; classes {'success': 93, 'never pressed: block1 placed on the empty mat': 4, 'stage 1, then moved block1 again (which-block error)': 2, 'pressed too early (block1 not on the empty mat at the press)': 1}
+   pressed twice, first press in the record between the presses: {}
+   never pressed, depth: {'ABOVE': 4}; lowest heights [0.1975, 0.2025, 0.2043, 0.2217]
+   write delay: {'median': 9.5, 'min': 5, 'max': 14, 'n': 96}
+
+DIAG 7A: majority_above True (ABOVE 15 of 17 never-pressed episodes of seed 18 (> half -> true)); written outputs/fullft/DIAG_V22_DIAG7A.json

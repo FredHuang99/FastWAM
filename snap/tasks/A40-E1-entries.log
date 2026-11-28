@@ -1,0 +1,47 @@
+
+[queue5] 2026-11-18 17:43:20 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e1_entries.py --task swap_blocks && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e1_entries.py --task put_back_block --examples 3
+swap_blocks pause: 13/50 visible-arm episodes with a ledger entry in the injected frames
+  entries by (kind, arm): {('bottom', 'active arm'): 13}
+  event frame - first injected frame: {'8-31': 13}; confirmation frame - first injected frame: {'>=32': 13}
+  seed_4300003: injection frames 328-391 (active arm 1, open_frame 293, shown 64); entries in it [('bottom', 1, 14, 66)]
+  seed_4300010: injection frames 320-383 (active arm 1, open_frame 283, shown 64); entries in it [('bottom', 1, 17, 66)]
+  seed_4300011: injection frames 328-391 (active arm 1, open_frame 292, shown 64); entries in it [('bottom', 1, 14, 65)]
+  seed_4300014: injection frames 352-415 (active arm 0, open_frame 319, shown 64); entries in it [('bottom', 0, 18, 248)]
+  seed_4300022: injection frames 336-399 (active arm 0, open_frame 300, shown 64); entries in it [('bottom', 0, 19, 236)]
+  seed_4300039: injection frames 344-407 (active arm 0, open_frame 308, shown 64); entries in it [('bottom', 0, 18, 242)]
+  seed_4300044: injection frames 344-407 (active arm 0, open_frame 309, shown 64); entries in it [('bottom', 0, 19, 248)]
+  seed_4300054: injection frames 320-383 (active arm 1, open_frame 286, shown 64); entries in it [('bottom', 1, 11, 65)]
+swap_blocks fidget: 13/50 visible-arm episodes with a ledger entry in the injected frames
+  entries by (kind, arm): {('bottom', 'active arm'): 13}
+  event frame - first injected frame: {'>=32': 11, '8-31': 2}; confirmation frame - first injected frame: {'>=32': 13}
+  seed_4300003: injection frames 328-391 (active arm 1, open_frame 293, shown 64); entries in it [('bottom', 1, 54, 66)]
+  seed_4300010: injection frames 320-383 (active arm 1, open_frame 283, shown 64); entries in it [('bottom', 1, 51, 66)]
+  seed_4300011: injection frames 328-391 (active arm 1, open_frame 292, shown 64); entries in it [('bottom', 1, 52, 65)]
+  seed_4300014: injection frames 352-415 (active arm 0, open_frame 319, shown 64); entries in it [('bottom', 0, 53, 249)]
+  seed_4300022: injection frames 336-399 (active arm 0, open_frame 300, shown 64); entries in it [('bottom', 0, 52, 241)]
+  seed_4300039: injection frames 344-407 (active arm 0, open_frame 308, shown 64); entries in it [('bottom', 0, 53, 244)]
+  seed_4300044: injection frames 344-407 (active arm 0, open_frame 309, shown 64); entries in it [('bottom', 0, 53, 247)]
+  seed_4300054: injection frames 320-383 (active arm 1, open_frame 286, shown 64); entries in it [('bottom', 1, 54, 65)]
+swap_blocks airgrasp: 27/50 visible-arm episodes with a ledger entry in the injected frames
+  entries by (kind, arm): {('close', 'active arm'): 19, ('bottom', 'active arm'): 8}
+  event frame - first injected frame: {5: 19, '8-31': 8}; confirmation frame - first injected frame: {5: 19, '>=32': 8}
+  seed_4300001: injection frames 352-383 (active arm 1, open_frame 319, shown 32); entries in it [('close', 1, 5, 5)]
+  seed_4300002: injection frames 344-375 (active arm 1, open_frame 308, shown 32); entries in it [('close', 1, 5, 5)]
+  seed_4300003: injection frames 328-359 (active arm 1, open_frame 293, shown 32); entries in it [('close', 1, 5, 5)]
+  seed_4300004: injection frames 320-351 (active arm 1, open_frame 285, shown 32); entries in it [('close', 1, 5, 5)]
+  seed_4300010: injection frames 320-351 (active arm 1, open_frame 283, shown 32); entries in it [('close', 1, 5, 5)]
+  seed_4300011: injection frames 328-359 (active arm 1, open_frame 292, shown 32); entries in it [('close', 1, 5, 5)]
+  seed_4300014: injection frames 352-383 (active arm 0, open_frame 319, shown 32); entries in it [('bottom', 0, 31, 216)]
+  seed_4300020: injection frames 320-351 (active arm 1, open_frame 287, shown 32); entries in it [('close', 1, 5, 5)]
+put_back_block pause: 0/50 visible-arm episodes with a ledger entry in the injected frames
+  entries by (kind, arm): {}
+  event frame - first injected frame: {}; confirmation frame - first injected frame: {}
+
+put_back_block fidget: 0/50 visible-arm episodes with a ledger entry in the injected frames
+  entries by (kind, arm): {}
+  event frame - first injected frame: {}; confirmation frame - first injected frame: {}
+
+put_back_block airgrasp: 0/50 visible-arm episodes with a ledger entry in the injected frames
+  entries by (kind, arm): {}
+  event frame - first injected frame: {}; confirmation frame - first injected frame: {}
+

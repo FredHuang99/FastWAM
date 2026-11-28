@@ -1,0 +1,4 @@
+
+[queue5] 2026-11-28 15:24:07 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py batclk
+{"run": "main-table cell battery clock (described)", "finished": {"battery_clock_e30": 100}, "success_1_100": 96, "against_battery_ar_e30": {"scenes": 100, "new": 96, "ref": 91, "D": 0.05, "ci95": [0.01, 0.1], "only_new": 5, "only_ref": 0}, "against_battery_arprop_e30": {"scenes": 100, "new": 96, "ref": 91, "D": 0.05, "ci95": [0.01, 0.1], "only_new": 5, "only_ref": 0}, "verdict": "DESCRIBED"}
+V20 BATCLK: DESCRIBED

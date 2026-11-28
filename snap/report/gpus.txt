@@ -1,0 +1,12 @@
+0, NVIDIA A40, 45334 MiB, 46068 MiB, 100 %, 74
+1, NVIDIA A40, 23959 MiB, 46068 MiB, 100 %, 73
+2, NVIDIA A40, 32725 MiB, 46068 MiB, 0 %, 42
+3, NVIDIA A40, 45430 MiB, 46068 MiB, 100 %, 69
+4, NVIDIA A40, 1 MiB, 46068 MiB, [N/A], [GPU requires reset]
+5, NVIDIA A40, 1 MiB, 46068 MiB, [N/A], [GPU requires reset]
+6, NVIDIA A40, 1 MiB, 46068 MiB, [N/A], [GPU requires reset]
+7, NVIDIA A40, 0 MiB, 46068 MiB, [N/A], [GPU requires reset]
+00000000:81:00.0, [N/A], [N/A]
+00000000:A1:00.0, [N/A], [N/A]
+00000000:C1:00.0, [N/A], [N/A]
+00000000:E1:00.0, [N/A], [N/A]

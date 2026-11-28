@@ -1,0 +1,14 @@
+
+[queue5] 2026-11-17 00:33:34 $ bash -c cd /workspace/FastWAM-memory2 && for x in 'ar_2task_e30 ar_2task_e30x swap_blocks a40eq_ar30_swap' 'ar2_prop_e30 ar2_prop_e30x swap_blocks a40eq_lp30_swap' 'ar2_prop_e30 ar2_prop_e30x put_back_block a40eq_lp30_put'; do set -- $x; PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/pair_eq.py --rule al4 --name $4 --a-folders closed_loop/g1 --a-label $1 --b-json closed_loop/check_a100/$2_stages.json --tasks $3 | tail -n 4; done
+PAIR a40eq_ar30_swap: rule al4; A = ['closed_loop/g1'] ar_2task_e30; B = closed_loop/check_a100/ar_2task_e30x_stages.json 
+  swap_blocks: paired n=100 (unpaired A 0, B 0); progress A 0.838 B 0.850; delta -0.012 CI [-0.042, +0.018]; s1 A 100/100 B 100/100; success A 56 B 59 (only A 7, only B 10, sign p 0.629) -> equivalent (1) True (2) True (3) True
+report: /workspace/FastWAM-memory2/outputs/fullft/align/PAIR_a40eq_ar30_swap_20261117_0034.json
+PAIR VERDICT a40eq_ar30_swap: EQUIVALENT
+PAIR a40eq_lp30_swap: rule al4; A = ['closed_loop/g1'] ar2_prop_e30; B = closed_loop/check_a100/ar2_prop_e30x_stages.json 
+  swap_blocks: paired n=100 (unpaired A 0, B 0); progress A 1.000 B 1.000; delta +0.000 CI [+0.000, +0.000]; s1 A 100/100 B 100/100; success A 100 B 100 (only A 0, only B 0, sign p 1.000) -> equivalent (1) True (2) True (3) True
+report: /workspace/FastWAM-memory2/outputs/fullft/align/PAIR_a40eq_lp30_swap_20261117_0035.json
+PAIR VERDICT a40eq_lp30_swap: EQUIVALENT
+PAIR a40eq_lp30_put: rule al4; A = ['closed_loop/g1'] ar2_prop_e30; B = closed_loop/check_a100/ar2_prop_e30x_stages.json 
+  put_back_block: paired n=100 (unpaired A 0, B 0); progress A 1.000 B 1.000; delta +0.000 CI [+0.000, +0.000]; lifted A 100/100 B 100/100; success A 100 B 100 (only A 0, only B 0, sign p 1.000) -> equivalent (1) True (2) True (3) True
+report: /workspace/FastWAM-memory2/outputs/fullft/align/PAIR_a40eq_lp30_put_20261117_0035.json
+PAIR VERDICT a40eq_lp30_put: EQUIVALENT

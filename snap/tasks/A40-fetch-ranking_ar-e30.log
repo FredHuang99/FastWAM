@@ -1,0 +1,14 @@
+
+[queue5] 2026-11-22 00:21:06 $ bash -c RUN=ranking_ar TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh
+[fetch] 2026-11-21 16:21:08 waiting for exports/ranking_ar_e30 on the relay
+[fetch] 2026-11-21 16:26:09 waiting for exports/ranking_ar_e30 on the relay
+[fetch] disk before: /dev/sdb         19T  9.7T  7.6T  56% /workspace/FastWAM-memory2
+[fetch] 2026-11-21 16:31:10 fetching ranking_ar_e30 (attempt 1)
+[relay] get hhyfred/memwam-fullft/exports/ranking_ar_e30/export_e30.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_ar_e30/export_e30.pt (12042062947 bytes)
+[relay] get hhyfred/memwam-fullft/exports/ranking_ar_e30/export_e30.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/ranking_ar_e30/export_e30.pt.sha256 (80 bytes)
+export_e30.pt: OK
+total 11759848
+drwxr-xr-x  2 root root        4096 Nov 21 17:07 .
+drwxr-xr-x 41 root root        4096 Nov 21 16:31 ..
+-rw-r--r--  1 root root 12042062947 Nov 21 17:07 export_e30.pt
+-rw-r--r--  1 root root          80 Nov 21 17:07 export_e30.pt.sha256

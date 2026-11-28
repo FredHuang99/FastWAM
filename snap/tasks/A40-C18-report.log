@@ -1,0 +1,43 @@
+
+[queue5] 2026-11-28 07:21:19 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_split.py c18:rearrange_arprop_e30_off c18:rearrange_arprop_e30_freeze1 c18:rearrange_arprop_e30_addmove c18:rearr_pw_e30_off c18:rearr_pw_e30_freeze1 c18:rearr_pw_e30_addmove e6:rearrange_arprop_e30 v20:rearr_pw_e30
+
+c18:rearrange_arprop_e30_off: 50 episodes
+   29  pressed twice or more (after step 1 was complete)   e.g. seeds [4300000, 4300001, 4300003, 4300005]
+   10  success   e.g. seeds [4300002, 4300004, 4300009, 4300012]
+    9  never pressed: block1 placed on the empty mat   e.g. seeds [4300006, 4300007, 4300014, 4300016]
+    2  stage 1, then moved block1 again (which-block error)   e.g. seeds [4300010, 4300021]
+
+c18:rearrange_arprop_e30_freeze1: 50 episodes
+   25  pressed twice or more (after step 1 was complete)   e.g. seeds [4300000, 4300001, 4300002, 4300003]
+   16  success   e.g. seeds [4300004, 4300009, 4300012, 4300013]
+    8  never pressed: block1 placed on the empty mat   e.g. seeds [4300007, 4300014, 4300016, 4300017]
+    1  stage 1, then moved block1 again (which-block error)   e.g. seeds [4300021]
+
+c18:rearrange_arprop_e30_addmove: 50 episodes
+   33  success   e.g. seeds [4300001, 4300003, 4300004, 4300006]
+    9  never pressed: block1 placed on the empty mat   e.g. seeds [4300002, 4300007, 4300014, 4300016]
+    8  pressed twice or more (after step 1 was complete)   e.g. seeds [4300000, 4300005, 4300019, 4300021]
+
+c18:rearr_pw_e30_off: 50 episodes
+   50  pressed twice or more (after step 1 was complete)   e.g. seeds [4300000, 4300001, 4300002, 4300003]
+
+c18:rearr_pw_e30_freeze1: 50 episodes
+   50  pressed twice or more (after step 1 was complete)   e.g. seeds [4300000, 4300001, 4300002, 4300003]
+
+c18:rearr_pw_e30_addmove: 50 episodes
+   49  success   e.g. seeds [4300000, 4300001, 4300002, 4300003]
+    1  never pressed: block1 placed on the empty mat   e.g. seeds [4300016]
+
+e6:rearrange_arprop_e30: 100 episodes
+   62  success   e.g. seeds [4300000, 4300001, 4300002, 4300003]
+   18  pressed twice or more (after step 1 was complete)   e.g. seeds [4300006, 4300008, 4300018, 4300024]
+   17  never pressed: block1 placed on the empty mat   e.g. seeds [4300007, 4300014, 4300016, 4300017]
+    3  stage 1, then moved block1 again (which-block error)   e.g. seeds [4300021, 4300040, 4300098]
+
+v20:rearr_pw_e30: 100 episodes
+   93  success   e.g. seeds [4300000, 4300001, 4300002, 4300003]
+    4  never pressed: block1 placed on the empty mat   e.g. seeds [4300029, 4300054, 4300087, 4300091]
+    2  stage 1, then moved block1 again (which-block error)   e.g. seeds [4300059, 4300093]
+    1  pressed too early (block1 not on the empty mat at the press)   e.g. seeds [4300097]
+
+REARR SPLIT REPORT: written outputs/fullft/REARR_SPLIT.json

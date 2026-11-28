@@ -1,0 +1,10 @@
+
+[queue5] 2026-11-21 00:59:38 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e14_verdict_a40.py
+press_v3c_e10 on 1-50: success 0/50, first right 5
+press_v3c_e20 on 1-50: success 1/50, first right 5
+press_v3c_e30 on 1-50: success 9/50, first right 36
+press_count_e10 on 1-50: success 0/50, first right 3
+press_count_e20 on 1-50: success 0/50, first right 1
+press_count_e30 on 1-50: success 8/50, first right 27
+E14 (A40): press_v3c_e30 vs press_count_e30 on 51-100, n=50: 8 vs 5; only new 7, only ref 4, sign p 0.5488
+E14 VERDICT (A40): NO EFFECT; >= 25/50: False

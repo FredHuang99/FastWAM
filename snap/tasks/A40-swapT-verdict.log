@@ -1,0 +1,4 @@
+
+[queue5] 2026-11-25 21:03:24 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py swapt
+{"run": "card 3 swap_T training length", "sesoi": 0.15, "finished": {"swapT_long_e60": 100, "swapT_arprop_h2_e30": 100}, "main": {"scenes": 100, "new": 36, "ref": 39, "D": -0.03, "ci95": [-0.12, 0.06], "only_new": 9, "only_ref": 12}, "verdict": "NOT TRAINING-LIMITED", "described_e45": {"scenes": 100, "new": 38, "ref": 39, "D": -0.01, "ci95": [-0.11, 0.09], "only_new": 14, "only_ref": 15}, "described_h2_vs_h100_e30": {"scenes": 100, "new": 39, "ref": 49, "D": -0.1, "ci95": [-0.21, 0.01], "only_new": 12, "only_ref": 22, "sign_p": 0.1214}}
+V20 SWAPT: NOT TRAINING-LIMITED

@@ -1,0 +1,8 @@
+
+[queue5] 2026-11-18 18:04:06 $ bash -c bash /workspace/FastWAM-memory2/scripts/fullft/a40_prep_task.sh battery_try
+[prep] 2026-11-18 10:04:07 battery_try; disk: /dev/sdb         19T  9.3T  8.0T  54% /workspace/FastWAM-memory2
+battery_try: outputs/memory_v2/closed_loop/scenes_seed42_n100_battery_try/battery_try.json complete (100 scenes, next seed 4300101)
+[text] battery_try: 'There are two batteries and a battery slot on the table. Combining the two batteries in different orientations causes the dashboard needle to rotate.' -> cache/battery_try_episode_0000000/encodings.pt (119 MiB; 50 training episodes share the instruction)
+[text] battery_try: 2 files checked against dense_battery_try_v1/RELAY_MANIFEST.json (sha256); marker .text_only
+[text] battery_try: 'There are two batteries and a battery slot on the table. Combining the two batteries in different orientations causes the dashboard needle to rotate.' -> cache/battery_try_episode_0000000/encodings.pt (50 training episodes share it); fingerprint d97a9c6ba4b3
+[prep] 2026-11-18 10:04:18 battery_try ready

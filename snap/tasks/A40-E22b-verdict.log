@@ -1,0 +1,5 @@
+
+[queue5] 2026-11-21 21:01:15 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e22_verdict.py --part b
+clock   K=32: 50/50  K=16: 50/50  K=8: 49/50  K=4: 39/50
+ledger  K=32: 50/50  K=16: 50/50  K=8: 0/50  K=4: 0/50
+E22b: clock B 8, ledger B 16 -> CURVE ONLY (appendix only)

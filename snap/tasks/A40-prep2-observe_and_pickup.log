@@ -1,0 +1,8 @@
+
+[queue5] 2026-11-22 00:34:01 $ bash -c bash /workspace/FastWAM-memory2/scripts/fullft/a40_prep_task.sh observe_and_pickup
+[prep] 2026-11-21 16:34:01 observe_and_pickup; disk: /dev/sdb         19T  9.7T  7.6T  56% /workspace/FastWAM-memory2
+observe_and_pickup: outputs/memory_v2/closed_loop/scenes_seed42_n100_observe_and_pickup/observe_and_pickup.json complete (100 scenes, next seed 4300102)
+[text] observe_and_pickup: 'Initially, there is one target object on the shelf and five random objects on the table. Then, a screen obscures the target object. Pick up the corresponding target object from the table and lift it up.' -> cache/observe_and_pickup_episode_0000000/encodings.pt (27 MiB; 50 training episodes share the instruction)
+[text] observe_and_pickup: 2 files checked against dense_observe_and_pickup_v1/RELAY_MANIFEST.json (sha256); marker .text_only
+[text] observe_and_pickup: 'Initially, there is one target object on the shelf and five random objects on the table. Then, a screen obscures the target object. Pick up the corresponding target object from the table and lift it up.' -> cache/observe_and_pickup_episode_0000000/encodings.pt (50 training episodes share it); fingerprint 2579ac7058fe
+[prep] 2026-11-21 16:34:18 observe_and_pickup ready

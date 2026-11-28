@@ -1,0 +1,9 @@
+
+[queue5] 2026-11-24 12:22:52 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e9e25_verdict.py
+  ar2_arev_e30_p64                   swap_blocks     pairs 46, Delta +1 (vis-only 1, hid-only 0), p 1.0000, hidden 18/50 -> FLOOR NOT MET
+  ar2_arev_e30_p256                  swap_blocks     pairs 46, Delta +0 (vis-only 0, hid-only 0), p 1.0000, hidden 19/50 -> FLOOR NOT MET
+  ar2_tw_e30_p64                     swap_blocks     pairs 47, Delta -12 (vis-only 2, hid-only 14), p 0.0042, hidden 30/50 -> FLOOR NOT MET
+  ar2_tw_e30_p256                    swap_blocks     pairs 47, Delta -28 (vis-only 0, hid-only 28), p 0.0000, hidden 30/50 -> FLOOR NOT MET
+E9: {'no_stress': {'swap': 42, 'swap_finished': 100, 'put': 31, 'put_finished': 100}, 'verdict': 'NO VERDICT (floor: put 31/100 < 90)', 'event_frames_off_swap_1_50': '3/50 (descriptive)'}
+E25: {'no_stress': {'swap': 54, 'swap_finished': 100, 'put': 21, 'put_finished': 100}, 'verdict': 'NO VERDICT (floor: put 21/100 < 90)', 'stress': 'UNDECIDED', 'with_E22a': {'images': {64: 'FLOOR NOT MET', 256: 'FLOOR NOT MET'}, 'body_clock': {64: 'NOT HURT', 256: 'FLOOR NOT MET', 1024: 'FLOOR NOT MET'}, 'reading': 'WAIT / MIXED'}}
+G3 image column: {64: 'NO READING (floor)', 256: 'NO READING (floor)'}

@@ -1,0 +1,54 @@
+
+[queue5] 2026-11-23 21:05:11 $ /opt/mwam/bin/python -m fastwam.memory_v2.online run --checkpoint /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_none_e30/export_e30.pt --label swapT_none_e30_smoke --modes on --scenes /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/scenes_seed42_n100_swap_T --output /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/e6smoke --tasks swap_T --execute 8 --limit 1
+[dense] WARNING runtime packages differ from the dense preparation receipt (cache is read, not re-encoded): {"python": {"recorded": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]", "actual": "3.12.3 (main, Nov  6 2024, 18:32:19) [GCC 13.2.0]"}, "packages.Pillow": {"recorded": "12.0.0", "actual": "11.0.0"}, "packages.numpy": {"recorded": "2.1.0", "actual": "1.26.4"}, "packages.torch": {"recorded": "2.10.0a0+b558c986e8.nv25.11", "actual": "2.6.0a0+df5bbc09d1.nv24.12"}, "packages.torchvision": {"recorded": "0.25.0a0+7a13ad0f", "actual": "0.20.0a0"}}
+[closed-loop] 2026-11-23 13:06:30 1 scenes x modes ['on'] -> labels {'on': 'swapT_none_e30_smoke'}; checkpoint /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_none_e30/export_e30.pt; T5 on CPU; max_targets=official
+[closed-loop] WARNING dense config was recorded for sm9.0; this GPU is sm8.6: TORCH_EXTENSIONS_DIR -> /workspace/FastWAM/outputs/fused_environment_memory_v2_sm86/torch_extensions (give --extensions-dir to reuse built kernels)
+[closed-loop] 2026-11-23 13:06:30 start swapT_none_e30_smoke/on swap_T seed=4300000 target_limit=600 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/e6smoke/swapT_none_e30_smoke/on/swap_T/seed_4300000
+[fullft] text from the training cache (swap_T/episode_0000000, 50 episodes share it; fingerprint 0e5f5bc1105d)
+/restore-tmp/dense_joint_v1/data_path.py:16: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /opt/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:206.)
+  return torch.stack([TF.resize(torch.from_numpy(np.ascontiguousarray(a)).permute(2,0,1).float()/255.,
+[decide] 2026-11-23 13:07:13 swapT_none_e30_smoke/on swap_T seed=4300000 frame=0/600 hist=0 policy=0.6s elapsed=7s
+[decide] 2026-11-23 13:07:26 swapT_none_e30_smoke/on swap_T seed=4300000 frame=32/600 hist=0 policy=0.4s elapsed=19s
+[decide] 2026-11-23 13:07:40 swapT_none_e30_smoke/on swap_T seed=4300000 frame=64/600 hist=0 policy=0.4s elapsed=33s
+[decide] 2026-11-23 13:07:58 swapT_none_e30_smoke/on swap_T seed=4300000 frame=96/600 hist=0 policy=0.4s elapsed=51s
+[decide] 2026-11-23 13:08:08 swapT_none_e30_smoke/on swap_T seed=4300000 frame=128/600 hist=0 policy=0.4s elapsed=61s
+[decide] 2026-11-23 13:08:19 swapT_none_e30_smoke/on swap_T seed=4300000 frame=160/600 hist=0 policy=0.4s elapsed=72s
+[decide] 2026-11-23 13:08:29 swapT_none_e30_smoke/on swap_T seed=4300000 frame=192/600 hist=0 policy=0.5s elapsed=82s
+[decide] 2026-11-23 13:08:41 swapT_none_e30_smoke/on swap_T seed=4300000 frame=224/600 hist=0 policy=0.4s elapsed=94s
+[decide] 2026-11-23 13:08:56 swapT_none_e30_smoke/on swap_T seed=4300000 frame=256/600 hist=0 policy=0.4s elapsed=109s
+[decide] 2026-11-23 13:09:08 swapT_none_e30_smoke/on swap_T seed=4300000 frame=288/600 hist=0 policy=0.4s elapsed=121s
+[decide] 2026-11-23 13:09:21 swapT_none_e30_smoke/on swap_T seed=4300000 frame=320/600 hist=0 policy=0.5s elapsed=134s
+[decide] 2026-11-23 13:09:30 swapT_none_e30_smoke/on swap_T seed=4300000 frame=352/600 hist=0 policy=0.5s elapsed=144s
+[decide] 2026-11-23 13:09:39 swapT_none_e30_smoke/on swap_T seed=4300000 frame=384/600 hist=0 policy=0.4s elapsed=152s
+[decide] 2026-11-23 13:09:48 swapT_none_e30_smoke/on swap_T seed=4300000 frame=416/600 hist=0 policy=0.5s elapsed=161s
+[decide] 2026-11-23 13:09:56 swapT_none_e30_smoke/on swap_T seed=4300000 frame=448/600 hist=0 policy=0.4s elapsed=169s
+[decide] 2026-11-23 13:10:05 swapT_none_e30_smoke/on swap_T seed=4300000 frame=480/600 hist=0 policy=0.4s elapsed=178s
+[decide] 2026-11-23 13:10:16 swapT_none_e30_smoke/on swap_T seed=4300000 frame=512/600 hist=0 policy=0.4s elapsed=189s
+[decide] 2026-11-23 13:10:29 swapT_none_e30_smoke/on swap_T seed=4300000 frame=544/600 hist=0 policy=0.4s elapsed=202s
+[decide] 2026-11-23 13:10:38 swapT_none_e30_smoke/on swap_T seed=4300000 frame=576/600 hist=0 policy=0.4s elapsed=211s
+[closed-loop] 2026-11-23 13:10:51 done  swapT_none_e30_smoke/on swap_T seed=4300000 success=False targets=600/600 reward=0.0 lift=None  261s
+
+label/mode              task               n  success  95% CI        lift5cm  reward  targets dep_null  dep_off   dep_on  pol_s
+battery_ar_e30_smoke/on battery_try        1     1.00  [0.21,1.00]         -    0.00      587        -        -        -    0.6
+battery_arprop_e30_smoke/onbattery_try        1     1.00  [0.21,1.00]         -    0.00      581        -        -        -    0.6
+cover_ar_e30_smoke/on   cover_blocks       1     1.00  [0.21,1.00]         -    1.00      943        -        -        -    0.6
+cover_arprop_e30_smoke/oncover_blocks       1     1.00  [0.21,1.00]         -    1.00      938        -        -        -    0.6
+obs_ar_e30_smoke/on     observe_and_pickup   1     0.00  [0.00,0.79]         -    0.00      250        -        -        -    0.6
+obs_arprop_e30_smoke/on observe_and_pickup   1     0.00  [0.00,0.79]         -    0.00      250        -        -        -    0.6
+ranking_ar_e30_smoke/on blocks_ranking_try   1     0.00  [0.00,0.79]      1.00    0.00     3500        -        -        -    0.6
+rearrange_ar_e30_smoke/onrearrange_blocks   1     0.00  [0.00,0.79]      1.00    0.00      700        -        -        -    0.6
+rearrange_arprop_e30_smoke/onrearrange_blocks   1     1.00  [0.21,1.00]      1.00    1.00      389        -        -        -    0.6
+swapT_ar_e30_smoke/on   swap_T             1     0.00  [0.00,0.79]         -    0.00      600        -        -        -    0.5
+swapT_arprop_e30_smoke/onswap_T             1     0.00  [0.00,0.79]         -    0.00      600        -        -        -    0.6
+swapT_none_e30_smoke/on swap_T             1     0.00  [0.00,0.79]         -    0.00      600        -        -        -    0.5
+
+paired on common scenes (A vs B):                         n  both  only A  only B  neither  McNemar p
+  battery_ar_e30_smoke/on  vs battery_arprop_e30_smoke/on   1     1       0       0        0  1.000
+  cover_ar_e30_smoke/on    vs cover_arprop_e30_smoke/on   1     1       0       0        0  1.000
+  obs_ar_e30_smoke/on      vs obs_arprop_e30_smoke/on    1     0       0       0        1  1.000
+  rearrange_ar_e30_smoke/on vs rearrange_arprop_e30_smoke/on   1     0       0       1        0  1.000
+  swapT_ar_e30_smoke/on    vs swapT_arprop_e30_smoke/on   1     0       0       0        1  1.000
+  swapT_ar_e30_smoke/on    vs swapT_none_e30_smoke/on    1     0       0       0        1  1.000
+  swapT_arprop_e30_smoke/on vs swapT_none_e30_smoke/on    1     0       0       0        1  1.000
+
+[summary] 12 episodes, 0 open errors -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/e6smoke/SUMMARY.json

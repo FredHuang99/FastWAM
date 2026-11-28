@@ -1,0 +1,60 @@
+[pull] 2026-11-27 14:56:32 alive; at 7e5d916 A40: hourly automatic pruning of intermediate exports above 85
+[pull] 2026-11-27 15:56:35 alive; at 7e5d916 A40: hourly automatic pruning of intermediate exports above 85
+[pull] 2026-11-27 16:56:39 alive; at 7e5d916 A40: hourly automatic pruning of intermediate exports above 85
+[pull] 2026-11-27 17:36:41 pulled 1 commit(s) -> e6afe2e patrol 11-27 17:30: card 2 r2 extension on the A40; 5090 GPU i; files: scripts/fullft/cuda_ordinal.sh scripts/fullft/gen_v21_tasks.py scripts/fullft/logtail_json.py scripts/fullft/q5090.txt scripts/memory_v2/jobs/queue5_tasks.yaml 
+[pull] 2026-11-27 17:56:42 alive; at e6afe2e patrol 11-27 17:30: card 2 r2 extension on the A40; 5090 GPU i
+[pull] 2026-11-27 18:56:45 alive; at e6afe2e patrol 11-27 17:30: card 2 r2 extension on the A40; 5090 GPU i
+[pull] 2026-11-27 19:56:49 alive; at e6afe2e patrol 11-27 17:30: card 2 r2 extension on the A40; 5090 GPU i
+[pull] 2026-11-27 20:36:51 pulled 1 commit(s) -> aece02a 5090: every pending GPU task on GPU 1 only (user 11-27 20:29),; files: scripts/fullft/q5090.txt 
+[pull] 2026-11-27 20:56:53 alive; at aece02a 5090: every pending GPU task on GPU 1 only (user 11-27 20:29),
+[pull] 2026-11-27 21:26:54 pulled 1 commit(s) -> cb2cc81 5090: rerun the frame-0 probe of obs_s800 e10 on GPU 1 (its tr; files: scripts/fullft/card13b_5090.sh scripts/fullft/q5090.txt 
+[pull] 2026-11-27 21:56:56 alive; at cb2cc81 5090: rerun the frame-0 probe of obs_s800 e10 on GPU 1 (its tr
+[pull] 2026-11-27 22:06:57 pulled 1 commit(s) -> 0bd79bc A40: restart the hourly relay auto-prune (loop2); the loop now; files: scripts/fullft/hf_prune_auto_loop.sh scripts/memory_v2/jobs/queue5_tasks.yaml 
+[pull] 2026-11-27 22:57:00 alive; at 0bd79bc A40: restart the hourly relay auto-prune (loop2); the loop now
+[pull] 2026-11-27 23:57:03 alive; at 0bd79bc A40: restart the hourly relay auto-prune (loop2); the loop now
+[pull] 2026-11-28 00:57:06 alive; at 0bd79bc A40: restart the hourly relay auto-prune (loop2); the loop now
+[pull] 2026-11-28 01:57:10 alive; at 0bd79bc A40: restart the hourly relay auto-prune (loop2); the loop now
+[pull] 2026-11-28 02:57:13 alive; at 0bd79bc A40: restart the hourly relay auto-prune (loop2); the loop now
+[pull] 2026-11-28 03:37:16 pulled 3 commit(s) -> 2165bd1 Relay auto-prune: measure an export's age by the A40 copy's mt; files: scripts/fullft/gen_v21_tasks.py scripts/fullft/hf_prune_auto.py scripts/fullft/v21_verdict.py scripts/gaas/gaas_queue.txt scripts/gaas/go/ar2_pw scripts/gaas/slots.txt scripts/memory_v2/jobs/queue5_tasks.yaml 
+[pull] 2026-11-28 03:57:17 alive; at 2165bd1 Relay auto-prune: measure an export's age by the A40 copy's mt
+[pull] 2026-11-28 04:57:20 alive; at 2165bd1 Relay auto-prune: measure an export's age by the A40 copy's mt
+[pull] 2026-11-28 05:57:24 alive; at 2165bd1 Relay auto-prune: measure an export's age by the A40 copy's mt
+[pull] 2026-11-28 06:57:27 alive; at 2165bd1 Relay auto-prune: measure an export's age by the A40 copy's mt
+[pull] 2026-11-28 07:57:30 alive; at 2165bd1 Relay auto-prune: measure an export's age by the A40 copy's mt
+[pull] 2026-11-28 08:47:34 pulled 1 commit(s) -> 21d49a1 Card 25 described items on the 5090 (held-out generated probe ; files: scripts/fullft/card25desc_5090.sh scripts/fullft/hf_offload_list2.txt scripts/fullft/obs_probe.py scripts/fullft/q5090.txt scripts/fullft/v21_verdict.py scripts/memory_v2/jobs/queue5_tasks.yaml 
+[pull] 2026-11-28 08:57:35 alive; at 21d49a1 Card 25 described items on the 5090 (held-out generated probe 
+[pull] 2026-11-28 09:57:39 alive; at 21d49a1 Card 25 described items on the 5090 (held-out generated probe 
+[pull] 2026-11-28 10:57:42 alive; at 21d49a1 Card 25 described items on the 5090 (held-out generated probe 
+[pull] 2026-11-28 11:57:45 alive; at 21d49a1 Card 25 described items on the 5090 (held-out generated probe 
+[pull] 2026-11-28 12:47:48 pulled 1 commit(s) -> 2de5f53 obs_s800_s18 on the old H200, gated (GO_obs_s800_s18_h200o, us; files: scripts/fullft/cache_ready.sh scripts/fullft/h200_queue.txt scripts/gaas/go/obs_s800_s18 
+[pull] 2026-11-28 12:57:49 alive; at 2de5f53 obs_s800_s18 on the old H200, gated (GO_obs_s800_s18_h200o, us
+[pull] 2026-11-28 13:57:52 alive; at 2de5f53 obs_s800_s18 on the old H200, gated (GO_obs_s800_s18_h200o, us
+[pull] 2026-11-28 14:47:55 pulled 1 commit(s) -> 0e1d89b Relay offload batch 2 approved by the user (11-28 14:45, all 3; files: scripts/fullft/GO_hf_offload2 
+[pull] 2026-11-28 14:57:55 alive; at 0e1d89b Relay offload batch 2 approved by the user (11-28 14:45, all 3
+[pull] 2026-11-28 15:57:59 alive; at 0e1d89b Relay offload batch 2 approved by the user (11-28 14:45, all 3
+[pull] 2026-11-28 16:07:59 pulled 1 commit(s) -> 46a79e8 Host-side container_restart.sh: restart a training container w; files: scripts/fullft/container_restart.sh 
+[pull] 2026-11-28 16:18:00 pulled 3 commit(s) -> 0690bb5 Plan v22 diagnostic 8 on the A40: swap_T / press / rearrange s; files: scripts/fullft/GO_card36 scripts/fullft/card36_ready.sh scripts/fullft/diag8.py scripts/fullft/gates/README.txt scripts/fullft/h100_queue.txt scripts/fullft/h200_queue.txt scripts/gaas/gaas_queue.txt scripts/gaas/go/obs_s800_s18 scripts/gaas/go/ranking_v3a_s18 scripts/gaas/go/rearr_ar_pw_s18 scripts/gaas/go/rearr_arprop_pw_s18 scripts/gaas/go/rearr_pw_long scripts/gaas/go/rearr_pw_long_s18 scripts
+[pull] 2026-11-28 16:28:02 pulled 5 commit(s) -> 50e1253 Fixes from the 11-28 code audit: seed_extension judges extensi; files: scripts/fullft/card25desc_5090.sh scripts/fullft/container_restart.sh scripts/fullft/hf_offload.py scripts/fullft/v21_verdict.py scripts/fullft/v22_gate.py scripts/fullft/v22_verdict.py scripts/gaas/gaas_queue.txt scripts/gaas/go/rearr_pw_long scripts/gaas/go/swapT_joint3_ow scripts/gaas/go/swapT_joint3_s18 scripts/memory_v2/jobs/queue5_tasks.yaml 
+[pull] 2026-11-28 16:38:03 pulled 1 commit(s) -> f44ee54 submit_v22.sh: the slot-label check now allows the padded labe; files: scripts/gaas/submit_v22.sh 
+[pull] 2026-11-28 16:48:04 pulled 1 commit(s) -> e5dee13 Plan v22: register cards 30 (obs_cf800) and 32 (rearr_joint3) ; files: scripts/fullft/card25_check.py scripts/fullft/card30_5090.sh scripts/fullft/diag7a.py scripts/fullft/diag_v22.py scripts/fullft/q5090.txt scripts/fullft/swapT_desc_5090.sh scripts/fullft/swapT_diag5_5090.py scripts/fullft/swapT_split.py scripts/gaas/gaas_queue.txt scripts/gaas/go/obs_cf800 scripts/gaas/go/rearr_joint3 scripts/memory_v2/jobs/queue5_tasks.yaml 
+[pull] 2026-11-28 16:58:05 pulled 3 commit(s) -> 17d96a2 Automation (plan v22b part 3 section 4): HEALTH BAD when nvidi; files: scripts/fullft/e22_verdict.py scripts/fullft/h100_queue.sh scripts/fullft/h200_queue.sh scripts/fullft/press_cd_events.py scripts/fullft/q5090.txt scripts/fullft/results_push.sh scripts/fullft/v22_verdict.py scripts/gaas/gaas_queue.txt scripts/gaas/gaas_run.pbs scripts/gaas/go/press_cd scripts/memory_v2/jobs/queue5_tasks.yaml src/fastwam/fullft/history.py src/fastwam/fullft/online.py 
+[pull] 2026-11-28 16:58:05 alive; at 17d96a2 Automation (plan v22b part 3 section 4): HEALTH BAD when nvidi
+[pull] 2026-11-28 17:08:06 pulled 3 commit(s) -> 6c89011 Plan v22 diagnostic 13 on the 5090 (CPU, described): key decis; files: scripts/fullft/diag13_5090.py scripts/fullft/h100_queue.txt scripts/fullft/hf_prune_d.py scripts/fullft/hf_prune_d_loop.sh scripts/fullft/q5090.txt scripts/fullft/v22_gate.py scripts/fullft/v22_verdict.py scripts/memory_v2/jobs/queue5_tasks.yaml 
+[pull] 2026-11-28 17:18:07 pulled 3 commit(s) -> 2cf5f35 RoboMME step 1 (plan v22 6.6): per-entry proprio width follows; files: scripts/fullft/diag13_5090.py scripts/fullft/diag7c_5090.py scripts/fullft/diag_v22.py scripts/fullft/hf_prune_d.py scripts/fullft/q5090.txt scripts/fullft/v22_gate.py scripts/fullft/v22_verdict.py scripts/gaas/gaas_queue.txt scripts/memory_v2/jobs/queue5_tasks.yaml src/fastwam/fullft/data.py src/fastwam/fullft/history.py src/fastwam/fullft/model.py src/fastwam/fullft/online.py 
+[pull] 2026-11-28 17:28:08 pulled 6 commit(s) -> 8628654 Diagnostic 12 classes fixed from the first 10 failures per mod; files: scripts/fullft/diag7c_5090.py scripts/fullft/q5090.txt scripts/fullft/swapT_diag5_5090.py scripts/robomme/robomme_norm.py scripts/robomme/tests/test_robomme_norm.py src/fastwam/fullft/history.py src/fastwam/fullft/tests/test_countdown.py src/fastwam/fullft/tests/test_proprio_width.py 
+[pull] 2026-11-28 17:38:09 pulled 4 commit(s) -> c9a3491 robomme_policy: goal text from the training cache (the convers; files: configs/fullft/robomme_ar.yaml scripts/fullft/q5090.txt scripts/robomme/robomme_client.py scripts/robomme/robomme_closed_loop_5090.sh scripts/robomme/robomme_norm.py scripts/robomme/tests/test_robomme_norm.py src/fastwam/fullft/robomme_policy.py src/fastwam/fullft/tests/test_robomme_loop.py src/fastwam/fullft/train.py 
+[pull] 2026-11-28 17:48:10 pulled 1 commit(s) -> ab5eced robomme_norm reports how often the ee gripper command and the ; files: scripts/robomme/robomme_norm.py 
+[pull] 2026-11-28 17:58:10 alive; at ab5eced robomme_norm reports how often the ee gripper command and the 
+[pull] 2026-11-28 18:58:14 alive; at ab5eced robomme_norm reports how often the ee gripper command and the 
+[pull] 2026-11-28 19:58:17 alive; at ab5eced robomme_norm reports how often the ee gripper command and the 
+[pull] 2026-11-28 20:38:19 pulled 3 commit(s) -> 5ebe75f Diagnostic 7(c) reading side: A40 rearr_split classes of the 1; files: scripts/fullft/card30_5090.sh scripts/fullft/diag8.py scripts/fullft/q5090.txt scripts/fullft/rearr_split.py scripts/memory_v2/jobs/queue5_tasks.yaml 
+[pull] 2026-11-28 20:48:20 pulled 1 commit(s) -> db04a3c RoboMME closed loop over TCP on 127.0.0.1 (the client containe; files: scripts/robomme/robomme_client.py scripts/robomme/robomme_closed_loop_5090.sh src/fastwam/fullft/robomme_policy.py src/fastwam/fullft/tests/test_robomme_loop.py 
+[pull] 2026-11-28 20:58:21 alive; at db04a3c RoboMME closed loop over TCP on 127.0.0.1 (the client containe
+[pull] 2026-11-28 21:58:24 alive; at db04a3c RoboMME closed loop over TCP on 127.0.0.1 (the client containe
+[pull] 2026-11-28 22:58:27 alive; at db04a3c RoboMME closed loop over TCP on 127.0.0.1 (the client containe
+[pull] 2026-11-28 23:58:31 alive; at db04a3c RoboMME closed loop over TCP on 127.0.0.1 (the client containe
+[pull] 2026-11-29 00:38:34 pulled 2 commit(s) -> 9b0e4b8 pool5: a GPU whose utilization nvidia-smi cannot read ([N/A] /; files: scripts/fullft/GO_press_cd_h200o scripts/fullft/h200_queue.txt scripts/fullft/h200o_v22_ready.sh scripts/gaas/go/press_cd scripts/memory_v2/pool5.py 
+[pull] 2026-11-29 00:58:35 pulled 2 commit(s) -> 40d1f2f A40: re-run the 20 diagnostic 8 / 9 shards that GPUs 4-7 ('GPU; files: scripts/memory_v2/jobs/queue5_tasks.yaml scripts/memory_v2/pool5.py 
+[pull] 2026-11-29 00:58:35 alive; at 40d1f2f A40: re-run the 20 diagnostic 8 / 9 shards that GPUs 4-7 ('GPU
+[pull] 2026-11-29 01:08:36 pulled 1 commit(s) -> f290768 Card 36 A100 fallback (user 11-29 00:5x: if the A40 is not rep; files: scripts/fullft/c36fb_gate.py scripts/fullft/v22_gate.py scripts/fullft/v22_verdict.py scripts/memory_v2/jobs/queue5_tasks.yaml scripts/memory_v2/pool5.py 
+[pull] 2026-11-29 01:28:37 pulled 1 commit(s) -> 8937801 q5090: re-run robomme-norm (robomme-norm-2) so it writes CACHE; files: scripts/fullft/q5090.txt 

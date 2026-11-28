@@ -1,0 +1,27 @@
+
+[queue5] 2026-11-25 08:15:26 $ /opt/mwam/bin/python -m fastwam.memory_v2.online run --checkpoint /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_v3c_h2_e30/export_e30.pt --label rearr_v3c_h2_e30_smoke --modes on --scenes /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/scenes_seed42_n100_rearrange_blocks --output /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/rv3csmoke --tasks rearrange_blocks --execute 8 --limit 1
+[dense] WARNING runtime packages differ from the dense preparation receipt (cache is read, not re-encoded): {"python": {"recorded": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]", "actual": "3.12.3 (main, Nov  6 2024, 18:32:19) [GCC 13.2.0]"}, "packages.Pillow": {"recorded": "12.0.0", "actual": "11.0.0"}, "packages.numpy": {"recorded": "2.1.0", "actual": "1.26.4"}, "packages.torch": {"recorded": "2.10.0a0+b558c986e8.nv25.11", "actual": "2.6.0a0+df5bbc09d1.nv24.12"}, "packages.torchvision": {"recorded": "0.25.0a0+7a13ad0f", "actual": "0.20.0a0"}}
+[closed-loop] 2026-11-25 00:16:40 1 scenes x modes ['on'] -> labels {'on': 'rearr_v3c_h2_e30_smoke'}; checkpoint /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_v3c_h2_e30/export_e30.pt; T5 on CPU; max_targets=official
+[closed-loop] WARNING dense config was recorded for sm9.0; this GPU is sm8.6: TORCH_EXTENSIONS_DIR -> /workspace/FastWAM/outputs/fused_environment_memory_v2_sm86/torch_extensions (give --extensions-dir to reuse built kernels)
+[closed-loop] 2026-11-25 00:16:40 start rearr_v3c_h2_e30_smoke/on rearrange_blocks seed=4300000 target_limit=700 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/rv3csmoke/rearr_v3c_h2_e30_smoke/on/rearrange_blocks/seed_4300000
+[fullft] text from the training cache (rearrange_blocks/episode_0000000, 50 episodes share it; fingerprint 73739a6aa417)
+/restore-tmp/dense_joint_v1/data_path.py:16: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /opt/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:206.)
+  return torch.stack([TF.resize(torch.from_numpy(np.ascontiguousarray(a)).permute(2,0,1).float()/255.,
+[decide] 2026-11-25 00:17:32 rearr_v3c_h2_e30_smoke/on rearrange_blocks seed=4300000 frame=0/700 hist=0 policy=0.7s elapsed=7s
+[decide] 2026-11-25 00:17:52 rearr_v3c_h2_e30_smoke/on rearrange_blocks seed=4300000 frame=32/700 hist=2 policy=1.3s elapsed=27s
+[decide] 2026-11-25 00:18:04 rearr_v3c_h2_e30_smoke/on rearrange_blocks seed=4300000 frame=64/700 hist=3 policy=0.6s elapsed=39s
+[decide] 2026-11-25 00:18:21 rearr_v3c_h2_e30_smoke/on rearrange_blocks seed=4300000 frame=96/700 hist=3 policy=0.6s elapsed=56s
+[decide] 2026-11-25 00:18:35 rearr_v3c_h2_e30_smoke/on rearrange_blocks seed=4300000 frame=128/700 hist=3 policy=0.6s elapsed=70s
+[decide] 2026-11-25 00:18:54 rearr_v3c_h2_e30_smoke/on rearrange_blocks seed=4300000 frame=160/700 hist=3 policy=0.6s elapsed=89s
+[decide] 2026-11-25 00:19:04 rearr_v3c_h2_e30_smoke/on rearrange_blocks seed=4300000 frame=192/700 hist=3 policy=0.6s elapsed=99s
+[decide] 2026-11-25 00:19:14 rearr_v3c_h2_e30_smoke/on rearrange_blocks seed=4300000 frame=224/700 hist=3 policy=0.6s elapsed=109s
+[decide] 2026-11-25 00:19:28 rearr_v3c_h2_e30_smoke/on rearrange_blocks seed=4300000 frame=256/700 hist=3 policy=0.6s elapsed=124s
+[decide] 2026-11-25 00:19:48 rearr_v3c_h2_e30_smoke/on rearrange_blocks seed=4300000 frame=288/700 hist=3 policy=0.6s elapsed=143s
+[decide] 2026-11-25 00:19:58 rearr_v3c_h2_e30_smoke/on rearrange_blocks seed=4300000 frame=320/700 hist=3 policy=0.6s elapsed=153s
+[decide] 2026-11-25 00:20:09 rearr_v3c_h2_e30_smoke/on rearrange_blocks seed=4300000 frame=352/700 hist=3 policy=0.6s elapsed=164s
+[closed-loop] 2026-11-25 00:20:34 done  rearr_v3c_h2_e30_smoke/on rearrange_blocks seed=4300000 success=True targets=384/700 reward=1.0 lift=0.12104564905166626  235s
+
+label/mode              task               n  success  95% CI        lift5cm  reward  targets dep_null  dep_off   dep_on  pol_s
+rearr_v3c_h2_e30_smoke/onrearrange_blocks   1     1.00  [0.21,1.00]      1.00    1.00      384        -        -        -    0.6
+
+[summary] 1 episodes, 0 open errors -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/rv3csmoke/SUMMARY.json

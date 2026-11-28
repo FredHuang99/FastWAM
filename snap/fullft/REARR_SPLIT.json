@@ -1,0 +1,4581 @@
+{
+ "c18:rearrange_arprop_e30_off": {
+  "counts": {
+   "pressed twice or more (after step 1 was complete)": 29,
+   "success": 10,
+   "never pressed: block1 placed on the empty mat": 9,
+   "stage 1, then moved block1 again (which-block error)": 2
+  },
+  "episodes": {
+   "4300000": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 200,
+    "t_block1_on_mat": 125,
+    "t_stage1": 200,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300001": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 204,
+    "t_block1_on_mat": 124,
+    "t_stage1": 204,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300002": {
+    "targets": 389,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 202,
+    "t_block1_on_mat": 126,
+    "t_stage1": 202,
+    "cls": "success"
+   },
+   "4300003": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 196,
+    "t_block1_on_mat": 124,
+    "t_stage1": 196,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300004": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300005": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 126,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300006": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 125,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300007": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 130,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300008": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 202,
+    "t_block1_on_mat": 125,
+    "t_stage1": 202,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300009": {
+    "targets": 422,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300010": {
+    "targets": 700,
+    "press_cnt": 1,
+    "max_stage": 1,
+    "t_press": 207,
+    "t_block1_on_mat": 131,
+    "t_stage1": 207,
+    "t_block1_left": 366,
+    "cls": "stage 1, then moved block1 again (which-block error)"
+   },
+   "4300011": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300012": {
+    "targets": 414,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300013": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 198,
+    "t_block1_on_mat": 123,
+    "t_stage1": 198,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300014": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 124,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300015": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 202,
+    "t_block1_on_mat": 124,
+    "t_stage1": 202,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300016": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 124,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300017": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 131,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300018": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 202,
+    "t_block1_on_mat": 123,
+    "t_stage1": 202,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300019": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 202,
+    "t_block1_on_mat": 124,
+    "t_stage1": 202,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300020": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 203,
+    "t_block1_on_mat": 126,
+    "t_stage1": 203,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300021": {
+    "targets": 700,
+    "press_cnt": 1,
+    "max_stage": 1,
+    "t_press": 201,
+    "t_block1_on_mat": 123,
+    "t_stage1": 201,
+    "t_block1_left": 349,
+    "cls": "stage 1, then moved block1 again (which-block error)"
+   },
+   "4300022": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 196,
+    "t_block1_on_mat": 124,
+    "t_stage1": 196,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300023": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 198,
+    "t_block1_on_mat": 123,
+    "t_stage1": 198,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300024": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 199,
+    "t_block1_on_mat": 124,
+    "t_stage1": 199,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300025": {
+    "targets": 415,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 205,
+    "t_block1_on_mat": 126,
+    "t_stage1": 205,
+    "cls": "success"
+   },
+   "4300026": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300027": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 196,
+    "t_block1_on_mat": 122,
+    "t_stage1": 196,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300028": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300029": {
+    "targets": 414,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300030": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 198,
+    "t_block1_on_mat": 124,
+    "t_stage1": 198,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300031": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300032": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 206,
+    "t_block1_on_mat": 129,
+    "t_stage1": 206,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300033": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 123,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300034": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 123,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300035": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 198,
+    "t_block1_on_mat": 124,
+    "t_stage1": 198,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300036": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 124,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300037": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 207,
+    "t_block1_on_mat": 130,
+    "t_stage1": 207,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300038": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 202,
+    "t_block1_on_mat": 124,
+    "t_stage1": 202,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300039": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 202,
+    "t_block1_on_mat": 123,
+    "t_stage1": 202,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300040": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 123,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300041": {
+    "targets": 407,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 204,
+    "t_block1_on_mat": 130,
+    "t_stage1": 204,
+    "cls": "success"
+   },
+   "4300042": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 199,
+    "t_block1_on_mat": 125,
+    "t_stage1": 199,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300043": {
+    "targets": 401,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 126,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300044": {
+    "targets": 401,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 201,
+    "t_block1_on_mat": 124,
+    "t_stage1": 201,
+    "cls": "success"
+   },
+   "4300045": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 123,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300046": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 198,
+    "t_block1_on_mat": 123,
+    "t_stage1": 198,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300047": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 196,
+    "t_block1_on_mat": 125,
+    "t_stage1": 196,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300048": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 201,
+    "t_block1_on_mat": 126,
+    "t_stage1": 201,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300049": {
+    "targets": 410,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 201,
+    "t_block1_on_mat": 126,
+    "t_stage1": 201,
+    "cls": "success"
+   }
+  }
+ },
+ "c18:rearrange_arprop_e30_freeze1": {
+  "counts": {
+   "pressed twice or more (after step 1 was complete)": 25,
+   "success": 16,
+   "never pressed: block1 placed on the empty mat": 8,
+   "stage 1, then moved block1 again (which-block error)": 1
+  },
+  "episodes": {
+   "4300000": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 199,
+    "t_block1_on_mat": 125,
+    "t_stage1": 199,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300001": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 205,
+    "t_block1_on_mat": 124,
+    "t_stage1": 205,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300002": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 199,
+    "t_block1_on_mat": 126,
+    "t_stage1": 199,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300003": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300004": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 199,
+    "t_block1_on_mat": 126,
+    "t_stage1": 199,
+    "cls": "success"
+   },
+   "4300005": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 196,
+    "t_block1_on_mat": 125,
+    "t_stage1": 196,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300006": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 200,
+    "t_block1_on_mat": 126,
+    "t_stage1": 200,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300007": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 130,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300008": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 202,
+    "t_block1_on_mat": 125,
+    "t_stage1": 202,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300009": {
+    "targets": 414,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300010": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 209,
+    "t_block1_on_mat": 130,
+    "t_stage1": 209,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300011": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300012": {
+    "targets": 406,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 124,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300013": {
+    "targets": 406,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 123,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300014": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 124,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300015": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 202,
+    "t_block1_on_mat": 123,
+    "t_stage1": 202,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300016": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 123,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300017": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 130,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300018": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 199,
+    "t_block1_on_mat": 124,
+    "t_stage1": 199,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300019": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 201,
+    "t_block1_on_mat": 124,
+    "t_stage1": 201,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300020": {
+    "targets": 406,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 202,
+    "t_block1_on_mat": 127,
+    "t_stage1": 202,
+    "cls": "success"
+   },
+   "4300021": {
+    "targets": 700,
+    "press_cnt": 1,
+    "max_stage": 1,
+    "t_press": 203,
+    "t_block1_on_mat": 123,
+    "t_stage1": 203,
+    "t_block1_left": 356,
+    "cls": "stage 1, then moved block1 again (which-block error)"
+   },
+   "4300022": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 122,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300023": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 200,
+    "t_block1_on_mat": 125,
+    "t_stage1": 200,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300024": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 199,
+    "t_block1_on_mat": 124,
+    "t_stage1": 199,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300025": {
+    "targets": 417,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 216,
+    "t_block1_on_mat": 130,
+    "t_stage1": 216,
+    "cls": "success"
+   },
+   "4300026": {
+    "targets": 397,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300027": {
+    "targets": 405,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 123,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300028": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300029": {
+    "targets": 405,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300030": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 199,
+    "t_block1_on_mat": 124,
+    "t_stage1": 199,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300031": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300032": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 206,
+    "t_block1_on_mat": 130,
+    "t_stage1": 206,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300033": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 200,
+    "t_block1_on_mat": 124,
+    "t_stage1": 200,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300034": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 198,
+    "t_block1_on_mat": 124,
+    "t_stage1": 198,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300035": {
+    "targets": 422,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 200,
+    "t_block1_on_mat": 125,
+    "t_stage1": 200,
+    "cls": "success"
+   },
+   "4300036": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 124,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300037": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 208,
+    "t_block1_on_mat": 130,
+    "t_stage1": 208,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300038": {
+    "targets": 406,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 202,
+    "t_block1_on_mat": 124,
+    "t_stage1": 202,
+    "cls": "success"
+   },
+   "4300039": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 123,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300040": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 212,
+    "t_block1_on_mat": 123,
+    "t_stage1": 212,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300041": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 198,
+    "t_block1_on_mat": 126,
+    "t_stage1": 198,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300042": {
+    "targets": 399,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300043": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300044": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 200,
+    "t_block1_on_mat": 125,
+    "t_stage1": 200,
+    "cls": "success"
+   },
+   "4300045": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 123,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300046": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 123,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300047": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 196,
+    "t_block1_on_mat": 125,
+    "t_stage1": 196,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300048": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 201,
+    "t_block1_on_mat": 125,
+    "t_stage1": 201,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300049": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 126,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   }
+  }
+ },
+ "c18:rearrange_arprop_e30_addmove": {
+  "counts": {
+   "pressed twice or more (after step 1 was complete)": 8,
+   "success": 33,
+   "never pressed: block1 placed on the empty mat": 9
+  },
+  "episodes": {
+   "4300000": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 200,
+    "t_block1_on_mat": 125,
+    "t_stage1": 200,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300001": {
+    "targets": 392,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 204,
+    "t_block1_on_mat": 124,
+    "t_stage1": 204,
+    "cls": "success"
+   },
+   "4300002": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 126,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300003": {
+    "targets": 389,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300004": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 200,
+    "t_block1_on_mat": 126,
+    "t_stage1": 200,
+    "cls": "success"
+   },
+   "4300005": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300006": {
+    "targets": 392,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 126,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300007": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 130,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300008": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 202,
+    "t_block1_on_mat": 125,
+    "t_stage1": 202,
+    "cls": "success"
+   },
+   "4300009": {
+    "targets": 407,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 199,
+    "t_block1_on_mat": 124,
+    "t_stage1": 199,
+    "cls": "success"
+   },
+   "4300010": {
+    "targets": 417,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 210,
+    "t_block1_on_mat": 130,
+    "t_stage1": 210,
+    "cls": "success"
+   },
+   "4300011": {
+    "targets": 389,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300012": {
+    "targets": 391,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300013": {
+    "targets": 397,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 123,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300014": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 124,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300015": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 202,
+    "t_block1_on_mat": 123,
+    "t_stage1": 202,
+    "cls": "success"
+   },
+   "4300016": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 123,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300017": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 130,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300018": {
+    "targets": 389,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 202,
+    "t_block1_on_mat": 124,
+    "t_stage1": 202,
+    "cls": "success"
+   },
+   "4300019": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 202,
+    "t_block1_on_mat": 124,
+    "t_stage1": 202,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300020": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 202,
+    "t_block1_on_mat": 127,
+    "t_stage1": 202,
+    "cls": "success"
+   },
+   "4300021": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 200,
+    "t_block1_on_mat": 123,
+    "t_stage1": 200,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300022": {
+    "targets": 377,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 122,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300023": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 199,
+    "t_block1_on_mat": 125,
+    "t_stage1": 199,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300024": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 124,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300025": {
+    "targets": 401,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 209,
+    "t_block1_on_mat": 130,
+    "t_stage1": 209,
+    "cls": "success"
+   },
+   "4300026": {
+    "targets": 389,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300027": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 123,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300028": {
+    "targets": 383,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 125,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300029": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 124,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300030": {
+    "targets": 389,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 199,
+    "t_block1_on_mat": 124,
+    "t_stage1": 199,
+    "cls": "success"
+   },
+   "4300031": {
+    "targets": 387,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 124,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300032": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 206,
+    "t_block1_on_mat": 130,
+    "t_stage1": 206,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300033": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 199,
+    "t_block1_on_mat": 124,
+    "t_stage1": 199,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300034": {
+    "targets": 389,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 124,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300035": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 199,
+    "t_block1_on_mat": 125,
+    "t_stage1": 199,
+    "cls": "success"
+   },
+   "4300036": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 124,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300037": {
+    "targets": 413,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 207,
+    "t_block1_on_mat": 130,
+    "t_stage1": 207,
+    "cls": "success"
+   },
+   "4300038": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 204,
+    "t_block1_on_mat": 124,
+    "t_stage1": 204,
+    "cls": "success"
+   },
+   "4300039": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 123,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300040": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 123,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300041": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 126,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300042": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300043": {
+    "targets": 397,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 200,
+    "t_block1_on_mat": 125,
+    "t_stage1": 200,
+    "cls": "success"
+   },
+   "4300044": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 200,
+    "t_block1_on_mat": 125,
+    "t_stage1": 200,
+    "cls": "success"
+   },
+   "4300045": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 123,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300046": {
+    "targets": 381,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 123,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300047": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 125,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300048": {
+    "targets": 389,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 201,
+    "t_block1_on_mat": 125,
+    "t_stage1": 201,
+    "cls": "success"
+   },
+   "4300049": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 201,
+    "t_block1_on_mat": 126,
+    "t_stage1": 201,
+    "cls": "success"
+   }
+  }
+ },
+ "c18:rearr_pw_e30_off": {
+  "counts": {
+   "pressed twice or more (after step 1 was complete)": 50
+  },
+  "episodes": {
+   "4300000": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 196,
+    "t_block1_on_mat": 125,
+    "t_stage1": 196,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300001": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 203,
+    "t_block1_on_mat": 125,
+    "t_stage1": 203,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300002": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300003": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 199,
+    "t_block1_on_mat": 128,
+    "t_stage1": 199,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300004": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 196,
+    "t_block1_on_mat": 126,
+    "t_stage1": 196,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300005": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 126,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300006": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 196,
+    "t_block1_on_mat": 126,
+    "t_stage1": 196,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300007": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 210,
+    "t_block1_on_mat": 132,
+    "t_stage1": 210,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300008": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 209,
+    "t_block1_on_mat": 132,
+    "t_stage1": 209,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300009": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 126,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300010": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 210,
+    "t_block1_on_mat": 132,
+    "t_stage1": 210,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300011": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300012": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 126,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300013": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 198,
+    "t_block1_on_mat": 126,
+    "t_stage1": 198,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300014": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 195,
+    "t_block1_on_mat": 125,
+    "t_stage1": 195,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300015": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 211,
+    "t_block1_on_mat": 131,
+    "t_stage1": 211,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300016": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 203,
+    "t_block1_on_mat": 125,
+    "t_stage1": 203,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300017": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 210,
+    "t_block1_on_mat": 132,
+    "t_stage1": 210,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300018": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 210,
+    "t_block1_on_mat": 132,
+    "t_stage1": 210,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300019": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 206,
+    "t_block1_on_mat": 128,
+    "t_stage1": 206,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300020": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 212,
+    "t_block1_on_mat": 130,
+    "t_stage1": 212,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300021": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 201,
+    "t_block1_on_mat": 126,
+    "t_stage1": 201,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300022": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 126,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300023": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 207,
+    "t_block1_on_mat": 132,
+    "t_stage1": 207,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300024": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 195,
+    "t_block1_on_mat": 125,
+    "t_stage1": 195,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300025": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 210,
+    "t_block1_on_mat": 131,
+    "t_stage1": 210,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300026": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 196,
+    "t_block1_on_mat": 125,
+    "t_stage1": 196,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300027": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300028": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300029": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 199,
+    "t_block1_on_mat": 124,
+    "t_stage1": 199,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300030": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 198,
+    "t_block1_on_mat": 124,
+    "t_stage1": 198,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300031": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300032": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 199,
+    "t_block1_on_mat": 126,
+    "t_stage1": 199,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300033": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 198,
+    "t_block1_on_mat": 126,
+    "t_stage1": 198,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300034": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 195,
+    "t_block1_on_mat": 125,
+    "t_stage1": 195,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300035": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 199,
+    "t_block1_on_mat": 125,
+    "t_stage1": 199,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300036": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 211,
+    "t_block1_on_mat": 131,
+    "t_stage1": 211,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300037": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 209,
+    "t_block1_on_mat": 131,
+    "t_stage1": 209,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300038": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 201,
+    "t_block1_on_mat": 126,
+    "t_stage1": 201,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300039": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 210,
+    "t_block1_on_mat": 131,
+    "t_stage1": 210,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300040": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 208,
+    "t_block1_on_mat": 131,
+    "t_stage1": 208,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300041": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 198,
+    "t_block1_on_mat": 126,
+    "t_stage1": 198,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300042": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 198,
+    "t_block1_on_mat": 126,
+    "t_stage1": 198,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300043": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 196,
+    "t_block1_on_mat": 125,
+    "t_stage1": 196,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300044": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 207,
+    "t_block1_on_mat": 132,
+    "t_stage1": 207,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300045": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 201,
+    "t_block1_on_mat": 126,
+    "t_stage1": 201,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300046": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 126,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300047": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 195,
+    "t_block1_on_mat": 125,
+    "t_stage1": 195,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300048": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 209,
+    "t_block1_on_mat": 132,
+    "t_stage1": 209,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300049": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 201,
+    "t_block1_on_mat": 127,
+    "t_stage1": 201,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   }
+  }
+ },
+ "c18:rearr_pw_e30_freeze1": {
+  "counts": {
+   "pressed twice or more (after step 1 was complete)": 50
+  },
+  "episodes": {
+   "4300000": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300001": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 202,
+    "t_block1_on_mat": 125,
+    "t_stage1": 202,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300002": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300003": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 199,
+    "t_block1_on_mat": 128,
+    "t_stage1": 199,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300004": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 195,
+    "t_block1_on_mat": 126,
+    "t_stage1": 195,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300005": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 126,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300006": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 196,
+    "t_block1_on_mat": 126,
+    "t_stage1": 196,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300007": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 209,
+    "t_block1_on_mat": 131,
+    "t_stage1": 209,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300008": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 209,
+    "t_block1_on_mat": 132,
+    "t_stage1": 209,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300009": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 196,
+    "t_block1_on_mat": 126,
+    "t_stage1": 196,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300010": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 209,
+    "t_block1_on_mat": 132,
+    "t_stage1": 209,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300011": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 199,
+    "t_block1_on_mat": 127,
+    "t_stage1": 199,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300012": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 196,
+    "t_block1_on_mat": 126,
+    "t_stage1": 196,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300013": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 199,
+    "t_block1_on_mat": 126,
+    "t_stage1": 199,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300014": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 196,
+    "t_block1_on_mat": 125,
+    "t_stage1": 196,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300015": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 210,
+    "t_block1_on_mat": 130,
+    "t_stage1": 210,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300016": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 202,
+    "t_block1_on_mat": 125,
+    "t_stage1": 202,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300017": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 210,
+    "t_block1_on_mat": 132,
+    "t_stage1": 210,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300018": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 210,
+    "t_block1_on_mat": 132,
+    "t_stage1": 210,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300019": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 210,
+    "t_block1_on_mat": 132,
+    "t_stage1": 210,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300020": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 212,
+    "t_block1_on_mat": 130,
+    "t_stage1": 212,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300021": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 202,
+    "t_block1_on_mat": 125,
+    "t_stage1": 202,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300022": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 126,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300023": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 207,
+    "t_block1_on_mat": 132,
+    "t_stage1": 207,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300024": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 195,
+    "t_block1_on_mat": 125,
+    "t_stage1": 195,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300025": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 210,
+    "t_block1_on_mat": 132,
+    "t_stage1": 210,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300026": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 196,
+    "t_block1_on_mat": 125,
+    "t_stage1": 196,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300027": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300028": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 196,
+    "t_block1_on_mat": 124,
+    "t_stage1": 196,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300029": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 198,
+    "t_block1_on_mat": 124,
+    "t_stage1": 198,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300030": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 198,
+    "t_block1_on_mat": 124,
+    "t_stage1": 198,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300031": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300032": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 208,
+    "t_block1_on_mat": 131,
+    "t_stage1": 208,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300033": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 198,
+    "t_block1_on_mat": 126,
+    "t_stage1": 198,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300034": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 195,
+    "t_block1_on_mat": 125,
+    "t_stage1": 195,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300035": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300036": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 204,
+    "t_block1_on_mat": 127,
+    "t_stage1": 204,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300037": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 209,
+    "t_block1_on_mat": 132,
+    "t_stage1": 209,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300038": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 201,
+    "t_block1_on_mat": 126,
+    "t_stage1": 201,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300039": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 210,
+    "t_block1_on_mat": 131,
+    "t_stage1": 210,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300040": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 208,
+    "t_block1_on_mat": 131,
+    "t_stage1": 208,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300041": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300042": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 200,
+    "t_block1_on_mat": 125,
+    "t_stage1": 200,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300043": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 196,
+    "t_block1_on_mat": 126,
+    "t_stage1": 196,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300044": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 207,
+    "t_block1_on_mat": 133,
+    "t_stage1": 207,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300045": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 201,
+    "t_block1_on_mat": 124,
+    "t_stage1": 201,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300046": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 202,
+    "t_block1_on_mat": 129,
+    "t_stage1": 202,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300047": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 194,
+    "t_block1_on_mat": 127,
+    "t_stage1": 194,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300048": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 208,
+    "t_block1_on_mat": 132,
+    "t_stage1": 208,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300049": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 208,
+    "t_block1_on_mat": 130,
+    "t_stage1": 208,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   }
+  }
+ },
+ "c18:rearr_pw_e30_addmove": {
+  "counts": {
+   "success": 49,
+   "never pressed: block1 placed on the empty mat": 1
+  },
+  "episodes": {
+   "4300000": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300001": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 201,
+    "t_block1_on_mat": 125,
+    "t_stage1": 201,
+    "cls": "success"
+   },
+   "4300002": {
+    "targets": 381,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300003": {
+    "targets": 385,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 199,
+    "t_block1_on_mat": 128,
+    "t_stage1": 199,
+    "cls": "success"
+   },
+   "4300004": {
+    "targets": 382,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 126,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300005": {
+    "targets": 392,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 126,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300006": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 126,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300007": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 207,
+    "t_block1_on_mat": 131,
+    "t_stage1": 207,
+    "cls": "success"
+   },
+   "4300008": {
+    "targets": 399,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 209,
+    "t_block1_on_mat": 132,
+    "t_stage1": 209,
+    "cls": "success"
+   },
+   "4300009": {
+    "targets": 391,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 126,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300010": {
+    "targets": 401,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 210,
+    "t_block1_on_mat": 132,
+    "t_stage1": 210,
+    "cls": "success"
+   },
+   "4300011": {
+    "targets": 391,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 127,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300012": {
+    "targets": 391,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 126,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300013": {
+    "targets": 391,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 126,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300014": {
+    "targets": 378,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 125,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300015": {
+    "targets": 413,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 210,
+    "t_block1_on_mat": 130,
+    "t_stage1": 210,
+    "cls": "success"
+   },
+   "4300016": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 125,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300017": {
+    "targets": 385,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 209,
+    "t_block1_on_mat": 132,
+    "t_stage1": 209,
+    "cls": "success"
+   },
+   "4300018": {
+    "targets": 393,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 210,
+    "t_block1_on_mat": 132,
+    "t_stage1": 210,
+    "cls": "success"
+   },
+   "4300019": {
+    "targets": 400,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 210,
+    "t_block1_on_mat": 132,
+    "t_stage1": 210,
+    "cls": "success"
+   },
+   "4300020": {
+    "targets": 399,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 213,
+    "t_block1_on_mat": 130,
+    "t_stage1": 213,
+    "cls": "success"
+   },
+   "4300021": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 202,
+    "t_block1_on_mat": 125,
+    "t_stage1": 202,
+    "cls": "success"
+   },
+   "4300022": {
+    "targets": 391,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 200,
+    "t_block1_on_mat": 126,
+    "t_stage1": 200,
+    "cls": "success"
+   },
+   "4300023": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 208,
+    "t_block1_on_mat": 132,
+    "t_stage1": 208,
+    "cls": "success"
+   },
+   "4300024": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 195,
+    "t_block1_on_mat": 125,
+    "t_stage1": 195,
+    "cls": "success"
+   },
+   "4300025": {
+    "targets": 393,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 210,
+    "t_block1_on_mat": 132,
+    "t_stage1": 210,
+    "cls": "success"
+   },
+   "4300026": {
+    "targets": 383,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 125,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300027": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 125,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300028": {
+    "targets": 409,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 124,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300029": {
+    "targets": 402,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 124,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300030": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 124,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300031": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300032": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 208,
+    "t_block1_on_mat": 131,
+    "t_stage1": 208,
+    "cls": "success"
+   },
+   "4300033": {
+    "targets": 391,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 126,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300034": {
+    "targets": 382,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 195,
+    "t_block1_on_mat": 125,
+    "t_stage1": 195,
+    "cls": "success"
+   },
+   "4300035": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300036": {
+    "targets": 377,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 206,
+    "t_block1_on_mat": 127,
+    "t_stage1": 206,
+    "cls": "success"
+   },
+   "4300037": {
+    "targets": 407,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 209,
+    "t_block1_on_mat": 132,
+    "t_stage1": 209,
+    "cls": "success"
+   },
+   "4300038": {
+    "targets": 391,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 202,
+    "t_block1_on_mat": 126,
+    "t_stage1": 202,
+    "cls": "success"
+   },
+   "4300039": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 209,
+    "t_block1_on_mat": 131,
+    "t_stage1": 209,
+    "cls": "success"
+   },
+   "4300040": {
+    "targets": 385,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 208,
+    "t_block1_on_mat": 131,
+    "t_stage1": 208,
+    "cls": "success"
+   },
+   "4300041": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300042": {
+    "targets": 391,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300043": {
+    "targets": 399,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 126,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300044": {
+    "targets": 393,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 208,
+    "t_block1_on_mat": 133,
+    "t_stage1": 208,
+    "cls": "success"
+   },
+   "4300045": {
+    "targets": 377,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 200,
+    "t_block1_on_mat": 124,
+    "t_stage1": 200,
+    "cls": "success"
+   },
+   "4300046": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 203,
+    "t_block1_on_mat": 129,
+    "t_stage1": 203,
+    "cls": "success"
+   },
+   "4300047": {
+    "targets": 383,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 195,
+    "t_block1_on_mat": 127,
+    "t_stage1": 195,
+    "cls": "success"
+   },
+   "4300048": {
+    "targets": 394,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 208,
+    "t_block1_on_mat": 132,
+    "t_stage1": 208,
+    "cls": "success"
+   },
+   "4300049": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 205,
+    "t_block1_on_mat": 130,
+    "t_stage1": 205,
+    "cls": "success"
+   }
+  }
+ },
+ "e6:rearrange_arprop_e30": {
+  "counts": {
+   "success": 62,
+   "pressed twice or more (after step 1 was complete)": 18,
+   "never pressed: block1 placed on the empty mat": 17,
+   "stage 1, then moved block1 again (which-block error)": 3
+  },
+  "episodes": {
+   "4300000": {
+    "targets": 389,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 199,
+    "t_block1_on_mat": 125,
+    "t_stage1": 199,
+    "cls": "success"
+   },
+   "4300001": {
+    "targets": 388,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 203,
+    "t_block1_on_mat": 124,
+    "t_stage1": 203,
+    "cls": "success"
+   },
+   "4300002": {
+    "targets": 445,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 126,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300003": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300004": {
+    "targets": 388,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 199,
+    "t_block1_on_mat": 126,
+    "t_stage1": 199,
+    "cls": "success"
+   },
+   "4300005": {
+    "targets": 388,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300006": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 201,
+    "t_block1_on_mat": 126,
+    "t_stage1": 201,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300007": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 130,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300008": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 202,
+    "t_block1_on_mat": 125,
+    "t_stage1": 202,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300009": {
+    "targets": 397,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 124,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300010": {
+    "targets": 417,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 209,
+    "t_block1_on_mat": 130,
+    "t_stage1": 209,
+    "cls": "success"
+   },
+   "4300011": {
+    "targets": 389,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300012": {
+    "targets": 388,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300013": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 123,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300014": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 124,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300015": {
+    "targets": 391,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 202,
+    "t_block1_on_mat": 123,
+    "t_stage1": 202,
+    "cls": "success"
+   },
+   "4300016": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 123,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300017": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 130,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300018": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 203,
+    "t_block1_on_mat": 124,
+    "t_stage1": 203,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300019": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 201,
+    "t_block1_on_mat": 124,
+    "t_stage1": 201,
+    "cls": "success"
+   },
+   "4300020": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 202,
+    "t_block1_on_mat": 127,
+    "t_stage1": 202,
+    "cls": "success"
+   },
+   "4300021": {
+    "targets": 700,
+    "press_cnt": 1,
+    "max_stage": 1,
+    "t_press": 202,
+    "t_block1_on_mat": 123,
+    "t_stage1": 202,
+    "t_block1_left": 349,
+    "cls": "stage 1, then moved block1 again (which-block error)"
+   },
+   "4300022": {
+    "targets": 381,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 122,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300023": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 200,
+    "t_block1_on_mat": 125,
+    "t_stage1": 200,
+    "cls": "success"
+   },
+   "4300024": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 200,
+    "t_block1_on_mat": 124,
+    "t_stage1": 200,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300025": {
+    "targets": 406,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 216,
+    "t_block1_on_mat": 130,
+    "t_stage1": 216,
+    "cls": "success"
+   },
+   "4300026": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300027": {
+    "targets": 389,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 123,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300028": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300029": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300030": {
+    "targets": 389,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 199,
+    "t_block1_on_mat": 124,
+    "t_stage1": 199,
+    "cls": "success"
+   },
+   "4300031": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300032": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 206,
+    "t_block1_on_mat": 130,
+    "t_stage1": 206,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300033": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 199,
+    "t_block1_on_mat": 124,
+    "t_stage1": 199,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300034": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300035": {
+    "targets": 388,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300036": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 124,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300037": {
+    "targets": 414,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 208,
+    "t_block1_on_mat": 130,
+    "t_stage1": 208,
+    "cls": "success"
+   },
+   "4300038": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 204,
+    "t_block1_on_mat": 124,
+    "t_stage1": 204,
+    "cls": "success"
+   },
+   "4300039": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 123,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300040": {
+    "targets": 700,
+    "press_cnt": 1,
+    "max_stage": 1,
+    "t_press": 202,
+    "t_block1_on_mat": 123,
+    "t_stage1": 202,
+    "t_block1_left": 341,
+    "cls": "stage 1, then moved block1 again (which-block error)"
+   },
+   "4300041": {
+    "targets": 389,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 126,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300042": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300043": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300044": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 201,
+    "t_block1_on_mat": 125,
+    "t_stage1": 201,
+    "cls": "success"
+   },
+   "4300045": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 206,
+    "t_block1_on_mat": 123,
+    "t_stage1": 206,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300046": {
+    "targets": 382,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 123,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300047": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 125,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300048": {
+    "targets": 394,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 200,
+    "t_block1_on_mat": 125,
+    "t_stage1": 200,
+    "cls": "success"
+   },
+   "4300049": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 200,
+    "t_block1_on_mat": 126,
+    "t_stage1": 200,
+    "cls": "success"
+   },
+   "4300050": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 200,
+    "t_block1_on_mat": 124,
+    "t_stage1": 200,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300051": {
+    "targets": 389,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 125,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300052": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 130,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300053": {
+    "targets": 389,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 200,
+    "t_block1_on_mat": 124,
+    "t_stage1": 200,
+    "cls": "success"
+   },
+   "4300054": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 131,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300055": {
+    "targets": 389,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 200,
+    "t_block1_on_mat": 124,
+    "t_stage1": 200,
+    "cls": "success"
+   },
+   "4300056": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 124,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300057": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 123,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300058": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 124,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300059": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 209,
+    "t_block1_on_mat": 131,
+    "t_stage1": 209,
+    "cls": "success"
+   },
+   "4300060": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 201,
+    "t_block1_on_mat": 124,
+    "t_stage1": 201,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300061": {
+    "targets": 382,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 124,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300062": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 208,
+    "t_block1_on_mat": 131,
+    "t_stage1": 208,
+    "cls": "success"
+   },
+   "4300063": {
+    "targets": 389,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300064": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300065": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 124,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300066": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 199,
+    "t_block1_on_mat": 124,
+    "t_stage1": 199,
+    "cls": "success"
+   },
+   "4300067": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 124,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300068": {
+    "targets": 388,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 123,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300069": {
+    "targets": 391,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 201,
+    "t_block1_on_mat": 125,
+    "t_stage1": 201,
+    "cls": "success"
+   },
+   "4300070": {
+    "targets": 385,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300071": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 196,
+    "t_block1_on_mat": 123,
+    "t_stage1": 196,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300072": {
+    "targets": 389,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 201,
+    "t_block1_on_mat": 125,
+    "t_stage1": 201,
+    "cls": "success"
+   },
+   "4300073": {
+    "targets": 389,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 125,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300074": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 123,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300075": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 207,
+    "t_block1_on_mat": 130,
+    "t_stage1": 207,
+    "cls": "success"
+   },
+   "4300076": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 196,
+    "t_block1_on_mat": 124,
+    "t_stage1": 196,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300077": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 124,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300078": {
+    "targets": 383,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 122,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300079": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300080": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 208,
+    "t_block1_on_mat": 126,
+    "t_stage1": 208,
+    "cls": "success"
+   },
+   "4300081": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 123,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300082": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300083": {
+    "targets": 401,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 208,
+    "t_block1_on_mat": 130,
+    "t_stage1": 208,
+    "cls": "success"
+   },
+   "4300084": {
+    "targets": 382,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 123,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300085": {
+    "targets": 393,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 200,
+    "t_block1_on_mat": 124,
+    "t_stage1": 200,
+    "cls": "success"
+   },
+   "4300086": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 125,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300087": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 124,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300088": {
+    "targets": 385,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 202,
+    "t_block1_on_mat": 126,
+    "t_stage1": 202,
+    "cls": "success"
+   },
+   "4300089": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300090": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 124,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300091": {
+    "targets": 389,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 200,
+    "t_block1_on_mat": 124,
+    "t_stage1": 200,
+    "cls": "success"
+   },
+   "4300092": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300093": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 126,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300094": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300095": {
+    "targets": 385,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 203,
+    "t_block1_on_mat": 124,
+    "t_stage1": 203,
+    "cls": "success"
+   },
+   "4300096": {
+    "targets": 700,
+    "press_cnt": 2,
+    "max_stage": 1,
+    "t_press": 207,
+    "t_block1_on_mat": 130,
+    "t_stage1": 207,
+    "cls": "pressed twice or more (after step 1 was complete)"
+   },
+   "4300097": {
+    "targets": 389,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 194,
+    "t_block1_on_mat": 121,
+    "t_stage1": 194,
+    "cls": "success"
+   },
+   "4300098": {
+    "targets": 700,
+    "press_cnt": 1,
+    "max_stage": 1,
+    "t_press": 200,
+    "t_block1_on_mat": 124,
+    "t_stage1": 200,
+    "t_block1_left": 346,
+    "cls": "stage 1, then moved block1 again (which-block error)"
+   },
+   "4300099": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 124,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   }
+  }
+ },
+ "v20:rearr_pw_e30": {
+  "counts": {
+   "success": 93,
+   "never pressed: block1 placed on the empty mat": 4,
+   "stage 1, then moved block1 again (which-block error)": 2,
+   "pressed too early (block1 not on the empty mat at the press)": 1
+  },
+  "episodes": {
+   "4300000": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300001": {
+    "targets": 389,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 202,
+    "t_block1_on_mat": 125,
+    "t_stage1": 202,
+    "cls": "success"
+   },
+   "4300002": {
+    "targets": 388,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 199,
+    "t_block1_on_mat": 125,
+    "t_stage1": 199,
+    "cls": "success"
+   },
+   "4300003": {
+    "targets": 385,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 199,
+    "t_block1_on_mat": 128,
+    "t_stage1": 199,
+    "cls": "success"
+   },
+   "4300004": {
+    "targets": 382,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 195,
+    "t_block1_on_mat": 126,
+    "t_stage1": 195,
+    "cls": "success"
+   },
+   "4300005": {
+    "targets": 391,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 126,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300006": {
+    "targets": 385,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 126,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300007": {
+    "targets": 394,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 209,
+    "t_block1_on_mat": 131,
+    "t_stage1": 209,
+    "cls": "success"
+   },
+   "4300008": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 209,
+    "t_block1_on_mat": 132,
+    "t_stage1": 209,
+    "cls": "success"
+   },
+   "4300009": {
+    "targets": 391,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 126,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300010": {
+    "targets": 399,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 210,
+    "t_block1_on_mat": 132,
+    "t_stage1": 210,
+    "cls": "success"
+   },
+   "4300011": {
+    "targets": 385,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 127,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300012": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 126,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300013": {
+    "targets": 391,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 126,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300014": {
+    "targets": 376,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 195,
+    "t_block1_on_mat": 125,
+    "t_stage1": 195,
+    "cls": "success"
+   },
+   "4300015": {
+    "targets": 399,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 210,
+    "t_block1_on_mat": 130,
+    "t_stage1": 210,
+    "cls": "success"
+   },
+   "4300016": {
+    "targets": 391,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 202,
+    "t_block1_on_mat": 125,
+    "t_stage1": 202,
+    "cls": "success"
+   },
+   "4300017": {
+    "targets": 385,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 209,
+    "t_block1_on_mat": 132,
+    "t_stage1": 209,
+    "cls": "success"
+   },
+   "4300018": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 210,
+    "t_block1_on_mat": 132,
+    "t_stage1": 210,
+    "cls": "success"
+   },
+   "4300019": {
+    "targets": 399,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 210,
+    "t_block1_on_mat": 132,
+    "t_stage1": 210,
+    "cls": "success"
+   },
+   "4300020": {
+    "targets": 399,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 212,
+    "t_block1_on_mat": 130,
+    "t_stage1": 212,
+    "cls": "success"
+   },
+   "4300021": {
+    "targets": 386,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 202,
+    "t_block1_on_mat": 125,
+    "t_stage1": 202,
+    "cls": "success"
+   },
+   "4300022": {
+    "targets": 383,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 126,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300023": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 207,
+    "t_block1_on_mat": 132,
+    "t_stage1": 207,
+    "cls": "success"
+   },
+   "4300024": {
+    "targets": 383,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 195,
+    "t_block1_on_mat": 125,
+    "t_stage1": 195,
+    "cls": "success"
+   },
+   "4300025": {
+    "targets": 400,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 210,
+    "t_block1_on_mat": 132,
+    "t_stage1": 210,
+    "cls": "success"
+   },
+   "4300026": {
+    "targets": 382,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 125,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300027": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 125,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300028": {
+    "targets": 394,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300029": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 124,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300030": {
+    "targets": 383,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 124,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300031": {
+    "targets": 376,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 124,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300032": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 207,
+    "t_block1_on_mat": 131,
+    "t_stage1": 207,
+    "cls": "success"
+   },
+   "4300033": {
+    "targets": 383,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 126,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300034": {
+    "targets": 382,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 195,
+    "t_block1_on_mat": 125,
+    "t_stage1": 195,
+    "cls": "success"
+   },
+   "4300035": {
+    "targets": 386,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300036": {
+    "targets": 385,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 208,
+    "t_block1_on_mat": 127,
+    "t_stage1": 208,
+    "cls": "success"
+   },
+   "4300037": {
+    "targets": 407,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 209,
+    "t_block1_on_mat": 132,
+    "t_stage1": 209,
+    "cls": "success"
+   },
+   "4300038": {
+    "targets": 391,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 201,
+    "t_block1_on_mat": 126,
+    "t_stage1": 201,
+    "cls": "success"
+   },
+   "4300039": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 210,
+    "t_block1_on_mat": 131,
+    "t_stage1": 210,
+    "cls": "success"
+   },
+   "4300040": {
+    "targets": 385,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 208,
+    "t_block1_on_mat": 131,
+    "t_stage1": 208,
+    "cls": "success"
+   },
+   "4300041": {
+    "targets": 385,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300042": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300043": {
+    "targets": 392,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 126,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300044": {
+    "targets": 393,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 207,
+    "t_block1_on_mat": 133,
+    "t_stage1": 207,
+    "cls": "success"
+   },
+   "4300045": {
+    "targets": 383,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 200,
+    "t_block1_on_mat": 124,
+    "t_stage1": 200,
+    "cls": "success"
+   },
+   "4300046": {
+    "targets": 391,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 202,
+    "t_block1_on_mat": 129,
+    "t_stage1": 202,
+    "cls": "success"
+   },
+   "4300047": {
+    "targets": 383,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 195,
+    "t_block1_on_mat": 127,
+    "t_stage1": 195,
+    "cls": "success"
+   },
+   "4300048": {
+    "targets": 394,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 205,
+    "t_block1_on_mat": 132,
+    "t_stage1": 205,
+    "cls": "success"
+   },
+   "4300049": {
+    "targets": 389,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 205,
+    "t_block1_on_mat": 130,
+    "t_stage1": 205,
+    "cls": "success"
+   },
+   "4300050": {
+    "targets": 391,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 208,
+    "t_block1_on_mat": 132,
+    "t_stage1": 208,
+    "cls": "success"
+   },
+   "4300051": {
+    "targets": 383,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 127,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300052": {
+    "targets": 383,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 202,
+    "t_block1_on_mat": 126,
+    "t_stage1": 202,
+    "cls": "success"
+   },
+   "4300053": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 199,
+    "t_block1_on_mat": 125,
+    "t_stage1": 199,
+    "cls": "success"
+   },
+   "4300054": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 132,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300055": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 207,
+    "t_block1_on_mat": 132,
+    "t_stage1": 207,
+    "cls": "success"
+   },
+   "4300056": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 126,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300057": {
+    "targets": 393,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 126,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300058": {
+    "targets": 401,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 210,
+    "t_block1_on_mat": 132,
+    "t_stage1": 210,
+    "cls": "success"
+   },
+   "4300059": {
+    "targets": 700,
+    "press_cnt": 1,
+    "max_stage": 1,
+    "t_press": 202,
+    "t_block1_on_mat": 126,
+    "t_stage1": 202,
+    "t_block1_left": 356,
+    "cls": "stage 1, then moved block1 again (which-block error)"
+   },
+   "4300060": {
+    "targets": 400,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 210,
+    "t_block1_on_mat": 132,
+    "t_stage1": 210,
+    "cls": "success"
+   },
+   "4300061": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300062": {
+    "targets": 399,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 210,
+    "t_block1_on_mat": 132,
+    "t_stage1": 210,
+    "cls": "success"
+   },
+   "4300063": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 126,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300064": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 199,
+    "t_block1_on_mat": 124,
+    "t_stage1": 199,
+    "cls": "success"
+   },
+   "4300065": {
+    "targets": 391,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 211,
+    "t_block1_on_mat": 131,
+    "t_stage1": 211,
+    "cls": "success"
+   },
+   "4300066": {
+    "targets": 392,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 124,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300067": {
+    "targets": 392,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 209,
+    "t_block1_on_mat": 132,
+    "t_stage1": 209,
+    "cls": "success"
+   },
+   "4300068": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300069": {
+    "targets": 393,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 208,
+    "t_block1_on_mat": 132,
+    "t_stage1": 208,
+    "cls": "success"
+   },
+   "4300070": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300071": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 126,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300072": {
+    "targets": 391,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 203,
+    "t_block1_on_mat": 126,
+    "t_stage1": 203,
+    "cls": "success"
+   },
+   "4300073": {
+    "targets": 384,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 126,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300074": {
+    "targets": 376,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 126,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300075": {
+    "targets": 391,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 207,
+    "t_block1_on_mat": 131,
+    "t_stage1": 207,
+    "cls": "success"
+   },
+   "4300076": {
+    "targets": 383,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 126,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300077": {
+    "targets": 399,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 213,
+    "t_block1_on_mat": 132,
+    "t_stage1": 213,
+    "cls": "success"
+   },
+   "4300078": {
+    "targets": 383,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 196,
+    "t_block1_on_mat": 125,
+    "t_stage1": 196,
+    "cls": "success"
+   },
+   "4300079": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 126,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300080": {
+    "targets": 407,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 214,
+    "t_block1_on_mat": 130,
+    "t_stage1": 214,
+    "cls": "success"
+   },
+   "4300081": {
+    "targets": 391,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 197,
+    "t_block1_on_mat": 125,
+    "t_stage1": 197,
+    "cls": "success"
+   },
+   "4300082": {
+    "targets": 388,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300083": {
+    "targets": 394,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 208,
+    "t_block1_on_mat": 132,
+    "t_stage1": 208,
+    "cls": "success"
+   },
+   "4300084": {
+    "targets": 377,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 195,
+    "t_block1_on_mat": 125,
+    "t_stage1": 195,
+    "cls": "success"
+   },
+   "4300085": {
+    "targets": 393,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 208,
+    "t_block1_on_mat": 132,
+    "t_stage1": 208,
+    "cls": "success"
+   },
+   "4300086": {
+    "targets": 392,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 126,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300087": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 131,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300088": {
+    "targets": 393,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 202,
+    "t_block1_on_mat": 127,
+    "t_stage1": 202,
+    "cls": "success"
+   },
+   "4300089": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 198,
+    "t_block1_on_mat": 125,
+    "t_stage1": 198,
+    "cls": "success"
+   },
+   "4300090": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 211,
+    "t_block1_on_mat": 132,
+    "t_stage1": 211,
+    "cls": "success"
+   },
+   "4300091": {
+    "targets": 700,
+    "press_cnt": 0,
+    "max_stage": 0,
+    "t_press": null,
+    "t_block1_on_mat": 126,
+    "t_stage1": null,
+    "cls": "never pressed: block1 placed on the empty mat"
+   },
+   "4300092": {
+    "targets": 390,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 201,
+    "t_block1_on_mat": 130,
+    "t_stage1": 201,
+    "cls": "success"
+   },
+   "4300093": {
+    "targets": 700,
+    "press_cnt": 1,
+    "max_stage": 1,
+    "t_press": 199,
+    "t_block1_on_mat": 125,
+    "t_stage1": 199,
+    "t_block1_left": 346,
+    "cls": "stage 1, then moved block1 again (which-block error)"
+   },
+   "4300094": {
+    "targets": 392,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 199,
+    "t_block1_on_mat": 124,
+    "t_stage1": 199,
+    "cls": "success"
+   },
+   "4300095": {
+    "targets": 385,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 206,
+    "t_block1_on_mat": 132,
+    "t_stage1": 206,
+    "cls": "success"
+   },
+   "4300096": {
+    "targets": 399,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 210,
+    "t_block1_on_mat": 131,
+    "t_stage1": 210,
+    "cls": "success"
+   },
+   "4300097": {
+    "targets": 700,
+    "press_cnt": 1,
+    "max_stage": 0,
+    "t_press": 107,
+    "t_block1_on_mat": null,
+    "t_stage1": null,
+    "cls": "pressed too early (block1 not on the empty mat at the press)"
+   },
+   "4300098": {
+    "targets": 392,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 208,
+    "t_block1_on_mat": 131,
+    "t_stage1": 208,
+    "cls": "success"
+   },
+   "4300099": {
+    "targets": 398,
+    "press_cnt": 1,
+    "max_stage": 2,
+    "t_press": 208,
+    "t_block1_on_mat": 131,
+    "t_stage1": 208,
+    "cls": "success"
+   }
+  }
+ }
+}

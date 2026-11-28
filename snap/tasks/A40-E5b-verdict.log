@@ -1,0 +1,8 @@
+
+[queue5] 2026-11-19 10:10:54 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e5b_verdict.py
+E5b put 1-50: finished vis 50, hid 50; valid pairs 50; vis-only 0, hid-only 0; Delta +0; sign p 1.0000; hidden successes 49/50
+  vis: {'success': 49, 'skipped -> returned': 1}
+  hid: {'success': 49, 'skipped -> returned': 1}
+  clock tokens inside the injected frames at the first decision after the pause (vis): mean 0.17 over 50 episodes (descriptive)
+E5b VERDICT: NOT ON PUT; rule C on put: MISS
+with E5 (swap) = NOT REPRODUCED: the clock model does not read the clock: if its no-stress swap is also >= 95/100 the weight moves to content (E9) and counting -> SWITCH TO FABLE (row 4)

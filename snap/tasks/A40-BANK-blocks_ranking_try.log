@@ -1,0 +1,547 @@
+
+[queue5] 2026-11-22 00:22:43 $ bash -c C=/workspace/FastWAM-memory2/outputs/memory_v2/closed_loop; P=/opt/mwam/bin/python; S=/workspace/FastWAM-memory2/scripts/memory_v2/official_scenes.py; t=blocks_ranking_try; B=$C/scenes_seed42_n100_$t; cd /workspace/FastWAM-memory2; for i in $(seq 1 60); do $P $S complete $B $t 100 && break; PYTHONPATH=src CUDA_VISIBLE_DEVICES=7 $P -m fastwam.memory_v2.online plan --seed 42 --episodes 100 --tasks $t --output $B && continue; $P $S skip-expert-error $B $t; rc=$?; [ $rc -eq 1 ] && exit 1; done; $P $S complete $B $t 100
+blocks_ranking_try: /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/scenes_seed42_n100_blocks_ranking_try/blocks_ranking_try.json NOT complete (0 scenes, next seed None)
+[closed-loop] WARNING dense config was recorded for sm9.0; this GPU is sm8.6: TORCH_EXTENSIONS_DIR -> /workspace/FastWAM/outputs/fused_environment_memory_v2_sm86/torch_extensions (give --extensions-dir to reuse built kernels)
+[plan] 2026-11-21 16:22:45 blocks_ranking_try: 100 expert-feasible scenes, seed 42 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/scenes_seed42_n100_blocks_ranking_try/blocks_ranking_try.json
+[backend] pid=2061179 fused_graph_v1; native guards retained; launch_blocking unset
+[simulator_import] running 
+============= Config =============
+
+[95mMessy Table:[0m False
+[95mRandom Background:[0m False
+[95mRandom Light:[0m False
+[95mRandom Table Height:[0m 0
+[95mRandom Head Camera Distance:[0m 0
+[94mHead Camera Config:[0m LargeView, True
+[94mWrist Camera Config:[0m LargeView, True
+[94mEmbodiment Config:[0m aloha-agilex
+
+==================================
+[scene_setup] running task=blocks_ranking_try seed=4300000
+[backend] pid=2061249 fused_graph_v1; native guards retained; launch_blocking unset
+[backend] pid=2061248 fused_graph_v1; native guards retained; launch_blocking unset
+Warp DeprecationWarning: The symbol `warp.torch.device_from_torch` will soon be removed from the public API. Use `warp.device_from_torch` instead.
+[planner_warmup] waiting batch=1
+[planner_warmup] running batch=1 wait_seconds=9.704288095235825e-05
+Warp DeprecationWarning: The symbol `warp.torch.device_from_torch` will soon be removed from the public API. Use `warp.device_from_torch` instead.
+[planner_warmup] waiting batch=1
+[planner_warmup] complete batch=1 seconds=4.992540251463652
+[planner_warmup] running batch=1 wait_seconds=3.715609853155911
+[fused verified] pid=2061249 optimizers=5 captures=10 replays=284
+[planner_warmup] waiting batch=10
+[planner_warmup] complete batch=1 seconds=4.807075689546764
+[planner_warmup] running batch=10 wait_seconds=4.481542113237083
+[fused verified] pid=2061248 optimizers=5 captures=10 replays=284
+[planner_warmup] waiting batch=10
+[planner_warmup] complete batch=10 seconds=4.023299308493733
+[planner_warmup] running batch=10 wait_seconds=3.7891248781234026
+[fused verified] pid=2061249 optimizers=10 captures=20 replays=599
+[planner_warmup] complete batch=10 seconds=4.011901320889592
+[fused verified] pid=2061248 optimizers=10 captures=20 replays=599
+[expert_filter] running task=blocks_ranking_try seed=4300000
+[freeze_instruction] running task=blocks_ranking_try seed=4300000
+[candidate] complete task=blocks_ranking_try seed=4300000 accepted=True seconds=52.82972778659314
+[scene-plan] blocks_ranking_try accepted=1/100 candidate=4300000 feasible=True seconds=52.9
+[scene_setup] running task=blocks_ranking_try seed=4300001
+[expert_filter] running task=blocks_ranking_try seed=4300001
+[freeze_instruction] running task=blocks_ranking_try seed=4300001
+[candidate] complete task=blocks_ranking_try seed=4300001 accepted=True seconds=6.312450231052935
+[scene-plan] blocks_ranking_try accepted=2/100 candidate=4300001 feasible=True seconds=6.3
+[scene_setup] running task=blocks_ranking_try seed=4300002
+[expert_filter] running task=blocks_ranking_try seed=4300002
+[freeze_instruction] running task=blocks_ranking_try seed=4300002
+[candidate] complete task=blocks_ranking_try seed=4300002 accepted=True seconds=30.44969621952623
+[scene-plan] blocks_ranking_try accepted=3/100 candidate=4300002 feasible=True seconds=30.5
+[scene_setup] running task=blocks_ranking_try seed=4300003
+[expert_filter] running task=blocks_ranking_try seed=4300003
+[freeze_instruction] running task=blocks_ranking_try seed=4300003
+[candidate] complete task=blocks_ranking_try seed=4300003 accepted=True seconds=12.040317728184164
+[scene-plan] blocks_ranking_try accepted=4/100 candidate=4300003 feasible=True seconds=12.1
+[scene_setup] running task=blocks_ranking_try seed=4300004
+[expert_filter] running task=blocks_ranking_try seed=4300004
+[freeze_instruction] running task=blocks_ranking_try seed=4300004
+[candidate] complete task=blocks_ranking_try seed=4300004 accepted=True seconds=24.07145546376705
+[scene-plan] blocks_ranking_try accepted=5/100 candidate=4300004 feasible=True seconds=24.1
+[scene_setup] running task=blocks_ranking_try seed=4300005
+[expert_filter] running task=blocks_ranking_try seed=4300005
+[freeze_instruction] running task=blocks_ranking_try seed=4300005
+[candidate] complete task=blocks_ranking_try seed=4300005 accepted=True seconds=24.544106173329055
+[scene-plan] blocks_ranking_try accepted=6/100 candidate=4300005 feasible=True seconds=24.6
+[scene_setup] running task=blocks_ranking_try seed=4300006
+[expert_filter] running task=blocks_ranking_try seed=4300006
+[freeze_instruction] running task=blocks_ranking_try seed=4300006
+[candidate] complete task=blocks_ranking_try seed=4300006 accepted=True seconds=13.597802740521729
+[scene-plan] blocks_ranking_try accepted=7/100 candidate=4300006 feasible=True seconds=14.1
+[scene_setup] running task=blocks_ranking_try seed=4300007
+[expert_filter] running task=blocks_ranking_try seed=4300007
+[freeze_instruction] running task=blocks_ranking_try seed=4300007
+[candidate] complete task=blocks_ranking_try seed=4300007 accepted=True seconds=7.995088508352637
+[scene-plan] blocks_ranking_try accepted=8/100 candidate=4300007 feasible=True seconds=8.0
+[scene_setup] running task=blocks_ranking_try seed=4300008
+[expert_filter] running task=blocks_ranking_try seed=4300008
+[freeze_instruction] running task=blocks_ranking_try seed=4300008
+[candidate] complete task=blocks_ranking_try seed=4300008 accepted=True seconds=14.28976194281131
+[scene-plan] blocks_ranking_try accepted=9/100 candidate=4300008 feasible=True seconds=14.3
+[scene_setup] running task=blocks_ranking_try seed=4300009
+[expert_filter] running task=blocks_ranking_try seed=4300009
+[freeze_instruction] running task=blocks_ranking_try seed=4300009
+[candidate] complete task=blocks_ranking_try seed=4300009 accepted=True seconds=31.13676341343671
+[scene-plan] blocks_ranking_try accepted=10/100 candidate=4300009 feasible=True seconds=31.2
+[scene_setup] running task=blocks_ranking_try seed=4300010
+[expert_filter] running task=blocks_ranking_try seed=4300010
+[freeze_instruction] running task=blocks_ranking_try seed=4300010
+[candidate] complete task=blocks_ranking_try seed=4300010 accepted=True seconds=19.858316211029887
+[scene-plan] blocks_ranking_try accepted=11/100 candidate=4300010 feasible=True seconds=19.9
+[scene_setup] running task=blocks_ranking_try seed=4300011
+[expert_filter] running task=blocks_ranking_try seed=4300011
+[freeze_instruction] running task=blocks_ranking_try seed=4300011
+[candidate] complete task=blocks_ranking_try seed=4300011 accepted=True seconds=31.080723671242595
+[scene-plan] blocks_ranking_try accepted=12/100 candidate=4300011 feasible=True seconds=31.1
+[scene_setup] running task=blocks_ranking_try seed=4300012
+[expert_filter] running task=blocks_ranking_try seed=4300012
+[freeze_instruction] running task=blocks_ranking_try seed=4300012
+[candidate] complete task=blocks_ranking_try seed=4300012 accepted=True seconds=12.8420964544639
+[scene-plan] blocks_ranking_try accepted=13/100 candidate=4300012 feasible=True seconds=12.9
+[scene_setup] running task=blocks_ranking_try seed=4300013
+[expert_filter] running task=blocks_ranking_try seed=4300013
+[freeze_instruction] running task=blocks_ranking_try seed=4300013
+[candidate] complete task=blocks_ranking_try seed=4300013 accepted=True seconds=32.0244662091136
+[scene-plan] blocks_ranking_try accepted=14/100 candidate=4300013 feasible=True seconds=32.1
+[scene_setup] running task=blocks_ranking_try seed=4300014
+[expert_filter] running task=blocks_ranking_try seed=4300014
+[freeze_instruction] running task=blocks_ranking_try seed=4300014
+[candidate] complete task=blocks_ranking_try seed=4300014 accepted=True seconds=5.992628590203822
+[scene-plan] blocks_ranking_try accepted=15/100 candidate=4300014 feasible=True seconds=6.0
+[scene_setup] running task=blocks_ranking_try seed=4300015
+[expert_filter] running task=blocks_ranking_try seed=4300015
+[freeze_instruction] running task=blocks_ranking_try seed=4300015
+[candidate] complete task=blocks_ranking_try seed=4300015 accepted=True seconds=28.99233577121049
+[scene-plan] blocks_ranking_try accepted=16/100 candidate=4300015 feasible=True seconds=29.0
+[scene_setup] running task=blocks_ranking_try seed=4300016
+[expert_filter] running task=blocks_ranking_try seed=4300016
+[freeze_instruction] running task=blocks_ranking_try seed=4300016
+[candidate] complete task=blocks_ranking_try seed=4300016 accepted=True seconds=15.025970908813179
+[scene-plan] blocks_ranking_try accepted=17/100 candidate=4300016 feasible=True seconds=15.6
+[scene_setup] running task=blocks_ranking_try seed=4300017
+[expert_filter] running task=blocks_ranking_try seed=4300017
+[freeze_instruction] running task=blocks_ranking_try seed=4300017
+[candidate] complete task=blocks_ranking_try seed=4300017 accepted=True seconds=14.010928863659501
+[scene-plan] blocks_ranking_try accepted=18/100 candidate=4300017 feasible=True seconds=14.7
+[scene_setup] running task=blocks_ranking_try seed=4300018
+[expert_filter] running task=blocks_ranking_try seed=4300018
+[freeze_instruction] running task=blocks_ranking_try seed=4300018
+[candidate] complete task=blocks_ranking_try seed=4300018 accepted=True seconds=26.26388785522431
+[scene-plan] blocks_ranking_try accepted=19/100 candidate=4300018 feasible=True seconds=26.3
+[scene_setup] running task=blocks_ranking_try seed=4300019
+[expert_filter] running task=blocks_ranking_try seed=4300019
+[freeze_instruction] running task=blocks_ranking_try seed=4300019
+[candidate] complete task=blocks_ranking_try seed=4300019 accepted=True seconds=26.740827469155192
+[scene-plan] blocks_ranking_try accepted=20/100 candidate=4300019 feasible=True seconds=26.8
+[scene_setup] running task=blocks_ranking_try seed=4300020
+[expert_filter] running task=blocks_ranking_try seed=4300020
+[freeze_instruction] running task=blocks_ranking_try seed=4300020
+[candidate] complete task=blocks_ranking_try seed=4300020 accepted=True seconds=29.992960778065026
+[scene-plan] blocks_ranking_try accepted=21/100 candidate=4300020 feasible=True seconds=30.0
+[scene_setup] running task=blocks_ranking_try seed=4300021
+[expert_filter] running task=blocks_ranking_try seed=4300021
+[freeze_instruction] running task=blocks_ranking_try seed=4300021
+[candidate] complete task=blocks_ranking_try seed=4300021 accepted=True seconds=25.92374073714018
+[scene-plan] blocks_ranking_try accepted=22/100 candidate=4300021 feasible=True seconds=26.0
+[scene_setup] running task=blocks_ranking_try seed=4300022
+[expert_filter] running task=blocks_ranking_try seed=4300022
+[freeze_instruction] running task=blocks_ranking_try seed=4300022
+[candidate] complete task=blocks_ranking_try seed=4300022 accepted=True seconds=28.952856371179223
+[scene-plan] blocks_ranking_try accepted=23/100 candidate=4300022 feasible=True seconds=29.0
+[scene_setup] running task=blocks_ranking_try seed=4300023
+[expert_filter] running task=blocks_ranking_try seed=4300023
+[freeze_instruction] running task=blocks_ranking_try seed=4300023
+[candidate] complete task=blocks_ranking_try seed=4300023 accepted=True seconds=17.458511654287577
+[scene-plan] blocks_ranking_try accepted=24/100 candidate=4300023 feasible=True seconds=17.5
+[scene_setup] running task=blocks_ranking_try seed=4300024
+[expert_filter] running task=blocks_ranking_try seed=4300024
+[freeze_instruction] running task=blocks_ranking_try seed=4300024
+[candidate] complete task=blocks_ranking_try seed=4300024 accepted=True seconds=11.935530200600624
+[scene-plan] blocks_ranking_try accepted=25/100 candidate=4300024 feasible=True seconds=12.0
+[scene_setup] running task=blocks_ranking_try seed=4300025
+[expert_filter] running task=blocks_ranking_try seed=4300025
+[freeze_instruction] running task=blocks_ranking_try seed=4300025
+[candidate] complete task=blocks_ranking_try seed=4300025 accepted=True seconds=19.42449968587607
+[scene-plan] blocks_ranking_try accepted=26/100 candidate=4300025 feasible=True seconds=19.9
+[scene_setup] running task=blocks_ranking_try seed=4300026
+[expert_filter] running task=blocks_ranking_try seed=4300026
+[freeze_instruction] running task=blocks_ranking_try seed=4300026
+[candidate] complete task=blocks_ranking_try seed=4300026 accepted=True seconds=15.32624354865402
+[scene-plan] blocks_ranking_try accepted=27/100 candidate=4300026 feasible=True seconds=15.4
+[scene_setup] running task=blocks_ranking_try seed=4300027
+[expert_filter] running task=blocks_ranking_try seed=4300027
+[freeze_instruction] running task=blocks_ranking_try seed=4300027
+[candidate] complete task=blocks_ranking_try seed=4300027 accepted=True seconds=6.430586373433471
+[scene-plan] blocks_ranking_try accepted=28/100 candidate=4300027 feasible=True seconds=6.5
+[scene_setup] running task=blocks_ranking_try seed=4300028
+[expert_filter] running task=blocks_ranking_try seed=4300028
+[freeze_instruction] running task=blocks_ranking_try seed=4300028
+[candidate] complete task=blocks_ranking_try seed=4300028 accepted=True seconds=13.980411105789244
+[scene-plan] blocks_ranking_try accepted=29/100 candidate=4300028 feasible=True seconds=14.0
+[scene_setup] running task=blocks_ranking_try seed=4300029
+[expert_filter] running task=blocks_ranking_try seed=4300029
+[freeze_instruction] running task=blocks_ranking_try seed=4300029
+[candidate] complete task=blocks_ranking_try seed=4300029 accepted=True seconds=22.684046351350844
+[scene-plan] blocks_ranking_try accepted=30/100 candidate=4300029 feasible=True seconds=22.7
+[scene_setup] running task=blocks_ranking_try seed=4300030
+[expert_filter] running task=blocks_ranking_try seed=4300030
+[freeze_instruction] running task=blocks_ranking_try seed=4300030
+[candidate] complete task=blocks_ranking_try seed=4300030 accepted=True seconds=6.011170708574355
+[scene-plan] blocks_ranking_try accepted=31/100 candidate=4300030 feasible=True seconds=6.1
+[scene_setup] running task=blocks_ranking_try seed=4300031
+[expert_filter] running task=blocks_ranking_try seed=4300031
+[freeze_instruction] running task=blocks_ranking_try seed=4300031
+[candidate] complete task=blocks_ranking_try seed=4300031 accepted=True seconds=6.1057551028206944
+[scene-plan] blocks_ranking_try accepted=32/100 candidate=4300031 feasible=True seconds=6.1
+[scene_setup] running task=blocks_ranking_try seed=4300032
+[expert_filter] running task=blocks_ranking_try seed=4300032
+[freeze_instruction] running task=blocks_ranking_try seed=4300032
+[candidate] complete task=blocks_ranking_try seed=4300032 accepted=True seconds=5.663909105584025
+[scene-plan] blocks_ranking_try accepted=33/100 candidate=4300032 feasible=True seconds=5.7
+[scene_setup] running task=blocks_ranking_try seed=4300033
+[expert_filter] running task=blocks_ranking_try seed=4300033
+[freeze_instruction] running task=blocks_ranking_try seed=4300033
+[candidate] complete task=blocks_ranking_try seed=4300033 accepted=True seconds=6.181996636092663
+[scene-plan] blocks_ranking_try accepted=34/100 candidate=4300033 feasible=True seconds=6.2
+[scene_setup] running task=blocks_ranking_try seed=4300034
+[expert_filter] running task=blocks_ranking_try seed=4300034
+[freeze_instruction] running task=blocks_ranking_try seed=4300034
+[candidate] complete task=blocks_ranking_try seed=4300034 accepted=True seconds=6.166560107842088
+[scene-plan] blocks_ranking_try accepted=35/100 candidate=4300034 feasible=True seconds=6.2
+[scene_setup] running task=blocks_ranking_try seed=4300035
+[expert_filter] running task=blocks_ranking_try seed=4300035
+[freeze_instruction] running task=blocks_ranking_try seed=4300035
+[candidate] complete task=blocks_ranking_try seed=4300035 accepted=True seconds=34.790214663371444
+[scene-plan] blocks_ranking_try accepted=36/100 candidate=4300035 feasible=True seconds=34.8
+[scene_setup] running task=blocks_ranking_try seed=4300036
+[expert_filter] running task=blocks_ranking_try seed=4300036
+[freeze_instruction] running task=blocks_ranking_try seed=4300036
+[candidate] complete task=blocks_ranking_try seed=4300036 accepted=True seconds=5.898305669426918
+[scene-plan] blocks_ranking_try accepted=37/100 candidate=4300036 feasible=True seconds=5.9
+[scene_setup] running task=blocks_ranking_try seed=4300037
+[expert_filter] running task=blocks_ranking_try seed=4300037
+[freeze_instruction] running task=blocks_ranking_try seed=4300037
+[candidate] complete task=blocks_ranking_try seed=4300037 accepted=True seconds=27.403195676393807
+[scene-plan] blocks_ranking_try accepted=38/100 candidate=4300037 feasible=True seconds=27.4
+[scene_setup] running task=blocks_ranking_try seed=4300038
+[expert_filter] running task=blocks_ranking_try seed=4300038
+[freeze_instruction] running task=blocks_ranking_try seed=4300038
+[candidate] complete task=blocks_ranking_try seed=4300038 accepted=True seconds=6.504907933995128
+[scene-plan] blocks_ranking_try accepted=39/100 candidate=4300038 feasible=True seconds=6.6
+[scene_setup] running task=blocks_ranking_try seed=4300039
+[expert_filter] running task=blocks_ranking_try seed=4300039
+[freeze_instruction] running task=blocks_ranking_try seed=4300039
+[candidate] complete task=blocks_ranking_try seed=4300039 accepted=True seconds=25.35323435626924
+[scene-plan] blocks_ranking_try accepted=40/100 candidate=4300039 feasible=True seconds=25.4
+[scene_setup] running task=blocks_ranking_try seed=4300040
+[expert_filter] running task=blocks_ranking_try seed=4300040
+[freeze_instruction] running task=blocks_ranking_try seed=4300040
+[candidate] complete task=blocks_ranking_try seed=4300040 accepted=True seconds=30.38305526599288
+[scene-plan] blocks_ranking_try accepted=41/100 candidate=4300040 feasible=True seconds=30.4
+[scene_setup] running task=blocks_ranking_try seed=4300041
+[expert_filter] running task=blocks_ranking_try seed=4300041
+[freeze_instruction] running task=blocks_ranking_try seed=4300041
+[candidate] complete task=blocks_ranking_try seed=4300041 accepted=True seconds=30.43384868092835
+[scene-plan] blocks_ranking_try accepted=42/100 candidate=4300041 feasible=True seconds=30.5
+[scene_setup] running task=blocks_ranking_try seed=4300042
+[expert_filter] running task=blocks_ranking_try seed=4300042
+[freeze_instruction] running task=blocks_ranking_try seed=4300042
+[candidate] complete task=blocks_ranking_try seed=4300042 accepted=True seconds=13.067911595106125
+[scene-plan] blocks_ranking_try accepted=43/100 candidate=4300042 feasible=True seconds=13.1
+[scene_setup] running task=blocks_ranking_try seed=4300043
+[expert_filter] running task=blocks_ranking_try seed=4300043
+[freeze_instruction] running task=blocks_ranking_try seed=4300043
+[candidate] complete task=blocks_ranking_try seed=4300043 accepted=True seconds=24.202723535709083
+[scene-plan] blocks_ranking_try accepted=44/100 candidate=4300043 feasible=True seconds=24.7
+[scene_setup] running task=blocks_ranking_try seed=4300044
+[expert_filter] running task=blocks_ranking_try seed=4300044
+[freeze_instruction] running task=blocks_ranking_try seed=4300044
+[candidate] complete task=blocks_ranking_try seed=4300044 accepted=True seconds=33.49024878162891
+[scene-plan] blocks_ranking_try accepted=45/100 candidate=4300044 feasible=True seconds=34.6
+[scene_setup] running task=blocks_ranking_try seed=4300045
+[expert_filter] running task=blocks_ranking_try seed=4300045
+[freeze_instruction] running task=blocks_ranking_try seed=4300045
+[candidate] complete task=blocks_ranking_try seed=4300045 accepted=True seconds=14.054253379814327
+[scene-plan] blocks_ranking_try accepted=46/100 candidate=4300045 feasible=True seconds=14.1
+[scene_setup] running task=blocks_ranking_try seed=4300046
+[expert_filter] running task=blocks_ranking_try seed=4300046
+[freeze_instruction] running task=blocks_ranking_try seed=4300046
+[candidate] complete task=blocks_ranking_try seed=4300046 accepted=True seconds=6.962060443125665
+[scene-plan] blocks_ranking_try accepted=47/100 candidate=4300046 feasible=True seconds=7.0
+[scene_setup] running task=blocks_ranking_try seed=4300047
+[expert_filter] running task=blocks_ranking_try seed=4300047
+[freeze_instruction] running task=blocks_ranking_try seed=4300047
+[candidate] complete task=blocks_ranking_try seed=4300047 accepted=True seconds=20.237863737158477
+[scene-plan] blocks_ranking_try accepted=48/100 candidate=4300047 feasible=True seconds=20.3
+[scene_setup] running task=blocks_ranking_try seed=4300048
+[expert_filter] running task=blocks_ranking_try seed=4300048
+[freeze_instruction] running task=blocks_ranking_try seed=4300048
+[candidate] complete task=blocks_ranking_try seed=4300048 accepted=True seconds=13.234724248759449
+[scene-plan] blocks_ranking_try accepted=49/100 candidate=4300048 feasible=True seconds=13.3
+[scene_setup] running task=blocks_ranking_try seed=4300049
+[expert_filter] running task=blocks_ranking_try seed=4300049
+[freeze_instruction] running task=blocks_ranking_try seed=4300049
+[candidate] complete task=blocks_ranking_try seed=4300049 accepted=True seconds=12.679077723994851
+[scene-plan] blocks_ranking_try accepted=50/100 candidate=4300049 feasible=True seconds=12.7
+[scene_setup] running task=blocks_ranking_try seed=4300050
+[expert_filter] running task=blocks_ranking_try seed=4300050
+[freeze_instruction] running task=blocks_ranking_try seed=4300050
+[candidate] complete task=blocks_ranking_try seed=4300050 accepted=True seconds=21.677909448742867
+[scene-plan] blocks_ranking_try accepted=51/100 candidate=4300050 feasible=True seconds=21.7
+[scene_setup] running task=blocks_ranking_try seed=4300051
+[expert_filter] running task=blocks_ranking_try seed=4300051
+[freeze_instruction] running task=blocks_ranking_try seed=4300051
+[candidate] complete task=blocks_ranking_try seed=4300051 accepted=True seconds=22.42999501619488
+[scene-plan] blocks_ranking_try accepted=52/100 candidate=4300051 feasible=True seconds=22.5
+[scene_setup] running task=blocks_ranking_try seed=4300052
+[expert_filter] running task=blocks_ranking_try seed=4300052
+[freeze_instruction] running task=blocks_ranking_try seed=4300052
+[candidate] complete task=blocks_ranking_try seed=4300052 accepted=True seconds=22.338757204823196
+[scene-plan] blocks_ranking_try accepted=53/100 candidate=4300052 feasible=True seconds=22.4
+[scene_setup] running task=blocks_ranking_try seed=4300053
+[expert_filter] running task=blocks_ranking_try seed=4300053
+[freeze_instruction] running task=blocks_ranking_try seed=4300053
+[candidate] complete task=blocks_ranking_try seed=4300053 accepted=True seconds=19.134898162446916
+[scene-plan] blocks_ranking_try accepted=54/100 candidate=4300053 feasible=True seconds=19.2
+[scene_setup] running task=blocks_ranking_try seed=4300054
+[expert_filter] running task=blocks_ranking_try seed=4300054
+[freeze_instruction] running task=blocks_ranking_try seed=4300054
+[candidate] complete task=blocks_ranking_try seed=4300054 accepted=True seconds=7.575933297164738
+[scene-plan] blocks_ranking_try accepted=55/100 candidate=4300054 feasible=True seconds=7.6
+[scene_setup] running task=blocks_ranking_try seed=4300055
+[expert_filter] running task=blocks_ranking_try seed=4300055
+[freeze_instruction] running task=blocks_ranking_try seed=4300055
+[candidate] complete task=blocks_ranking_try seed=4300055 accepted=True seconds=28.035695355385542
+[scene-plan] blocks_ranking_try accepted=56/100 candidate=4300055 feasible=True seconds=28.1
+[scene_setup] running task=blocks_ranking_try seed=4300056
+[expert_filter] running task=blocks_ranking_try seed=4300056
+[freeze_instruction] running task=blocks_ranking_try seed=4300056
+[candidate] complete task=blocks_ranking_try seed=4300056 accepted=True seconds=6.007312982343137
+[scene-plan] blocks_ranking_try accepted=57/100 candidate=4300056 feasible=True seconds=6.0
+[scene_setup] running task=blocks_ranking_try seed=4300057
+[expert_filter] running task=blocks_ranking_try seed=4300057
+[freeze_instruction] running task=blocks_ranking_try seed=4300057
+[candidate] complete task=blocks_ranking_try seed=4300057 accepted=True seconds=23.94187048263848
+[scene-plan] blocks_ranking_try accepted=58/100 candidate=4300057 feasible=True seconds=24.0
+[scene_setup] running task=blocks_ranking_try seed=4300058
+[expert_filter] running task=blocks_ranking_try seed=4300058
+[freeze_instruction] running task=blocks_ranking_try seed=4300058
+[candidate] complete task=blocks_ranking_try seed=4300058 accepted=True seconds=13.357533706352115
+[scene-plan] blocks_ranking_try accepted=59/100 candidate=4300058 feasible=True seconds=13.4
+[scene_setup] running task=blocks_ranking_try seed=4300059
+[expert_filter] running task=blocks_ranking_try seed=4300059
+[freeze_instruction] running task=blocks_ranking_try seed=4300059
+[candidate] complete task=blocks_ranking_try seed=4300059 accepted=True seconds=14.066822687163949
+[scene-plan] blocks_ranking_try accepted=60/100 candidate=4300059 feasible=True seconds=14.1
+[scene_setup] running task=blocks_ranking_try seed=4300060
+[expert_filter] running task=blocks_ranking_try seed=4300060
+[freeze_instruction] running task=blocks_ranking_try seed=4300060
+[candidate] complete task=blocks_ranking_try seed=4300060 accepted=True seconds=13.868518373928964
+[scene-plan] blocks_ranking_try accepted=61/100 candidate=4300060 feasible=True seconds=13.9
+[scene_setup] running task=blocks_ranking_try seed=4300061
+[expert_filter] running task=blocks_ranking_try seed=4300061
+[freeze_instruction] running task=blocks_ranking_try seed=4300061
+[candidate] complete task=blocks_ranking_try seed=4300061 accepted=True seconds=7.1370332865044475
+[scene-plan] blocks_ranking_try accepted=62/100 candidate=4300061 feasible=True seconds=7.2
+[scene_setup] running task=blocks_ranking_try seed=4300062
+[expert_filter] running task=blocks_ranking_try seed=4300062
+[freeze_instruction] running task=blocks_ranking_try seed=4300062
+[candidate] complete task=blocks_ranking_try seed=4300062 accepted=True seconds=6.00473992805928
+[scene-plan] blocks_ranking_try accepted=63/100 candidate=4300062 feasible=True seconds=6.0
+[scene_setup] running task=blocks_ranking_try seed=4300063
+[expert_filter] running task=blocks_ranking_try seed=4300063
+[freeze_instruction] running task=blocks_ranking_try seed=4300063
+[candidate] complete task=blocks_ranking_try seed=4300063 accepted=True seconds=27.57938977703452
+[scene-plan] blocks_ranking_try accepted=64/100 candidate=4300063 feasible=True seconds=27.6
+[scene_setup] running task=blocks_ranking_try seed=4300064
+[expert_filter] running task=blocks_ranking_try seed=4300064
+[freeze_instruction] running task=blocks_ranking_try seed=4300064
+[candidate] complete task=blocks_ranking_try seed=4300064 accepted=True seconds=31.479181052185595
+[scene-plan] blocks_ranking_try accepted=65/100 candidate=4300064 feasible=True seconds=31.5
+[scene_setup] running task=blocks_ranking_try seed=4300065
+[expert_filter] running task=blocks_ranking_try seed=4300065
+[freeze_instruction] running task=blocks_ranking_try seed=4300065
+[candidate] complete task=blocks_ranking_try seed=4300065 accepted=True seconds=14.403083363547921
+[scene-plan] blocks_ranking_try accepted=66/100 candidate=4300065 feasible=True seconds=14.8
+[scene_setup] running task=blocks_ranking_try seed=4300066
+[expert_filter] running task=blocks_ranking_try seed=4300066
+[freeze_instruction] running task=blocks_ranking_try seed=4300066
+[candidate] complete task=blocks_ranking_try seed=4300066 accepted=True seconds=30.818542825989425
+[scene-plan] blocks_ranking_try accepted=67/100 candidate=4300066 feasible=True seconds=30.9
+[scene_setup] running task=blocks_ranking_try seed=4300067
+[expert_filter] running task=blocks_ranking_try seed=4300067
+[freeze_instruction] running task=blocks_ranking_try seed=4300067
+[candidate] complete task=blocks_ranking_try seed=4300067 accepted=True seconds=32.780667898245156
+[scene-plan] blocks_ranking_try accepted=68/100 candidate=4300067 feasible=True seconds=32.8
+[scene_setup] running task=blocks_ranking_try seed=4300068
+[expert_filter] running task=blocks_ranking_try seed=4300068
+[freeze_instruction] running task=blocks_ranking_try seed=4300068
+[candidate] complete task=blocks_ranking_try seed=4300068 accepted=True seconds=5.923000239767134
+[scene-plan] blocks_ranking_try accepted=69/100 candidate=4300068 feasible=True seconds=6.0
+[scene_setup] running task=blocks_ranking_try seed=4300069
+[expert_filter] running task=blocks_ranking_try seed=4300069
+[freeze_instruction] running task=blocks_ranking_try seed=4300069
+[candidate] complete task=blocks_ranking_try seed=4300069 accepted=True seconds=31.671121384948492
+[scene-plan] blocks_ranking_try accepted=70/100 candidate=4300069 feasible=True seconds=31.7
+[scene_setup] running task=blocks_ranking_try seed=4300070
+[expert_filter] running task=blocks_ranking_try seed=4300070
+[freeze_instruction] running task=blocks_ranking_try seed=4300070
+[candidate] complete task=blocks_ranking_try seed=4300070 accepted=True seconds=30.2460813857615
+[scene-plan] blocks_ranking_try accepted=71/100 candidate=4300070 feasible=True seconds=30.3
+[scene_setup] running task=blocks_ranking_try seed=4300071
+[expert_filter] running task=blocks_ranking_try seed=4300071
+[freeze_instruction] running task=blocks_ranking_try seed=4300071
+[candidate] complete task=blocks_ranking_try seed=4300071 accepted=True seconds=27.960190433077514
+[scene-plan] blocks_ranking_try accepted=72/100 candidate=4300071 feasible=True seconds=28.0
+[scene_setup] running task=blocks_ranking_try seed=4300072
+[expert_filter] running task=blocks_ranking_try seed=4300072
+[freeze_instruction] running task=blocks_ranking_try seed=4300072
+[candidate] complete task=blocks_ranking_try seed=4300072 accepted=True seconds=13.773483979515731
+[scene-plan] blocks_ranking_try accepted=73/100 candidate=4300072 feasible=True seconds=13.8
+[scene_setup] running task=blocks_ranking_try seed=4300073
+[expert_filter] running task=blocks_ranking_try seed=4300073
+[freeze_instruction] running task=blocks_ranking_try seed=4300073
+[candidate] complete task=blocks_ranking_try seed=4300073 accepted=True seconds=13.02398366946727
+[scene-plan] blocks_ranking_try accepted=74/100 candidate=4300073 feasible=True seconds=13.4
+[scene_setup] running task=blocks_ranking_try seed=4300074
+[expert_filter] running task=blocks_ranking_try seed=4300074
+[freeze_instruction] running task=blocks_ranking_try seed=4300074
+[candidate] complete task=blocks_ranking_try seed=4300074 accepted=True seconds=25.144960328005254
+[scene-plan] blocks_ranking_try accepted=75/100 candidate=4300074 feasible=True seconds=25.2
+[scene_setup] running task=blocks_ranking_try seed=4300075
+[expert_filter] running task=blocks_ranking_try seed=4300075
+[freeze_instruction] running task=blocks_ranking_try seed=4300075
+[candidate] complete task=blocks_ranking_try seed=4300075 accepted=True seconds=21.2926032776013
+[scene-plan] blocks_ranking_try accepted=76/100 candidate=4300075 feasible=True seconds=21.3
+[scene_setup] running task=blocks_ranking_try seed=4300076
+[expert_filter] running task=blocks_ranking_try seed=4300076
+[freeze_instruction] running task=blocks_ranking_try seed=4300076
+[candidate] complete task=blocks_ranking_try seed=4300076 accepted=True seconds=14.870515640825033
+[scene-plan] blocks_ranking_try accepted=77/100 candidate=4300076 feasible=True seconds=14.9
+[scene_setup] running task=blocks_ranking_try seed=4300077
+[expert_filter] running task=blocks_ranking_try seed=4300077
+[freeze_instruction] running task=blocks_ranking_try seed=4300077
+[candidate] complete task=blocks_ranking_try seed=4300077 accepted=True seconds=32.0949625922367
+[scene-plan] blocks_ranking_try accepted=78/100 candidate=4300077 feasible=True seconds=32.1
+[scene_setup] running task=blocks_ranking_try seed=4300078
+[expert_filter] running task=blocks_ranking_try seed=4300078
+[freeze_instruction] running task=blocks_ranking_try seed=4300078
+[candidate] complete task=blocks_ranking_try seed=4300078 accepted=True seconds=28.940753357484937
+[scene-plan] blocks_ranking_try accepted=79/100 candidate=4300078 feasible=True seconds=29.0
+[scene_setup] running task=blocks_ranking_try seed=4300079
+[expert_filter] running task=blocks_ranking_try seed=4300079
+[freeze_instruction] running task=blocks_ranking_try seed=4300079
+[candidate] complete task=blocks_ranking_try seed=4300079 accepted=True seconds=22.14813344925642
+[scene-plan] blocks_ranking_try accepted=80/100 candidate=4300079 feasible=True seconds=22.2
+[scene_setup] running task=blocks_ranking_try seed=4300080
+[expert_filter] running task=blocks_ranking_try seed=4300080
+[freeze_instruction] running task=blocks_ranking_try seed=4300080
+[candidate] complete task=blocks_ranking_try seed=4300080 accepted=True seconds=14.45991977956146
+[scene-plan] blocks_ranking_try accepted=81/100 candidate=4300080 feasible=True seconds=14.5
+[scene_setup] running task=blocks_ranking_try seed=4300081
+[expert_filter] running task=blocks_ranking_try seed=4300081
+[freeze_instruction] running task=blocks_ranking_try seed=4300081
+[candidate] complete task=blocks_ranking_try seed=4300081 accepted=True seconds=12.996057571843266
+[scene-plan] blocks_ranking_try accepted=82/100 candidate=4300081 feasible=True seconds=13.0
+[scene_setup] running task=blocks_ranking_try seed=4300082
+[expert_filter] running task=blocks_ranking_try seed=4300082
+[freeze_instruction] running task=blocks_ranking_try seed=4300082
+[candidate] complete task=blocks_ranking_try seed=4300082 accepted=True seconds=24.83103073388338
+[scene-plan] blocks_ranking_try accepted=83/100 candidate=4300082 feasible=True seconds=24.9
+[scene_setup] running task=blocks_ranking_try seed=4300083
+[expert_filter] running task=blocks_ranking_try seed=4300083
+[freeze_instruction] running task=blocks_ranking_try seed=4300083
+[candidate] complete task=blocks_ranking_try seed=4300083 accepted=True seconds=22.871070261113346
+[scene-plan] blocks_ranking_try accepted=84/100 candidate=4300083 feasible=True seconds=22.9
+[scene_setup] running task=blocks_ranking_try seed=4300084
+[expert_filter] running task=blocks_ranking_try seed=4300084
+[freeze_instruction] running task=blocks_ranking_try seed=4300084
+[candidate] complete task=blocks_ranking_try seed=4300084 accepted=True seconds=12.186126911081374
+[scene-plan] blocks_ranking_try accepted=85/100 candidate=4300084 feasible=True seconds=12.2
+[scene_setup] running task=blocks_ranking_try seed=4300085
+[expert_filter] running task=blocks_ranking_try seed=4300085
+[freeze_instruction] running task=blocks_ranking_try seed=4300085
+[candidate] complete task=blocks_ranking_try seed=4300085 accepted=True seconds=20.736253549344838
+[scene-plan] blocks_ranking_try accepted=86/100 candidate=4300085 feasible=True seconds=21.6
+[scene_setup] running task=blocks_ranking_try seed=4300086
+[expert_filter] running task=blocks_ranking_try seed=4300086
+[freeze_instruction] running task=blocks_ranking_try seed=4300086
+[candidate] complete task=blocks_ranking_try seed=4300086 accepted=True seconds=8.716695449315012
+[scene-plan] blocks_ranking_try accepted=87/100 candidate=4300086 feasible=True seconds=9.1
+[scene_setup] running task=blocks_ranking_try seed=4300087
+[expert_filter] running task=blocks_ranking_try seed=4300087
+[freeze_instruction] running task=blocks_ranking_try seed=4300087
+[candidate] complete task=blocks_ranking_try seed=4300087 accepted=True seconds=28.600279983133078
+[scene-plan] blocks_ranking_try accepted=88/100 candidate=4300087 feasible=True seconds=28.6
+[scene_setup] running task=blocks_ranking_try seed=4300088
+[expert_filter] running task=blocks_ranking_try seed=4300088
+[freeze_instruction] running task=blocks_ranking_try seed=4300088
+[candidate] complete task=blocks_ranking_try seed=4300088 accepted=True seconds=25.049426725134254
+[scene-plan] blocks_ranking_try accepted=89/100 candidate=4300088 feasible=True seconds=25.1
+[scene_setup] running task=blocks_ranking_try seed=4300089
+[expert_filter] running task=blocks_ranking_try seed=4300089
+[freeze_instruction] running task=blocks_ranking_try seed=4300089
+[candidate] complete task=blocks_ranking_try seed=4300089 accepted=True seconds=22.744238103739917
+[scene-plan] blocks_ranking_try accepted=90/100 candidate=4300089 feasible=True seconds=23.7
+[scene_setup] running task=blocks_ranking_try seed=4300090
+[expert_filter] running task=blocks_ranking_try seed=4300090
+[freeze_instruction] running task=blocks_ranking_try seed=4300090
+[candidate] complete task=blocks_ranking_try seed=4300090 accepted=True seconds=23.95270811393857
+[scene-plan] blocks_ranking_try accepted=91/100 candidate=4300090 feasible=True seconds=24.0
+[scene_setup] running task=blocks_ranking_try seed=4300091
+[expert_filter] running task=blocks_ranking_try seed=4300091
+[freeze_instruction] running task=blocks_ranking_try seed=4300091
+[candidate] complete task=blocks_ranking_try seed=4300091 accepted=True seconds=18.94680566713214
+[scene-plan] blocks_ranking_try accepted=92/100 candidate=4300091 feasible=True seconds=19.0
+[scene_setup] running task=blocks_ranking_try seed=4300092
+[expert_filter] running task=blocks_ranking_try seed=4300092
+[freeze_instruction] running task=blocks_ranking_try seed=4300092
+[candidate] complete task=blocks_ranking_try seed=4300092 accepted=True seconds=18.10075305122882
+[scene-plan] blocks_ranking_try accepted=93/100 candidate=4300092 feasible=True seconds=18.1
+[scene_setup] running task=blocks_ranking_try seed=4300093
+[expert_filter] running task=blocks_ranking_try seed=4300093
+[candidate] complete task=blocks_ranking_try seed=4300093 accepted=False seconds=14.34152077510953
+[scene-plan] blocks_ranking_try accepted=93/100 candidate=4300093 feasible=False seconds=14.4
+[scene_setup] running task=blocks_ranking_try seed=4300094
+[expert_filter] running task=blocks_ranking_try seed=4300094
+[freeze_instruction] running task=blocks_ranking_try seed=4300094
+[candidate] complete task=blocks_ranking_try seed=4300094 accepted=True seconds=23.453193618915975
+[scene-plan] blocks_ranking_try accepted=94/100 candidate=4300094 feasible=True seconds=23.5
+[scene_setup] running task=blocks_ranking_try seed=4300095
+[expert_filter] running task=blocks_ranking_try seed=4300095
+[freeze_instruction] running task=blocks_ranking_try seed=4300095
+[candidate] complete task=blocks_ranking_try seed=4300095 accepted=True seconds=15.659745355136693
+[scene-plan] blocks_ranking_try accepted=95/100 candidate=4300095 feasible=True seconds=15.7
+[scene_setup] running task=blocks_ranking_try seed=4300096
+[expert_filter] running task=blocks_ranking_try seed=4300096
+[freeze_instruction] running task=blocks_ranking_try seed=4300096
+[candidate] complete task=blocks_ranking_try seed=4300096 accepted=True seconds=19.330225557088852
+[scene-plan] blocks_ranking_try accepted=96/100 candidate=4300096 feasible=True seconds=19.4
+[scene_setup] running task=blocks_ranking_try seed=4300097
+[expert_filter] running task=blocks_ranking_try seed=4300097
+[freeze_instruction] running task=blocks_ranking_try seed=4300097
+[candidate] complete task=blocks_ranking_try seed=4300097 accepted=True seconds=12.661958925426006
+[scene-plan] blocks_ranking_try accepted=97/100 candidate=4300097 feasible=True seconds=12.7
+[scene_setup] running task=blocks_ranking_try seed=4300098
+[expert_filter] running task=blocks_ranking_try seed=4300098
+[freeze_instruction] running task=blocks_ranking_try seed=4300098
+[candidate] complete task=blocks_ranking_try seed=4300098 accepted=True seconds=8.569152045994997
+[scene-plan] blocks_ranking_try accepted=98/100 candidate=4300098 feasible=True seconds=8.6
+[scene_setup] running task=blocks_ranking_try seed=4300099
+[expert_filter] running task=blocks_ranking_try seed=4300099
+[freeze_instruction] running task=blocks_ranking_try seed=4300099
+[candidate] complete task=blocks_ranking_try seed=4300099 accepted=True seconds=30.32295344118029
+[scene-plan] blocks_ranking_try accepted=99/100 candidate=4300099 feasible=True seconds=30.4
+[scene_setup] running task=blocks_ranking_try seed=4300100
+[expert_filter] running task=blocks_ranking_try seed=4300100
+[freeze_instruction] running task=blocks_ranking_try seed=4300100
+[candidate] complete task=blocks_ranking_try seed=4300100 accepted=True seconds=12.694535193033516
+[scene-plan] blocks_ranking_try accepted=100/100 candidate=4300100 feasible=True seconds=12.7
+Data has been saved to eval_result/blocks_ranking_try/deploy_policy/demo_clean/memory_s1_scene_plan/2026-11-21 16:22:53/_result.txt
+[plan] 2026-11-21 16:55:38 blocks_ranking_try: complete=True scenes=100
+blocks_ranking_try: /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/scenes_seed42_n100_blocks_ranking_try/blocks_ranking_try.json complete (100 scenes, next seed 4300101)
+blocks_ranking_try: /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/scenes_seed42_n100_blocks_ranking_try/blocks_ranking_try.json complete (100 scenes, next seed 4300101)

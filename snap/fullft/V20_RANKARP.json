@@ -1,0 +1,23 @@
+{
+ "run": "main-table cell ranking body record (described)",
+ "finished": {
+  "ranking_arprop_e30": 100,
+  "ranking_ar_e30": 100
+ },
+ "success_1_100": 65,
+ "against_ranking_ar": {
+  "scenes": 100,
+  "new": 65,
+  "ref": 77,
+  "D": -0.12,
+  "ci95": [
+   -0.26,
+   0.02
+  ],
+  "only_new": 19,
+  "only_ref": 31,
+  "sign_p": 0.1189
+ },
+ "plan_v20_6_back_to_fable": "body record 65 below three-frame 77 (plan v20 section 6)",
+ "verdict": "DESCRIBED"
+}

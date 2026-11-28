@@ -1,0 +1,12143 @@
+{
+ "e6:ranking_arprop_e30": {
+  "counts": {
+   "success": 65,
+   "repeated an order already pressed (counting error)": 35
+  },
+  "episodes": {
+   "4300000": {
+    "presses": 5,
+    "distinct_orders_pressed": 2,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1855,
+    "cls": "success"
+   },
+   "4300001": {
+    "presses": 9,
+    "distinct_orders_pressed": 5,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     1,
+     2,
+     0
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300002": {
+    "presses": 5,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2305,
+    "cls": "success"
+   },
+   "4300003": {
+    "presses": 6,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1110,
+    "cls": "success"
+   },
+   "4300004": {
+    "presses": 5,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1823,
+    "cls": "success"
+   },
+   "4300005": {
+    "presses": 6,
+    "distinct_orders_pressed": 5,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1885,
+    "cls": "success"
+   },
+   "4300006": {
+    "presses": 7,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300007": {
+    "presses": 8,
+    "distinct_orders_pressed": 4,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     1,
+     2,
+     0
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300008": {
+    "presses": 3,
+    "distinct_orders_pressed": 2,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 999,
+    "cls": "success"
+   },
+   "4300009": {
+    "presses": 6,
+    "distinct_orders_pressed": 6,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": true,
+    "reached_sorted": true,
+    "targets": 2315,
+    "cls": "success"
+   },
+   "4300010": {
+    "presses": 3,
+    "distinct_orders_pressed": 2,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1441,
+    "cls": "success"
+   },
+   "4300011": {
+    "presses": 5,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2323,
+    "cls": "success"
+   },
+   "4300012": {
+    "presses": 6,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300013": {
+    "presses": 6,
+    "distinct_orders_pressed": 5,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2329,
+    "cls": "success"
+   },
+   "4300014": {
+    "presses": 7,
+    "distinct_orders_pressed": 4,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     1,
+     2,
+     0
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300015": {
+    "presses": 4,
+    "distinct_orders_pressed": 2,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2292,
+    "cls": "success"
+   },
+   "4300016": {
+    "presses": 11,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300017": {
+    "presses": 28,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300018": {
+    "presses": 6,
+    "distinct_orders_pressed": 5,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2767,
+    "cls": "success"
+   },
+   "4300019": {
+    "presses": 6,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2765,
+    "cls": "success"
+   },
+   "4300020": {
+    "presses": 6,
+    "distinct_orders_pressed": 5,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2348,
+    "cls": "success"
+   },
+   "4300021": {
+    "presses": 8,
+    "distinct_orders_pressed": 6,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2842,
+    "cls": "success"
+   },
+   "4300022": {
+    "presses": 6,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2313,
+    "cls": "success"
+   },
+   "4300023": {
+    "presses": 6,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": false,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300024": {
+    "presses": 10,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300025": {
+    "presses": 5,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1463,
+    "cls": "success"
+   },
+   "4300026": {
+    "presses": 8,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300027": {
+    "presses": 7,
+    "distinct_orders_pressed": 4,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     1,
+     2,
+     0
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300028": {
+    "presses": 8,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300029": {
+    "presses": 8,
+    "distinct_orders_pressed": 3,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300030": {
+    "presses": 6,
+    "distinct_orders_pressed": 3,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300031": {
+    "presses": 9,
+    "distinct_orders_pressed": 5,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300032": {
+    "presses": 3,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 570,
+    "cls": "success"
+   },
+   "4300033": {
+    "presses": 7,
+    "distinct_orders_pressed": 5,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     1,
+     2,
+     0
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300034": {
+    "presses": 3,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 543,
+    "cls": "success"
+   },
+   "4300035": {
+    "presses": 6,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2317,
+    "cls": "success"
+   },
+   "4300036": {
+    "presses": 8,
+    "distinct_orders_pressed": 5,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     1,
+     2,
+     0
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300037": {
+    "presses": 6,
+    "distinct_orders_pressed": 5,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3327,
+    "cls": "success"
+   },
+   "4300038": {
+    "presses": 7,
+    "distinct_orders_pressed": 4,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     1,
+     2,
+     0
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300039": {
+    "presses": 5,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1839,
+    "cls": "success"
+   },
+   "4300040": {
+    "presses": 6,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2329,
+    "cls": "success"
+   },
+   "4300041": {
+    "presses": 5,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2253,
+    "cls": "success"
+   },
+   "4300042": {
+    "presses": 3,
+    "distinct_orders_pressed": 2,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 961,
+    "cls": "success"
+   },
+   "4300043": {
+    "presses": 7,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2832,
+    "cls": "success"
+   },
+   "4300044": {
+    "presses": 7,
+    "distinct_orders_pressed": 5,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3161,
+    "cls": "success"
+   },
+   "4300045": {
+    "presses": 8,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300046": {
+    "presses": 6,
+    "distinct_orders_pressed": 4,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     1,
+     2,
+     0
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300047": {
+    "presses": 5,
+    "distinct_orders_pressed": 3,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1441,
+    "cls": "success"
+   },
+   "4300048": {
+    "presses": 7,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300049": {
+    "presses": 3,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": true,
+    "reached_sorted": true,
+    "targets": 998,
+    "cls": "success"
+   },
+   "4300050": {
+    "presses": 4,
+    "distinct_orders_pressed": 3,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1435,
+    "cls": "success"
+   },
+   "4300051": {
+    "presses": 5,
+    "distinct_orders_pressed": 3,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1438,
+    "cls": "success"
+   },
+   "4300052": {
+    "presses": 6,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2778,
+    "cls": "success"
+   },
+   "4300053": {
+    "presses": 10,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": [
+     2,
+     0,
+     1
+    ],
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300054": {
+    "presses": 8,
+    "distinct_orders_pressed": 5,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     1,
+     2,
+     0
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300055": {
+    "presses": 5,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2286,
+    "cls": "success"
+   },
+   "4300056": {
+    "presses": 3,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 558,
+    "cls": "success"
+   },
+   "4300057": {
+    "presses": 8,
+    "distinct_orders_pressed": 5,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2847,
+    "cls": "success"
+   },
+   "4300058": {
+    "presses": 10,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300059": {
+    "presses": 3,
+    "distinct_orders_pressed": 2,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 968,
+    "cls": "success"
+   },
+   "4300060": {
+    "presses": 2,
+    "distinct_orders_pressed": 2,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 992,
+    "cls": "success"
+   },
+   "4300061": {
+    "presses": 7,
+    "distinct_orders_pressed": 3,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     1,
+     2,
+     0
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300062": {
+    "presses": 4,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 591,
+    "cls": "success"
+   },
+   "4300063": {
+    "presses": 3,
+    "distinct_orders_pressed": 2,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2243,
+    "cls": "success"
+   },
+   "4300064": {
+    "presses": 4,
+    "distinct_orders_pressed": 2,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2288,
+    "cls": "success"
+   },
+   "4300065": {
+    "presses": 8,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300066": {
+    "presses": 5,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2304,
+    "cls": "success"
+   },
+   "4300067": {
+    "presses": 5,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2283,
+    "cls": "success"
+   },
+   "4300068": {
+    "presses": 3,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 549,
+    "cls": "success"
+   },
+   "4300069": {
+    "presses": 5,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2289,
+    "cls": "success"
+   },
+   "4300070": {
+    "presses": 4,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2326,
+    "cls": "success"
+   },
+   "4300071": {
+    "presses": 6,
+    "distinct_orders_pressed": 5,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2346,
+    "cls": "success"
+   },
+   "4300072": {
+    "presses": 4,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1020,
+    "cls": "success"
+   },
+   "4300073": {
+    "presses": 9,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300074": {
+    "presses": 6,
+    "distinct_orders_pressed": 3,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     2,
+     1,
+     0
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300075": {
+    "presses": 3,
+    "distinct_orders_pressed": 2,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1370,
+    "cls": "success"
+   },
+   "4300076": {
+    "presses": 5,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300077": {
+    "presses": 3,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2329,
+    "cls": "success"
+   },
+   "4300078": {
+    "presses": 6,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2302,
+    "cls": "success"
+   },
+   "4300079": {
+    "presses": 9,
+    "distinct_orders_pressed": 2,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300080": {
+    "presses": 4,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1003,
+    "cls": "success"
+   },
+   "4300081": {
+    "presses": 3,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": true,
+    "reached_sorted": true,
+    "targets": 994,
+    "cls": "success"
+   },
+   "4300082": {
+    "presses": 4,
+    "distinct_orders_pressed": 3,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1873,
+    "cls": "success"
+   },
+   "4300083": {
+    "presses": 4,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1918,
+    "cls": "success"
+   },
+   "4300084": {
+    "presses": 10,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300085": {
+    "presses": 3,
+    "distinct_orders_pressed": 2,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1393,
+    "cls": "success"
+   },
+   "4300086": {
+    "presses": 3,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 534,
+    "cls": "success"
+   },
+   "4300087": {
+    "presses": 4,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2262,
+    "cls": "success"
+   },
+   "4300088": {
+    "presses": 5,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1840,
+    "cls": "success"
+   },
+   "4300089": {
+    "presses": 3,
+    "distinct_orders_pressed": 2,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1433,
+    "cls": "success"
+   },
+   "4300090": {
+    "presses": 5,
+    "distinct_orders_pressed": 2,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1815,
+    "cls": "success"
+   },
+   "4300091": {
+    "presses": 3,
+    "distinct_orders_pressed": 2,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300092": {
+    "presses": 7,
+    "distinct_orders_pressed": 3,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300094": {
+    "presses": 6,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2809,
+    "cls": "success"
+   },
+   "4300095": {
+    "presses": 11,
+    "distinct_orders_pressed": 5,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300096": {
+    "presses": 3,
+    "distinct_orders_pressed": 2,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1405,
+    "cls": "success"
+   },
+   "4300097": {
+    "presses": 10,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300098": {
+    "presses": 4,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 612,
+    "cls": "success"
+   },
+   "4300099": {
+    "presses": 6,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2286,
+    "cls": "success"
+   },
+   "4300100": {
+    "presses": 4,
+    "distinct_orders_pressed": 2,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 979,
+    "cls": "success"
+   }
+  }
+ },
+ "e6:ranking_ar_e30": {
+  "counts": {
+   "repeated an order already pressed (counting error)": 23,
+   "success": 77
+  },
+  "episodes": {
+   "4300000": {
+    "presses": 11,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300001": {
+    "presses": 2,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": true,
+    "reached_sorted": true,
+    "targets": 518,
+    "cls": "success"
+   },
+   "4300002": {
+    "presses": 11,
+    "distinct_orders_pressed": 5,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2363,
+    "cls": "success"
+   },
+   "4300003": {
+    "presses": 10,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1099,
+    "cls": "success"
+   },
+   "4300004": {
+    "presses": 8,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1767,
+    "cls": "success"
+   },
+   "4300005": {
+    "presses": 4,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1741,
+    "cls": "success"
+   },
+   "4300006": {
+    "presses": 12,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1116,
+    "cls": "success"
+   },
+   "4300007": {
+    "presses": 5,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 572,
+    "cls": "success"
+   },
+   "4300008": {
+    "presses": 10,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1077,
+    "cls": "success"
+   },
+   "4300009": {
+    "presses": 8,
+    "distinct_orders_pressed": 5,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2360,
+    "cls": "success"
+   },
+   "4300010": {
+    "presses": 13,
+    "distinct_orders_pressed": 5,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": false,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300011": {
+    "presses": 8,
+    "distinct_orders_pressed": 5,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3256,
+    "cls": "success"
+   },
+   "4300012": {
+    "presses": 4,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 999,
+    "cls": "success"
+   },
+   "4300013": {
+    "presses": 5,
+    "distinct_orders_pressed": 5,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2279,
+    "cls": "success"
+   },
+   "4300014": {
+    "presses": 15,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 724,
+    "cls": "success"
+   },
+   "4300015": {
+    "presses": 9,
+    "distinct_orders_pressed": 5,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2227,
+    "cls": "success"
+   },
+   "4300016": {
+    "presses": 12,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1135,
+    "cls": "success"
+   },
+   "4300017": {
+    "presses": 6,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1044,
+    "cls": "success"
+   },
+   "4300018": {
+    "presses": 26,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2058,
+    "cls": "success"
+   },
+   "4300019": {
+    "presses": 18,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1926,
+    "cls": "success"
+   },
+   "4300020": {
+    "presses": 9,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     1,
+     0,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": false,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300021": {
+    "presses": 11,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1821,
+    "cls": "success"
+   },
+   "4300022": {
+    "presses": 10,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     1,
+     0,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": false,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300023": {
+    "presses": 5,
+    "distinct_orders_pressed": 3,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": [
+     1,
+     2,
+     0
+    ],
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": false,
+    "targets": 1453,
+    "cls": "success"
+   },
+   "4300024": {
+    "presses": 6,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1038,
+    "cls": "success"
+   },
+   "4300025": {
+    "presses": 9,
+    "distinct_orders_pressed": 5,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300026": {
+    "presses": 4,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 990,
+    "cls": "success"
+   },
+   "4300027": {
+    "presses": 8,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 621,
+    "cls": "success"
+   },
+   "4300028": {
+    "presses": 5,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1020,
+    "cls": "success"
+   },
+   "4300029": {
+    "presses": 13,
+    "distinct_orders_pressed": 5,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300030": {
+    "presses": 13,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 693,
+    "cls": "success"
+   },
+   "4300031": {
+    "presses": 2,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": true,
+    "reached_sorted": true,
+    "targets": 516,
+    "cls": "success"
+   },
+   "4300032": {
+    "presses": 5,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 584,
+    "cls": "success"
+   },
+   "4300033": {
+    "presses": 8,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 614,
+    "cls": "success"
+   },
+   "4300034": {
+    "presses": 13,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 682,
+    "cls": "success"
+   },
+   "4300035": {
+    "presses": 9,
+    "distinct_orders_pressed": 6,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2366,
+    "cls": "success"
+   },
+   "4300036": {
+    "presses": 17,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 759,
+    "cls": "success"
+   },
+   "4300037": {
+    "presses": 5,
+    "distinct_orders_pressed": 5,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2278,
+    "cls": "success"
+   },
+   "4300038": {
+    "presses": 4,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 555,
+    "cls": "success"
+   },
+   "4300039": {
+    "presses": 20,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2090,
+    "cls": "success"
+   },
+   "4300040": {
+    "presses": 11,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": false,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300041": {
+    "presses": 7,
+    "distinct_orders_pressed": 6,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2350,
+    "cls": "success"
+   },
+   "4300042": {
+    "presses": 6,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1029,
+    "cls": "success"
+   },
+   "4300043": {
+    "presses": 17,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300044": {
+    "presses": 19,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     1,
+     2,
+     0
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": false,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300045": {
+    "presses": 11,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1095,
+    "cls": "success"
+   },
+   "4300046": {
+    "presses": 2,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": true,
+    "reached_sorted": true,
+    "targets": 521,
+    "cls": "success"
+   },
+   "4300047": {
+    "presses": 27,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2615,
+    "cls": "success"
+   },
+   "4300048": {
+    "presses": 4,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 988,
+    "cls": "success"
+   },
+   "4300049": {
+    "presses": 3,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": true,
+    "reached_sorted": true,
+    "targets": 968,
+    "cls": "success"
+   },
+   "4300050": {
+    "presses": 14,
+    "distinct_orders_pressed": 3,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": [
+     1,
+     2,
+     0
+    ],
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": false,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300051": {
+    "presses": 15,
+    "distinct_orders_pressed": 5,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": false,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300052": {
+    "presses": 12,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1817,
+    "cls": "success"
+   },
+   "4300053": {
+    "presses": 24,
+    "distinct_orders_pressed": 5,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": false,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300054": {
+    "presses": 3,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 537,
+    "cls": "success"
+   },
+   "4300055": {
+    "presses": 13,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     1,
+     2,
+     0
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": false,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300056": {
+    "presses": 3,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 535,
+    "cls": "success"
+   },
+   "4300057": {
+    "presses": 8,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300058": {
+    "presses": 15,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1171,
+    "cls": "success"
+   },
+   "4300059": {
+    "presses": 6,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1030,
+    "cls": "success"
+   },
+   "4300060": {
+    "presses": 8,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1070,
+    "cls": "success"
+   },
+   "4300061": {
+    "presses": 8,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 621,
+    "cls": "success"
+   },
+   "4300062": {
+    "presses": 10,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 646,
+    "cls": "success"
+   },
+   "4300063": {
+    "presses": 6,
+    "distinct_orders_pressed": 5,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2318,
+    "cls": "success"
+   },
+   "4300064": {
+    "presses": 12,
+    "distinct_orders_pressed": 5,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2294,
+    "cls": "success"
+   },
+   "4300065": {
+    "presses": 18,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1153,
+    "cls": "success"
+   },
+   "4300066": {
+    "presses": 16,
+    "distinct_orders_pressed": 5,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2453,
+    "cls": "success"
+   },
+   "4300067": {
+    "presses": 17,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     1,
+     2,
+     0
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": false,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300068": {
+    "presses": 9,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 638,
+    "cls": "success"
+   },
+   "4300069": {
+    "presses": 6,
+    "distinct_orders_pressed": 6,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": true,
+    "reached_sorted": true,
+    "targets": 2326,
+    "cls": "success"
+   },
+   "4300070": {
+    "presses": 16,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     1,
+     2,
+     0
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": false,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300071": {
+    "presses": 20,
+    "distinct_orders_pressed": 5,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2524,
+    "cls": "success"
+   },
+   "4300072": {
+    "presses": 3,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": true,
+    "reached_sorted": true,
+    "targets": 988,
+    "cls": "success"
+   },
+   "4300073": {
+    "presses": 5,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1012,
+    "cls": "success"
+   },
+   "4300074": {
+    "presses": 9,
+    "distinct_orders_pressed": 5,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1924,
+    "cls": "success"
+   },
+   "4300075": {
+    "presses": 9,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2349,
+    "cls": "success"
+   },
+   "4300076": {
+    "presses": 8,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1053,
+    "cls": "success"
+   },
+   "4300077": {
+    "presses": 8,
+    "distinct_orders_pressed": 4,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     1,
+     0,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": false,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300078": {
+    "presses": 19,
+    "distinct_orders_pressed": 5,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     1,
+     2,
+     0
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": false,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300079": {
+    "presses": 24,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1983,
+    "cls": "success"
+   },
+   "4300080": {
+    "presses": 4,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 987,
+    "cls": "success"
+   },
+   "4300081": {
+    "presses": 4,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 988,
+    "cls": "success"
+   },
+   "4300082": {
+    "presses": 4,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1841,
+    "cls": "success"
+   },
+   "4300083": {
+    "presses": 16,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2037,
+    "cls": "success"
+   },
+   "4300084": {
+    "presses": 16,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1166,
+    "cls": "success"
+   },
+   "4300085": {
+    "presses": 13,
+    "distinct_orders_pressed": 5,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300086": {
+    "presses": 5,
+    "distinct_orders_pressed": 3,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1460,
+    "cls": "success"
+   },
+   "4300087": {
+    "presses": 8,
+    "distinct_orders_pressed": 5,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2352,
+    "cls": "success"
+   },
+   "4300088": {
+    "presses": 9,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1783,
+    "cls": "success"
+   },
+   "4300089": {
+    "presses": 9,
+    "distinct_orders_pressed": 5,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": false,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300090": {
+    "presses": 6,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1867,
+    "cls": "success"
+   },
+   "4300091": {
+    "presses": 18,
+    "distinct_orders_pressed": 5,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": [
+     2,
+     0,
+     1
+    ],
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300092": {
+    "presses": 13,
+    "distinct_orders_pressed": 5,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": null,
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300094": {
+    "presses": 8,
+    "distinct_orders_pressed": 4,
+    "start": [
+     2,
+     0,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 4,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1766,
+    "cls": "success"
+   },
+   "4300095": {
+    "presses": 8,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1051,
+    "cls": "success"
+   },
+   "4300096": {
+    "presses": 8,
+    "distinct_orders_pressed": 5,
+    "start": [
+     2,
+     1,
+     0
+    ],
+    "final": [
+     0,
+     2,
+     1
+    ],
+    "orders_pressed": [
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      0,
+      1
+     ]
+    ],
+    "expert_position_of_sorted": 3,
+    "follows_expert_order": false,
+    "reached_sorted": false,
+    "targets": 3500,
+    "cls": "repeated an order already pressed (counting error)"
+   },
+   "4300097": {
+    "presses": 13,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1165,
+    "cls": "success"
+   },
+   "4300098": {
+    "presses": 5,
+    "distinct_orders_pressed": 2,
+    "start": [
+     0,
+     2,
+     1
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 1,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 577,
+    "cls": "success"
+   },
+   "4300099": {
+    "presses": 11,
+    "distinct_orders_pressed": 5,
+    "start": [
+     1,
+     0,
+     2
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      1,
+      0,
+      2
+     ],
+     [
+      2,
+      0,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      0,
+      2,
+      1
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 5,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 2251,
+    "cls": "success"
+   },
+   "4300100": {
+    "presses": 15,
+    "distinct_orders_pressed": 3,
+    "start": [
+     1,
+     2,
+     0
+    ],
+    "final": [
+     0,
+     1,
+     2
+    ],
+    "orders_pressed": [
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      1,
+      2,
+      0
+     ],
+     [
+      2,
+      1,
+      0
+     ],
+     [
+      0,
+      1,
+      2
+     ]
+    ],
+    "expert_position_of_sorted": 2,
+    "follows_expert_order": false,
+    "reached_sorted": true,
+    "targets": 1157,
+    "cls": "success"
+   }
+  }
+ }
+}

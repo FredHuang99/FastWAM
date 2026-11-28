@@ -1,0 +1,9 @@
+
+[queue5] 2026-11-24 18:43:01 $ bash -c bash /workspace/FastWAM-memory2/scripts/fullft/press_told_fetch.sh
+[told-fetch] 2026-11-24 10:43:02 not on the relay yet; next look in 10 min
+[told-fetch] 2026-11-24 10:53:02 not on the relay yet; next look in 10 min
+[told-fetch] 2026-11-24 11:03:03 not on the relay yet; next look in 10 min
+[told-fetch] 2026-11-24 11:13:03 not on the relay yet; next look in 10 min
+[relay] get hhyfred/memwam-diag-v1/diag/press_told/TOLD_TEXT.json -> /workspace/FastWAM-memory2/outputs/fullft/relay_in/press_told/TOLD_TEXT.json (21731 bytes)
+[relay] get hhyfred/memwam-diag-v1/diag/press_told/TOLD_TEXT.pt -> /workspace/FastWAM-memory2/outputs/fullft/relay_in/press_told/TOLD_TEXT.pt (47241877 bytes)
+[told-fetch] 2026-11-24 11:23:09 text table in place (sha256 ok)

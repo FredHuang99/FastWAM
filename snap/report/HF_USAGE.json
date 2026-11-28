@@ -1,0 +1,626 @@
+{
+ "time": "2026-11-28 17:53:16",
+ "account": "(logged-in account)",
+ "total_bytes": 701708444528,
+ "quota_gb": 1000.0,
+ "used_fraction": 0.7017,
+ "status": "ok",
+ "repos": [
+  {
+   "repo": "hhyfred/fastwam-memory-s1-backup",
+   "type": "model",
+   "bytes": 2533306191,
+   "files": 6,
+   "top_folders": [
+    {
+     "name": "ready",
+     "gb": 2.47
+    },
+    {
+     "name": "migration",
+     "gb": 0.06
+    },
+    {
+     "name": ".",
+     "gb": 0.0
+    }
+   ],
+   "top_subfolders": [
+    {
+     "name": "ready/memory_s1_variable_t_seed17_v2",
+     "gb": 2.47
+    },
+    {
+     "name": "migration/a100_after_h100",
+     "gb": 0.06
+    }
+   ]
+  },
+  {
+   "repo": "hhyfred/memwam-diag-v1",
+   "type": "model",
+   "bytes": 3407895675,
+   "files": 102,
+   "top_folders": [
+    {
+     "name": "diag",
+     "gb": 3.41
+    },
+    {
+     "name": ".",
+     "gb": 0.0
+    }
+   ],
+   "top_subfolders": [
+    {
+     "name": "diag/e22_a100",
+     "gb": 3.18
+    },
+    {
+     "name": "diag/env_h200",
+     "gb": 0.15
+    },
+    {
+     "name": "diag/press_told",
+     "gb": 0.05
+    },
+    {
+     "name": "diag/collect_1120",
+     "gb": 0.01
+    },
+    {
+     "name": "diag/collect_1118",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/al1_pack_v2",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/al1_pack",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/collect_1113",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/first_actions",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/first_requests",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/collect_1115",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/a100_4300030",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/collect_1114",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/collect_1116",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/events_ruleA",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/collect_1117",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/al0",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/collect_1116b",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/events_b1",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/parity_ref",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/al2_frame0",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/blocks_ranking_try_v3c",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/blocks_ranking_try_v3a",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/press_button_v3d",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/swap_blocks_v3c",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/events_battery",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/a100_ar_2task_e30x_stages",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/a100_ar2_prop_e30x_stages",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/press_fast",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/press_v3c",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/a100_x7_stages",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/rearrange_blocks_v3c",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/put_back_block_v3c",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/a100_ar_2task_e30_stages",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/a100_ar2_prop_e30_stages",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/a100_ar2_prop_e20_stages",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/a100_ar2_prop_e10_stages",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/a100_ar_2task_e20_stages50",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/a100_ar_2task_e10_stages50",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/press_timing_audit",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/bank_swap_T_a40",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/a100_ar_2task_e20_stages",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/a100_ar_2task_e10_stages",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/events_obs",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/timing_verdict",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/z1_verdict",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/press_series_verdict",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/noise_band",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/oracle_verdict",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/swap_lag",
+     "gb": 0.0
+    },
+    {
+     "name": "diag/press_fast_verdict",
+     "gb": 0.0
+    }
+   ]
+  },
+  {
+   "repo": "hhyfred/memwam-caches",
+   "type": "model",
+   "bytes": 141820068087,
+   "files": 6592,
+   "top_folders": [
+    {
+     "name": "dense_observe_and_pickup_gen800b_v1",
+     "gb": 22.91
+    },
+    {
+     "name": "dense_observe_and_pickup_cf755_v1",
+     "gb": 21.61
+    },
+    {
+     "name": "dense_robomme_v1",
+     "gb": 17.39
+    },
+    {
+     "name": "dense_observe_and_pickup_gen600_v1",
+     "gb": 17.17
+    },
+    {
+     "name": "dense_blocks_ranking_try_v1",
+     "gb": 13.65
+    },
+    {
+     "name": "dense_place_block_mat_v1",
+     "gb": 9.92
+    },
+    {
+     "name": "dense_cover_blocks_v1",
+     "gb": 9.47
+    },
+    {
+     "name": "dense_battery_try_v1",
+     "gb": 6.26
+    },
+    {
+     "name": "dense_press_button_v1",
+     "gb": 4.9
+    },
+    {
+     "name": "dense_observe_and_pickup_gen155_v1",
+     "gb": 4.44
+    },
+    {
+     "name": "dense_observe_and_pickup_cf155_v1",
+     "gb": 4.43
+    },
+    {
+     "name": "dense_rearrange_blocks_v1",
+     "gb": 3.76
+    },
+    {
+     "name": "dense_swap_T_v1",
+     "gb": 3.22
+    },
+    {
+     "name": "dense_observe_and_pickup_v1",
+     "gb": 1.43
+    },
+    {
+     "name": "zoom_obs_match_a476d745",
+     "gb": 0.35
+    },
+    {
+     "name": "zoom_obs_02102ba0",
+     "gb": 0.35
+    },
+    {
+     "name": "dense_observe_and_pickup_cf10probe2_v1",
+     "gb": 0.29
+    },
+    {
+     "name": "dense_observe_and_pickup_cf10probe_v1",
+     "gb": 0.29
+    },
+    {
+     "name": ".",
+     "gb": 0.0
+    }
+   ],
+   "top_subfolders": [
+    {
+     "name": "dense_observe_and_pickup_gen800b_v1/cache",
+     "gb": 22.9
+    },
+    {
+     "name": "dense_observe_and_pickup_cf755_v1/cache",
+     "gb": 21.61
+    },
+    {
+     "name": "dense_robomme_v1/cache",
+     "gb": 17.39
+    },
+    {
+     "name": "dense_observe_and_pickup_gen600_v1/cache",
+     "gb": 17.17
+    },
+    {
+     "name": "dense_blocks_ranking_try_v1/cache",
+     "gb": 13.65
+    },
+    {
+     "name": "dense_place_block_mat_v1/cache",
+     "gb": 9.92
+    },
+    {
+     "name": "dense_cover_blocks_v1/cache",
+     "gb": 9.47
+    },
+    {
+     "name": "dense_battery_try_v1/cache",
+     "gb": 6.26
+    },
+    {
+     "name": "dense_press_button_v1/cache",
+     "gb": 4.9
+    },
+    {
+     "name": "dense_observe_and_pickup_gen155_v1/cache",
+     "gb": 4.44
+    },
+    {
+     "name": "dense_observe_and_pickup_cf155_v1/cache",
+     "gb": 4.43
+    },
+    {
+     "name": "dense_rearrange_blocks_v1/cache",
+     "gb": 3.76
+    },
+    {
+     "name": "dense_swap_T_v1/cache",
+     "gb": 3.22
+    },
+    {
+     "name": "dense_observe_and_pickup_v1/cache",
+     "gb": 1.43
+    },
+    {
+     "name": "dense_observe_and_pickup_cf10probe2_v1/cache",
+     "gb": 0.29
+    },
+    {
+     "name": "dense_observe_and_pickup_cf10probe_v1/cache",
+     "gb": 0.29
+    },
+    {
+     "name": "dense_robomme_v1/events",
+     "gb": 0.0
+    }
+   ]
+  },
+  {
+   "repo": "hhyfred/memwam-fullft",
+   "type": "model",
+   "bytes": 553947174575,
+   "files": 95,
+   "top_folders": [
+    {
+     "name": "exports",
+     "gb": 553.95
+    },
+    {
+     "name": "diag",
+     "gb": 0.0
+    },
+    {
+     "name": ".",
+     "gb": 0.0
+    }
+   ],
+   "top_subfolders": [
+    {
+     "name": "exports/ranking_v3a_e30",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/ranking_arprop_e30",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/press_told_e30",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/swapT_joint3_e30",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/ar2_v3c_e30",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/swapT_joint3_e10",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/swapT_joint3_e20",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/ar2_pw_e10",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/ar2_pw_e20",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/ar2_prop_s18_e30",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/rearr_pw_e30",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/rearr_pw_s18_e30",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/rearr_v3c_e30",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/swapT_long_e60",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/swapT_long_h100_e60",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/rearr_arprop_pw_e20",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/rearr_arprop_pw_e30",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/swapT_ow_e10",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/swapT_ow_e20",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/swapT_ow_s18_e10",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/ar2_prop_s18_e10",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/cover_arprop_e20",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/rearrange_arprop_e20",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/cover_arprop_e10",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/battery_clock_e20",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/battery_clock_e30",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/battery_clock_e10",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/obs_match_e30",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/obs_s800_e10",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/rearr_ar_pw_e20",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/rearr_ar_pw_e30",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/obs_cf200_e20",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/obs_cf200_e30",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/obs_s200_e30",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/obs_cf200_e10",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/ranking_none_e20",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/ranking_none_e30",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/ranking_none_e10",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/obs_none_e30",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/rearrange_none_e30",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/swapT_none_e30",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/battery_none_e30",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/cover_ar_e30",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/ranking_ar_e30",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/obs_ar_e30",
+     "gb": 12.04
+    },
+    {
+     "name": "exports/obs_s800_e5",
+     "gb": 12.04
+    },
+    {
+     "name": "diag/events_2task",
+     "gb": 0.0
+    }
+   ]
+  }
+ ]
+}

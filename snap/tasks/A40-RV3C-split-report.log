@@ -1,0 +1,39 @@
+
+[queue5] 2026-11-25 20:52:45 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_split.py rv3c:rearr_v3c_e30 e6:rearrange_arprop_e30 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_ledger.py rv3c:rearr_v3c_e30 e6:rearrange_arprop_e30
+
+rv3c:rearr_v3c_e30: 100 episodes
+   45  pressed twice or more (after step 1 was complete)   e.g. seeds [4300009, 4300010, 4300011, 4300013]
+   33  success   e.g. seeds [4300000, 4300002, 4300003, 4300004]
+   14  never pressed: block1 placed on the empty mat   e.g. seeds [4300001, 4300005, 4300006, 4300007]
+    8  stage 1, then moved block1 again (which-block error)   e.g. seeds [4300020, 4300021, 4300032, 4300049]
+
+e6:rearrange_arprop_e30: 100 episodes
+   62  success   e.g. seeds [4300000, 4300001, 4300002, 4300003]
+   18  pressed twice or more (after step 1 was complete)   e.g. seeds [4300006, 4300008, 4300018, 4300024]
+   17  never pressed: block1 placed on the empty mat   e.g. seeds [4300007, 4300014, 4300016, 4300017]
+    3  stage 1, then moved block1 again (which-block error)   e.g. seeds [4300021, 4300040, 4300098]
+
+REARR SPLIT REPORT: written outputs/fullft/REARR_SPLIT.json
+
+== rv3c:rearr_v3c_e30
+   14  never pressed: left-arm entries at the last decision bottom,close,top   e.g. []
+    4  pressed once, failed later: first press always in the record   e.g. ['4300021', '4300032', '4300049', '4300095']
+    4  pressed once, failed later: first press sometimes in the record   e.g. ['4300020', '4300058', '4300080', '4300083']
+   14  pressed twice: first press always in the record   e.g. ['4300033', '4300038', '4300044', '4300052']
+   31  pressed twice: first press sometimes in the record   e.g. ['4300009', '4300010', '4300011', '4300013']
+   13  success: first press always in the record   e.g. ['4300000', '4300002', '4300014', '4300023']
+   20  success: first press sometimes in the record   e.g. ['4300003', '4300004', '4300008', '4300012']
+  write delay (targets from the press to the first decision whose record has it): median 9.5, min 4, max 14, n 86
+
+== e6:rearrange_arprop_e30
+    8  never pressed: left-arm entries at the last decision bottom,close,top   e.g. []
+    8  never pressed: left-arm entries at the last decision bottom,top   e.g. []
+    1  never pressed: left-arm entries at the last decision close,top   e.g. []
+    3  pressed once, failed later: first press sometimes in the record   e.g. ['4300021', '4300040', '4300098']
+   16  pressed twice: first press never in the record   e.g. ['4300006', '4300018', '4300024', '4300026']
+    2  pressed twice: first press sometimes in the record   e.g. ['4300008', '4300071']
+    3  success: first press never in the record   e.g. ['4300002', '4300010', '4300095']
+   59  success: first press sometimes in the record   e.g. ['4300000', '4300001', '4300003', '4300004']
+  write delay (targets from the press to the first decision whose record has it): median 18.0, min 9, max 48, n 76
+
+REARR LEDGER REPORT done

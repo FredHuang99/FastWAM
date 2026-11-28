@@ -1,0 +1,4 @@
+
+[queue5] 2026-11-26 08:11:49 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py obsmatch
+{"run": "card 7 find-same match frame (dinov2 crop, frozen public encoder)", "sesoi": 0.15, "finished": {"obs_match_e30": 100, "obs_ar_e30": 100}, "main": {"scenes": 100, "new": 12, "ref": 13, "D": -0.01, "ci95": [-0.08, 0.05], "only_new": 5, "only_ref": 6}, "verdict": "NO HELP", "success_vs_bars": "12 vs 28 (pure-WAM best, self-reported) and 20 (blind pick)"}
+V20 OBSMATCH: NO HELP

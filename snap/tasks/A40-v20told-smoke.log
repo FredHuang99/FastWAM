@@ -1,0 +1,67 @@
+
+[queue5] 2026-11-25 20:21:59 $ /opt/mwam/bin/python -m fastwam.memory_v2.online run --checkpoint /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e30/export_e30.pt --label press_told_e30_smoke --modes on --scenes /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/scenes_seed42_n100_press_button --output /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/v20smoke --tasks press_button --execute 8 --limit 1
+[dense] WARNING runtime packages differ from the dense preparation receipt (cache is read, not re-encoded): {"python": {"recorded": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]", "actual": "3.12.3 (main, Nov  6 2024, 18:32:19) [GCC 13.2.0]"}, "packages.Pillow": {"recorded": "12.0.0", "actual": "11.0.0"}, "packages.numpy": {"recorded": "2.1.0", "actual": "1.26.4"}, "packages.torch": {"recorded": "2.10.0a0+b558c986e8.nv25.11", "actual": "2.6.0a0+df5bbc09d1.nv24.12"}, "packages.torchvision": {"recorded": "0.25.0a0+7a13ad0f", "actual": "0.20.0a0"}}
+[closed-loop] 2026-11-25 12:23:19 1 scenes x modes ['on'] -> labels {'on': 'press_told_e30_smoke'}; checkpoint /workspace/FastWAM-memory2/outputs/fullft/exports/press_told_e30/export_e30.pt; T5 on CPU; max_targets=official
+[closed-loop] WARNING dense config was recorded for sm9.0; this GPU is sm8.6: TORCH_EXTENSIONS_DIR -> /workspace/FastWAM/outputs/fused_environment_memory_v2_sm86/torch_extensions (give --extensions-dir to reuse built kernels)
+[closed-loop] 2026-11-25 12:23:19 start press_told_e30_smoke/on press_button seed=4300000 target_limit=1500 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/v20smoke/press_told_e30_smoke/on/press_button/seed_4300000
+[fullft] text from the run's text table /workspace/FastWAM-memory2/outputs/fullft/press_told/TOLD_TEXT.pt (fingerprint 45f5c23b3cd8)
+/restore-tmp/dense_joint_v1/data_path.py:16: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /opt/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:206.)
+  return torch.stack([TF.resize(torch.from_numpy(np.ascontiguousarray(a)).permute(2,0,1).float()/255.,
+[decide] 2026-11-25 12:24:09 press_told_e30_smoke/on press_button seed=4300000 frame=0/1500 hist=0 policy=0.9s elapsed=7s
+[decide] 2026-11-25 12:24:19 press_told_e30_smoke/on press_button seed=4300000 frame=32/1500 hist=2 policy=0.6s elapsed=17s
+[decide] 2026-11-25 12:24:29 press_told_e30_smoke/on press_button seed=4300000 frame=64/1500 hist=3 policy=0.6s elapsed=27s
+[decide] 2026-11-25 12:24:39 press_told_e30_smoke/on press_button seed=4300000 frame=96/1500 hist=3 policy=0.6s elapsed=37s
+[decide] 2026-11-25 12:24:49 press_told_e30_smoke/on press_button seed=4300000 frame=128/1500 hist=3 policy=0.6s elapsed=47s
+[decide] 2026-11-25 12:25:00 press_told_e30_smoke/on press_button seed=4300000 frame=160/1500 hist=3 policy=0.6s elapsed=57s
+[decide] 2026-11-25 12:25:10 press_told_e30_smoke/on press_button seed=4300000 frame=192/1500 hist=3 policy=0.6s elapsed=67s
+[decide] 2026-11-25 12:25:22 press_told_e30_smoke/on press_button seed=4300000 frame=224/1500 hist=3 policy=0.6s elapsed=80s
+[decide] 2026-11-25 12:25:37 press_told_e30_smoke/on press_button seed=4300000 frame=256/1500 hist=3 policy=0.6s elapsed=95s
+[decide] 2026-11-25 12:25:48 press_told_e30_smoke/on press_button seed=4300000 frame=288/1500 hist=3 policy=0.6s elapsed=105s
+[decide] 2026-11-25 12:26:02 press_told_e30_smoke/on press_button seed=4300000 frame=320/1500 hist=3 policy=0.6s elapsed=120s
+[decide] 2026-11-25 12:26:15 press_told_e30_smoke/on press_button seed=4300000 frame=352/1500 hist=3 policy=0.6s elapsed=132s
+[decide] 2026-11-25 12:26:25 press_told_e30_smoke/on press_button seed=4300000 frame=384/1500 hist=3 policy=0.6s elapsed=143s
+[decide] 2026-11-25 12:26:35 press_told_e30_smoke/on press_button seed=4300000 frame=416/1500 hist=3 policy=0.6s elapsed=153s
+[decide] 2026-11-25 12:26:45 press_told_e30_smoke/on press_button seed=4300000 frame=448/1500 hist=3 policy=0.6s elapsed=163s
+[decide] 2026-11-25 12:26:58 press_told_e30_smoke/on press_button seed=4300000 frame=480/1500 hist=3 policy=0.6s elapsed=175s
+[decide] 2026-11-25 12:27:16 press_told_e30_smoke/on press_button seed=4300000 frame=512/1500 hist=3 policy=0.6s elapsed=194s
+[decide] 2026-11-25 12:27:34 press_told_e30_smoke/on press_button seed=4300000 frame=544/1500 hist=3 policy=0.6s elapsed=212s
+[decide] 2026-11-25 12:27:44 press_told_e30_smoke/on press_button seed=4300000 frame=576/1500 hist=3 policy=0.6s elapsed=222s
+[decide] 2026-11-25 12:27:54 press_told_e30_smoke/on press_button seed=4300000 frame=608/1500 hist=3 policy=0.6s elapsed=232s
+[decide] 2026-11-25 12:28:05 press_told_e30_smoke/on press_button seed=4300000 frame=640/1500 hist=3 policy=0.6s elapsed=242s
+[decide] 2026-11-25 12:28:15 press_told_e30_smoke/on press_button seed=4300000 frame=672/1500 hist=3 policy=0.6s elapsed=253s
+[decide] 2026-11-25 12:28:25 press_told_e30_smoke/on press_button seed=4300000 frame=704/1500 hist=3 policy=0.6s elapsed=263s
+[decide] 2026-11-25 12:28:35 press_told_e30_smoke/on press_button seed=4300000 frame=736/1500 hist=3 policy=0.6s elapsed=273s
+[decide] 2026-11-25 12:28:45 press_told_e30_smoke/on press_button seed=4300000 frame=768/1500 hist=3 policy=0.6s elapsed=283s
+[decide] 2026-11-25 12:28:56 press_told_e30_smoke/on press_button seed=4300000 frame=800/1500 hist=3 policy=0.6s elapsed=293s
+[decide] 2026-11-25 12:29:06 press_told_e30_smoke/on press_button seed=4300000 frame=832/1500 hist=3 policy=0.6s elapsed=304s
+[decide] 2026-11-25 12:29:16 press_told_e30_smoke/on press_button seed=4300000 frame=864/1500 hist=3 policy=0.6s elapsed=314s
+[decide] 2026-11-25 12:29:26 press_told_e30_smoke/on press_button seed=4300000 frame=896/1500 hist=3 policy=0.6s elapsed=324s
+[decide] 2026-11-25 12:29:36 press_told_e30_smoke/on press_button seed=4300000 frame=928/1500 hist=3 policy=0.6s elapsed=334s
+[decide] 2026-11-25 12:29:47 press_told_e30_smoke/on press_button seed=4300000 frame=960/1500 hist=3 policy=0.6s elapsed=344s
+[decide] 2026-11-25 12:30:03 press_told_e30_smoke/on press_button seed=4300000 frame=992/1500 hist=3 policy=0.6s elapsed=361s
+[decide] 2026-11-25 12:30:13 press_told_e30_smoke/on press_button seed=4300000 frame=1024/1500 hist=3 policy=0.6s elapsed=371s
+[decide] 2026-11-25 12:30:30 press_told_e30_smoke/on press_button seed=4300000 frame=1056/1500 hist=3 policy=0.6s elapsed=387s
+[decide] 2026-11-25 12:30:40 press_told_e30_smoke/on press_button seed=4300000 frame=1088/1500 hist=3 policy=0.6s elapsed=398s
+[decide] 2026-11-25 12:30:50 press_told_e30_smoke/on press_button seed=4300000 frame=1120/1500 hist=3 policy=0.6s elapsed=408s
+[decide] 2026-11-25 12:31:08 press_told_e30_smoke/on press_button seed=4300000 frame=1152/1500 hist=3 policy=0.6s elapsed=426s
+[decide] 2026-11-25 12:31:18 press_told_e30_smoke/on press_button seed=4300000 frame=1184/1500 hist=3 policy=0.6s elapsed=436s
+[decide] 2026-11-25 12:31:29 press_told_e30_smoke/on press_button seed=4300000 frame=1216/1500 hist=3 policy=0.6s elapsed=447s
+[decide] 2026-11-25 12:31:41 press_told_e30_smoke/on press_button seed=4300000 frame=1248/1500 hist=3 policy=0.6s elapsed=458s
+[decide] 2026-11-25 12:31:53 press_told_e30_smoke/on press_button seed=4300000 frame=1280/1500 hist=3 policy=0.6s elapsed=471s
+[decide] 2026-11-25 12:32:11 press_told_e30_smoke/on press_button seed=4300000 frame=1312/1500 hist=3 policy=0.6s elapsed=489s
+[decide] 2026-11-25 12:32:26 press_told_e30_smoke/on press_button seed=4300000 frame=1344/1500 hist=3 policy=0.6s elapsed=504s
+[decide] 2026-11-25 12:32:36 press_told_e30_smoke/on press_button seed=4300000 frame=1376/1500 hist=3 policy=0.6s elapsed=514s
+[decide] 2026-11-25 12:32:47 press_told_e30_smoke/on press_button seed=4300000 frame=1408/1500 hist=3 policy=0.6s elapsed=524s
+[decide] 2026-11-25 12:32:57 press_told_e30_smoke/on press_button seed=4300000 frame=1440/1500 hist=3 policy=0.6s elapsed=535s
+[decide] 2026-11-25 12:33:07 press_told_e30_smoke/on press_button seed=4300000 frame=1472/1500 hist=3 policy=0.6s elapsed=545s
+[closed-loop] 2026-11-25 12:33:20 done  press_told_e30_smoke/on press_button seed=4300000 success=False targets=1500/1500 reward=0.0 lift=None  601s
+
+label/mode              task               n  success  95% CI        lift5cm  reward  targets dep_null  dep_off   dep_on  pol_s
+press_told_e30_smoke/on press_button       1     0.00  [0.00,0.79]         -    0.00     1500        -        -        -    0.6
+swapT_arprop_h2_e30_smoke/onswap_T             1     0.00  [0.00,0.79]         -    0.00      600        -        -        -    0.6
+swapT_long_e60_smoke/on swap_T             1     0.00  [0.00,0.79]         -    0.00      600        -        -        -    0.6
+
+paired on common scenes (A vs B):                         n  both  only A  only B  neither  McNemar p
+  swapT_arprop_h2_e30_smoke/on vs swapT_long_e60_smoke/on    1     0       0       0        1  1.000
+
+[summary] 3 episodes, 0 open errors -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/v20smoke/SUMMARY.json

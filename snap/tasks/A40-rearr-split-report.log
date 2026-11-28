@@ -1,0 +1,23 @@
+
+[queue5] 2026-11-22 18:34:48 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_split.py
+
+e6:rearrange_ar_e30: 100 episodes
+   34  pressed twice or more (after step 1 was complete)   e.g. seeds [4300001, 4300002, 4300003, 4300005]
+   33  never pressed: block1 placed on the empty mat   e.g. seeds [4300000, 4300006, 4300007, 4300010]
+   29  success   e.g. seeds [4300004, 4300008, 4300012, 4300013]
+    4  stage 1, then moved block1 again (which-block error)   e.g. seeds [4300032, 4300048, 4300095, 4300097]
+
+e6:rearrange_arprop_e30: 100 episodes
+   62  success   e.g. seeds [4300000, 4300001, 4300002, 4300003]
+   18  pressed twice or more (after step 1 was complete)   e.g. seeds [4300006, 4300008, 4300018, 4300024]
+   17  never pressed: block1 placed on the empty mat   e.g. seeds [4300007, 4300014, 4300016, 4300017]
+    3  stage 1, then moved block1 again (which-block error)   e.g. seeds [4300021, 4300040, 4300098]
+
+e16:rearrange_clock_e30: 100 episodes
+   62  success   e.g. seeds [4300000, 4300002, 4300003, 4300004]
+   16  stage 1, then moved block1 again (which-block error)   e.g. seeds [4300001, 4300021, 4300038, 4300039]
+   15  pressed twice or more (after step 1 was complete)   e.g. seeds [4300005, 4300006, 4300009, 4300012]
+    7  never pressed: block1 placed on the empty mat   e.g. seeds [4300014, 4300016, 4300036, 4300077]
+r2:rearrange_ar_e30: no episodes
+
+REARR SPLIT REPORT: written outputs/fullft/REARR_SPLIT.json

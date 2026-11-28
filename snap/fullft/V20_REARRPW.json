@@ -1,0 +1,82 @@
+{
+ "run": "card 6 rearr_pw (pre-event weighting on the press approach)",
+ "finished": {
+  "rearr_pw_e30": 100,
+  "rearr_v3c_h2_e30": 100
+ },
+ "classes": {
+  "rearr_pw_e30": {
+   "success": 93,
+   "never pressed: block1 placed on the empty mat": 4,
+   "stage 1, then moved block1 again (which-block error)": 2,
+   "pressed too early (block1 not on the empty mat at the press)": 1
+  },
+  "rearr_v3c_h2_e30": {
+   "success": 47,
+   "stage 1, then moved block1 again (which-block error)": 11,
+   "pressed twice or more (after step 1 was complete)": 27,
+   "never pressed: block1 placed on the empty mat": 15
+  }
+ },
+ "control_never_pressed": 15,
+ "described": {
+  "success": {
+   "scenes": 100,
+   "new": 93,
+   "ref": 47,
+   "D": 0.46,
+   "ci95": [
+    0.34,
+    0.58
+   ],
+   "only_new": 51,
+   "only_ref": 5
+  },
+  "success_against_100": "93/100"
+ },
+ "guard_pressed_twice": {
+  "scenes": 100,
+  "new": 0,
+  "ref": 27,
+  "D": -0.27,
+  "ci95": [
+   -0.36,
+   -0.18
+  ],
+  "only_new": 0,
+  "only_ref": 27,
+  "overcorrected": false
+ },
+ "sesoi": -0.075,
+ "main": {
+  "scenes": 100,
+  "new": 4,
+  "ref": 15,
+  "D": -0.11,
+  "ci95": [
+   -0.19,
+   -0.03
+  ],
+  "only_new": 3,
+  "only_ref": 14
+ },
+ "verdict": "PRESS MISS HALVED",
+ "described_e10": {
+  "success": "14/100",
+  "classes": {
+   "never pressed: block1 placed on the empty mat": 83,
+   "success": 14,
+   "pressed twice or more (after step 1 was complete)": 1,
+   "stage 1, second step never started (block2 never lifted)": 1,
+   "stage 1, then moved block1 again (which-block error)": 1
+  }
+ },
+ "described_e20": {
+  "success": "78/100",
+  "classes": {
+   "success": 78,
+   "never pressed: block1 placed on the empty mat": 20,
+   "stage 1, second step never started (block2 never lifted)": 2
+  }
+ }
+}

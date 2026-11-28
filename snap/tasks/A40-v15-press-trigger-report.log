@@ -1,0 +1,4 @@
+
+[queue5] 2026-11-20 08:08:27 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/press_trigger_report.py v15smoke press_count_e30_smoke_p64_vis
+seed_4300000: cards 3/2; injection at frame 72 (trigger event frame 62); press targets [59, 76, 109, 131, 181, 195]; presses counted before the injection: 1; executed targets logged 1500
+seed_4300001: cards 1/9; injection at frame 72 (trigger event frame 65); press targets [59, 77, 129, 137, 183, 204]; presses counted before the injection: 1; executed targets logged 1500

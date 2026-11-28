@@ -1,0 +1,12 @@
+
+[queue5] 2026-11-19 08:06:59 $ bash -c RUN=press_arprop TAG=e10 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh
+[fetch] disk before: /dev/sdb         19T  9.4T  8.0T  55% /workspace/FastWAM-memory2
+[fetch] 2026-11-19 00:07:00 fetching press_arprop_e10 (attempt 1)
+[relay] get hhyfred/memwam-fullft/exports/press_arprop_e10/export_e10.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/press_arprop_e10/export_e10.pt (12042505925 bytes)
+[relay] get hhyfred/memwam-fullft/exports/press_arprop_e10/export_e10.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/press_arprop_e10/export_e10.pt.sha256 (80 bytes)
+export_e10.pt: OK
+total 11760280
+drwxr-xr-x  2 root root        4096 Nov 19 00:49 .
+drwxr-xr-x 26 root root        4096 Nov 19 00:07 ..
+-rw-r--r--  1 root root 12042505925 Nov 19 00:49 export_e10.pt
+-rw-r--r--  1 root root          80 Nov 19 00:49 export_e10.pt.sha256

@@ -1,0 +1,159 @@
+
+[queue5] 2026-11-24 17:49:27 $ /opt/mwam/bin/python -m fastwam.memory_v2.online run --checkpoint /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt --label ar2_clock_e30 --modes on --scenes /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/scenes_seed42_n100_put_back_block --output /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/r2 --tasks put_back_block --execute 8 --limit 100 --shard 0/10
+[dense] WARNING runtime packages differ from the dense preparation receipt (cache is read, not re-encoded): {"python": {"recorded": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]", "actual": "3.12.3 (main, Nov  6 2024, 18:32:19) [GCC 13.2.0]"}, "packages.Pillow": {"recorded": "12.0.0", "actual": "11.0.0"}, "packages.numpy": {"recorded": "2.1.0", "actual": "1.26.4"}, "packages.torch": {"recorded": "2.10.0a0+b558c986e8.nv25.11", "actual": "2.6.0a0+df5bbc09d1.nv24.12"}, "packages.torchvision": {"recorded": "0.25.0a0+7a13ad0f", "actual": "0.20.0a0"}}
+[closed-loop] 2026-11-24 09:52:38 10 scenes x modes ['on'] -> labels {'on': 'ar2_clock_e30'}; checkpoint /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt; T5 on CPU; max_targets=official
+[closed-loop] WARNING dense config was recorded for sm9.0; this GPU is sm8.6: TORCH_EXTENSIONS_DIR -> /workspace/FastWAM/outputs/fused_environment_memory_v2_sm86/torch_extensions (give --extensions-dir to reuse built kernels)
+[closed-loop] 2026-11-24 09:52:38 start ar2_clock_e30/on put_back_block seed=4300000 target_limit=500 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/r2/ar2_clock_e30/on/put_back_block/seed_4300000
+[fullft] text from the training cache (put_back_block/episode_0000000, 50 episodes share it; fingerprint eb57baab5d5c)
+/restore-tmp/dense_joint_v1/data_path.py:16: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /opt/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:206.)
+  return torch.stack([TF.resize(torch.from_numpy(np.ascontiguousarray(a)).permute(2,0,1).float()/255.,
+[decide] 2026-11-24 09:53:30 ar2_clock_e30/on put_back_block seed=4300000 frame=0/500 hist=0 policy=0.6s elapsed=8s
+[decide] 2026-11-24 09:53:45 ar2_clock_e30/on put_back_block seed=4300000 frame=32/500 hist=2 policy=0.5s elapsed=22s
+[decide] 2026-11-24 09:53:54 ar2_clock_e30/on put_back_block seed=4300000 frame=64/500 hist=3 policy=0.6s elapsed=32s
+[decide] 2026-11-24 09:54:04 ar2_clock_e30/on put_back_block seed=4300000 frame=96/500 hist=3 policy=0.5s elapsed=42s
+[decide] 2026-11-24 09:54:14 ar2_clock_e30/on put_back_block seed=4300000 frame=128/500 hist=3 policy=0.6s elapsed=51s
+[decide] 2026-11-24 09:54:24 ar2_clock_e30/on put_back_block seed=4300000 frame=160/500 hist=3 policy=0.6s elapsed=61s
+[decide] 2026-11-24 09:54:34 ar2_clock_e30/on put_back_block seed=4300000 frame=192/500 hist=3 policy=0.6s elapsed=71s
+[decide] 2026-11-24 09:54:44 ar2_clock_e30/on put_back_block seed=4300000 frame=224/500 hist=3 policy=0.6s elapsed=81s
+[decide] 2026-11-24 09:54:54 ar2_clock_e30/on put_back_block seed=4300000 frame=256/500 hist=3 policy=0.5s elapsed=91s
+[decide] 2026-11-24 09:55:04 ar2_clock_e30/on put_back_block seed=4300000 frame=288/500 hist=3 policy=0.5s elapsed=101s
+[decide] 2026-11-24 09:55:13 ar2_clock_e30/on put_back_block seed=4300000 frame=320/500 hist=3 policy=0.5s elapsed=111s
+[closed-loop] 2026-11-24 09:55:23 done  ar2_clock_e30/on put_back_block seed=4300000 success=True targets=343/500 reward=1.0 lift=0.12474799156188965  165s
+[closed-loop] 2026-11-24 09:55:23 start ar2_clock_e30/on put_back_block seed=4300010 target_limit=500 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/r2/ar2_clock_e30/on/put_back_block/seed_4300010
+[decide] 2026-11-24 09:56:20 ar2_clock_e30/on put_back_block seed=4300010 frame=0/500 hist=0 policy=0.4s elapsed=5s
+[decide] 2026-11-24 09:56:30 ar2_clock_e30/on put_back_block seed=4300010 frame=32/500 hist=2 policy=0.6s elapsed=15s
+[decide] 2026-11-24 09:56:40 ar2_clock_e30/on put_back_block seed=4300010 frame=64/500 hist=3 policy=0.6s elapsed=25s
+[decide] 2026-11-24 09:56:49 ar2_clock_e30/on put_back_block seed=4300010 frame=96/500 hist=3 policy=0.6s elapsed=35s
+[decide] 2026-11-24 09:56:59 ar2_clock_e30/on put_back_block seed=4300010 frame=128/500 hist=3 policy=0.6s elapsed=44s
+[decide] 2026-11-24 09:57:09 ar2_clock_e30/on put_back_block seed=4300010 frame=160/500 hist=3 policy=0.6s elapsed=54s
+[decide] 2026-11-24 09:57:21 ar2_clock_e30/on put_back_block seed=4300010 frame=192/500 hist=3 policy=0.6s elapsed=66s
+[decide] 2026-11-24 09:57:39 ar2_clock_e30/on put_back_block seed=4300010 frame=224/500 hist=3 policy=0.5s elapsed=84s
+[decide] 2026-11-24 09:57:58 ar2_clock_e30/on put_back_block seed=4300010 frame=256/500 hist=3 policy=0.6s elapsed=103s
+[decide] 2026-11-24 09:58:08 ar2_clock_e30/on put_back_block seed=4300010 frame=288/500 hist=3 policy=0.6s elapsed=113s
+[decide] 2026-11-24 09:58:18 ar2_clock_e30/on put_back_block seed=4300010 frame=320/500 hist=3 policy=0.5s elapsed=123s
+[decide] 2026-11-24 09:58:28 ar2_clock_e30/on put_back_block seed=4300010 frame=352/500 hist=3 policy=0.6s elapsed=133s
+[closed-loop] 2026-11-24 09:58:31 done  ar2_clock_e30/on put_back_block seed=4300010 success=True targets=358/500 reward=1.0 lift=0.1218981146812439  189s
+[closed-loop] 2026-11-24 09:58:31 start ar2_clock_e30/on put_back_block seed=4300020 target_limit=500 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/r2/ar2_clock_e30/on/put_back_block/seed_4300020
+[decide] 2026-11-24 09:59:23 ar2_clock_e30/on put_back_block seed=4300020 frame=0/500 hist=0 policy=0.4s elapsed=5s
+[decide] 2026-11-24 09:59:32 ar2_clock_e30/on put_back_block seed=4300020 frame=32/500 hist=2 policy=0.5s elapsed=15s
+[decide] 2026-11-24 09:59:42 ar2_clock_e30/on put_back_block seed=4300020 frame=64/500 hist=3 policy=0.6s elapsed=24s
+[decide] 2026-11-24 09:59:54 ar2_clock_e30/on put_back_block seed=4300020 frame=96/500 hist=3 policy=0.5s elapsed=37s
+[decide] 2026-11-24 10:00:08 ar2_clock_e30/on put_back_block seed=4300020 frame=128/500 hist=3 policy=0.5s elapsed=51s
+[decide] 2026-11-24 10:00:18 ar2_clock_e30/on put_back_block seed=4300020 frame=160/500 hist=3 policy=0.5s elapsed=61s
+[decide] 2026-11-24 10:00:28 ar2_clock_e30/on put_back_block seed=4300020 frame=192/500 hist=3 policy=0.5s elapsed=70s
+[decide] 2026-11-24 10:00:38 ar2_clock_e30/on put_back_block seed=4300020 frame=224/500 hist=3 policy=0.5s elapsed=80s
+[decide] 2026-11-24 10:00:48 ar2_clock_e30/on put_back_block seed=4300020 frame=256/500 hist=3 policy=0.5s elapsed=91s
+[decide] 2026-11-24 10:00:58 ar2_clock_e30/on put_back_block seed=4300020 frame=288/500 hist=3 policy=0.5s elapsed=100s
+[decide] 2026-11-24 10:01:08 ar2_clock_e30/on put_back_block seed=4300020 frame=320/500 hist=3 policy=0.6s elapsed=110s
+[closed-loop] 2026-11-24 10:01:22 done  ar2_clock_e30/on put_back_block seed=4300020 success=True targets=351/500 reward=1.0 lift=0.12227916717529297  170s
+[closed-loop] 2026-11-24 10:01:22 start ar2_clock_e30/on put_back_block seed=4300030 target_limit=500 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/r2/ar2_clock_e30/on/put_back_block/seed_4300030
+[decide] 2026-11-24 10:02:17 ar2_clock_e30/on put_back_block seed=4300030 frame=0/500 hist=0 policy=0.4s elapsed=7s
+[decide] 2026-11-24 10:02:31 ar2_clock_e30/on put_back_block seed=4300030 frame=32/500 hist=2 policy=0.5s elapsed=21s
+[decide] 2026-11-24 10:02:41 ar2_clock_e30/on put_back_block seed=4300030 frame=64/500 hist=3 policy=0.6s elapsed=31s
+[decide] 2026-11-24 10:02:51 ar2_clock_e30/on put_back_block seed=4300030 frame=96/500 hist=3 policy=0.6s elapsed=41s
+[decide] 2026-11-24 10:03:02 ar2_clock_e30/on put_back_block seed=4300030 frame=128/500 hist=3 policy=0.5s elapsed=52s
+[decide] 2026-11-24 10:03:17 ar2_clock_e30/on put_back_block seed=4300030 frame=160/500 hist=3 policy=0.6s elapsed=68s
+[decide] 2026-11-24 10:03:27 ar2_clock_e30/on put_back_block seed=4300030 frame=192/500 hist=3 policy=0.6s elapsed=78s
+[decide] 2026-11-24 10:03:38 ar2_clock_e30/on put_back_block seed=4300030 frame=224/500 hist=3 policy=0.6s elapsed=88s
+[decide] 2026-11-24 10:03:48 ar2_clock_e30/on put_back_block seed=4300030 frame=256/500 hist=3 policy=0.6s elapsed=98s
+[decide] 2026-11-24 10:03:58 ar2_clock_e30/on put_back_block seed=4300030 frame=288/500 hist=3 policy=0.6s elapsed=108s
+[decide] 2026-11-24 10:04:08 ar2_clock_e30/on put_back_block seed=4300030 frame=320/500 hist=3 policy=0.6s elapsed=118s
+[closed-loop] 2026-11-24 10:04:25 done  ar2_clock_e30/on put_back_block seed=4300030 success=True targets=350/500 reward=1.0 lift=0.12296134233474731  183s
+[closed-loop] 2026-11-24 10:04:25 start ar2_clock_e30/on put_back_block seed=4300040 target_limit=500 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/r2/ar2_clock_e30/on/put_back_block/seed_4300040
+[decide] 2026-11-24 10:05:24 ar2_clock_e30/on put_back_block seed=4300040 frame=0/500 hist=0 policy=0.5s elapsed=5s
+[decide] 2026-11-24 10:05:34 ar2_clock_e30/on put_back_block seed=4300040 frame=32/500 hist=2 policy=0.6s elapsed=15s
+[decide] 2026-11-24 10:05:44 ar2_clock_e30/on put_back_block seed=4300040 frame=64/500 hist=3 policy=0.6s elapsed=25s
+[decide] 2026-11-24 10:05:53 ar2_clock_e30/on put_back_block seed=4300040 frame=96/500 hist=3 policy=0.6s elapsed=35s
+[decide] 2026-11-24 10:06:03 ar2_clock_e30/on put_back_block seed=4300040 frame=128/500 hist=3 policy=0.6s elapsed=45s
+[decide] 2026-11-24 10:06:20 ar2_clock_e30/on put_back_block seed=4300040 frame=160/500 hist=3 policy=0.6s elapsed=62s
+[decide] 2026-11-24 10:06:30 ar2_clock_e30/on put_back_block seed=4300040 frame=192/500 hist=3 policy=0.6s elapsed=72s
+[decide] 2026-11-24 10:06:43 ar2_clock_e30/on put_back_block seed=4300040 frame=224/500 hist=3 policy=0.6s elapsed=85s
+[decide] 2026-11-24 10:06:58 ar2_clock_e30/on put_back_block seed=4300040 frame=256/500 hist=3 policy=0.6s elapsed=100s
+[decide] 2026-11-24 10:07:08 ar2_clock_e30/on put_back_block seed=4300040 frame=288/500 hist=3 policy=0.6s elapsed=110s
+[decide] 2026-11-24 10:07:18 ar2_clock_e30/on put_back_block seed=4300040 frame=320/500 hist=3 policy=0.6s elapsed=120s
+[closed-loop] 2026-11-24 10:07:31 done  ar2_clock_e30/on put_back_block seed=4300040 success=True targets=346/500 reward=1.0 lift=0.12309116125106812  186s
+[closed-loop] 2026-11-24 10:07:31 start ar2_clock_e30/on put_back_block seed=4300050 target_limit=500 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/r2/ar2_clock_e30/on/put_back_block/seed_4300050
+[decide] 2026-11-24 10:08:23 ar2_clock_e30/on put_back_block seed=4300050 frame=0/500 hist=0 policy=0.5s elapsed=5s
+[decide] 2026-11-24 10:08:33 ar2_clock_e30/on put_back_block seed=4300050 frame=32/500 hist=2 policy=0.6s elapsed=16s
+[decide] 2026-11-24 10:08:43 ar2_clock_e30/on put_back_block seed=4300050 frame=64/500 hist=3 policy=0.6s elapsed=26s
+[decide] 2026-11-24 10:08:53 ar2_clock_e30/on put_back_block seed=4300050 frame=96/500 hist=3 policy=0.6s elapsed=36s
+[decide] 2026-11-24 10:09:03 ar2_clock_e30/on put_back_block seed=4300050 frame=128/500 hist=3 policy=0.6s elapsed=46s
+[decide] 2026-11-24 10:09:15 ar2_clock_e30/on put_back_block seed=4300050 frame=160/500 hist=3 policy=0.6s elapsed=58s
+[decide] 2026-11-24 10:09:30 ar2_clock_e30/on put_back_block seed=4300050 frame=192/500 hist=3 policy=0.6s elapsed=73s
+[decide] 2026-11-24 10:09:41 ar2_clock_e30/on put_back_block seed=4300050 frame=224/500 hist=3 policy=0.6s elapsed=83s
+[decide] 2026-11-24 10:09:51 ar2_clock_e30/on put_back_block seed=4300050 frame=256/500 hist=3 policy=0.6s elapsed=94s
+[decide] 2026-11-24 10:10:04 ar2_clock_e30/on put_back_block seed=4300050 frame=288/500 hist=3 policy=0.6s elapsed=107s
+[decide] 2026-11-24 10:10:19 ar2_clock_e30/on put_back_block seed=4300050 frame=320/500 hist=3 policy=0.6s elapsed=122s
+[closed-loop] 2026-11-24 10:10:33 done  ar2_clock_e30/on put_back_block seed=4300050 success=True targets=351/500 reward=1.0 lift=0.12216776609420776  182s
+[closed-loop] 2026-11-24 10:10:33 start ar2_clock_e30/on put_back_block seed=4300060 target_limit=500 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/r2/ar2_clock_e30/on/put_back_block/seed_4300060
+[decide] 2026-11-24 10:11:27 ar2_clock_e30/on put_back_block seed=4300060 frame=0/500 hist=0 policy=0.5s elapsed=5s
+[decide] 2026-11-24 10:11:37 ar2_clock_e30/on put_back_block seed=4300060 frame=32/500 hist=2 policy=0.6s elapsed=16s
+[decide] 2026-11-24 10:11:47 ar2_clock_e30/on put_back_block seed=4300060 frame=64/500 hist=3 policy=0.6s elapsed=25s
+[decide] 2026-11-24 10:11:57 ar2_clock_e30/on put_back_block seed=4300060 frame=96/500 hist=3 policy=0.6s elapsed=36s
+[decide] 2026-11-24 10:12:07 ar2_clock_e30/on put_back_block seed=4300060 frame=128/500 hist=3 policy=0.6s elapsed=46s
+[decide] 2026-11-24 10:12:17 ar2_clock_e30/on put_back_block seed=4300060 frame=160/500 hist=3 policy=0.6s elapsed=56s
+[decide] 2026-11-24 10:12:34 ar2_clock_e30/on put_back_block seed=4300060 frame=192/500 hist=3 policy=0.6s elapsed=72s
+[decide] 2026-11-24 10:12:44 ar2_clock_e30/on put_back_block seed=4300060 frame=224/500 hist=3 policy=0.6s elapsed=83s
+[decide] 2026-11-24 10:12:55 ar2_clock_e30/on put_back_block seed=4300060 frame=256/500 hist=3 policy=0.6s elapsed=93s
+[decide] 2026-11-24 10:13:05 ar2_clock_e30/on put_back_block seed=4300060 frame=288/500 hist=3 policy=0.6s elapsed=103s
+[decide] 2026-11-24 10:13:15 ar2_clock_e30/on put_back_block seed=4300060 frame=320/500 hist=3 policy=0.6s elapsed=114s
+[closed-loop] 2026-11-24 10:13:25 done  ar2_clock_e30/on put_back_block seed=4300060 success=True targets=345/500 reward=1.0 lift=0.12462252378463745  172s
+[closed-loop] 2026-11-24 10:13:25 start ar2_clock_e30/on put_back_block seed=4300070 target_limit=500 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/r2/ar2_clock_e30/on/put_back_block/seed_4300070
+[decide] 2026-11-24 10:14:27 ar2_clock_e30/on put_back_block seed=4300070 frame=0/500 hist=0 policy=0.5s elapsed=5s
+[decide] 2026-11-24 10:14:37 ar2_clock_e30/on put_back_block seed=4300070 frame=32/500 hist=2 policy=0.6s elapsed=15s
+[decide] 2026-11-24 10:14:47 ar2_clock_e30/on put_back_block seed=4300070 frame=64/500 hist=3 policy=0.6s elapsed=25s
+[decide] 2026-11-24 10:14:57 ar2_clock_e30/on put_back_block seed=4300070 frame=96/500 hist=3 policy=0.6s elapsed=35s
+[decide] 2026-11-24 10:15:13 ar2_clock_e30/on put_back_block seed=4300070 frame=128/500 hist=3 policy=0.6s elapsed=51s
+[decide] 2026-11-24 10:15:23 ar2_clock_e30/on put_back_block seed=4300070 frame=160/500 hist=3 policy=0.6s elapsed=61s
+[decide] 2026-11-24 10:15:36 ar2_clock_e30/on put_back_block seed=4300070 frame=192/500 hist=3 policy=0.6s elapsed=74s
+[decide] 2026-11-24 10:15:51 ar2_clock_e30/on put_back_block seed=4300070 frame=224/500 hist=3 policy=0.6s elapsed=89s
+[decide] 2026-11-24 10:16:01 ar2_clock_e30/on put_back_block seed=4300070 frame=256/500 hist=3 policy=0.6s elapsed=99s
+[decide] 2026-11-24 10:16:11 ar2_clock_e30/on put_back_block seed=4300070 frame=288/500 hist=3 policy=0.6s elapsed=109s
+[decide] 2026-11-24 10:16:21 ar2_clock_e30/on put_back_block seed=4300070 frame=320/500 hist=3 policy=0.6s elapsed=120s
+[closed-loop] 2026-11-24 10:16:29 done  ar2_clock_e30/on put_back_block seed=4300070 success=True targets=337/500 reward=1.0 lift=0.12496531009674072  184s
+[closed-loop] 2026-11-24 10:16:29 start ar2_clock_e30/on put_back_block seed=4300080 target_limit=500 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/r2/ar2_clock_e30/on/put_back_block/seed_4300080
+[decide] 2026-11-24 10:17:31 ar2_clock_e30/on put_back_block seed=4300080 frame=0/500 hist=0 policy=0.5s elapsed=9s
+[decide] 2026-11-24 10:17:41 ar2_clock_e30/on put_back_block seed=4300080 frame=32/500 hist=2 policy=0.6s elapsed=19s
+[decide] 2026-11-24 10:17:51 ar2_clock_e30/on put_back_block seed=4300080 frame=64/500 hist=3 policy=0.6s elapsed=29s
+[decide] 2026-11-24 10:18:01 ar2_clock_e30/on put_back_block seed=4300080 frame=96/500 hist=3 policy=0.6s elapsed=40s
+[decide] 2026-11-24 10:18:13 ar2_clock_e30/on put_back_block seed=4300080 frame=128/500 hist=3 policy=0.6s elapsed=52s
+[decide] 2026-11-24 10:18:28 ar2_clock_e30/on put_back_block seed=4300080 frame=160/500 hist=3 policy=0.6s elapsed=66s
+[decide] 2026-11-24 10:18:40 ar2_clock_e30/on put_back_block seed=4300080 frame=192/500 hist=3 policy=0.6s elapsed=79s
+[decide] 2026-11-24 10:18:55 ar2_clock_e30/on put_back_block seed=4300080 frame=224/500 hist=3 policy=0.6s elapsed=94s
+[decide] 2026-11-24 10:19:06 ar2_clock_e30/on put_back_block seed=4300080 frame=256/500 hist=3 policy=0.6s elapsed=105s
+[decide] 2026-11-24 10:19:16 ar2_clock_e30/on put_back_block seed=4300080 frame=288/500 hist=3 policy=0.6s elapsed=115s
+[decide] 2026-11-24 10:19:27 ar2_clock_e30/on put_back_block seed=4300080 frame=320/500 hist=3 policy=0.6s elapsed=125s
+[decide] 2026-11-24 10:19:37 ar2_clock_e30/on put_back_block seed=4300080 frame=352/500 hist=3 policy=0.6s elapsed=135s
+[closed-loop] 2026-11-24 10:19:40 done  ar2_clock_e30/on put_back_block seed=4300080 success=True targets=357/500 reward=1.0 lift=0.12307405471801758  191s
+[closed-loop] 2026-11-24 10:19:40 start ar2_clock_e30/on put_back_block seed=4300090 target_limit=500 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/r2/ar2_clock_e30/on/put_back_block/seed_4300090
+[decide] 2026-11-24 10:20:38 ar2_clock_e30/on put_back_block seed=4300090 frame=0/500 hist=0 policy=0.5s elapsed=6s
+[decide] 2026-11-24 10:20:49 ar2_clock_e30/on put_back_block seed=4300090 frame=32/500 hist=2 policy=0.6s elapsed=16s
+[decide] 2026-11-24 10:20:59 ar2_clock_e30/on put_back_block seed=4300090 frame=64/500 hist=3 policy=0.6s elapsed=26s
+[decide] 2026-11-24 10:21:09 ar2_clock_e30/on put_back_block seed=4300090 frame=96/500 hist=3 policy=0.6s elapsed=36s
+[decide] 2026-11-24 10:21:26 ar2_clock_e30/on put_back_block seed=4300090 frame=128/500 hist=3 policy=0.6s elapsed=53s
+[decide] 2026-11-24 10:21:40 ar2_clock_e30/on put_back_block seed=4300090 frame=160/500 hist=3 policy=0.6s elapsed=68s
+[decide] 2026-11-24 10:21:59 ar2_clock_e30/on put_back_block seed=4300090 frame=192/500 hist=3 policy=0.6s elapsed=86s
+[decide] 2026-11-24 10:22:10 ar2_clock_e30/on put_back_block seed=4300090 frame=224/500 hist=3 policy=0.6s elapsed=97s
+[decide] 2026-11-24 10:22:20 ar2_clock_e30/on put_back_block seed=4300090 frame=256/500 hist=3 policy=0.6s elapsed=108s
+[decide] 2026-11-24 10:22:31 ar2_clock_e30/on put_back_block seed=4300090 frame=288/500 hist=3 policy=0.6s elapsed=118s
+[decide] 2026-11-24 10:22:41 ar2_clock_e30/on put_back_block seed=4300090 frame=320/500 hist=3 policy=0.6s elapsed=128s
+[closed-loop] 2026-11-24 10:22:53 done  ar2_clock_e30/on put_back_block seed=4300090 success=True targets=351/500 reward=1.0 lift=0.12375485897064209  193s
+
+label/mode              task               n  success  95% CI        lift5cm  reward  targets dep_null  dep_off   dep_on  pol_s
+ar2_clock_e30/on        put_back_block    35     0.97  [0.85,0.99]      1.00    0.97      357        -        -        -    0.6
+ar2_none_e30/on         put_back_block   100     0.00  [0.00,0.04]      1.00    0.00      500        -        -        -    0.5
+ar2_none_e30/on         swap_blocks       96     0.22  [0.15,0.31]      0.99    0.22      908        -        -        -    0.5
+ar2_prop_e30/on         put_back_block   100     1.00  [0.96,1.00]      1.00    1.00      344        -        -        -    0.6
+ar2_prop_e30/on         swap_blocks      100     1.00  [0.96,1.00]      1.00    1.00      586        -        -        -    0.6
+ar_2task_e30/on         put_back_block   100     1.00  [0.96,1.00]      1.00    1.00      350        -        -        -    0.6
+ar_2task_e30/on         swap_blocks      100     0.55  [0.45,0.64]      0.99    0.55      771        -        -        -    0.6
+
+paired on common scenes (A vs B):                         n  both  only A  only B  neither  McNemar p
+  ar2_clock_e30/on         vs ar2_none_e30/on           35     0      34       0        1  0.000
+  ar2_clock_e30/on         vs ar2_prop_e30/on           35    34       0       1        0  1.000
+  ar2_clock_e30/on         vs ar_2task_e30/on           35    34       0       1        0  1.000
+  ar2_none_e30/on          vs ar2_prop_e30/on          196    21       0     175        0  0.000
+  ar2_none_e30/on          vs ar_2task_e30/on          196    18       3     133       42  0.000
+  ar2_prop_e30/on          vs ar_2task_e30/on          200   155      45       0        0  0.000
+
+[summary] 631 episodes, 0 open errors -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/r2/SUMMARY.json

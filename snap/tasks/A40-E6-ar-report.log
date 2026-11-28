@@ -1,0 +1,10 @@
+
+[queue5] 2026-11-19 05:33:25 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e6_report.py
+battery_try        battery_ar_e30         1-50: 0/0  51-100: 0/0  1-100: 0/0
+battery_try        battery_arprop_e30     1-50: 0/0  51-100: 0/0  1-100: 0/0
+rearrange_blocks   rearrange_ar_e30       1-50: 15/50  51-100: 14/50  1-100: 29/100
+swap_T             swapT_ar_e30           1-50: 27/50  51-100: 24/50  1-100: 51/100
+S-C (b) battery_try scenes 1-50: AR 0, ledger 0 on 0 paired scenes (finished AR 0, ledger 0); ledger-only 0, AR-only 0, sign p 1.0000
+S-C (b) VERDICT: WAIT (50 of scenes 1-50 not finished in both arms)
+  battery_try 51-100 (descriptive): AR 0, ledger 0 on 0 paired scenes; ledger-only 0, AR-only 0, sign p 1.0000
+  battery_try 1-100 (descriptive): AR 0, ledger 0 on 0 paired scenes; ledger-only 0, AR-only 0, sign p 1.0000

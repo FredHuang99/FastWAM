@@ -1,0 +1,9 @@
+
+[queue5] 2026-11-23 07:06:24 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e9e25_verdict.py
+  ar2_arev_e30_p64                   swap_blocks     pairs 46, Delta +1 (vis-only 1, hid-only 0), p 1.0000, hidden 18/50 -> FLOOR NOT MET
+  ar2_arev_e30_p256                  swap_blocks     pairs 46, Delta +0 (vis-only 0, hid-only 0), p 1.0000, hidden 19/50 -> FLOOR NOT MET
+  ar2_tw_e30_p64                     swap_blocks     pairs 0, Delta +0 (vis-only 0, hid-only 0), p 1.0000, hidden 0/50 -> WAIT
+  ar2_tw_e30_p256                    swap_blocks     pairs 0, Delta +0 (vis-only 0, hid-only 0), p 1.0000, hidden 0/50 -> WAIT
+E9: {'no_stress': {'swap': 42, 'swap_finished': 100, 'put': 31, 'put_finished': 100}, 'verdict': 'NO VERDICT (floor: put 31/100 < 90)', 'event_frames_off_swap_1_50': '3/50 (descriptive)'}
+E25: {'no_stress': {'swap': 0, 'swap_finished': 0, 'put': 0, 'put_finished': 0}, 'verdict': 'WAIT', 'stress': 'WAIT', 'with_E22a': {'images': {64: 'WAIT', 256: 'WAIT'}, 'body_clock': {64: 'NOT HURT', 256: 'FLOOR NOT MET', 1024: 'FLOOR NOT MET'}, 'reading': 'WAIT / MIXED'}}
+G3 image column: {64: 'WAIT', 256: 'WAIT'}

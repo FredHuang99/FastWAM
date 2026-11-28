@@ -1,0 +1,5 @@
+
+[queue5] 2026-11-18 17:43:20 $ bash -c bash /workspace/FastWAM-memory2/scripts/fullft/a40_prep_task.sh rearrange_blocks
+[prep] 2026-11-18 09:43:21 rearrange_blocks; disk: /dev/sdb         19T  9.3T  8.0T  54% /workspace/FastWAM-memory2
+rearrange_blocks: outputs/memory_v2/closed_loop/scenes_seed42_n100_rearrange_blocks/rearrange_blocks.json NOT complete (0 scenes, next seed None)
+[prep] rearrange_blocks: no complete scene bank at outputs/memory_v2/closed_loop/scenes_seed42_n100_rearrange_blocks: stop

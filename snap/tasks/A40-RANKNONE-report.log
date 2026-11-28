@@ -1,0 +1,4 @@
+
+[queue5] 2026-11-28 19:01:43 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v20_verdict.py ranknone
+{"run": "main-table cell ranking without history (described)", "finished": {"ranking_none_e30": 100}, "success_1_100": 6, "against_ranking_ar_e30": {"scenes": 100, "new": 6, "ref": 77, "D": -0.71, "ci95": [-0.8, -0.61], "only_new": 2, "only_ref": 73}, "against_ranking_arprop_e30": {"scenes": 100, "new": 6, "ref": 65, "D": -0.59, "ci95": [-0.68, -0.49], "only_new": 0, "only_ref": 59}, "verdict": "DESCRIBED"}
+V20 RANKNONE: DESCRIBED

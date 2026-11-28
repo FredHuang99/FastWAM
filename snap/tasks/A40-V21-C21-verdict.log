@@ -1,0 +1,24 @@
+
+[queue5] 2026-11-28 00:29:45 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v21_verdict.py c21 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/rearr_ledger.py v21:rearr_arprop_pw_e30 v20:rearr_pw_e30
+{"run": "card 21 rearr_arprop_pw (old writer + pre-event weighting), non-inferiority against rearr_pw", "margin": -0.1, "finished": {"rearr_arprop_pw_e30": 100, "rearr_pw_e30": 100}, "main": {"scenes": 100, "new": 45, "ref": 93, "D": -0.48, "ci95": [-0.59, -0.37], "only_new": 3, "only_ref": 51}, "verdict": "TIMELY WRITER NEEDED", "described": {"rearr_arprop_pw_e30": {"pressed twice or more (after step 1 was complete)": 26, "stage 1, then moved block1 again (which-block error)": 19, "success": 45, "never pressed: block1 placed on the empty mat": 10}, "rearrange_arprop_e30_h100": {"success": 62, "pressed twice or more (after step 1 was complete)": 18, "never pressed: block1 placed on the empty mat": 17, "stage 1, then moved block1 again (which-block error)": 3}, "rearr_pw_e30": {"success": 93, "never pressed: block1 placed on the empty mat": 4, "stage 1, then moved block1 again (which-block error)": 2, "pressed too early (block1 not on the empty mat at the press)": 1}}, "expectation_written_before": {"pressed_twice": 26, "late writing causes repeats (twice >= 10)": true}, "described_e10": {"success": "18/100", "classes": {"never pressed: block1 placed on the empty mat": 50, "success": 18, "pressed twice or more (after step 1 was complete)": 13, "stage 1, then moved block1 again (which-block error)": 15, "stage 1, second step never started (block2 never lifted)": 4}}, "described_e20": {"success": "62/100", "classes": {"success": 62, "never pressed: block1 placed on the empty mat": 24, "stage 1, then moved block1 again (which-block error)": 1, "pressed twice or more (after step 1 was complete)": 13}}, "seed_extension_v21_5_5_6": "not due (|D| >= 0.30)"}
+V21 C21: TIMELY WRITER NEEDED
+
+== v21:rearr_arprop_pw_e30
+    3  never pressed: left-arm entries at the last decision bottom,close,top   e.g. []
+    5  never pressed: left-arm entries at the last decision bottom,top   e.g. []
+    2  never pressed: left-arm entries at the last decision close,top   e.g. []
+   19  pressed once, failed later: first press sometimes in the record   e.g. ['4300001', '4300015', '4300016', '4300019']
+   25  pressed twice: first press never in the record   e.g. ['4300000', '4300002', '4300005', '4300010']
+    1  pressed twice: first press sometimes in the record   e.g. ['4300027']
+   45  success: first press sometimes in the record   e.g. ['4300003', '4300004', '4300006', '4300007']
+  write delay (targets from the press to the first decision whose record has it): median 18.0, min 11, max 22, n 88
+
+== v20:rearr_pw_e30
+    4  never pressed: left-arm entries at the last decision bottom,close,top   e.g. []
+    1  pressed once, failed later: first press always in the record   e.g. ['4300093']
+    2  pressed once, failed later: first press sometimes in the record   e.g. ['4300059', '4300097']
+   31  success: first press always in the record   e.g. ['4300001', '4300002', '4300003', '4300007']
+   62  success: first press sometimes in the record   e.g. ['4300000', '4300004', '4300005', '4300006']
+  write delay (targets from the press to the first decision whose record has it): median 9.5, min 5, max 14, n 96
+
+REARR LEDGER REPORT done

@@ -1,0 +1,12 @@
+
+[queue5] 2026-11-27 13:16:49 $ bash -c RUN=obs_s800 TAG=e5 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh
+[fetch] disk before: /dev/sdb         19T   11T  6.8T  61% /workspace/FastWAM-memory2
+[fetch] 2026-11-27 05:16:50 fetching obs_s800_e5 (attempt 1)
+[relay] get hhyfred/memwam-fullft/exports/obs_s800_e5/export_e5.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e5/export_e5.pt (12042061801 bytes)
+[relay] get hhyfred/memwam-fullft/exports/obs_s800_e5/export_e5.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/obs_s800_e5/export_e5.pt.sha256 (79 bytes)
+export_e5.pt: OK
+total 11759844
+drwxr-xr-x  2 root root        4096 Nov 27 05:24 .
+drwxr-xr-x 91 root root        4096 Nov 27 05:16 ..
+-rw-r--r--  1 root root 12042061801 Nov 27 05:24 export_e5.pt
+-rw-r--r--  1 root root          79 Nov 27 05:24 export_e5.pt.sha256

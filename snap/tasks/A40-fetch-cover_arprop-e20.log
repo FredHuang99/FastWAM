@@ -1,0 +1,12 @@
+
+[queue5] 2026-11-27 01:56:23 $ bash -c RUN=cover_arprop TAG=e20 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh
+[fetch] disk before: /dev/sdb         19T   11T  6.9T  61% /workspace/FastWAM-memory2
+[fetch] 2026-11-26 17:56:24 fetching cover_arprop_e20 (attempt 1)
+[relay] get hhyfred/memwam-fullft/exports/cover_arprop_e20/export_e20.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e20/export_e20.pt (12042506245 bytes)
+[relay] get hhyfred/memwam-fullft/exports/cover_arprop_e20/export_e20.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/cover_arprop_e20/export_e20.pt.sha256 (80 bytes)
+export_e20.pt: OK
+total 11760280
+drwxr-xr-x  2 root root        4096 Nov 26 18:23 .
+drwxr-xr-x 86 root root        4096 Nov 26 17:56 ..
+-rw-r--r--  1 root root 12042506245 Nov 26 18:23 export_e20.pt
+-rw-r--r--  1 root root          80 Nov 26 18:23 export_e20.pt.sha256

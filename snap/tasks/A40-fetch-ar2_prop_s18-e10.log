@@ -1,0 +1,13 @@
+
+[queue5] 2026-11-28 16:48:24 $ bash -c RUN=ar2_prop_s18 TAG=e10 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh
+[fetch] 2026-11-28 08:48:25 waiting for exports/ar2_prop_s18_e10 on the relay
+[fetch] disk before: /dev/sdb         19T   11T  6.6T  62% /workspace/FastWAM-memory2
+[fetch] 2026-11-28 08:53:25 fetching ar2_prop_s18_e10 (attempt 1)
+[relay] get hhyfred/memwam-fullft/exports/ar2_prop_s18_e10/export_e10.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_s18_e10/export_e10.pt (12042506309 bytes)
+[relay] get hhyfred/memwam-fullft/exports/ar2_prop_s18_e10/export_e10.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_s18_e10/export_e10.pt.sha256 (80 bytes)
+export_e10.pt: OK
+total 11760280
+drwxr-xr-x   2 root root        4096 Nov 28 09:03 .
+drwxr-xr-x 104 root root        4096 Nov 28 08:53 ..
+-rw-r--r--   1 root root 12042506309 Nov 28 09:03 export_e10.pt
+-rw-r--r--   1 root root          80 Nov 28 09:03 export_e10.pt.sha256

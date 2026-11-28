@@ -1,0 +1,144 @@
+{
+ "run": "D1 decision training",
+ "sesoi": 0.15,
+ "arms": {
+  "d1_w": {
+   "finished_swap": 100,
+   "finished_put": 100,
+   "main": {
+    "scenes": 200,
+    "new": 120,
+    "ref": 111,
+    "D": 0.045,
+    "ci95": [
+     -0.025,
+     0.115
+    ],
+    "only_new": 31,
+    "only_ref": 22
+   },
+   "verdict": "UNCERTAIN at 100 pairs -> NO HELP at 200 pairs (pre-set extension)",
+   "extension": {
+    "r2_finished": {
+     "d1_w_e30": 100,
+     "ar_2task_e30": 100
+    },
+    "pooled": {
+     "scenes": 200,
+     "new": 120,
+     "ref": 111,
+     "D": 0.045,
+     "ci95": [
+      -0.025,
+      0.115
+     ],
+     "only_new": 31,
+     "only_ref": 22
+    },
+    "verdict": "NO HELP"
+   },
+   "main_100": {
+    "scenes": 100,
+    "new": 61,
+    "ref": 56,
+    "D": 0.05,
+    "ci95": [
+     -0.06,
+     0.15
+    ],
+    "only_new": 17,
+    "only_ref": 12
+   },
+   "described_put_back": {
+    "scenes": 100,
+    "new": 100,
+    "ref": 100,
+    "D": 0.0,
+    "ci95": [
+     0.0,
+     0.0
+    ],
+    "only_new": 0,
+    "only_ref": 0
+   }
+  },
+  "d1_wn": {
+   "finished_swap": 100,
+   "finished_put": 100,
+   "main": {
+    "scenes": 200,
+    "new": 129,
+    "ref": 111,
+    "D": 0.09,
+    "ci95": [
+     0.02,
+     0.16
+    ],
+    "only_new": 37,
+    "only_ref": 19
+   },
+   "verdict": "UNCERTAIN at 100 pairs -> UNCERTAIN at 200 pairs (pre-set extension)",
+   "extension": {
+    "r2_finished": {
+     "d1_wn_e30": 100,
+     "ar_2task_e30": 100
+    },
+    "pooled": {
+     "scenes": 200,
+     "new": 129,
+     "ref": 111,
+     "D": 0.09,
+     "ci95": [
+      0.02,
+      0.16
+     ],
+     "only_new": 37,
+     "only_ref": 19
+    },
+    "verdict": "UNCERTAIN"
+   },
+   "main_100": {
+    "scenes": 100,
+    "new": 61,
+    "ref": 56,
+    "D": 0.05,
+    "ci95": [
+     -0.06,
+     0.15
+    ],
+    "only_new": 17,
+    "only_ref": 12
+   },
+   "described_put_back": {
+    "scenes": 100,
+    "new": 98,
+    "ref": 100,
+    "D": -0.02,
+    "ci95": [
+     -0.05,
+     0.0
+    ],
+    "only_new": 0,
+    "only_ref": 2
+   }
+  }
+ },
+ "arm_difference_described": {
+  "scenes": 100,
+  "new": 61,
+  "ref": 61,
+  "D": 0.0,
+  "ci95": [
+   -0.11,
+   0.11
+  ],
+  "only_new": 16,
+  "only_ref": 16
+ },
+ "plan_6_2_back_to_fable": [
+  "d1_w: NO HELP (200 pairs), 120/200",
+  "d1_w: UNCERTAIN at 100 pairs -> NO HELP at 200 pairs (pre-set extension), 120/100",
+  "d1_wn: UNCERTAIN at 100 pairs -> UNCERTAIN at 200 pairs (pre-set extension), 129/100"
+ ],
+ "verdict": "d1_w: UNCERTAIN at 100 pairs -> NO HELP at 200 pairs (pre-set extension); d1_wn: UNCERTAIN at 100 pairs -> UNCERTAIN at 200 pairs (pre-set extension)"
+}

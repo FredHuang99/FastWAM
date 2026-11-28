@@ -1,0 +1,54 @@
+
+[queue5] 2026-11-28 19:54:40 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag8.py report
+Traceback (most recent call last):
+  File "/workspace/FastWAM-memory2/scripts/fullft/diag8.py", line 90, in <module>
+    main()
+  File "/workspace/FastWAM-memory2/scripts/fullft/diag8.py", line 80, in main
+    "settings": {k: one(k) for k in SETTINGS}, "verdict": "DESCRIBED"}
+                    ^^^^^^
+  File "/workspace/FastWAM-memory2/scripts/fullft/diag8.py", line 62, in one
+    c50 = compare(new, ref, first)
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/FastWAM-memory2/scripts/fullft/deed_verdict.py", line 63, in compare
+    d, lo, hi = a1.paired_ci(a, b)
+                ^^^^^^^^^^^^^^^^^^
+  File "/workspace/FastWAM-memory2/scripts/fullft/a1_verdict.py", line 46, in paired_ci
+    d = sum(a) / k - sum(b) / k
+        ~~~~~~~^~~
+ZeroDivisionError: division by zero
+
+[queue5] 2026-11-28 20:05:20 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag8.py report
+Traceback (most recent call last):
+  File "/workspace/FastWAM-memory2/scripts/fullft/diag8.py", line 90, in <module>
+    main()
+  File "/workspace/FastWAM-memory2/scripts/fullft/diag8.py", line 80, in main
+    "settings": {k: one(k) for k in SETTINGS}, "verdict": "DESCRIBED"}
+                    ^^^^^^
+  File "/workspace/FastWAM-memory2/scripts/fullft/diag8.py", line 62, in one
+    c50 = compare(new, ref, first)
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/FastWAM-memory2/scripts/fullft/deed_verdict.py", line 63, in compare
+    d, lo, hi = a1.paired_ci(a, b)
+                ^^^^^^^^^^^^^^^^^^
+  File "/workspace/FastWAM-memory2/scripts/fullft/a1_verdict.py", line 46, in paired_ci
+    d = sum(a) / k - sum(b) / k
+        ~~~~~~~^~~
+ZeroDivisionError: division by zero
+
+[queue5] 2026-11-28 20:16:02 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag8.py report
+Traceback (most recent call last):
+  File "/workspace/FastWAM-memory2/scripts/fullft/diag8.py", line 90, in <module>
+    main()
+  File "/workspace/FastWAM-memory2/scripts/fullft/diag8.py", line 80, in main
+    "settings": {k: one(k) for k in SETTINGS}, "verdict": "DESCRIBED"}
+                    ^^^^^^
+  File "/workspace/FastWAM-memory2/scripts/fullft/diag8.py", line 62, in one
+    c50 = compare(new, ref, first)
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/FastWAM-memory2/scripts/fullft/deed_verdict.py", line 63, in compare
+    d, lo, hi = a1.paired_ci(a, b)
+                ^^^^^^^^^^^^^^^^^^
+  File "/workspace/FastWAM-memory2/scripts/fullft/a1_verdict.py", line 46, in paired_ci
+    d = sum(a) / k - sum(b) / k
+        ~~~~~~~^~~
+ZeroDivisionError: division by zero

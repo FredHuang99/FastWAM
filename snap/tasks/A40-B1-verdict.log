@@ -1,0 +1,4 @@
+
+[queue5] 2026-11-22 18:34:48 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/deed_verdict.py b1
+{"run": "B1 body record vs three-frame", "sesoi": 0.15, "tasks": {"rearrange_blocks": {"finished": {"rearrange_arprop_e30": 100, "rearrange_ar_e30": 100}, "main": {"scenes": 100, "new": 62, "ref": 29, "D": 0.33, "ci95": [0.23, 0.43], "only_new": 36, "only_ref": 3}, "verdict": "LEDGER HELPS"}, "swap_T": {"finished": {"swapT_arprop_e30": 100, "swapT_ar_e30": 100}, "main": {"scenes": 100, "new": 49, "ref": 51, "D": -0.02, "ci95": [-0.11, 0.07], "only_new": 9, "only_ref": 11}, "verdict": "SAME AS AR"}}, "plan_6_2_item_1": false, "verdict": "rearrange_blocks: LEDGER HELPS; swap_T: SAME AS AR"}
+B1 VERDICT: rearrange_blocks: LEDGER HELPS; swap_T: SAME AS AR

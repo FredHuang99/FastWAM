@@ -1,0 +1,15 @@
+
+[queue5] 2026-11-21 17:07:54 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e17_report.py
+press_arprop_e10   1-50:  0/50 (first right  2)   51-100:  0/50 (first right  1)
+press_arprop_e20   1-50:  4/50 (first right 28)   51-100:  4/50 (first right 28)
+press_arprop_e30   1-50:  0/50 (first right 10)   51-100:  2/50 (first right 10)
+press_ar_e30       1-50:  2/50 (first right  7)   51-100:  0/50 (first right  5)
+press_fast_e10     1-50:  1/50 (first right  4)   51-100:  1/50 (first right  1)
+press_fast_e20     1-50: 11/50 (first right 33)   51-100: 11/50 (first right 35)
+press_fast_e30     1-50: 13/50 (first right 35)   51-100: 13/50 (first right 36)
+press_count_e10    1-50:  0/50 (first right  3)   51-100:  1/50 (first right  5)
+press_count_e20    1-50:  0/50 (first right  1)   51-100:  0/50 (first right  2)
+press_count_e30    1-50:  8/50 (first right 27)   51-100:  5/50 (first right 23)
+P-SEL picks (1-50): {'press_arprop': 'e20', 'press_ar': 'e30', 'press_fast': 'e30', 'press_count': 'e30'}
+E3 analogue on 51-100 (A40, descriptive): {'a': 'press_fast_e30', 'b': 'press_arprop_e20', 'n': 50, 'a_success': 13, 'b_success': 4, 'diff': 9, 'only_a': 11, 'only_b': 2, 'p': 0.0224609375}
+E4 analogue on 51-100 (A40, descriptive): {'a': 'press_count_e30', 'b': 'press_fast_e30', 'n': 50, 'a_success': 5, 'b_success': 13, 'diff': -8, 'only_a': 4, 'only_b': 12, 'p': 0.076812744140625}

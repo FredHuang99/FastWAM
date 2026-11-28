@@ -1,0 +1,14 @@
+
+[queue5] 2026-11-17 11:10:26 $ bash -c RUN=ar_2task TAG=e20 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh
+[fetch] 2026-11-17 03:10:27 fetching ar_2task_e20 (attempt 1)
+
+[queue5] 2026-11-17 13:24:00 $ bash -c RUN=ar_2task TAG=e20 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh
+[fetch] 2026-11-17 05:24:01 fetching ar_2task_e20 (attempt 1)
+[relay] get hhyfred/memwam-fullft/exports/ar_2task_e20/export_e20.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt (12042062883 bytes)
+[relay] get hhyfred/memwam-fullft/exports/ar_2task_e20/export_e20.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/ar_2task_e20/export_e20.pt.sha256 (80 bytes)
+export_e20.pt: OK
+total 11759844
+drwxr-xr-x  2 root root        4096 Nov 17 05:47 .
+drwxr-xr-x 10 root root        4096 Nov 17 03:10 ..
+-rw-r--r--  1 root root 12042062883 Nov 17 05:46 export_e20.pt
+-rw-r--r--  1 root root          80 Nov 17 05:47 export_e20.pt.sha256

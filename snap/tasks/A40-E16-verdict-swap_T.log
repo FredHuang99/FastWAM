@@ -1,0 +1,5 @@
+
+[queue5] 2026-11-23 12:48:39 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e16_verdict.py --task swap_T
+E16 swap_T no stress 1-100: {'clock': '51/100', 'AR': '51/100', 'ledger': '49/100', 'clock_vs_AR': {'n': 100, 'clock': 51, 'AR': 51, 'only_clock': 10, 'only_AR': 10, 'p': 1.0}, 'clock_vs_ledger': {'n': 100, 'clock': 51, 'ledger': 49, 'only_clock': 15, 'only_ledger': 13, 'p': 0.8505540192127228}}
+  swapT_clock_e30_p64                swap_T          pairs 19, Delta +0 (vis-only 0, hid-only 0), p 1.0000, hidden 26/50 -> FLOOR NOT MET
+E16 VERDICT (swap_T): NO VERDICT (floor: clock no stress 51/100 < 70); descriptive only (no E2 prediction)

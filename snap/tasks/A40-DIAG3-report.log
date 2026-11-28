@@ -1,0 +1,14 @@
+
+[queue5] 2026-11-27 01:35:56 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag_cpu_v21.py diag3
+
+== rv3c:rearr_v3c_e30: {'pressed_twice': 45, 'second_press': {'immediately (no block lifted in between)': 45}, 'targets_between': {'median': 17}, 'lowest_ee_at_first_press_m': [0.184, 0.185, 0.185, 0.185, 0.185, 0.185, 0.185, 0.185, 0.185, 0.185, 0.185, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.187, 0.187, 0.187, 0.187, 0.187, 0.187, 0.187, 0.187, 0.187, 0.187, 0.187, 0.188, 0.188, 0.188, 0.189, 0.191], 'first_press_in_record_between': {'sometimes': 31, 'always': 14}, 'first_press_in_record_at_the_starting_decision': {'None': 45}, 'write_delay_targets': {'median': 9.5, 'min': 4, 'max': 14, 'n': 86}}
+
+== rv3c:rearr_v3c_h2_e30: {'pressed_twice': 27, 'second_press': {'immediately (no block lifted in between)': 27}, 'targets_between': {'median': 17}, 'lowest_ee_at_first_press_m': [0.185, 0.185, 0.185, 0.185, 0.185, 0.185, 0.185, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.187, 0.187, 0.187, 0.187, 0.187, 0.188, 0.188, 0.189, 0.19], 'first_press_in_record_between': {'always': 10, 'sometimes': 16, 'never': 1}, 'first_press_in_record_at_the_starting_decision': {'None': 27}, 'write_delay_targets': {'median': 10.0, 'min': 5, 'max': 13, 'n': 84}}
+
+== v20:rearr_pw_e30: {'pressed_twice': 0, 'second_press': {}, 'targets_between': None, 'lowest_ee_at_first_press_m': [], 'write_delay_targets': {'median': 9.5, 'min': 5, 'max': 14, 'n': 96}}
+
+== e6:rearrange_arprop_e30: {'pressed_twice': 18, 'second_press': {'immediately (no block lifted in between)': 18}, 'targets_between': {'median': 16.0}, 'lowest_ee_at_first_press_m': [0.184, 0.184, 0.184, 0.185, 0.185, 0.185, 0.185, 0.185, 0.186, 0.186, 0.186, 0.186, 0.186, 0.188, 0.188, 0.188, 0.189, 0.19], 'first_press_in_record_between': {'never': 15, 'sometimes': 3}, 'first_press_in_record_at_the_starting_decision': {'None': 18}, 'write_delay_targets': {'median': 18.0, 'min': 9, 'max': 48, 'n': 76}}
+
+== e6:rearrange_ar_e30: {'pressed_twice': 34, 'second_press': {'immediately (no block lifted in between)': 34}, 'targets_between': {'median': 16.5}, 'lowest_ee_at_first_press_m': [0.183, 0.185, 0.185, 0.185, 0.185, 0.185, 0.185, 0.185, 0.185, 0.185, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.186, 0.187, 0.187, 0.187, 0.187, 0.187, 0.187, 0.187, 0.188, 0.189], 'first_press_in_record_between': {'never': 34}, 'first_press_in_record_at_the_starting_decision': {'None': 34}}
+
+DIAG V21 DIAG3: DESCRIBED

@@ -1,0 +1,12 @@
+
+[queue5] 2026-11-18 17:43:20 $ bash -c RUN=ar2_long TAG=e45 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh
+[fetch] disk before: /dev/sdb         19T  9.3T  8.0T  54% /workspace/FastWAM-memory2
+[fetch] 2026-11-18 09:43:21 fetching ar2_long_e45 (attempt 1)
+[relay] get hhyfred/memwam-fullft/exports/ar2_long_e45/export_e45.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e45/export_e45.pt (12042063011 bytes)
+[relay] get hhyfred/memwam-fullft/exports/ar2_long_e45/export_e45.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_long_e45/export_e45.pt.sha256 (80 bytes)
+export_e45.pt: OK
+total 11759844
+drwxr-xr-x  2 root root        4096 Nov 18 09:51 .
+drwxr-xr-x 12 root root        4096 Nov 18 09:43 ..
+-rw-r--r--  1 root root 12042063011 Nov 18 09:51 export_e45.pt
+-rw-r--r--  1 root root          80 Nov 18 09:51 export_e45.pt.sha256

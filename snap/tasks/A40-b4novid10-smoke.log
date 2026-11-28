@@ -1,0 +1,47 @@
+
+[queue5] 2026-11-23 22:17:25 $ /opt/mwam/bin/python -m fastwam.memory_v2.online run --checkpoint /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_novid_e10/export_e10.pt --label ar2_prop_novid_e10_smoke --modes on --scenes /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/scenes_seed42_n100_swap_blocks --output /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/b4smoke --tasks swap_blocks --execute 8 --limit 1
+[dense] WARNING runtime packages differ from the dense preparation receipt (cache is read, not re-encoded): {"python": {"recorded": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]", "actual": "3.12.3 (main, Nov  6 2024, 18:32:19) [GCC 13.2.0]"}, "packages.Pillow": {"recorded": "12.0.0", "actual": "11.0.0"}, "packages.numpy": {"recorded": "2.1.0", "actual": "1.26.4"}, "packages.torch": {"recorded": "2.10.0a0+b558c986e8.nv25.11", "actual": "2.6.0a0+df5bbc09d1.nv24.12"}, "packages.torchvision": {"recorded": "0.25.0a0+7a13ad0f", "actual": "0.20.0a0"}}
+[closed-loop] 2026-11-23 14:18:46 1 scenes x modes ['on'] -> labels {'on': 'ar2_prop_novid_e10_smoke'}; checkpoint /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_novid_e10/export_e10.pt; T5 on CPU; max_targets=official
+[closed-loop] WARNING dense config was recorded for sm9.0; this GPU is sm8.6: TORCH_EXTENSIONS_DIR -> /workspace/FastWAM/outputs/fused_environment_memory_v2_sm86/torch_extensions (give --extensions-dir to reuse built kernels)
+[closed-loop] 2026-11-23 14:18:46 start ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 target_limit=1000 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/b4smoke/ar2_prop_novid_e10_smoke/on/swap_blocks/seed_4300000
+[fullft] text from the training cache (swap_blocks/episode_0000000, 50 episodes share it; fingerprint 63ee709c830f)
+/restore-tmp/dense_joint_v1/data_path.py:16: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /opt/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:206.)
+  return torch.stack([TF.resize(torch.from_numpy(np.ascontiguousarray(a)).permute(2,0,1).float()/255.,
+[decide] 2026-11-23 14:19:35 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=0/1000 hist=0 policy=0.7s elapsed=6s
+[decide] 2026-11-23 14:19:45 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=32/1000 hist=2 policy=0.5s elapsed=16s
+[decide] 2026-11-23 14:19:56 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=64/1000 hist=3 policy=0.5s elapsed=26s
+[decide] 2026-11-23 14:20:08 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=96/1000 hist=3 policy=0.5s elapsed=39s
+[decide] 2026-11-23 14:20:25 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=128/1000 hist=3 policy=0.5s elapsed=56s
+[decide] 2026-11-23 14:20:40 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=160/1000 hist=3 policy=0.5s elapsed=70s
+[decide] 2026-11-23 14:20:50 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=192/1000 hist=3 policy=0.5s elapsed=80s
+[decide] 2026-11-23 14:21:00 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=224/1000 hist=3 policy=0.5s elapsed=90s
+[decide] 2026-11-23 14:21:10 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=256/1000 hist=3 policy=0.5s elapsed=101s
+[decide] 2026-11-23 14:21:20 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=288/1000 hist=3 policy=0.5s elapsed=111s
+[decide] 2026-11-23 14:21:31 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=320/1000 hist=3 policy=0.5s elapsed=121s
+[decide] 2026-11-23 14:21:41 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=352/1000 hist=3 policy=0.5s elapsed=131s
+[decide] 2026-11-23 14:21:51 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=384/1000 hist=3 policy=0.5s elapsed=141s
+[decide] 2026-11-23 14:22:01 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=416/1000 hist=3 policy=0.5s elapsed=152s
+[decide] 2026-11-23 14:22:14 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=448/1000 hist=3 policy=0.6s elapsed=165s
+[decide] 2026-11-23 14:22:30 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=480/1000 hist=3 policy=0.5s elapsed=180s
+[decide] 2026-11-23 14:22:40 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=512/1000 hist=3 policy=0.5s elapsed=191s
+[decide] 2026-11-23 14:22:50 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=544/1000 hist=3 policy=0.5s elapsed=201s
+[decide] 2026-11-23 14:23:01 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=576/1000 hist=3 policy=0.5s elapsed=211s
+[decide] 2026-11-23 14:23:14 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=608/1000 hist=3 policy=0.6s elapsed=225s
+[decide] 2026-11-23 14:23:34 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=640/1000 hist=3 policy=0.6s elapsed=244s
+[decide] 2026-11-23 14:23:44 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=672/1000 hist=3 policy=0.6s elapsed=254s
+[decide] 2026-11-23 14:23:54 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=704/1000 hist=3 policy=0.5s elapsed=264s
+[decide] 2026-11-23 14:24:04 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=736/1000 hist=3 policy=0.5s elapsed=275s
+[decide] 2026-11-23 14:24:14 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=768/1000 hist=3 policy=0.5s elapsed=285s
+[decide] 2026-11-23 14:24:27 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=800/1000 hist=3 policy=0.5s elapsed=298s
+[decide] 2026-11-23 14:24:44 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=832/1000 hist=3 policy=0.6s elapsed=314s
+[decide] 2026-11-23 14:25:00 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=864/1000 hist=3 policy=0.5s elapsed=330s
+[decide] 2026-11-23 14:25:14 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=896/1000 hist=3 policy=0.5s elapsed=344s
+[decide] 2026-11-23 14:25:24 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=928/1000 hist=3 policy=0.5s elapsed=355s
+[decide] 2026-11-23 14:25:34 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=960/1000 hist=3 policy=0.6s elapsed=365s
+[decide] 2026-11-23 14:25:45 ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 frame=992/1000 hist=3 policy=0.5s elapsed=375s
+[closed-loop] 2026-11-23 14:25:50 done  ar2_prop_novid_e10_smoke/on swap_blocks seed=4300000 success=False targets=1000/1000 reward=0.0 lift=0.09570920467376709  424s
+
+label/mode              task               n  success  95% CI        lift5cm  reward  targets dep_null  dep_off   dep_on  pol_s
+ar2_prop_novid_e10_smoke/onswap_blocks        1     0.00  [0.00,0.79]      1.00    0.00     1000        -        -        -    0.5
+
+[summary] 1 episodes, 0 open errors -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/b4smoke/SUMMARY.json

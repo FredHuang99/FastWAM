@@ -1,0 +1,9 @@
+
+[queue5] 2026-11-16 19:17:23 $ bash -c cd /workspace/FastWAM-memory2 && for t in ar2_prop_e30x ar_2task_e30x; do until /opt/hf-tools/bin/python scripts/memory_v2/migrate/relay.py get --prefix diag/a100_${t}_stages --out outputs/memory_v2/closed_loop/check_a100; do echo "waiting for diag/a100_${t}_stages"; sleep 300; done; done; ls -la outputs/memory_v2/closed_loop/check_a100
+[relay] get hhyfred/memwam-diag-v1/diag/a100_ar2_prop_e30x_stages/ar2_prop_e30x_stages.json -> outputs/memory_v2/closed_loop/check_a100/ar2_prop_e30x_stages.json (67254 bytes)
+[relay] get hhyfred/memwam-diag-v1/diag/a100_ar_2task_e30x_stages/ar_2task_e30x_stages.json -> outputs/memory_v2/closed_loop/check_a100/ar_2task_e30x_stages.json (67447 bytes)
+total 144
+drwxr-xr-x  2 root root  4096 Nov 16 11:17 .
+drwxr-xr-x 43 root root  4096 Nov 16 11:17 ..
+-rw-r--r--  1 root root 67254 Nov 16 11:17 ar2_prop_e30x_stages.json
+-rw-r--r--  1 root root 67447 Nov 16 11:17 ar_2task_e30x_stages.json

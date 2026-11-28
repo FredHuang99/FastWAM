@@ -1,0 +1,8 @@
+
+[queue5] 2026-11-18 17:56:18 $ bash -c bash /workspace/FastWAM-memory2/scripts/fullft/a40_prep_task.sh swap_T
+[prep] 2026-11-18 09:56:18 swap_T; disk: /dev/sdb         19T  9.3T  8.0T  54% /workspace/FastWAM-memory2
+swap_T: outputs/memory_v2/closed_loop/scenes_seed42_n100_swap_T/swap_T.json complete (100 scenes, next seed 4300108)
+[text] swap_T: 'Swap the poses of the two T-blocks, including both position and orientation.' -> cache/swap_T_episode_0000000/encodings.pt (62 MiB; 50 training episodes share the instruction)
+[text] swap_T: 2 files checked against dense_swap_T_v1/RELAY_MANIFEST.json (sha256); marker .text_only
+[text] swap_T: 'Swap the poses of the two T-blocks, including both position and orientation.' -> cache/swap_T_episode_0000000/encodings.pt (50 training episodes share it); fingerprint 0e5f5bc1105d
+[prep] 2026-11-18 09:56:27 swap_T ready

@@ -1,0 +1,10 @@
+
+[queue5] 2026-11-21 02:34:11 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e21_verdict.py
+untreated   50/50 finished; failures {}; vs untreated {'n': 50, 'only_this': 0, 'only_untreated': 0}
+a            0/50 finished; failures {'pressed before s3': 50}; vs untreated {'n': 50, 'only_this': 0, 'only_untreated': 50}
+b            0/50 finished; failures {'pressed after s3': 31, 'kept moving': 19}; vs untreated {'n': 50, 'only_this': 0, 'only_untreated': 50}
+c            0/50 finished; failures {'kept moving': 50}; vs untreated {'n': 50, 'only_this': 0, 'only_untreated': 50}
+d           50/50 finished; failures {}; vs untreated {'n': 50, 'only_this': 0, 'only_untreated': 0}
+e            0/50 finished; failures {'pressed after s3': 50}; vs untreated {'n': 50, 'only_this': 0, 'only_untreated': 50}
+c_put       41/50 finished; failures {'unclassified': 9}; vs untreated {'n': 27, 'only_this': 0, 'only_untreated': 4}
+E21 VERDICT: time code TIME CODE READ; dependence DEPENDS; content DOES NOT READ CONTENT; put with clock off 41/50 (reported only; expectation >= 45/50)

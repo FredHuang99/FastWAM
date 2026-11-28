@@ -1,0 +1,66 @@
+
+[queue5] 2026-11-26 12:59:13 $ /opt/mwam/bin/python -m fastwam.memory_v2.online run --checkpoint /workspace/FastWAM-memory2/outputs/fullft/exports/press_count_s19_e30/export_e30.pt --label press_count_s19_e30_smoke --modes on --scenes /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/scenes_seed42_n100_press_button --output /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/n1smoke --tasks press_button --execute 8 --limit 1
+[dense] WARNING runtime packages differ from the dense preparation receipt (cache is read, not re-encoded): {"python": {"recorded": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]", "actual": "3.12.3 (main, Nov  6 2024, 18:32:19) [GCC 13.2.0]"}, "packages.Pillow": {"recorded": "12.0.0", "actual": "11.0.0"}, "packages.numpy": {"recorded": "2.1.0", "actual": "1.26.4"}, "packages.torch": {"recorded": "2.10.0a0+b558c986e8.nv25.11", "actual": "2.6.0a0+df5bbc09d1.nv24.12"}, "packages.torchvision": {"recorded": "0.25.0a0+7a13ad0f", "actual": "0.20.0a0"}}
+[closed-loop] 2026-11-26 05:02:33 1 scenes x modes ['on'] -> labels {'on': 'press_count_s19_e30_smoke'}; checkpoint /workspace/FastWAM-memory2/outputs/fullft/exports/press_count_s19_e30/export_e30.pt; T5 on CPU; max_targets=official
+[closed-loop] WARNING dense config was recorded for sm9.0; this GPU is sm8.6: TORCH_EXTENSIONS_DIR -> /workspace/FastWAM/outputs/fused_environment_memory_v2_sm86/torch_extensions (give --extensions-dir to reuse built kernels)
+[closed-loop] 2026-11-26 05:02:33 start press_count_s19_e30_smoke/on press_button seed=4300000 target_limit=1500 -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/n1smoke/press_count_s19_e30_smoke/on/press_button/seed_4300000
+[fullft] text from the training cache (press_button/episode_0000000, 50 episodes share it; fingerprint 86b7d3c298c6)
+/restore-tmp/dense_joint_v1/data_path.py:16: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /opt/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:206.)
+  return torch.stack([TF.resize(torch.from_numpy(np.ascontiguousarray(a)).permute(2,0,1).float()/255.,
+[decide] 2026-11-26 05:03:18 press_count_s19_e30_smoke/on press_button seed=4300000 frame=0/1500 hist=0 policy=0.7s elapsed=6s
+[decide] 2026-11-26 05:03:29 press_count_s19_e30_smoke/on press_button seed=4300000 frame=32/1500 hist=2 policy=0.6s elapsed=17s
+[decide] 2026-11-26 05:03:39 press_count_s19_e30_smoke/on press_button seed=4300000 frame=64/1500 hist=3 policy=0.6s elapsed=27s
+[decide] 2026-11-26 05:03:49 press_count_s19_e30_smoke/on press_button seed=4300000 frame=96/1500 hist=3 policy=0.6s elapsed=37s
+[decide] 2026-11-26 05:03:59 press_count_s19_e30_smoke/on press_button seed=4300000 frame=128/1500 hist=3 policy=0.6s elapsed=47s
+[decide] 2026-11-26 05:04:11 press_count_s19_e30_smoke/on press_button seed=4300000 frame=160/1500 hist=3 policy=0.6s elapsed=59s
+[decide] 2026-11-26 05:04:25 press_count_s19_e30_smoke/on press_button seed=4300000 frame=192/1500 hist=3 policy=0.6s elapsed=73s
+[decide] 2026-11-26 05:04:39 press_count_s19_e30_smoke/on press_button seed=4300000 frame=224/1500 hist=3 policy=0.6s elapsed=87s
+[decide] 2026-11-26 05:04:52 press_count_s19_e30_smoke/on press_button seed=4300000 frame=256/1500 hist=3 policy=0.6s elapsed=100s
+[decide] 2026-11-26 05:05:02 press_count_s19_e30_smoke/on press_button seed=4300000 frame=288/1500 hist=3 policy=0.6s elapsed=110s
+[decide] 2026-11-26 05:05:12 press_count_s19_e30_smoke/on press_button seed=4300000 frame=320/1500 hist=3 policy=0.6s elapsed=120s
+[decide] 2026-11-26 05:05:27 press_count_s19_e30_smoke/on press_button seed=4300000 frame=352/1500 hist=3 policy=0.6s elapsed=135s
+[decide] 2026-11-26 05:05:38 press_count_s19_e30_smoke/on press_button seed=4300000 frame=384/1500 hist=3 policy=0.6s elapsed=146s
+[decide] 2026-11-26 05:05:48 press_count_s19_e30_smoke/on press_button seed=4300000 frame=416/1500 hist=3 policy=0.6s elapsed=157s
+[decide] 2026-11-26 05:05:59 press_count_s19_e30_smoke/on press_button seed=4300000 frame=448/1500 hist=3 policy=0.6s elapsed=167s
+[decide] 2026-11-26 05:06:17 press_count_s19_e30_smoke/on press_button seed=4300000 frame=480/1500 hist=3 policy=0.6s elapsed=185s
+[decide] 2026-11-26 05:06:33 press_count_s19_e30_smoke/on press_button seed=4300000 frame=512/1500 hist=3 policy=0.6s elapsed=201s
+[decide] 2026-11-26 05:06:47 press_count_s19_e30_smoke/on press_button seed=4300000 frame=544/1500 hist=3 policy=0.6s elapsed=215s
+[decide] 2026-11-26 05:06:57 press_count_s19_e30_smoke/on press_button seed=4300000 frame=576/1500 hist=3 policy=0.6s elapsed=225s
+[decide] 2026-11-26 05:07:07 press_count_s19_e30_smoke/on press_button seed=4300000 frame=608/1500 hist=3 policy=0.6s elapsed=235s
+[decide] 2026-11-26 05:07:17 press_count_s19_e30_smoke/on press_button seed=4300000 frame=640/1500 hist=3 policy=0.6s elapsed=246s
+[decide] 2026-11-26 05:07:28 press_count_s19_e30_smoke/on press_button seed=4300000 frame=672/1500 hist=3 policy=0.6s elapsed=256s
+[decide] 2026-11-26 05:07:38 press_count_s19_e30_smoke/on press_button seed=4300000 frame=704/1500 hist=3 policy=0.6s elapsed=266s
+[decide] 2026-11-26 05:07:48 press_count_s19_e30_smoke/on press_button seed=4300000 frame=736/1500 hist=3 policy=0.6s elapsed=276s
+[decide] 2026-11-26 05:07:58 press_count_s19_e30_smoke/on press_button seed=4300000 frame=768/1500 hist=3 policy=0.6s elapsed=286s
+[decide] 2026-11-26 05:08:08 press_count_s19_e30_smoke/on press_button seed=4300000 frame=800/1500 hist=3 policy=0.6s elapsed=296s
+[decide] 2026-11-26 05:08:18 press_count_s19_e30_smoke/on press_button seed=4300000 frame=832/1500 hist=3 policy=0.6s elapsed=306s
+[decide] 2026-11-26 05:08:28 press_count_s19_e30_smoke/on press_button seed=4300000 frame=864/1500 hist=3 policy=0.6s elapsed=316s
+[decide] 2026-11-26 05:08:38 press_count_s19_e30_smoke/on press_button seed=4300000 frame=896/1500 hist=3 policy=0.6s elapsed=326s
+[decide] 2026-11-26 05:08:49 press_count_s19_e30_smoke/on press_button seed=4300000 frame=928/1500 hist=3 policy=0.6s elapsed=337s
+[decide] 2026-11-26 05:09:01 press_count_s19_e30_smoke/on press_button seed=4300000 frame=960/1500 hist=3 policy=0.6s elapsed=349s
+[decide] 2026-11-26 05:09:20 press_count_s19_e30_smoke/on press_button seed=4300000 frame=992/1500 hist=3 policy=0.6s elapsed=368s
+[decide] 2026-11-26 05:09:44 press_count_s19_e30_smoke/on press_button seed=4300000 frame=1024/1500 hist=3 policy=0.6s elapsed=392s
+[decide] 2026-11-26 05:09:54 press_count_s19_e30_smoke/on press_button seed=4300000 frame=1056/1500 hist=3 policy=0.6s elapsed=403s
+[decide] 2026-11-26 05:10:05 press_count_s19_e30_smoke/on press_button seed=4300000 frame=1088/1500 hist=3 policy=0.6s elapsed=413s
+[decide] 2026-11-26 05:10:16 press_count_s19_e30_smoke/on press_button seed=4300000 frame=1120/1500 hist=3 policy=0.6s elapsed=424s
+[decide] 2026-11-26 05:10:31 press_count_s19_e30_smoke/on press_button seed=4300000 frame=1152/1500 hist=3 policy=0.6s elapsed=439s
+[decide] 2026-11-26 05:10:41 press_count_s19_e30_smoke/on press_button seed=4300000 frame=1184/1500 hist=3 policy=0.6s elapsed=449s
+[decide] 2026-11-26 05:10:51 press_count_s19_e30_smoke/on press_button seed=4300000 frame=1216/1500 hist=3 policy=0.6s elapsed=459s
+[decide] 2026-11-26 05:11:01 press_count_s19_e30_smoke/on press_button seed=4300000 frame=1248/1500 hist=3 policy=0.6s elapsed=469s
+[decide] 2026-11-26 05:11:18 press_count_s19_e30_smoke/on press_button seed=4300000 frame=1280/1500 hist=3 policy=0.6s elapsed=486s
+[decide] 2026-11-26 05:11:28 press_count_s19_e30_smoke/on press_button seed=4300000 frame=1312/1500 hist=3 policy=0.6s elapsed=496s
+[decide] 2026-11-26 05:11:38 press_count_s19_e30_smoke/on press_button seed=4300000 frame=1344/1500 hist=3 policy=0.6s elapsed=506s
+[decide] 2026-11-26 05:11:48 press_count_s19_e30_smoke/on press_button seed=4300000 frame=1376/1500 hist=3 policy=0.6s elapsed=517s
+[decide] 2026-11-26 05:11:59 press_count_s19_e30_smoke/on press_button seed=4300000 frame=1408/1500 hist=3 policy=0.6s elapsed=527s
+[decide] 2026-11-26 05:12:09 press_count_s19_e30_smoke/on press_button seed=4300000 frame=1440/1500 hist=3 policy=0.6s elapsed=537s
+[decide] 2026-11-26 05:12:19 press_count_s19_e30_smoke/on press_button seed=4300000 frame=1472/1500 hist=3 policy=0.6s elapsed=547s
+[closed-loop] 2026-11-26 05:12:33 done  press_count_s19_e30_smoke/on press_button seed=4300000 success=False targets=1500/1500 reward=0.0 lift=None  600s
+
+label/mode              task               n  success  95% CI        lift5cm  reward  targets dep_null  dep_off   dep_on  pol_s
+press_count_s18_e30_smoke/onpress_button       1     1.00  [0.21,1.00]         -    0.00      357        -        -        -    0.7
+press_count_s19_e30_smoke/onpress_button       1     0.00  [0.00,0.79]         -    0.00     1500        -        -        -    0.6
+
+paired on common scenes (A vs B):                         n  both  only A  only B  neither  McNemar p
+  press_count_s18_e30_smoke/on vs press_count_s19_e30_smoke/on   1     0       1       0        0  1.000
+
+[summary] 2 episodes, 0 open errors -> /workspace/FastWAM-memory2/outputs/memory_v2/closed_loop/n1smoke/SUMMARY.json

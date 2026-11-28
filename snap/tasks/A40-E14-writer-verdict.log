@@ -1,0 +1,27 @@
+
+[queue5] 2026-11-19 08:50:11 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/press_writer_scan.py --relay
+[scan] 50 press demos read
+[scan] T(0.012, 0.015)                          recall 1.000  spurious/press 0.000  tau 0.419  eligible
+[scan] T(0.012, 0.01)                           recall 1.000  spurious/press 0.000  tau 0.419  eligible
+[scan] T(0.012, 0.005)                          recall 1.000  spurious/press 0.000  tau 0.419  eligible
+[scan] T(0.01, 0.015)                           recall 1.000  spurious/press 0.000  tau 0.450  eligible
+[scan] T(0.01, 0.01)                            recall 1.000  spurious/press 0.000  tau 0.450  eligible
+[scan] T(0.01, 0.005)                           recall 1.000  spurious/press 0.000  tau 0.450  eligible
+[scan] T(0.008, 0.015)                          recall 1.000  spurious/press 0.000  tau 0.920  eligible
+[scan] T(0.008, 0.01)                           recall 1.000  spurious/press 0.000  tau 0.920  eligible
+[scan] T(0.008, 0.005)                          recall 1.000  spurious/press 0.000  tau 0.920  eligible
+[scan] T(0.006, 0.015)                          recall 1.000  spurious/press 0.000  tau 0.920  eligible
+[scan] T(0.006, 0.01)                           recall 1.000  spurious/press 0.000  tau 0.920  eligible
+[scan] T(0.006, 0.005)                          recall 1.000  spurious/press 0.000  tau 0.920  eligible
+[scan] T(0.005, 0.015)                          recall 1.000  spurious/press 0.000  tau 0.920  eligible
+[scan] T(0.005, 0.01)                           recall 1.000  spurious/press 0.000  tau 0.920  eligible
+[scan] T(0.005, 0.005)                          recall 1.000  spurious/press 0.000  tau 0.920  eligible
+[scan] T(0.004, 0.015)                          recall 1.000  spurious/press 0.000  tau 0.999  eligible
+[scan] T(0.004, 0.01)                           recall 1.000  spurious/press 0.000  tau 0.999  eligible
+[scan] T(0.004, 0.005)                          recall 1.000  spurious/press 0.000  tau 0.999  eligible
+[scan] G(0.012, 0.015)                          recall 1.000  spurious/press 0.000  tau 0.419  eligible
+[scan] P(eps 0.002; delta 0.012, min_path 0.015) recall 1.000  spurious/press 0.000  tau 1.000  eligible
+[scan] P(eps 0.003; delta 0.012, min_path 0.015) recall 1.000  spurious/press 0.000  tau 1.000  eligible
+[scan] P(eps 0.005; delta 0.012, min_path 0.015) recall 1.000  spurious/press 0.000  tau 0.920  eligible
+[scan] margin P(eps 0.002; delta 0.012, min_path 0.015): recall x0.8 1.000, x1.2 1.000 -> OK
+E14 WRITER: CHOSEN P(eps 0.002; delta 0.012, min_path 0.015) (tau 1.000, recall 1.000, spurious/press 0.000) -- NEEDS ENGINEERING (the online detector)

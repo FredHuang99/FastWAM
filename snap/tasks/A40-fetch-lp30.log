@@ -1,0 +1,11 @@
+
+[queue5] 2026-11-16 19:17:23 $ bash -c RUN=ar2_prop TAG=e30 bash /workspace/FastWAM-memory2/scripts/fullft/export_fetch.sh
+[fetch] 2026-11-16 11:17:24 fetching ar2_prop_e30 (attempt 1)
+[relay] get hhyfred/memwam-fullft/exports/ar2_prop_e30/export_e30.pt -> /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt (12042506053 bytes)
+[relay] get hhyfred/memwam-fullft/exports/ar2_prop_e30/export_e30.pt.sha256 -> /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt.sha256 (80 bytes)
+export_e30.pt: OK
+total 11760272
+drwxr-xr-x 2 root root        4096 Nov 16 11:42 .
+drwxr-xr-x 4 root root        4096 Nov 16 11:17 ..
+-rw-r--r-- 1 root root 12042506053 Nov 16 11:42 export_e30.pt
+-rw-r--r-- 1 root root          80 Nov 16 11:42 export_e30.pt.sha256

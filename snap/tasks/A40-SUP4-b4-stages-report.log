@@ -1,0 +1,27 @@
+
+[queue5] 2026-11-25 02:23:53 $ bash -c cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/b4_stages.py
+b4:ar2_prop_novid_e10:swap_blocks: 100 episodes, success 1
+   furthest stage: {'none': 39, 'lifted': 34, 's1': 20, 's2': 6, 'success': 1}
+   second move after s1: {'None': 92, 'other block': 7, 'same block again': 1}
+b4:ar2_prop_novid_e10:put_back_block: 50 episodes, success 6
+   furthest stage: {'pressed': 40, 'success': 6, 'stage1': 3, 'centre': 1}
+   choice after the centre (True = original mat): {'None': 45, 'True': 5}
+lc:ar2_prop_e10:swap_blocks: 100 episodes, success 78
+   furthest stage: {'success': 78, 's2': 16, 's1': 4, 'none': 1, 'lifted': 1}
+   second move after s1: {'other block': 95, 'None': 5}
+lc:ar2_prop_e10:put_back_block: 100 episodes, success 76
+   furthest stage: {'success': 76, 'returned': 22, 'centre': 1, 'stage1': 1}
+   choice after the centre (True = original mat): {'True': 98, 'None': 2}
+b4:ar2_prop_novid_e30:swap_blocks: 100 episodes, success 82
+   furthest stage: {'success': 82, 's2': 9, 's1': 6, 'none': 2, 'lifted': 1}
+   second move after s1: {'other block': 91, 'None': 7, 'same block again': 2}
+b4:ar2_prop_novid_e30:put_back_block: 100 episodes, success 67
+   furthest stage: {'success': 67, 'pressed': 23, 'none': 10}
+   choice after the centre (True = original mat): {'True': 67, 'None': 33}
+g1:ar2_prop_e30:swap_blocks: 100 episodes, success 100
+   furthest stage: {'success': 100}
+   second move after s1: {'other block': 100}
+g1:ar2_prop_e30:put_back_block: 100 episodes, success 100
+   furthest stage: {'success': 100}
+   choice after the centre (True = original mat): {'True': 100}
+B4 STAGES REPORT: written outputs/fullft/B4_STAGES.json
