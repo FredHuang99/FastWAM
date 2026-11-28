@@ -77,11 +77,15 @@ def main():
     train = [r for r in records if r.get("split") == "train"]
     print(f"[norm] {root}: {len(records)} episodes, {len(train)} train", flush=True)
     data = {"proprio_raw": [], "actions_raw": []}
-    invalid, wraps = 0, []
+    invalid, wraps, grip_agree, grip_n = 0, [], 0, 0
     for r in records:
         e = torch.load(folder(root, r["episode_id"]) / "encodings.pt", map_location="cpu", weights_only=True, mmap=True)
         v = e["action_valid"].bool()
         invalid += int((~v).sum())
+        if "joint_action" in e:          # report only: the ee gripper command vs the joint one the events were made from
+            ga, gj = e["actions_raw"][v, 6].float(), e["joint_action"][v, 7].float()
+            grip_agree += int((torch.sign(ga) == torch.sign(gj)).sum())
+            grip_n += int(v.sum())
         for key, cols in ANGLES.items():
             x = held(e[key].float(), v) if key == "actions_raw" else e[key].float()     # invalid frames held first
             d = (x[1:, list(cols)] - x[:-1, list(cols)]).abs()
@@ -104,11 +108,13 @@ def main():
             "stats": {"proprio": stats["proprio_raw"], "actions": stats["actions_raw"]}}
     sha = hashlib.sha256(json.dumps(body, sort_keys=True).encode()).hexdigest()
     rep = {**body, "sha256": sha, "episodes": len(records), "train_episodes": len(train),
-           "invalid_action_frames": invalid, "angle_wraps": wraps[:50], "angle_wrap_episodes": len(wraps)}
+           "invalid_action_frames": invalid, "angle_wraps": wraps[:50], "angle_wrap_episodes": len(wraps),
+           "gripper_sign_agreement_ee_vs_joint": [grip_agree, grip_n]}
     (root / "NORM_STATS.json").write_text(json.dumps(rep, indent=1) + "\n")
     for k in ("proprio", "actions"):
         s = body["stats"][k]
         print(f"[norm] {k}: min {[round(v, 3) for v in s['min']]} max {[round(v, 3) for v in s['max']]}", flush=True)
+    print(f"[norm] ee vs joint gripper command, same sign on {grip_agree}/{grip_n} valid frames", flush=True)
     print(f"[norm] invalid action frames {invalid}; angle wraps in {len(wraps)} episode-keys; stats sha256 {sha[:16]}",
           flush=True)
     if wraps:
