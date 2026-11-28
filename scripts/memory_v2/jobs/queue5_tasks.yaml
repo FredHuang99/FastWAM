@@ -47666,3 +47666,22 @@ tasks:
   output: closed_loop/stepa
   env: {MWAM_TEXT_SOURCE: "cache"}
 
+
+# 11-28 18:10 (Opus; plan v22b part 3 1.2 / check 5): does the A100's pool5 (dispatcher alive, lanes loop / train /
+# extra / gpu0 / cpu; GPUs 0 and 3 free) take a task without a restart? One episode of an export it already holds; the
+# A100 only describes, never a verdict. If this finishes, user step 4 is not needed.
+- id: A100-v22-smoke
+  lane: extra
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 3
+  hypothesis: "check 5: the A100 takes a queued task without a restart (ar2_prop_e30, swap_blocks scene 1, one episode; closed_loop/a100smoke)"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_a100smoke
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_blocks]
+  tasks: [swap_blocks]
+  online_args: ["--execute", "8", "--limit", "1"]
+  output: closed_loop/a100smoke
+  env: {MWAM_TEXT_SOURCE: "cache"}
+  pass_if: "m.get('episodes', 0) >= 1"
