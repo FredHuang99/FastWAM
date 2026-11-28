@@ -68,10 +68,10 @@ if [ "$PART" = close ]; then
     say "pass $pass exit code $?; finished $(ls $OUT/$L/on/$T/seed_*/result.json 2>/dev/null | wc -l)/50"
   done
   n=$(ls $OUT/$L/on/$T/seed_*/result.json 2>/dev/null | wc -l)
-  $PY scripts/fullft/obs_grasp.py a3diag:obs_ar_e30 c25obj:$L
-  $PY scripts/fullft/obs_split.py a3diag:obs_ar_e30 c25obj:$L
+  $PY scripts/fullft/obs_grasp.py a3diag:obs_ar_e30 c25obj:$L || { say "obs_grasp.py FAILED"; FAIL=1; }   # 11-28 audit: exit codes
+  $PY scripts/fullft/obs_split.py a3diag:obs_ar_e30 c25obj:$L || { say "obs_split.py FAILED"; FAIL=1; }
   say "CARD 25 DESCRIBED CLOSE done ($n/50 episodes)"
   [ "$n" -ge 50 ] || exit 1
-  exit 0
+  exit $FAIL
 fi
 say "unknown PART=$PART"; exit 2

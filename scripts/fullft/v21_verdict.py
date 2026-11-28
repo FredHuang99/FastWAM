@@ -53,11 +53,16 @@ success, compare, three, with_extension, rearr_classes = v20.success, v20.compar
 
 
 def seed_extension(out):
-    """Plan v21 5.5 item 6: due when the verdict is not UNCERTAIN and |D| < 0.30 (single-seed verdict word stands)."""
+    """Plan v21 5.5 item 6: due when the verdict is not UNCERTAIN and |D| < 0.30 (single-seed verdict word stands).
+    11-28 (code audit): a verdict settled by the pre-set extension ("UNCERTAIN at 100 pairs -> X at 200 pairs") is
+    judged by its final word X and the pooled D; before, it started with "UNCERTAIN" and was always reported not due."""
     main = out.get("main")
-    if not main or str(out.get("verdict", "")).startswith(("WAIT", "UNCERTAIN")):
+    v = str(out.get("verdict", ""))
+    word = v.split("->")[-1].strip().split(" at ")[0].strip()
+    if not main or word.startswith(("WAIT", "UNCERTAIN")):
         return "not due"
-    return "DUE (both arms seed 18; pooled interval when they exist)" if abs(main["D"]) < 0.30 else "not due (|D| >= 0.30)"
+    d = ((out.get("extension") or {}).get("pooled") or {}).get("D", main["D"]) if "->" in v else main["D"]
+    return "DUE (both arms seed 18; pooled interval when they exist)" if abs(d) < 0.30 else "not due (|D| >= 0.30)"
 
 
 def described(folder, label):

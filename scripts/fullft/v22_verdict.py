@@ -78,10 +78,15 @@ def c36b():
     return out
 
 
-def gate(name, word):
-    f = F / f"V22_{name.upper()}.json"
+def gate(name, word, anywhere=False):
+    """name = c36 / c36b (V22_<NAME>.json) or a verdict file stem such as V21_C23 (11-28 audit: card 23's extension)."""
+    f = F / (f"{name}.json" if name.startswith("V2") else f"V22_{name.upper()}.json")
     v = json.loads(f.read_text()).get("verdict", "") if f.exists() else ""
-    ok = v.startswith(word)
+    if anywhere:     # "task (MAIN): X; task (beside): Y" -> release if any part is still unresolved UNCERTAIN
+        parts = [p.split(": ", 1)[-1] for p in v.split("; ")]
+        ok = any(p.startswith(word) and "->" not in p for p in parts)
+    else:
+        ok = v.startswith(word) and "->" not in v
     print(f"V22 GATE {name} {word}: verdict '{v}' -> {'release' if ok else 'hold'}")
     return 0 if ok else 3
 
@@ -89,7 +94,7 @@ def gate(name, word):
 def main():
     name = sys.argv[1] if len(sys.argv) > 1 else ""
     if name == "gate":
-        return gate(sys.argv[2], sys.argv[3])
+        return gate(sys.argv[2], sys.argv[3], "--anywhere" in sys.argv)
     fns = {"c36": c36, "c36b": c36b}
     if name not in fns:
         print(__doc__)

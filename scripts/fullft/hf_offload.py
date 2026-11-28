@@ -82,7 +82,7 @@ def main():
         out["done"].append(n)
         (R / "outputs/fullft/HF_OFFLOAD.json").write_text(json.dumps(out, indent=1) + "\n")
     if args.squash and out["done"]:
-        if retry(lambda: api.super_squash_history(repo_id=REPO, repo_type="model"), "squash") is not None:
+        if retry(lambda: api.super_squash_history(repo_id=REPO, repo_type="model") or True, "squash") is not None:   # returns None on success (11-28 audit)
             out["squashed"] = True
             print("[offload] history squashed (quota within 36 h)", flush=True)
     out["finished"] = time.strftime("%F %T")

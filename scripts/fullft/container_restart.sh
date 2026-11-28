@@ -8,7 +8,7 @@
 #   usage (on the host; the script is read from inside the container after a git pull):
 #     C=<container> M=<h200o|h100> bash -c "$(docker exec <container> cat /workspace/FastWAM-memory2/scripts/fullft/container_restart.sh)"
 #   steps:
-#     1 inside: no fastwam.fullft.train process (a running training is never restarted under it)
+#     1 inside: no training, export upload or cache fetch running (else stop); C must be the machine M's container
 #     2 docker restart; wait 30 s
 #     3 inside: nvidia-smi must list the GPUs (old H200: GPU0; H100: GPUs 0-3); else stop (daemons NOT started)
 #     4 inside: auto_pull.sh start; results_push.sh restart; ensure_runner.sh <M>
@@ -28,9 +28,14 @@ case $M in
   *) say "M must be h200o or h100"; exit 2;;
 esac
 say "container $C, machine $M; code inside: $(inside "git -c safe.directory='*' -C $R log --oneline -1 | cut -c1-60")"
-say "1 a training running inside $C?"
-procs=$(inside "ps -eo pid,etime,cmd | grep -a '[f]astwam.fullft.train' | cut -c1-160")
-if [ -n "$procs" ]; then say "trainer processes in $C (nothing restarted):"; echo "$procs"; exit 1; fi
+say "1 a training, an export upload or a cache fetch running inside $C?"
+# 11-28 code audit: a failed docker exec must not read as "nothing running"; uploads / fetches count too (their
+# exports would stay off the relay; relay_retry.sh, started by results_push.sh once, retries only what failed)
+procs=$(inside "ps -eo pid,etime,cmd | grep -aE '[f]astwam.fullft.train|[e]xport_watch|[e]xport_relay|[r]elay.py put|[c]ache_relay' | cut -c1-160") \
+  || { say "docker exec into $C failed: stop (nothing restarted)"; exit 1; }
+if [ -n "$procs" ]; then say "processes that a restart would kill, in $C (nothing restarted):"; echo "$procs"; exit 1; fi
+want=$([ $M = h200o ] && echo mwam2 || echo mwam-h100n)
+[ "$C" = "$want" ] || { say "container $C does not belong to machine $M (expected $want): stop"; exit 1; }
 say "none; nvidia-smi inside before the restart: $(inside "nvidia-smi -L 2>&1 | head -1")"
 say "2 docker restart $C"
 docker restart $C > /dev/null || { say "docker restart FAILED"; exit 1; }
