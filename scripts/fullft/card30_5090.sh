@@ -81,7 +81,10 @@ while :; do
   if [ -f $B/t4/demo_clean/$T/aloha_agilex/seed.txt ] && grep -qw $((B0 + BATCH - 1)) $B/t4/demo_clean/$T/aloha_agilex/seed.txt; then
     N=$((N + 1)); continue
   fi
-  SEEDS=$(seq $B0 $((B0 + BATCH - 1)) | tr '\n' ' ')
+  # 11-28 20:34 fix: gen_demos.py's --seeds wants len(seeds) expert-successful seeds IN TOTAL (seed.txt included), so a
+  # batch must pass every seed from START on (done ones are skipped, failed ones re-tried); the 16:49-17:43 run passed
+  # one batch's 60 and got 56 + 3 + 0 + 0 + 0 + 0 groups.
+  SEEDS=$(seq $START $((B0 + BATCH - 1)) | tr '\n' ' ')
   say "batch $N: seeds $B0-$((B0 + BATCH - 1)) x 5 targets (complete groups so far $have)"
   for K in 0 1 2 3 4; do mkdir -p $B/t$K; gen $B/t$K --gen-seeds $SEEDS --gen-target $K; say "  target $K exit $?"; done
   N=$((N + 1))
