@@ -36,6 +36,12 @@ diag7c | gpu1 | test -s outputs/fullft/events/events_rearrange_blocks_v3c.json |
 # RoboMME step 2 (plan v22 6.6): normalised proprio / actions keys in the RoboMME dense root (min/max from its train
 # split, absolute actions; stops before writing anything if an orientation angle wraps). CPU.
 robomme-norm | cpu | test -s outputs/robomme/dense_robomme_v1/RECORDS.json | PYTHONPATH=src /opt/mwam/bin/python scripts/robomme/robomme_norm.py
+# 11-29 01:2x (Opus): robomme-norm ran 17:33:35 on the version before CACHE.json was written (commit 21cdd58 landed
+# 17:33:34; the 5090 had not pulled it), so its log lacks the "marked/len" line and no CACHE.json exists -> robomme-cache-put
+# stays "waiting (condition)". A re-run with the current code recomputes the same stats (sha e791b810), skips all 200
+# already-normalised episodes, counts 200/200 marked and writes CACHE.json (the cache-relay build marker), unblocking the
+# upload. Idempotent (skips matched markers, atomic per-episode rewrite otherwise).
+robomme-norm-2 | cpu | test -s outputs/robomme/dense_robomme_v1/RECORDS.json | PYTHONPATH=src /opt/mwam/bin/python scripts/robomme/robomme_norm.py
 # RoboMME closed-loop plumbing smoke needs an export: the untrained LIBERO base wrapped as a fullft export (train.py
 # export without --resume; CPU, ~12 GB file). The closed loop itself is started by the user on the host
 # (scripts/robomme/robomme_closed_loop_5090.sh).
