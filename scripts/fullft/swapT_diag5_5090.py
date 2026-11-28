@@ -255,11 +255,99 @@ def part_d():
     return 0
 
 
+# ---- plan v22 diagnostic 12 (11-28, Opus; written before any of these measurements is read) -----------------------
+# In the "a block back at its own start" failures: at the moment the LATER placer's hand was closest (horizontally) to
+# the other block's start while carrying, how far its block was from the required pose -- angle to the other block's
+# start orientation (the benchmark wants < 15 deg) and horizontal distance (< 2.5 cm) -- how high the block was above
+# its own start height, and the arm's gripper reading. Successes (first 5) as the reference, measured the same way at
+# the same moment. Question (plan v22 4.3): the hand got there and did not let go -- was the orientation off (a
+# precision problem) or was it within tolerance (the release decision itself)?
+# Classes: fixed by Opus from the first 10 failures per model (--first 10 prints measurements only) BEFORE the full
+# run; until CLASSES_12 is set, the full run refuses.
+CLASSES_12 = None
+
+
+def measure_e(sp, d: Path):
+    x = measure_b(sp, d)
+    if not x or "why" in x or not x.get("later"):
+        return x
+    acts = sp.rows(d / "executed_actions.jsonl")
+    pos = [(r.get("objects_after") or {}).get("_actors") or {} for r in acts]
+    quat = [(r.get("objects_after") or {}).get("_quat") or {} for r in acts]
+    l = x["later"]
+    b, t = l["block"], l.get("closest_to_other_start_at")
+    o = "T_block2" if b == "T_block1" else "T_block1"
+    if t is None or b not in pos[t] or not quat[t].get(b) or not quat[0].get(o):
+        x["at_closest"] = None
+        return x
+    g = acts[t].get("physical_after") or []
+    gi = 6 if l.get("arm") == "left" else 13
+    x["at_closest"] = {
+        "target": t, "hand_to_other_start_cm": l.get("closest_to_other_start_cm"),
+        "block_angle_to_required_deg": round(sp.angle_deg(quat[t][b], quat[0][o]), 1),
+        "block_to_other_start_cm": round(100 * hdist(pos[t][b], pos[0][o]), 1),
+        "block_above_own_start_cm": round(100 * (pos[t][b][2] - pos[0][b][2]), 1),
+        "gripper": round(g[gi], 2) if len(g) > gi else None}
+    # the best the carried block got within OVER_CM of the other start (angle while the block was near there)
+    near = [(sp.angle_deg(quat[i][b], quat[0][o]), i) for i in range(len(pos))
+            if b in pos[i] and quat[i].get(b) and hdist(pos[i][b], pos[0][o]) < OVER_CM / 100.0
+            and pos[i][b][2] > pos[0][b][2] + 0.01]
+    x["near_other_start"] = ({"targets": len(near), "min_angle_deg": round(min(near)[0], 1)} if near
+                             else {"targets": 0, "min_angle_deg": None})
+    return x
+
+
+def part_e(first: int, items):
+    sp = _module("swapT_split", "swapT_split.py")
+    if not first and CLASSES_12 is None:
+        print("DIAG 12: the classes are not fixed yet (run --first 10, fix CLASSES_12): nothing read")
+        return 2
+    rep = {"run": "plan v22 diagnostic 12: orientation when the later hand was over the other start (described)",
+           "models": {}}
+    for item in items:
+        folder, label = item.split(":", 1)
+        root = O / folder / label / "on" / "swap_T"
+        eps = sorted((d for d in root.glob("seed_*") if d.name[5:].isdigit()), key=lambda d: int(d.name[5:]))
+        back, succ = {}, {}
+        for d in eps:
+            x = measure_e(sp, d)
+            if x is None or "why" in x:
+                continue
+            if x["back_at_own_start"] and not x["success"]:
+                if not first or len(back) < first:
+                    back[d.name[5:]] = x
+            elif x["success"] and len(succ) < 5:
+                succ[d.name[5:]] = x
+        print(f"\n== {item}: back-at-own-start failures {len(back)}, successes {len(succ)}"
+              f"{' (first ' + str(first) + ')' if first else ''}")
+        for tag, group in (("BACK", back), ("SUCCESS", succ)):
+            for s_, x in group.items():
+                print(f"  {tag} {s_}: later {x['later'].get('block')} ({x['later'].get('arm')}); at closest "
+                      f"{json.dumps(x.get('at_closest'))}; near the other start {json.dumps(x.get('near_other_start'))}")
+        if not first:
+            from collections import Counter
+            cnt = Counter(CLASSES_12(x) for x in back.values())
+            for c, k in cnt.most_common():
+                print(f"  {k:3d}  {c}")
+            rep["models"][item] = {"classes": dict(cnt), "back": back, "successes": succ}
+        else:
+            rep["models"][item] = {"back": back, "successes": succ}
+    default = ["swaptdiag:swapT_ar_e30", "swaptdiag:swapT_arprop_e30"]
+    tail = "" if list(items) == default else "_" + "_".join(i.split(":", 1)[1] for i in items)
+    name = ("SWAPT_DIAG12_FIRST" if first else "SWAPT_DIAG12") + tail + ".json"
+    (F / name).write_text(json.dumps(rep, indent=1) + "\n")
+    print(f"DIAG 12: written outputs/fullft/{name}")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("part", choices=("b", "d"))
+    ap.add_argument("part", choices=("b", "d", "e"))
     ap.add_argument("--first", type=int, default=0)
+    ap.add_argument("--items", nargs="*", default=[], help="part e: FOLDER:LABEL (default: card 11's two models)")
     a = ap.parse_args()
+    if a.part == "e":
+        return part_e(a.first, a.items or ["swaptdiag:swapT_ar_e30", "swaptdiag:swapT_arprop_e30"])
     return part_b(a.first) if a.part == "b" else part_d()
 
 

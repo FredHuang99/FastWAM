@@ -13,6 +13,10 @@ The card's checks (plan v21 6.3), all four must pass before anything is generate
   4 card 8's render gate (gen_check.py --gate background on the official seeds 0-2) is re-run by the runner script with
     the current code (its result file is read here).
 Prints CARD25 CHECK PASS / FAIL; JSON -> outputs/fullft/gen_cf/CARD25_CHECK.json
+11-28 (Opus; plan v22 card 30): --gate8 = check 2 with the threshold the user approved on 11-27 for card 25 (card 8's:
+on every camera -- head outside the shelf box, each wrist -- the share of pixels differing by more than 8 levels is
+below 2 %; mean |diff| reported, not gated). --max-seeds N compares only the first N common seeds in check 2. Both off
+by default: card 25's behaviour unchanged.
   PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/card25_check.py --base outputs/fullft/gen_cf/check
 """
 from __future__ import annotations
@@ -45,6 +49,8 @@ def main():
     ap.add_argument("--targets", type=int, default=5)
     ap.add_argument("--render", default="/workspace/FastWAM-memory2/outputs/fullft/gen_cf/GEN_CHECK_RENDER.json")
     ap.add_argument("--out", default="/workspace/FastWAM-memory2/outputs/fullft/gen_cf/CARD25_CHECK.json")
+    ap.add_argument("--gate8", action="store_true")
+    ap.add_argument("--max-seeds", type=int, default=0)
     a = ap.parse_args()
     rep = {"base": a.base, "checks": {}}
     # 1 + 3
@@ -72,6 +78,8 @@ def main():
     cfg = json.loads((Path("/workspace/FastWAM-memory2/outputs/memory_v2/press") / f"dense_{TASK}_v1" / "IDENTITY.json").read_text())["config"]
     maps = [seed_to_episode(tdir(a.base, k)) for k in range(a.targets)]
     seeds = sorted(set(maps[0]).intersection(*[set(m) for m in maps[1:]]))
+    if a.max_seeds:
+        seeds = seeds[:a.max_seeds]
     pix = []
     for s in seeds:
         frames = []
@@ -93,12 +101,25 @@ def main():
                     row["head_outside_shelf_max"] = int(d[~box].max())
                     row["head_outside_shelf_nonzero"] = round(float((d[~box] > 0).mean()), 6)
                     row["shelf_box_differs"] = bool((d[box] > 8).mean() > 0.01)
+                    row["head_outside_shelf_over8"] = round(float((d[~box] > 8).mean()), 6)
+                    row["head_outside_shelf_mean"] = round(float(d[~box].mean()), 4)
                 else:
                     row[f"wrist{c}_max"] = int(d.max())
+                    row[f"wrist{c}_over8"] = round(float((d > 8).mean()), 6)
+                    row[f"wrist{c}_mean"] = round(float(d.mean()), 4)
             pix.append(row)
-    same = bool(pix) and all(r["head_outside_shelf_max"] == 0 and all(v == 0 for kk, v in r.items() if kk.startswith("wrist"))
-                             for r in pix)
-    rep["checks"]["2_same_table"] = {"pass": same, "seeds_compared": len(seeds), "pairs": pix,
+    if a.gate8:     # card 8's threshold (user 11-27 for card 25): > 8 levels on < 2 % of the pixels, every camera
+        same = bool(pix) and all(r["head_outside_shelf_over8"] < 0.02 and
+                                 all(v < 0.02 for kk, v in r.items() if kk.startswith("wrist") and kk.endswith("_over8"))
+                                 for r in pix)
+    else:
+        same = bool(pix) and all(r["head_outside_shelf_max"] == 0 and
+                                 all(v == 0 for kk, v in r.items() if kk.startswith("wrist") and kk.endswith("_max"))
+                                 for r in pix)
+    over8 = [v for r in pix for kk, v in r.items() if kk.endswith("_over8")]
+    rep["checks"]["2_same_table"] = {"pass": same, "gate": "over8 < 2 %" if a.gate8 else "pixel-identical",
+                                     "seeds_compared": len(seeds), "pairs": pix,
+                                     "largest_over8": max(over8) if over8 else None,
                                      "shelf_differs_in": sum(r["shelf_box_differs"] for r in pix)}
     # 4
     rend = json.loads(Path(a.render).read_text()) if Path(a.render).exists() else {}

@@ -1,0 +1,3 @@
+# 11-28 (Opus): plan v22 card 30 opens once the 5090 has generated, checked and uploaded the 755-scene cache
+# (scripts/fullft/card30_5090.sh: "CARD30 GEN DONE"); the job fetches it like cf155 for card 25.
+"${HFPY:-$HOME/mwam/envs/hf-tools/bin/python}" scripts/fullft/cache_relay.py ls 2>/dev/null | grep -qx dense_observe_and_pickup_cf755_v1

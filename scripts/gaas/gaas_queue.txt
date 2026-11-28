@@ -676,3 +676,64 @@ swapT_joint3_ow | data.roots=[/workspace/FastWAM/outputs/s1_dense_joint_h100_v1,
 # swap 1-100 beside seed 17. The main-table swap_T cell of this recipe is the mean of the two seeds (rule R1 of plan
 # v19) and is marked "three tasks co-trained". No verdict; card 9b's verdict stands for its two checkpoints.
 swapT_joint3_s18 | seed=18 data.roots=[/workspace/FastWAM/outputs/s1_dense_joint_h100_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_swap_T_v1] data.tasks=[put_back_block,swap_blocks,swap_T] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_put_back_block.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_blocks.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_T.json] | test -f outputs/memory_v2/press/dense_swap_T_v1/.verified && test -s outputs/fullft/events/events_put_back_block.json && test -s outputs/fullft/events/events_swap_blocks.json && test -f outputs/fullft/events/events_swap_T.json && test -f outputs/fullft/READY_arprop_swap_T
+
+#
+# 11-28 (Opus): plan v22 card 30, reading copied verbatim from claude/MemWAM_Plan_v22_20261128.md 5.4, registered before
+# any obs_cf800 scene exists (the 5090 generates them: scripts/fullft/card30_5090.sh, seeds 30,000,000+; card 25's
+# checks with the threshold approved on 11-27, run on the generated groups before any cache is built). If fewer than
+# 151 complete groups come out, this registration is amended with the real count before training (plan v22b part 3
+# section 6). go/obs_cf800 opens only once the cache is on the cache relay; slot list position 6 (v22b 1.0).
+# Card 30 (plan v22, P1): obs_cf800 = obs_s800's exact recipe (three frames, 10 frame-epochs, exports e5 / e10,
+# seed 17) on 800 training scenes built as counterfactual groups as in card 25: the 45 official training demos + 151
+# table layouts x 5 targets (complete groups only; new seeds, disjoint from the evaluation seeds, the official demos'
+# seeds, the 5090 development scenes and every seed used by obs_s200 / obs_s800 / obs_s1600 / obs_cf200 and its probe
+# groups; the benchmark's own scripted expert; card 25's generation checks with the thresholds approved on 11-27; no
+# annotation). 2 further groups are generated and kept out of every training as probe groups.
+# Question: at the same number of scenes and the same training length, does organising the scenes so that the table
+# alone cannot predict the target beat independent scenes? (obs_s800 e10: 49/100, frame 0 used; obs_cf200 e10: 30/100
+# against 15/100 for obs_s200 e30.)
+# Registered reading (11-28, before any obs_cf800 episode; A40, observe_and_pickup 1-100, default noise; both arms
+# H200 class):
+#   MAIN: D = success(obs_cf800 e10) - success(obs_s800 e10), paired by scene, paired bootstrap 95 % CI (10,000,
+#   seed 0); SESOI +0.15: CI lower > +0.15 -> COUNTERFACTUAL GROUPS HELP AT 800; CI upper < +0.15 -> NO GAIN AT 800;
+#   otherwise UNCERTAIN (pre-set extension: both e10 again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule).
+#   Described: e5; success against 28 (pure-WAM best, self-reported, with RoboTwin pre-training) and 20 (blind pick);
+#   the frame-0 swap at the onset and in the wait window on held-out generated groups and on held-out official demos;
+#   the onset action loss, trained vs held-out; on the 5090 (MWAM_OBJECT_LOG=1, scenes 1-50) the first-close-on-target
+#   rate and the share of target-directed first closes that end in a success, beside obs_s800 e10 measured the same
+#   way.
+#   Written before the run: the first close is on the target in more than 60 % of the episodes with a close (22/49
+#   for obs_cf200 e10); success above 49.
+#   Single trainings: the verdict is about these two checkpoints (plan v21 5.5); if the verdict is not UNCERTAIN and
+#   |D| < 0.30, both arms get seed 18 and the four trainings are pooled (stratified paired bootstrap over seeds and
+#   scenes).
+#   A main-table entry from this run carries a double dagger (generated scenes with a designed target assignment).
+obs_cf800 | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_cf755_v1] data.tasks=[observe_and_pickup] schedule.frame_epochs=10 schedule.export_at_epochs=[5,10] | test -f outputs/memory_v2/press/dense_observe_and_pickup_v1/.verified && test -f outputs/memory_v2/press/dense_observe_and_pickup_cf755_v1/.verified
+
+#
+# 11-28 (Opus): plan v22 card 32 (pre-approved by the user 11-28 15:52, decision E: only if the card's three conditions
+# hold), reading copied verbatim from claude/MemWAM_Plan_v22_20261128.md 2.4, registered before any run. The line =
+# ar2_v3c's sets (timely writer) with rearrange_blocks added as in swapT_joint3 (two-task root + the task's dense cache;
+# the three tasks' v3c event files). go/rearr_joint3 = v22_gate.py c32 (card 9b CO-TRAINING HELPS, diagnostic 7(a)
+# majority_above, card 27 not TRAINING-LIMITED); slot list position 5.
+# Card 32 (plan v22, P1; conditional): rearr_joint3 = ar2_v3c's exact two-task line + rearrange_blocks as a third task
+# with rearr_v3c_h2's data and events (timely writer for all three tasks; no pre-event weighting; seed 17; 30
+# frame-epochs; H200 class).
+# Opens only if (a) card 9b read CO-TRAINING HELPS, and (b) diagnostic 7(a) shows that in most of rearr_pw_s18's
+# "never pressed" episodes the hand stopped above the press depth (the press itself was not learned), and (c) card 27
+# has not read TRAINING-LIMITED by the time a card is free for it.
+# Question: rearrange holds one press per demo (45 in the training set). Does practice from the other tasks (put_back
+# adds 45 presses and reaches 100 with the same press; all three share pick-and-place) do what the loss weighting did
+# in one seed and not in the other?
+# Registered reading (before any rearr_joint3 episode; A40, rearrange_blocks 1-100, default noise; control
+# rearr_v3c_h2 e30 = the same writer, single task, no weighting, H200 class: 47/100, "pressed twice" 27, "never
+# pressed" 15):
+#   MAIN: D = success(rearr_joint3 e30) - success(rearr_v3c_h2 e30), paired by scene, paired bootstrap 95 % CI (10,000,
+#   seed 0); SESOI +0.15: CI lower > +0.15 -> CO-TRAINING HELPS REARRANGE; CI upper < +0.15 -> NO HELP; otherwise
+#   UNCERTAIN (pre-set extension: both e30 again with MWAM_NOISE_SALT=r2, 200 pairs, the same rule).
+#   Beside it: put_back_block and swap_blocks 1-100 against ar2_v3c e30 (non-inferiority, margin -0.05, card 2's rule).
+#   Described: rearr_split.py classes; against the two seeds of rearr_pw (93 / 61); e10 / e20.
+#   Written before the run: "never pressed" falls below 8 and "pressed twice" below 10 without any weighting.
+#   Single trainings: the verdict is about these two checkpoints; seed extension as in plan v21 5.5 item 6.
+#   A main-table entry from this run is marked "three tasks co-trained".
+rearr_joint3 | data.roots=[/workspace/FastWAM/outputs/s1_dense_joint_h100_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[put_back_block,swap_blocks,rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_put_back_block_v3c.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_blocks_v3c.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks_v3c.json] | test -f outputs/memory_v2/press/dense_rearrange_blocks_v1/.verified && test -f outputs/fullft/READY_arprop_events_put_back_block_v3c && test -f outputs/fullft/READY_arprop_events_swap_blocks_v3c && test -f outputs/fullft/READY_arprop_events_rearrange_blocks_v3c

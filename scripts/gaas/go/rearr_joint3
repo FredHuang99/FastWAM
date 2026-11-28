@@ -1,0 +1,4 @@
+# 11-28 (Opus): plan v22 card 32 opens only if card 9b read CO-TRAINING HELPS, diagnostic 7(a) says most of
+# rearr_pw_s18's never-pressed episodes stopped above the press depth, and card 27 has not read TRAINING-LIMITED
+# (decision tree, v22b part 3 section 3; user decision E 11-28 15:52).
+"${HFPY:-$HOME/mwam/envs/hf-tools/bin/python}" scripts/fullft/v22_gate.py c32

@@ -131,6 +131,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("items", nargs="+")
     ap.add_argument("--first", type=int, default=0, help="measurements of the first N episodes (bank order) only")
+    ap.add_argument("--out", default="", help="output file name in outputs/fullft (11-28, plan v22: card 9b / 36 / 36b "
+                    "splits; default unchanged: SWAPT_SPLIT[_FIRST].json)")
     args = ap.parse_args()
     if not args.first and CLASSES is None:
         print("SWAPT SPLIT: the classes are not fixed yet (read --first 10 first, then fix CLASSES): nothing read")
@@ -171,7 +173,7 @@ def main():
             for c, k in counts.most_common():
                 print(f"  {k:3d}  {c}   e.g. seeds {seeds[c][:4]}")
         out[item] = per
-    name = "SWAPT_SPLIT_FIRST.json" if args.first else "SWAPT_SPLIT.json"
+    name = args.out or ("SWAPT_SPLIT_FIRST.json" if args.first else "SWAPT_SPLIT.json")
     (F / name).write_text(json.dumps(out, indent=1) + "\n")
     print(f"\nSWAPT SPLIT: written outputs/fullft/{name}")
     return 0
