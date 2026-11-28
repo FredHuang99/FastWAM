@@ -15989,6 +15989,19 @@ tasks:
   command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag8.py report"
   pass_if: "m['rc'] == 0"
 
+# 11-28 20:32 (Opus, patrol 1): A40-d8-swapT-report / report100 crashed (ZeroDivisionError: the report also computed the
+# press / rearrange settings, which have no episodes yet); diag8.py now lists those as "no paired episodes yet". The
+# gates were not affected (they exited 3 = below the line). Same command again, nothing else changed.
+- id: A40-d8-swapT-report2
+  lane: a40cpu
+  kind: shell
+  after: [A40-d8-swapT-report100]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "plan v22 rev. 1 diagnostic 8: report of the swapT settings on 1-50 (re-run after the 20:32 report fix; described only)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag8.py report"
+  pass_if: "m['rc'] == 0"
+
 - id: A40-d8-press_x16-s0
   lane: a40
   kind: closed_loop
