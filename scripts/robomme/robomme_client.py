@@ -34,19 +34,20 @@ def unpack(message: bytes):
     return json.loads(message[4:4 + n].decode()), message[4 + n:]
 
 
-def last(x):
-    """The current element of a RoboMME *_list observation value (a list / array of per-substep values)."""
+def last(x, ndim: int):
+    """The current element of a RoboMME *_list observation value: a list of per-substep values, or one value, or a
+    stacked array of them (one more dimension than a single value of `ndim` dimensions)."""
     if isinstance(x, (list, tuple)):
-        return x[-1]
+        x = x[-1]
     a = np.asarray(x)
-    return a
+    return a[-1] if a.ndim == ndim + 1 else a
 
 
 def frame_of(obs: dict, k: int) -> tuple:
-    front = np.ascontiguousarray(np.asarray(last(obs["front_rgb_list"]), dtype=np.uint8))
-    wrist = np.ascontiguousarray(np.asarray(last(obs["wrist_rgb_list"]), dtype=np.uint8))
-    eef = np.asarray(last(obs["eef_state_list"]), dtype=np.float64).reshape(-1)[:6]
-    grip = np.asarray(last(obs["gripper_state_list"]), dtype=np.float64).reshape(-1)[:2]
+    front = np.ascontiguousarray(np.asarray(last(obs["front_rgb_list"], 3), dtype=np.uint8))
+    wrist = np.ascontiguousarray(np.asarray(last(obs["wrist_rgb_list"], 3), dtype=np.uint8))
+    eef = np.asarray(last(obs["eef_state_list"], 1), dtype=np.float64).reshape(-1)[:6]
+    grip = np.asarray(last(obs["gripper_state_list"], 1), dtype=np.float64).reshape(-1)[:2]
     if front.shape != wrist.shape or front.ndim != 3:
         raise ValueError(f"front {front.shape} / wrist {wrist.shape}")
     return {"frame": k, "eef": eef.tolist(), "grip": grip.tolist(), "shape": list(front.shape)}, front, wrist
@@ -101,8 +102,8 @@ def run_episode(env, remote: Remote, task: str, episode: int, max_steps: int) ->
 def main():
     from multiprocessing.connection import Client
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--socket", required=True)
-    ap.add_argument("--key-file", required=True)
+    ap.add_argument("--socket", required=True, help="an AF_UNIX path, or host:port (TCP)")
+    ap.add_argument("--key-file", default="", help="default: the key in $MWAM_RPC_KEY")
     ap.add_argument("--task", default="PickXtimes")
     ap.add_argument("--dataset", default="test")
     ap.add_argument("--episodes", type=int, nargs="*", default=None, help="default: every episode of the split")
@@ -114,9 +115,13 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     builder = BenchmarkEnvBuilder(env_id=a.task, dataset=a.dataset, action_space="ee_pose", max_steps=a.max_steps)
     episodes = a.episodes if a.episodes else list(range(builder.get_episode_num()))
-    key = Path(a.key_file).read_bytes().strip()
+    import os
+    key = Path(a.key_file).read_bytes().strip() if a.key_file else os.environ.get("MWAM_RPC_KEY", "").encode()
+    host, sep, port = a.socket.rpartition(":")
+    address, family = (((host or "127.0.0.1"), int(port)), "AF_INET") if sep and port.isdigit() and "/" not in a.socket \
+        else (a.socket, "AF_UNIX")
     rows = []
-    with Client(a.socket, family="AF_UNIX", authkey=key) as conn:
+    with Client(address, family=family, authkey=key) as conn:
         remote = Remote(conn)
         try:
             for ep in episodes:

@@ -116,3 +116,33 @@ def test_goal_map_from_the_conversion(tmp_path):
     fake = type("P", (), {"text_memo": {}, "text_source": {}, "cache_goals": m})()
     t = rp.RoboMMEPolicy._text(fake, "pick up the cube once")
     assert t.shape == (1, 4, 3) and float(t[0, 0, 0]) == 2.0 and fake.text_source["pick up the cube once"].startswith("cache")
+
+
+def test_loop_over_tcp_and_stacked_obs(tmp_path):
+    import socket as so
+    s = so.socket()
+    s.bind(("127.0.0.1", 0))
+    port = s.getsockname()[1]
+    s.close()
+    pol = FakePolicy()
+    th = threading.Thread(target=rp.serve, args=(pol, f"127.0.0.1:{port}", b"k", tmp_path / "log"), daemon=True)
+    th.start()
+    for _ in range(100):
+        try:
+            conn = Client(("127.0.0.1", port), family="AF_INET", authkey=b"k")
+            break
+        except OSError:
+            threading.Event().wait(0.05)
+
+    class Stacked(FakeEnv):                 # *_list values as stacked arrays instead of lists
+        def obs(self):
+            o = super().obs()
+            return {k: np.stack(v) for k, v in o.items()}
+    with conn:
+        remote = client.Remote(conn)
+        row = client.run_episode(Stacked(end_at=6), remote, "PickXtimes", 0, 1300)
+        remote.call({"cmd": "close"})
+    th.join(5)
+    assert row["success"] and row["steps"] == 6
+    assert rp.endpoint("127.0.0.1:5555") == (("127.0.0.1", 5555), "AF_INET")
+    assert rp.endpoint("/tmp/x/rpc.sock") == ("/tmp/x/rpc.sock", "AF_UNIX")

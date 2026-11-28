@@ -234,13 +234,23 @@ class RoboMMEPolicy:
 
 
 # ----------------------------------------------------------------------------- server
+def endpoint(where: str):
+    """'host:port' -> (AF_INET address, family); anything else = an AF_UNIX socket path. 11-28 20:47: the 5090 launcher
+    uses TCP on 127.0.0.1 with the client joining mwam5090's network namespace (no shared folder needed)."""
+    host, sep, port = str(where).rpartition(":")
+    if sep and port.isdigit() and "/" not in where:
+        return (host or "127.0.0.1", int(port)), "AF_INET"
+    return str(where), "AF_UNIX"
+
+
 def serve(policy, socket: str, key: bytes, log_dir: Path):
     from multiprocessing.connection import Listener
     log_dir.mkdir(parents=True, exist_ok=True)
     dec = (log_dir / "decisions.jsonl").open("a")
-    if os.path.exists(socket):
-        os.unlink(socket)
-    with Listener(socket, family="AF_UNIX", authkey=key) as listener:
+    address, family = endpoint(socket)
+    if family == "AF_UNIX" and os.path.exists(address):
+        os.unlink(address)
+    with Listener(address, family=family, authkey=key) as listener:
         print(f"[robomme-policy] {time.strftime('%F %T')} listening on {socket}", flush=True)
         with listener.accept() as conn:
             while True:
@@ -274,8 +284,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--checkpoint", required=True)
     ap.add_argument("--root", default="/workspace/FastWAM-memory2/outputs/robomme/dense_robomme_v1")
-    ap.add_argument("--socket", required=True)
-    ap.add_argument("--key-file", required=True)
+    ap.add_argument("--socket", required=True, help="an AF_UNIX path, or host:port (TCP)")
+    ap.add_argument("--key-file", default="", help="default: the key in $MWAM_RPC_KEY")
     ap.add_argument("--execute", type=int, default=8)
     ap.add_argument("--steps", type=int, default=0)
     ap.add_argument("--log", required=True)
@@ -283,7 +293,10 @@ def main():
     policy = RoboMMEPolicy(a.checkpoint, a.root, "cuda", a.steps, a.execute)
     print(f"[robomme-policy] {a.checkpoint}: history {policy.rule.variant}, action dim {policy.action_dim}, "
           f"steps {policy.steps}, execute {policy.execute}, norm {policy.norm.sha[:16]}", flush=True)
-    return serve(policy, a.socket, Path(a.key_file).read_bytes().strip(), Path(a.log))
+    key = Path(a.key_file).read_bytes().strip() if a.key_file else os.environ.get("MWAM_RPC_KEY", "").encode()
+    if not key:
+        raise SystemExit("no key (--key-file or MWAM_RPC_KEY)")
+    return serve(policy, a.socket, key, Path(a.log))
 
 
 if __name__ == "__main__":
