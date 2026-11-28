@@ -13,7 +13,7 @@
 # plan v22 card 31: the countdown events file (press_told's v3c file annotated; checks before writing) -> relay
 # diag/press_button_v3d; go/press_cd on the new H200 opens once it is there.
 press-cd-events | cpu | - | PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/press_cd_events.py --relay
-# 11-28 17:30: the first run stopped (17:0x) on 'top' entries 6-10 cm beside every button; a top now takes the button and
+# 11-28 17:24: the first run stopped (before 16:59) on 'top' entries 6-10 cm beside every button; a top now takes the button and
 # count of its arm's latest press (history.annotate_remaining fix); the same checks.
 press-cd-events-2 | cpu | - | PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/press_cd_events.py --relay
 # plan v22 decision D (user 11-28 15:52): relay auto-clean of intermediate exports with a checked copy here and no
