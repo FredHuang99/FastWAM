@@ -55,6 +55,7 @@ def test_norm_writes_keys(tmp_path):
     assert torch.equal(e["actions"][2], e["actions"][1])           # held
     assert e["proprio"][:, 0].min() >= -1 - 1e-6 and float(e["actions"][:, 6].abs().max()) == 1.0
     assert torch.equal(e["proprio_raw"], torch.arange(48, dtype=torch.float32).reshape(6, 8) / 10)   # raw kept
+    assert json.loads((tmp_path / "CACHE.json").read_text())["episodes"] == 3
     assert run(tmp_path) == 0                                        # second run skips
     v = torch.load(tmp_path / "cache/PickXtimes_episode_2/encodings.pt", weights_only=True)
     assert v["proprio"].max() > 1                                    # val outside the train range is not clipped to 1
@@ -65,4 +66,4 @@ def test_wrap_stops(tmp_path):
     assert run(tmp_path) == 1
     assert json.loads((tmp_path / "NORM_STATS.json").read_text())["angle_wrap_episodes"] == 1
     e = torch.load(tmp_path / "cache/PickXtimes_episode_0/encodings.pt", weights_only=True)
-    assert "proprio" not in e
+    assert "proprio" not in e and not (tmp_path / "CACHE.json").exists()

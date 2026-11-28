@@ -13,7 +13,8 @@ Choices (R0 section 2 and Status 12.8; written before any statistic is computed)
     between consecutive frames of an episode is a wrap. Any wrap -> nothing is written (STOP; the report lists them):
     min/max over wrapped angles would be meaningless, and how to unwrap (also online) is decided after seeing them.
 Writes <root>/NORM_STATS.json (stats, counts, wraps, sha256 of the stats) and, unless --stats-only or a STOP, adds the
-two keys to each encodings.pt (written to a temporary file in the same folder, then renamed over the old one; every
+two keys to each encodings.pt; when every episode is done, <root>/CACHE.json (the dense-cache build marker that
+cache_relay.py needs before it uploads a root) (written to a temporary file in the same folder, then renamed over the old one; every
 existing key is kept unchanged; an episode that already has both keys from the same stats is skipped).
   PYTHONPATH=src /opt/mwam/bin/python scripts/robomme/robomme_norm.py [--root DIR] [--stats-only]
 """
@@ -137,8 +138,13 @@ def main():
         done += 1
         if done % 20 == 0:
             print(f"[norm] {done} written", flush=True)
-    print(f"[norm] DONE: {done} written, {skipped} already done (stats sha256 {sha[:16]})")
-    return 0
+    marked = sum((folder(root, r["episode_id"]) / "NORM.json").exists() for r in records)
+    if marked == len(records):        # the dense-cache build marker (cache_relay.py refuses a root without it)
+        (root / "CACHE.json").write_text(json.dumps({
+            "built_by": "scripts/robomme/robomme_encode.py + scripts/robomme/robomme_norm.py", "episodes": len(records),
+            "norm_sha256": sha, "keys": "latent video_latent video_valid text text_valid proprio actions (+ raw)"}, indent=1) + "\n")
+    print(f"[norm] DONE: {done} written, {skipped} already done, {marked}/{len(records)} marked (stats sha256 {sha[:16]})")
+    return 0 if marked == len(records) else 1
 
 
 if __name__ == "__main__":
