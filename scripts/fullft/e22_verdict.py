@@ -46,6 +46,12 @@ e1 = module("e1_verdict", "e1_verdict.py")
 e5 = module("e5_verdict", "e5_verdict.py")
 e5b = module("e5b_verdict", "e5b_verdict.py")
 CLOCK, LEDGER = "ar2_clock_e30", "ar2_prop_e30"
+# 11-28 (Opus; the code audit): the A100's 25 hidden-arm cards of the 256 / 1024 cells ran with
+# --stress event:pause:L:history (the VISIBLE arm) -- their "_hid" cells are a second visible run, not hidden. The hidden
+# arm is re-run on the A100 as "_hid2" with :hidden (A100-E22h-*); --hid-suffix hid2 reads those, --out writes a new
+# file. Default "hid" / E22A_VERDICT.json: unchanged (the registered reading itself is not changed).
+HID = "hid"
+OUT_A = "E22A_VERDICT.json"
 TASKS = ("swap_blocks", "put_back_block")
 LEVELS = {(CLOCK, "swap_blocks"): (64, 256, 1024), (CLOCK, "put_back_block"): (64, 256),
           (LEDGER, "swap_blocks"): (64, 1024), (LEDGER, "put_back_block"): (64, 256)}
@@ -56,7 +62,7 @@ def where(model, level):
     if level == 64:
         folder = O / ("e5" if model == CLOCK else "e1")
         return folder, f"{model}_e1pause_vis", f"{model}_e1pause_hid"
-    return O / "e22", f"{model}_p{level}_vis", f"{model}_p{level}_hid"
+    return O / "e22", f"{model}_p{level}_vis", f"{model}_p{level}_{HID}"
 
 
 def classes(folder, label, task, seeds):
@@ -124,7 +130,8 @@ def part_a():
                 word = "PARTIAL"
         out[task] = {"verdict": word, "clock": clock, "ledger": ledger}
         print(f"E22a {task}: {word}")
-    (F / "E22A_VERDICT.json").write_text(json.dumps(out, indent=1) + "\n")
+    out["hidden_cells"] = f"closed_loop/e22 *_{HID} (256 / 1024 levels)"
+    (F / OUT_A).write_text(json.dumps(out, indent=1) + "\n")
 
 
 def budget_curve(model, seeds):
@@ -197,7 +204,11 @@ def occupancy():
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--part", choices=("a", "b", "occupancy"), required=True)
+    ap.add_argument("--hid-suffix", default="hid")
+    ap.add_argument("--out", default="E22A_VERDICT.json")
     args = ap.parse_args()
+    global HID, OUT_A
+    HID, OUT_A = args.hid_suffix, args.out
     {"a": part_a, "b": part_b, "occupancy": occupancy}[args.part]()
 
 

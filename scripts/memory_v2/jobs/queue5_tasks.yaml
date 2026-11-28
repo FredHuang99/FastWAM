@@ -50048,3 +50048,464 @@ tasks:
   output: closed_loop/a100smoke
   env: {MWAM_TEXT_SOURCE: "cache"}
   pass_if: "m.get('episodes', 0) >= 1"
+
+# 11-28 19:00 (Opus; the 11-28 code audit, user informed 16:3x): E22a's hidden arm re-run. The 25 A100-E22-*-hid-*
+# cards ran with --stress event:pause:L:history = the VISIBLE arm (every other hidden cell of E1 / E5 / E19 uses
+# :hidden), so the 256 / 1024 '_hid' cells and the FLOOR NOT MET read from them are void. Same cards with :hidden, new
+# labels '_hid2' (nothing old is touched or overwritten), then pack hid2 -> the A40 -> e22_verdict.py --part a
+# --hid-suffix hid2 --out E22A_VERDICT_HID2.json (the registered reading unchanged). Described evaluation machine (A100).
+- id: A100-E22h-clock-p256-hid-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check"]
+  requires_pass: ["A100-E22-smoke-check"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_clock_e30_p256_hid2; ar2_clock_e30, pause 256 hid, swap_blocks scenes 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_swap_blocks"]
+  tasks: ["swap_blocks"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:256:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-clock-p256-hid-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check"]
+  requires_pass: ["A100-E22-smoke-check"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_clock_e30_p256_hid2; ar2_clock_e30, pause 256 hid, swap_blocks scenes 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_swap_blocks"]
+  tasks: ["swap_blocks"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:256:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-clock-p256-hid-swap-s2
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check"]
+  requires_pass: ["A100-E22-smoke-check"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_clock_e30_p256_hid2; ar2_clock_e30, pause 256 hid, swap_blocks scenes 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_swap_blocks"]
+  tasks: ["swap_blocks"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:256:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-clock-p256-hid-swap-s3
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check"]
+  requires_pass: ["A100-E22-smoke-check"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_clock_e30_p256_hid2; ar2_clock_e30, pause 256 hid, swap_blocks scenes 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_swap_blocks"]
+  tasks: ["swap_blocks"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:256:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-clock-p256-hid-swap-s4
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check"]
+  requires_pass: ["A100-E22-smoke-check"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_clock_e30_p256_hid2; ar2_clock_e30, pause 256 hid, swap_blocks scenes 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_swap_blocks"]
+  tasks: ["swap_blocks"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:256:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-clock-p256-hid-put-s0
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check"]
+  requires_pass: ["A100-E22-smoke-check"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_clock_e30_p256_hid2; ar2_clock_e30, pause 256 hid, put_back_block scenes 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_put_back_block"]
+  tasks: ["put_back_block"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:256:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-clock-p256-hid-put-s1
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check"]
+  requires_pass: ["A100-E22-smoke-check"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_clock_e30_p256_hid2; ar2_clock_e30, pause 256 hid, put_back_block scenes 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_put_back_block"]
+  tasks: ["put_back_block"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:256:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-clock-p256-hid-put-s2
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check"]
+  requires_pass: ["A100-E22-smoke-check"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_clock_e30_p256_hid2; ar2_clock_e30, pause 256 hid, put_back_block scenes 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_put_back_block"]
+  tasks: ["put_back_block"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:256:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-clock-p256-hid-put-s3
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check"]
+  requires_pass: ["A100-E22-smoke-check"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_clock_e30_p256_hid2; ar2_clock_e30, pause 256 hid, put_back_block scenes 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_put_back_block"]
+  tasks: ["put_back_block"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:256:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-clock-p256-hid-put-s4
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check"]
+  requires_pass: ["A100-E22-smoke-check"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_clock_e30_p256_hid2; ar2_clock_e30, pause 256 hid, put_back_block scenes 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p256_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_put_back_block"]
+  tasks: ["put_back_block"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:256:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-ledger-p256-hid-put-s0
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check"]
+  requires_pass: ["A100-E22-smoke-check"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_prop_e30_p256_hid2; ar2_prop_e30, pause 256 hid, put_back_block scenes 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p256_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_put_back_block"]
+  tasks: ["put_back_block"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:256:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-ledger-p256-hid-put-s1
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check"]
+  requires_pass: ["A100-E22-smoke-check"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_prop_e30_p256_hid2; ar2_prop_e30, pause 256 hid, put_back_block scenes 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p256_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_put_back_block"]
+  tasks: ["put_back_block"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:256:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-ledger-p256-hid-put-s2
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check"]
+  requires_pass: ["A100-E22-smoke-check"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_prop_e30_p256_hid2; ar2_prop_e30, pause 256 hid, put_back_block scenes 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p256_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_put_back_block"]
+  tasks: ["put_back_block"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:256:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-ledger-p256-hid-put-s3
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check"]
+  requires_pass: ["A100-E22-smoke-check"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_prop_e30_p256_hid2; ar2_prop_e30, pause 256 hid, put_back_block scenes 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p256_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_put_back_block"]
+  tasks: ["put_back_block"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:256:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-ledger-p256-hid-put-s4
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check"]
+  requires_pass: ["A100-E22-smoke-check"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_prop_e30_p256_hid2; ar2_prop_e30, pause 256 hid, put_back_block scenes 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p256_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_put_back_block"]
+  tasks: ["put_back_block"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:256:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-clock-p1024-hid-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check", "A100-E22-time1024"]
+  requires_pass: ["A100-E22-smoke-check", "A100-E22-time1024"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_clock_e30_p1024_hid2; ar2_clock_e30, pause 1024 hid, swap_blocks scenes 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p1024_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_swap_blocks"]
+  tasks: ["swap_blocks"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:1024:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-clock-p1024-hid-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check", "A100-E22-time1024"]
+  requires_pass: ["A100-E22-smoke-check", "A100-E22-time1024"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_clock_e30_p1024_hid2; ar2_clock_e30, pause 1024 hid, swap_blocks scenes 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p1024_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_swap_blocks"]
+  tasks: ["swap_blocks"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:1024:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-clock-p1024-hid-swap-s2
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check", "A100-E22-time1024"]
+  requires_pass: ["A100-E22-smoke-check", "A100-E22-time1024"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_clock_e30_p1024_hid2; ar2_clock_e30, pause 1024 hid, swap_blocks scenes 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p1024_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_swap_blocks"]
+  tasks: ["swap_blocks"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:1024:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-clock-p1024-hid-swap-s3
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check", "A100-E22-time1024"]
+  requires_pass: ["A100-E22-smoke-check", "A100-E22-time1024"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_clock_e30_p1024_hid2; ar2_clock_e30, pause 1024 hid, swap_blocks scenes 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p1024_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_swap_blocks"]
+  tasks: ["swap_blocks"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:1024:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-clock-p1024-hid-swap-s4
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check", "A100-E22-time1024"]
+  requires_pass: ["A100-E22-smoke-check", "A100-E22-time1024"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_clock_e30_p1024_hid2; ar2_clock_e30, pause 1024 hid, swap_blocks scenes 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_clock_e30/export_e30.pt
+  label: ar2_clock_e30_p1024_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_swap_blocks"]
+  tasks: ["swap_blocks"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:1024:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-ledger-p1024-hid-swap-s0
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check", "A100-E22-time1024"]
+  requires_pass: ["A100-E22-smoke-check", "A100-E22-time1024"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_prop_e30_p1024_hid2; ar2_prop_e30, pause 1024 hid, swap_blocks scenes 1-50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p1024_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_swap_blocks"]
+  tasks: ["swap_blocks"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "0/5", "--stress", "event:pause:1024:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-ledger-p1024-hid-swap-s1
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check", "A100-E22-time1024"]
+  requires_pass: ["A100-E22-smoke-check", "A100-E22-time1024"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_prop_e30_p1024_hid2; ar2_prop_e30, pause 1024 hid, swap_blocks scenes 1-50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p1024_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_swap_blocks"]
+  tasks: ["swap_blocks"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "1/5", "--stress", "event:pause:1024:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-ledger-p1024-hid-swap-s2
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check", "A100-E22-time1024"]
+  requires_pass: ["A100-E22-smoke-check", "A100-E22-time1024"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_prop_e30_p1024_hid2; ar2_prop_e30, pause 1024 hid, swap_blocks scenes 1-50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p1024_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_swap_blocks"]
+  tasks: ["swap_blocks"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "2/5", "--stress", "event:pause:1024:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-ledger-p1024-hid-swap-s3
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check", "A100-E22-time1024"]
+  requires_pass: ["A100-E22-smoke-check", "A100-E22-time1024"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_prop_e30_p1024_hid2; ar2_prop_e30, pause 1024 hid, swap_blocks scenes 1-50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p1024_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_swap_blocks"]
+  tasks: ["swap_blocks"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "3/5", "--stress", "event:pause:1024:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-ledger-p1024-hid-swap-s4
+  lane: loop
+  kind: closed_loop
+  after: ["A100-E22-smoke-check", "A100-E22-time1024"]
+  requires_pass: ["A100-E22-smoke-check", "A100-E22-time1024"]
+  need_mib: 30000
+  timeout_h: 10
+  hypothesis: "E22a hidden arm RE-RUN with :hidden (the original A100 card ran :history, the visible arm): ar2_prop_e30_p1024_hid2; ar2_prop_e30, pause 1024 hid, swap_blocks scenes 1-50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/ar2_prop_e30/export_e30.pt
+  label: ar2_prop_e30_p1024_hid2
+  modes: ["on"]
+  scenes: ["closed_loop/scenes_seed42_n100_swap_blocks"]
+  tasks: ["swap_blocks"]
+  online_args: ["--execute", "8", "--limit", "50", "--shard", "4/5", "--stress", "event:pause:1024:hidden"]
+  output: closed_loop/e22
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A100-E22h-pack-hid2
+  lane: cpu
+  kind: shell
+  after: [A100-E22h-clock-p256-hid-swap-s0, A100-E22h-clock-p256-hid-swap-s1, A100-E22h-clock-p256-hid-swap-s2, A100-E22h-clock-p256-hid-swap-s3, A100-E22h-clock-p256-hid-swap-s4, A100-E22h-clock-p256-hid-put-s0, A100-E22h-clock-p256-hid-put-s1, A100-E22h-clock-p256-hid-put-s2, A100-E22h-clock-p256-hid-put-s3, A100-E22h-clock-p256-hid-put-s4, A100-E22h-ledger-p256-hid-put-s0, A100-E22h-ledger-p256-hid-put-s1, A100-E22h-ledger-p256-hid-put-s2, A100-E22h-ledger-p256-hid-put-s3, A100-E22h-ledger-p256-hid-put-s4, A100-E22h-clock-p1024-hid-swap-s0, A100-E22h-clock-p1024-hid-swap-s1, A100-E22h-clock-p1024-hid-swap-s2, A100-E22h-clock-p1024-hid-swap-s3, A100-E22h-clock-p1024-hid-swap-s4, A100-E22h-ledger-p1024-hid-swap-s0, A100-E22h-ledger-p1024-hid-swap-s1, A100-E22h-ledger-p1024-hid-swap-s2, A100-E22h-ledger-p1024-hid-swap-s3, A100-E22h-ledger-p1024-hid-swap-s4]
+  requires_pass: [A100-E22h-clock-p256-hid-swap-s0, A100-E22h-clock-p256-hid-swap-s1, A100-E22h-clock-p256-hid-swap-s2, A100-E22h-clock-p256-hid-swap-s3, A100-E22h-clock-p256-hid-swap-s4, A100-E22h-clock-p256-hid-put-s0, A100-E22h-clock-p256-hid-put-s1, A100-E22h-clock-p256-hid-put-s2, A100-E22h-clock-p256-hid-put-s3, A100-E22h-clock-p256-hid-put-s4, A100-E22h-ledger-p256-hid-put-s0, A100-E22h-ledger-p256-hid-put-s1, A100-E22h-ledger-p256-hid-put-s2, A100-E22h-ledger-p256-hid-put-s3, A100-E22h-ledger-p256-hid-put-s4, A100-E22h-clock-p1024-hid-swap-s0, A100-E22h-clock-p1024-hid-swap-s1, A100-E22h-clock-p1024-hid-swap-s2, A100-E22h-clock-p1024-hid-swap-s3, A100-E22h-clock-p1024-hid-swap-s4, A100-E22h-ledger-p1024-hid-swap-s0, A100-E22h-ledger-p1024-hid-swap-s1, A100-E22h-ledger-p1024-hid-swap-s2, A100-E22h-ledger-p1024-hid-swap-s3, A100-E22h-ledger-p1024-hid-swap-s4]
+  need_mib: 0
+  timeout_h: 3
+  hypothesis: "E22a hidden-arm re-run cells (_hid2) -> relay diag/e22_a100 (e22_a100.sh pack hid2)"
+  command: "bash /workspace/FastWAM-memory2/scripts/fullft/e22_a100.sh pack hid2"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-E22h-fetch-hid2
+  lane: a40cpu
+  kind: shell
+  need_mib: 0
+  timeout_h: 120
+  hypothesis: "E22a hidden-arm re-run cells from the A100: e22_a100.sh fetch hid2 (sha256; same first 50 seeds; existing files never overwritten)"
+  command: "bash /workspace/FastWAM-memory2/scripts/fullft/e22_a100.sh fetch hid2"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-E22h-verdict
+  lane: a40cpu
+  kind: shell
+  after: [A40-E22h-fetch-hid2]
+  requires_pass: [A40-E22h-fetch-hid2]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "E22a verdict with the re-run hidden arm (registered reading in e22_verdict.py --part a, unchanged; --hid-suffix hid2 --out E22A_VERDICT_HID2.json)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/e22_verdict.py --part a --hid-suffix hid2 --out E22A_VERDICT_HID2.json"
+  pass_if: "m['rc'] == 0"
