@@ -21,6 +21,9 @@ diag13 | cpu | - | PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag13_509
 swapdesc-swapT_joint3_e30 | gpu1 | bash scripts/fullft/relay_has.sh swapT_joint3_e30 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); RUN=swapT_joint3 TAG=e30 bash scripts/fullft/swapT_desc_5090.sh
 card30-gen | gpu1 | - | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); bash scripts/fullft/card30_5090.sh
 dev-rearr_pw_s18_e30 | gpu1 | bash scripts/fullft/relay_has.sh rearr_pw_s18_e30 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PF_GPUS=$GPU DEV_RUNS="rearr_pw_s18_e30:rearrange_blocks" bash scripts/fullft/dev_eval_5090.sh
+# plan v22 diagnostic 7(c): rearrange press-window action loss of 13 checkpoints on the 5 held-out demos (GPU 1, read-only;
+# a checkpoint found nowhere is skipped, never waited for); the closed-loop counts are put beside it at reading time.
+diag7c | gpu1 | test -s outputs/fullft/events/events_rearrange_blocks_v3c.json | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); CUDA_VISIBLE_DEVICES=$GPU PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag7c_5090.py
 c25desc-close-obs_s800_e10 | gpu1 | bash scripts/fullft/relay_has.sh obs_s800_e10 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PART=close RUN=obs_s800 TAG=e10 bash scripts/fullft/card25desc_5090.sh
 # plan v22 diagnostic 11 needs ar2_prop_s18_e10 on the A40: it was moved here by offload batch 2 (user 14:45); put it
 # back on the relay (sha256 checked first; the A40 task A40-fetch-ar2_prop_s18-e10 waits for it).
