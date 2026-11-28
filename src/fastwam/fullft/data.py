@@ -104,20 +104,24 @@ def latent_valid(mask: torch.Tensor, polarity: str) -> torch.Tensor:
     return torch.stack([real[0], real[1:5].any(), real[5:9].any()])
 
 
-def ledger_tensor(rule: HistoryRule, entries: Sequence[dict], proprio_of) -> Tuple[torch.Tensor, torch.Tensor]:
+def ledger_tensor(rule: HistoryRule, entries: Sequence[dict], proprio_of,
+                  proprio_dim: int = 14) -> Tuple[torch.Tensor, torch.Tensor]:
     """(features [event_max, ledger_dim], valid [event_max]) of ledger entries (ascending); proprio_of(frame) ->
-    normalised proprio [14]. Slot j holds entry j; rank 0 = the most recent entry."""
+    normalised proprio [proprio_dim] (14 RoboTwin; 11-28: 8 for the LIBERO base / RoboMME, the other features shift by
+    proprio_dim - 14; 14 = exactly as before). Slot j holds entry j; rank 0 = the most recent entry."""
     slots = rule.event_max
     dims = int(rule.ordinal)
-    feat = torch.zeros(slots, ledger_dim(slots, dims))
+    p = int(proprio_dim)
+    feat = torch.zeros(slots, ledger_dim(slots, dims, p))
     valid = torch.zeros(slots, dtype=torch.bool)
-    flag = 20 + slots                                   # the valid flag (= the last feature when dims == 0)
+    kind0, arm0, rank0 = p, p + len(LEDGER_KINDS), p + len(LEDGER_KINDS) + 2
+    flag = rank0 + slots                                # the valid flag (= the last feature when dims == 0)
     n = len(entries)
     for j, e in enumerate(entries):
-        feat[j, :14] = proprio_of(int(e["frame"])).float()
-        feat[j, 14 + LEDGER_KINDS.index(e["kind"])] = 1.0
-        feat[j, 18 + int(e["arm"])] = 1.0
-        feat[j, 20 + (n - 1 - j)] = 1.0
+        feat[j, :p] = proprio_of(int(e["frame"])).float()
+        feat[j, kind0 + LEDGER_KINDS.index(e["kind"])] = 1.0
+        feat[j, arm0 + int(e["arm"])] = 1.0
+        feat[j, rank0 + (n - 1 - j)] = 1.0
         feat[j, flag] = 1.0
         if dims:                                        # 11-17 E4: KeyError if an entry carries no ordinal
             feat[j, flag + 1:flag + 1 + dims] = torch.tensor(ordinal_code(int(e["ordinal"]), dims))
@@ -177,7 +181,7 @@ CLOCK_MODES = ("", "off", "freeze", "flat")
 
 
 def clock_tensor(rule: HistoryRule, frames: Sequence[int], proprio_of, scale: float = 1.0, mode: str = "",
-                 current: Optional[int] = None) -> Tuple[torch.Tensor, torch.Tensor]:
+                 current: Optional[int] = None, proprio_dim: int = 14) -> Tuple[torch.Tensor, torch.Tensor]:
     """arclk (plan v13 E5): (features [event_max, clock_dim], valid [event_max]) of the sampled frames (ascending);
     proprio_of(frame) -> normalised proprio [14]; scale multiplies the frame index inside the timestamp code only
     (test-time timestamp scaling, 1.0 = as trained).
@@ -190,13 +194,14 @@ def clock_tensor(rule: HistoryRule, frames: Sequence[int], proprio_of, scale: fl
     if mode == "freeze" and current is None:
         raise ValueError("clock mode 'freeze' needs the current frame")
     slots = rule.event_max
-    feat = torch.zeros(slots, clock_dim())
+    p = int(proprio_dim)                                # 11-28: the base's proprio width (14 = as before)
+    feat = torch.zeros(slots, clock_dim(p))
     valid = torch.zeros(slots, dtype=torch.bool)
     shown = [] if mode == "off" else [int(f) for f in list(frames)[-slots:]]
     middle = shown[len(shown) // 2] if shown else 0
     for j, f in enumerate(shown):
-        feat[j, :14] = proprio_of(int(current) if mode == "freeze" else f).float()
-        feat[j, 14:-1] = torch.tensor(clock_code(float(middle if mode == "flat" else f) * scale))
+        feat[j, :p] = proprio_of(int(current) if mode == "freeze" else f).float()
+        feat[j, p:-1] = torch.tensor(clock_code(float(middle if mode == "flat" else f) * scale))
         feat[j, -1] = 1.0
         valid[j] = True
     return feat, valid
@@ -288,6 +293,7 @@ class Samples(torch.utils.data.Dataset):
         episode_id, a = self.items[i]
         e = self.episodes(episode_id)
         actions, action_valid = action_window(e["actions"], a)
+        pdim = int(e["proprio"].shape[-1])              # 11-28: 14 RoboTwin, 8 LIBERO / RoboMME
         rng = random.Random(hash((self.seed, self.epoch, i)) & 0xFFFFFFFF) if self.augment else None
         known = event_frames(self.events.get(episode_id, []), before=a, known_by=a - int(self.rule.lag))
         ids, pos = select(self.rule, a, known, rng)
@@ -313,7 +319,7 @@ class Samples(torch.utils.data.Dataset):
         if k:
             lat = e["latent"]
             hist_latent = torch.zeros((k,) + tuple(lat.shape[1:]), dtype=lat.dtype)
-            hist_proprio = torch.zeros(k, 14)
+            hist_proprio = torch.zeros(k, pdim)
             hist_valid = torch.zeros(k, dtype=torch.bool)
             hist_pos = torch.zeros(k)
             hist_ids = torch.full((k,), -1, dtype=torch.long)
@@ -338,7 +344,7 @@ class Samples(torch.utils.data.Dataset):
                           hist_pos=hist_pos, hist_ids=hist_ids)
         if self.rule.variant == "prop":
             frames = event_states(self.rule, a, known)
-            states = torch.zeros(self.rule.event_max, 14)
+            states = torch.zeros(self.rule.event_max, pdim)
             valid = torch.zeros(self.rule.event_max, dtype=torch.bool)
             for j, f in enumerate(frames):
                 states[j] = e["proprio"][f].float()
@@ -348,7 +354,7 @@ class Samples(torch.utils.data.Dataset):
             if episode_id not in self.checked_text:
                 check_ledger_slots(text, self.rule.event_max, f"in {episode_id}")
                 self.checked_text.add(episode_id)
-            feat, valid = clock_tensor(self.rule, clock_frames(self.rule, a), lambda f: e["proprio"][f])
+            feat, valid = clock_tensor(self.rule, clock_frames(self.rule, a), lambda f: e["proprio"][f], proprio_dim=pdim)
             sample.update(ledger=feat, ledger_valid=valid)
         if self.rule.variant == "arprop":
             if episode_id not in self.checked_text:
@@ -360,7 +366,7 @@ class Samples(torch.utils.data.Dataset):
                                          lambda f: e["proprio"][f], rng)          # plan v19 3.2 (4), training only
             if rng is not None and float(self.rule.record_dropout) > 0 and rng.random() < float(self.rule.record_dropout):
                 entries = []                     # plan v21 card 24b: the empty record (training only)
-            feat, valid = ledger_tensor(self.rule, entries, lambda f: e["proprio"][f])
+            feat, valid = ledger_tensor(self.rule, entries, lambda f: e["proprio"][f], proprio_dim=pdim)
             sample.update(ledger=feat, ledger_valid=valid)
         return sample
 

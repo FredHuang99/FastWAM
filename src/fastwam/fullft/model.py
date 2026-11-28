@@ -126,11 +126,14 @@ class FullModel(nn.Module):
         self.num_heads = mot.num_heads
         self.hist_gate = nn.Parameter(torch.zeros(self.num_layers, self.num_heads))
         text_dim = proprio_encoder.out_features
+        # 11-28 (RoboMME): every per-entry proprio block is the base's proprio width (14 RoboTwin = exactly as before;
+        # 8 LIBERO); HistoryRule.ledger_features counts 14, so the ledger widths shift by pd - 14.
+        pd = int(proprio_encoder.in_features)
         self.extra = None
         if variant == "clk":
             self.extra = nn.Linear(CLK_DIM, text_dim)
         elif variant == "prop":
-            self.extra = nn.Linear(event_slots * 15, text_dim)
+            self.extra = nn.Linear(event_slots * (pd + 1), text_dim)
         if self.extra is not None:
             nn.init.zeros_(self.extra.weight)
             nn.init.zeros_(self.extra.bias)
@@ -141,7 +144,7 @@ class FullModel(nn.Module):
             # E5 arclk: the clock tokens use the same zero-initialised encoder and slots (width from the rule).
             if variant == "arclk" and not int(ledger_features):
                 raise ValueError("arclk needs ledger_features (HistoryRule.ledger_features)")
-            self.ledger = nn.Linear(int(ledger_features) or ledger_dim(event_slots), text_dim)
+            self.ledger = nn.Linear((int(ledger_features) or ledger_dim(event_slots)) + pd - 14, text_dim)
             nn.init.zeros_(self.ledger.weight)
             nn.init.zeros_(self.ledger.bias)
         self.next_event_head = None                   # plan v19 3.2 (2); None = every earlier model exactly
@@ -150,7 +153,7 @@ class FullModel(nn.Module):
             self.next_event_head = NextEventHead(int(mot.mixtures["action"].hidden_dim), NEXT_EVENT_CLASSES)
         self.next_pose_head = None                    # 11-23 (2b); None = every earlier model exactly
         if next_pose:                                 # the same zero-initialised linear map, 14 outputs (a pose delta)
-            self.next_pose_head = NextEventHead(int(mot.mixtures["action"].hidden_dim), 14)
+            self.next_pose_head = NextEventHead(int(mot.mixtures["action"].hidden_dim), pd)
         self.video_scheduler = WanContinuousFlowMatchScheduler(shift=video_shift)
         self.action_scheduler = WanContinuousFlowMatchScheduler(shift=action_shift)
         self.checkpoint_layers = False

@@ -211,7 +211,7 @@ def decide_encoded(model: FullModel, rule: HistoryRule, cache: FrameCache, encod
              "proprio": encoded[current][1][None].to(device), "anchor": torch.tensor([current], device=device)}
     if rule.variant == "prop":
         frames = [int(e) for e in events if 0 < int(e) < current][-rule.event_max:]
-        states = torch.zeros(1, rule.event_max, 14, device=device)
+        states = torch.zeros(1, rule.event_max, int(model.proprio_encoder.in_features), device=device)   # 11-28: 14 = as before
         valid = torch.zeros(1, rule.event_max, dtype=torch.bool, device=device)
         for j, f in enumerate(frames):
             states[0, j], valid[0, j] = encoded[f][1].to(device), True
@@ -577,7 +577,8 @@ class FullSession:
                     budget = token_budget()                      # 11-19 plan v15 E22b: only the last K entries
                     if budget:
                         entries = entries[-budget:]
-                    ledger = ledger_tensor(p.rule, entries, self._proprio)
+                    ledger = ledger_tensor(p.rule, entries, self._proprio,
+                                           proprio_dim=int(p.model.proprio_encoder.in_features))   # 11-28: 14 = as before
             if p.rule.variant == "arclk":                       # 11-17 plan v13 E5: clock tokens (time-indexed)
                 from .data import check_ledger_slots, clock_tensor
                 from .history import clock_frames
@@ -591,7 +592,8 @@ class FullSession:
                     frames = clock_frames(dataclasses.replace(p.rule, event_max=min(budget, int(p.rule.event_max))), current)
                 else:
                     frames = clock_frames(p.rule, current)
-                ledger = clock_tensor(p.rule, frames, self._proprio, scale, mode=cmode, current=current)
+                ledger = clock_tensor(p.rule, frames, self._proprio, scale, mode=cmode, current=current,
+                                      proprio_dim=int(p.model.proprio_encoder.in_features))   # 11-28: 14 = as before
                 entries = [{"frame": f, "arm": -1, "kind": "clock", "confirmed": f} for f in frames]
             ids, _ = select(p.rule, current, known)
             self._encode(sorted(set(ids) | {current} | (set(known) if p.rule.variant == "prop" else set())))

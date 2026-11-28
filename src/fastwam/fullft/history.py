@@ -231,15 +231,17 @@ def event_states(rule: HistoryRule, t: int, events: Sequence[int]) -> List[int]:
     return sorted({int(e) for e in events if 0 < int(e) < t})[-rule.event_max:]
 
 
-def ledger_dim(slots: int, ordinal: int = 0) -> int:
+def ledger_dim(slots: int, ordinal: int = 0, proprio: int = 14) -> int:
     """Features of one ledger token: proprio (14) + kind one-hot (4) + arm one-hot (2) + rank one-hot (slots) + 1
-    (valid flag) [+ ordinal thermometer (ordinal dims), 11-17 E4]. Rank 0 = the most recent entry."""
-    return 14 + len(LEDGER_KINDS) + 2 + int(slots) + 1 + int(ordinal)
+    (valid flag) [+ ordinal thermometer (ordinal dims), 11-17 E4]. Rank 0 = the most recent entry.
+    11-28 (RoboMME, single arm): proprio = the proprio width of the base (LIBERO 8); 14 = exactly as before."""
+    return int(proprio) + len(LEDGER_KINDS) + 2 + int(slots) + 1 + int(ordinal)
 
 
-def clock_dim() -> int:
-    """Features of one arclk token: proprio (14) + timestamp code (CLOCK_CODE) + 1 (valid flag)."""
-    return 14 + CLOCK_CODE + 1
+def clock_dim(proprio: int = 14) -> int:
+    """Features of one arclk token: proprio (14) + timestamp code (CLOCK_CODE) + 1 (valid flag). 11-28: proprio = the
+    base's proprio width (14 = as before)."""
+    return int(proprio) + CLOCK_CODE + 1
 
 
 def clock_frames(rule: HistoryRule, t: int) -> List[int]:
