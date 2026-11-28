@@ -1,0 +1,34 @@
+[run] 2026-11-27 07:38:57 run rearr_ar_pw; host hpc-gaas-g10; job 119191.gaas; cores 12; CUDA_VISIBLE_DEVICES=GPU-22da8595-de39-f180-3731-f80e53de8506
+GPU 0: NVIDIA H200 (UUID: GPU-22da8595-de39-f180-3731-f80e53de8506)
+[run] 2026-11-27 07:38:58 code f8e7728 Round 8 (11-27 04:00): card 25 gate fix, diag 5(b) classes, br
+[run] 2026-11-27 07:38:58 sets: data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.event_delta=0.012 history.event_min_path=0.015 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks_v3c.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[bottom]
+[run] 2026-11-27 07:38:58 apptainer: module apptainer/1.4.1 (apptainer version 1.4.1)
+[run] 2026-11-27 07:38:58 1 container, environment, unit tests
+[run] 2026-11-27 07:38:58 node hpc-gaas-g10: /tmp 666G free; home 482G free
+[run] 2.10.0a0+b558c986e8.nv25.11 NVIDIA H200 SMs 132
+[W1127 07:39:22.622822347 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+76 passed, 1 warning in 5.54s
+[W1127 07:39:29.527784641 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[run] 2026-11-27 07:39:29 2 data checks
+[run] 2026-11-27 07:39:29 two-task cache verified (8.3G)
+[run] 2026-11-27 07:39:29 cache dense_rearrange_blocks_v1 verified before
+[run] 2026-11-27 07:39:29 home 482 GB free
+[run] 2026-11-27 07:39:29 3 condition and training
+[run] 2026-11-27 07:39:29 relay backlog started in this job (scripts/gaas/relay_backlog.txt)
+[run] 2026-11-27 07:39:29 rearr_ar_pw attempt 1
+[run] 2026-11-27 21:01:55 trainer exit code 0; [fullft] 11-27 20:59:30 u 8470/8478 ep 30.035 lr 1.00e-05 video 0.0313 action 0.0005 gn 0.11 11.3 samples/s peak 93.8 GiB gate 0.2038 ETA 0.0 h
+[run] 2026-11-27 21:01:55 rearr_ar_pw finished: {
+ "status": "complete",
+ "updates": 8478,
+ "epochs": 30.063695676213644,
+ "samples_per_s": 11.303215439337071,
+ "peak_gib": 93.84296703338623,
+ "final_eval": {
+  "val_video": 0.07394699624516458,
+  "val_action": 0.001059429965067693,
+  "val_arm_rmse": 0.005550004410906695,
+  "val_arm_rmse_8": 0.003
+[run] 2026-11-27 21:11:55 export watcher: .relayed_e10 .relayed_e20 .relayed_e30 
+[run] 2026-11-27 21:11:55 AUTO_CLEAN: removed rearr_ar_pw/resume.pt (68G)
+[run] 2026-11-27 21:11:55 AUTO_CLEAN: removed rearr_ar_pw/export_final.pt (12G)
+[run] 2026-11-27 21:11:55 done

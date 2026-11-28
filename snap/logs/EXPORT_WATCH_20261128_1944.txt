@@ -1,0 +1,8 @@
+[watch] 2026-11-28 19:45:00 run swapT_ow_s18, tags e10 e20 e30
+[watch] 2026-11-28 19:45:00 waiting for /workspace/FastWAM-memory2/outputs/fullft/swapT_ow_s18/export_e10.pt
+[watch] 2026-11-28 23:35:00 e10 appeared (12G)
+[watch] 2026-11-28 23:42:14 e10 relayed (try 1):
+export_e10.pt 12042506373
+export_e10.pt.sha256 80
+[watch] 2026-11-28 23:42:14 AUTO_CLEAN: removed /workspace/FastWAM-memory2/outputs/fullft/swapT_ow_s18/export_e10.pt (12042506373 bytes, on the relay)
+[watch] 2026-11-28 23:42:14 waiting for /workspace/FastWAM-memory2/outputs/fullft/swapT_ow_s18/export_e20.pt

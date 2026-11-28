@@ -1,0 +1,38 @@
+[run] 2026-11-27 08:17:05 run rearr_arprop_pw; host hpc-gaas-g08; job 118764.gaas; cores 12; CUDA_VISIBLE_DEVICES=GPU-9ba8440a-7fc4-c301-19e1-7f5b2db0702c
+GPU 0: NVIDIA H200 (UUID: GPU-9ba8440a-7fc4-c301-19e1-7f5b2db0702c)
+[run] 2026-11-27 08:17:05 code f8e7728 Round 8 (11-27 04:00): card 25 gate fix, diag 5(b) classes, br
+[run] 2026-11-27 08:17:05 sets: data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[bottom]
+[run] 2026-11-27 08:17:05 apptainer: module apptainer/1.4.1 (apptainer version 1.4.1)
+[run] 2026-11-27 08:17:05 1 container, environment, unit tests
+[run] 2026-11-27 08:17:05 node hpc-gaas-g08: /tmp 736G free; home 550G free
+[run] 2.10.0a0+b558c986e8.nv25.11 NVIDIA H200 SMs 132
+[W1127 08:17:30.402373731 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+76 passed, 1 warning in 5.36s
+[W1127 08:17:37.092782782 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[run] 2026-11-27 08:17:37 2 data checks
+[run] 2026-11-27 08:17:37 two-task cache verified (8.3G)
+[run] 2026-11-27 08:17:37 cache dense_rearrange_blocks_v1 verified before
+[run] 2026-11-27 08:17:37 home 550 GB free
+[ready] rearrange_blocks: 50 dense episodes (root /workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1); event lists: 50 by id, 50 after matching by episode number; e.g. dense ['rearrange_blocks/episode_0000000', 'rearrange_blocks/episode_0000001'] / events ['rearrange_blocks/episode_0000000', 'rearrange_blocks/episode_0000001']
+[ready] rearrange_blocks: (check3 subset, deviation 44) event closes on crossings, every missing one after a same-arm event: 100/100 episode-arms (need all); crossings dropped by the debounce 11/150; unexplained []; text positions not padding in 0 episodes []
+[ready] ALL CHECKS PASSED -> /workspace/FastWAM-memory2/outputs/fullft/READY_arprop_rearrange_blocks
+[W1127 08:17:40.502646929 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[run] 2026-11-27 08:17:40 3 condition and training
+[run] 2026-11-27 08:17:40 relay backlog started in this job (scripts/gaas/relay_backlog.txt)
+[run] 2026-11-27 08:17:40 rearr_arprop_pw attempt 1
+[run] 2026-11-27 21:38:52 trainer exit code 0; [fullft] 11-27 21:36:28 u 8470/8478 ep 30.035 lr 1.00e-05 video 0.0304 action 0.0005 gn 0.07 11.3 samples/s peak 93.8 GiB gate 0.2020 ETA 0.0 h
+[run] 2026-11-27 21:38:53 rearr_arprop_pw finished: {
+ "status": "complete",
+ "updates": 8478,
+ "epochs": 30.063695676213644,
+ "samples_per_s": 11.320124250362007,
+ "peak_gib": 93.84634017944336,
+ "final_eval": {
+  "val_video": 0.0736599395495432,
+  "val_action": 0.0011916977970590399,
+  "val_arm_rmse": 0.005553109160246095,
+  "val_arm_rmse_8": 0.003
+[run] 2026-11-27 21:48:53 export watcher: .relayed_e10 .relayed_e20 .relayed_e30 
+[run] 2026-11-27 21:48:53 AUTO_CLEAN: removed rearr_arprop_pw/resume.pt (68G)
+[run] 2026-11-27 21:48:53 AUTO_CLEAN: removed rearr_arprop_pw/export_final.pt (12G)
+[run] 2026-11-27 21:48:53 done

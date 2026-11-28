@@ -1,0 +1,34 @@
+[run] 2026-11-27 14:27:33 run rearr_pw_s18; host hpc-gaas-g03; job 119257.gaas; cores 12; CUDA_VISIBLE_DEVICES=GPU-cba67362-fdc3-2430-613d-0c864a15654b
+GPU 0: NVIDIA H200 (UUID: GPU-cba67362-fdc3-2430-613d-0c864a15654b)
+[run] 2026-11-27 14:27:34 code 7e5d916 A40: hourly automatic pruning of intermediate exports above 85
+[run] 2026-11-27 14:27:34 sets: seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_rearrange_blocks_v1] data.tasks=[rearrange_blocks] history.variant=arprop history.event_max=32 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_rearrange_blocks_v3c.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[bottom]
+[run] 2026-11-27 14:27:34 apptainer: module apptainer/1.4.1 (apptainer version 1.4.1)
+[run] 2026-11-27 14:27:34 1 container, environment, unit tests
+[run] 2026-11-27 14:27:34 node hpc-gaas-g03: /tmp 473G free; home 482G free
+[run] 2.10.0a0+b558c986e8.nv25.11 NVIDIA H200 SMs 132
+[W1127 14:28:00.279304986 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+82 passed, 1 warning in 5.45s
+[W1127 14:28:07.094487778 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[run] 2026-11-27 14:28:07 2 data checks
+[run] 2026-11-27 14:28:07 two-task cache verified (8.3G)
+[run] 2026-11-27 14:28:07 cache dense_rearrange_blocks_v1 verified before
+[run] 2026-11-27 14:28:07 home 482 GB free
+[run] 2026-11-27 14:28:07 3 condition and training
+[run] 2026-11-27 14:28:08 relay backlog started in this job (scripts/gaas/relay_backlog.txt)
+[run] 2026-11-27 14:28:08 rearr_pw_s18 attempt 1
+[run] 2026-11-28 03:54:09 trainer exit code 0; [fullft] 11-28 03:51:40 u 8470/8478 ep 30.035 lr 1.00e-05 video 0.0334 action 0.0004 gn 0.12 11.3 samples/s peak 93.8 GiB gate 0.2053 ETA 0.0 h
+[run] 2026-11-28 03:54:09 rearr_pw_s18 finished: {
+ "status": "complete",
+ "updates": 8478,
+ "epochs": 30.063695676213644,
+ "samples_per_s": 11.253481456661392,
+ "peak_gib": 93.84634017944336,
+ "final_eval": {
+  "val_video": 0.07470375505787767,
+  "val_action": 0.0011181843038485795,
+  "val_arm_rmse": 0.005108491881401278,
+  "val_arm_rmse_8": 0.00
+[run] 2026-11-28 04:04:09 export watcher: .relayed_e10 .relayed_e20 .relayed_e30 
+[run] 2026-11-28 04:04:09 AUTO_CLEAN: removed rearr_pw_s18/resume.pt (68G)
+[run] 2026-11-28 04:04:10 AUTO_CLEAN: removed rearr_pw_s18/export_final.pt (12G)
+[run] 2026-11-28 04:04:10 done

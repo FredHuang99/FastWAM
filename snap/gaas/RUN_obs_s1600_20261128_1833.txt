@@ -1,0 +1,21 @@
+[run] 2026-11-28 18:33:21 run obs_s1600; host hpc-gaas-g06; job 119259.gaas; cores 12; CUDA_VISIBLE_DEVICES=GPU-0a17321e-c5ab-8e6d-6796-eb241953755c
+GPU 0: NVIDIA H200 (UUID: GPU-0a17321e-c5ab-8e6d-6796-eb241953755c)
+[run] 2026-11-28 18:33:22 code ab5eced robomme_norm reports how often the ee gripper command and the 
+[run] 2026-11-28 18:33:22 sets: data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen155_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen600_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen800b_v1] data.tasks=[observe_and_pickup] schedule.frame_epochs=10 schedule.export_at_epochs=[5,10]
+[run] 2026-11-28 18:33:22 apptainer: module apptainer/1.4.1 (apptainer version 1.4.1)
+[run] 2026-11-28 18:33:22 1 container, environment, unit tests
+[run] 2026-11-28 18:33:22 node hpc-gaas-g06: /tmp 507G free; home 457G free
+[run] 2.10.0a0+b558c986e8.nv25.11 NVIDIA H200 SMs 132
+[W1128 18:33:47.699020329 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+96 passed, 1 warning in 5.49s
+[W1128 18:33:54.728831768 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[run] 2026-11-28 18:33:55 2 data checks
+[run] 2026-11-28 18:33:55 two-task cache verified (8.3G)
+[run] 2026-11-28 18:33:55 cache dense_observe_and_pickup_v1 verified before
+[run] 2026-11-28 18:33:55 cache dense_observe_and_pickup_gen155_v1 verified before
+[run] 2026-11-28 18:33:55 cache dense_observe_and_pickup_gen600_v1 verified before
+[run] 2026-11-28 18:33:55 cache dense_observe_and_pickup_gen800b_v1 verified before
+[run] 2026-11-28 18:33:55 home 457 GB free
+[run] 2026-11-28 18:33:55 3 condition and training
+[run] 2026-11-28 18:33:55 relay backlog started in this job (scripts/gaas/relay_backlog.txt)
+[run] 2026-11-28 18:33:55 obs_s1600 attempt 1

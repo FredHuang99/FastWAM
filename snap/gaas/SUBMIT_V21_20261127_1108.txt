@@ -1,0 +1,24 @@
+[v21] 2026-11-27 11:08:36 code 7d07d85 Round 9 (11-27 09:30): RoboMME dims from the base, resubmit co; home 415G free
+Job ID                         Username        Queue           Jobname         SessID   NDS  TSK   Memory Time  S Time
+------------------------------ --------------- --------------- --------------- -------- ---- ----- ------ ----- - -----
+118502.gaas                    heyang.huang    gpu_as          mwam_run          669757    1    12  250gb 96:00 R 28:36:57
+118764.gaas                    heyang.huang    gpu_as          mwam_run         3049272    1    12  250gb 96:00 R 02:50:01
+118765.gaas                    heyang.huang    gpu_as          mwam_run         2218539    1    12  250gb 96:00 R 12:01:02
+119191.gaas                    heyang.huang    gpu_as          mwam_run         2815116    1    12  250gb 96:00 R 03:28:00
+[v21] 2026-11-27 11:08:36 lanes now: A6 118763.gaas B6 118764.gaas C4 118765.gaas D5 118766.gaas
+[v21] 2026-11-27 11:08:36 slot D6: job 119191.gaas already R
+[v21] 2026-11-27 11:08:37 slot D7: job 119255.gaas, starts when 119191 ends
+[v21] 2026-11-27 11:08:38 slot B7: job 119256.gaas, starts when 118764 ends
+[v21] 2026-11-27 11:08:40 slot A6: job 119257.gaas, starts when 118502 ends
+[v21] 2026-11-27 11:08:42 slot A7: job 119258.gaas, starts when 119257 ends
+[v21] 2026-11-27 11:08:43 slot C5: job 119259.gaas, starts when 118765 ends
+  118502     mwam_run     R   beforeany:118763.gaas      RUN=@A5
+  118764     mwam_run     R   beforeany:119193.gaas      RUN=@B6
+  118765     mwam_run     R   beforeany:119195.gaas      RUN=@C4
+  119191     mwam_run     R   beforeany:119192.gaas      RUN=@D6
+  119255     mwam_run     H   afterany:119191.gaas       RUN=@D7
+  119256     mwam_run     H   afterany:118764.gaas       RUN=@B7
+  119257     mwam_run     H   afterany:118502.gaas       RUN=@A6
+  119258     mwam_run     H   afterany:119257.gaas       RUN=@A7
+  119259     mwam_run     H   afterany:118765.gaas       RUN=@C5
+[v21] 2026-11-27 11:08:51 done; each slot job writes ~/mwam/logs/PICK_<slot>_<time>.txt (what it picked and why) and RUN_<run>_<time>.txt

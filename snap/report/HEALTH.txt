@@ -1,0 +1,5 @@
+machine h200n host hpc-gaas-g03 at 2026-11-29 01:54:16
+info pushed from slot job 119258.gaas on hpc-gaas-g03
+ok    GPU 0: 98373 MiB, 100 %
+ok   disk /home 59% used (389G free)
+ok   disk /home 59% used (389G free)

@@ -1,0 +1,13 @@
+[pick] 2026-11-26 06:31:12 slot A5; job 118502.gaas; code 4c29acc New H200 after the full home: one follower slot more
+[pick] obs_match: finished already
+[pick] obs_s200: running in job 118506.gaas
+[pick] obs_s800: running in job 118504.gaas
+[pick] rearr_pw: finished already
+[pick] press_told: finished already
+[pick] swapT_long: go test not met (test -f outputs/fullft/swapT_arprop_h2/SUMMARY.json && test -f outputs/fullft/swapT_arprop_h2/resume.pt)
+[pick] ranking_v3a: running in job 118766.gaas
+[relay] get hhyfred/memwam-diag-v1/diag/put_back_block_v3c/events_put_back_block_v3c.json -> /home/heyang.huang/mwam/FastWAM-memory2/outputs/fullft/relay_in/put_back_block_v3c/events_put_back_block_v3c.json (40836 bytes)
+[prep] ar2_v3c: events_put_back_block_v3c.json fetched (40836 bytes, sha256 2fd7e0fc8185ff36)
+[relay] get hhyfred/memwam-diag-v1/diag/swap_blocks_v3c/events_swap_blocks_v3c.json -> /home/heyang.huang/mwam/FastWAM-memory2/outputs/fullft/relay_in/swap_blocks_v3c/events_swap_blocks_v3c.json (77702 bytes)
+[prep] ar2_v3c: events_swap_blocks_v3c.json fetched (77702 bytes, sha256 09c05b068baafc85)
+[pick] 2026-11-26 06:31:15 slot A5 -> ar2_v3c

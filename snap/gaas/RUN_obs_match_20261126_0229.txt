@@ -1,0 +1,35 @@
+[run] 2026-11-26 02:29:12 run obs_match; host hpc-gaas-g03; job 118501.gaas; cores 12; CUDA_VISIBLE_DEVICES=GPU-cba67362-fdc3-2430-613d-0c864a15654b
+GPU 0: NVIDIA H200 (UUID: GPU-cba67362-fdc3-2430-613d-0c864a15654b)
+[run] 2026-11-26 02:29:12 code 4c29acc New H200 after the full home: one follower slot more per lane 
+[run] 2026-11-26 02:29:12 sets: data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1] data.tasks=[observe_and_pickup] history.zoom=true history.zoom_ref_box=[0.395,0.06,0.675,0.34] history.zoom_cur_box=[0.0,0.42,1.0,1.0] history.zoom_match=true data.zoom_root=/workspace/FastWAM-memory2/outputs/memory_v2/press/zoom_obs_match_a476d745
+[run] 2026-11-26 02:29:12 apptainer: path /usr/local/apptainer/1.4.1/bin (apptainer version 1.4.1)
+[run] 2026-11-26 02:29:12 1 container, environment, unit tests
+[run] 2026-11-26 02:29:12 node hpc-gaas-g03: /tmp 485G free; home 431G free
+[run] 2.10.0a0+b558c986e8.nv25.11 NVIDIA H200 SMs 132
+[W1126 02:29:45.582404787 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+76 passed, 1 warning in 5.72s
+[W1126 02:29:52.017572725 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[run] 2026-11-26 02:29:52 2 data checks
+[run] 2026-11-26 02:29:52 two-task cache verified (8.3G)
+[run] 2026-11-26 02:29:52 cache dense_observe_and_pickup_v1 verified before
+[run] 2026-11-26 02:29:52 zoom latents zoom_obs_match_a476d745 here (331M)
+[run] 2026-11-26 02:29:52 home 431 GB free
+[run] 2026-11-26 02:29:53 3 condition and training
+[run] 2026-11-26 02:29:53 relay backlog started in this job (scripts/gaas/relay_backlog.txt)
+[run] 2026-11-26 02:29:53 obs_match attempt 1
+[run] 2026-11-26 06:20:35 trainer exit code 0; [fullft] 11-26 06:18:18 u 3150/3152 ep 29.999 lr 1.00e-05 video 0.0309 action 0.0007 gn 0.06 10.1 samples/s peak 94.9 GiB gate 0.0852 ETA 0.0 h
+[run] 2026-11-26 06:20:35 obs_match finished: {
+ "status": "complete",
+ "updates": 3152,
+ "epochs": 30.019036287923853,
+ "samples_per_s": 10.037278134577294,
+ "peak_gib": 94.85580015182495,
+ "final_eval": {
+  "val_video": 0.1833205013957316,
+  "val_action": 0.062274313571568506,
+  "val_arm_rmse": 0.06518168550610426,
+  "val_arm_rmse_8": 0.01504
+[run] 2026-11-26 06:30:35 export watcher: .relayed_e10 .relayed_e20 .relayed_e30 
+[run] 2026-11-26 06:30:35 AUTO_CLEAN: removed obs_match/resume.pt (68G)
+[run] 2026-11-26 06:30:35 AUTO_CLEAN: removed obs_match/export_final.pt (12G)
+[run] 2026-11-26 06:30:35 done

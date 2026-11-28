@@ -1,0 +1,47 @@
+[v22] 2026-11-28 16:30:51 code f44ee54 submit_v22.sh: the slot-label check now allows the padded labe; home 411G free
+Job ID                         Username        Queue           Jobname         SessID   NDS  TSK   Memory Time  S Time
+------------------------------ --------------- --------------- --------------- -------- ---- ----- ------ ----- - -----
+118765.gaas                    heyang.huang    gpu_as          mwam_run         2218539    1    12  250gb 96:00 R 41:22:26
+119255.gaas                    heyang.huang    gpu_as          mwam_run         2022502    1    12  250gb 96:00 R 19:17:36
+119256.gaas                    heyang.huang    gpu_as          mwam_run         2948952    1    12  250gb 96:00 R 18:40:04
+119258.gaas                    heyang.huang    gpu_as          mwam_run         2261938    1    12  250gb 96:00 R 12:25:05
+119259.gaas                    heyang.huang    gpu_as          mwam_run             --     1    12  250gb 96:00 H  -- 
+[v22] 2026-11-28 16:30:52 lanes now: D7 119255.gaas A7 119258.gaas B7 119256.gaas C5 119259.gaas
+[v22] 2026-11-28 16:30:52 slot D8: job 119668.gaas, starts when 119255 ends
+[v22] 2026-11-28 16:30:53 slot D9: job 119669.gaas, starts when 119668 ends
+[v22] 2026-11-28 16:30:55 slot D10: job 119670.gaas, starts when 119669 ends
+[v22] 2026-11-28 16:30:57 slot D11: job 119671.gaas, starts when 119670 ends
+[v22] 2026-11-28 16:30:58 slot A8: job 119672.gaas, starts when 119258 ends
+[v22] 2026-11-28 16:31:01 slot A9: job 119673.gaas, starts when 119672 ends
+[v22] 2026-11-28 16:31:03 slot A10: job 119674.gaas, starts when 119673 ends
+[v22] 2026-11-28 16:31:05 slot A11: job 119675.gaas, starts when 119674 ends
+[v22] 2026-11-28 16:31:08 slot B8: job 119676.gaas, starts when 119256 ends
+[v22] 2026-11-28 16:31:11 slot B9: job 119677.gaas, starts when 119676 ends
+[v22] 2026-11-28 16:31:15 slot B10: job 119678.gaas, starts when 119677 ends
+[v22] 2026-11-28 16:31:17 slot B11: job 119679.gaas, starts when 119678 ends
+[v22] 2026-11-28 16:31:21 slot C6: job 119680.gaas, starts when 119259 ends
+[v22] 2026-11-28 16:31:25 slot C7: job 119681.gaas, starts when 119680 ends
+[v22] 2026-11-28 16:31:29 slot C8: job 119682.gaas, starts when 119681 ends
+[v22] 2026-11-28 16:31:34 slot C9: job 119683.gaas, starts when 119682 ends
+  118765     mwam_run     R   beforeany:119195.gaas      RUN=@C4
+  119255     mwam_run     R   beforeany:119668.gaas      RUN=@D7
+  119256     mwam_run     R   beforeany:119676.gaas      RUN=@B7
+  119258     mwam_run     R   beforeany:119672.gaas      RUN=@A7
+  119259     mwam_run     H   afterany:118765.gaas       RUN=@C5
+  119668     mwam_run     H   afterany:119255.gaas       RUN=@D8
+  119669     mwam_run     H   afterany:119668.gaas       RUN=@D9
+  119670     mwam_run     H   afterany:119669.gaas       RUN=@D10
+  119671     mwam_run     H   afterany:119670.gaas       RUN=@D11
+  119672     mwam_run     H   afterany:119258.gaas       RUN=@A8
+  119673     mwam_run     H   afterany:119672.gaas       RUN=@A9
+  119674     mwam_run     H   afterany:119673.gaas       RUN=@A10
+  119675     mwam_run     H   afterany:119674.gaas       RUN=@A11
+  119676     mwam_run     H   afterany:119256.gaas       RUN=@B8
+  119677     mwam_run     H   afterany:119676.gaas       RUN=@B9
+  119678     mwam_run     H   afterany:119677.gaas       RUN=@B10
+  119679     mwam_run     H   afterany:119678.gaas       RUN=@B11
+  119680     mwam_run     H   afterany:119259.gaas       RUN=@C6
+  119681     mwam_run     H   afterany:119680.gaas       RUN=@C7
+  119682     mwam_run     H   afterany:119681.gaas       RUN=@C8
+  119683     mwam_run     H   afterany:119682.gaas       RUN=@C9
+[v22] 2026-11-28 16:31:53 done; each slot job writes ~/mwam/logs/PICK_<slot>_<time>.txt (what it picked and why) and RUN_<run>_<time>.txt

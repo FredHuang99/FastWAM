@@ -1,0 +1,5 @@
+-rw-r--r-- 1 heyang.huang hpc_tianwei.zhang_group 12042506565 Nov 27 03:40 /workspace/FastWAM-memory2/outputs/fullft/ar2_v3c/export_e20.pt
+ab34462f9c9bfe5d47bfbb759c1a0caf79a9ed63a2d35e1322a6b5a65653f2fd  export_e20.pt
+[relay] put /workspace/FastWAM-memory2/outputs/fullft/ar2_v3c/export_e20.pt (12042506565 bytes) -> hhyfred/memwam-fullft/exports/ar2_v3c_e20/export_e20.pt
+[relay] put /workspace/FastWAM-memory2/outputs/fullft/ar2_v3c/export_e20.pt.sha256 (80 bytes) -> hhyfred/memwam-fullft/exports/ar2_v3c_e20/export_e20.pt.sha256
+[relay] 2026-11-27 03:52:26 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/RELAY_20261127_0345.txt

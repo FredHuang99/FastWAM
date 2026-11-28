@@ -1,0 +1,35 @@
+[run] 2026-11-27 21:14:55 run obs_cf200; host hpc-gaas-g03; job 119255.gaas; cores 12; CUDA_VISIBLE_DEVICES=GPU-7c1d4440-aa7c-e54a-dac9-de3b6e02401f
+GPU 0: NVIDIA H200 (UUID: GPU-7c1d4440-aa7c-e54a-dac9-de3b6e02401f)
+[run] 2026-11-27 21:14:56 code aece02a 5090: every pending GPU task on GPU 1 only (user 11-27 20:29),
+[run] 2026-11-27 21:14:56 sets: data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_cf155_v1] data.tasks=[observe_and_pickup]
+[run] 2026-11-27 21:14:56 apptainer: module apptainer/1.4.1 (apptainer version 1.4.1)
+[run] 2026-11-27 21:14:56 1 container, environment, unit tests
+[run] 2026-11-27 21:14:56 node hpc-gaas-g03: /tmp 447G free; home 478G free
+[run] 2.10.0a0+b558c986e8.nv25.11 NVIDIA H200 SMs 132
+[W1127 21:15:33.494125434 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+82 passed, 1 warning in 5.59s
+[W1127 21:15:40.409877213 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[run] 2026-11-27 21:15:40 2 data checks
+[run] 2026-11-27 21:15:40 two-task cache verified (8.3G)
+[run] 2026-11-27 21:15:40 cache dense_observe_and_pickup_v1 verified before
+[run] 2026-11-27 21:15:40 cache dense_observe_and_pickup_cf155_v1 verified before
+[run] 2026-11-27 21:15:40 home 478 GB free
+[run] 2026-11-27 21:15:40 3 condition and training
+[run] 2026-11-27 21:15:40 relay backlog started in this job (scripts/gaas/relay_backlog.txt)
+[run] 2026-11-27 21:15:40 obs_cf200 attempt 1
+[run] 2026-11-28 19:32:08 trainer exit code 0; [fullft] 11-28 19:29:41 u 13990/13997 ep 30.021 lr 1.00e-05 video 0.0313 action 0.0004 gn 0.05 11.2 samples/s peak 93.8 GiB gate 0.3279 ETA 0.0 h
+[run] 2026-11-28 19:32:08 obs_cf200 finished: {
+ "status": "complete",
+ "updates": 13997,
+ "epochs": 30.03643670462157,
+ "samples_per_s": 11.192764022296714,
+ "peak_gib": 93.84296655654907,
+ "final_eval": {
+  "val_video": 0.1984451463079798,
+  "val_action": 0.044451876564086966,
+  "val_arm_rmse": 0.03182559470224078,
+  "val_arm_rmse_8": 0.00652
+[run] 2026-11-28 19:42:08 export watcher: .relayed_e10 .relayed_e20 .relayed_e30 
+[run] 2026-11-28 19:42:08 AUTO_CLEAN: removed obs_cf200/resume.pt (68G)
+[run] 2026-11-28 19:42:09 AUTO_CLEAN: removed obs_cf200/export_final.pt (12G)
+[run] 2026-11-28 19:42:09 done

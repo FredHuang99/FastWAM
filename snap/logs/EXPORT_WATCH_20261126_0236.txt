@@ -1,0 +1,14 @@
+[watch] 2026-11-26 02:37:44 run obs_s800, tags e5 e10
+[watch] 2026-11-26 02:37:44 waiting for /workspace/FastWAM-memory2/outputs/fullft/obs_s800/export_e5.pt
+[watch] 2026-11-26 17:22:44 e5 appeared (12G)
+[watch] 2026-11-26 17:30:22 e5 relayed (try 1):
+export_e5.pt 12042061801
+export_e5.pt.sha256 79
+[watch] 2026-11-26 17:30:23 AUTO_CLEAN: removed /workspace/FastWAM-memory2/outputs/fullft/obs_s800/export_e5.pt (12042061801 bytes, on the relay)
+[watch] 2026-11-26 17:30:23 waiting for /workspace/FastWAM-memory2/outputs/fullft/obs_s800/export_e10.pt
+[watch] 2026-11-27 08:05:23 e10 appeared (12G)
+[watch] 2026-11-27 08:12:51 e10 relayed (try 1):
+export_e10.pt 12042063459
+export_e10.pt.sha256 80
+[watch] 2026-11-27 08:12:51 AUTO_CLEAN: removed /workspace/FastWAM-memory2/outputs/fullft/obs_s800/export_e10.pt (12042063459 bytes, on the relay)
+[watch] 2026-11-27 08:12:51 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/EXPORT_WATCH_20261126_0236.txt

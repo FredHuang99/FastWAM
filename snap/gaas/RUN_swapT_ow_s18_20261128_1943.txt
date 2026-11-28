@@ -1,0 +1,18 @@
+[run] 2026-11-28 19:43:14 run swapT_ow_s18; host hpc-gaas-g03; job 119668.gaas; cores 12; CUDA_VISIBLE_DEVICES=GPU-7c1d4440-aa7c-e54a-dac9-de3b6e02401f
+GPU 0: NVIDIA H200 (UUID: GPU-7c1d4440-aa7c-e54a-dac9-de3b6e02401f)
+[run] 2026-11-28 19:43:15 code ab5eced robomme_norm reports how often the ee gripper command and the 
+[run] 2026-11-28 19:43:15 sets: seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_swap_T_v1] data.tasks=[swap_T] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_T.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[open]
+[run] 2026-11-28 19:43:15 apptainer: module apptainer/1.4.1 (apptainer version 1.4.1)
+[run] 2026-11-28 19:43:15 1 container, environment, unit tests
+[run] 2026-11-28 19:43:15 node hpc-gaas-g03: /tmp 441G free; home 524G free
+[run] 2.10.0a0+b558c986e8.nv25.11 NVIDIA H200 SMs 132
+[W1128 19:43:52.768925697 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+96 passed, 1 warning in 6.06s
+[W1128 19:43:59.240052524 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[run] 2026-11-28 19:43:59 2 data checks
+[run] 2026-11-28 19:44:00 two-task cache verified (8.3G)
+[run] 2026-11-28 19:44:00 cache dense_swap_T_v1 verified before
+[run] 2026-11-28 19:44:00 home 524 GB free
+[run] 2026-11-28 19:44:00 3 condition and training
+[run] 2026-11-28 19:44:00 relay backlog started in this job (scripts/gaas/relay_backlog.txt)
+[run] 2026-11-28 19:44:00 swapT_ow_s18 attempt 1

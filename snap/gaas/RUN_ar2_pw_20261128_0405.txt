@@ -1,0 +1,17 @@
+[run] 2026-11-28 04:05:13 run ar2_pw; host hpc-gaas-g03; job 119258.gaas; cores 12; CUDA_VISIBLE_DEVICES=GPU-cba67362-fdc3-2430-613d-0c864a15654b
+GPU 0: NVIDIA H200 (UUID: GPU-cba67362-fdc3-2430-613d-0c864a15654b)
+[run] 2026-11-28 04:05:14 code 2165bd1 Relay auto-prune: measure an export's age by the A40 copy's mt
+[run] 2026-11-28 04:05:14 sets: history.variant=arprop history.event_max=32 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_put_back_block_v3c.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_blocks_v3c.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[bottom]
+[run] 2026-11-28 04:05:14 apptainer: module apptainer/1.4.1 (apptainer version 1.4.1)
+[run] 2026-11-28 04:05:14 1 container, environment, unit tests
+[run] 2026-11-28 04:05:14 node hpc-gaas-g03: /tmp 448G free; home 478G free
+[run] 2.10.0a0+b558c986e8.nv25.11 NVIDIA H200 SMs 132
+[W1128 04:05:50.869369893 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+82 passed, 1 warning in 5.56s
+[W1128 04:06:00.225927005 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[run] 2026-11-28 04:06:00 2 data checks
+[run] 2026-11-28 04:06:01 two-task cache verified (8.3G)
+[run] 2026-11-28 04:06:01 home 478 GB free
+[run] 2026-11-28 04:06:01 3 condition and training
+[run] 2026-11-28 04:06:01 relay backlog started in this job (scripts/gaas/relay_backlog.txt)
+[run] 2026-11-28 04:06:01 ar2_pw attempt 1

@@ -1,0 +1,20 @@
+[watch] 2026-11-26 23:08:34 run swapT_joint3, tags e10 e20 e30
+[watch] 2026-11-26 23:08:34 waiting for /workspace/FastWAM-memory2/outputs/fullft/swapT_joint3/export_e10.pt
+[watch] 2026-11-27 13:33:34 e10 appeared (12G)
+[watch] 2026-11-27 13:40:54 e10 relayed (try 1):
+export_e10.pt 12042506629
+export_e10.pt.sha256 80
+[watch] 2026-11-27 13:40:54 AUTO_CLEAN: removed /workspace/FastWAM-memory2/outputs/fullft/swapT_joint3/export_e10.pt (12042506629 bytes, on the relay)
+[watch] 2026-11-27 13:40:54 waiting for /workspace/FastWAM-memory2/outputs/fullft/swapT_joint3/export_e20.pt
+[watch] 2026-11-28 03:50:55 e20 appeared (12G)
+[watch] 2026-11-28 03:58:15 e20 relayed (try 1):
+export_e20.pt 12042506629
+export_e20.pt.sha256 80
+[watch] 2026-11-28 03:58:15 AUTO_CLEAN: removed /workspace/FastWAM-memory2/outputs/fullft/swapT_joint3/export_e20.pt (12042506629 bytes, on the relay)
+[watch] 2026-11-28 03:58:15 waiting for /workspace/FastWAM-memory2/outputs/fullft/swapT_joint3/export_e30.pt
+[watch] 2026-11-28 18:13:16 e30 appeared (12G)
+[watch] 2026-11-28 18:20:32 e30 relayed (try 1):
+export_e30.pt 12042506693
+export_e30.pt.sha256 80
+[watch] 2026-11-28 18:20:32 AUTO_CLEAN: removed /workspace/FastWAM-memory2/outputs/fullft/swapT_joint3/export_e30.pt (12042506693 bytes, on the relay)
+[watch] 2026-11-28 18:20:32 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/EXPORT_WATCH_20261126_2307.txt

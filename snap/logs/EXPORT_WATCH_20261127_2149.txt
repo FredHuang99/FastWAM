@@ -1,0 +1,2 @@
+[watch] 2026-11-27 21:50:57 run obs_s800_20, tags e10 e20
+[watch] 2026-11-27 21:50:57 waiting for /workspace/FastWAM-memory2/outputs/fullft/obs_s800_20/export_e10.pt

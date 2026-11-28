@@ -1,0 +1,5 @@
+[pick] 2026-11-28 19:43:14 slot D8; job 119668.gaas; code ab5eced robomme_norm reports how often the ee gripper comman
+[pick] qsub probe: qsub /opt/pbs/bin/qsub; qstat answers
+[pick] rearr_pw_long_s18: go test not met (# 11-28 (Opus; plan v22 card 27): open only if the resume checkpoint is still there (core 1; the slot job fails at its
+# condition otherwise, so the pick must s)
+[pick] 2026-11-28 19:43:14 slot D8 -> swapT_ow_s18

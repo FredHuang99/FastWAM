@@ -1,0 +1,20 @@
+[watch] 2026-11-27 07:40:30 run rearr_ar_pw, tags e10 e20 e30
+[watch] 2026-11-27 07:40:30 waiting for /workspace/FastWAM-memory2/outputs/fullft/rearr_ar_pw/export_e10.pt
+[watch] 2026-11-27 12:05:30 e10 appeared (12G)
+[watch] 2026-11-27 12:12:48 e10 relayed (try 1):
+export_e10.pt 12042063395
+export_e10.pt.sha256 80
+[watch] 2026-11-27 12:12:48 AUTO_CLEAN: removed /workspace/FastWAM-memory2/outputs/fullft/rearr_ar_pw/export_e10.pt (12042063395 bytes, on the relay)
+[watch] 2026-11-27 12:12:48 waiting for /workspace/FastWAM-memory2/outputs/fullft/rearr_ar_pw/export_e20.pt
+[watch] 2026-11-27 16:32:49 e20 appeared (12G)
+[watch] 2026-11-27 16:39:54 e20 relayed (try 1):
+export_e20.pt 12042063459
+export_e20.pt.sha256 80
+[watch] 2026-11-27 16:39:54 AUTO_CLEAN: removed /workspace/FastWAM-memory2/outputs/fullft/rearr_ar_pw/export_e20.pt (12042063459 bytes, on the relay)
+[watch] 2026-11-27 16:39:54 waiting for /workspace/FastWAM-memory2/outputs/fullft/rearr_ar_pw/export_e30.pt
+[watch] 2026-11-27 20:59:55 e30 appeared (12G)
+[watch] 2026-11-27 21:07:16 e30 relayed (try 1):
+export_e30.pt 12042063459
+export_e30.pt.sha256 80
+[watch] 2026-11-27 21:07:17 AUTO_CLEAN: removed /workspace/FastWAM-memory2/outputs/fullft/rearr_ar_pw/export_e30.pt (12042063459 bytes, on the relay)
+[watch] 2026-11-27 21:07:17 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/EXPORT_WATCH_20261127_0739.txt

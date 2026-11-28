@@ -1,0 +1,29 @@
+[v21] 2026-11-27 01:40:46 code d4774cd Plan v21 6.5 CPU diagnostics 1 / 3 / 4(a) (diag_cpu_v21.py, de; home 415G free
+Job ID                         Username        Queue           Jobname         SessID   NDS  TSK   Memory Time  S Time
+------------------------------ --------------- --------------- --------------- -------- ---- ----- ------ ----- - -----
+118502.gaas                    heyang.huang    gpu_as          mwam_run          669757    1    12  250gb 96:00 R 19:07:59
+118504.gaas                    heyang.huang    gpu_as          mwam_run         1930317    1    12  250gb 96:00 R 25:39:51
+118763.gaas                    heyang.huang    gpu_as          mwam_run             --     1    12  250gb 96:00 H  -- 
+118764.gaas                    heyang.huang    gpu_as          mwam_run             --     1    12  250gb 96:00 H  -- 
+118765.gaas                    heyang.huang    gpu_as          mwam_run         2218539    1    12  250gb 96:00 R 02:32:33
+118766.gaas                    heyang.huang    gpu_as          mwam_run         1093953    1    12  250gb 96:00 R 20:37:11
+119049.gaas                    heyang.huang    gpu_as          mwam_run             --     1    12  250gb 96:00 Q  -- 
+[v21] 2026-11-27 01:40:46 lanes now: A6 118763.gaas B6 118764.gaas C4 118765.gaas D5 118766.gaas
+[v21] 2026-11-27 01:40:48 slot D6: job 119191.gaas, starts when 118766 ends
+[v21] 2026-11-27 01:40:49 slot D7: job 119192.gaas, starts when 119191 ends
+[v21] 2026-11-27 01:40:51 slot B7: job 119193.gaas, starts when 118764 ends
+[v21] 2026-11-27 01:40:53 slot A7: job 119194.gaas, starts when 118763 ends
+[v21] 2026-11-27 01:40:55 slot C5: job 119195.gaas, starts when 118765 ends
+  118502     mwam_run     R   beforeany:118763.gaas      RUN=@A5
+  118504     mwam_run     R   beforeany:118764.gaas      RUN=@B5
+  118763     mwam_run     H   afterany:118502.gaas       RUN=@A6
+  118764     mwam_run     H   afterany:118504.gaas       RUN=@B6
+  118765     mwam_run     R   beforeany:119195.gaas      RUN=@C4
+  118766     mwam_run     R   beforeany:119191.gaas      RUN=@D5
+  119049     mwam_run     Q                              RUN=swapT_joint3
+  119191     mwam_run     H   afterany:118766.gaas       RUN=@D6
+  119192     mwam_run     H   afterany:119191.gaas       RUN=@D7
+  119193     mwam_run     H   afterany:118764.gaas       RUN=@B7
+  119194     mwam_run     H   afterany:118763.gaas       RUN=@A7
+  119195     mwam_run     H   afterany:118765.gaas       RUN=@C5
+[v21] 2026-11-27 01:41:06 done; each slot job writes ~/mwam/logs/PICK_<slot>_<time>.txt (what it picked and why) and RUN_<run>_<time>.txt

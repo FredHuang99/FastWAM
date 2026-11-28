@@ -1,0 +1,19 @@
+du of our trees, 2026-11-29 00:38:58
+8.0K	/home/heyang.huang/mwam/mwam_run.o119255
+8.0K	/home/heyang.huang/mwam/mwam_setup.o113786
+8.0K	/home/heyang.huang/mwam/mwam_setup.o113987
+12K	/home/heyang.huang/mwam/mwam_run.o118501
+12K	/home/heyang.huang/mwam/mwam_run.o118506
+12K	/home/heyang.huang/mwam/mwam_run.o118508
+20K	/home/heyang.huang/mwam/mwam_run.o118504
+168K	/home/heyang.huang/mwam/slots
+928K	/home/heyang.huang/mwam/logs
+13M	/home/heyang.huang/mwam/results_push
+142M	/home/heyang.huang/mwam/dl
+500M	/home/heyang.huang/mwam/envs
+8.2G	/home/heyang.huang/mwam/sif
+20G	/home/heyang.huang/mwam/hf
+496G	/home/heyang.huang/mwam/FastWAM-memory2
+8.0M	/home/heyang.huang/mwam/FastWAM-memory2/outputs/collect
+81G	/home/heyang.huang/mwam/FastWAM-memory2/outputs/memory_v2
+416G	/home/heyang.huang/mwam/FastWAM-memory2/outputs/fullft

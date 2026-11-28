@@ -1,0 +1,22 @@
+                                                            Req'd  Req'd   Elap
+Job ID          Username Queue    Jobname    SessID NDS TSK Memory Time  S Time
+--------------- -------- -------- ---------- ------ --- --- ------ ----- - -----
+119256.gaas     heyang.* gpu_as   mwam_run   29489*   1  12  250gb 96:00 R 28:04
+119258.gaas     heyang.* gpu_as   mwam_run   22619*   1  12  250gb 96:00 R 21:48
+119259.gaas     heyang.* gpu_as   mwam_run   36050*   1  12  250gb 96:00 R 07:29
+119668.gaas     heyang.* gpu_as   mwam_run   29706*   1  12  250gb 96:00 R 06:10
+119669.gaas     heyang.* gpu_as   mwam_run      --    1  12  250gb 96:00 H   -- 
+119670.gaas     heyang.* gpu_as   mwam_run      --    1  12  250gb 96:00 H   -- 
+119671.gaas     heyang.* gpu_as   mwam_run      --    1  12  250gb 96:00 H   -- 
+119672.gaas     heyang.* gpu_as   mwam_run      --    1  12  250gb 96:00 H   -- 
+119673.gaas     heyang.* gpu_as   mwam_run      --    1  12  250gb 96:00 H   -- 
+119674.gaas     heyang.* gpu_as   mwam_run      --    1  12  250gb 96:00 H   -- 
+119675.gaas     heyang.* gpu_as   mwam_run      --    1  12  250gb 96:00 H   -- 
+119676.gaas     heyang.* gpu_as   mwam_run      --    1  12  250gb 96:00 H   -- 
+119677.gaas     heyang.* gpu_as   mwam_run      --    1  12  250gb 96:00 H   -- 
+119678.gaas     heyang.* gpu_as   mwam_run      --    1  12  250gb 96:00 H   -- 
+119679.gaas     heyang.* gpu_as   mwam_run      --    1  12  250gb 96:00 H   -- 
+119680.gaas     heyang.* gpu_as   mwam_run      --    1  12  250gb 96:00 H   -- 
+119681.gaas     heyang.* gpu_as   mwam_run      --    1  12  250gb 96:00 H   -- 
+119682.gaas     heyang.* gpu_as   mwam_run      --    1  12  250gb 96:00 H   -- 
+119683.gaas     heyang.* gpu_as   mwam_run      --    1  12  250gb 96:00 H   -- 

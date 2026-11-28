@@ -1,0 +1,10 @@
+[pick] 2026-11-26 02:31:44 slot D4; job 118508.gaas; code 4c29acc New H200 after the full home: one follower slot more
+[pick] obs_match: running in job 118501.gaas
+[pick] obs_s200: running in job 118506.gaas
+[prep] 2026-11-26 02:31:45 obs_s800: verifying dense_observe_and_pickup_gen600_v1 (here, not verified yet)
+    missing cache/observe_and_pickup_gen_10000341/COMPLETE.json
+    missing cache/observe_and_pickup_gen_10000341/encodings.pt
+    missing cache/observe_and_pickup_gen_10000342/COMPLETE.json
+[prep] obs_s800: dense_observe_and_pickup_gen600_v1 sha256 check FAILED
+[pick] obs_s800: data not ready -> next candidate
+[pick] 2026-11-26 02:31:50 slot D4 -> rearr_pw

@@ -1,0 +1,2 @@
+[backlog] 2026-11-27 21:49:57 every listed export is on the relay
+[backlog] 2026-11-27 21:49:57 finished; log /workspace/FastWAM-memory2/outputs/fullft/RELAY_BACKLOG_20261127_2149.txt

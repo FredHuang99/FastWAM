@@ -1,0 +1,36 @@
+[run] 2026-11-26 05:01:50 run ranking_v3a; host hpc-gaas-g25; job 118766.gaas; cores 12; CUDA_VISIBLE_DEVICES=GPU-a6e5d6c3-e3b0-3ea0-c1a0-4591bea88543
+GPU 0: NVIDIA H200 (UUID: GPU-a6e5d6c3-e3b0-3ea0-c1a0-4591bea88543)
+[run] 2026-11-26 05:01:51 code 4c29acc New H200 after the full home: one follower slot more per lane 
+[run] 2026-11-26 05:01:51 sets: data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_blocks_ranking_try_v1] data.tasks=[blocks_ranking_try] history.variant=arprop history.event_max=69 history.lag=0 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_blocks_ranking_try_v3a.json]
+[run] 2026-11-26 05:01:51 apptainer: path /usr/local/apptainer/1.4.1/bin (apptainer version 1.4.1)
+[run] 2026-11-26 05:01:51 1 container, environment, unit tests
+[run] 2026-11-26 05:01:51 node hpc-gaas-g25: /tmp 542G free; home 415G free
+[run] 2.10.0a0+b558c986e8.nv25.11 NVIDIA H200 SMs 132
+[W1126 05:02:24.872627441 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+76 passed, 1 warning in 5.82s
+[W1126 05:02:31.003124197 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[run] 2026-11-26 05:02:31 2 data checks
+[run] 2026-11-26 05:02:31 two-task cache verified (8.3G)
+[run] 2026-11-26 05:02:31 cache dense_blocks_ranking_try_v1 verified before
+[run] 2026-11-26 05:02:31 home has 415 GB free (< 448 GB: 160 + 72 x 4 other runs training); waiting 10 min
+[run] 2026-11-26 05:12:31 home has 415 GB free (< 448 GB: 160 + 72 x 4 other runs training); waiting 10 min
+[run] 2026-11-26 05:22:31 home 415 GB free
+[run] 2026-11-26 05:22:31 3 condition and training
+[run] 2026-11-26 05:22:31 relay backlog started in this job (scripts/gaas/relay_backlog.txt)
+[run] 2026-11-26 05:22:31 ranking_v3a attempt 1
+[run] 2026-11-27 07:28:00 trainer exit code 0; [fullft] 11-27 07:25:44 u 31500/31501 ep 30.000 lr 1.00e-05 video 0.0330 action 0.0002 gn 0.05 11.3 samples/s peak 93.8 GiB gate 0.4163 ETA 0.0 h
+[run] 2026-11-27 07:28:00 ranking_v3a finished: {
+ "status": "complete",
+ "updates": 31501,
+ "epochs": 30.000952366780258,
+ "samples_per_s": 11.257049317752749,
+ "peak_gib": 93.84880113601685,
+ "final_eval": {
+  "val_video": 0.061573317156216945,
+  "val_action": 0.0008846169767480205,
+  "val_arm_rmse": 0.0037828285348950885,
+  "val_arm_rmse_8": 0
+[run] 2026-11-27 07:38:00 export watcher: .relayed_e10 .relayed_e20 .relayed_e30 
+[run] 2026-11-27 07:38:00 AUTO_CLEAN: removed ranking_v3a/resume.pt (68G)
+[run] 2026-11-27 07:38:00 AUTO_CLEAN: removed ranking_v3a/export_final.pt (12G)
+[run] 2026-11-27 07:38:00 done

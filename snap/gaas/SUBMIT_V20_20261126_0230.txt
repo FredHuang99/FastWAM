@@ -1,0 +1,48 @@
+[v20] 2026-11-26 02:30:34 code 4c29acc New H200 after the full home: one follower slot more per lane ; home 430G free
+Job ID                         Username        Queue           Jobname         SessID   NDS  TSK   Memory Time  S Time
+------------------------------ --------------- --------------- --------------- -------- ---- ----- ------ ----- - -----
+118501.gaas                    heyang.huang    gpu_as          mwam_run          444328    1    12  250gb 96:00 R 02:29:39
+118502.gaas                    heyang.huang    gpu_as          mwam_run             --     1    12  250gb 96:00 H  -- 
+118504.gaas                    heyang.huang    gpu_as          mwam_run         1930317    1    12  250gb 96:00 R 02:30:03
+118506.gaas                    heyang.huang    gpu_as          mwam_run         1286463    1    12  250gb 96:00 R 02:29:49
+118508.gaas                    heyang.huang    gpu_as          mwam_run          930361    1    12  250gb 96:00 R 02:27:18
+[v20] 2026-11-26 02:30:35 running now: ar2_prop_novid gone, d1_w gone, press_none gone
+[v20] 2026-11-26 02:30:36 slot A: 4 of our jobs already run / wait without a dependency: not submitted
+[v20] 2026-11-26 02:30:36 slot A2: the job it was to follow (118107.gaas) is gone: its GPU is free
+[v20] 2026-11-26 02:30:38 slot A2: 4 of our jobs already run / wait without a dependency: not submitted
+[v20] 2026-11-26 02:30:39 slot B: 4 of our jobs already run / wait without a dependency: not submitted
+[v20] 2026-11-26 02:30:39 slot B2: the job it was to follow (118109.gaas) is gone: its GPU is free
+[v20] 2026-11-26 02:30:41 slot B2: 4 of our jobs already run / wait without a dependency: not submitted
+[v20] 2026-11-26 02:30:42 slot C: 4 of our jobs already run / wait without a dependency: not submitted
+[v20] 2026-11-26 02:30:44 slot D: 4 of our jobs already run / wait without a dependency: not submitted
+[v20] 2026-11-26 02:30:44 slot A3: the job it was to follow (118108.gaas) is gone: its GPU is free
+[v20] 2026-11-26 02:30:45 slot A3: 4 of our jobs already run / wait without a dependency: not submitted
+[v20] 2026-11-26 02:30:46 slot B3: the job it was to follow (118113.gaas) is gone: its GPU is free
+[v20] 2026-11-26 02:30:47 slot B3: 4 of our jobs already run / wait without a dependency: not submitted
+[v20] 2026-11-26 02:30:47 slot D2: the job it was to follow (118111.gaas) is gone: its GPU is free
+[v20] 2026-11-26 02:30:49 slot D2: 4 of our jobs already run / wait without a dependency: not submitted
+[v20] 2026-11-26 02:30:49 slot A4: job 118501.gaas already R
+[v20] 2026-11-26 02:30:50 slot A5: job 118502.gaas already H
+[v20] 2026-11-26 02:30:50 slot B4: the job it was to follow (118170.gaas) is gone: its GPU is free
+[v20] 2026-11-26 02:30:51 slot B4: 4 of our jobs already run / wait without a dependency: not submitted
+[v20] 2026-11-26 02:30:52 slot B5: job 118504.gaas already R
+[v20] 2026-11-26 02:30:52 slot C2: the job it was to follow (118110.gaas) is gone: its GPU is free
+[v20] 2026-11-26 02:30:53 slot C2: 4 of our jobs already run / wait without a dependency: not submitted
+[v20] 2026-11-26 02:30:54 slot C3: job 118506.gaas already R
+[v20] 2026-11-26 02:30:54 slot D3: the job it was to follow (118171.gaas) is gone: its GPU is free
+[v20] 2026-11-26 02:30:55 slot D3: 4 of our jobs already run / wait without a dependency: not submitted
+[v20] 2026-11-26 02:30:56 slot D4: job 118508.gaas already R
+[v20] 2026-11-26 02:31:02 slot A6: job 118763.gaas, starts when 118502 ends
+[v20] 2026-11-26 02:31:03 slot B6: job 118764.gaas, starts when 118504 ends
+[v20] 2026-11-26 02:31:04 slot C4: job 118765.gaas, starts when 118506 ends
+[v20] 2026-11-26 02:31:05 slot D5: job 118766.gaas, starts when 118508 ends
+  118501     mwam_run     R   beforeany:118502.gaas      RUN=@A4
+  118502     mwam_run     H   afterany:118501.gaas       RUN=@A5
+  118504     mwam_run     R   beforeany:118764.gaas      RUN=@B5
+  118506     mwam_run     R   beforeany:118765.gaas      RUN=@C3
+  118508     mwam_run     R   beforeany:118766.gaas      RUN=@D4
+  118763     mwam_run     H   afterany:118502.gaas       RUN=@A6
+  118764     mwam_run     H   afterany:118504.gaas       RUN=@B6
+  118765     mwam_run     H   afterany:118506.gaas       RUN=@C4
+  118766     mwam_run     H   afterany:118508.gaas       RUN=@D5
+[v20] 2026-11-26 02:31:49 done; each slot job writes ~/mwam/logs/PICK_<slot>_<time>.txt (what it picked and why) and RUN_<run>_<time>.txt

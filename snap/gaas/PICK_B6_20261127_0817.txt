@@ -1,0 +1,6 @@
+[pick] 2026-11-27 08:17:01 slot B6; job 118764.gaas; code f8e7728 Round 8 (11-27 04:00): card 25 gate fix, diag 5(b) c
+[pick] rearr_ar_pw: running in job 119191.gaas
+[relay] get hhyfred/memwam-diag-v1/diag/events_b1/events_rearrange_blocks.json -> /home/heyang.huang/mwam/FastWAM-memory2/outputs/fullft/relay_in/events_b1/events_rearrange_blocks.json (43383 bytes)
+[relay] get hhyfred/memwam-diag-v1/diag/events_b1/events_swap_T.json -> /home/heyang.huang/mwam/FastWAM-memory2/outputs/fullft/relay_in/events_b1/events_swap_T.json (47925 bytes)
+[prep] rearr_arprop_pw: events_rearrange_blocks.json fetched (43383 bytes, sha256 35847fcacbded1c2)
+[pick] 2026-11-27 08:17:05 slot B6 -> rearr_arprop_pw

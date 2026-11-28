@@ -1,0 +1,14 @@
+[watch] 2026-11-28 04:07:01 run ar2_pw, tags e10 e20 e30
+[watch] 2026-11-28 04:07:01 waiting for /workspace/FastWAM-memory2/outputs/fullft/ar2_pw/export_e10.pt
+[watch] 2026-11-28 14:42:01 e10 appeared (12G)
+[watch] 2026-11-28 14:49:17 e10 relayed (try 1):
+export_e10.pt 12042506565
+export_e10.pt.sha256 80
+[watch] 2026-11-28 14:49:18 AUTO_CLEAN: removed /workspace/FastWAM-memory2/outputs/fullft/ar2_pw/export_e10.pt (12042506565 bytes, on the relay)
+[watch] 2026-11-28 14:49:18 waiting for /workspace/FastWAM-memory2/outputs/fullft/ar2_pw/export_e20.pt
+[watch] 2026-11-29 01:14:18 e20 appeared (12G)
+[watch] 2026-11-29 01:21:35 e20 relayed (try 1):
+export_e20.pt 12042506565
+export_e20.pt.sha256 80
+[watch] 2026-11-29 01:21:36 AUTO_CLEAN: removed /workspace/FastWAM-memory2/outputs/fullft/ar2_pw/export_e20.pt (12042506565 bytes, on the relay)
+[watch] 2026-11-29 01:21:36 waiting for /workspace/FastWAM-memory2/outputs/fullft/ar2_pw/export_e30.pt

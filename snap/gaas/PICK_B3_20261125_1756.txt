@@ -1,0 +1,6 @@
+[pick] 2026-11-25 17:56:47 slot B3; job 118170.gaas; code e7703f4 5090 dev evals: a run that finishes no episode print
+Fetching ... files: 0it [00:00, ?it/s]Fetching ... files: 1it [00:02,  2.13s/it]Fetching ... files: 7it [00:02,  3.06it/s]Fetching ... files: 13it [00:05,  2.18it/s]Fetching ... files: 19it [00:07,  2.41it/s]Fetching ... files: 25it [00:10,  2.46it/s]Fetching ... files: 31it [00:11,  2.79it/s]Fetching ... files: 37it [00:13,  2.71it/s]Fetching ... files: 43it [00:15,  2.70it/s]Fetching ... files: 49it [00:18,  2.70it/s]Fetching ... files: 55it [00:20,  2.69it/s]Fetching ... files: 57it [00:21,  2.68it/s]
+[cache] zoom_obs_match_a476d745: downloaded in 22 s (attempt 1)
+[cache] GET OK zoom_obs_match_a476d745: 56 files, 0.32 GiB in /home/heyang.huang/mwam/FastWAM-memory2/outputs/memory_v2/press/zoom_obs_match_a476d745
+[prep] obs_match: zoom cache zoom_obs_match_a476d745 fetched (331M)
+[pick] 2026-11-25 17:57:10 slot B3 -> obs_match

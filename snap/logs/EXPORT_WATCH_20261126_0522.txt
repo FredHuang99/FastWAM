@@ -1,0 +1,15 @@
+[watch] 2026-11-26 05:22:31 run ranking_v3a, tags e10 e20 e30
+[watch] e10: already relayed
+[watch] 2026-11-26 05:22:31 waiting for /workspace/FastWAM-memory2/outputs/fullft/ranking_v3a/export_e20.pt
+[watch] 2026-11-26 14:57:31 e20 appeared (12G)
+[watch] 2026-11-26 15:04:29 e20 relayed (try 1):
+export_e20.pt 12042809541
+export_e20.pt.sha256 80
+[watch] 2026-11-26 15:04:30 AUTO_CLEAN: removed /workspace/FastWAM-memory2/outputs/fullft/ranking_v3a/export_e20.pt (12042809541 bytes, on the relay)
+[watch] 2026-11-26 15:04:30 waiting for /workspace/FastWAM-memory2/outputs/fullft/ranking_v3a/export_e30.pt
+[watch] 2026-11-27 07:29:30 e30 appeared (12G)
+[watch] 2026-11-27 07:36:33 e30 relayed (try 1):
+export_e30.pt 12042809541
+export_e30.pt.sha256 80
+[watch] 2026-11-27 07:36:34 AUTO_CLEAN: removed /workspace/FastWAM-memory2/outputs/fullft/ranking_v3a/export_e30.pt (12042809541 bytes, on the relay)
+[watch] 2026-11-27 07:36:34 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/EXPORT_WATCH_20261126_0522.txt

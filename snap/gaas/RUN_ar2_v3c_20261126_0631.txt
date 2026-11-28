@@ -1,0 +1,41 @@
+[run] 2026-11-26 06:31:15 run ar2_v3c; host hpc-gaas-g03; job 118502.gaas; cores 12; CUDA_VISIBLE_DEVICES=GPU-cba67362-fdc3-2430-613d-0c864a15654b
+GPU 0: NVIDIA H200 (UUID: GPU-cba67362-fdc3-2430-613d-0c864a15654b)
+[run] 2026-11-26 06:31:16 code 4c29acc New H200 after the full home: one follower slot more per lane 
+[run] 2026-11-26 06:31:16 sets: history.variant=arprop history.event_max=32 history.lag=0 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_put_back_block_v3c.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_blocks_v3c.json]
+[run] 2026-11-26 06:31:16 apptainer: path /usr/local/apptainer/1.4.1/bin (apptainer version 1.4.1)
+[run] 2026-11-26 06:31:16 1 container, environment, unit tests
+[run] 2026-11-26 06:31:16 node hpc-gaas-g03: /tmp 483G free; home 482G free
+[run] 2.10.0a0+b558c986e8.nv25.11 NVIDIA H200 SMs 132
+[W1126 06:31:51.854963619 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+76 passed, 1 warning in 5.37s
+[W1126 06:31:58.551229872 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[run] 2026-11-26 06:31:58 2 data checks
+[run] 2026-11-26 06:31:58 two-task cache verified (8.3G)
+[run] 2026-11-26 06:31:58 home 482 GB free
+[ready] put_back_block: 50 dense episodes (root /workspace/FastWAM/outputs/s1_dense_joint_h100_v1); event lists: 50 by id, 50 after matching by episode number; e.g. dense ['put_back_block/episode_0000000', 'put_back_block/episode_0000001'] / events ['put_back_block/episode_0000000', 'put_back_block/episode_0000001']
+[ready] put_back_block: close frames equal in 100/100 episode-arms (1.000, need >= 0.95); text positions not padding in 0 episodes []
+[ready] ALL CHECKS PASSED -> /workspace/FastWAM-memory2/outputs/fullft/READY_arprop_events_put_back_block_v3c
+[W1126 06:32:03.155355751 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[ready] swap_blocks: 50 dense episodes (root /workspace/FastWAM/outputs/s1_dense_joint_h100_v1); event lists: 50 by id, 50 after matching by episode number; e.g. dense ['swap_blocks/episode_0000000', 'swap_blocks/episode_0000001'] / events ['swap_blocks/episode_0000000', 'swap_blocks/episode_0000001']
+[ready] swap_blocks: close frames equal in 100/100 episode-arms (1.000, need >= 0.95); text positions not padding in 0 episodes []
+[ready] ALL CHECKS PASSED -> /workspace/FastWAM-memory2/outputs/fullft/READY_arprop_events_swap_blocks_v3c
+[W1126 06:32:08.216535368 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[run] 2026-11-26 06:32:09 3 condition and training
+[run] 2026-11-26 06:32:09 relay backlog started in this job (scripts/gaas/relay_backlog.txt)
+[run] 2026-11-26 06:32:09 ar2_v3c attempt 1
+[run] 2026-11-27 14:17:03 trainer exit code 0; [fullft] 11-27 14:14:24 u 20070/20077 ep 30.000 lr 1.00e-05 video 0.0429 action 0.0005 gn 0.07 11.3 samples/s peak 93.8 GiB gate 0.3347 ETA 0.0 h
+[run] 2026-11-27 14:17:03 ar2_v3c finished: {
+ "status": "complete",
+ "updates": 20077,
+ "epochs": 30.010460202199443,
+ "samples_per_s": 11.25099539260934,
+ "peak_gib": 93.8463397026062,
+ "final_eval": {
+  "val_video": 0.06091631896015315,
+  "val_action": 0.005004656183212812,
+  "val_arm_rmse": 0.003681101294205291,
+  "val_arm_rmse_8": 0.0028
+[run] 2026-11-27 14:27:03 export watcher: .relayed_e10 .relayed_e20 .relayed_e30 
+[run] 2026-11-27 14:27:03 AUTO_CLEAN: removed ar2_v3c/resume.pt (68G)
+[run] 2026-11-27 14:27:03 AUTO_CLEAN: removed ar2_v3c/export_final.pt (12G)
+[run] 2026-11-27 14:27:03 done

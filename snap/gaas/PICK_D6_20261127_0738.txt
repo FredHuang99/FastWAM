@@ -1,0 +1,2 @@
+[pick] 2026-11-27 07:38:57 slot D6; job 119191.gaas; code f8e7728 Round 8 (11-27 04:00): card 25 gate fix, diag 5(b) c
+[pick] 2026-11-27 07:38:57 slot D6 -> rearr_ar_pw

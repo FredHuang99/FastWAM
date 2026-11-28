@@ -1,0 +1,30 @@
+[fullft] 11-28 19:07:51 u 13760/13997 ep 29.527 lr 1.01e-05 video 0.0277 action 0.0004 gn 0.05 11.2 samples/s peak 93.8 GiB gate 0.3276 ETA 0.4 h
+[fullft] 11-28 19:08:47 u 13770/13997 ep 29.549 lr 1.01e-05 video 0.0278 action 0.0003 gn 0.06 11.2 samples/s peak 93.8 GiB gate 0.3276 ETA 0.4 h
+[fullft] 11-28 19:09:43 u 13780/13997 ep 29.570 lr 1.01e-05 video 0.0312 action 0.0004 gn 0.07 11.2 samples/s peak 93.8 GiB gate 0.3276 ETA 0.3 h
+[fullft] 11-28 19:10:39 u 13790/13997 ep 29.592 lr 1.01e-05 video 0.0318 action 0.0004 gn 0.06 11.2 samples/s peak 93.8 GiB gate 0.3277 ETA 0.3 h
+[fullft] 11-28 19:11:35 u 13800/13997 ep 29.613 lr 1.00e-05 video 0.0268 action 0.0004 gn 0.05 11.2 samples/s peak 93.8 GiB gate 0.3277 ETA 0.3 h
+[fullft] 11-28 19:12:31 u 13810/13997 ep 29.634 lr 1.00e-05 video 0.0272 action 0.0004 gn 0.05 11.2 samples/s peak 93.8 GiB gate 0.3277 ETA 0.3 h
+[fullft] 11-28 19:13:28 u 13820/13997 ep 29.656 lr 1.00e-05 video 0.0295 action 0.0004 gn 0.05 11.2 samples/s peak 93.8 GiB gate 0.3277 ETA 0.3 h
+[fullft] 11-28 19:14:23 u 13830/13997 ep 29.677 lr 1.00e-05 video 0.0320 action 0.0004 gn 0.04 11.2 samples/s peak 93.8 GiB gate 0.3277 ETA 0.3 h
+[fullft] 11-28 19:15:19 u 13840/13997 ep 29.699 lr 1.00e-05 video 0.0320 action 0.0003 gn 0.05 11.2 samples/s peak 93.8 GiB gate 0.3277 ETA 0.2 h
+[fullft] 11-28 19:16:15 u 13850/13997 ep 29.720 lr 1.00e-05 video 0.0287 action 0.0004 gn 0.05 11.2 samples/s peak 93.8 GiB gate 0.3278 ETA 0.2 h
+[fullft] 11-28 19:17:11 u 13860/13997 ep 29.742 lr 1.00e-05 video 0.0288 action 0.0003 gn 0.05 11.2 samples/s peak 93.8 GiB gate 0.3278 ETA 0.2 h
+[fullft] 11-28 19:18:07 u 13870/13997 ep 29.763 lr 1.00e-05 video 0.0282 action 0.0004 gn 0.05 11.2 samples/s peak 93.8 GiB gate 0.3278 ETA 0.2 h
+[fullft] 11-28 19:19:03 u 13880/13997 ep 29.784 lr 1.00e-05 video 0.0316 action 0.0004 gn 0.05 11.2 samples/s peak 93.8 GiB gate 0.3278 ETA 0.2 h
+[fullft] 11-28 19:19:59 u 13890/13997 ep 29.806 lr 1.00e-05 video 0.0275 action 0.0004 gn 0.05 11.2 samples/s peak 93.8 GiB gate 0.3278 ETA 0.2 h
+[fullft] 11-28 19:20:55 u 13900/13997 ep 29.827 lr 1.00e-05 video 0.0297 action 0.0004 gn 0.06 11.2 samples/s peak 93.8 GiB gate 0.3278 ETA 0.2 h
+[fullft] 11-28 19:21:51 u 13910/13997 ep 29.849 lr 1.00e-05 video 0.0303 action 0.0004 gn 0.08 11.2 samples/s peak 93.8 GiB gate 0.3278 ETA 0.1 h
+[fullft] 11-28 19:22:47 u 13920/13997 ep 29.870 lr 1.00e-05 video 0.0304 action 0.0004 gn 0.04 11.2 samples/s peak 93.8 GiB gate 0.3278 ETA 0.1 h
+[fullft] 11-28 19:23:43 u 13930/13997 ep 29.892 lr 1.00e-05 video 0.0290 action 0.0004 gn 0.05 11.2 samples/s peak 93.8 GiB gate 0.3278 ETA 0.1 h
+[fullft] 11-28 19:24:39 u 13940/13997 ep 29.913 lr 1.00e-05 video 0.0294 action 0.0004 gn 0.05 11.2 samples/s peak 93.8 GiB gate 0.3279 ETA 0.1 h
+[fullft] 11-28 19:25:35 u 13950/13997 ep 29.934 lr 1.00e-05 video 0.0298 action 0.0004 gn 0.05 11.2 samples/s peak 93.8 GiB gate 0.3279 ETA 0.1 h
+[fullft] 11-28 19:26:31 u 13960/13997 ep 29.956 lr 1.00e-05 video 0.0289 action 0.0004 gn 0.04 11.2 samples/s peak 93.8 GiB gate 0.3279 ETA 0.1 h
+[fullft] 11-28 19:27:27 u 13970/13997 ep 29.977 lr 1.00e-05 video 0.0278 action 0.0003 gn 0.04 11.2 samples/s peak 93.8 GiB gate 0.3279 ETA 0.0 h
+[fullft] 11-28 19:28:23 u 13980/13997 ep 29.999 lr 1.00e-05 video 0.0302 action 0.0004 gn 0.06 11.2 samples/s peak 93.8 GiB gate 0.3279 ETA 0.0 h
+[fullft] 11-28 19:28:51 exported /workspace/FastWAM-memory2/outputs/fullft/obs_cf200/export_e30.pt (11.2 GiB)
+[fullft] 11-28 19:29:41 u 13990/13997 ep 30.021 lr 1.00e-05 video 0.0313 action 0.0004 gn 0.05 11.2 samples/s peak 93.8 GiB gate 0.3279 ETA 0.0 h
+[fullft] 11-28 19:30:26 eval {"val_video": 0.1984451463079798, "val_action": 0.044451876564086966, "val_arm_rmse": 0.03182559470224078, "val_arm_rmse_8": 0.006522639858303592, "update": 13997, "epoch": 30.0364}
+[fullft] 11-28 19:31:44 resume checkpoint saved at update 13997
+[fullft] 11-28 19:32:06 exported /workspace/FastWAM-memory2/outputs/fullft/obs_cf200/export_final.pt (11.2 GiB)
+[fullft] 11-28 19:32:06 summary {"status": "complete", "updates": 13997, "epochs": 30.03643670462157, "samples_per_s": 11.192764022296714, "peak_gib": 93.84296655654907, "final_eval": {"val_video": 0.1984451463079798, "val_action": 0.044451876564086966, "val_arm_rmse": 0.03182559470224078, "val_arm_rmse_8": 0.006522639858303592}}
+[W1128 19:32:07.231971019 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())

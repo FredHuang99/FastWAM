@@ -1,0 +1,33 @@
+[run] 2026-11-25 01:00:58 run press_told; host hpc-gaas-g07; job 118111.gaas; cores 12; CUDA_VISIBLE_DEVICES=GPU-0df61187-aa6c-1cee-0d0b-cc543a39ad0f
+GPU 0: NVIDIA H200 (UUID: GPU-0df61187-aa6c-1cee-0d0b-cc543a39ad0f)
+[run] 2026-11-25 01:00:59 code 916358e Card 11: classes fixed from the first 10 episodes per model, b
+[run] 2026-11-25 01:00:59 sets: data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_press_button_v1] data.tasks=[press_button] data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_press_button_v3c.json] history.variant=arprop history.event_max=32 history.lag=0 history.ordinal=16 history.event_delta=0.012 history.event_min_path=0.015 history.event_provisional=0.002 data.text_table=/workspace/FastWAM-memory2/outputs/fullft/press_told/TOLD_TEXT.pt
+[run] 2026-11-25 01:00:59 apptainer: path /usr/local/apptainer/1.4.1/bin (apptainer version 1.4.1)
+[run] 2026-11-25 01:00:59 1 container, environment, unit tests
+[run] 2026-11-25 01:00:59 node hpc-gaas-g07: /tmp 732G free; home 345G free
+[run] 2.10.0a0+b558c986e8.nv25.11 NVIDIA H200 SMs 132
+[W1125 01:01:25.248993980 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+76 passed, 1 warning in 5.36s
+[W1125 01:01:31.935084700 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[run] 2026-11-25 01:01:32 2 data checks
+[run] 2026-11-25 01:01:32 two-task cache verified (8.3G)
+[run] 2026-11-25 01:01:32 cache dense_press_button_v1 verified before
+[run] 2026-11-25 01:01:32 home 327 GB free
+[run] 2026-11-25 01:01:32 3 condition and training
+[run] 2026-11-25 01:01:32 relay backlog started in this job (scripts/gaas/relay_backlog.txt)
+[run] 2026-11-25 01:01:32 press_told attempt 1
+[run] 2026-11-25 18:41:40 trainer exit code 0; [fullft] 11-25 18:39:02 u 11150/11159 ep 30.054 lr 1.00e-05 video 0.0287 action 0.0003 gn 0.04 11.3 samples/s peak 93.8 GiB gate 0.2234 ETA 0.0 h
+[run] 2026-11-25 18:41:40 press_told finished: {
+ "status": "complete",
+ "updates": 11159,
+ "epochs": 30.077970089060663,
+ "samples_per_s": 11.265994127280202,
+ "peak_gib": 93.8473391532898,
+ "final_eval": {
+  "val_video": 0.03614922347802955,
+  "val_action": 0.0006270272499004174,
+  "val_arm_rmse": 0.006293981739872834,
+  "val_arm_rmse_8": 0.00
+[run] 2026-11-25 18:51:40 export watcher: .relayed_e10 .relayed_e20 .relayed_e30 
+[run] 2026-11-25 18:51:40 AUTO_CLEAN: removed press_told/resume.pt (68G)
+[run] 2026-11-25 18:51:40 done

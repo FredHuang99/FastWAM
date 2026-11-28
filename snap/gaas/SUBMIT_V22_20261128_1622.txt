@@ -1,0 +1,2 @@
+[v22] 2026-11-28 16:22:35 code d71adf5 Check 5: one-episode A100 task to see whether the A100 pool ta; home 411G free
+[v22] 2026-11-28 16:22:35 slots.txt / the plan v22 lines are missing (git pull): stop

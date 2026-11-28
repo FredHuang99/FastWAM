@@ -1,0 +1,20 @@
+[watch] 2026-11-26 02:30:00 run obs_s200, tags e10 e20 e30
+[watch] 2026-11-26 02:30:00 waiting for /workspace/FastWAM-memory2/outputs/fullft/obs_s200/export_e10.pt
+[watch] 2026-11-26 08:15:00 e10 appeared (12G)
+[watch] 2026-11-26 08:22:03 e10 relayed (try 1):
+export_e10.pt 12042063331
+export_e10.pt.sha256 80
+[watch] 2026-11-26 08:22:04 AUTO_CLEAN: removed /workspace/FastWAM-memory2/outputs/fullft/obs_s200/export_e10.pt (12042063331 bytes, on the relay)
+[watch] 2026-11-26 08:22:04 waiting for /workspace/FastWAM-memory2/outputs/fullft/obs_s200/export_e20.pt
+[watch] 2026-11-26 15:37:04 e20 appeared (12G)
+[watch] 2026-11-26 15:44:38 e20 relayed (try 1):
+export_e20.pt 12042063395
+export_e20.pt.sha256 80
+[watch] 2026-11-26 15:44:39 AUTO_CLEAN: removed /workspace/FastWAM-memory2/outputs/fullft/obs_s200/export_e20.pt (12042063395 bytes, on the relay)
+[watch] 2026-11-26 15:44:39 waiting for /workspace/FastWAM-memory2/outputs/fullft/obs_s200/export_e30.pt
+[watch] 2026-11-26 22:54:39 e30 appeared (12G)
+[watch] 2026-11-26 23:02:02 e30 relayed (try 1):
+export_e30.pt 12042063395
+export_e30.pt.sha256 80
+[watch] 2026-11-26 23:02:02 AUTO_CLEAN: removed /workspace/FastWAM-memory2/outputs/fullft/obs_s200/export_e30.pt (12042063395 bytes, on the relay)
+[watch] 2026-11-26 23:02:02 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/EXPORT_WATCH_20261126_0230.txt

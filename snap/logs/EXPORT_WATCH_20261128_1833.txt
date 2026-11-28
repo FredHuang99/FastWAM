@@ -1,0 +1,2 @@
+[watch] 2026-11-28 18:34:55 run obs_s1600, tags e5 e10
+[watch] 2026-11-28 18:34:55 waiting for /workspace/FastWAM-memory2/outputs/fullft/obs_s1600/export_e5.pt

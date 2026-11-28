@@ -1,0 +1,2 @@
+[pick] 2026-11-26 02:29:12 slot A4; job 118501.gaas; code 4c29acc New H200 after the full home: one follower slot more
+[pick] 2026-11-26 02:29:12 slot A4 -> obs_match

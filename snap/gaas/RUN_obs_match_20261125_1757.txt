@@ -1,0 +1,25 @@
+[run] 2026-11-25 17:57:10 run obs_match; host hpc-gaas-g08; job 118170.gaas; cores 12; CUDA_VISIBLE_DEVICES=GPU-9ba8440a-7fc4-c301-19e1-7f5b2db0702c
+GPU 0: NVIDIA H200 (UUID: GPU-9ba8440a-7fc4-c301-19e1-7f5b2db0702c)
+[run] 2026-11-25 17:57:11 code e7703f4 5090 dev evals: a run that finishes no episode prints the clos
+[run] 2026-11-25 17:57:11 sets: data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1] data.tasks=[observe_and_pickup] history.zoom=true history.zoom_ref_box=[0.395,0.06,0.675,0.34] history.zoom_cur_box=[0.0,0.42,1.0,1.0] history.zoom_match=true data.zoom_root=/workspace/FastWAM-memory2/outputs/memory_v2/press/zoom_obs_match_a476d745
+[run] 2026-11-25 17:57:11 apptainer: path /usr/local/apptainer/1.4.1/bin (apptainer version 1.4.1)
+[run] 2026-11-25 17:57:11 1 container, environment, unit tests
+[run] 2026-11-25 17:57:11 node hpc-gaas-g08: /tmp 737G free; home 154G free
+[run] 2.10.0a0+b558c986e8.nv25.11 NVIDIA H200 SMs 132
+[W1125 17:57:36.617858278 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+76 passed, 1 warning in 5.43s
+[W1125 17:57:43.490295693 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[run] 2026-11-25 17:57:43 2 data checks
+[run] 2026-11-25 17:57:43 two-task cache verified (8.3G)
+[run] 2026-11-25 17:57:43 cache dense_observe_and_pickup_v1 verified before
+[run] 2026-11-25 17:57:43 zoom latents zoom_obs_match_a476d745 here (331M)
+[run] 2026-11-25 17:57:43 home has 153 GB free (< 160 GB); waiting 10 min
+[run] 2026-11-25 18:07:43 home has 153 GB free (< 160 GB); waiting 10 min
+[run] 2026-11-25 18:17:43 home has 153 GB free (< 160 GB); waiting 10 min
+[run] 2026-11-25 18:27:43 home has 153 GB free (< 160 GB); waiting 10 min
+[run] 2026-11-25 18:37:43 home has 142 GB free (< 160 GB); waiting 10 min
+[run] 2026-11-25 18:47:43 home has 131 GB free (< 160 GB); waiting 10 min
+[run] 2026-11-25 18:57:43 home 206 GB free
+[run] 2026-11-25 18:57:43 3 condition and training
+[run] 2026-11-25 18:57:43 relay backlog started in this job (scripts/gaas/relay_backlog.txt)
+[run] 2026-11-25 18:57:43 obs_match attempt 1

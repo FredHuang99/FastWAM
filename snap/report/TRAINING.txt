@@ -1,0 +1,19 @@
+swapT_ow_s18             last write     0 min ago | u 3870/7233 ep 16.058 lr 5.49e-05 video 0.0718 action 0.0022 gn 0.17 11 |  
+obs_s800_20              last write     0 min ago | u 17870/37357 ep 9.571 lr 5.91e-05 video 0.0492 action 0.0012 gn 0.13 11. |  
+ar2_pw                   last write     0 min ago | u 13840/20077 ep 20.687 lr 3.07e-05 video 0.0483 action 0.0013 gn 0.19 11 |  
+obs_s1600                last write     0 min ago | u 4640/37369 ep 1.242 lr 9.72e-05 video 0.0845 action 0.0051 gn 0.29 11. |  
+obs_cf200                last write   382 min ago | u 13990/13997 ep 30.021 lr 1.00e-05 video 0.0313 action 0.0004 gn 0.05 11 | FINISHED 
+swapT_joint3             last write   459 min ago | u 27300/27309 ep 30.000 lr 1.00e-05 video 0.0354 action 0.0005 gn 0.08 11 | FINISHED 
+rearr_pw_s18             last write  1320 min ago | u 8470/8478 ep 30.035 lr 1.00e-05 video 0.0334 action 0.0004 gn 0.12 11 | FINISHED 
+rearr_arprop_pw          last write  1695 min ago | u 8470/8478 ep 30.035 lr 1.00e-05 video 0.0304 action 0.0005 gn 0.07 11 | FINISHED 
+rearr_ar_pw              last write  1732 min ago | u 8470/8478 ep 30.035 lr 1.00e-05 video 0.0313 action 0.0005 gn 0.11 11 | FINISHED 
+ar2_v3c                  last write  2137 min ago | u 20070/20077 ep 30.000 lr 1.00e-05 video 0.0429 action 0.0005 gn 0.07 11 | FINISHED 
+obs_s800                 last write  2508 min ago | u 18670/18679 ep 10.000 lr 1.00e-05 video 0.0425 action 0.0004 gn 0.06 11 | FINISHED 
+ranking_v3a              last write  2546 min ago | u 31500/31501 ep 30.000 lr 1.00e-05 video 0.0330 action 0.0002 gn 0.05 11 | FINISHED 
+obs_s200                 last write  3062 min ago | u 14010/14010 ep 30.000 lr 1.00e-05 video 0.0300 action 0.0004 gn 0.05 11 | FINISHED 
+obs_match                last write  4053 min ago | u 3150/3152 ep 29.999 lr 1.00e-05 video 0.0309 action 0.0007 gn 0.06 10 | FINISHED 
+rearr_pw                 last write  4139 min ago | u 8470/8478 ep 30.035 lr 1.00e-05 video 0.0331 action 0.0005 gn 0.14 11 | FINISHED 
+press_told               last write  4752 min ago | u 11150/11159 ep 30.054 lr 1.00e-05 video 0.0287 action 0.0003 gn 0.04 11 | FINISHED 
+swapT_long               last write  4808 min ago | u 14460/14466 ep 60.000 lr 1.00e-05 video 0.0303 action 0.0004 gn 0.05 11 | FINISHED 
+rearr_v3c_h2             last write  5398 min ago | u 8470/8478 ep 30.035 lr 1.00e-05 video 0.0280 action 0.0005 gn 0.06 11 | FINISHED 
+swapT_arprop_h2          last write  5508 min ago | u 7230/7233 ep 30.000 lr 1.00e-05 video 0.0418 action 0.0006 gn 0.06 11 | FINISHED 

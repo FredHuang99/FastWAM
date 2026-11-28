@@ -1,0 +1,34 @@
+[run] 2026-11-26 23:07:01 run swapT_joint3; host hpc-gaas-g06; job 118765.gaas; cores 12; CUDA_VISIBLE_DEVICES=GPU-0a17321e-c5ab-8e6d-6796-eb241953755c
+GPU 0: NVIDIA H200 (UUID: GPU-0a17321e-c5ab-8e6d-6796-eb241953755c)
+[run] 2026-11-26 23:07:01 code d24b3d0 Round 7 (11-26 22:00): the A40 had no ready card (every MAIN w
+[run] 2026-11-26 23:07:01 sets: data.roots=[/workspace/FastWAM/outputs/s1_dense_joint_h100_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_swap_T_v1] data.tasks=[put_back_block,swap_blocks,swap_T] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_put_back_block.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_blocks.json,/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_T.json]
+[run] 2026-11-26 23:07:02 apptainer: module apptainer/1.4.1 (apptainer version 1.4.1)
+[run] 2026-11-26 23:07:02 1 container, environment, unit tests
+[run] 2026-11-26 23:07:02 node hpc-gaas-g06: /tmp 528G free; home 476G free
+[run] 2.10.0a0+b558c986e8.nv25.11 NVIDIA H200 SMs 132
+[W1126 23:07:26.945494425 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+76 passed, 1 warning in 5.89s
+[W1126 23:07:33.403563140 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[run] 2026-11-26 23:07:33 2 data checks
+[run] 2026-11-26 23:07:33 two-task cache verified (8.3G)
+[run] 2026-11-26 23:07:33 cache dense_swap_T_v1 verified before
+[run] 2026-11-26 23:07:33 home 459 GB free
+[run] 2026-11-26 23:07:33 3 condition and training
+[run] 2026-11-26 23:07:33 relay backlog started in this job (scripts/gaas/relay_backlog.txt)
+[run] 2026-11-26 23:07:33 swapT_joint3 attempt 1
+[run] 2026-11-28 18:14:22 trainer exit code 0; [fullft] 11-28 18:11:09 u 27300/27309 ep 30.000 lr 1.00e-05 video 0.0354 action 0.0005 gn 0.08 11.3 samples/s peak 93.8 GiB gate 0.3838 ETA 0.0 h
+[run] 2026-11-28 18:14:22 swapT_joint3 finished: {
+ "status": "complete",
+ "updates": 27309,
+ "epochs": 30.009886884429875,
+ "samples_per_s": 11.269581261442072,
+ "peak_gib": 93.8463397026062,
+ "final_eval": {
+  "val_video": 0.10388498852939342,
+  "val_action": 0.007242470222300944,
+  "val_arm_rmse": 0.0035376030318730045,
+  "val_arm_rmse_8": 0.00
+[run] 2026-11-28 18:24:22 export watcher: .relayed_e10 .relayed_e20 .relayed_e30 
+[run] 2026-11-28 18:24:22 AUTO_CLEAN: removed swapT_joint3/resume.pt (68G)
+[run] 2026-11-28 18:24:22 AUTO_CLEAN: removed swapT_joint3/export_final.pt (12G)
+[run] 2026-11-28 18:24:22 done

@@ -1,0 +1,10 @@
+[pick] 2026-11-26 23:07:00 slot C4; job 118765.gaas; code d24b3d0 Round 7 (11-26 22:00): the A40 had no ready card (ev
+[pick] obs_match: finished already
+[pick] obs_s200: finished already
+[pick] obs_s800: running in job 118504.gaas
+[pick] rearr_pw: finished already
+[pick] press_told: finished already
+[pick] swapT_long: go test not met (test -f outputs/fullft/swapT_arprop_h2/SUMMARY.json && test -f outputs/fullft/swapT_arprop_h2/resume.pt)
+[pick] ranking_v3a: running in job 118766.gaas
+[pick] ar2_v3c: running in job 118502.gaas
+[pick] 2026-11-26 23:07:01 slot C4 -> swapT_joint3

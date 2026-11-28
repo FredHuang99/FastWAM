@@ -1,0 +1,3 @@
+[pick] 2026-11-27 21:49:22 slot B7; job 119256.gaas; code cb2cc81 5090: rerun the frame-0 probe of obs_s800 e10 on GPU
+[pick] rearr_pw_s18: running in job 119257.gaas
+[pick] 2026-11-27 21:49:22 slot B7 -> obs_s800_20

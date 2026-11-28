@@ -1,0 +1,3 @@
+[pick] 2026-11-26 02:29:25 slot C3; job 118506.gaas; code 4c29acc New H200 after the full home: one follower slot more
+[pick] obs_match: running in job 118501.gaas
+[pick] 2026-11-26 02:29:26 slot C3 -> obs_s200

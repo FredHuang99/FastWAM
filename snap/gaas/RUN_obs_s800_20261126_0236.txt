@@ -1,0 +1,36 @@
+[run] 2026-11-26 02:36:09 run obs_s800; host hpc-gaas-g08; job 118504.gaas; cores 12; CUDA_VISIBLE_DEVICES=GPU-9ba8440a-7fc4-c301-19e1-7f5b2db0702c
+GPU 0: NVIDIA H200 (UUID: GPU-9ba8440a-7fc4-c301-19e1-7f5b2db0702c)
+[run] 2026-11-26 02:36:09 code 4c29acc New H200 after the full home: one follower slot more per lane 
+[run] 2026-11-26 02:36:09 sets: data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen155_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen600_v1] data.tasks=[observe_and_pickup] schedule.frame_epochs=10 schedule.export_at_epochs=[5,10]
+[run] 2026-11-26 02:36:09 apptainer: path /usr/local/apptainer/1.4.1/bin (apptainer version 1.4.1)
+[run] 2026-11-26 02:36:09 1 container, environment, unit tests
+[run] 2026-11-26 02:36:09 node hpc-gaas-g08: /tmp 737G free; home 415G free
+[run] 2.10.0a0+b558c986e8.nv25.11 NVIDIA H200 SMs 132
+[W1126 02:36:37.964613613 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+76 passed, 1 warning in 5.30s
+[W1126 02:36:44.585984711 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[run] 2026-11-26 02:36:44 2 data checks
+[run] 2026-11-26 02:36:44 two-task cache verified (8.3G)
+[run] 2026-11-26 02:36:44 cache dense_observe_and_pickup_v1 verified before
+[run] 2026-11-26 02:36:44 cache dense_observe_and_pickup_gen155_v1 verified before
+[run] 2026-11-26 02:36:44 cache dense_observe_and_pickup_gen600_v1 verified before
+[run] 2026-11-26 02:36:44 home 415 GB free
+[run] 2026-11-26 02:36:44 3 condition and training
+[run] 2026-11-26 02:36:44 relay backlog started in this job (scripts/gaas/relay_backlog.txt)
+[run] 2026-11-26 02:36:44 obs_s800 attempt 1
+[run] 2026-11-27 08:06:12 trainer exit code 0; [fullft] 11-27 08:03:18 u 18670/18679 ep 10.000 lr 1.00e-05 video 0.0425 action 0.0004 gn 0.06 11.3 samples/s peak 93.8 GiB gate 0.4291 ETA 0.0 h
+[run] 2026-11-27 08:06:12 obs_s800 finished: {
+ "status": "complete",
+ "updates": 18679,
+ "epochs": 10.00481843049665,
+ "samples_per_s": 11.271522083615444,
+ "peak_gib": 93.84296655654907,
+ "final_eval": {
+  "val_video": 0.14950413552681616,
+  "val_action": 0.0622265943591079,
+  "val_arm_rmse": 0.09000665184430545,
+  "val_arm_rmse_8": 0.012515
+[run] 2026-11-27 08:16:12 export watcher: .relayed_e10 .relayed_e5 
+[run] 2026-11-27 08:16:12 AUTO_CLEAN: removed obs_s800/resume.pt (68G)
+[run] 2026-11-27 08:16:12 AUTO_CLEAN: removed obs_s800/export_final.pt (12G)
+[run] 2026-11-27 08:16:12 done

@@ -1,0 +1,20 @@
+[run] 2026-11-27 21:49:22 run obs_s800_20; host hpc-gaas-g06; job 119256.gaas; cores 12; CUDA_VISIBLE_DEVICES=GPU-268eae10-7f4e-1379-4f5a-c983ab863bfc
+GPU 0: NVIDIA H200 (UUID: GPU-268eae10-7f4e-1379-4f5a-c983ab863bfc)
+[run] 2026-11-27 21:49:23 code cb2cc81 5090: rerun the frame-0 probe of obs_s800 e10 on GPU 1 (its tr
+[run] 2026-11-27 21:49:23 sets: data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen155_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen600_v1] data.tasks=[observe_and_pickup] schedule.frame_epochs=20 schedule.export_at_epochs=[10,20]
+[run] 2026-11-27 21:49:23 apptainer: module apptainer/1.4.1 (apptainer version 1.4.1)
+[run] 2026-11-27 21:49:23 1 container, environment, unit tests
+[run] 2026-11-27 21:49:23 node hpc-gaas-g06: /tmp 508G free; home 546G free
+[run] 2.10.0a0+b558c986e8.nv25.11 NVIDIA H200 SMs 132
+[W1127 21:49:49.522564357 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+82 passed, 1 warning in 6.02s
+[W1127 21:49:57.893485239 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[run] 2026-11-27 21:49:57 2 data checks
+[run] 2026-11-27 21:49:57 two-task cache verified (8.3G)
+[run] 2026-11-27 21:49:57 cache dense_observe_and_pickup_v1 verified before
+[run] 2026-11-27 21:49:57 cache dense_observe_and_pickup_gen155_v1 verified before
+[run] 2026-11-27 21:49:57 cache dense_observe_and_pickup_gen600_v1 verified before
+[run] 2026-11-27 21:49:57 home 546 GB free
+[run] 2026-11-27 21:49:57 3 condition and training
+[run] 2026-11-27 21:49:57 relay backlog started in this job (scripts/gaas/relay_backlog.txt)
+[run] 2026-11-27 21:49:57 obs_s800_20 attempt 1

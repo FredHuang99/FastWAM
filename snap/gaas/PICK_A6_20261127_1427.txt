@@ -1,0 +1,4 @@
+[pick] 2026-11-27 14:27:33 slot A6; job 119257.gaas; code 7e5d916 A40: hourly automatic pruning of intermediate export
+[pick] rearr_ar_pw: running in job 119191.gaas
+[pick] rearr_arprop_pw: running in job 118764.gaas
+[pick] 2026-11-27 14:27:33 slot A6 -> rearr_pw_s18
