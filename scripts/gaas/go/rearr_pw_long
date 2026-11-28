@@ -1,3 +1,3 @@
 # 11-28 (Opus; plan v22 card 27 early stop): seed 17 is trained on only if seed 18 gained >= +0.10 from e30 to e60
-# (gate file written by the decision-tree step from the A40 result) and its resume checkpoint is still there.
-test -f scripts/fullft/gates/C27_S17_GO && test -f outputs/fullft/rearr_pw/resume.pt
+# (V22_C27 early_stop, decision tree) and its resume checkpoint is still there.
+python3 scripts/fullft/v22_gate.py c27s17 && test -f outputs/fullft/rearr_pw/resume.pt
