@@ -61,11 +61,34 @@ def joint3_helps():
     return v == "CO-TRAINING HELPS", f"card 9b swap_T: {v or j.get('verdict')}"
 
 
+REF100 = "refs/remotes/origin/results-a100"
+STAMP100 = R / "outputs/fullft/.v22_gate_fetch_a100"
+
+
+def a100_json(name):
+    """The A100's JSON `name` (only the A100 writes these names), or None; as a40_json."""
+    if (LOCAL / name).exists() and (LOCAL / name).stat().st_size > 0:
+        return json.loads((LOCAL / name).read_text())
+    if not STAMP100.exists() or time.time() - STAMP100.stat().st_mtime > 600:
+        _git("fetch", "-q", "origin", f"+results-a100:{REF100}")
+        STAMP100.parent.mkdir(parents=True, exist_ok=True)
+        STAMP100.touch()
+    r = _git("show", f"{REF100}:snap/fullft/{name}")
+    return json.loads(r.stdout) if r.returncode == 0 and r.stdout.strip() else None
+
+
 def c36_two():
-    j = a40_json("V22_C36.json")
+    """11-29 (user-approved fallback): if c36fb_gate.py on the A100 started the fallback (C36FB_GATE.json fallback
+    true), card 36's verdict is the A100 one (V22_C36_A100.json) and nothing else; otherwise the A40's V22_C36."""
+    g = a100_json("C36FB_GATE.json") or {}
+    if g.get("fallback"):
+        j, src = a100_json("V22_C36_A100.json"), "A100 fallback"
+    else:
+        j, src = a40_json("V22_C36.json"), "A40"
     if not j or "early_stop" not in j:
-        return None, "V22_C36 not final"
-    return bool(j.get("card37_condition_two")), f"card 36 condition two {j.get('card37_condition_two')} ({j.get('verdict')})"
+        return None, f"card 36 ({src}) not final"
+    return bool(j.get("card37_condition_two")), \
+        f"card 36 ({src}) condition two {j.get('card37_condition_two')} ({j.get('verdict')})"
 
 
 def gate(name):

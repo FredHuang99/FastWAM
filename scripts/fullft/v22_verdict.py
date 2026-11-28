@@ -6,6 +6,8 @@ seed-42 banks, default noise; new runs' episodes in closed_loop/v22 (r2 noise in
         CI lower > +0.15 -> RELEASE WEIGHTING HELPS; CI upper < +0.15 -> NO HELP; otherwise UNCERTAIN (pre-set
         extension: r2, 200 pairs, the same rule). Early stop (written before the run): success(swapT_ow e30) - 39 < 5 ->
         the seed-18 run is not trained. Described: swapT_ow_s18 e30 (main-table cell = mean of the two seeds); e10 / e20.
+  c36_a100  card 36 on the A100 (fallback approved 11-29, only if the A40 is not repaired at 11-29 12:00): both arms
+        on the A100, closed_loop/a100fb; see c36_a100() -> V22_C36_A100.json
   c36b  card 36b: D = success(swapT_ar_ow e30) - success(swapT_ar e30, closed_loop/e6), swap_T 1-100; SESOI +0.15:
         RELEASE WEIGHTING HELPS (NO RECORD) / NO HELP / UNCERTAIN (same extension). Described: swapT_ar_ow_s18 e30.
 Each verdict is about these two checkpoints (plan v21 5.5).
@@ -68,6 +70,28 @@ def c36():
                              "seed18": "NOT TRAINED (early stop)" if gain < 5 else "train"}
         out["card37_condition_two"] = bool(gain >= 10 or out.get("verdict", "").endswith("RELEASE WEIGHTING HELPS"))
     _described(out, task, order, ref, [("swapT_ow_s18_e30", "v22"), ("swapT_ow_e10", "v22"), ("swapT_ow_e20", "v22")])
+    return out
+
+
+def c36_a100():
+    """Card 36 on the A100 (fallback; user 11-29 00:5x "中午 12 点没修好就挪"; written 11-29 01:06 before any A100
+    episode of these runs). Runs only if scripts/fullft/c36fb_gate.py found the A40 not repaired at 11-29 12:00. Both
+    arms on the A100 (A100 class), the A40's swap_T scene bank copied over, the same scenes, arguments and default
+    noise; episodes in the A100's closed_loop/a100fb (the pre-set r2 extension in the A100's closed_loop/r2). The same
+    rule and SESOI as c36. Every "39" of c36 (swapT_arprop_h2's A40 success) is swapT_arprop_h2's A100 success here.
+    After a fallback this is card 36's verdict (v22_gate.py reads it); the A40's c36, if it runs later, is described."""
+    task = "swap_T"
+    out = {"run": "card 36 on the A100 (fallback, A100 class): swapT_ow against swapT_arprop_h2, both arms on the A100",
+           "sesoi": 0.15, "machine": "A100"}
+    out, order, new, ref = _main_rule(out, task, "swapT_ow_e30", "a100fb", "swapT_arprop_h2_e30", "a100fb", 0.15,
+                                      "RELEASE WEIGHTING HELPS", "NO HELP")
+    if len(new) >= 100 and len(ref) >= 100:
+        base = sum(ref.values())
+        gain = sum(new.values()) - base
+        out["early_stop"] = {"rule": f"success(swapT_ow e30) - success(swapT_arprop_h2 e30) on the A100 ({base}) < 5 -> "
+                                     "seed 18 not trained (seed 18 was already trained: reported only)",
+                             "gain_over_reference": gain, "seed18": "NOT TRAINED (early stop)" if gain < 5 else "train"}
+        out["card37_condition_two"] = bool(gain >= 10 or out.get("verdict", "").endswith("RELEASE WEIGHTING HELPS"))
     return out
 
 
@@ -322,7 +346,7 @@ def main():
     name = sys.argv[1] if len(sys.argv) > 1 else ""
     if name == "gate":
         return gate(sys.argv[2], sys.argv[3], "--anywhere" in sys.argv)
-    fns = {"c36": c36, "c36b": c36b, "c31": c31, "c27": lambda: c27("c27"), "c27b": lambda: c27("c27b"),
+    fns = {"c36": c36, "c36_a100": c36_a100, "c36b": c36b, "c31": c31, "c27": lambda: c27("c27"), "c27b": lambda: c27("c27b"),
            "c30": c30, "c32": c32, "c37": c37}
     if name == "desc":                       # desc <task> <ref folder:label> <folder:label> ... [--name X]
         args = [a for a in sys.argv[2:] if not a.startswith("--name")]

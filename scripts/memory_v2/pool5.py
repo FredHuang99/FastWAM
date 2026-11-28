@@ -317,7 +317,7 @@ DROP_LINE = re.compile(r"is unhealthy \(.*?\); dropped \[([0-9, ]*)\] from the a
 
 
 def readmit_healthy():
-    """11-29 01:00 (A40 GPUs 4-7 wait for an administrator's reset, at an unknown hour): a GPU the guard dropped
+    """11-29 00:55 (A40 GPUs 4-7 wait for an administrator's reset, at an unknown hour): a GPU the guard dropped
     (POOL_CONFIG.json 'dropped_unhealthy') goes back on the allowed list as soon as nvidia-smi reads its utilization
     again; one that fails again is dropped again at no attempt cost. `allow` / `start --gpus` empty the list (the
     user's choice wins), `pause` takes its GPUs off it. The first run seeds the list with the GPUs that are not allowed
