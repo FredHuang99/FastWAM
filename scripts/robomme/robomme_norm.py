@@ -1,4 +1,4 @@
-"""RoboMME step 2 (plan v22 6.6; Status 11-28 12.8), 11-28 18:00 Opus. CPU, mwam5090 (the RoboMME dense root is there).
+"""RoboMME step 2 (plan v22 6.6; Status 11-28 12.8), 11-28 17:20 Opus. CPU, mwam5090 (the RoboMME dense root is there).
 Adds the normalised "proprio" [L, 8] / "actions" [L, 7] keys that fullft.data reads to every episode of the RoboMME
 dense root (robomme_encode.py wrote only proprio_raw / actions_raw on purpose: the normalisation is a training choice).
 Choices (R0 section 2 and Status 12.8; written before any statistic is computed):

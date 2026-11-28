@@ -1,4 +1,4 @@
-"""Plan v22 diagnostic 7(c) (appendix of claude/MemWAM_Plan_v22_20261128.md), written 11-28 17:30 (Opus) before any
+"""Plan v22 diagnostic 7(c) (appendix of claude/MemWAM_Plan_v22_20261128.md), written 11-28 17:13 (Opus) before any
 of these numbers is measured. 5090, one GPU (~20 GB at --micro 2), read-only, DESCRIBED ONLY (no verdict word).
 Question: without running the simulator, can one tell which rearrange checkpoint has not learned the press?
   Demos: the rearrange_blocks demos of the dense cache's 'val' split (the demos no training used; training reads the
