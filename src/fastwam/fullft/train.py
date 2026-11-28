@@ -711,9 +711,12 @@ def main(argv: Optional[List[str]] = None) -> None:
                                        ledger_features=cfg.rule.ledger_features, next_event=cfg.next_event_head,
                                        next_pose=cfg.next_pose is not None)
         model.set_trainable(cfg.model.train_video, cfg.model.lora_rank)
-        ck = torch.load(args.resume, map_location="cpu", weights_only=False)
-        model.load_state_dict(ck["model"], strict=True)
-        export(model, Path(args.out), cfg, ck["state"], print)
+        if args.resume:
+            ck = torch.load(args.resume, map_location="cpu", weights_only=False)
+            model.load_state_dict(ck["model"], strict=True)
+            export(model, Path(args.out), cfg, ck["state"], print)
+        else:                                # 11-28 (RoboMME closed-loop plumbing smoke): the untrained base as an
+            export(model, Path(args.out), cfg, {"update": 0, "note": "base weights, no training"}, print)   # export
 
 
 if __name__ == "__main__":

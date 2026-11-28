@@ -33,6 +33,10 @@ diag7c | gpu1 | test -s outputs/fullft/events/events_rearrange_blocks_v3c.json |
 # RoboMME step 2 (plan v22 6.6): normalised proprio / actions keys in the RoboMME dense root (min/max from its train
 # split, absolute actions; stops before writing anything if an orientation angle wraps). CPU.
 robomme-norm | cpu | test -s outputs/robomme/dense_robomme_v1/RECORDS.json | PYTHONPATH=src /opt/mwam/bin/python scripts/robomme/robomme_norm.py
+# RoboMME closed-loop plumbing smoke needs an export: the untrained LIBERO base wrapped as a fullft export (train.py
+# export without --resume; CPU, ~12 GB file). The closed loop itself is started by the user on the host
+# (scripts/robomme/robomme_closed_loop_5090.sh).
+robomme-base-export | cpu | test -f /workspace/FastWAM/resources/base/libero_optional_idm_2cam224.pt | mkdir -p outputs/robomme/base_export && PYTHONPATH=src /opt/mwam/bin/python -m fastwam.fullft.train export --config configs/fullft/robomme_ar.yaml --out outputs/robomme/base_export/export_e0.pt
 c25desc-close-obs_s800_e10 | gpu1 | bash scripts/fullft/relay_has.sh obs_s800_e10 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PART=close RUN=obs_s800 TAG=e10 bash scripts/fullft/card25desc_5090.sh
 # plan v22 diagnostic 11 needs ar2_prop_s18_e10 on the A40: it was moved here by offload batch 2 (user 14:45); put it
 # back on the relay (sha256 checked first; the A40 task A40-fetch-ar2_prop_s18-e10 waits for it).
