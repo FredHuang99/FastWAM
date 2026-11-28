@@ -116,3 +116,12 @@ ar2_prop_s18 | seed=18 history.variant=arprop history.event_max=32 history.lag=4
 #   only (main-table cell, no-history row). Described: success 1-100; paired counts against ranking_ar e30 and
 #   ranking_arprop e30 on the same scenes.
 ranking_none | data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_blocks_ranking_try_v1] data.tasks=[blocks_ranking_try] history.variant=none | test -f outputs/memory_v2/press/dense_blocks_ranking_try_v1/.verified
+#
+# 11-28 12:50 (Opus, weekend round 5/5; NOT started: waits for the user's approval = scripts/fullft/GO_obs_s800_s18_h200o).
+# obs_s800_s18 (registered 11-27 13:20 in scripts/gaas/gaas_queue.txt above its line, commit 98a1cdf; described only) was
+# meant for new-H200 slot A7, which took card 23 (ar2_pw) instead; the old H200 has been idle since ranking_none ended
+# (about 09:34). The H200 class like obs_s800 (seed 17, new H200; the two H200s are identical). The sets are copied
+# verbatim from the gaas_queue.txt line; cache_ready.sh fetches the two generated-scene caches from the cache relay.
+# The GO file also makes the new H200's go test for obs_s800_s18 fail (scripts/gaas/go/obs_s800_s18), so it is
+# trained once.
+obs_s800_s18 | seed=18 data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen155_v1,/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_observe_and_pickup_gen600_v1] data.tasks=[observe_and_pickup] schedule.frame_epochs=10 schedule.export_at_epochs=[5,10] | bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1
