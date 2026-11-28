@@ -291,34 +291,82 @@ def fmt_eta(eta):
 
 
 # ============================================================================ exec: one task, one attempt
-def unhealthy_gpus():
-    """11-29 00:37 (A40: GPUs 4-7 'requires reset' report 1 MiB used, so the dispatcher took them for empty and every
-    task sent there failed within a minute): indices whose utilization nvidia-smi cannot read ([N/A] / requires
-    reset / not a number) -> {index: reason}."""
+def smi_util():
+    """{index: utilization string} from nvidia-smi, or None when it gives nothing."""
     try:
         r = subprocess.run(["nvidia-smi", "--query-gpu=index,utilization.gpu", "--format=csv,noheader,nounits"],
                            capture_output=True, text=True, timeout=60)
     except (OSError, subprocess.SubprocessError):
-        return {}
-    bad = {}
+        return None
+    out = {}
     for line in r.stdout.strip().splitlines():
         p = [x.strip() for x in line.split(",")]
-        if len(p) >= 2 and p[0].isdigit() and not p[1].isdigit():
-            bad[int(p[0])] = p[1][:40]
-    return bad
+        if len(p) >= 2 and p[0].isdigit():
+            out[int(p[0])] = p[1]
+    return out or None
+
+
+def unhealthy_gpus():
+    """11-29 00:37 (A40: GPUs 4-7 'requires reset' report 1 MiB used, so the dispatcher took them for empty and every
+    task sent there failed within a minute): indices whose utilization nvidia-smi cannot read ([N/A] / requires
+    reset / not a number) -> {index: reason}."""
+    return {g: v[:40] for g, v in (smi_util() or {}).items() if not v.isdigit()}
+
+
+DROP_LINE = re.compile(r"is unhealthy \(.*?\); dropped \[([0-9, ]*)\] from the allowed GPUs")
+
+
+def readmit_healthy():
+    """11-29 01:00 (A40 GPUs 4-7 wait for an administrator's reset, at an unknown hour): a GPU the guard dropped
+    (POOL_CONFIG.json 'dropped_unhealthy') goes back on the allowed list as soon as nvidia-smi reads its utilization
+    again; one that fails again is dropped again at no attempt cost. `allow` / `start --gpus` empty the list (the
+    user's choice wins), `pause` takes its GPUs off it. The first run seeds the list with the GPUs that are not allowed
+    and either unhealthy now or named in a drop line of an exec log (drops made before the list existed). Called by
+    `report` (every 30 min from results_push.sh, a fresh process), by every exec and by the dispatcher loop.
+    Returns the GPUs put back."""
+    util = smi_util()
+    if not util:
+        return []
+    cfg = config()
+    allowed = {int(g) for g in cfg["gpus"]}
+    seeded = "dropped_unhealthy" not in cfg
+    if seeded:
+        named = {g for g, v in util.items() if not v.isdigit()}
+        for f in (EXEC.glob("*.log") if EXEC.exists() else []):
+            try:
+                text = f.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+            if "is unhealthy (" not in text:
+                continue
+            for m in DROP_LINE.finditer(text):
+                named |= {int(x) for x in m.group(1).replace(" ", "").split(",") if x}
+        cfg["dropped_unhealthy"] = sorted(g for g in named if g in util and g not in allowed)
+    dropped = [int(g) for g in cfg["dropped_unhealthy"]]
+    back = [g for g in dropped if g in util and util[g].isdigit()]
+    if back or seeded:
+        cfg["gpus"] = sorted(allowed | set(back))
+        cfg["dropped_unhealthy"] = [g for g in dropped if g not in back]
+        q.write_json(CFG_PATH, cfg)
+    if back:
+        log(f"GPU(s) {back} healthy again (nvidia-smi reads their utilization): back on the allowed list "
+            f"(now {cfg['gpus']}); still dropped: {cfg['dropped_unhealthy']}")
+    return back
 
 
 def drop_unhealthy(tid, gpu):
     """True if `gpu` is unhealthy: every unhealthy GPU leaves the allowed list (POOL_CONFIG.json, re-read by the
-    dispatcher every cycle; `pool5.py allow --gpus ...` puts them back after a reset) and the task goes back to the
-    queue with its attempt counter unchanged."""
+    dispatcher every cycle) and is recorded in 'dropped_unhealthy' (readmit_healthy puts it back once healthy), and
+    the task goes back to the queue with its attempt counter unchanged."""
     bad = unhealthy_gpus()
     if gpu is None or int(gpu) not in bad:
         return False
     cfg = config()
     keep = [g for g in cfg["gpus"] if int(g) not in bad]
-    if keep != cfg["gpus"]:
+    gone = [int(g) for g in cfg["gpus"] if int(g) in bad]
+    if keep != cfg["gpus"] or gone:
         cfg["gpus"] = keep
+        cfg["dropped_unhealthy"] = sorted({int(g) for g in cfg.get("dropped_unhealthy") or []} | set(gone))
         q.write_json(CFG_PATH, {k: v for k, v in cfg.items()})
     s = q.state(tid)
     q.set_state(tid, status="pending", pid=None, child_pid=None, attempt=max(0, int(s.get("attempt") or 1) - 1),
@@ -331,6 +379,10 @@ def drop_unhealthy(tid, gpu):
 def cmd_exec(args):
     tasks = {t["id"]: t for t in q.load_tasks()}
     task, tid = tasks[args.id], args.id
+    try:
+        readmit_healthy()
+    except Exception as error:                 # noqa: BLE001  (never in the way of the task)
+        log(f"readmit_healthy failed: {error!r}")
     if not args.adopt and not args.judge_only and drop_unhealthy(tid, args.gpu):
         return
     cfg = config()
@@ -579,6 +631,12 @@ def cmd_pool(args):
             time.sleep(300)
             continue
         by_id = {t["id"]: t for t in tasks}
+        if cfg.get("dropped_unhealthy"):
+            try:
+                if readmit_healthy():
+                    cfg = config()
+            except Exception as error:             # noqa: BLE001
+                log(f"readmit_healthy failed: {error!r}")
         occupied = {}
         reconcile(tasks, cfg, occupied)
         if time.time() - last_stall > 300:
@@ -657,6 +715,7 @@ def cmd_share(args):
 def cmd_allow(args):
     cfg = config()
     cfg["gpus"] = [int(x) for x in args.gpus.split(",") if x.strip() != ""]
+    cfg["dropped_unhealthy"] = []
     q.write_json(CFG_PATH, cfg)
     print(f"allowed GPUs now {cfg['gpus']} ({CFG_PATH}); the pool reads it within one cycle")
 
@@ -667,6 +726,7 @@ def cmd_pause(args):
     gpus = [int(x) for x in args.gpu]
     cfg = config()
     cfg["gpus"] = [g for g in cfg["gpus"] if int(g) not in gpus]
+    cfg["dropped_unhealthy"] = [g for g in cfg.get("dropped_unhealthy") or [] if int(g) not in gpus]
     q.write_json(CFG_PATH, cfg)
     print(f"allowed GPUs now {cfg['gpus']}")
     victims = [t for t in q.load_tasks() if q.state(t["id"])["status"] == "running" and q.state(t["id"]).get("gpu") is not None
@@ -705,7 +765,9 @@ def status_lines(cfg=None):
     deadline = q._deadline()
     lines.append(f"== pool5 {q.now_bj()} on {socket.gethostname()}: dispatcher pid {info.get('pid')} "
                  f"{'ALIVE' if alive else 'NOT RUNNING'} (last beat {info.get('beat')}); allowed GPUs {cfg['gpus']}; "
-                 f"lanes {cfg['lanes']}; nothing new starts after {datetime.fromtimestamp(deadline, q.BJ):%m-%d %H:%M}")
+                 f"lanes {cfg['lanes']}; nothing new starts after {datetime.fromtimestamp(deadline, q.BJ):%m-%d %H:%M}"
+                 + (f"; dropped as unhealthy (back automatically once healthy): {cfg['dropped_unhealthy']}"
+                    if cfg.get("dropped_unhealthy") else ""))
     table = gpu_table()
     if SMI_ERROR[0] or not table:
         lines.append(f"   !! nvidia-smi inside the container fails ({SMI_ERROR[0]}): no GPU can be used. "
@@ -784,6 +846,10 @@ def cmd_status(args):
 
 def cmd_report(args):
     REPORTS.mkdir(parents=True, exist_ok=True)
+    try:
+        readmit_healthy()
+    except Exception as error:                 # noqa: BLE001
+        log(f"readmit_healthy failed: {error!r}")
     cfg = config()
     tasks = q.load_tasks()
     lines = [f"# pool5 report {q.now_bj()} ({socket.gethostname()})", "", "```"] + status_lines(cfg) + ["```", ""]
@@ -834,6 +900,7 @@ def cmd_start(args):
         cfg["lanes"] = [x for x in args.lanes.split(",") if x]
     if args.gpus is not None:
         cfg["gpus"] = [int(x) for x in args.gpus.split(",") if x.strip() != ""]
+        cfg["dropped_unhealthy"] = []
     q.write_json(CFG_PATH, cfg)
     info = q.read_json(POOL, {}) or {}
     if q.pid_alive(info.get("pid"), "pool5.py pool"):
