@@ -222,6 +222,20 @@ def c25():
            "finished": {"obs_cf200_e30": len(new), "obs_s200_e30": len(ref)}}
     if len(new) < 100 or len(ref) < 100:
         out["verdict"] = f"WAIT ({len(new)} / {len(ref)} of 100)"
+        # 11-28: the registered described e10 / e20 are reported as soon as they exist (no verdict from them)
+        o_ar, ar = success("e6", "obs_ar_e30", t)
+        _, s800 = success("v20", "obs_s800_e10", t)
+        for tag in ("e10", "e20"):
+            _, x = success("v21", f"obs_cf200_{tag}", t)
+            if len(x) == 100:
+                d = {"success": sum(x.values())}
+                if len(ref) == 100:
+                    d["against_obs_s200_e30"] = compare(x, ref, order)
+                if len(ar) == 100:
+                    d["against_obs_ar_e30"] = compare(x, ar, o_ar)
+                if len(s800) == 100:
+                    d["against_obs_s800_e10"] = compare(x, s800, order)
+                out.setdefault("described", {})[f"obs_cf200_{tag}"] = d
         return out
     c = compare(new, ref, order)                  # D = success(obs_cf200) - success(obs_s200)
     rule = lambda x: three(x, 0.15, "BREAKING THE SHORTCUT HELPS", "NO HELP")   # noqa: E731

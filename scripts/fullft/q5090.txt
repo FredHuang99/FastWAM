@@ -19,6 +19,13 @@ gen600-build | gpu0 | grep -q '"finished"' outputs/fullft/gen_obs/gen600/demo_cl
 probe-obs_s800_e10-2 | gpu1 | bash scripts/fullft/relay_has.sh obs_s800_e10 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); RUNS=obs_s800 TAG=e10 bash scripts/fullft/card13b_5090.sh
 gen800b-3 | gpu1 | - | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); GEN_GPU=$GPU GEN_GATE=background GEN_MORE=gen800b:800 bash scripts/fullft/gen_obs_5090.sh
 probe-obs_cf200_e10 | gpu1 | bash scripts/fullft/relay_has.sh obs_cf200_e10 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); RUNS=obs_cf200 TAG=e10 bash scripts/fullft/card13b_5090.sh
+# 11-28 08:50 (Opus, round 4/5): plan v21 card 25 described items not written before (card25desc_5090.sh): the
+# frame-0 swap probe on the 10 held-out generated probe-group demos (obs_cf200 e10 / e30, obs_s200 e30) and the
+# first-close-on-target rate (object record, official scenes 1-50, beside a3diag obs_ar e30).
+c25desc-probe-e10 | gpu1 | bash scripts/fullft/relay_has.sh obs_cf200_e10 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PART=probe RUNS="obs_cf200:e10 obs_s200:e30" bash scripts/fullft/card25desc_5090.sh
+c25desc-close-e10 | gpu1 | bash scripts/fullft/relay_has.sh obs_cf200_e10 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PART=close RUN=obs_cf200 TAG=e10 bash scripts/fullft/card25desc_5090.sh
+c25desc-probe-e30 | gpu1 | bash scripts/fullft/relay_has.sh obs_cf200_e30 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PART=probe RUNS="obs_cf200:e30" bash scripts/fullft/card25desc_5090.sh
+c25desc-close-e30 | gpu1 | bash scripts/fullft/relay_has.sh obs_cf200_e30 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); PART=close RUN=obs_cf200 TAG=e30 bash scripts/fullft/card25desc_5090.sh
 probe-obs_s800_20_e10 | gpu1 | bash scripts/fullft/relay_has.sh obs_s800_20_e10 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); RUNS=obs_s800_20 TAG=e10 bash scripts/fullft/card13b_5090.sh
 probe-obs_s800_s18_e10 | gpu1 | bash scripts/fullft/relay_has.sh obs_s800_s18_e10 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); RUNS=obs_s800_s18 TAG=e10 bash scripts/fullft/card13b_5090.sh
 probe-obs_cf200_e30 | gpu1 | bash scripts/fullft/relay_has.sh obs_cf200_e30 | export GPU=$(bash scripts/fullft/cuda_ordinal.sh $GPU); RUNS=obs_cf200 TAG=e30 bash scripts/fullft/card13b_5090.sh
@@ -34,6 +41,9 @@ dev-swapT_joint3_e20 | gpu1 | bash scripts/fullft/relay_has.sh swapT_joint3_e20 
 # HF relay at 99 % (11-25 14:55): the 12 intermediate exports that exist only on the relay -> this disk, verified, then
 # deleted on the relay one by one (user 14:55: "download them to the 5090, then delete; automatic, one by one")
 hf-offload-12 | cpu | - | /opt/hf-tools/bin/python scripts/fullft/hf_offload.py --list scripts/fullft/hf_offload_list.txt --squash
+# 11-28 08:50: PROPOSED second batch (hf_offload_list2.txt), runs only after the user's explicit OK (the GO file is
+# committed then); nothing is deleted before that.
+hf-offload-2 | cpu | test -f scripts/fullft/GO_hf_offload2 | /opt/hf-tools/bin/python scripts/fullft/hf_offload.py --list scripts/fullft/hf_offload_list2.txt --squash
 #
 # development-scene quick evaluations (plan v20 section 5: every new version's e10 / e20 as soon as it is exported; 30
 # dev scenes, 5090 only, never a verdict). P0 cards first (8, 5, 6, 7), then cards 4 and 3.

@@ -605,6 +605,18 @@ tasks:
   hypothesis: "hourly until 11-28 14:00: hf_usage.py then hf_prune_auto.py (nothing at <= 85 %); log outputs/fullft/HF_PRUNE_AUTO.log"
   command: "bash /workspace/FastWAM-memory2/scripts/fullft/hf_prune_auto_loop.sh"
   pass_if: "m['rc'] == 0"
+# 11-28 08:50 (Opus, round 4/5): card 25's described e10 (obs_cf200 e10 on observe_and_pickup 1-100, done 06:44)
+# reported now by v21_verdict.py c25 (MAIN stays WAIT until e30; the e10 description never gives a verdict).
+- id: A40-V21-C25-e10look
+  lane: a40cpu
+  kind: shell
+  after: [A40-v21-obs_cf200-e10-s0, A40-v21-obs_cf200-e10-s1, A40-v21-obs_cf200-e10-s2, A40-v21-obs_cf200-e10-s3, A40-v21-obs_cf200-e10-s4, A40-v21-obs_cf200-e10-s5, A40-v21-obs_cf200-e10-s6, A40-v21-obs_cf200-e10-s7, A40-v21-obs_cf200-e10-s8, A40-v21-obs_cf200-e10-s9]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "card 25 described: obs_cf200 e10 success 1-100 against obs_s200 e30 / obs_ar e30 / obs_s800 e10 (v21_verdict.py c25; MAIN WAIT); log pushed"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/v21_verdict.py c25"
+  pass_if: "m['rc'] == 0"
+
 # 11-27 22:10 (Opus, round 2/5): the loop above was stopped by the pool's 120-min stall rule three times (it wrote only to
 # HF_PRUNE_AUTO.log, never to its job log) and ended ERROR at 19:59; the relay then stood at 86.8 % (5090, 21:26). Same
 # loop, now also writing to its job log every step (hf_prune_auto_loop.sh); same rule (user 11-27 13:19), until 11-28 14:00.

@@ -30,6 +30,8 @@ Reading: in the choice window, (swap - true) / true < 2 % -> "frame 0 is not use
           put-down): while both blocks are carried, where to put them is shown only by frame 0. The contrast window
           'late' is then [r2 + 8, end], r2 = the second opening (both blocks down). Default --task observe_and_pickup:
           exactly as before.
+  --roots (11-28, plan v21 card 25 described: "the frame-0 swap at the onset on held-out generated demos"): the
+          demos come from these dense caches instead of the run's data.roots (default: unchanged).
 The same for the late window as a contrast, and (none - true) / true for reference. Also: the share of training anchors
 that fall in a 48-frame choice window (how much of the training signal is about the choice).
   PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/obs_probe.py --export outputs/fullft/exports/obs_ar_e30/export_e30.pt
@@ -111,12 +113,15 @@ def main():
                     help="11-24: demos of one split only (the dense records' split; the model trained on 'train')")
     ap.add_argument("--swap", choices=("frame0", "matchref"), default="frame0")
     ap.add_argument("--out", default="")
+    ap.add_argument("--roots", default="", help="11-28 (plan v21 card 25 described): comma-separated dense caches that replace the run's data.roots, e.g. the held-out generated probe groups (dense_observe_and_pickup_cf10probe_v1); default: the run's own roots, exactly as before")
     args = ap.parse_args()
     from fastwam.fullft.data import DenseEpisodes, Samples, collate, load_events, video_polarity
     from fastwam.fullft.online import load_export
     from fastwam.fullft.train import fixed_noise, to_device
     device = "cuda"
     model, cfg, _ = load_export(args.export, device)
+    if args.roots:                               # 11-28: probe on other demos (held-out generated groups)
+        cfg.data.roots = [x for x in args.roots.split(",") if x]
     episodes = DenseEpisodes(cfg.data.roots, cfg.data.tasks, capacity=cfg.data.episode_cache)
     if (args.window == "carry") != (args.task == "swap_T"):
         raise SystemExit("--window carry goes with --task swap_T (and swap_T only with carry)")

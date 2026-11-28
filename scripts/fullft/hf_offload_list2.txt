@@ -1,0 +1,42 @@
+# 11-28 08:50 (Opus, round 4/5) - PROPOSED, NOT RUN: waits for the user's explicit OK (scripts/fullft/GO_hf_offload2 is
+# committed only after it). The relay stood at 93.9 % (A40, 07:12) and the automatic rule of 11-27 13:19 can delete
+# nothing: these intermediate exports have no A40 copy (the A40 never fetched them), so they are outside that rule.
+# Same procedure as hf-offload-12 (user 11-25 14:55): download each to the 5090 (outputs/fullft/exports_hf_backup),
+# check its sha256 against the relay's .sha256, only then delete it on the relay; one after another; squash at the end.
+# Selection: intermediate (e10 / e20) exports of finished runs that no pending A40 task or 5090 task uses
+# (queue5_tasks.yaml / q5090.txt checked 11-28 08:45). Not in the list: battery_clock and ranking_none (still training),
+# swapT_joint3 (training; 5090 development looks pending), anything an A40 task still needs (cover_arprop e10 / e20,
+# rearrange_arprop e20: step A of plan v21 6.7). 32 x 12.04 GB = 385 GB (the first 14, about 169 GB, bring 93.9 % to
+# about 77 %). Order: the oldest runs first.
+ar2_tw_e10
+ar2_tw_e20
+ar2_arev_e20
+ar2_prop_novid_e20
+d1_w_e10
+d1_w_e20
+d1_wn_e10
+d1_wn_e20
+obs_none_e10
+obs_none_e20
+swapT_none_e10
+swapT_none_e20
+rearrange_none_e10
+rearrange_none_e20
+battery_none_e10
+battery_none_e20
+swapT_arprop_e20
+swapT_arprop_h2_e10
+swapT_arprop_h2_e20
+rearr_v3c_e10
+rearr_v3c_e20
+rearr_v3c_h2_e10
+rearr_v3c_h2_e20
+ar2_prop_s18_e10
+ar2_prop_s18_e20
+ranking_arprop_e10
+ranking_arprop_e20
+ranking_v3a_e10
+ranking_v3a_e20
+ar2_v3c_e20
+rearr_pw_s18_e10
+rearr_pw_s18_e20
