@@ -1,0 +1,2 @@
+/dev/nvme1n1    3.6T  1.9T  1.6T  55% /workspace/FastWAM-memory2
+overlay         3.6T  2.5T  953G  73% /

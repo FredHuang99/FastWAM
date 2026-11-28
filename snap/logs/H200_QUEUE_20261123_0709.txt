@@ -1,0 +1,400 @@
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+[queue] 2026-11-28 04:24:04 nothing runnable now; next look in 10 min
+[queue] 2026-11-28 04:34:04 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+[queue] 2026-11-28 04:34:04 nothing runnable now; next look in 10 min
+[queue] 2026-11-28 04:44:04 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+[queue] 2026-11-28 04:44:05 nothing runnable now; next look in 10 min
+[queue] 2026-11-28 04:54:05 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+  obs_s800_s18: waits (condition: bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1)
+[queue] 2026-11-28 04:54:05 nothing runnable now; next look in 10 min
+[queue] 2026-11-28 05:04:05 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+  obs_s800_s18: waits (condition: bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1)
+[queue] 2026-11-28 05:04:06 nothing runnable now; next look in 10 min
+[queue] 2026-11-28 05:14:06 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+  obs_s800_s18: waits (condition: bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1)
+[queue] 2026-11-28 05:14:06 nothing runnable now; next look in 10 min
+[queue] 2026-11-28 05:24:06 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+  obs_s800_s18: waits (condition: bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1)
+[queue] 2026-11-28 05:24:07 nothing runnable now; next look in 10 min
+[queue] 2026-11-28 05:34:07 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+  obs_s800_s18: waits (condition: bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1)
+[queue] 2026-11-28 05:34:07 nothing runnable now; next look in 10 min
+[queue] 2026-11-28 05:44:07 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+  obs_s800_s18: waits (condition: bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1)
+[queue] 2026-11-28 05:44:08 nothing runnable now; next look in 10 min
+[queue] 2026-11-28 05:54:08 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+  obs_s800_s18: waits (condition: bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1)
+[queue] 2026-11-28 05:54:08 nothing runnable now; next look in 10 min
+[queue] 2026-11-28 06:04:08 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+  obs_s800_s18: waits (condition: bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1)
+[queue] 2026-11-28 06:04:09 nothing runnable now; next look in 10 min
+[queue] 2026-11-28 06:14:09 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+  obs_s800_s18: waits (condition: bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1)
+[queue] 2026-11-28 06:14:09 nothing runnable now; next look in 10 min
+[queue] 2026-11-28 06:24:09 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+  obs_s800_s18: waits (condition: bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1)
+[queue] 2026-11-28 06:24:10 nothing runnable now; next look in 10 min
+[queue] 2026-11-28 06:34:10 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+  obs_s800_s18: waits (condition: bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1)
+[queue] 2026-11-28 06:34:10 nothing runnable now; next look in 10 min
+[queue] 2026-11-28 06:44:10 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+  obs_s800_s18: waits (condition: bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1)
+[queue] 2026-11-28 06:44:11 nothing runnable now; next look in 10 min
+[queue] 2026-11-28 06:54:11 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+  obs_s800_s18: waits (condition: bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1)
+[queue] 2026-11-28 06:54:12 nothing runnable now; next look in 10 min
+[queue] 2026-11-28 07:04:12 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+  obs_s800_s18: waits (condition: bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1)
+[queue] 2026-11-28 07:04:12 nothing runnable now; next look in 10 min
+[queue] 2026-11-28 07:14:12 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+  obs_s800_s18: waits (condition: bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1)
+[queue] 2026-11-28 07:14:13 nothing runnable now; next look in 10 min
+[queue] 2026-11-28 07:24:13 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+  obs_s800_s18: waits (condition: bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1)
+[queue] 2026-11-28 07:24:13 nothing runnable now; next look in 10 min
+[queue] 2026-11-28 07:34:13 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+  obs_s800_s18: waits (condition: bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1)
+[queue] 2026-11-28 07:34:14 nothing runnable now; next look in 10 min
+[queue] 2026-11-28 07:44:14 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+  obs_s800_s18: waits (condition: bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1)
+[queue] 2026-11-28 07:44:14 nothing runnable now; next look in 10 min
+[queue] 2026-11-28 07:54:14 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+  obs_s800_s18: waits (condition: bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1)
+[queue] 2026-11-28 07:54:15 nothing runnable now; next look in 10 min
+[queue] 2026-11-28 08:04:15 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+  obs_s800_s18: waits (condition: bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1)
+[queue] 2026-11-28 08:04:15 nothing runnable now; next look in 10 min

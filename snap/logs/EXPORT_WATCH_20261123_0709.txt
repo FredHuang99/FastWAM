@@ -1,0 +1,17 @@
+[watch] 2026-11-23 07:10:13 run ranking_arprop, tags e10 e20 e30
+[watch] 2026-11-23 07:10:13 waiting for /workspace/FastWAM-memory2/outputs/fullft/ranking_arprop/export_e10.pt
+[watch] 2026-11-24 01:15:13 e10 appeared (12G)
+[watch] 2026-11-24 01:37:55 e10 relayed (try 1):
+export_e10.pt 12042809285
+export_e10.pt.sha256 80
+[watch] 2026-11-24 01:37:55 waiting for /workspace/FastWAM-memory2/outputs/fullft/ranking_arprop/export_e20.pt
+[watch] 2026-11-24 19:17:56 e20 appeared (12G)
+[watch] 2026-11-24 19:40:43 e20 relayed (try 1):
+export_e20.pt 12042809349
+export_e20.pt.sha256 80
+[watch] 2026-11-24 19:40:43 waiting for /workspace/FastWAM-memory2/outputs/fullft/ranking_arprop/export_e30.pt
+[watch] 2026-11-25 13:20:44 e30 appeared (12G)
+[watch] 2026-11-25 13:43:39 e30 relayed (try 1):
+export_e30.pt 12042809349
+export_e30.pt.sha256 80
+[watch] 2026-11-25 13:43:39 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/EXPORT_WATCH_20261123_0709.txt

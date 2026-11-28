@@ -1,0 +1,4 @@
+swapT_ow                 last write     0 min ago | u 5460/7233 ep 22.655 lr 2.46e-05 video 0.0564 action 0.0010 gn 0.10 10 |  
+ranking_none             last write   965 min ago | u 31500/31501 ep 30.000 lr 1.00e-05 video 0.0335 action 0.0004 gn 0.06 13 | FINISHED 
+ar2_prop_s18             last write  3398 min ago | u 20070/20077 ep 30.000 lr 1.00e-05 video 0.0333 action 0.0005 gn 0.06 10 | FINISHED 
+ranking_arprop           last write  4579 min ago | u 31500/31501 ep 30.000 lr 1.00e-05 video 0.0338 action 0.0003 gn 0.06 10 | FINISHED 

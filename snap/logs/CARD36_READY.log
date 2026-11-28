@@ -1,0 +1,6 @@
+[card36] 2026-11-28 16:18:24 attempt
+[ready] swap_T: 50 dense episodes (root /workspace/FastWAM-memory2/outputs/memory_v2/press/dense_swap_T_v1); event lists: 50 by id, 50 after matching by episode number; e.g. dense ['swap_T/episode_0000000', 'swap_T/episode_0000001'] / events ['swap_T/episode_0000000', 'swap_T/episode_0000001']
+[ready] swap_T: close frames equal in 100/100 episode-arms (1.000, need >= 0.95); text positions not padding in 0 episodes []
+[ready] ALL CHECKS PASSED -> /workspace/FastWAM-memory2/outputs/fullft/READY_arprop_swap_T
+[W1128 08:18:26.867153461 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[card36] 2026-11-28 16:18:26 READY

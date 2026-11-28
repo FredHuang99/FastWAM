@@ -1,0 +1,5 @@
+-rw-r--r-- 1 root root 12042063331 Nov 27 12:01 /workspace/FastWAM-memory2/outputs/fullft/ranking_none/export_e20.pt
+ce464a7d5d5384c927ce0bb90657fd7c8c7a399b27197ed22d25f67334e5110b  export_e20.pt
+[relay] put /workspace/FastWAM-memory2/outputs/fullft/ranking_none/export_e20.pt (12042063331 bytes) -> hhyfred/memwam-fullft/exports/ranking_none_e20/export_e20.pt
+[relay] put /workspace/FastWAM-memory2/outputs/fullft/ranking_none/export_e20.pt.sha256 (80 bytes) -> hhyfred/memwam-fullft/exports/ranking_none_e20/export_e20.pt.sha256
+[relay] 2026-11-27 12:28:17 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/RELAY_20261127_1205.txt

@@ -1,0 +1,11 @@
+-rw-r--r-- 1 root root 12042506501 Nov 25 21:30 /workspace/FastWAM-memory2/outputs/fullft/ar2_prop_s18/export_e20.pt
+-rw-r--r-- 1 root root 12042506501 Nov 25 21:30 /workspace/FastWAM-memory2/outputs/fullft/ar2_prop_s18/export_e20.pt
+6de8cfb696f2f98a5ad3372fde5f729637bba4f0da8e59236aa20d29d7a0569b  export_e20.pt
+6de8cfb696f2f98a5ad3372fde5f729637bba4f0da8e59236aa20d29d7a0569b  export_e20.pt
+[relay] put /workspace/FastWAM-memory2/outputs/fullft/ar2_prop_s18/export_e20.pt (12042506501 bytes) -> hhyfred/memwam-fullft/exports/ar2_prop_s18_e20/export_e20.pt
+[relay] put /workspace/FastWAM-memory2/outputs/fullft/ar2_prop_s18/export_e20.pt.sha256 (80 bytes) -> hhyfred/memwam-fullft/exports/ar2_prop_s18_e20/export_e20.pt.sha256
+[relay] 2026-11-25 22:16:46 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/RELAY_20261125_2134.txt
+[relay] put /workspace/FastWAM-memory2/outputs/fullft/ar2_prop_s18/export_e20.pt (12042506501 bytes) -> hhyfred/memwam-fullft/exports/ar2_prop_s18_e20/export_e20.pt
+No files have been modified since last commit. Skipping to prevent empty commit.
+[relay] put /workspace/FastWAM-memory2/outputs/fullft/ar2_prop_s18/export_e20.pt.sha256 (80 bytes) -> hhyfred/memwam-fullft/exports/ar2_prop_s18_e20/export_e20.pt.sha256
+[relay] 2026-11-25 22:17:57 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/RELAY_20261125_2134.txt

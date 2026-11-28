@@ -1,0 +1,38 @@
+[queue] 2026-11-28 08:08:23 start; checkout 46a79e8 Host-side container_restart.sh: restart a training c; queue file /workspace/FastWAM-memory2/scripts/fullft/h200_queue.txt
+[queue] 2026-11-28 08:08:23 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+  obs_s800_s18: waits (condition: bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1)
+[queue] 2026-11-28 08:08:24 nothing runnable now; next look in 10 min
+[queue] 2026-11-28 08:18:24 picking:
+  obs_ar: finished
+  ar2_prop: finished
+  press_arprop: finished
+  press_ar: finished
+  ar2_none: finished
+  press_noise500: finished
+  press_fast: finished
+  press_count: finished
+  put_arprop: waits (condition: test -f outputs/fullft/READY_arprop && test -f outputs/fullft/events/events_put_back_block.json && test -f outputs/fullft/GO_put_arprop)
+  press_v3c: finished
+  obs_arprop: finished
+  ar2_arev: finished
+  ranking_arprop: finished
+  ar2_prop_s18: finished
+  ranking_none: finished
+  obs_s800_s18: waits (condition: bash scripts/fullft/cache_ready.sh GO_obs_s800_s18_h200o dense_observe_and_pickup_v1 dense_observe_and_pickup_gen155_v1 dense_observe_and_pickup_gen600_v1)
+[queue] next: swapT_ow  sets: data.roots=[/workspace/FastWAM-memory2/outputs/memory_v2/press/dense_swap_T_v1] data.tasks=[swap_T] history.variant=arprop history.event_max=32 history.lag=4 data.events=[/workspace/FastWAM-memory2/outputs/fullft/events/events_swap_T.json] model.decision_weight=3 model.decision_window=0 model.decision_pre_window=24 model.decision_pre_kinds=[open]
+[queue] 2026-11-28 08:18:26 ===== swapT_ow attempt 1 (GPU0 15 MiB before)

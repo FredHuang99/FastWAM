@@ -1,0 +1,7 @@
+machine h200o host conti-h200-0 at 2026-11-29 01:39:31
+ok   auto_pull alive (last log 10 min)
+ok   h200_queue alive (log 561 min)
+ok    GPU 0: 98387 MiB, 100 %
+ok    GPU 1: 130157 MiB, 100 %
+ok   disk /workspace/FastWAM-memory2 55% used (1.6T free)
+ok   disk / 73% used (953G free)

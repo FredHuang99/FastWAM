@@ -1,0 +1,5 @@
+-rw-r--r-- 1 root root 12042506373 Nov 28 12:25 /workspace/FastWAM-memory2/outputs/fullft/swapT_ow/export_e10.pt
+44c7978f86189da8d0cebe1defca9b8e81acf041c483582c20b37b57ce6cadf6  export_e10.pt
+[relay] put /workspace/FastWAM-memory2/outputs/fullft/swapT_ow/export_e10.pt (12042506373 bytes) -> hhyfred/memwam-fullft/exports/swapT_ow_e10/export_e10.pt
+[relay] put /workspace/FastWAM-memory2/outputs/fullft/swapT_ow/export_e10.pt.sha256 (80 bytes) -> hhyfred/memwam-fullft/exports/swapT_ow_e10/export_e10.pt.sha256
+[relay] 2026-11-28 12:52:18 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/RELAY_20261128_1229.txt

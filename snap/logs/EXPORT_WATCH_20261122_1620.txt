@@ -1,0 +1,17 @@
+[watch] 2026-11-22 16:21:53 run ar2_prop_s18, tags e10 e20 e30
+[watch] 2026-11-22 16:21:53 waiting for /workspace/FastWAM-memory2/outputs/fullft/ar2_prop_s18/export_e10.pt
+[watch] 2026-11-23 03:51:53 e10 appeared (12G)
+[watch] 2026-11-23 04:14:49 e10 relayed (try 1):
+export_e10.pt 12042506309
+export_e10.pt.sha256 80
+[watch] 2026-11-23 04:14:49 waiting for /workspace/FastWAM-memory2/outputs/fullft/ar2_prop_s18/export_e20.pt
+[watch] 2026-11-25 21:34:51 e20 appeared (12G)
+[watch] 2026-11-25 22:16:48 e20 relayed (try 1):
+export_e20.pt 12042506501
+export_e20.pt.sha256 80
+[watch] 2026-11-25 22:16:48 waiting for /workspace/FastWAM-memory2/outputs/fullft/ar2_prop_s18/export_e30.pt
+[watch] 2026-11-26 09:01:48 e30 appeared (12G)
+[watch] 2026-11-26 09:42:53 e30 relayed (try 1):
+export_e30.pt 12042506501
+export_e30.pt.sha256 80
+[watch] 2026-11-26 09:42:53 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/EXPORT_WATCH_20261122_1620.txt

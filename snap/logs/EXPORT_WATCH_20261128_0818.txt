@@ -1,0 +1,12 @@
+[watch] 2026-11-28 08:19:26 run swapT_ow, tags e10 e20 e30
+[watch] 2026-11-28 08:19:26 waiting for /workspace/FastWAM-memory2/outputs/fullft/swapT_ow/export_e10.pt
+[watch] 2026-11-28 12:29:26 e10 appeared (12G)
+[watch] 2026-11-28 12:52:19 e10 relayed (try 1):
+export_e10.pt 12042506373
+export_e10.pt.sha256 80
+[watch] 2026-11-28 12:52:19 waiting for /workspace/FastWAM-memory2/outputs/fullft/swapT_ow/export_e20.pt
+[watch] 2026-11-28 16:37:19 e20 appeared (12G)
+[watch] 2026-11-28 17:00:10 e20 relayed (try 1):
+export_e20.pt 12042506373
+export_e20.pt.sha256 80
+[watch] 2026-11-28 17:00:10 waiting for /workspace/FastWAM-memory2/outputs/fullft/swapT_ow/export_e30.pt

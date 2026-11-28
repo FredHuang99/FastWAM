@@ -1,0 +1,17 @@
+[watch] 2026-11-26 09:02:21 run ranking_none, tags e10 e20 e30
+[watch] 2026-11-26 09:02:21 waiting for /workspace/FastWAM-memory2/outputs/fullft/ranking_none/export_e10.pt
+[watch] 2026-11-26 22:32:22 e10 appeared (12G)
+[watch] 2026-11-26 22:55:16 e10 relayed (try 1):
+export_e10.pt 12042063267
+export_e10.pt.sha256 80
+[watch] 2026-11-26 22:55:16 waiting for /workspace/FastWAM-memory2/outputs/fullft/ranking_none/export_e20.pt
+[watch] 2026-11-27 12:05:17 e20 appeared (12G)
+[watch] 2026-11-27 12:28:17 e20 relayed (try 1):
+export_e20.pt 12042063331
+export_e20.pt.sha256 80
+[watch] 2026-11-27 12:28:17 waiting for /workspace/FastWAM-memory2/outputs/fullft/ranking_none/export_e30.pt
+[watch] 2026-11-28 01:33:18 e30 appeared (12G)
+[watch] 2026-11-28 01:56:14 e30 relayed (try 1):
+export_e30.pt 12042063331
+export_e30.pt.sha256 80
+[watch] 2026-11-28 01:56:14 finished, exit code 0; log /workspace/FastWAM-memory2/outputs/fullft/EXPORT_WATCH_20261126_0901.txt
