@@ -8849,6 +8849,1261 @@ tasks:
   pass_if: "m['rc'] == 0"
 
 # described checkpoints after every MAIN evaluation (plan v20 section 5): swapT_long e45, ar2_v3c e10 (swap)
+
+# 11-28 17:30 (Opus; plan v22b part 3 1.2: diagnostic 8 is the first diagnostic, after the new verdict evaluations
+# above). Scenes 1-50 per setting; a setting that gains >= 8 on 1-50 is re-evaluated on 51-100 (gate task, diag8.py);
+# swap_T first, then press_button, then rearrange seed 18. New episodes in closed_loop/d8.
+
+- id: A40-d8-swapT_x16-s0
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 1-50 with --execute 16; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "16", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_x16-s1
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 1-50 with --execute 16; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "16", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_x16-s2
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 1-50 with --execute 16; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "16", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_x16-s3
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 1-50 with --execute 16; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "16", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_x16-s4
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 1-50 with --execute 16; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "16", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_x32-s0
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 1-50 with --execute 32; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "32", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_x32-s1
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 1-50 with --execute 32; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "32", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_x32-s2
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 1-50 with --execute 32; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "32", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_x32-s3
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 1-50 with --execute 32; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "32", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_x32-s4
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 1-50 with --execute 32; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "32", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_s50-s0
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 1-50 with --execute 8 --steps 50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_s50
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--steps", "50", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_s50-s1
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 1-50 with --execute 8 --steps 50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_s50
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--steps", "50", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_s50-s2
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 1-50 with --execute 8 --steps 50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_s50
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--steps", "50", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_s50-s3
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 1-50 with --execute 8 --steps 50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_s50
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--steps", "50", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_s50-s4
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 1-50 with --execute 8 --steps 50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_s50
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--steps", "50", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-d8-swapT_x16-s0, A40-d8-swapT_x16-s1, A40-d8-swapT_x16-s2, A40-d8-swapT_x16-s3, A40-d8-swapT_x16-s4, A40-d8-swapT_x32-s0, A40-d8-swapT_x32-s1, A40-d8-swapT_x32-s2, A40-d8-swapT_x32-s3, A40-d8-swapT_x32-s4, A40-d8-swapT_s50-s0, A40-d8-swapT_s50-s1, A40-d8-swapT_s50-s2, A40-d8-swapT_s50-s3, A40-d8-swapT_s50-s4]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): report of the swapT settings on 1-50"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag8.py report"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-d8-swapT_x16-gate
+  lane: a40cpu
+  kind: shell
+  after: [A40-d8-swapT-report]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): gate -- swapT_x16 gained >= 8 on scenes 1-50? (exit 0 = re-evaluate 51-100; exit 3 = no)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag8.py gate swapT_x16"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-d8-swapT_x16-b0
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-swapT_x16-gate]
+  requires_pass: [A40-d8-swapT_x16-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 51-100 with --execute 16 (only if the 1-50 gate passed); shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "16", "--from-scene", "51", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_x16-b1
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-swapT_x16-gate]
+  requires_pass: [A40-d8-swapT_x16-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 51-100 with --execute 16 (only if the 1-50 gate passed); shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "16", "--from-scene", "51", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_x16-b2
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-swapT_x16-gate]
+  requires_pass: [A40-d8-swapT_x16-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 51-100 with --execute 16 (only if the 1-50 gate passed); shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "16", "--from-scene", "51", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_x16-b3
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-swapT_x16-gate]
+  requires_pass: [A40-d8-swapT_x16-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 51-100 with --execute 16 (only if the 1-50 gate passed); shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "16", "--from-scene", "51", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_x16-b4
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-swapT_x16-gate]
+  requires_pass: [A40-d8-swapT_x16-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 51-100 with --execute 16 (only if the 1-50 gate passed); shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "16", "--from-scene", "51", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_x32-gate
+  lane: a40cpu
+  kind: shell
+  after: [A40-d8-swapT-report]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): gate -- swapT_x32 gained >= 8 on scenes 1-50? (exit 0 = re-evaluate 51-100; exit 3 = no)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag8.py gate swapT_x32"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-d8-swapT_x32-b0
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-swapT_x32-gate]
+  requires_pass: [A40-d8-swapT_x32-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 51-100 with --execute 32 (only if the 1-50 gate passed); shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "32", "--from-scene", "51", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_x32-b1
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-swapT_x32-gate]
+  requires_pass: [A40-d8-swapT_x32-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 51-100 with --execute 32 (only if the 1-50 gate passed); shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "32", "--from-scene", "51", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_x32-b2
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-swapT_x32-gate]
+  requires_pass: [A40-d8-swapT_x32-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 51-100 with --execute 32 (only if the 1-50 gate passed); shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "32", "--from-scene", "51", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_x32-b3
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-swapT_x32-gate]
+  requires_pass: [A40-d8-swapT_x32-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 51-100 with --execute 32 (only if the 1-50 gate passed); shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "32", "--from-scene", "51", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_x32-b4
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-swapT_x32-gate]
+  requires_pass: [A40-d8-swapT_x32-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 51-100 with --execute 32 (only if the 1-50 gate passed); shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "32", "--from-scene", "51", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_s50-gate
+  lane: a40cpu
+  kind: shell
+  after: [A40-d8-swapT-report]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): gate -- swapT_s50 gained >= 8 on scenes 1-50? (exit 0 = re-evaluate 51-100; exit 3 = no)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag8.py gate swapT_s50"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-d8-swapT_s50-b0
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-swapT_s50-gate]
+  requires_pass: [A40-d8-swapT_s50-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 51-100 with --execute 8 --steps 50 (only if the 1-50 gate passed); shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_s50
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--steps", "50", "--from-scene", "51", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_s50-b1
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-swapT_s50-gate]
+  requires_pass: [A40-d8-swapT_s50-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 51-100 with --execute 8 --steps 50 (only if the 1-50 gate passed); shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_s50
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--steps", "50", "--from-scene", "51", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_s50-b2
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-swapT_s50-gate]
+  requires_pass: [A40-d8-swapT_s50-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 51-100 with --execute 8 --steps 50 (only if the 1-50 gate passed); shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_s50
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--steps", "50", "--from-scene", "51", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_s50-b3
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-swapT_s50-gate]
+  requires_pass: [A40-d8-swapT_s50-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 51-100 with --execute 8 --steps 50 (only if the 1-50 gate passed); shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_s50
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--steps", "50", "--from-scene", "51", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT_s50-b4
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-swapT_s50-gate]
+  requires_pass: [A40-d8-swapT_s50-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): swapT_ar_e30 on swap_T 51-100 with --execute 8 --steps 50 (only if the 1-50 gate passed); shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/swapT_ar_e30/export_e30.pt
+  label: swapT_ar_e30_s50
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_swap_T]
+  tasks: [swap_T]
+  online_args: ["--execute", "8", "--steps", "50", "--from-scene", "51", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-swapT-report100
+  lane: a40cpu
+  kind: shell
+  after: [A40-d8-swapT_x16-b0, A40-d8-swapT_x16-b1, A40-d8-swapT_x16-b2, A40-d8-swapT_x16-b3, A40-d8-swapT_x16-b4, A40-d8-swapT_x32-b0, A40-d8-swapT_x32-b1, A40-d8-swapT_x32-b2, A40-d8-swapT_x32-b3, A40-d8-swapT_x32-b4, A40-d8-swapT_s50-b0, A40-d8-swapT_s50-b1, A40-d8-swapT_s50-b2, A40-d8-swapT_s50-b3, A40-d8-swapT_s50-b4]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): report on 1-100 (51-100 listed apart) for the swapT settings that passed the gate"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag8.py report"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-d8-press_x16-s0
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 1-50 with --execute 16; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "16", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_x16-s1
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 1-50 with --execute 16; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "16", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_x16-s2
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 1-50 with --execute 16; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "16", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_x16-s3
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 1-50 with --execute 16; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "16", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_x16-s4
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 1-50 with --execute 16; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "16", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_x32-s0
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 1-50 with --execute 32; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "32", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_x32-s1
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 1-50 with --execute 32; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "32", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_x32-s2
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 1-50 with --execute 32; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "32", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_x32-s3
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 1-50 with --execute 32; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "32", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_x32-s4
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 1-50 with --execute 32; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "32", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_s50-s0
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 1-50 with --execute 8 --steps 50; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_s50
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--steps", "50", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_s50-s1
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 1-50 with --execute 8 --steps 50; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_s50
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--steps", "50", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_s50-s2
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 1-50 with --execute 8 --steps 50; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_s50
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--steps", "50", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_s50-s3
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 1-50 with --execute 8 --steps 50; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_s50
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--steps", "50", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_s50-s4
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 1-50 with --execute 8 --steps 50; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_s50
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--steps", "50", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-d8-press_x16-s0, A40-d8-press_x16-s1, A40-d8-press_x16-s2, A40-d8-press_x16-s3, A40-d8-press_x16-s4, A40-d8-press_x32-s0, A40-d8-press_x32-s1, A40-d8-press_x32-s2, A40-d8-press_x32-s3, A40-d8-press_x32-s4, A40-d8-press_s50-s0, A40-d8-press_s50-s1, A40-d8-press_s50-s2, A40-d8-press_s50-s3, A40-d8-press_s50-s4]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): report of the press settings on 1-50"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag8.py report"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-d8-press_x16-gate
+  lane: a40cpu
+  kind: shell
+  after: [A40-d8-press-report]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): gate -- press_x16 gained >= 8 on scenes 1-50? (exit 0 = re-evaluate 51-100; exit 3 = no)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag8.py gate press_x16"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-d8-press_x16-b0
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-press_x16-gate]
+  requires_pass: [A40-d8-press_x16-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 51-100 with --execute 16 (only if the 1-50 gate passed); shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "16", "--from-scene", "51", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_x16-b1
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-press_x16-gate]
+  requires_pass: [A40-d8-press_x16-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 51-100 with --execute 16 (only if the 1-50 gate passed); shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "16", "--from-scene", "51", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_x16-b2
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-press_x16-gate]
+  requires_pass: [A40-d8-press_x16-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 51-100 with --execute 16 (only if the 1-50 gate passed); shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "16", "--from-scene", "51", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_x16-b3
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-press_x16-gate]
+  requires_pass: [A40-d8-press_x16-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 51-100 with --execute 16 (only if the 1-50 gate passed); shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "16", "--from-scene", "51", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_x16-b4
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-press_x16-gate]
+  requires_pass: [A40-d8-press_x16-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 51-100 with --execute 16 (only if the 1-50 gate passed); shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "16", "--from-scene", "51", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_x32-gate
+  lane: a40cpu
+  kind: shell
+  after: [A40-d8-press-report]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): gate -- press_x32 gained >= 8 on scenes 1-50? (exit 0 = re-evaluate 51-100; exit 3 = no)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag8.py gate press_x32"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-d8-press_x32-b0
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-press_x32-gate]
+  requires_pass: [A40-d8-press_x32-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 51-100 with --execute 32 (only if the 1-50 gate passed); shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "32", "--from-scene", "51", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_x32-b1
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-press_x32-gate]
+  requires_pass: [A40-d8-press_x32-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 51-100 with --execute 32 (only if the 1-50 gate passed); shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "32", "--from-scene", "51", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_x32-b2
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-press_x32-gate]
+  requires_pass: [A40-d8-press_x32-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 51-100 with --execute 32 (only if the 1-50 gate passed); shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "32", "--from-scene", "51", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_x32-b3
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-press_x32-gate]
+  requires_pass: [A40-d8-press_x32-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 51-100 with --execute 32 (only if the 1-50 gate passed); shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "32", "--from-scene", "51", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_x32-b4
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-press_x32-gate]
+  requires_pass: [A40-d8-press_x32-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 51-100 with --execute 32 (only if the 1-50 gate passed); shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_x32
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "32", "--from-scene", "51", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_s50-gate
+  lane: a40cpu
+  kind: shell
+  after: [A40-d8-press-report]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): gate -- press_s50 gained >= 8 on scenes 1-50? (exit 0 = re-evaluate 51-100; exit 3 = no)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag8.py gate press_s50"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-d8-press_s50-b0
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-press_s50-gate]
+  requires_pass: [A40-d8-press_s50-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 51-100 with --execute 8 --steps 50 (only if the 1-50 gate passed); shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_s50
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--steps", "50", "--from-scene", "51", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_s50-b1
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-press_s50-gate]
+  requires_pass: [A40-d8-press_s50-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 51-100 with --execute 8 --steps 50 (only if the 1-50 gate passed); shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_s50
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--steps", "50", "--from-scene", "51", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_s50-b2
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-press_s50-gate]
+  requires_pass: [A40-d8-press_s50-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 51-100 with --execute 8 --steps 50 (only if the 1-50 gate passed); shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_s50
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--steps", "50", "--from-scene", "51", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_s50-b3
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-press_s50-gate]
+  requires_pass: [A40-d8-press_s50-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 51-100 with --execute 8 --steps 50 (only if the 1-50 gate passed); shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_s50
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--steps", "50", "--from-scene", "51", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press_s50-b4
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-press_s50-gate]
+  requires_pass: [A40-d8-press_s50-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): press_fast_e30 on press_button 51-100 with --execute 8 --steps 50 (only if the 1-50 gate passed); shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/press_fast_e30/export_e30.pt
+  label: press_fast_e30_s50
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_press_button]
+  tasks: [press_button]
+  online_args: ["--execute", "8", "--steps", "50", "--from-scene", "51", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-press-report100
+  lane: a40cpu
+  kind: shell
+  after: [A40-d8-press_x16-b0, A40-d8-press_x16-b1, A40-d8-press_x16-b2, A40-d8-press_x16-b3, A40-d8-press_x16-b4, A40-d8-press_x32-b0, A40-d8-press_x32-b1, A40-d8-press_x32-b2, A40-d8-press_x32-b3, A40-d8-press_x32-b4, A40-d8-press_s50-b0, A40-d8-press_s50-b1, A40-d8-press_s50-b2, A40-d8-press_s50-b3, A40-d8-press_s50-b4]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): report on 1-100 (51-100 listed apart) for the press settings that passed the gate"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag8.py report"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-d8-rearr18_x16-s0
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): rearr_pw_s18_e30 on rearrange_blocks 1-50 with --execute 16; shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_s18_e30/export_e30.pt
+  label: rearr_pw_s18_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "16", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-rearr18_x16-s1
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): rearr_pw_s18_e30 on rearrange_blocks 1-50 with --execute 16; shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_s18_e30/export_e30.pt
+  label: rearr_pw_s18_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "16", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-rearr18_x16-s2
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): rearr_pw_s18_e30 on rearrange_blocks 1-50 with --execute 16; shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_s18_e30/export_e30.pt
+  label: rearr_pw_s18_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "16", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-rearr18_x16-s3
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): rearr_pw_s18_e30 on rearrange_blocks 1-50 with --execute 16; shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_s18_e30/export_e30.pt
+  label: rearr_pw_s18_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "16", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-rearr18_x16-s4
+  lane: a40
+  kind: closed_loop
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): rearr_pw_s18_e30 on rearrange_blocks 1-50 with --execute 16; shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_s18_e30/export_e30.pt
+  label: rearr_pw_s18_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "16", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-rearr18-report
+  lane: a40cpu
+  kind: shell
+  after: [A40-d8-rearr18_x16-s0, A40-d8-rearr18_x16-s1, A40-d8-rearr18_x16-s2, A40-d8-rearr18_x16-s3, A40-d8-rearr18_x16-s4]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): report of the rearr18 settings on 1-50"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag8.py report"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-d8-rearr18_x16-gate
+  lane: a40cpu
+  kind: shell
+  after: [A40-d8-rearr18-report]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): gate -- rearr18_x16 gained >= 8 on scenes 1-50? (exit 0 = re-evaluate 51-100; exit 3 = no)"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag8.py gate rearr18_x16"
+  pass_if: "m['rc'] == 0"
+
+- id: A40-d8-rearr18_x16-b0
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-rearr18_x16-gate]
+  requires_pass: [A40-d8-rearr18_x16-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): rearr_pw_s18_e30 on rearrange_blocks 51-100 with --execute 16 (only if the 1-50 gate passed); shard 0 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_s18_e30/export_e30.pt
+  label: rearr_pw_s18_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "16", "--from-scene", "51", "--limit", "50", "--shard", "0/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-rearr18_x16-b1
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-rearr18_x16-gate]
+  requires_pass: [A40-d8-rearr18_x16-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): rearr_pw_s18_e30 on rearrange_blocks 51-100 with --execute 16 (only if the 1-50 gate passed); shard 1 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_s18_e30/export_e30.pt
+  label: rearr_pw_s18_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "16", "--from-scene", "51", "--limit", "50", "--shard", "1/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-rearr18_x16-b2
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-rearr18_x16-gate]
+  requires_pass: [A40-d8-rearr18_x16-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): rearr_pw_s18_e30 on rearrange_blocks 51-100 with --execute 16 (only if the 1-50 gate passed); shard 2 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_s18_e30/export_e30.pt
+  label: rearr_pw_s18_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "16", "--from-scene", "51", "--limit", "50", "--shard", "2/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-rearr18_x16-b3
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-rearr18_x16-gate]
+  requires_pass: [A40-d8-rearr18_x16-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): rearr_pw_s18_e30 on rearrange_blocks 51-100 with --execute 16 (only if the 1-50 gate passed); shard 3 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_s18_e30/export_e30.pt
+  label: rearr_pw_s18_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "16", "--from-scene", "51", "--limit", "50", "--shard", "3/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-rearr18_x16-b4
+  lane: a40
+  kind: closed_loop
+  after: [A40-d8-rearr18_x16-gate]
+  requires_pass: [A40-d8-rearr18_x16-gate]
+  need_mib: 30000
+  timeout_h: 12
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): rearr_pw_s18_e30 on rearrange_blocks 51-100 with --execute 16 (only if the 1-50 gate passed); shard 4 of 5"
+  checkpoint: /workspace/FastWAM-memory2/outputs/fullft/exports/rearr_pw_s18_e30/export_e30.pt
+  label: rearr_pw_s18_e30_x16
+  modes: ["on"]
+  scenes: [closed_loop/scenes_seed42_n100_rearrange_blocks]
+  tasks: [rearrange_blocks]
+  online_args: ["--execute", "16", "--from-scene", "51", "--limit", "50", "--shard", "4/5"]
+  output: closed_loop/d8
+  env: {MWAM_TEXT_SOURCE: "cache"}
+
+- id: A40-d8-rearr18-report100
+  lane: a40cpu
+  kind: shell
+  after: [A40-d8-rearr18_x16-b0, A40-d8-rearr18_x16-b1, A40-d8-rearr18_x16-b2, A40-d8-rearr18_x16-b3, A40-d8-rearr18_x16-b4]
+  need_mib: 0
+  timeout_h: 1
+  hypothesis: "plan v22 rev. 1 diagnostic 8 (claude/MemWAM_Plan_v22_20261128.md appendix; described only; report scripts/fullft/diag8.py written before any episode): report on 1-100 (51-100 listed apart) for the rearr18 settings that passed the gate"
+  command: "cd /workspace/FastWAM-memory2 && PYTHONPATH=src /opt/mwam/bin/python scripts/fullft/diag8.py report"
+  pass_if: "m['rc'] == 0"
+
 - id: A40-fetch-swapT_long-e45
   lane: a40cpu
   kind: shell
