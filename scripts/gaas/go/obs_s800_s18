@@ -1,3 +1,4 @@
-# 11-28 12:50 (Opus): the user may train obs_s800_s18 on the old H200 instead (scripts/fullft/h200_queue.txt);
-# then scripts/fullft/GO_obs_s800_s18_h200o exists and no new-H200 slot picks it. Without that file: go as before.
-test ! -f scripts/fullft/GO_obs_s800_s18_h200o
+# 11-28 16:xx (Opus): user 15:52 decision B -- the second find-same seed is postponed and given by card 34 to the
+# recipe that leads when card 30 is out; obs_s800_s18 itself is not trained unless that rule picks it
+# (the gate file scripts/fullft/gates/C34_obs_s800 is written then). The old-H200 line stays closed as well.
+test -f scripts/fullft/gates/C34_obs_s800 && test ! -f scripts/fullft/GO_obs_s800_s18_h200o

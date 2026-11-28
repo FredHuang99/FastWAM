@@ -1,0 +1,3 @@
+# 11-28 (Opus; plan v22 card 27): open only if the resume checkpoint is still there (core 1; the slot job fails at its
+# condition otherwise, so the pick must skip it here). Runs in the repo root on the new H200.
+test -f outputs/fullft/rearr_pw_s18/resume.pt

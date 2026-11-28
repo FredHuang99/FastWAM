@@ -49,3 +49,23 @@ D7 | rearr_pw_s18 obs_cf200 obs_s800_20 obs_s800_s18 rearr_ar_h2 rearr_arprop_h2
 B7 | rearr_pw_s18 obs_s800_20 obs_cf200 obs_s800_s18 rearr_ar_h2 rearr_arprop_h2 cover_none
 A7 | ar2_pw obs_s800_s18 obs_s800_20 obs_cf200 rearr_ar_h2 rearr_arprop_h2 cover_none
 C5 | ar2_pw obs_s1600 obs_s800_s18 obs_s800_20 obs_cf200 rearr_ar_h2 rearr_arprop_h2 cover_none
+# 11-28 17:05 (Opus; plan v22 rev. 1, user 15:52): followers of the four lanes (submit_v22.sh). Order = plan v22b part 3
+# 1.0 (lift a lagging main-table cell first), then the fillers (6.7, then v21's). A run without a gaas_queue.txt line or
+# whose go test fails is passed over (cards 37 / 31 / 32 / 30 / 35 / 34 get their lines when registered / their
+# conditions hold). obs_s800_s18 is NOT listed (user B: postponed; card 34 decides the second find-same seed).
+D8  | rearr_pw_long_s18 swapT_ow_s18 rearr_pw_long swapT_joint3_ow press_cd rearr_joint3 obs_cf800 swapT_joint3_s18 rearr_ar_pw_s18 rearr_arprop_pw_s18 fs_seed2 ranking_v3a_s18 rearr_pw_s19 rearr_ar_h2 rearr_arprop_h2 cover_none
+D9  | rearr_pw_long_s18 swapT_ow_s18 rearr_pw_long swapT_joint3_ow press_cd rearr_joint3 obs_cf800 swapT_joint3_s18 rearr_ar_pw_s18 rearr_arprop_pw_s18 fs_seed2 ranking_v3a_s18 rearr_pw_s19 rearr_ar_h2 rearr_arprop_h2 cover_none
+D10 | rearr_pw_long_s18 swapT_ow_s18 rearr_pw_long swapT_joint3_ow press_cd rearr_joint3 obs_cf800 swapT_joint3_s18 rearr_ar_pw_s18 rearr_arprop_pw_s18 fs_seed2 ranking_v3a_s18 rearr_pw_s19 rearr_ar_h2 rearr_arprop_h2 cover_none
+D11 | rearr_pw_long_s18 swapT_ow_s18 rearr_pw_long swapT_joint3_ow press_cd rearr_joint3 obs_cf800 swapT_joint3_s18 rearr_ar_pw_s18 rearr_arprop_pw_s18 fs_seed2 ranking_v3a_s18 rearr_pw_s19 rearr_ar_h2 rearr_arprop_h2 cover_none
+A8  | rearr_pw_long_s18 swapT_ow_s18 rearr_pw_long swapT_joint3_ow press_cd rearr_joint3 obs_cf800 swapT_joint3_s18 rearr_ar_pw_s18 rearr_arprop_pw_s18 fs_seed2 ranking_v3a_s18 rearr_pw_s19 rearr_ar_h2 rearr_arprop_h2 cover_none
+A9  | rearr_pw_long_s18 swapT_ow_s18 rearr_pw_long swapT_joint3_ow press_cd rearr_joint3 obs_cf800 swapT_joint3_s18 rearr_ar_pw_s18 rearr_arprop_pw_s18 fs_seed2 ranking_v3a_s18 rearr_pw_s19 rearr_ar_h2 rearr_arprop_h2 cover_none
+A10 | rearr_pw_long_s18 swapT_ow_s18 rearr_pw_long swapT_joint3_ow press_cd rearr_joint3 obs_cf800 swapT_joint3_s18 rearr_ar_pw_s18 rearr_arprop_pw_s18 fs_seed2 ranking_v3a_s18 rearr_pw_s19 rearr_ar_h2 rearr_arprop_h2 cover_none
+A11 | rearr_pw_long_s18 swapT_ow_s18 rearr_pw_long swapT_joint3_ow press_cd rearr_joint3 obs_cf800 swapT_joint3_s18 rearr_ar_pw_s18 rearr_arprop_pw_s18 fs_seed2 ranking_v3a_s18 rearr_pw_s19 rearr_ar_h2 rearr_arprop_h2 cover_none
+B8  | rearr_pw_long_s18 swapT_ow_s18 rearr_pw_long swapT_joint3_ow press_cd rearr_joint3 obs_cf800 swapT_joint3_s18 rearr_ar_pw_s18 rearr_arprop_pw_s18 fs_seed2 ranking_v3a_s18 rearr_pw_s19 rearr_ar_h2 rearr_arprop_h2 cover_none
+B9  | rearr_pw_long_s18 swapT_ow_s18 rearr_pw_long swapT_joint3_ow press_cd rearr_joint3 obs_cf800 swapT_joint3_s18 rearr_ar_pw_s18 rearr_arprop_pw_s18 fs_seed2 ranking_v3a_s18 rearr_pw_s19 rearr_ar_h2 rearr_arprop_h2 cover_none
+B10 | rearr_pw_long_s18 swapT_ow_s18 rearr_pw_long swapT_joint3_ow press_cd rearr_joint3 obs_cf800 swapT_joint3_s18 rearr_ar_pw_s18 rearr_arprop_pw_s18 fs_seed2 ranking_v3a_s18 rearr_pw_s19 rearr_ar_h2 rearr_arprop_h2 cover_none
+B11 | rearr_pw_long_s18 swapT_ow_s18 rearr_pw_long swapT_joint3_ow press_cd rearr_joint3 obs_cf800 swapT_joint3_s18 rearr_ar_pw_s18 rearr_arprop_pw_s18 fs_seed2 ranking_v3a_s18 rearr_pw_s19 rearr_ar_h2 rearr_arprop_h2 cover_none
+C6  | rearr_pw_long_s18 swapT_ow_s18 rearr_pw_long swapT_joint3_ow press_cd rearr_joint3 obs_cf800 swapT_joint3_s18 rearr_ar_pw_s18 rearr_arprop_pw_s18 fs_seed2 ranking_v3a_s18 rearr_pw_s19 rearr_ar_h2 rearr_arprop_h2 cover_none
+C7  | rearr_pw_long_s18 swapT_ow_s18 rearr_pw_long swapT_joint3_ow press_cd rearr_joint3 obs_cf800 swapT_joint3_s18 rearr_ar_pw_s18 rearr_arprop_pw_s18 fs_seed2 ranking_v3a_s18 rearr_pw_s19 rearr_ar_h2 rearr_arprop_h2 cover_none
+C8  | rearr_pw_long_s18 swapT_ow_s18 rearr_pw_long swapT_joint3_ow press_cd rearr_joint3 obs_cf800 swapT_joint3_s18 rearr_ar_pw_s18 rearr_arprop_pw_s18 fs_seed2 ranking_v3a_s18 rearr_pw_s19 rearr_ar_h2 rearr_arprop_h2 cover_none
+C9  | rearr_pw_long_s18 swapT_ow_s18 rearr_pw_long swapT_joint3_ow press_cd rearr_joint3 obs_cf800 swapT_joint3_s18 rearr_ar_pw_s18 rearr_arprop_pw_s18 fs_seed2 ranking_v3a_s18 rearr_pw_s19 rearr_ar_h2 rearr_arprop_h2 cover_none
